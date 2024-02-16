@@ -4,11 +4,8 @@
         <h1 class="font-bold text-center">{{ title }} <span v-html="icon"></span></h1>
 
         <div id="chart">
-            <apexchart type="pie" width="400" :options="chartOptions" :series="series"></apexchart>
+            <apexchart type="pie" width="620" :options="chartOptions" :series="series"></apexchart>
         </div>
-        <!-- <div class="flex justify-end mx-6 absolute bottom-3 right-5">
-            <button class="text-primary text-xs">Ver detalles</button>
-        </div> -->
     </div>
 </template>
 
@@ -20,7 +17,7 @@ export default {
             series: this.options.series,
             chartOptions: {
                 chart: {
-                    width: 400,
+                    width: 500,
                     type: 'pie',
                 },
                 colors: this.options.colors,
@@ -29,7 +26,7 @@ export default {
                     breakpoint: 480,
                     options: {
                         chart: {
-                            width: 320
+                            width: 420
                         },
                         legend: {
                             position: 'right'

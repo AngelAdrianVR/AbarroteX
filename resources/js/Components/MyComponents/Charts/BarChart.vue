@@ -43,7 +43,7 @@ export default {
                 },
                 yaxis: {
                     title: {
-                        text: '$ (miles)'
+                        text: '$ pesos'
                     }
                 },
                 fill: {
@@ -52,7 +52,7 @@ export default {
                 tooltip: {
                     y: {
                         formatter: function (val) {
-                            return "$ " + val + "K"
+                            return "$ " + val.toLocaleString('en-US', { minimumFractionDigits: 2 })
                         }
                     }
                 }

@@ -1,22 +1,25 @@
 <template>
     <AppLayout title="Inicio">
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
-        <el-radio-group v-model="period" class="!flex justify-center my-8 mx-2 lg:mx-14">
+        <el-radio-group v-model="period" @change="handleChangePeriod" class="!flex justify-center my-8 mx-2 lg:mx-14">
             <el-radio label="Hoy">Hoy</el-radio>
             <el-radio label="Semanal">Semanal</el-radio>
             <el-radio label="Mensual">Mensual</el-radio>
         </el-radio-group>
-        <section class="mx-2 lg:mx-14 mt-6 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
-            <SimpleKPI v-for="(item, index) in simpleKpis" :key="index" :title="item.title" :icon="item.icon"
-                class="self-start" :value="item.value" />
-            <Kpi :options="profitKpiOptions" :title="getKPITitle()" />
-        </section>
-        <section class="mx-2 lg:mx-14 mt-6 grid-cols-1 grid lg:grid-cols-3 gap-1 lg:gap-8">
-            <PieChart :options="ticketsStatusChartOptions" title="Estado de los tickets"
-                icon='<i class="fa-solid fa-circle-nodes ml-2"></i>' />
-            <BarChart :options="yearSalesComparisonChartOptions" :title="getBarChartTitle('Ingresos (ventas)')" />
-            <BarChart :options="yearSalesComparisonChartOptions" :title="getBarChartTitle('Egresos (compras)')" />
-        </section>
+        <Loading v-if="loading" class="my-16" />
+        <main v-else class="mx-2 lg:mx-14 mt-6">
+            <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
+                <SimpleKPI v-for="(item, index) in getSimpleKpisOptions" :key="index" :title="item.title" :icon="item.icon"
+                    class="self-start" :value="item.value" />
+                <Kpi v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
+            </section>
+            <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
+                <BarChart v-for="(item, index) in getBarChartOptions" :key="index" :options="item"
+                    :title="getBarChartTitle(item.title)" />
+                <PieChart v-for="(item, index) in getPieChartOptions" :key="index" :options="item"
+                    title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' />
+            </section>
+        </main>
     </AppLayout>
 </template>
 <script>
@@ -24,57 +27,50 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import SimpleKPI from '@/Components/MyComponents/Dashboard/SimpleKPI.vue';
 import PieChart from '@/Components/MyComponents/Charts/PieChart.vue';
 import Kpi from '@/Components/MyComponents/Dashboard/Kpi.vue';
+import Loading from '@/Components/MyComponents/Loading.vue';
 import BarChart from "@/Components/MyComponents/Charts/BarChart.vue";
+import axios from 'axios';
 
 export default {
     data() {
         return {
             period: 'Hoy',
-            ticketsStatusChartOptions: {
-                colors: ['#0355B5', '#FD8827', '#B927FD', '#3F9C30', '#FD4646', '#3D3D3D'],
-                labels: ["Abierto", "En espera", "En espera de 3ro", "Completado", "Re-abierto", "En proceso"],
-                series: [1, 2, 3, 4, 5, 6],
-            },
-            yearSalesComparisonChartOptions: {
-                colors: ['#BEBFC1', '#F07209'],
-                categories: ['1', '2'],
-                series: [{
-                    name: 'Año pasado',
-                    data: [5, 9]
-                },
-                {
-                    name: 'Año en curso',
-                    data: [6, 2]
-                }],
-            },
+            
+            // sales
+            salesCurrentPeriod: this.sales,
+            salesLastPeriod: this.last_period_sales,
+            todaySales: this.sales,
+            weekSales: null,
+            monthSales: null,
+            yesterdaySales: this.last_period_sales,
+            lastWeekSales: null,
+            lastMonthSales: null,
 
-            // kpis
-            profitKpiOptions: {
-                currentVal: 10600,
-                refVal: 8966,
-                tooltipCurrentVal: 'Ganancias periodo actual',
-                tooltipRefVal: 'Ganancias periodo anterior',
-                unit: '$',
-            },
+            // expenses
+            expensesCurrentPeriod: this.expenses,
+            expensesLastPeriod: this.last_period_expenses,
+            todayExpenses: this.expenses,
+            weekExpenses: this.expenses,
+            monthExpenses: null,
+            yesterdayExpenses: this.last_period_expenses,
+            lastWeekExpenses: null,
+            lastMonthExpenses: null,
 
-            // kpis simples
-            simpleKpis: [
-                {
-                    title: "Venta",
-                    icon: "fa-solid fa-dollar-sign",
-                    value: "$" + this.calculateTotalSale().toLocaleString('en-US', { minimumFractionDigits: 2 }),
-                },
-                {
-                    title: "Productos vendidos",
-                    icon: "fa-solid fa-clipboard-list",
-                    value: this.calculateTotalProductsSold().toLocaleString('en-US', { minimumFractionDigits: 2 }),
-                },
+            // top products
+            topProductsCurrentPeriod: this.top_products,
+            todayTopProducts: this.top_products,
+            weekTopProducts: null,
+            monthTopProducts: null,
 
-            ]
+            loading: false,
         }
     },
     props: {
         sales: Array,
+        last_period_sales: Array,
+        expenses: Array,
+        last_period_expenses: Array,
+        top_products: Array,
     },
     components: {
         AppLayout,
@@ -82,17 +78,201 @@ export default {
         SimpleKPI,
         Kpi,
         BarChart,
+        Loading,
     },
-    methods: {
+    computed: {
         calculateTotalSale() {
-            return this.sales.reduce((acumulador, current) => {
+            return this.salesCurrentPeriod?.reduce((acumulador, current) => {
                 return acumulador + current.quantity * current.current_price;
             }, 0);
         },
         calculateTotalProductsSold() {
-            return this.sales.reduce((acumulador, current) => {
+            return this.salesCurrentPeriod?.reduce((acumulador, current) => {
                 return acumulador + current.quantity;
             }, 0);
+        },
+        getTimeLine() {
+            let timeLine = ['6AM', '7AM', '8AM', '9PM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM'];
+            let last = { name: "Ayer", data: {sales: this.calculateHourlySales(this.salesLastPeriod), expenses: this.calculateHourlySales(this.expensesLastPeriod)} };
+            let current = { name: "Hoy", data: {sales: this.calculateHourlySales(this.salesCurrentPeriod), expenses: this.calculateHourlySales(this.expensesCurrentPeriod)} };
+
+            if (this.period == 'Semanal') {
+                timeLine = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
+                last = { name: "Semana pasada", data: {sales: this.calculateDailySales(this.salesLastPeriod), expenses: this.calculateDailySales(this.expensesLastPeriod)} };
+                current = { name: "Esta semana", data: {sales: this.calculateDailySales(this.salesCurrentPeriod), expenses: this.calculateDailySales(this.expensesCurrentPeriod)} };
+            } else if (this.period == 'Mensual') {
+                timeLine = ['Del 1 al 7', 'Del 8 al 14', 'Del 15 al 21', 'Del 22 al 28', 'Del 29 al 31'];
+                last = { name: "Mes pasado", data: {sales: this.calculateWeeklySales(this.salesLastPeriod), expenses: this.calculateWeeklySales(this.expensesLastPeriod)} };
+                current = { name: "Este mes", data: {sales: this.calculateWeeklySales(this.salesCurrentPeriod), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod)} };
+            }
+
+            return { timeline: timeLine, last: last, current: current };
+        },
+        getSimpleKpisOptions() {
+            return [
+                {
+                    title: "Venta",
+                    icon: "fa-solid fa-dollar-sign",
+                    value: "$" + this.calculateTotalSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                },
+                {
+                    title: "Productos vendidos",
+                    icon: "fa-solid fa-clipboard-list",
+                    value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                },
+            ]
+        },
+        getKpiOptions() {
+            let last = "ayer";
+            let current = "hoy";
+            if (this.period == 'Semanal') {
+                current = "esta semana";
+                last = "semana pasada";
+            } else if (this.period == 'Mensual') {
+                current = "este mes";
+                last = "mes pasado";
+            }
+
+            return [
+                {
+                    currentVal: this.salesCurrentPeriod.reduce((acumulador, current) => {
+                        return acumulador + current.quantity * current.current_price;
+                    }, 0),
+                    refVal: this.salesLastPeriod.reduce((acumulador, current) => {
+                        return acumulador + current.quantity * current.current_price;
+                    }, 0),
+                    tooltipCurrentVal: 'Ganancias de ' + current,
+                    tooltipRefVal: 'Ganancias de ' + last,
+                    unit: '$',
+                },
+            ]
+        },
+        getBarChartOptions() {
+            const timeline = this.getTimeLine;
+            return [
+                {
+                    title: 'Ingresos (ventas)',
+                    colors: ['#C30303', '#F07209'],
+                    categories: timeline.timeline,
+                    series: [{
+                        name: timeline.last.name,
+                        data: timeline.last.data.sales,
+                    },
+                    {
+                        name: timeline.current.name,
+                        data: timeline.current.data.sales,
+                    }],
+                },
+                {
+                    title: 'Egresos (compras)',
+                    colors: ['#C30303', '#F07209'],
+                    categories: timeline.timeline,
+                    series: [{
+                        name: timeline.last.name,
+                        data: timeline.last.data.expenses,
+                    },
+                    {
+                        name: timeline.current.name,
+                        data: timeline.current.data.expenses,
+                    }],
+                },
+            ]
+        },
+        getPieChartOptions() {
+            return [
+                {
+                    colors: ['#C30303', '#373737', '#999999', '#5FCB1F', '#2387FC'],
+                    labels: this.topProductsCurrentPeriod.map((item) => item.product.name),
+                    series: this.topProductsCurrentPeriod.map((item) => item.total_quantity),
+                },
+            ]
+        }
+    },
+    methods: {
+        setElementsWithNumberFormat(set) {
+            return set.map(item => item.toFixed(2));
+        },
+        calculateHourlySales(data) {
+            // Inicializa el array hourlyData con ceros para cada hora del día
+            let hourlyData = Array(18).fill(0);
+
+            // Recorre las ventas y suma el total por hora
+            data.forEach((sale) => {
+                const saleHour = new Date(sale.created_at).getHours();
+                hourlyData[saleHour] += sale.quantity * sale.current_price;
+            });
+
+            hourlyData = this.setElementsWithNumberFormat(hourlyData);
+
+            return hourlyData;
+        },
+        calculateDailySales(data) {
+            let dailyData = Array(7).fill(0);
+
+            data.forEach((sale) => {
+                const saleDayOfWeek = new Date(sale.created_at).getDay();
+
+                // Incrementa el total por día de la semana correspondiente
+                dailyData[saleDayOfWeek] += sale.quantity * sale.current_price;
+            });
+
+            dailyData = this.setElementsWithNumberFormat(dailyData);
+
+            return dailyData;
+        },
+        calculateWeeklySales(data) {
+            // Inicializa el array weeklyData con ceros para cada rango semanal
+            let weeklyData = Array(5).fill(0);
+
+            // Recorre las ventas y suma el total por rango semanal
+            data.forEach((sale) => {
+                const saleDay = new Date(sale.created_at).getDate();
+
+                if (saleDay >= 1 && saleDay <= 7) {
+                    weeklyData[0] += sale.quantity * sale.current_price;
+                } else if (saleDay >= 8 && saleDay <= 14) {
+                    weeklyData[1] += sale.quantity * sale.current_price;
+                } else if (saleDay >= 15 && saleDay <= 21) {
+                    weeklyData[2] += sale.quantity * sale.current_price;
+                } else if (saleDay >= 22 && saleDay <= 28) {
+                    weeklyData[3] += sale.quantity * sale.current_price;
+                } else if (saleDay >= 29 && saleDay <= 31) {
+                    weeklyData[4] += sale.quantity * sale.current_price;
+                }
+            });
+
+            weeklyData = this.setElementsWithNumberFormat(weeklyData);
+
+            return weeklyData;
+        },
+        handleChangePeriod() {
+            if (this.period == 'Semanal') {
+                if (this.weekSales === null) {
+                    this.fetchWeekData();
+                } else {
+                    this.salesCurrentPeriod = this.weekSales;
+                    this.salesLastPeriod = this.lastWeekSales;
+                    this.expensesCurrentPeriod = this.weekExpenses;
+                    this.expensesLastPeriod = this.lastWeekExpenses;
+                    this.topProductsCurrentPeriod = this.weekTopProducts;
+                }
+            } else if (this.period == 'Mensual') {
+                if (this.monthSales === null) {
+                    this.fetchMonthData();
+                } else {
+                    this.salesCurrentPeriod = this.monthSales;
+                    this.salesLastPeriod = this.lastMonthSales;
+                    this.expensesCurrentPeriod = this.monthExpenses;
+                    this.expensesLastPeriod = this.lastMonthExpenses;
+                    this.topProductsCurrentPeriod = this.monthTopProducts;
+                }
+            } else {
+                this.salesCurrentPeriod = this.sales;
+                this.salesLastPeriod = this.yesterdaySales;
+                this.expensesCurrentPeriod = this.expenses;
+                this.expensesLastPeriod = this.yesterdayExpenses;
+                this.topProductsCurrentPeriod = this.todayTopProducts;
+            }
         },
         getKPITitle() {
             if (this.period == 'Hoy') return "Ganancias de hoy vs ayer";
@@ -104,98 +284,46 @@ export default {
             if (this.period == 'Semanal') return concept + " de esta semana vs semana pasada";
             if (this.period == 'Mensual') return concept + " de este mes vs mes pasado";
         },
-        ticketsByStatus() {
-            // Inicializar un objeto para almacenar el recuento de tickets por estado
-            const statuses = ["Abierto", "En espera", "En espera de 3ro", "Completado", "Re-abierto", "En proceso"];
-            const byStatus = {};
-            statuses.forEach(status => {
-                byStatus[status] = 0;
-            });
+        async fetchWeekData() {
+            this.loading = true;
+            try {
+                const response = await axios.get(route('dashboard.get-week-data'));
 
-            // Contar los tickets por estado
-            this.tickets.forEach(ticket => {
-                if (byStatus.hasOwnProperty(ticket.status)) {
-                    byStatus[ticket.status]++;
+                if (response.status === 200) {
+                    this.weekSales = response.sales;
+                    this.lastWeekSales = response.data.sales_last_period;
+                    this.weekExpenses = response.data.expenses;
+                    this.lastWeekExpenses = response.data.expenses_last_period;
+                    this.weekTopProducts = response.data.top_products;
+                    this.salesCurrentPeriod = this.weekSales;
+                    this.salesLastPeriod = this.lastWeekSales;
                 }
-            });
-
-            // Convertir el objeto a un arreglo de recuento
-            const result = statuses.map(status => byStatus[status]);
-
-            return result;
-        },
-        ticketsByPriority() {
-            // Inicializar un objeto para almacenar el recuento de tickets por estado
-            const priorities = ["Baja", "Media", "Alta"];
-            const byStatus = {};
-            priorities.forEach(priority => {
-                byStatus[priority] = 0;
-            });
-
-            // Contar los tickets por estado
-            this.tickets.forEach(ticket => {
-                if (byStatus.hasOwnProperty(ticket.priority)) {
-                    byStatus[ticket.priority]++;
-                }
-            });
-
-            // Convertir el objeto a un arreglo de recuento
-            const result = priorities.map(priority => byStatus[priority]);
-
-            return result;
-        },
-        calculateAverageResponseTimeByPriority(priority) {
-            const responseTimes = this.tickets
-                .filter(ticket => ticket.priority === priority)
-                .map(ticket => {
-                    // Check if there are solutions for the ticket
-                    if (ticket.ticket_solutions && ticket.ticket_solutions.length > 0) {
-                        // Calculate response time in milliseconds
-                        const responseTimeMillis = new Date(ticket.ticket_solutions[0].created_at) - new Date(ticket.created_at);
-
-                        // Convert to hours
-                        const responseTimeHours = responseTimeMillis / (1000 * 60 * 60);
-
-                        return responseTimeHours;
-                    } else {
-                        // If there is no solution, return null or a value indicating no response time
-                        return null;
-                    }
-                });
-
-            // Filter out non-null response times
-            const validResponseTimes = responseTimes.filter(time => time !== null);
-
-            // Calculate the average response time
-            if (validResponseTimes.length > 0) {
-                const averageResponseTime = validResponseTimes.reduce((total, time) => total + time, 0) / validResponseTimes.length;
-                return averageResponseTime.toFixed(2) + ' horas';
-            } else {
-                return 'Sin información'; // Another way to handle the case when there are no valid response times
+            } catch (error) {
+                console.error(error);
+            } finally {
+                this.loading = false;
             }
         },
-        calculatePercentageResolvedBeforeExpiration() {
-            const resolvedBeforeExpiration = this.tickets.filter(ticket => {
-                // Check if there are solutions for the ticket and an expiration date
-                if (ticket.ticket_solutions && ticket.ticket_solutions.length > 0 && ticket.expired_date) {
-                    // Compare the solution date with the expiration date
-                    const solutionDate = new Date(ticket.ticket_solutions[0].created_at);
-                    const expirationDate = new Date(ticket.expired_date);
+        async fetchMonthData() {
+            this.loading = true;
+            try {
+                const response = await axios.get(route('dashboard.get-month-data'));
 
-                    return solutionDate < expirationDate;
-                } else {
-                    return false;
+                if (response.status === 200) {
+                    this.monthSales = response.sales;
+                    this.lastMonthSales = response.data.sales_last_period;
+                    this.monthExpenses = response.data.expenses;
+                    this.lastMonthExpenses = response.data.expenses_last_period;
+                    this.monthTopProducts = response.data.top_products;
+                    this.salesCurrentPeriod = this.monthSales;
+                    this.salesLastPeriod = this.lastMonthSales;
                 }
-            });
-
-            // Calculate the percentage
-            const percentage = (resolvedBeforeExpiration.length / this.tickets.filter(item => item.ticket_solutions.length).length) * 100;
-
-            if (percentage)
-                return percentage + '%'; // Return the percentage or 0 if there are no tickets
-            else
-                return 'Sin información';
-        },
+            } catch (error) {
+                console.error(error);
+            } finally {
+                this.loading = false;
+            }
+        }
     }
 }
 </script>

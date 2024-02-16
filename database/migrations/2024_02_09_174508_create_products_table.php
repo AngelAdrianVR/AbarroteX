@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedFloat('public_price');
             $table->unsignedFloat('cost')->nullable();
-            $table->string('code')->nullable();
+            $table->string('code')->unique()->nullable();
             $table->unsignedSmallInteger('min_stock')->nullable();
             $table->unsignedSmallInteger('max_stock')->nullable();
             $table->unsignedFloat('current_stock')->nullable();
