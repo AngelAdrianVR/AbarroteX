@@ -35,42 +35,23 @@ export default {
     data() {
         return {
             period: 'Hoy',
-            
+
             // sales
-            salesCurrentPeriod: this.sales,
-            salesLastPeriod: this.last_period_sales,
-            todaySales: this.sales,
-            weekSales: null,
-            monthSales: null,
-            yesterdaySales: this.last_period_sales,
-            lastWeekSales: null,
-            lastMonthSales: null,
+            salesCurrentPeriod: [],
+            salesLastPeriod: [],
 
             // expenses
-            expensesCurrentPeriod: this.expenses,
-            expensesLastPeriod: this.last_period_expenses,
-            todayExpenses: this.expenses,
-            weekExpenses: this.expenses,
-            monthExpenses: null,
-            yesterdayExpenses: this.last_period_expenses,
-            lastWeekExpenses: null,
-            lastMonthExpenses: null,
+            expensesCurrentPeriod: [],
+            expensesLastPeriod: [],
 
             // top products
-            topProductsCurrentPeriod: this.top_products,
-            todayTopProducts: this.top_products,
-            weekTopProducts: null,
-            monthTopProducts: null,
+            topProductsCurrentPeriod: [],
 
             loading: false,
         }
     },
     props: {
-        sales: Array,
-        last_period_sales: Array,
-        expenses: Array,
-        last_period_expenses: Array,
-        top_products: Array,
+
     },
     components: {
         AppLayout,
@@ -90,23 +71,6 @@ export default {
             return this.salesCurrentPeriod?.reduce((acumulador, current) => {
                 return acumulador + current.quantity;
             }, 0);
-        },
-        getTimeLine() {
-            let timeLine = ['6AM', '7AM', '8AM', '9PM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM'];
-            let last = { name: "Ayer", data: {sales: this.calculateHourlySales(this.salesLastPeriod), expenses: this.calculateHourlySales(this.expensesLastPeriod)} };
-            let current = { name: "Hoy", data: {sales: this.calculateHourlySales(this.salesCurrentPeriod), expenses: this.calculateHourlySales(this.expensesCurrentPeriod)} };
-
-            if (this.period == 'Semanal') {
-                timeLine = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
-                last = { name: "Semana pasada", data: {sales: this.calculateDailySales(this.salesLastPeriod), expenses: this.calculateDailySales(this.expensesLastPeriod)} };
-                current = { name: "Esta semana", data: {sales: this.calculateDailySales(this.salesCurrentPeriod), expenses: this.calculateDailySales(this.expensesCurrentPeriod)} };
-            } else if (this.period == 'Mensual') {
-                timeLine = ['Del 1 al 7', 'Del 8 al 14', 'Del 15 al 21', 'Del 22 al 28', 'Del 29 al 31'];
-                last = { name: "Mes pasado", data: {sales: this.calculateWeeklySales(this.salesLastPeriod), expenses: this.calculateWeeklySales(this.expensesLastPeriod)} };
-                current = { name: "Este mes", data: {sales: this.calculateWeeklySales(this.salesCurrentPeriod), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod)} };
-            }
-
-            return { timeline: timeLine, last: last, current: current };
         },
         getSimpleKpisOptions() {
             return [
@@ -135,17 +99,30 @@ export default {
 
             return [
                 {
-                    currentVal: this.salesCurrentPeriod.reduce((acumulador, current) => {
-                        return acumulador + current.quantity * current.current_price;
-                    }, 0),
-                    refVal: this.salesLastPeriod.reduce((acumulador, current) => {
-                        return acumulador + current.quantity * current.current_price;
-                    }, 0),
+                    currentVal: this.calculateProfit('current'),
+                    refVal: this.calculateProfit('last'),
                     tooltipCurrentVal: 'Ganancias de ' + current,
                     tooltipRefVal: 'Ganancias de ' + last,
                     unit: '$',
                 },
             ]
+        },
+        getTimeLine() {
+            let timeLine = ['6AM', '7AM', '8AM', '9PM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM'];
+            let last = { name: "Ayer", data: { sales: this.calculateHourlySales(this.salesLastPeriod), expenses: this.calculateHourlySales(this.expensesLastPeriod) } };
+            let current = { name: "Hoy", data: { sales: this.calculateHourlySales(this.salesCurrentPeriod), expenses: this.calculateHourlySales(this.expensesCurrentPeriod) } };
+
+            if (this.period == 'Semanal') {
+                timeLine = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
+                last = { name: "Semana pasada", data: { sales: this.calculateDailySales(this.salesLastPeriod), expenses: this.calculateDailySales(this.expensesLastPeriod) } };
+                current = { name: "Esta semana", data: { sales: this.calculateDailySales(this.salesCurrentPeriod), expenses: this.calculateDailySales(this.expensesCurrentPeriod) } };
+            } else if (this.period == 'Mensual') {
+                timeLine = ['Del 1 al 7', 'Del 8 al 14', 'Del 15 al 21', 'Del 22 al 28', 'Del 29 al 31'];
+                last = { name: "Mes pasado", data: { sales: this.calculateWeeklySales(this.salesLastPeriod), expenses: this.calculateWeeklySales(this.expensesLastPeriod) } };
+                current = { name: "Este mes", data: { sales: this.calculateWeeklySales(this.salesCurrentPeriod), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod) } };
+            }
+
+            return { timeline: timeLine, last: last, current: current };
         },
         getBarChartOptions() {
             const timeline = this.getTimeLine;
@@ -186,7 +163,7 @@ export default {
                     series: this.topProductsCurrentPeriod.map((item) => item.total_quantity),
                 },
             ]
-        }
+        },
     },
     methods: {
         setElementsWithNumberFormat(set) {
@@ -245,33 +222,33 @@ export default {
 
             return weeklyData;
         },
+        calculateProfit(period) {
+            let sales = this.salesLastPeriod.reduce((acumulador, current) => {
+                return acumulador + current.quantity * current.current_price;
+            }, 0);
+
+            let expenses = this.expensesLastPeriod.reduce((acumulador, current) => {
+                return acumulador + current.quantity * current.current_price;
+            }, 0);
+            if (period == 'current') {
+                sales = this.salesCurrentPeriod.reduce((acumulador, current) => {
+                    return acumulador + current.quantity * current.current_price;
+                }, 0);
+
+                expenses = this.expensesCurrentPeriod.reduce((acumulador, current) => {
+                    return acumulador + current.quantity * current.current_price;
+                }, 0);
+            }
+
+            return sales - expenses;
+        },
         handleChangePeriod() {
             if (this.period == 'Semanal') {
-                if (this.weekSales === null) {
-                    this.fetchWeekData();
-                } else {
-                    this.salesCurrentPeriod = this.weekSales;
-                    this.salesLastPeriod = this.lastWeekSales;
-                    this.expensesCurrentPeriod = this.weekExpenses;
-                    this.expensesLastPeriod = this.lastWeekExpenses;
-                    this.topProductsCurrentPeriod = this.weekTopProducts;
-                }
+                this.fetchWeekData();
             } else if (this.period == 'Mensual') {
-                if (this.monthSales === null) {
-                    this.fetchMonthData();
-                } else {
-                    this.salesCurrentPeriod = this.monthSales;
-                    this.salesLastPeriod = this.lastMonthSales;
-                    this.expensesCurrentPeriod = this.monthExpenses;
-                    this.expensesLastPeriod = this.lastMonthExpenses;
-                    this.topProductsCurrentPeriod = this.monthTopProducts;
-                }
+                this.fetchMonthData();
             } else {
-                this.salesCurrentPeriod = this.sales;
-                this.salesLastPeriod = this.yesterdaySales;
-                this.expensesCurrentPeriod = this.expenses;
-                this.expensesLastPeriod = this.yesterdayExpenses;
-                this.topProductsCurrentPeriod = this.todayTopProducts;
+                this.fetchDailyData();
             }
         },
         getKPITitle() {
@@ -284,19 +261,35 @@ export default {
             if (this.period == 'Semanal') return concept + " de esta semana vs semana pasada";
             if (this.period == 'Mensual') return concept + " de este mes vs mes pasado";
         },
+        async fetchDailyData() {
+            this.loading = true;
+            try {
+                const response = await axios.get(route('dashboard.get-day-data'));
+
+                if (response.status === 200) {
+                    this.salesCurrentPeriod = response.data.sales;
+                    this.salesLastPeriod = response.data.last_period_sales;
+                    this.expensesCurrentPeriod = response.data.expenses;
+                    this.expensesLastPeriod = response.data.last_period_expenses;
+                    this.topProductsCurrentPeriod = response.data.top_products;
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                this.loading = false;
+            }
+        },
         async fetchWeekData() {
             this.loading = true;
             try {
                 const response = await axios.get(route('dashboard.get-week-data'));
 
                 if (response.status === 200) {
-                    this.weekSales = response.sales;
-                    this.lastWeekSales = response.data.sales_last_period;
-                    this.weekExpenses = response.data.expenses;
-                    this.lastWeekExpenses = response.data.expenses_last_period;
-                    this.weekTopProducts = response.data.top_products;
-                    this.salesCurrentPeriod = this.weekSales;
-                    this.salesLastPeriod = this.lastWeekSales;
+                    this.salesCurrentPeriod = response.data.sales;
+                    this.salesLastPeriod = response.data.last_period_sales;
+                    this.expensesCurrentPeriod = response.data.expenses;
+                    this.expensesLastPeriod = response.data.last_period_expenses;
+                    this.topProductsCurrentPeriod = response.data.top_products;
                 }
             } catch (error) {
                 console.error(error);
@@ -310,13 +303,11 @@ export default {
                 const response = await axios.get(route('dashboard.get-month-data'));
 
                 if (response.status === 200) {
-                    this.monthSales = response.sales;
-                    this.lastMonthSales = response.data.sales_last_period;
-                    this.monthExpenses = response.data.expenses;
-                    this.lastMonthExpenses = response.data.expenses_last_period;
-                    this.monthTopProducts = response.data.top_products;
-                    this.salesCurrentPeriod = this.monthSales;
-                    this.salesLastPeriod = this.lastMonthSales;
+                    this.salesCurrentPeriod = response.data.sales;
+                    this.salesLastPeriod = response.data.last_period_sales;
+                    this.expensesCurrentPeriod = response.data.expenses;
+                    this.expensesLastPeriod = response.data.last_period_expenses;
+                    this.topProductsCurrentPeriod = response.data.top_products;
                 }
             } catch (error) {
                 console.error(error);
@@ -324,6 +315,9 @@ export default {
                 this.loading = false;
             }
         }
+    },
+    mounted() {
+        this.fetchDailyData();
     }
 }
 </script>

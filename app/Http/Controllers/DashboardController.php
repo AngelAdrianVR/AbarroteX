@@ -11,10 +11,15 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        return inertia('Dashboard');
+    }
+    
+    public function getDayData()
+    {
         $sales = Sale::with('product')->whereDate('created_at', today())->get();
         $last_period_sales = Sale::with('product')->whereDate('created_at', today()->subDay())->get();
-        // $expenses = Expense::whereDate('created_at', today())->get();
-        // $last_period_expenses = Expense::whereDate('created_at', today()->subDay())->get();
+        $expenses = Expense::whereDate('created_at', today())->get();
+        $last_period_expenses = Expense::whereDate('created_at', today()->subDay())->get();
         $top_products = Sale::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
             ->whereDate('created_at', today())
             ->groupBy('product_id')
@@ -24,9 +29,8 @@ class DashboardController extends Controller
 
         // Puedes cargar los datos del producto asociado si lo necesitas
         $top_products->load('product');
-        return $top_products;
 
-        return inertia('Dashboard', compact('sales', 'last_period_sales', 'top_products', 'expenses', 'last_period_expenses'));
+        return response()->json(compact('sales', 'last_period_sales', 'top_products', 'expenses', 'last_period_expenses'));
     }
 
     public function getWeekData()

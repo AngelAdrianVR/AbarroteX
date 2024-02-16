@@ -5,7 +5,7 @@
         <main class="flex items-center space-x-4 pt-4">
             <section class="flex flex-col items-center space-y-1 w-2/3">
                 <el-tooltip :content="options.tooltipCurrentVal" placement="left">
-                    <p class="font-bold text-3xl">{{ options.unit }}{{ options.currentVal.toLocaleString('en-US', {
+                    <p class="font-bold text-2xl">{{ options.unit }}{{ options.currentVal.toLocaleString('en-US', {
                         minimumFractionDigits: 2
                     }) }}</p>
                 </el-tooltip>
@@ -16,7 +16,7 @@
                 </el-tooltip>
             </section>
             <section :class="options.currentVal - options.refVal < 0 ? 'text-red-600' : 'text-green-600'"
-                class="w-1/3 text-3xl text-center">
+                class="w-1/3 text-2xl text-center">
                 <span>{{
                     calcPercentage() }}%</span>
                 <svg v-if="options.currentVal - options.refVal >= 0" xmlns="http://www.w3.org/2000/svg" fill="none"
