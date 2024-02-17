@@ -26,7 +26,7 @@
                     @confirm="deleteNotifications()">
                     <template #reference>
                         <button
-                            class="flex justify-center items-center size-6 text-xs rounded-[5px] bg-primarylight text-primary disabled:cursor-not-allowed disabled:bg-grayED disabled:text-gray66"
+                            class="flex justify-center items-center size-6 text-xs rounded-[5px] bg-primarylight text-primary disabled:cursor-not-allowed disabled:bg-grayF2 disabled:text-gray66"
                             :disabled="!selectedItems.length">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="size-4">

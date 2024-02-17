@@ -1,8 +1,8 @@
 <template>
-    <div v-if="products.length > 0" class="w-full mx-auto text-sm">
-        <div class="text-center text-base grid grid-cols-7 mb-2">
+    <div v-if="products.length" class="w-full mx-auto text-[11px] lg:text-sm overflow-auto">
+        <div class="text-center lg:text-base grid grid-cols-7 mb-2">
             <div class=""></div>
-            <div class="font-bold pb-3 pl-2 text-left">ID</div>
+            <div class="font-bold pb-3 pl-2 text-left w-20">ID</div>
             <div class="font-bold pb-3 text-left">Nombre de producto</div>
             <div class="font-bold pb-3 text-left">Precio</div>
             <div class="font-bold pb-3 text-left">Existencias</div>
@@ -12,8 +12,8 @@
         <div>
             <div v-for="product in products" :key="product.id" class="*:px-2 *:py-1 cursor-pointer grid grid-cols-7 border rounded-full items-center mb-2" 
             @click="$inertia.get(route('products.show', product.id))">
-                <div class="w-40 rounded-l-full">
-                    <img class="mx-auto w-16 object-contain" :src="product.imageCover[0]?.original_url" alt="">
+                <div class="w-16 lg:w-40 rounded-l-full">
+                    <img class="mx-auto w-12 lg:w-16 object-contain" :src="product.imageCover[0]?.original_url" alt="">
                 </div>
                 <div class="">{{ product.id }}</div>
                 <div class="">{{ product.name }}</div>

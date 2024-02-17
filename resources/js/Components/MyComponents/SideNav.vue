@@ -6,10 +6,10 @@
         <div class="bg-[#F2F2F2] h-full overflow-auto">
             <!-- Logo -->
             <div class="flex items-center justify-center mt-7">
-                <Link v-if="small" :href="route('dashboard')">
+                <Link v-if="small" :href="route('sales.index')">
                     <ApplicationMark />
                 </Link>
-                <Link v-else :href="route('dashboard')">
+                <Link v-else :href="route('sales.index')">
                     <figure class="">
                         <img class="w-36 px-2" src="@/../../public/images/logo.png" alt="logo">
                     </figure>
@@ -44,8 +44,8 @@
                         </Accordion>
                         <!-- Sin submenues -->
                         <button v-else-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active" :title="menu.label"
-                            class="w-full text-start pl-4 mt-2 flex items-center justify-between text-xs rounded-r-[10px] py-1 transition ease-linear duration-150"
-                            :class="menu.active ? 'bg-gray-300 text-primary border-l-4 border-primary font-bold' : 'hover:text-primary hover:bg-gray-300 text-gray-600'">
+                            class="w-full text-start pl-4 pr-3 mt-2 border-l-4 flex items-center justify-between text-xs rounded-r-[10px] py-1 transition ease-linear duration-150"
+                            :class="menu.active ? 'bg-gray-300 text-primary border-primary font-bold' : 'hover:text-primary border-transparent hover:bg-gray-300 text-gray-600'">
                             <p class="w-full text-sm truncate"><span class="mr-2" v-html="menu.icon"></span> {{ menu.label }}</p>
                         </button>
                     </div>
@@ -69,19 +69,19 @@ export default {
             collapsedMenu: null,
             menus: [
                 {
-                    label: 'Inicio',
-                    icon: '<i class="fa-solid fa-house text-lg"></i>',
-                    route: route('dashboard'),
-                    active: route().current('dashboard'),
+                    label: 'Punto de venta',
+                    icon: '<i class="fa-solid fa-basket-shopping text-lg"></i>',
+                    route: route('sales.index'),
+                    active: route().current('sales.*'),
                     options: [],
                     dropdown: false,
                     show: true
                 },
                 {
-                    label: 'Ventas',
-                    icon: '<i class="fa-regular fa-circle-check text-lg"></i>',
-                    route: route('sales.index'),
-                    active: route().current('sales.*'),
+                    label: 'Análisis de ventas',
+                    icon: '<i class="fa-solid fa-chart-simple text-lg"></i>',
+                    route: route('dashboard'),
+                    active: route().current('dashboard'),
                     options: [],
                     dropdown: false,
                     show: true

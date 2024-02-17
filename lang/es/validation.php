@@ -167,7 +167,7 @@ return [
         'employee_properties.department' => 'departamento',
         'employee_properties.job_position' => 'puesto',
         'cost' => 'costo',
-        'public_price' => 'precioal publico',
+        'public_price' => 'precio al publico',
         'current_stock' => 'existencia actual',
         'code' => 'código de producto',
         'quantity' => 'cantidad',

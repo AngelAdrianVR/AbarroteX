@@ -1,6 +1,6 @@
 <template>
     <div
-        class="min-h-[220px] border-gray3 border rounded-[10px] lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
+        class="min-h-[220px] max-h-[420px] border-gray3 border rounded-[10px] lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
         <h1 class="font-bold text-center">{{ title }} <span v-html="icon"></span></h1>
 
         <div id="chart">

@@ -1,10 +1,10 @@
 <template>
   <AppLayout title="Registrar venta">
-    <div class="px-6 py-7">
+    <div class="px-2 lg:px-6 py-7">
       <!-- header botones -->
-      <div class="flex justify-between items-center mx-3">
+      <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
-        <div class="flex items-center space-x-3">
+        <div class="my-4 lg:my-0 flex items-center space-x-3">
           <PrimaryButton @click="handleTabsEdit(tabIndex, 'add')"><i class="fa-solid fa-plus"></i> Nuevo</PrimaryButton>
           <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
             @confirm="clearTab()">
@@ -17,10 +17,10 @@
       </div>
 
       <!-- cuerpo de la pagina -->
-      <div class="flex space-x-5 my-8">
+      <div class="lg:flex space-x-5 my-8">
         <!-- scaner de código  -->
-        <section class="w-[70%]">
-          <div class="relative w-1/2 mx-auto mb-4">
+        <section class="lg:w-[70%]">
+          <div class="relative lg:w-1/2 mx-auto mb-4">
             <input v-model="scannerQuery" :disabled="scanning" @keydown.enter="getProductByCode" ref="scanInput"
               class="input w-full pl-9" placeholder="Escanea el producto" type="text">
             <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
@@ -37,7 +37,7 @@
         </section>
 
         <!-- seccion de desgloce de montos -->
-        <section class="w-[30%]">
+        <section class="lg:w-[30%]">
           <!-- buscador de productos -->
           <div class="relative">
             <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
@@ -54,18 +54,18 @@
               </p>
               <!-- estado de carga -->
               <div v-if="loading" class="flex justify-center items-center py-10">
-                <i class="fa-solid fa-spinner fa-spin text-4xl text-primary"></i>
+                <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
               </div>
             </div>
           </div>
 
           <!-- Detalle de producto encontrado -->
-          <div class="border border-grayD9 rounded-lg p-4 mt-5">
+          <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
             <div class="relative" v-if="productSelected">
               <i @click="productSelected = null"
-                class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full flex items-center justify-center absolute right-3"></i>
+                class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
               <figure>
-                <img class="object-contain w-32 mx-auto" :src="productSelected?.imageCover[0]?.original_url" alt="">
+                <img class="object-contain w-32 mx-auto" :src="productSelected?.imageCover[0]?.original_url">
               </figure>
               <div class="flex justify-between items-center mt-2 mb-4">
                 <p class="font-bold">{{ productSelected?.name }}</p>
@@ -84,7 +84,7 @@
           </div>
 
           <!-- Total por cobrar -->
-          <div class="border border-grayD9 rounded-lg p-4 mt-5">
+          <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
             <div v-if="!editableTabs[this.editableTabsValue - 1]?.paying">
               <div class="flex items-center justify-between text-lg mx-5">
                 <p class="font-bold">Total</p>
@@ -93,13 +93,13 @@
               <div class="text-center mt-7">
                 <PrimaryButton @click="editableTabs[this.editableTabsValue - 1].paying = true"
                   :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
-                  class="!rounded-full !px-24 !bg-[#5FCB1F]">Cobrar</PrimaryButton>
+                  class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
               </div>
             </div>
 
             <!-- cobrando -->
             <div v-else>
-              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong class="">{{ calculateTotal() }}</strong>
+              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ calculateTotal() }}</strong>
               </p>
               <div class="flex items-center justify-between mx-5 space-x-10">
                 <p>Entregado</p>
@@ -109,7 +109,7 @@
               <div class="flex items-center justify-between mx-5 my-2 relative">
                 <p>Cambio</p>
                 <p v-if="calculateTotal() <= editableTabs[this.editableTabsValue - 1]?.moneyReceived">${{
-                  editableTabs[this.editableTabsValue - 1]?.moneyReceived - calculateTotal() }}</p>
+                  (editableTabs[this.editableTabsValue - 1]?.moneyReceived - calculateTotal()).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
               </div>
               <p v-if="calculateTotal() > editableTabs[this.editableTabsValue - 1]?.moneyReceived"
                 class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una cantidad
@@ -303,7 +303,7 @@ export default {
     calculateTotal() {
       // Suma de los productos del precio y la cantidad para cada elemento en saleProducts
       return this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.reduce((total, sale) => {
-        return total + sale.product.public_price * sale.quantity;
+        return (total + sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 });
       }, 0);
     },
     scanInputFocus() {

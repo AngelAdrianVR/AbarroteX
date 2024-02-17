@@ -14,10 +14,10 @@ class ProductController extends Controller
     
     public function index()
     {
-        $products = ProductResource::collection(Product::paginate(15));
+        $products = ProductResource::collection(Product::get()->take(20));
+        $total_products = Product::all()->count();
 
-        // return $products;
-        return inertia('Product/Index', compact('products'));
+        return inertia('Product/Index', compact('products', 'total_products'));
     }
 
     
@@ -55,8 +55,6 @@ class ProductController extends Controller
     {   
         $product = ProductResource::make(Product::find($product_id));
 
-        // return $product;
-        
         return inertia('Product/Show', compact('product'));
     }
 
@@ -65,7 +63,6 @@ class ProductController extends Controller
     {
         $product = ProductResource::make(Product::find($product_id));
 
-        // return $product;
         return inertia('Product/Edit', compact('product'));
     }
 
@@ -84,7 +81,7 @@ class ProductController extends Controller
 
         //precio actual para checar si se cambió el precio y registrarlo
         $current_price = $product->public_price;
-        // return $current_price;
+
         if ($current_price != $request->public_price) {
             ProductHistory::create([
                 'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
@@ -154,7 +151,7 @@ class ProductController extends Controller
         $query = $request->input('query');
 
         // Realiza la búsqueda en la base de datos
-        $products = ProductResource::collection(Product::where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(3));
+        $products = ProductResource::collection(Product::where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(20));
 
         return response()->json(['items' => $products]);
     }
@@ -209,4 +206,14 @@ class ProductController extends Controller
 
         return response()->json(['items' => $groupedHistoryArray]);
     }   
+
+    public function getItemsByPage($currentPage)
+    {
+        $offset = $currentPage * 20;
+        $products = ProductResource::collection(Product::skip($offset)
+            ->take(20)
+            ->get());
+
+        return response()->json(['items' => $products]);
+    }
 }

@@ -97,7 +97,7 @@
                     <div v-if="currentTab == 2" class="mt-7 mx-16">
                         <!-- estado de carga -->
                         <div v-if="loading" class="flex justify-center items-center py-10">
-                            <i class="fa-solid fa-spinner fa-spin text-4xl text-primary"></i>
+                            <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
                         </div>
                         <div v-else>
                             <div v-for="(history, index) in productHistory" :key="history">

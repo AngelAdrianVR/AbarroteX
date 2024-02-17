@@ -3,7 +3,7 @@
         <div class="px-10 py-7">
             <Back />
 
-            <form v-if="products_quantity < 500 " @submit.prevent="store" class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 grid grid-cols-2 gap-x-3">
+            <form v-if="products_quantity < 500 " @submit.prevent="store" class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
@@ -19,7 +19,7 @@
                     </div>
                     <el-input v-model="form.cost" placeholder="ingresa el precio"
                       :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\$\s?|(,*)/g, '')">
+                      :parser="(value) => value.replace(/\D/g, '')">
                       <template #prefix>
                         <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -30,7 +30,7 @@
                     <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
                       :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\$\s?|(,*)/g, '')">
+                      :parser="(value) => value.replace(/\D/g, '')">
                       <template #prefix>
                         <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -41,7 +41,7 @@
                     <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
                       :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\$\s?|(,*)/g, '')" />
+                      :parser="(value) => value.replace(/\D/g, '')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
 
@@ -51,7 +51,7 @@
                     <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.min_stock" placeholder="Catidad mínima permitida en stock"
                       :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\$\s?|(,*)/g, '')" />
+                      :parser="(value) => value.replace(/\D/g, '')" />
                     <InputError :message="form.errors.min_stock" />
                 </div>
 
@@ -59,7 +59,7 @@
                     <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.max_stock" placeholder="Catidad máxima permitida en stock"
                       :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\$\s?|(,*)/g, '')" />
+                      :parser="(value) => value.replace(/\D/g, '')" />
                     <InputError :message="form.errors.max_stock" />
                 </div>
 

@@ -46,7 +46,6 @@ const logout = () => {
             <!-- resto de pagina -->
             <main class="w-full">
                 <nav class="bg-white border-b border-gray-100">
-                    <!-- Primary Navigation Menu -->
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-16">
                             <div class="flex">
@@ -118,6 +117,8 @@ const logout = () => {
 
                             <!-- Hamburger -->
                             <div class="-me-2 flex items-center sm:hidden">
+                                <!-- notifications -->
+                                <NotificationsCenter />
                                 <button
                                     class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
                                     @click="showingNavigationDropdown = !showingNavigationDropdown">
@@ -135,16 +136,15 @@ const logout = () => {
                             </div>
                         </div>
                     </div>
-
                     <!-- Responsive Navigation Menu -->
                     <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }"
                         class="sm:hidden">
                         <div class="pt-2 pb-3 space-y-1">
-                            <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                Inicio
-                            </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('sales.index')" :active="route().current('sales.*')">
-                                Venta
+                                Punto de venta
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                Análisis de venta
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*')">
                                 Productos
