@@ -5,7 +5,7 @@
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <div class="my-4 lg:my-0 flex items-center space-x-3">
-          <PrimaryButton @click="handleTabsEdit(tabIndex, 'add')"><i class="fa-solid fa-plus"></i> Nuevo</PrimaryButton>
+          <!-- <PrimaryButton @click="handleTabsEdit(tabIndex, 'add')"><i class="fa-solid fa-plus"></i> Nuevo</PrimaryButton> -->
           <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
             @confirm="clearTab()">
             <template #reference>
@@ -27,12 +27,19 @@
           </div>
           <!-- Pestañas -->
           <div class="mx-7">
-            <el-tabs v-model="editableTabsValue" type="card" editable class="demo-tabs" @edit="handleTabsEdit"
+            <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs"
               @keydown.enter="this.scanInputFocus();">
               <el-tab-pane v-for="tab in editableTabs" :key="tab.name" :label="tab.title" :name="tab.name">
                 <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
               </el-tab-pane>
             </el-tabs>
+            <!-- ------------- Pestañas editables ------------ -->
+            <!-- <el-tabs v-model="editableTabsValue" type="card" editable class="demo-tabs" @edit="handleTabsEdit"
+              @keydown.enter="this.scanInputFocus();">
+              <el-tab-pane v-for="tab in editableTabs" :key="tab.name" :label="tab.title" :name="tab.name">
+                <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
+              </el-tab-pane>
+            </el-tabs> -->
           </div>
         </section>
 
@@ -73,7 +80,7 @@
               </div>
               <div class="flex justify-between items-center">
                 <p class="text-gray99">Cantidad</p>
-                <el-input-number v-model="quantity" :min="1" :max="productSelected.current_stock" :precision="2" />
+                <el-input-number v-model="quantity" :min="0" :max="productSelected.current_stock" :precision="2" />
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="addSaleProduct(this.productSelected)" class="!rounded-full !px-24">Agregar
@@ -116,7 +123,7 @@
                 igual o mayor al total de compra.</p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
-                <PrimaryButton :disabled="calculateTotal() > editableTabs[this.editableTabsValue - 1]?.moneyReceived"
+                <PrimaryButton :disabled="(calculateTotal() > editableTabs[this.editableTabsValue - 1]?.moneyReceived) || storeProcessing"
                   @click="store" class="!rounded-full">Aceptar</PrimaryButton>
               </div>
             </div>
@@ -139,6 +146,7 @@ export default {
   data() {
 
     return {
+      storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
       loading: false, //cargando la busqueda de productos
       scannerQuery: null, //input para scanear el codigo de producto
@@ -153,6 +161,20 @@ export default {
         {
           title: "Registro 1",
           name: "1",
+          saleProducts: [],
+          paying: false,
+          moneyReceived: null,
+        },
+        {
+          title: "Registro 2",
+          name: "2",
+          saleProducts: [],
+          paying: false,
+          moneyReceived: null,
+        },
+        {
+          title: "Registro 3",
+          name: "3",
           saleProducts: [],
           paying: false,
           moneyReceived: null,
@@ -173,6 +195,7 @@ export default {
   methods: {
     async store() {
       try {
+        this.storeProcessing = true;
         const response = await axios.post(route('sales.store'), {
           data: {
             saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
@@ -184,6 +207,7 @@ export default {
             text: "Se ha registrado la venta con éxito!",
             type: "success",
           });
+          this.storeProcessing = false;
           this.clearTab();
         }
       } catch (error) {
@@ -194,34 +218,34 @@ export default {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
       this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
     },
-    handleTabsEdit(targetName, action) {
-      if (action === "add") {
-        const newTabName = `${++this.tabIndex}`;
-        this.editableTabs.push({
-          title: "Registro " + this.tabIndex,
-          name: newTabName,
-          saleProducts: [],
-          paying: false,
-          moneyReceived: null,
-        });
-        this.editableTabsValue = newTabName;
-      } else if (action === "remove") {
-        const tabs = this.editableTabs;
-        let activeName = this.editableTabsValue;
-        if (activeName === targetName) {
-          tabs.forEach((tab, index) => {
-            if (tab.name === targetName) {
-              const nextTab = tabs[index + 1] || tabs[index - 1];
-              if (nextTab) {
-                activeName = nextTab.name;
-              }
-            }
-          });
-        }
-        this.editableTabsValue = activeName;
-        this.editableTabs = tabs.filter((tab) => tab.name !== targetName);
-      }
-    },
+    // handleTabsEdit(targetName, action) {
+    //   if (action === "add") {
+    //     const newTabName = `${++this.tabIndex}`;
+    //     this.editableTabs.push({
+    //       title: "Registro " + this.tabIndex,
+    //       name: newTabName,
+    //       saleProducts: [],
+    //       paying: false,
+    //       moneyReceived: null,
+    //     });
+    //     this.editableTabsValue = newTabName;
+    //   } else if (action === "remove") {
+    //     const tabs = this.editableTabs;
+    //     let activeName = this.editableTabsValue;
+    //     if (activeName === targetName) {
+    //       tabs.forEach((tab, index) => {
+    //         if (tab.name === targetName) {
+    //           const nextTab = tabs[index + 1] || tabs[index - 1];
+    //           if (nextTab) {
+    //             activeName = nextTab.name;
+    //           }
+    //         }
+    //       });
+    //     }
+    //     this.editableTabsValue = activeName;
+    //     this.editableTabs = tabs.filter((tab) => tab.name !== targetName);
+    //   }
+    // },
     async searchProducts() {
       try {
         this.loading = true;
@@ -302,9 +326,12 @@ export default {
     },
     calculateTotal() {
       // Suma de los productos del precio y la cantidad para cada elemento en saleProducts
-      return this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.reduce((total, sale) => {
-        return (total + sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 });
+      const total = this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.reduce((accumulator, sale) => {
+        return accumulator + sale.product.public_price * sale.quantity;
       }, 0);
+
+      // Formatear el resultado al final
+      return total?.toLocaleString('en-US', { minimumFractionDigits: 2 });
     },
     scanInputFocus() {
       this.$nextTick(() => {

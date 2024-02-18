@@ -32,7 +32,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'code' => 'nullable|string|max:100',
+            'code' => 'nullable|unique:products|string|max:100',
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'required|numeric|min:0|max:9999',
             'current_stock' => 'required|numeric|min:0|max:9999',

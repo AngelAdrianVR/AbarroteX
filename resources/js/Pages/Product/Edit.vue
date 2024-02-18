@@ -18,8 +18,7 @@
                         </el-tooltip>
                     </div>
                     <el-input v-model="form.cost" placeholder="ingresa el precio"
-                      :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\D/g, '')">
+                      :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
                       <template #prefix>
                         <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -29,8 +28,7 @@
                 <div class="mt-3">
                     <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
-                      :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\D/g, '')">
+                      :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
                       <template #prefix>
                         <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -40,8 +38,7 @@
                 <div class="mt-3">
                     <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
-                      :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                      :parser="(value) => value.replace(/\D/g, '')" />
+                      :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
 
@@ -74,7 +71,7 @@
                 </div>
 
                 <div class="mt-3 col-span-2">
-                    <InputLabel value="Código del producto*" class="ml-3 mb-1" />
+                    <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
                     <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
                         <template #prefix>
                         <i class="fa-solid fa-barcode"></i>

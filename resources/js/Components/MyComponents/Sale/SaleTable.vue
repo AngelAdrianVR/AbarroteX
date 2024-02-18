@@ -16,7 +16,7 @@
         </div>
         <div class="w-24">${{ sale.product.public_price }}</div>
         <div>
-          <el-input-number v-model="sale.quantity" :min="1" :max="sale.product.current_stock" :precision="2" />
+          <el-input-number v-model="sale.quantity" :min="0" :max="sale.product.current_stock" :precision="2" />
         </div>
         <div class="text-[#5FCB1F] font-bold">${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
           minimumFractionDigits: 2
@@ -42,7 +42,7 @@
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
         <p class="font-bold">{{ sale.product.name }}</p>
         <p>${{ sale.product.public_price }} / unidad</p>
-        <el-input-number v-model="sale.quantity" :min="1" :max="sale.product.current_stock" :precision="2" size="small" />
+        <el-input-number v-model="sale.quantity" :min="0" :max="sale.product.current_stock" :precision="2" size="small" />
         <div class="text-[#5FCB1F] font-bold">${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
           minimumFractionDigits: 2
         }) }}</div>

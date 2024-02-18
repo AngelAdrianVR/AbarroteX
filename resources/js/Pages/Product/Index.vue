@@ -54,8 +54,7 @@
                         <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
                         <el-input v-model="form.quantity" ref="quantityInput" autofocus @keydown.enter="entryProduct"
                             placeholder="Catidad que entra a almacén"
-                            :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                            :parser="(value) => value.replace(/\$\s?|(,*)/g, '')">
+                            >
                             <template #prefix>
                                 <i class="fa-solid fa-hashtag"></i>
                             </template>
@@ -200,18 +199,19 @@ export default {
             this.form.put(route('products.entry', this.productEntryFound[0]?.id), {
                 onSuccess: () => {
                     const IndexProductEntry = this.localProducts.findIndex(item => item.code === this.form.code);
-                    this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
-                    this.form.reset();
-                    this.productEntryFound = null;
+                    if (IndexProductEntry != -1) {
+                        this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                    }
                     this.$nextTick(() => {
                         this.$refs.codeInput.focus(); // Enfocar el input de código cuando se abre el modal
                     });
                     this.$notify({
-                        title: 'Success',
-                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.productEntryFound[0]?.name,
-                        type: 'success',
-                        position: 'bottom-right',
+                        title: "Correcto",
+                        message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.productEntryFound[0].name,
+                        type: "success",
                     });
+                        this.form.reset();
+                        this.productEntryFound = null;
                 },
             });
         },
