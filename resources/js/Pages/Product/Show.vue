@@ -242,7 +242,7 @@ export default {
                 if (response.status == 200) {
                     this.productsFound = response.data.items;
                 }
-                
+
             } catch (error) {
                 console.log(error);
             } finally {

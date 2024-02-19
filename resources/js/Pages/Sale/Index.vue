@@ -27,8 +27,7 @@
           </div>
           <!-- Pestañas -->
           <div class="mx-7">
-            <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs"
-              @keydown.enter="this.scanInputFocus();">
+            <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs" @keydown.enter="this.scanInputFocus();">
               <el-tab-pane v-for="tab in editableTabs" :key="tab.name" :label="tab.title" :name="tab.name">
                 <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
               </el-tab-pane>
@@ -54,7 +53,7 @@
             <div v-if="searchFocus && searchQuery"
               class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50">
               <ul v-if="productsFound?.length > 0 && !loading">
-                <li @click="productSelected = product; searchQuery = null" v-for="(product, index) in productsFound"
+                <li @click="productFoundSelected = product; searchQuery = null" v-for="(product, index) in productsFound"
                   :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.name }}</li>
               </ul>
               <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias
@@ -68,22 +67,22 @@
 
           <!-- Detalle de producto encontrado -->
           <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-            <div class="relative" v-if="productSelected">
-              <i @click="productSelected = null"
+            <div class="relative" v-if="productFoundSelected">
+              <i @click="productFoundSelected = null"
                 class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
               <figure class="h-32">
-                <img class="object-contain w-32 mx-auto" :src="productSelected?.imageCover[0]?.original_url">
+                <img class="object-contain w-32 mx-auto" :src="productFoundSelected?.imageCover[0]?.original_url">
               </figure>
               <div class="flex justify-between items-center mt-2 mb-4">
-                <p class="font-bold">{{ productSelected?.name }}</p>
-                <p class="text-[#5FCB1F]">${{ productSelected?.public_price }}</p>
+                <p class="font-bold">{{ productFoundSelected?.name }}</p>
+                <p class="text-[#5FCB1F]">${{ productFoundSelected?.public_price }}</p>
               </div>
               <div class="flex justify-between items-center">
                 <p class="text-gray99">Cantidad</p>
-                <el-input-number v-model="quantity" :min="0" :max="productSelected.current_stock" :precision="2" />
+                <el-input-number v-model="quantity" :min="0" :max="productFoundSelected.current_stock" :precision="2" />
               </div>
               <div class="text-center mt-7">
-                <PrimaryButton @click="addSaleProduct(this.productSelected)" class="!rounded-full !px-24">Agregar
+                <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null" class="!rounded-full !px-24">Agregar
                 </PrimaryButton>
               </div>
             </div>
@@ -116,15 +115,16 @@
               <div class="flex items-center justify-between mx-5 my-2 relative">
                 <p>Cambio</p>
                 <p v-if="calculateTotal() <= editableTabs[this.editableTabsValue - 1]?.moneyReceived">${{
-                  (editableTabs[this.editableTabsValue - 1]?.moneyReceived - calculateTotal()).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
+                  (editableTabs[this.editableTabsValue - 1]?.moneyReceived - calculateTotal()).toLocaleString('en-US', {
+                    minimumFractionDigits: 2
+                  }) }}</p>
               </div>
               <p v-if="(calculateTotal() > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
                 class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una cantidad
                 igual o mayor al total de compra.</p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
-                <PrimaryButton :disabled="storeProcessing"
-                  @click="store" class="!rounded-full">Aceptar</PrimaryButton>
+                <PrimaryButton :disabled="storeProcessing" @click="store" class="!rounded-full">Aceptar</PrimaryButton>
               </div>
             </div>
           </div>
@@ -153,7 +153,8 @@ export default {
       searchQuery: null, //buscador
       searchFocus: false, //buscador
       productsFound: null, //buscador
-      productSelected: null, //producto escaneado o buscado
+      productSelected: null, //producto escaneado agergado a la lista de compras
+      productFoundSelected: null, //producto seleccionado desde barra de busqueda
       quantity: 1, //cantidad para agregar del producto escaneado o buscado
       tabIndex: 1, //index del tab - componente de tabs
       editableTabsValue: "1", //tab seleccionado - componente de tabs

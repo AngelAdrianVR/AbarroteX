@@ -12,8 +12,8 @@
         <div>
             <div v-for="product in products" :key="product.id" class="*:px-2 *:py-1 cursor-pointer flex items-center space-x-4 border rounded-full mb-2" 
             @click="$inertia.get(route('products.show', product.id))">
-                <div class="hidden lg:block w-[10%] rounded-l-full">
-                    <img class="mx-auto w-full h-full object-contain rounded-full" :src="product.imageCover[0]?.original_url">
+                <div class="hidden lg:block w-[10%] h-14 rounded-l-full">
+                    <img class="mx-auto h-12 object-contain rounded-full" :src="product.imageCover[0]?.original_url">
                 </div>
                 <div class="w-[18%] lg:w-[13%]">{{ product.code }}</div>
                 <div class="w-[35%] lg:w-[30%]">{{ product.name }}</div>

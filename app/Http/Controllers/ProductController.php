@@ -11,23 +11,23 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    
+
     public function index()
     {
-        $products = ProductResource::collection(Product::get()->take(20));
+        $products = ProductResource::collection(Product::latest()->get()->take(20));
         $total_products = Product::all()->count();
 
         return inertia('Product/Index', compact('products', 'total_products'));
     }
 
-    
+
     public function create()
     {
         $products_quantity = Product::all()->count();
         return inertia('Product/Create', compact('products_quantity'));
     }
 
-    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -50,15 +50,15 @@ class ProductController extends Controller
         return to_route('products.show', $product->id);
     }
 
-    
+
     public function show($product_id)
-    {   
+    {
         $product = ProductResource::make(Product::find($product_id));
 
         return inertia('Product/Show', compact('product'));
     }
 
-    
+
     public function edit($product_id)
     {
         $product = ProductResource::make(Product::find($product_id));
@@ -66,7 +66,7 @@ class ProductController extends Controller
         return inertia('Product/Edit', compact('product'));
     }
 
-    
+
     public function update(Request $request, Product $product)
     {
         $request->validate([
@@ -126,20 +126,20 @@ class ProductController extends Controller
         $product->update($request->except('imageCover'));
 
         // media ------------
-         // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
-         if ($request->hasFile('imageCover')) {
+        // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
+        if ($request->hasFile('imageCover')) {
             $product->clearMediaCollection('imageCover');
         }
 
-         // Guardar el archivo en la colección 'imageCover'
-         if ($request->hasFile('imageCover')) {
+        // Guardar el archivo en la colección 'imageCover'
+        if ($request->hasFile('imageCover')) {
             $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
         return to_route('products.index');
     }
 
-    
+
     public function destroy(Product $product)
     {
         $product->delete();
@@ -205,12 +205,13 @@ class ProductController extends Controller
         $groupedHistoryArray = $groupedHistory->toArray();
 
         return response()->json(['items' => $groupedHistoryArray]);
-    }   
+    }
 
     public function getItemsByPage($currentPage)
     {
         $offset = $currentPage * 20;
-        $products = ProductResource::collection(Product::skip($offset)
+        $products = ProductResource::collection(Product::latest()
+            ->skip($offset)
             ->take(20)
             ->get());
 

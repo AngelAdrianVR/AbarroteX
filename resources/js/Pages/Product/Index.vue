@@ -20,16 +20,19 @@
 
             <Loading v-if="loading" class="mt-20" />
             <div v-else class="mt-8 lg:w-11/12">
-                <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{ total_products }} elementos
+                <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
+                    total_products }} elementos
                 </p>
                 <ProductTable :products="localProducts" />
-                <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{ total_products }} elementos
+                <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
+                    total_products }} elementos
                 </p>
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-else-if="total_products > 15 && localProducts.length < total_products && localProducts.length" @click="fetchItemsByPage"
-                    class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
+                <button v-else-if="total_products > 15 && localProducts.length < total_products && localProducts.length"
+                    @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
+                    elementos</button>
             </div>
         </div>
 
@@ -54,7 +57,8 @@
                         <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
                         <el-input v-model="form.quantity" ref="quantityInput" autofocus @keydown.enter="entryProduct"
                             placeholder="Cantidad que entra a almacén"
-                            >
+                            :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                            :parser="(value) => value.replace(/\D/g, '')">
                             <template #prefix>
                                 <i class="fa-solid fa-hashtag"></i>
                             </template>
@@ -85,7 +89,8 @@
 
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
-                        <PrimaryButton @click="entryProduct" class="!rounded-full">Ingresar producto</PrimaryButton>
+                        <PrimaryButton @click="entryProduct" class="!rounded-full" :disabled="!form.quantity">Ingresar
+                            producto</PrimaryButton>
                         <CancelButton @click="closeEntryModal">Cancelar</CancelButton>
                     </div>
                 </section>
@@ -210,8 +215,8 @@ export default {
                         message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.productEntryFound[0].name,
                         type: "success",
                     });
-                        this.form.reset();
-                        this.productEntryFound = null;
+                    this.form.reset();
+                    this.productEntryFound = null;
                 },
             });
         },

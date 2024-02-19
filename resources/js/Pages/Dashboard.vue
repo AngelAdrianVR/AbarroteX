@@ -29,6 +29,7 @@ import PieChart from '@/Components/MyComponents/Charts/PieChart.vue';
 import Kpi from '@/Components/MyComponents/Dashboard/Kpi.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import BarChart from "@/Components/MyComponents/Charts/BarChart.vue";
+import { format, subHours } from 'date-fns';
 import axios from 'axios';
 
 export default {
@@ -67,15 +68,25 @@ export default {
                 return acumulador + current.quantity * current.current_price;
             }, 0);
         },
+        calculateTotalExpense() {
+            return this.expensesCurrentPeriod?.reduce((acumulador, current) => {
+                return acumulador + current.quantity * current.current_price;
+            }, 0);
+        },
         calculateTotalProductsSold() {
             return this.salesCurrentPeriod?.reduce((acumulador, current) => {
+                return acumulador + current.quantity;
+            }, 0);
+        },
+        calculateTotalProductsExpense() {
+            return this.expensesCurrentPeriod?.reduce((acumulador, current) => {
                 return acumulador + current.quantity;
             }, 0);
         },
         getSimpleKpisOptions() {
             return [
                 {
-                    title: "Venta",
+                    title: "Venta (ingresos)",
                     icon: "fa-solid fa-dollar-sign",
                     value: "$" + this.calculateTotalSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
@@ -83,6 +94,16 @@ export default {
                     title: "Productos vendidos",
                     icon: "fa-solid fa-clipboard-list",
                     value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                },
+                {
+                    title: "Compras (Egresos)",
+                    icon: "fa-solid fa-dollar-sign",
+                    value: "$" + this.calculateTotalExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                },
+                {
+                    title: "Productos comprados",
+                    icon: "fa-solid fa-clipboard-list",
+                    value: this.calculateTotalProductsExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
             ]
         },
@@ -173,12 +194,21 @@ export default {
             // Inicializa el array hourlyData con ceros para cada hora del día
             let hourlyData = Array(18).fill(0);
 
+            // Define la zona horaria local de la máquina
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
             // Recorre las ventas y suma el total por hora
             data.forEach((sale) => {
-                const saleHour = new Date(sale.created_at).getHours();
+                const saleDateTime = new Date(sale.created_at);
+
+                // Ajusta la fecha y hora a la zona horaria local
+                const localSaleDateTime = subHours(saleDateTime, new Date().getTimezoneOffset() / 60);
+
+                // Convierte la fecha y hora a la hora del día en la zona horaria local
+                const saleHour = format(localSaleDateTime, 'H', { timeZone });
+
                 hourlyData[saleHour] += sale.quantity * sale.current_price;
             });
-
             hourlyData = this.setElementsWithNumberFormat(hourlyData);
 
             return hourlyData;
