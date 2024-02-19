@@ -1,10 +1,10 @@
 <template>
     <AppLayout :title="product.data.name">
-        <div class="px-10 py-7">
+        <div class="px-2 lg:px-10 py-7">
             <!-- header botones -->
-            <div class="flex justify-between items-center mx-3">
+            <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 my-2 lg:my-0">
                     <PrimaryButton @click="openEntryModal" class="!rounded-full !bg-[#5FCB1F]">Entrada de producto
                     </PrimaryButton>
                     <PrimaryButton @click="$inertia.get(route('products.edit', product.data.id))" class="!rounded-full">
@@ -32,7 +32,7 @@
             </div>
 
             <!-- Info de producto -->
-            <div class="grid grid-cols-3 gap-x-12 mx-10">
+            <div class="lg:grid grid-cols-3 gap-x-12 mx-10">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
                     <figure class="border border-grayD9 rounded-lg">
@@ -41,7 +41,7 @@
                 </section>
 
                 <!-- informacion de producto -->
-                <section class="col-span-2">
+                <section class="col-span-2 my-3 lg:my-0">
                     <!-- Pestañas -->
                     <div
                         class="lg:w-3/4 w-full flex items-center space-x-7 text-sm border-b border-gray4 lg:mx-16 mx-2 mb-5 contenedor transition-colors ease-linear duration-200">
@@ -60,8 +60,8 @@
                     </div>
 
                     <!-- pestaña 1 Informacion de producto -->
-                    <div v-if="currentTab == 1" class="mt-7 mx-16">
-                        <div class="flex justify-between items-center">
+                    <div v-if="currentTab == 1" class="mt-7 mx-16 text-sm lg:text-base">
+                        <div class="lg:flex justify-between items-center">
                             <p class="text-gray37 flex items-center">
                                 <span class="mr-2">Código</span>
                                 <span class="font-bold">{{ product.data.code }}</span>
@@ -79,9 +79,9 @@
                             <p class="text-gray37">Fecha de alta: <strong class="ml-5">{{ product.data.created_at
                             }}</strong></p>
                         </div>
-                        <h1 class="font-bold text-xl my-4">{{ product.data.name }}</h1>
+                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ product.data.name }}</h1>
 
-                        <div class="w-1/2 mt-10 -ml-7 space-y-2">
+                        <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de compra:</p>
                                 <p class="text-right font-bold">${{ product.data.cost }}</p>
@@ -177,6 +177,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
@@ -204,6 +205,7 @@ export default {
         PrimaryButton,
         CancelButton,
         InputError,
+        InputLabel,
         Modal,
         Back,
         Loading,
