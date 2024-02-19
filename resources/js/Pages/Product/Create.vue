@@ -42,11 +42,11 @@
                     <InputError :message="form.errors.current_stock" />
                 </div>
 
-                <h2 class="font-bold col-span-full text-sm my-5">Cantidades de stock permitidas</h2>
+                <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
                 
                 <div class="mt-3">
                     <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.min_stock" placeholder="Catidad mínima permitida en stock"
+                    <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
                       :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                       :parser="(value) => value.replace(/\D/g, '')" />
                     <InputError :message="form.errors.min_stock" />
@@ -54,7 +54,7 @@
 
                 <div class="mt-3">
                     <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.max_stock" placeholder="Catidad máxima permitida en stock"
+                    <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
                       :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                       :parser="(value) => value.replace(/\D/g, '')" />
                     <InputError :message="form.errors.max_stock" />

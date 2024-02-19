@@ -48,7 +48,7 @@
           <!-- buscador de productos -->
           <div class="relative">
             <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
-              ref="searchInput" class="input w-full pl-9" placeholder="Buscar producto" type="text">
+              ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto" type="search">
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
             <!-- Resultados de la búsqueda -->
             <div v-if="searchFocus && searchQuery"
@@ -71,7 +71,7 @@
             <div class="relative" v-if="productSelected">
               <i @click="productSelected = null"
                 class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
-              <figure>
+              <figure class="h-32">
                 <img class="object-contain w-32 mx-auto" :src="productSelected?.imageCover[0]?.original_url">
               </figure>
               <div class="flex justify-between items-center mt-2 mb-4">
@@ -98,7 +98,7 @@
                 <p class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal() }}</strong></p>
               </div>
               <div class="text-center mt-7">
-                <PrimaryButton @click="editableTabs[this.editableTabsValue - 1].paying = true"
+                <PrimaryButton @click="receive()"
                   :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
                   class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
               </div>
@@ -111,19 +111,19 @@
               <div class="flex items-center justify-between mx-5 space-x-10">
                 <p>Entregado</p>
                 <input v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" @keydown.enter="store"
-                  type="number" class="input !rounded-md w-1/3" autofocus placeholder="$00.00">
+                  type="number" class="input !rounded-md w-1/3" ref="receivedInput" placeholder="$0.00">
               </div>
               <div class="flex items-center justify-between mx-5 my-2 relative">
                 <p>Cambio</p>
                 <p v-if="calculateTotal() <= editableTabs[this.editableTabsValue - 1]?.moneyReceived">${{
                   (editableTabs[this.editableTabsValue - 1]?.moneyReceived - calculateTotal()).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
               </div>
-              <p v-if="calculateTotal() > editableTabs[this.editableTabsValue - 1]?.moneyReceived"
+              <p v-if="(calculateTotal() > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
                 class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una cantidad
                 igual o mayor al total de compra.</p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
-                <PrimaryButton :disabled="(calculateTotal() > editableTabs[this.editableTabsValue - 1]?.moneyReceived) || storeProcessing"
+                <PrimaryButton :disabled="storeProcessing"
                   @click="store" class="!rounded-full">Aceptar</PrimaryButton>
               </div>
             </div>
@@ -333,9 +333,18 @@ export default {
       // Formatear el resultado al final
       return total?.toLocaleString('en-US', { minimumFractionDigits: 2 });
     },
+    receive() {
+      this.editableTabs[this.editableTabsValue - 1].paying = true;
+      this.receivedInputFocus();
+    },
     scanInputFocus() {
       this.$nextTick(() => {
         this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
+      });
+    },
+    receivedInputFocus() {
+      this.$nextTick(() => {
+        this.$refs.receivedInput.focus(); // Enfocar el input de código cuando se abre el modal
       });
     },
   },

@@ -47,7 +47,7 @@ class ProductController extends Controller
             $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
-        return to_route('products.index');
+        return to_route('products.show', $product->id);
     }
 
     
@@ -98,7 +98,7 @@ class ProductController extends Controller
             $product->clearMediaCollection('imageCover');
         }
 
-        return to_route('products.index');
+        return to_route('products.show', $product->id);
     }
 
     public function updateWithMedia(Request $request, Product $product)
@@ -194,7 +194,7 @@ class ProductController extends Controller
 
     public function fetchHistory($product_id)
     {
-        $product_history = ProductHistoryResource::collection(ProductHistory::where('product_id', $product_id)->get());
+        $product_history = ProductHistoryResource::collection(ProductHistory::where('product_id', $product_id)->latest()->get());
 
         // Agrupar por mes y año
         $groupedHistory = $product_history->groupBy(function ($item) {

@@ -13,12 +13,13 @@
             </div>
             <div class="lg:w-1/4 relative">
                 <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
-                    class="input w-full pl-9" placeholder="Buscar producto" type="text">
+                    class="input w-full pl-9" placeholder="Buscar código o nombre de producto" type="search">
                 <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
                 <!-- Resultados de la búsqueda -->
                 <div v-if="searchFocus && searchQuery"
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
-                    <ul v-if="productsFound?.length > 0">
+                    <Loading v-if="searchLoading" />
+                    <ul v-else-if="productsFound?.length > 0">
                         <li @click.stop="$inertia.get(route('products.show', product.id))"
                             v-for="(product, index) in productsFound" :key="index"
                             class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.name }}</li>
@@ -149,7 +150,7 @@
                     <div class="mt-3">
                         <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
                         <el-input v-model="form.quantity" ref="quantityInput" @keydown.enter="entryProduct"
-                            placeholder="Catidad que entra a almacén"
+                            placeholder="Cantidad que entra a almacén"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                             :parser="(value) => value.replace(/\$\s?|(,*)/g, '')">
                             <template #prefix>
@@ -173,6 +174,7 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import Loading from '@/Components/MyComponents/Loading.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
@@ -194,6 +196,7 @@ export default {
             entryProductModal: false,
             productHistory: null,
             loading: null,
+            searchLoading: false,
         };
     },
     components: {
@@ -202,7 +205,8 @@ export default {
         CancelButton,
         InputError,
         Modal,
-        Back
+        Back,
+        Loading,
     },
     props: {
         product: Object
@@ -232,14 +236,17 @@ export default {
             });
         },
         async searchProducts() {
+            this.searchLoading = true;
             try {
                 const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
                 if (response.status == 200) {
                     this.productsFound = response.data.items;
                 }
-
+                
             } catch (error) {
                 console.log(error);
+            } finally {
+                this.searchLoading = false;
             }
         },
         handleBlur() {

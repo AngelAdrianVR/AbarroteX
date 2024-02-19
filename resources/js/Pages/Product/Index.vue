@@ -14,7 +14,7 @@
 
             <div class="lg:w-1/4 relative">
                 <input v-model="searchQuery" @keydown.enter="searchProducts" class="input w-full pl-9"
-                    placeholder="Buscar producto" type="text">
+                    placeholder="Buscar código o nombre de producto" type="search">
                 <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
             </div>
 
@@ -53,7 +53,7 @@
                     <div v-if="productEntryFound?.length > 0" class="mt-3">
                         <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
                         <el-input v-model="form.quantity" ref="quantityInput" autofocus @keydown.enter="entryProduct"
-                            placeholder="Catidad que entra a almacén"
+                            placeholder="Cantidad que entra a almacén"
                             >
                             <template #prefix>
                                 <i class="fa-solid fa-hashtag"></i>
@@ -80,8 +80,8 @@
                             <p>Existencias: <strong class="ml-2">{{ productEntryFound[0]?.current_stock }}</strong></p>
                         </div>
                     </div>
-                    <p v-else-if="!loading && form.code" class="mt-5 text-gray-500 text-center text-sm">No se encontró
-                        ningun producto</p>
+                    <!-- <p v-else-if="!loading && " class="mt-5 text-gray-500 text-center text-sm">No se encontró
+                        ningun producto</p> -->
 
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
