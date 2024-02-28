@@ -4,35 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Abarrotes el japo</title>
     <style>
-        main {
-            height: 100vh;
-            display: flex;
-            justify-content: start;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 {
-            color: #7f659c;
-            font-weight: bold;
+        body {
             font-family: sans-serif;
-        }
-
-        p {
-            margin-left: 160px;
-            margin-right: 160px;
-            text-align: center;
         }
     </style>
 </head>
 
-<body>
-    <main>
+<body class="font">
+    <main class="h-screen flex flex-col items-center justify-start">
         <img src="./images/disconected.jpg">
-        <h1>Servicio temporalmente suspendido</h1>
-        <p>
+        <h1 class="font-bold text-[#7f659c] text-2xl">Servicio temporalmente suspendido</h1>
+        <p class="mx-4 lg:mx-36 text-center text-sm my-3">
             Lamentamos los inconvenientes, pero el servicio está temporalmente suspendido ya
             que hay un saldo pendiente por liquidar.
             Una vez recibido el pago, el sistema se restablecerá automáticamente. Agradecemos tu comprensión.
