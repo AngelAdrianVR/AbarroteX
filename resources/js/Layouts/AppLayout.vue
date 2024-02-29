@@ -50,7 +50,7 @@ const logout = () => {
                         <div class="flex justify-between h-16">
                             <div class="flex">
                                 <!-- Logo -->
-                                <div class="lg:hidden shrink-0 flex items-center">
+                                <div class="md:hidden shrink-0 flex items-center">
                                     <Link :href="route('dashboard')">
                                     <ApplicationMark class="block h-9 w-auto" />
                                     </Link>

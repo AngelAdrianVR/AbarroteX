@@ -74,8 +74,7 @@
                     <!-- informacion del producto escaneado -->
                     <div v-if="productEntryFound?.length > 0" class="mt-5 grid grid-cols-3">
                         <figure class="w-32 ml-16">
-                            <img class="w-32 object-contain" :src="productEntryFound[0]?.imageCover[0]?.original_url"
-                                alt="">
+                            <img class="w-32 object-contain" :src="productEntryFound[0]?.imageCover[0]?.original_url">
                         </figure>
 
                         <div class="col-span-2 text-left">
@@ -86,7 +85,6 @@
                     </div>
                     <!-- <p v-else-if="!loading && " class="mt-5 text-gray-500 text-center text-sm">No se encontró
                         ningun producto</p> -->
-
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
                         <PrimaryButton @click="entryProduct" class="!rounded-full" :disabled="!form.quantity">Ingresar
