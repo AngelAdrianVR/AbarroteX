@@ -3,7 +3,7 @@
         <div class="px-10 py-7">
             <Back />
 
-            <form v-if="products_quantity < 500" @submit.prevent="store"
+            <form v-if="products_quantity < 650" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3 col-span-2">
@@ -84,7 +84,7 @@
             </form>
             <div v-else class="text-center text-gray-500">
                 <p class="text-3xl mb-3">¡Lo sentimos!</p>
-                <p class="">Has llegado al límite de productos disponibles (500). Para poder aumentar el límite ponte en
+                <p class="">Has llegado al límite de productos disponibles (650). Para poder aumentar el límite ponte en
                     contacto con el equipo de DTW</p>
             </div>
         </div>
