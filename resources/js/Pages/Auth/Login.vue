@@ -35,7 +35,7 @@ const submit = () => {
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
-            <h2 class="font-bold mt-7 text-center text-lg">Iniciar sesion</h2>
+            <h2 class="font-bold mt-7 text-center text-lg">Iniciar sesionn</h2>
         </template>
 
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
