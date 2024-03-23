@@ -35,7 +35,7 @@ const submit = () => {
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
-            <h2 class="font-bold mt-7 text-center text-lg">Iniciar sesionn</h2>
+            <h2 class="font-bold mt-7 text-center text-lg">Iniciar sesion</h2>
         </template>
 
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
@@ -81,7 +81,7 @@ const submit = () => {
             <div class="block mt-4">
                 <label class="flex items-center">
                     <Checkbox v-model:checked="form.remember" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600">Dejar sesión abierta</span>
+                    <span class="ms-2 text-sm text-gray-600">Mantener sesión abierta</span>
                 </label>
             </div>
 

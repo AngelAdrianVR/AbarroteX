@@ -18,8 +18,8 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                primary: '#C30303',
-                primarylight: '#FD9696',
+                primary: '#131F8C',
+                primarylight: '#D2D6F9',
                 secondary: '#25346D',
                 secondarylight: '#25346D',
                 redpad: '#C1202A',
