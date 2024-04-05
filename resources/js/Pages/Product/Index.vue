@@ -5,8 +5,8 @@
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="my-4 lg:my-0 flex items-center space-x-3">
-                    <PrimaryButton @click="openEntryModal" class="!rounded-full !bg-[#5FCB1F]">Entrada de producto
-                    </PrimaryButton>
+                    <ThirthButton @click="openEntryModal">Entrada de producto
+                    </ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">Nuevo producto
                     </PrimaryButton>
                 </div>
@@ -101,6 +101,7 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ProductTable from '@/Components/MyComponents/Product/ProductTable.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -135,11 +136,12 @@ export default {
         PrimaryButton,
         CancelButton,
         ProductTable,
+        ThirthButton,
         Pagination,
         InputError,
-        Modal,
+        InputLabel,
         Loading,
-        InputLabel
+        Modal
     },
     props: {
         products: Object,

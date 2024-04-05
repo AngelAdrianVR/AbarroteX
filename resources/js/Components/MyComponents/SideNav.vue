@@ -3,7 +3,7 @@
     <div class="h-screen hidden md:block shadow-lg relative">
         <i @click="small = false" v-if="small" class="fa-solid fa-angle-right text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
         <i @click="small = true" v-else class="fa-solid fa-angle-left text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
-        <div class="bg-[#F2F2F2] h-full overflow-auto">
+        <div class="bg-[#232323] h-full overflow-auto">
             <!-- Logo -->
             <div class="flex items-center justify-center mt-7">
                 <Link v-if="small" :href="route('sales.index')">
@@ -21,7 +21,7 @@
                     <div v-for="(menu, index) in menus" :key="index">
                         <button v-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active" :title="menu.label"
                             class="w-full text-center py-2 pr-3 pl-5 justify-between rounded-r-[10px] mt-2 transition ease-linear duration-150"
-                            :class="menu.active ? 'bg-gray-300 text-primary border-l-4 border-primary' : 'hover:text-primary hover:bg-gray-300 text-gray-600'">
+                            :class="menu.active ? 'bg-[#393939] text-primary border-l-2 border-primary' : 'hover:text-primary hover:bg-[#393939] text-[#9A9A9A]'">
                             <span v-html="menu.icon"></span>
                         </button>
                     </div>
@@ -37,15 +37,15 @@
                                 <button @click="goToRoute(option.route)" v-if="option.show" :active="option.active"
                                     :title="option.label"
                                     class="w-full text-start pl-6 pr-2 mt-2 flex justify-between text-xs rounded-md py-1 transition ease-linear duration-150"
-                                    :class="option.active ? 'bg-gray-300 text-primary' : 'hover:text-primary hover:bg-gradient-to-r from-gray-800 to-black1 text-gray-700'">
+                                    :class="option.active ? 'bg-[#393939] text-primary' : 'hover:text-primary hover:bg-gradient-to-r from-gray-800 to-black1 text-gray-700'">
                                     <p class="w-full truncate"> {{ option.label }}</p>
                                 </button>
                             </div>
                         </Accordion>
                         <!-- Sin submenues -->
                         <button v-else-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active" :title="menu.label"
-                            class="w-full text-start pl-4 pr-3 mt-2 border-l-4 flex items-center justify-between text-xs rounded-r-[10px] py-1 transition ease-linear duration-150"
-                            :class="menu.active ? 'bg-gray-300 text-primary border-primary font-bold' : 'hover:text-primary border-transparent hover:bg-gray-300 text-gray-600'">
+                            class="w-full text-start pl-4 pr-3 mt-2 border-l-2 flex items-center justify-between text-xs rounded-r-[10px] py-1 transition ease-linear duration-150"
+                            :class="menu.active ? 'bg-[#393939] text-primary border-primary' : 'hover:text-primary border-transparent hover:bg-[#393939] text-[#9A9A9A]'">
                             <p class="w-full text-sm truncate"><span class="mr-2" v-html="menu.icon"></span> {{ menu.label }}</p>
                         </button>
                     </div>
@@ -71,8 +71,8 @@ export default {
                 {
                     label: 'Punto de venta',
                     icon: '<i class="fa-solid fa-basket-shopping text-lg"></i>',
-                    route: route('sales.index'),
-                    active: route().current('sales.*'),
+                    route: route('sales.point'),
+                    active: route().current('sales.point'),
                     options: [],
                     dropdown: false,
                     show: true
@@ -87,10 +87,28 @@ export default {
                     show: true
                 },
                 {
+                    label: 'Ventas registradas',
+                    icon: '<i class="fa-solid fa-receipt text-lg"></i>',
+                    route: route('sales.index'),
+                    active: route().current('sales.index') || route().current('sales.show'),
+                    options: [],
+                    dropdown: false,
+                    show: true
+                },
+                {
                     label: 'Productos',
                     icon: '<i class="fa-regular fa-clipboard text-lg"></i>',
                     route: route('products.index'),
                     active: route().current('products.*'),
+                    options: [],
+                    dropdown: false,
+                    show: true
+                },
+                {
+                    label: 'Configuraciones',
+                    icon: '<i class="fa-solid fa-gears text-lg"></i>',
+                    route: route('settings.index'),
+                    active: route().current('settings.*'),
                     options: [],
                     dropdown: false,
                     show: true

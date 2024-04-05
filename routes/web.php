@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -54,17 +57,43 @@ Route::get('products-get-product-scaned/{product_id}', [ProductController::class
 Route::get('products-fetch-history/{product_id}', [ProductController::class, 'fetchHistory'])->name('products.fetch-history')->middleware('auth');
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
 
+
 //sales routes-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 Route::resource('sales', SaleController::class)->middleware('auth');
+Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware('auth');
+Route::get('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
+Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
+
+
+//clients routes-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+// Route::resource('clients', ClientController::class)->middleware('auth');
+// Route::get('clients-get-pendent-amount/{client}', [ClientController::class, 'getClientPendentAmount'])->name('clients.get-pendent-amount')->middleware('auth');
+// Route::get('clients-get-by-id/{client}', [ClientController::class, 'getById'])->middleware('auth')->name('clients.get-by-id');
+// Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
+// Route::get('clients-search', [ClientController::class, 'search'])->name('clients.search')->middleware('auth');
+
+
+//payments routes-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
+// Route::resource('payments', PaymentController::class)->middleware('auth');
 
 
 //history routes-------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::resource('product-histories', ProductHistoryController::class)->middleware('auth');
 
+
 // User routes-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::get('users-get-notifications', [UserController::class, 'getNotifications'])->middleware('auth')->name('users.get-notifications');
 Route::post('users-read-notifications', [UserController::class, 'readNotifications'])->middleware('auth')->name('users.read-user-notifications');
 Route::post('users-delete-notifications', [UserController::class, 'deleteNotifications'])->middleware('auth')->name('users.delete-user-notifications');
+
+
+
+
+//settings routes-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::resource('settings', SettingController::class)->middleware('auth');
