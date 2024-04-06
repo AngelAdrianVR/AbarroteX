@@ -38,20 +38,19 @@
 
             <Loading v-if="loading" class="mt-20" />
             <div v-else class="mt-8 lg:w-11/12">
-                <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
+                <!-- <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
                     elementos
-                </p>
-                <RegisteredSalesTable :sales="localSales" class="hidden md:block" />
+                </p> -->
+                <RegisteredSalesTable :sales="localSales" />
                 <!-- <SaleMobileIndex v-for="item in localSales" :key="item.id" :saleId="item.id" class="md:hidden" /> -->
-                <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
+                <!-- <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
                     elementos
-                </p>
+                </p> -->
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-else-if="total_sales > 20 && (localSales.length < total_sales) && localSales.length"
-                    @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
-                    elementos</button>
+                <button
+                    @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
             </div>
         </div>
     </AppLayout>
@@ -94,7 +93,7 @@ export default {
         async searchSales() {
             this.loading = true;
             try {
-                const response = await axios.get(route('sales.search'), { params: { queryDate: this.searchDate, queryClient: this.searchClient } });
+                const response = await axios.get(route('sales.search'), { params: { queryDate: this.searchDate } });
                 if (response.status == 200) {
                     this.localSales = response.data.items;
                 }
@@ -112,7 +111,7 @@ export default {
                 const response = await axios.get(route('sales.get-by-page', this.currentPage));
 
                 if (response.status === 200) {
-                    this.localSales = [...this.localSales, ...response.data.items];
+                    this.localSales = {...this.localSales, ...response.data.items};
                     this.currentPage++;
                 }
             } catch (error) {
