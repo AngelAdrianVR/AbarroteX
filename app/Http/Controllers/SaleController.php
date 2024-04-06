@@ -23,10 +23,13 @@ class SaleController extends Controller
     
     public function index()
     {
-        // Obtener las ventas más recientes
-        $sales = Sale::latest()->take(20)->get();
+         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
+        $days_ago = Carbon::now()->subDays(5);
 
-         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        // Obtener las ventas registradas en los últimos 7 días
+        $sales = Sale::whereDate('created_at', '>=', $days_ago)->latest()->get();
+
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $sales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->format('d-F-Y');
         })->map(function ($sales) {
@@ -42,10 +45,8 @@ class SaleController extends Controller
             ];
         });
 
-        $total_sales = Sale::all()->count();
-
         // return $groupedSales;
-        return inertia('Sale/Index', compact('groupedSales', 'total_sales'));
+        return inertia('Sale/Index', compact('groupedSales'));
     }
 
     
@@ -89,13 +90,45 @@ class SaleController extends Controller
     }
 
     
-    public function show(Sale $sale)
+    public function show($created_at)
     {
-        // $sale = SaleResource::make(Sale::with('client', 'payments', 'products')->find($sale_id));
-        // $clients = Client::all(['id', 'name']);
+        
+    // Parsear la fecha recibida para obtener solo la parte de la fecha
+    $date = Carbon::parse($created_at)->toDateString();
 
-        // // return $sale;
-        // return inertia('Sale/Show', compact('sale', 'clients'));
+    // Obtener las ventas registradas en la fecha recibida
+    $sales = Sale::with('product:id,name')->whereDate('created_at', $date)->get();
+
+    // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+    $day_sales = $sales->groupBy(function ($sale) {
+        return Carbon::parse($sale->created_at)->format('d-F-Y');
+    })->map(function ($sales) {
+        // Agrupar las ventas por product_id y sumar la cantidad vendida para cada producto
+        $groupedSales = $sales->groupBy('product_id')->map(function ($productSales) {
+            return [
+                'id' => $productSales->first()->id,
+                'name' => $productSales->first()->product?->name,
+                'current_price' => $productSales->first()->current_price,
+                'quantity' => $productSales->sum('quantity'),
+                'product_id' => $productSales->first()->product_id,
+                'created_at' => $productSales->first()->created_at,
+            ];
+        });
+    
+        $totalQuantity = $groupedSales->sum('quantity');
+        $totalSale = $groupedSales->sum(function ($productSale) {
+            return $productSale['quantity'] * $productSale['current_price'];
+        });
+    
+        return [
+            'total_quantity' => $totalQuantity,
+            'total_sale' => $totalSale,
+            'sales' => $groupedSales->values(), // Convertir el mapa en un arreglo indexado
+        ];
+    });
+
+        // return $day_sales;
+        return inertia('Sale/Show', compact('day_sales'));
     }
 
     
@@ -113,43 +146,90 @@ class SaleController extends Controller
     
     public function destroy(Sale $sale)
     {
+        // Obtener la fecha de creación del registro de venta
+        $saleDate = $sale->created_at->toDateString();
+
+        // Eliminar todos los registros que tengan la misma fecha de creación
+        Sale::whereDate('created_at', $saleDate)->delete();
+
+        // Eliminar el registro de venta enviado como referencia
         $sale->delete();
     }
 
 
-    // public function searchProduct(Request $request)
-    // {
-    //     $queryDate = $request->input('queryDate');
+    public function searchProduct(Request $request)
+    {
+        $queryDate = $request->input('queryDate');
+        $startDate = Carbon::parse($queryDate[0])->startOfDay();
+        $endDate = Carbon::parse($queryDate[1])->endOfDay();
 
-    //     $salesQuery = Sale::with('client', 'payments', 'products');
+        // Obtener las ventas registradas en los últimos 7 días
+        $sales = Sale::whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
 
-    //     // Filtrar por rango de fechas si se proporciona
-    //     if (!empty($queryDate) && count($queryDate) === 2) {
-    //         $startDate = Carbon::parse($queryDate[0])->startOfDay();
-    //         $endDate = Carbon::parse($queryDate[1])->endOfDay();
-    //         $salesQuery->whereBetween('created_at', [$startDate, $endDate]);
-    //     }
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        $groupedSales = $sales->groupBy(function ($sale) {
+            return Carbon::parse($sale->created_at)->format('d-F-Y');
+        })->map(function ($sales) {
+            $totalQuantity = $sales->sum('quantity');
+            $totalSale = $sales->sum(function ($sale) {
+                return $sale->quantity * $sale->current_price;
+            });
 
-    //     // Filtrar por cliente si se proporciona
-    //     if (!empty($queryClient)) {
-    //         $salesQuery->where('client_id', $queryClient);
-    //     }
+            return [
+                'total_quantity' => $totalQuantity,
+                'total_sale' => $totalSale,
+                'sales' => $sales,
+            ];
+        });
 
-    //     // Realizar la consulta y devolver los resultados
-    //     $sales = SaleResource::collection($salesQuery->take(20)->get());
+        // // Filtrar por rango de fechas si se proporciona
+        // if (!empty($queryDate) && count($queryDate) === 2) {
+        //     $startDate = Carbon::parse($queryDate[0])->startOfDay();
+        //     $endDate = Carbon::parse($queryDate[1])->endOfDay();
+        //     $salesQuery->whereBetween('created_at', [$startDate, $endDate]);
+        // }
 
-    //     return response()->json(['items' => $sales]);
-    // }
+        // // Filtrar por cliente si se proporciona
+        // if (!empty($queryClient)) {
+        //     $salesQuery->where('client_id', $queryClient);
+        // }
+
+        // // Realizar la consulta y devolver los resultados
+        // $sales = SaleResource::collection($salesQuery->take(20)->get());
+
+        return response()->json(['items' => $groupedSales]);
+    }
 
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 20;
-        $sales = SaleResource::collection(Sale::latest()
-            ->skip($offset)
-            ->take(20)
-            ->get());
+        $offset = 5 + $currentPage * 5; //multiplica por 2 para traer de 2 dias en 2 dias. suma 5 dias porque son los que ya se cargaron
+        $skip_days = $currentPage * 5; //multiplica por 2 para traer de 2 dias en 2 dias
 
-        return response()->json(['items' => $sales]);
+         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
+         $days_ago = Carbon::now()->subDays($offset);
+         // ignorar esa cantidad de dias porque ya se cargaron.
+         $days_befor = Carbon::now()->subDays($skip_days);
+
+         // Obtener las ventas registradas en los últimos 7 días
+         $sales = Sale::whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
+ 
+         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+         $groupedSales = $sales->groupBy(function ($sale) {
+             return Carbon::parse($sale->created_at)->format('d-F-Y');
+         })->map(function ($sales) {
+             $totalQuantity = $sales->sum('quantity');
+             $totalSale = $sales->sum(function ($sale) {
+                 return $sale->quantity * $sale->current_price;
+             });
+ 
+             return [
+                 'total_quantity' => $totalQuantity,
+                 'total_sale' => $totalSale,
+                 'sales' => $sales,
+             ];
+         });
+
+        return response()->json(['items' => $groupedSales]);
     }
 }

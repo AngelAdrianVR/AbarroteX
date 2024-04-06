@@ -92,8 +92,6 @@ Route::post('users-read-notifications', [UserController::class, 'readNotificatio
 Route::post('users-delete-notifications', [UserController::class, 'deleteNotifications'])->middleware('auth')->name('users.delete-user-notifications');
 
 
-
-
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('settings', SettingController::class)->middleware('auth');

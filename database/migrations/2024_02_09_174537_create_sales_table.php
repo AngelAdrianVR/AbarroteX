@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedFloat('current_price');
             $table->unsignedFloat('quantity');
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
