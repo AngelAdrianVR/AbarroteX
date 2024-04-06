@@ -11,14 +11,16 @@ class GlobalProductController extends Controller
     
     public function selectGlobalProducts()
     {
-        return inertia('GlobalProduct/selectGlobalProducts');
+        return inertia('GlobalProduct/SelectGlobalProducts');
     }
 
 
     public function index()
     {   
-        $global_products = GlobalProduct::latest()->get();
-        return inertia('GlobalProduct/Index');
+        $global_products = GlobalProduct::with('media')->latest()->get();
+
+        // return $global_products;
+        return inertia('GlobalProduct/Index', compact('global_products'));
     }
 
     

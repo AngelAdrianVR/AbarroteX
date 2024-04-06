@@ -19,14 +19,10 @@ AppLayout,
 PrimaryButton
 },
 props:{
-
+global_products: Array
 },
 methods:{
     
 }
 }
 </script>
-
-<style>
-
-</style>

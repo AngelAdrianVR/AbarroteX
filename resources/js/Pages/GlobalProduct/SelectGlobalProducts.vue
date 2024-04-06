@@ -1,6 +1,7 @@
 <template>
   <AppLayout title="Catálogo base">
     <div class="px-2 lg:px-10 py-7">
+      <Back />
       <!-- header botones -->
       <div class="flex justify-between items-center mb-4">
         <h1 class="font-bold text-lg">Catálogo base</h1>
@@ -30,6 +31,7 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Back from "@/Components/MyComponents/Back.vue";
 
 export default {
   data() {
@@ -51,7 +53,8 @@ export default {
     };
   },
   components: {
-    AppLayout
+    AppLayout,
+    Back
   },
   props: {},
   methods: {},
