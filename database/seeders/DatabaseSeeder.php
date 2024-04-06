@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Angel Vazquez',
             'email' => 'angel@gmail.com',
             'password' => bcrypt('321321321'),
+            'store_id' => 1,
         ]);
 
         // Product::factory(150)->create();
