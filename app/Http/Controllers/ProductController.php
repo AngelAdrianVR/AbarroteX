@@ -42,7 +42,7 @@ class ProductController extends Controller
 
         $product = Product::create($request->except('imageCover'));
 
-        // Guardar el archivo en la colección 'guest_images'
+        // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
             $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }

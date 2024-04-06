@@ -2,62 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\GlobalProduct;
 use Illuminate\Http\Request;
 
 class GlobalProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    
+    public function selectGlobalProducts()
     {
-        //
+        return inertia('GlobalProduct/selectGlobalProducts');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
+    public function index()
+    {   
+        $global_products = GlobalProduct::latest()->get();
+        return inertia('GlobalProduct/Index');
+    }
+
+    
     public function create()
     {
-        //
+        $categories = Category::all();
+
+        return inertia('GlobalProduct/Create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:200',
+            'code' => 'nullable|string|max:200',
+            'public_price' => 'required|string|max:200',
+            'category_id' => 'required',
+        ]);
+
+        $global_product = GlobalProduct::create($request->except('imageCover'));
+
+        // Guardar el archivo en la colección 'imageCover'
+        if ($request->hasFile('imageCover')) {
+            $global_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
+    
     public function show(GlobalProduct $globalProduct)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    
     public function edit(GlobalProduct $globalProduct)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, GlobalProduct $globalProduct)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    
     public function destroy(GlobalProduct $globalProduct)
     {
         //
