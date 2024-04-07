@@ -1,61 +1,83 @@
 <template>
-    <div class="text-[15px]">
-        <p>Puedes activar la configuración para mostrar la acción en el punto de venta, y si no lo necesitas, también tienes la opción de desactivarla</p>
+    <Loading v-if="loading" class="my-12" />
+    <div v-else class="text-sm">
+        <p>Puedes activar la configuración para mostrar la acción en el punto de venta, y si no lo necesitas, también
+            tienes la opción de desactivarla</p>
 
-        <section class="flex w-full space-x-2 mt-5">
-            <div class="w-48 space-y-2">
-                <p>Escanear productos</p>
-                <p>Editar precio unitario</p>
-                <p>Agregar clientes</p>
-                <p>Descuentos</p>
-                <p>Inventario</p>
-            </div>
-            <div class="space-y-2">
-                <el-switch
-                    v-model="value1"
-                    :loading="loading"
-                    :before-change="beforeChange1"
-                />
+        <section class="mt-5 *:flex *:items-center">
+            <div v-for="(item, index) in settings" :key="item.id">
+                <p class="w-[15%]">{{ item.key }}</p>
+                <el-switch @change="updateSettingValue(index)" v-model="values[index]" :loading="settingLoading[index]" size="small"
+                    class="w-[6%]" />
+                <p class="text-gray99 text-[11px]">{{ item.description }}</p>
             </div>
         </section>
     </div>
 </template>
 
 <script>
-export default {
-data() {
-    return {
-        loading: false,
-        value1: false,
-    }
-},
-props:{
+import Loading from '@/Components/MyComponents/Loading.vue';
+import axios from 'axios';
 
-},
-methods:{
-    beforeChange1() {
-            this.loading = true
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                this.loading = false
-                this.$notify({
-                        title: "Correcto",
-                        message: "Se ha agregado un nuevo producto",
-                        type: "success",
+export default {
+    data() {
+        return {
+            loading: false,
+            settingLoading: [],
+            settings: [],
+            values: [],
+        }
+    },
+    components: {
+        Loading,
+    },
+    methods: {
+        // beforeSettingChange(index) {
+        //     // return this.updateSettingValue(index);
+        // },
+        async updateSettingValue(index) {
+            try {
+                this.settingLoading[index] = true
+                const response = await axios.put(route('stores.toggle-setting-value', {
+                    store: this.$page.props.auth.user.store_id,
+                    setting_id: this.settings[index].id
+                }), {value: this.values[index]});
+
+                if (response.status === 200) {
+                    // por lo pronto no se requiere hacer nada
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.settingLoading[index] = false;
+                return true;
+            }
+        },
+        async fetchModuleSettings() {
+            try {
+                this.loading = true;
+                const response = await axios.get(route('stores.get-settings-by-module', {
+                    store: this.$page.props.auth.user.store_id, module: 'Punto de venta'
+                }));
+
+                if (response.status === 200) {
+                    this.settings = response.data.items;
+                    this.settingLoading = new Array(response.data.items.length).fill(false);
+                    this.values = response.data.items.map(item => {
+                        return item.type == 'Bool'
+                            ? Boolean(item.pivot.value)
+                            : item.pivot.value;
                     });
-                return resolve(true)
-                }, 1000)
-            });
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.loading = false;
+            }
+        },
+    },
+    mounted() {
+        this.fetchModuleSettings();
     }
-}
 }
 </script>
-
-<style scoped>
-.el-switch {
-  --el-switch-on-color: #F68C0F; /* Cambia este valor al color que desees */
-}
-.el-switch {
-  --el-switch-off-color: #CCCCCC; /* Cambia este valor al color que desees */
-}
-</style>

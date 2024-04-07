@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -100,6 +101,12 @@ Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sale
 Route::resource('product-histories', ProductHistoryController::class)->middleware('auth');
 
 
+//store routes-------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
+Route::resource('stores', StoreController::class)->middleware('auth');
+Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
+Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
+
 // User routes-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::get('users-get-notifications', [UserController::class, 'getNotifications'])->middleware('auth')->name('users.get-notifications');
@@ -110,3 +117,4 @@ Route::post('users-delete-notifications', [UserController::class, 'deleteNotific
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('settings', SettingController::class)->middleware('auth');
+Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
