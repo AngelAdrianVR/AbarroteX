@@ -64,7 +64,8 @@ Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'get
 //Global products routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-products', GlobalProductController::class)->middleware('auth');
-Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('products.select')->middleware('auth');
+Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('global-products.select')->middleware('auth');
+Route::get('global-products-get-by-page/{currentPage}', [GlobalProductController::class, 'getItemsByPage'])->name('global-products.get-by-page')->middleware('auth');
 
 
 //categories routes----------------------------------------------------------------------------------

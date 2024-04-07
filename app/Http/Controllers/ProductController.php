@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductHistoryResource;
 use App\Http\Resources\ProductResource;
+use App\Models\Category;
 use App\Models\Expense;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -24,7 +25,9 @@ class ProductController extends Controller
     public function create()
     {
         $products_quantity = Product::all()->count();
-        return inertia('Product/Create', compact('products_quantity'));
+        $categories = Category::all();
+        
+        return inertia('Product/Create', compact('products_quantity', 'categories'));
     }
 
 
@@ -38,9 +41,10 @@ class ProductController extends Controller
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
+            'category_id' => 'required',
         ]);
 
-        $product = Product::create($request->except('imageCover'));
+        $product = Product::create($request->except('imageCover') + ['store_id' => auth()->user()->store_id]);
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
@@ -53,7 +57,7 @@ class ProductController extends Controller
 
     public function show($product_id)
     {
-        $product = ProductResource::make(Product::find($product_id));
+        $product = ProductResource::make(Product::with('category')->find($product_id));
 
         return inertia('Product/Show', compact('product'));
     }
@@ -61,9 +65,10 @@ class ProductController extends Controller
 
     public function edit($product_id)
     {
-        $product = ProductResource::make(Product::find($product_id));
+        $product = ProductResource::make(Product::with('category')->find($product_id));
+        $categories = Category::all();
 
-        return inertia('Product/Edit', compact('product'));
+        return inertia('Product/Edit', compact('product', 'categories'));
     }
 
 
@@ -77,6 +82,7 @@ class ProductController extends Controller
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
+            'category_id' => 'required',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -111,6 +117,7 @@ class ProductController extends Controller
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
+            'category_id' => 'required',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo

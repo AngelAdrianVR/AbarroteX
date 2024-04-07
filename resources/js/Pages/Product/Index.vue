@@ -105,7 +105,6 @@ import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ProductTable from '@/Components/MyComponents/Product/ProductTable.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Pagination from '@/Components/MyComponents/Pagination.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
@@ -137,7 +136,6 @@ export default {
         CancelButton,
         ProductTable,
         ThirthButton,
-        Pagination,
         InputError,
         InputLabel,
         Loading,
