@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\GlobalProduct;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class GlobalProductController extends Controller
@@ -11,7 +12,12 @@ class GlobalProductController extends Controller
     
     public function selectGlobalProducts()
     {
-        return inertia('GlobalProduct/SelectGlobalProducts');
+        $global_products = GlobalProduct::all(['id', 'name']);
+        $my_products = Product::all(['id', 'name']);
+        $categories = Category::all(['id', 'name']);
+
+        // return $categories;
+        return inertia('GlobalProduct/SelectGlobalProducts', compact('global_products', 'my_products', 'categories'));
     }
 
 
@@ -106,5 +112,13 @@ class GlobalProductController extends Controller
             ->get();
 
         return response()->json(['items' => $global_products]);
+    }
+
+
+    public function fetchProductInfo($global_product_id)
+    {
+        $global_product = GlobalProduct::with('category', 'media')->find($global_product_id);
+
+        return response()->json(['item' => $global_product]);
     }
 }
