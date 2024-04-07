@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('setting_store', function (Blueprint $table) {
             $table->id();
-            $table->string('key');
-            $table->string('type');
-            $table->string('module');
-            $table->text('description')->nullable();
+            $table->string('value')->nullable();
+            $table->foreignId('store_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('setting_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('settings');
+        Schema::dropIfExists('setting_store');
     }
 };
