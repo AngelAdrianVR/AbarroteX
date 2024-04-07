@@ -19,12 +19,4 @@ class Setting extends Model
     ];
 
     // relaciones
-    public function authStore(): BelongsToMany
-    {
-        return $this->belongsToMany(Store::class)
-            ->withPivot([
-                'value',
-            ])->withTimestamps()
-            ->where('stores.id', auth()->user()->store_id);
-    }
 }

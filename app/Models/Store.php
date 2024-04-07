@@ -50,6 +50,6 @@ class Store extends Model
         return $this->belongsToMany(Setting::class)
             ->withPivot([
                 'value',
-            ])->withTimestamps();
+            ]);
     }
 }

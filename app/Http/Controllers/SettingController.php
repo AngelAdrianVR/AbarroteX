@@ -10,7 +10,6 @@ class SettingController extends Controller
     
     public function index()
     {
-        // return Setting::first()->authStore;
         return inertia('Setting/Index');
     }
 

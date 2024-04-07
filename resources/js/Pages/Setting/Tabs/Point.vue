@@ -7,7 +7,8 @@
         <section class="mt-5 *:flex *:items-center">
             <div v-for="(item, index) in settings" :key="item.id">
                 <p class="w-[15%]">{{ item.key }}</p>
-                <el-switch v-model="value1" :loading="settingLoading" size="small" :before-change="beforeChange1" class="w-[6%]" />
+                <el-switch @change="updateSettingValue(index)" v-model="values[index]" :loading="settingLoading[index]" size="small"
+                    class="w-[6%]" />
                 <p class="text-gray99 text-[11px]">{{ item.description }}</p>
             </div>
         </section>
@@ -22,31 +23,51 @@ export default {
     data() {
         return {
             loading: false,
-            settingLoading: false,
+            settingLoading: [],
             settings: [],
-            value1: false,
+            values: [],
         }
     },
     components: {
         Loading,
     },
     methods: {
-        beforeChange1() {
-            this.settingLoading = true
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    this.settingLoading = false
-                    return resolve(true)
-                }, 1000)
-            });
+        // beforeSettingChange(index) {
+        //     // return this.updateSettingValue(index);
+        // },
+        async updateSettingValue(index) {
+            try {
+                this.settingLoading[index] = true
+                const response = await axios.put(route('stores.toggle-setting-value', {
+                    store: this.$page.props.auth.user.store_id,
+                    setting_id: this.settings[index].id
+                }), {value: this.values[index]});
+
+                if (response.status === 200) {
+                    // por lo pronto no se requiere hacer nada
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.settingLoading[index] = false;
+                return true;
+            }
         },
-        async fetchSettings() {
+        async fetchModuleSettings() {
             try {
                 this.loading = true;
-                const response = await axios.get(route('settings.get-by-module', 'Punto de venta'));
+                const response = await axios.get(route('stores.get-settings-by-module', {
+                    store: this.$page.props.auth.user.store_id, module: 'Punto de venta'
+                }));
 
                 if (response.status === 200) {
                     this.settings = response.data.items;
+                    this.settingLoading = new Array(response.data.items.length).fill(false);
+                    this.values = response.data.items.map(item => {
+                        return item.type == 'Bool'
+                            ? Boolean(item.pivot.value)
+                            : item.pivot.value;
+                    });
                 }
             } catch (error) {
                 console.log(error);
@@ -56,7 +77,7 @@ export default {
         },
     },
     mounted() {
-        this.fetchSettings();
+        this.fetchModuleSettings();
     }
 }
 </script>
