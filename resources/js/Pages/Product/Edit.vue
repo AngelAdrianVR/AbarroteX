@@ -43,6 +43,23 @@
                     <InputError :message="form.errors.current_stock" />
                 </div>
 
+                <div class="mt-3">
+                    <div class="flex items-center justify-between">
+                        <InputLabel value="Categoría*" class="ml-3 mb-1" />
+                        <button
+                            @click="showCategoryFormModal = true" type="button"
+                            class="rounded-full border border-primary size-4 flex items-center justify-center">
+                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
+                        </button>
+                    </div>
+                    <el-select class="w-1/2" v-model="form.category_id" clearable
+                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                        no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="category in localCategories" :key="category" :label="category.name" :value="category.id" />
+                    </el-select>
+                    <InputError :message="form.errors.category_id" />
+                </div>
+
                 <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
 
                 <div class="mt-3">
@@ -85,12 +102,34 @@
                 </div>
             </form>
         </div>
+
+        <!-- category form -->
+        <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
+            <template #title> Agregar categoría </template>
+            <template #content>
+            <form @submit.prevent="storeCategory" ref="categoryForm">
+                <div>
+                <label class="text-sm ml-3">Nombre de la categoría *</label>
+                <el-input v-model="categoryForm.name" placeholder="Escribe el nombre de la categoría" :maxlength="100" required clearable />
+                <InputError :message="categoryForm.errors.name" />
+                </div>
+            </form>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-2">
+                    <CancelButton @click="showCategoryFormModal = false" :disabled="categoryForm.processing">Cancelar</CancelButton>
+                    <PrimaryButton @click="storeCategory()" :disabled="categoryForm.processing">Crear</PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
     </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import DialogModal from "@/Components/DialogModal.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
@@ -105,26 +144,37 @@ export default {
             public_price: this.product.data.public_price,
             cost: this.product.data.cost,
             current_stock: this.product.data.current_stock,
+            category_id: this.product.data.category.id,
             min_stock: this.product.data.min_stock,
             max_stock: this.product.data.max_stock,
             imageCover: null,
             imageCoverCleared: false
         });
 
+        const categoryForm = useForm({
+            name: null,
+        });
+
         return {
             form,
+            categoryForm,
+            localCategories: this.categories,
+            showCategoryFormModal: false,
         };
     },
     components: {
         AppLayout,
+        InputFilePreview,
         PrimaryButton,
+        CancelButton,
+        DialogModal,
         InputLabel,
         InputError,
-        InputFilePreview,
         Back
     },
     props: {
-        product: Object
+        product: Object,
+        categories: Array
     },
     methods: {
         update() {
@@ -149,6 +199,26 @@ export default {
                         });
                     },
                 });
+            }
+        },
+        async storeCategory() {
+            try {
+                const response = await axios.post(route('categories.store'), {
+                    name: this.categoryForm.name
+                });
+                if (response.status === 200) {
+                    this.$notify({
+                        title: "Éxito",
+                        message: "Se ha creado una nueva categoría",
+                        type: "success",
+                    });
+                    this.form.category_id = response.data.item.id;
+                    this.localCategories.push(response.data.item);
+                    this.showCategoryFormModal = false;
+                    this.categoryForm.reset();
+                }
+            } catch (error) {
+                console.log(error)
             }
         },
         saveImage(image) {

@@ -62,20 +62,24 @@
                     <!-- pestaña 1 Informacion de producto -->
                     <div v-if="currentTab == 1" class="mt-7 mx-16 text-sm lg:text-base">
                         <div class="lg:flex justify-between items-center">
-                            <p class="text-gray37 flex items-center">
-                                <span class="mr-2">Código</span>
-                                <span class="font-bold">{{ product.data.code }}</span>
-                                <el-tooltip content="Copiar código" placement="right">
-                                    <button @click="copyToClipboard"
-                                        class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="size-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-                                        </svg>
-                                    </button>
-                                </el-tooltip>
-                            </p>
+                            <div class="flex space-x-4 items-center">
+                                <p class="text-gray37 flex items-center">
+                                    <span class="mr-2">Código</span>
+                                    <span class="font-bold">{{ product.data.code ?? 'N/A' }}</span>
+                                    <el-tooltip v-if="product.data.code" content="Copiar código" placement="right">
+                                        <button @click="copyToClipboard"
+                                            class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                                            </svg>
+                                        </button>
+                                    </el-tooltip>
+                                </p>
+                                <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
+                                <p class="text-gray37">Categoría: <span class="font-bold">{{ product.data.category?.name }}</span></p>
+                            </div>
                             <p class="text-gray37">Fecha de alta: <strong class="ml-5">{{ product.data.created_at
                             }}</strong></p>
                         </div>
@@ -84,7 +88,7 @@
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de compra:</p>
-                                <p class="text-right font-bold">${{ product.data.cost }}</p>
+                                <p class="text-right font-bold">${{ product.data.cost ?? '-' }}</p>
                             </div>
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de venta: </p>
@@ -93,11 +97,11 @@
                             <div v-if="product.data.current_stock >= product.data.min_stock"
                                 class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-[#5FCB1F]">{{ product.data.current_stock }}</p>
+                                <p class="text-right font-bold text-[#5FCB1F]">{{ product.data.current_stock ?? '-' }}</p>
                             </div>
                             <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-primary">{{ product.data.current_stock }}<i
+                                <p class="text-right font-bold text-primary">{{ product.data.current_stock ?? '-' }}<i
                                         class="fa-solid fa-arrow-down text-xs ml-2"></i></p>
                                 <p class="absolute top-2 -right-16 text-xs font-bold text-primary">Bajo stock</p>
                             </div>
@@ -106,11 +110,11 @@
 
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Cantidad mínima:</p>
-                                <p class="text-right font-bold">{{ product.data.min_stock }}</p>
+                                <p class="text-right font-bold">{{ product.data.min_stock ?? '-' }}</p>
                             </div>
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Cantidad máxima:</p>
-                                <p class="text-right font-bold">{{ product.data.max_stock }}</p>
+                                <p class="text-right font-bold">{{ product.data.max_stock ?? '-' }}</p>
                             </div>
                         </div>
                     </div>
