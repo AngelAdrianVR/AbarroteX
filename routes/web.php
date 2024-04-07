@@ -108,3 +108,4 @@ Route::post('users-delete-notifications', [UserController::class, 'deleteNotific
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('settings', SettingController::class)->middleware('auth');
+Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');

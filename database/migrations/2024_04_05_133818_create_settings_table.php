@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('module');
             $table->text('description')->nullable();
+            $table->json('options')->nullable();
             $table->timestamps();
         });
     }

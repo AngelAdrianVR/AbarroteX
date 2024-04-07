@@ -10,6 +10,7 @@ class SettingController extends Controller
     
     public function index()
     {
+        // return Setting::first()->authStore;
         return inertia('Setting/Index');
     }
 
@@ -47,5 +48,13 @@ class SettingController extends Controller
     public function destroy(Setting $setting)
     {
         //
+    }
+
+    // API
+    public function getByModule($module)
+    {
+        $items = Setting::where('module', $module)->get();
+
+        return response()->json(compact('items'));
     }
 }
