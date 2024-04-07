@@ -48,4 +48,12 @@ class SettingController extends Controller
     {
         //
     }
+
+    // API
+    public function getByModule($module)
+    {
+        $items = Setting::where('module', $module)->get();
+
+        return response()->json(compact('items'));
+    }
 }

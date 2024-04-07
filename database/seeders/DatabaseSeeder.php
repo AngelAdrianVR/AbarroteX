@@ -6,6 +6,9 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Setting;
+use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,16 +18,40 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+         // crear las configuraciones
+         $this->call([
+            SettingSeeder::class,
+        ]);
 
-        \App\Models\User::factory()->create([
+        // crear la primera tienda
+        Store::create([
+            'name' => 'Tienda 1',
+            'contact_name' => 'Contacto 1',
+            'contact_phone' => '3312457896',
+            'address' => 'Direccion 1',
+            'plan' => 'Plan 1',
+            'next_payment' => now()->addDays(10),
+        ]);
+
+        // crear el primer usuario
+        User::factory()->create([
             'name' => 'Angel Vazquez',
             'email' => 'angel@gmail.com',
             'password' => bcrypt('321321321'),
             'store_id' => 1,
         ]);
 
-        // Product::factory(150)->create();
-        // Sale::factory(1500)->create();
+        // agregar mas tiendas y usuarios desde el factory
+        Store::factory(10)->create();
+        User::factory(20)->create();
+
+        // agregar las configuraciones iniciales a las tiendas
+        $stores = Store::all();
+        $settings = Setting::all();
+        $stores->each(function($store) use ($settings) {
+            $settings->each(function($setting) use ($store){
+                $store->settings()->attach($setting->id, ['value' => 1]);
+            });
+        });
     }
 }
