@@ -99,7 +99,7 @@ export default {
                     label: 'Productos',
                     icon: '<i class="fa-regular fa-clipboard text-lg"></i>',
                     route: route('products.index'),
-                    active: route().current('products.*'),
+                    active: route().current('products.*') || route().current('global-products.*'),
                     options: [],
                     dropdown: false,
                     show: true
@@ -109,6 +109,15 @@ export default {
                     icon: '<i class="fa-solid fa-gears text-lg"></i>',
                     route: route('settings.index'),
                     active: route().current('settings.*'),
+                    options: [],
+                    dropdown: false,
+                    show: true
+                },
+                {
+                    label: 'Productos globales',
+                    icon: '<i class="fa-solid fa-earth-americas text-lg"></i>',
+                    route: route('global-products.index'),
+                    active: route().current('global-products.*'),
                     options: [],
                     dropdown: false,
                     show: true

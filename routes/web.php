@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
@@ -56,6 +58,17 @@ Route::get('products-search', [ProductController::class, 'searchProduct'])->name
 Route::get('products-get-product-scaned/{product_id}', [ProductController::class, 'getProductScaned'])->name('products.get-product-scaned')->middleware('auth');
 Route::get('products-fetch-history/{product_id}', [ProductController::class, 'fetchHistory'])->name('products.fetch-history')->middleware('auth');
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
+
+
+//Global products routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+Route::resource('global-products', GlobalProductController::class)->middleware('auth');
+Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('products.select')->middleware('auth');
+
+
+//categories routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+Route::resource('categories', CategoryController::class)->middleware('auth');
 
 
 //sales routes-------------------------------------------------------------------------------------

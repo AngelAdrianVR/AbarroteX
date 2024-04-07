@@ -171,5 +171,6 @@ return [
         'current_stock' => 'existencia actual',
         'code' => 'código de producto',
         'quantity' => 'cantidad',
+        'category_id' => 'categoría',
     ],
 ];
