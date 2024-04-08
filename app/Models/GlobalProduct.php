@@ -17,11 +17,17 @@ class GlobalProduct extends Model implements HasMedia
         'public_price',
         'code',
         'category_id',
+        'brand_id',
     ];
 
     //relationships
     public function category() :BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function brand() :BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
     }
 }

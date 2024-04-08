@@ -30,6 +30,23 @@
                 </div>
 
                 <div class="mt-3">
+                    <div class="flex items-center justify-between">
+                        <InputLabel value="Marca*" class="ml-3 mb-1" />
+                        <button
+                            @click="showBrandFormModal = true" type="button"
+                            class="rounded-full border border-primary size-4 flex items-center justify-center">
+                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
+                        </button>
+                    </div>
+                    <el-select class="w-1/2" v-model="form.brand_id" clearable
+                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                        no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
+                    </el-select>
+                    <InputError :message="form.errors.brand_id" />
+                </div>
+
+                <div class="mt-3">
                     <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
@@ -80,6 +97,26 @@
                 </div>
             </template>
         </DialogModal>
+
+        <!-- brand form -->
+        <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
+            <template #title> Agregar marca </template>
+            <template #content>
+            <form @submit.prevent="storeBrand">
+                <div>
+                <label class="text-sm ml-3">Nombre de la marca*</label>
+                <el-input v-model="brandForm.name" placeholder="Escribe el nombre de la marca" :maxlength="100" required clearable />
+                <InputError :message="brandForm.errors.name" />
+                </div>
+            </form>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-2">
+                    <CancelButton @click="showBrandFormModal = false" :disabled="brandForm.processing">Cancelar</CancelButton>
+                    <PrimaryButton @click="storeBrand()" :disabled="brandForm.processing">Crear</PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
     </AppLayout>
 </template>
 
@@ -100,6 +137,7 @@ export default {
         const form = useForm({
             name: null,
             category_id: null,
+            brand_id: null,
             code: null,
             public_price: null,
             imageCover: null,
@@ -109,11 +147,18 @@ export default {
             name: null,
         });
 
+        const brandForm = useForm({
+            name: null,
+        });
+
         return {
             form,
+            brandForm,
             categoryForm,
             localCategories: this.categories,
-            showCategoryFormModal: false,
+            localBrands: this.brands,
+            showCategoryFormModal: false, //muestra formulario para agregar categoría
+            showBrandFormModal: false, //muestra formulario para agregar marca
         };
     },
     components: {
@@ -127,7 +172,8 @@ export default {
         Back
     },
     props: {
-        categories: Array
+        categories: Array,
+        brands: Array
     },
     methods: {
         store() {
@@ -157,6 +203,26 @@ export default {
                     this.localCategories.push(response.data.item);
                     this.showCategoryFormModal = false;
                     this.categoryForm.reset();
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async storeBrand() {
+            try {
+                const response = await axios.post(route('brands.store'), {
+                    name: this.brandForm.name
+                });
+                if (response.status === 200) {
+                    this.$notify({
+                        title: "Éxito",
+                        message: "Se ha creado una nueva marca",
+                        type: "success",
+                    });
+                    this.localBrands.push(response.data.item);
+                    this.form.brand_id = response.data.item.id;
+                    this.showBrandFormModal = false;
+                    this.brandForm.reset();
                 }
             } catch (error) {
                 console.log(error)
