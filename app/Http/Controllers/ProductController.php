@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductHistoryResource;
 use App\Http\Resources\ProductResource;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\Product;
@@ -26,22 +27,24 @@ class ProductController extends Controller
     {
         $products_quantity = Product::all()->count();
         $categories = Category::all();
+        $brands = Brand::all(['id', 'name']);
         
-        return inertia('Product/Create', compact('products_quantity', 'categories'));
+        return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
     }
 
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'code' => 'nullable|unique:products|string|max:100',
+            'name' => 'required|string|max:100|unique:products,name',
+            'code' => 'nullable|unique:products,code|string|max:100',
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'required|numeric|min:0|max:9999',
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'required',
+            'brand_id' => 'required',
         ]);
 
         $product = Product::create($request->except('imageCover') + ['store_id' => auth()->user()->store_id]);
@@ -57,7 +60,7 @@ class ProductController extends Controller
 
     public function show($product_id)
     {
-        $product = ProductResource::make(Product::with('category')->find($product_id));
+        $product = ProductResource::make(Product::with('category', 'brand')->find($product_id));
 
         return inertia('Product/Show', compact('product'));
     }
@@ -65,24 +68,26 @@ class ProductController extends Controller
 
     public function edit($product_id)
     {
-        $product = ProductResource::make(Product::with('category')->find($product_id));
+        $product = ProductResource::make(Product::with('category', 'brand')->find($product_id));
         $categories = Category::all();
+        $brands = Brand::all(['id', 'name']);
 
-        return inertia('Product/Edit', compact('product', 'categories'));
+        return inertia('Product/Edit', compact('product', 'categories', 'brands'));
     }
 
 
     public function update(Request $request, Product $product)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'code' => 'nullable|string|max:100',
+            'name' => 'required|string|max:100|unique:products,name,'.$product->id,
+            'code' => 'nullable|string|max:100|unique:products,code,'.$product->id,
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'required|numeric|min:0|max:9999',
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'required',
+            'brand_id' => 'required',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -110,14 +115,15 @@ class ProductController extends Controller
     public function updateWithMedia(Request $request, Product $product)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'code' => 'nullable|string|max:100',
+            'name' => 'required|string|max:100|unique:products,name,'.$product->id,
+            'code' => 'nullable|string|max:100|unique:products,code,'.$product->id,
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'required|numeric|min:0|max:9999',
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'required',
+            'brand_id' => 'required',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -158,7 +164,7 @@ class ProductController extends Controller
         $query = $request->input('query');
 
         // Realiza la búsqueda en la base de datos
-        $products = ProductResource::collection(Product::where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(20));
+        $products = ProductResource::collection(Product::with(['category', 'brand'])->where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(20));
 
         return response()->json(['items' => $products]);
     }
@@ -167,7 +173,7 @@ class ProductController extends Controller
     public function getProductScaned($product_id)
     {
         // Realiza la búsqueda en la base de datos
-        $product = ProductResource::make(Product::find($product_id));
+        $product = ProductResource::make(Product::with(['category', 'brand'])->find($product_id));
 
         return response()->json(['item' => $product]);
     }
@@ -217,7 +223,8 @@ class ProductController extends Controller
     public function getItemsByPage($currentPage)
     {
         $offset = $currentPage * 20;
-        $products = ProductResource::collection(Product::latest()
+        $products = ProductResource::collection(Product::with(['category', 'brand'])
+            ->latest()
             ->skip($offset)
             ->take(20)
             ->get());

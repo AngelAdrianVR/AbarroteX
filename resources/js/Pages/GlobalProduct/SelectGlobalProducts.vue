@@ -4,7 +4,7 @@
       <!-- tabs -->
       <div class="flex justify-between mb-5 mx-2">
         <Back />
-        <div class="flex items-center justify-center">
+        <div class="flex items-center justify-center text-sm">
             <button @click="$inertia.get(route('products.index'))" class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Mis productos</button>
             <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -ml-5 cursor-default">Catálogo base</button>
         </div>
@@ -86,7 +86,7 @@
               <div class="space-y-1 font-bold">
                 <p>{{ productInfo?.name ?? '-' }}</p>
                 <p>{{ productInfo?.category?.name ?? '-' }}</p>
-                <p>{{ productInfo?.brand ?? '-' }}</p>
+                <p>{{ productInfo?.brand?.name ?? '-' }}</p>
                 <p>${{ productInfo?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
                 <p>{{ productInfo?.code ?? 'N/A' }}</p>
               </div>
@@ -95,10 +95,12 @@
         </div>
         <!-- Boton para transferir los poductos -->
         <div class="col-span-full text-center mt-7">
-          <PrimaryButton :disabled="!products.length" @click="searchSales">Transferir productos</PrimaryButton>
+          <PrimaryButton :disabled="!products.length" @click="transferProducts">Transferir productos</PrimaryButton>
         </div>
       </section>
     </div>
+
+    {{ products }}
 
     <!-- ventana de filtro izquierdo -->
     <div v-if="showLeftFilter"
@@ -117,8 +119,8 @@
             <el-select v-model="leftFilterBrand" clearable filterable placeholder="Seleccione"
                 no-data-text="No hay opciones registradas"
                 no-match-text="No se encontraron coincidencias">
-                <el-option v-for="item in brands" :key="item" :label="item"
-                    :value="item" />
+                <el-option v-for="item in brands" :key="item.id" :label="item.name"
+                    :value="item.id" />
             </el-select>
         </div>
         <div class="flex space-x-2">
@@ -149,7 +151,6 @@ export default {
       showRightFilter: false, //muestra filtro derecho
       leftFilterCategory: null, //información para fltrar por categoría izquierdo
       leftFilterBrand: null, //información para fltrar por marca izquierdo
-      brands: ['La costeña', 'Coca-cola', 'Otra'],
     };
   },
   components: {
