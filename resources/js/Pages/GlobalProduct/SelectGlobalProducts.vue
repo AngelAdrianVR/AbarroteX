@@ -2,7 +2,7 @@
   <AppLayout title="Catálogo base">
     <div class="px-2 lg:px-20 py-7">
       <!-- tabs -->
-      <div class="flex justify-between mb-5">
+      <div class="flex justify-between mb-5 mx-2">
         <Back />
         <div class="flex items-center justify-center">
             <button @click="$inertia.get(route('products.index'))" class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Mis productos</button>
@@ -164,6 +164,7 @@ export default {
     global_products: Array,
     my_products: Array,
     categories: Array,
+    brands: Array,
   },
   methods: {
     myProductsFormater() {

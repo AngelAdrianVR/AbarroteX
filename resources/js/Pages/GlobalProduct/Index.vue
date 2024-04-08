@@ -4,7 +4,7 @@
             <!-- header botones -->
             <div class="flex justify-between items-center mx-3 mb-3">
                 <h1 class="font-bold text-lg">Productos globales</h1>
-                <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">Nuevo producto global</PrimaryButton>
+                <PrimaryButton @click="$inertia.get(route('global-products.create'))" class="!rounded-full">Nuevo producto global</PrimaryButton>
             </div>
 
             <!-- buscador -->

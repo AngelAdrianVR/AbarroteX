@@ -23,6 +23,7 @@ class Product extends Model implements HasMedia
         'current_stock',
         'store_id',
         'category_id',
+        'brand_id',
     ];
 
     //relationships
@@ -44,5 +45,10 @@ class Product extends Model implements HasMedia
     public function category() :BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function brand() :BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
     }
 }
