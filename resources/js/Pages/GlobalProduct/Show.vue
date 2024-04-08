@@ -45,7 +45,7 @@
                     </div>
 
                     <!-- pestaña 1 Informacion de producto -->
-                    <div v-if="currentTab == 1" class="mt-7 mx-16 text-sm lg:text-base">
+                    <div v-if="currentTab == 1" class="mt-7 md:mx-16 text-sm lg:text-base">
                         <div class="lg:flex justify-between items-center">
                             <div class="flex space-x-4 items-center">
                                 <p class="text-gray37 flex items-center">
@@ -64,9 +64,10 @@
                                 </p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
                                 <p class="text-gray37">Categoría: <span class="font-bold">{{ global_product.category?.name }}</span></p>
+                                <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
+                                <p class="text-gray37">Marca: <span class="font-bold">{{ global_product.brand?.name }}</span></p>
                             </div>
-                            <p class="text-gray37">Fecha de alta: <strong class="ml-5">{{ global_product.created_at
-                            }}</strong></p>
+                            <p class="text-gray37 mt-3 lg:mt-0">Fecha de alta: <strong class="ml-5">{{ global_product.created_at.split('T')[0]}}</strong></p>
                         </div>
                         <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ global_product.name }}</h1>
 

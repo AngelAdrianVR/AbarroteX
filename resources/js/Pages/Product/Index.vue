@@ -2,7 +2,7 @@
     <AppLayout title="Productos">
         <div class="px-2 lg:px-10 py-7">
             <!-- tabs -->
-            <div class="flex items-center justify-center">
+            <div class="flex items-center justify-center text-sm">
                 <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -mr-5 cursor-default">Mis productos</button>
                 <button @click="$inertia.get(route('global-products.select'))" class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Catálogo base</button>
             </div>

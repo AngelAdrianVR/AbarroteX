@@ -99,7 +99,7 @@ export default {
                     label: 'Productos',
                     icon: '<i class="fa-regular fa-clipboard text-lg"></i>',
                     route: route('products.index'),
-                    active: route().current('products.*') || route().current('global-products.*'),
+                    active: route().current('products.*'),
                     options: [],
                     dropdown: false,
                     show: true

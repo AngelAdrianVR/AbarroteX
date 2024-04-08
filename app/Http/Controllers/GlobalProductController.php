@@ -45,8 +45,8 @@ class GlobalProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:200',
-            'code' => 'nullable|string|max:200',
+            'name' => 'required|string|max:100|unique:global_products,name',
+            'code' => 'nullable|string|max:100|unique:global_products,code',
             'public_price' => 'required|string|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
@@ -63,7 +63,7 @@ class GlobalProductController extends Controller
     
     public function show($global_product_id)
     {
-        $global_product = GlobalProduct::with(['media', 'category'])->find($global_product_id);
+        $global_product = GlobalProduct::with(['media', 'category', 'brand'])->find($global_product_id);
         $global_products = GlobalProduct::all(['id', 'name']);
 
         return inertia('GlobalProduct/Show', compact('global_product', 'global_products'));
@@ -83,9 +83,9 @@ class GlobalProductController extends Controller
     public function update(Request $request, GlobalProduct $global_product)
     {
         $request->validate([
-            'name' => 'required|string|max:200',
-            'code' => 'nullable|string|max:200',
-            'public_price' => 'required|string|max:200',
+            'name' => 'required|string|max:100|unique:global_products,name,'.$global_product->id,
+            'code' => 'nullable|string|max:100|unique:global_products,code,'.$global_product->id,
+            'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
         ]);
@@ -98,16 +98,16 @@ class GlobalProductController extends Controller
             $global_product->clearMediaCollection('imageCover');
         }
 
-        return to_route('global_products.show', $global_product->id);
+        return to_route('global-products.index');
     }
 
 
     public function updateWithMedia(Request $request, GlobalProduct $global_product)
     {
         $request->validate([
-            'name' => 'required|string|max:200',
-            'code' => 'nullable|string|max:200',
-            'public_price' => 'required|string|max:200',
+            'name' => 'required|string|max:100|unique:global_products,name,'.$global_product->id,
+            'code' => 'nullable|string|max:100|unique:global_products,code,'.$global_product->id,
+            'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
         ]);
@@ -125,7 +125,7 @@ class GlobalProductController extends Controller
             $global_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
-        return to_route('global_products.index');
+        return to_route('global-products.index');
     }
 
     
@@ -150,7 +150,7 @@ class GlobalProductController extends Controller
 
     public function fetchProductInfo($global_product_id)
     {
-        $global_product = GlobalProduct::with('category', 'media')->find($global_product_id);
+        $global_product = GlobalProduct::with('category', 'media', 'brand')->find($global_product_id);
 
         return response()->json(['item' => $global_product]);
     }

@@ -10,7 +10,7 @@
             <div class="w-[17%]"></div>
         </div>
         <div>
-            <div v-for="product in products" :key="product.id" class="*:px-2 *:py-1 cursor-pointer flex items-center space-x-4 border rounded-full mb-2" 
+            <div v-for="product in products" :key="product.id" class="*:px-2 *:py-1 cursor-pointer flex items-center hover:border-primary space-x-4 border rounded-full mb-2" 
             @click="$inertia.get(route('products.show', product.id))">
                 <div class="hidden md:block w-[10%] h-14 rounded-l-full">
                     <img class="mx-auto h-12 object-contain rounded-lg" :src="product.imageCover[0]?.original_url">
