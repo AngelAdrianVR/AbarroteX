@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\GlobalProduct;
 use App\Models\Product;
@@ -15,9 +16,10 @@ class GlobalProductController extends Controller
         $global_products = GlobalProduct::all(['id', 'name']);
         $my_products = Product::all(['id', 'name']);
         $categories = Category::all(['id', 'name']);
+        $brands = Brand::all(['id', 'name']);
 
         // return $categories;
-        return inertia('GlobalProduct/SelectGlobalProducts', compact('global_products', 'my_products', 'categories'));
+        return inertia('GlobalProduct/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }
 
 
@@ -34,8 +36,9 @@ class GlobalProductController extends Controller
     public function create()
     {
         $categories = Category::all();
+        $brands = Brand::all(['id', 'name']);
 
-        return inertia('GlobalProduct/Create', compact('categories'));
+        return inertia('GlobalProduct/Create', compact('categories', 'brands'));
     }
 
     
@@ -46,6 +49,7 @@ class GlobalProductController extends Controller
             'code' => 'nullable|string|max:200',
             'public_price' => 'required|string|max:200',
             'category_id' => 'required',
+            'brand_id' => 'required',
         ]);
 
         $global_product = GlobalProduct::create($request->except('imageCover'));
@@ -70,8 +74,9 @@ class GlobalProductController extends Controller
     {   
         $global_product = GlobalProduct::with('media')->find($global_product_id);
         $categories = Category::all();
+        $brands = Brand::all(['id', 'name']);
         
-        return inertia('GlobalProduct/Edit', compact('global_product', 'categories'));
+        return inertia('GlobalProduct/Edit', compact('global_product', 'categories', 'brands'));
     }
 
     
@@ -82,6 +87,7 @@ class GlobalProductController extends Controller
             'code' => 'nullable|string|max:200',
             'public_price' => 'required|string|max:200',
             'category_id' => 'required',
+            'brand_id' => 'required',
         ]);
 
         $global_product->update($request->except('imageCover'));
@@ -93,6 +99,33 @@ class GlobalProductController extends Controller
         }
 
         return to_route('global_products.show', $global_product->id);
+    }
+
+
+    public function updateWithMedia(Request $request, GlobalProduct $global_product)
+    {
+        $request->validate([
+            'name' => 'required|string|max:200',
+            'code' => 'nullable|string|max:200',
+            'public_price' => 'required|string|max:200',
+            'category_id' => 'required',
+            'brand_id' => 'required',
+        ]);
+
+        $global_product->update($request->except('imageCover'));
+
+        // media ------------
+        // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
+        if ($request->hasFile('imageCover')) {
+            $global_product->clearMediaCollection('imageCover');
+        }
+
+        // Guardar el archivo en la colección 'imageCover'
+        if ($request->hasFile('imageCover')) {
+            $global_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+        }
+
+        return to_route('global_products.index');
     }
 
     

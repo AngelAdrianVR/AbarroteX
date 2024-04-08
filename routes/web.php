@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
@@ -64,6 +65,7 @@ Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'get
 //Global products routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-products', GlobalProductController::class)->middleware('auth');
+Route::post('products/update-with-media/{global_product}', [GlobalProductController::class, 'updateWithMedia'])->name('products.update-with-media')->middleware('auth');
 Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('global-products.select')->middleware('auth');
 Route::get('global-products-get-by-page/{currentPage}', [GlobalProductController::class, 'getItemsByPage'])->name('global-products.get-by-page')->middleware('auth');
 Route::get('global-products-fetch-product-info/{global_product_id}', [GlobalProductController::class, 'fetchProductInfo'])->name('global-products.fetch-info-product')->middleware('auth');
@@ -72,6 +74,11 @@ Route::get('global-products-fetch-product-info/{global_product_id}', [GlobalProd
 //categories routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('categories', CategoryController::class)->middleware('auth');
+
+
+//brands routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+Route::resource('brands', BrandController::class)->middleware('auth');
 
 
 //sales routes-------------------------------------------------------------------------------------
