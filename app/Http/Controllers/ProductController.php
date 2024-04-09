@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductController extends Controller
 {
@@ -22,7 +23,7 @@ class ProductController extends Controller
         $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
                 ->where('store_id', auth()->user()->store_id)
                 ->latest()
-                ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock'])
+                ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock'])
                 ->take(20);
 
         // productos transferidos desde el catálogo base
@@ -179,9 +180,27 @@ class ProductController extends Controller
     public function searchProduct(Request $request)
     {
         $query = $request->input('query');
-
-        // Realiza la búsqueda en la base de datos
-        $products = Product::with(['category', 'brand', 'media'])->where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(20);
+    
+        // Realiza la búsqueda en la base de datos local
+        $local_products = Product::with(['category', 'brand', 'media'])
+            ->where('name', 'like', "%$query%")
+            ->orWhere('code', $query)
+            ->take(20)
+            ->get();
+    
+            $global_products = GlobalProductStore::with(['globalProduct.media'])
+                ->whereHas('globalProduct', function (Builder $queryBuilder) use ($query) {
+                    $queryBuilder->where('name', 'like', "%$query%")
+                                ->orWhere('code', $query);
+                })
+                ->take(20)
+                ->get();
+    
+        // Combinar los resultados en una colección
+        $combined_products = $local_products->merge($global_products);
+    
+        // Tomar solo los primeros 20 elementos del arreglo combinado
+        $products = $combined_products->take(20);
 
         return response()->json(['items' => $products]);
     }
@@ -217,7 +236,8 @@ class ProductController extends Controller
         Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
             'current_price' => $product->cost,
-            'quantity' => $request->quantity
+            'quantity' => $request->quantity,
+            'store_id' => auth()->user()->store_id,
         ]);
     }
 

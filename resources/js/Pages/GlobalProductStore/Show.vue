@@ -270,13 +270,13 @@ export default {
             });
         },
         entryProduct() {
-            this.form.put(route('products.entry', this.global_product_store?.id), {
+            this.form.put(route('global-product-store.entry', this.global_product_store.id), {
                 onSuccess: () => {
                     this.form.reset();
                     this, this.entryProductModal = false;
                     this.$notify({
                         title: 'Correcto',
-                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
+                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
                         type: 'success',
                     });
                 },

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Expense;
 use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
+use App\Models\ProductHistory;
 use Illuminate\Http\Request;
 
 class GlobalProductStoreController extends Controller
@@ -98,6 +100,7 @@ class GlobalProductStoreController extends Controller
 
             GlobalProductStore::create([
                 'public_price' => $product->public_price,
+                'cost' => 0,
                 'current_stock' => 1,
                 'global_product_id' => $productId,
                 'store_id' => auth()->user()->store_id,
@@ -105,5 +108,32 @@ class GlobalProductStoreController extends Controller
         }
 
         // return to_route('products.index');
+    }
+
+
+    public function entryStock(Request $request, $product_id)
+    {
+        $product = GlobalProductStore::with('globalProduct')->find($product_id);
+
+        // Asegúrate de convertir la cantidad a un número antes de sumar
+        $product->current_stock += intval($request->quantity);
+
+        // Guarda el producto
+        $product->save();
+
+        // Crear entrada
+        // ProductHistory::create([
+        //     'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
+        //     'type' => 'Entrada',
+        //     'product_id' => $product_id
+        // ]);
+
+        // Crear egreso
+        Expense::create([
+            'concept' => 'Compra de producto: ' . $product->globalProduct->name,
+            'current_price' => $product->cost,
+            'quantity' => $request->quantity,
+            'store_id' => auth()->user()->store_id,
+        ]);
     }
 }

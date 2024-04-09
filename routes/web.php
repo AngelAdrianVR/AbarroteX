@@ -76,6 +76,7 @@ Route::get('global-products-fetch-product-info/{global_product_id}', [GlobalProd
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
 Route::post('global-product-store/transfer-products', [GlobalProductStoreController::class, 'transferProducts'])->name('global-product-store.transfer-products')->middleware('auth');
+Route::put('global-product-store-entry/{product_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
 
 
 //categories routes----------------------------------------------------------------------------------
