@@ -7,18 +7,35 @@ use App\Http\Resources\ProductResource;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class ProductController extends Controller
 {
 
     public function index()
     {
-        $products = ProductResource::collection(Product::latest()->get()->take(20));
-        $total_products = Product::all()->count();
+        // productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
+                ->where('store_id', auth()->user()->store_id)
+                ->latest()
+                ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock'])
+                ->take(20);
 
+        // productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with(['globalProduct.media'])->where('store_id', auth()->user()->store_id)->get();
+        
+        // Convertimos $local_products a un arreglo asociativo
+        $local_products_array = $local_products->toArray();
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
+
+        $total_products = $products->count();
+
+        // return $products;
         return inertia('Product/Index', compact('products', 'total_products'));
     }
 
@@ -164,7 +181,7 @@ class ProductController extends Controller
         $query = $request->input('query');
 
         // Realiza la búsqueda en la base de datos
-        $products = ProductResource::collection(Product::with(['category', 'brand'])->where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(20));
+        $products = Product::with(['category', 'brand', 'media'])->where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(20);
 
         return response()->json(['items' => $products]);
     }

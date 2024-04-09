@@ -35,7 +35,7 @@
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-else-if="total_products > 15 && localProducts.length < total_products && localProducts.length"
+                <button v-else-if="total_products > 20 && localProducts.length < total_products && localProducts.length"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
                     elementos</button>
             </div>
@@ -129,7 +129,7 @@ export default {
             searchFocus: false,
             entryProductModal: false,
             productEntryFound: null,
-            localProducts: this.products.data,
+            localProducts: this.products,
             // paginacion
             loadingItems: false,
             currentPage: 1,
@@ -173,17 +173,21 @@ export default {
             }
         },
         async searchProducts() {
-            this.loading = true;
-            try {
+            if ( this.searchQuery != '') {
+                try {
+                    this.loading = true;
                 const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
                 if (response.status == 200) {
                     this.localProducts = response.data.items;
                 }
 
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    this.loading = false;
+                }
+            } else {
+                this.localProducts = this.products;
             }
         },
         async getProduct() {

@@ -208,6 +208,26 @@ export default {
         this.loadingProduct = false;
       }
     },
+    transferProducts() {    
+      // Enviar la solicitud POST con los datos en el cuerpo
+      axios.post(route('global-product-store.transfer-products'), { products: this.products })
+          .then(response => {
+              this.$notify({
+                  title: "Éxito",
+                  message: "¡Se han transferido los productos a tu tienda!",
+                  type: "success",
+              });
+          })
+          .catch(error => {
+              // Manejar errores si es necesario
+              console.error(error);
+              this.$notify({
+                  title: "No se pudo completar la petición",
+                  message: "Algo salió mal, vuelve a intentarlo más tarde",
+                  type: "success",
+              });
+          });
+    }
   },
   mounted() {
     // this.myProductsFormater();
