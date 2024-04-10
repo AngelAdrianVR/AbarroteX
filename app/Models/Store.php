@@ -52,4 +52,16 @@ class Store extends Model
                 'value',
             ]);
     }
+
+    public function globalProducts() :BelongsToMany
+    {
+        return $this->belongsToMany(GlobalProduct::class, 'global_product_store')
+            ->withPivot([
+                'public_price',
+                'cost',
+                'min_stock',
+                'max_stock',
+                'current_stock',
+            ])->withTimestamps();
+    }
 }

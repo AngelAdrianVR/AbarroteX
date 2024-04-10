@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\GlobalProduct;
+use App\Models\GlobalProductStore;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -14,11 +15,11 @@ class GlobalProductController extends Controller
     public function selectGlobalProducts()
     {
         $global_products = GlobalProduct::all(['id', 'name']);
-        $my_products = Product::all(['id', 'name']);
+        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
         $categories = Category::all(['id', 'name']);
         $brands = Brand::all(['id', 'name']);
 
-        // return $categories;
+        // return $my_products;
         return inertia('GlobalProduct/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }
 
@@ -153,5 +154,32 @@ class GlobalProductController extends Controller
         $global_product = GlobalProduct::with('category', 'media', 'brand')->find($global_product_id);
 
         return response()->json(['item' => $global_product]);
+    }
+
+
+    public function filter(Request $request)
+    {
+        // Obtener los parámetros de la solicitud
+        $category_id = request('category_id');
+        $brand_id = request('brand_id');
+
+        // Consultar los productos globales con los filtros aplicados
+        $filtered_global_products = GlobalProduct::query();
+
+        // Aplicar el filtro por categoría si está presente
+        if ($category_id !== null) {
+            $filtered_global_products->where('category_id', $category_id);
+        }
+
+        // Aplicar el filtro por marca si está presente
+        if ($brand_id !== null) {
+            $filtered_global_products->where('brand_id', $brand_id);
+        }
+
+        // Obtener los resultados filtrados
+        $filtered_global_products = $filtered_global_products->get();
+
+        // Devolver los resultados como una respuesta JSON
+        return response()->json(['items' => $filtered_global_products]);
     }
 }

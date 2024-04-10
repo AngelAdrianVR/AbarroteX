@@ -12,8 +12,8 @@
       <div v-for="(sale, index) in saleProducts" :key="index"
         class="mb-2 flex items-center space-x-4 border rounded-full relative">
         <div class="grid grid-cols-2 items-center h-14 w-[45%]">
-          <img class="mx-auto h-14 object-contain" :src="sale.product.imageCover[0]?.original_url">
-          <p class="font-bold">{{ sale.product.name }}</p>
+          <img class="mx-auto h-14 object-contain" :src="sale.product.global_product_id ? sale.product.global_product.media[0]?.original_url : sale.product.media[0]?.original_url">
+          <p class="font-bold">{{ sale.product.global_product_id ? sale.product.global_product.name : sale.product.name }}</p>
         </div>
         <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-base flex items-center">
           <template v-if="editMode !== index">
@@ -69,10 +69,10 @@
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-2 border rounded-md items-center relative">
       <figure>
-        <img class="mx-auto w-3/4 object-contain" :src="sale.product.imageCover[0]?.original_url" alt="">
+        <img class="mx-auto w-3/4 object-contain" :src="sale.product.global_product_id ? sale.product.global_product.media[0]?.original_url : sale.product.media[0]?.original_url" alt="">
       </figure>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
-        <p class="font-bold">{{ sale.product.name }}</p>
+        <p class="font-bold">{{ sale.product.global_product_id ? sale.product.global_product.name : sale.product.name }}</p>
         <div class="flex items-center space-x-2">
           <template v-if="editMode !== index">
             ${{ sale.product.public_price }}

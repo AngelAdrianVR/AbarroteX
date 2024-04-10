@@ -7,18 +7,36 @@ use App\Http\Resources\ProductResource;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductController extends Controller
 {
 
     public function index()
     {
-        $products = ProductResource::collection(Product::latest()->get()->take(20));
-        $total_products = Product::all()->count();
+        // productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
+                ->where('store_id', auth()->user()->store_id)
+                ->latest()
+                ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock'])
+                ->take(20);
 
+        // productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with(['globalProduct.media'])->where('store_id', auth()->user()->store_id)->get();
+        
+        // Convertimos $local_products a un arreglo asociativo
+        $local_products_array = $local_products->toArray();
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
+
+        $total_products = $products->count();
+
+        // return $products;
         return inertia('Product/Index', compact('products', 'total_products'));
     }
 
@@ -162,9 +180,27 @@ class ProductController extends Controller
     public function searchProduct(Request $request)
     {
         $query = $request->input('query');
-
-        // Realiza la búsqueda en la base de datos
-        $products = ProductResource::collection(Product::with(['category', 'brand'])->where('name', 'like', "%$query%")->orWhere('code', $query)->get()->take(20));
+    
+        // Realiza la búsqueda en la base de datos local
+        $local_products = Product::with(['category', 'brand', 'media'])
+            ->where('name', 'like', "%$query%")
+            ->orWhere('code', $query)
+            ->take(20)
+            ->get();
+    
+            $global_products = GlobalProductStore::with(['globalProduct.media'])
+                ->whereHas('globalProduct', function (Builder $queryBuilder) use ($query) {
+                    $queryBuilder->where('name', 'like', "%$query%")
+                                ->orWhere('code', $query);
+                })
+                ->take(20)
+                ->get();
+    
+        // Combinar los resultados en una colección
+        $combined_products = $local_products->merge($global_products);
+    
+        // Tomar solo los primeros 20 elementos del arreglo combinado
+        $products = $combined_products->take(20);
 
         return response()->json(['items' => $products]);
     }
@@ -172,8 +208,10 @@ class ProductController extends Controller
 
     public function getProductScaned($product_id)
     {
-        // Realiza la búsqueda en la base de datos
-        $product = ProductResource::make(Product::with(['category', 'brand'])->find($product_id));
+        return request();
+        // Realiza la búsqueda en la base de datos para productos locales y productos globales registrados en la tienda
+        $product = Product::with(['category', 'brand', 'media'])->find($product_id);
+        // $product = GlobalProductStore::with([ 'globalProduct' =>['category', 'brand']])->find($product_id);
 
         return response()->json(['item' => $product]);
     }
@@ -200,7 +238,8 @@ class ProductController extends Controller
         Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
             'current_price' => $product->cost,
-            'quantity' => $request->quantity
+            'quantity' => $request->quantity,
+            'store_id' => auth()->user()->store_id,
         ]);
     }
 

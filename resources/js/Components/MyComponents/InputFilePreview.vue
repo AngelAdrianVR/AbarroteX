@@ -1,12 +1,13 @@
 <template>
   <div class="inline">
     <figure @click="triggerImageInput"
-      class="flex items-center justify-center rounded-md border border-grayD9 w-48 h-36 cursor-pointer relative">
-      <i v-if="image && canDelete" @click.stop="clearImage"
+      class="flex items-center justify-center rounded-md border border-grayD9 w-48 h-36 cursor-pointer relative"
+      :class="disabled ? 'cursor-not-allowed' : '' ">
+      <i v-if="image && canDelete && !disabled" @click.stop="clearImage"
         class="fa-solid fa-xmark absolute p-1 top-1 right-1 z-10 text-sm"></i>
       <i v-if="!image" class="fa-solid fa-camera text-gray-400 text-xl"></i>
       <img v-if="image" :src="image" :alt="alt" class="w-full h-full object-contain bg-no-repeat rounded-md opacity-50" />
-      <input ref="fileInput" type="file" @change="handleImageUpload" class="hidden" />
+      <input :disabled="disabled" ref="fileInput" type="file" @change="handleImageUpload" class="hidden" />
     </figure>
   </div>
 </template>
@@ -33,6 +34,10 @@ export default {
     imageUrl: {
       type: String,
       default: null,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
   watch: {
