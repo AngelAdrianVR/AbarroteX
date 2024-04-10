@@ -2,7 +2,7 @@
     <AppLayout title="Productos">
         <div class="px-2 lg:px-10 py-7">
             <!-- tabs -->
-            <div class="flex items-center justify-center">
+            <div class="flex items-center justify-center text-sm">
                 <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -mr-5 cursor-default">Mis productos</button>
                 <button @click="$inertia.get(route('global-products.select'))" class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Catálogo base</button>
             </div>
@@ -35,7 +35,7 @@
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-else-if="total_products > 15 && localProducts.length < total_products && localProducts.length"
+                <button v-else-if="total_products > 20 && localProducts.length < total_products && localProducts.length"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
                     elementos</button>
             </div>
@@ -60,7 +60,7 @@
                     </div>
                     <div v-if="productEntryFound?.length > 0" class="mt-3">
                         <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
-                        <el-input v-model="form.quantity" ref="quantityInput" autofocus @keydown.enter="entryProduct"
+                        <el-input v-model="form.quantity" ref="quantityInput" autofocus @keydown.enter="entryProduct(productEntryFound[0])"
                             placeholder="Cantidad que entra a almacén"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                             :parser="(value) => value.replace(/\D/g, '')">
@@ -79,11 +79,12 @@
                     <!-- informacion del producto escaneado -->
                     <div v-if="productEntryFound?.length > 0" class="mt-5 grid grid-cols-3">
                         <figure class="w-32 ml-16">
-                            <img class="w-32 object-contain" :src="productEntryFound[0]?.imageCover[0]?.original_url">
+                            <img class="w-32 object-contain" 
+                                :src="productEntryFound[0]?.global_product_id ? productEntryFound[0]?.global_product.media[0]?.original_url : productEntryFound[0]?.media[0]?.original_url">
                         </figure>
 
                         <div class="col-span-2 text-left">
-                            <p>Nombre: <strong class="ml-2">{{ productEntryFound[0]?.name }}</strong></p>
+                            <p>Nombre: <strong class="ml-2">{{ productEntryFound[0]?.global_product_id ? productEntryFound[0]?.global_product.name : productEntryFound[0]?.name }}</strong></p>
                             <p>Precio: <strong class="ml-2">${{ productEntryFound[0]?.public_price }}</strong></p>
                             <p>Existencias: <strong class="ml-2">{{ productEntryFound[0]?.current_stock }}</strong></p>
                         </div>
@@ -92,7 +93,7 @@
                         ningun producto</p> -->
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
-                        <PrimaryButton @click="entryProduct" class="!rounded-full" :disabled="!form.quantity">Ingresar
+                        <PrimaryButton @click="entryProduct(productEntryFound[0])" class="!rounded-full" :disabled="!form.quantity">Ingresar
                             producto</PrimaryButton>
                         <CancelButton @click="closeEntryModal">Cancelar</CancelButton>
                     </div>
@@ -129,7 +130,7 @@ export default {
             searchFocus: false,
             entryProductModal: false,
             productEntryFound: null,
-            localProducts: this.products.data,
+            localProducts: this.products,
             // paginacion
             loadingItems: false,
             currentPage: 1,
@@ -173,17 +174,21 @@ export default {
             }
         },
         async searchProducts() {
-            this.loading = true;
-            try {
+            if ( this.searchQuery != '') {
+                try {
+                    this.loading = true;
                 const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
                 if (response.status == 200) {
                     this.localProducts = response.data.items;
                 }
 
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    this.loading = false;
+                }
+            } else {
+                this.localProducts = this.products;
             }
         },
         async getProduct() {
@@ -203,21 +208,43 @@ export default {
                 this.loading = false;
             }
         },
-        entryProduct() {
-            this.form.put(route('products.entry', this.productEntryFound[0]?.id), {
+        entryProduct(product) {
+            console.log(product);
+            let routePage;
+            if ( product.global_product_id ) {
+                routePage = 'global-product-store.entry';
+            } else {
+                routePage = 'products.entry';
+            }
+
+            this.form.put(route(routePage, product.id), {
                 onSuccess: () => {
-                    const IndexProductEntry = this.localProducts.findIndex(item => item.code === this.form.code);
-                    if (IndexProductEntry != -1) {
-                        this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                    if (product.global_product_id) {
+                        const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
+                        console.log(IndexProductEntry);
+                        if (IndexProductEntry !== -1) {
+                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                        }
+                        this.$notify({
+                            title: "Correcto",
+                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + product.global_product?.name,
+                            type: "success",
+                        });
+                    } else {
+                        const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
+                        if (IndexProductEntry !== -1) {
+                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                        }
+                        this.$notify({
+                            title: "Correcto",
+                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.localProducts[IndexProductEntry].name,
+                            type: "success",
+                        });
                     }
                     this.$nextTick(() => {
                         this.$refs.codeInput.focus(); // Enfocar el input de código cuando se abre el modal
                     });
-                    this.$notify({
-                        title: "Correcto",
-                        message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.productEntryFound[0].name,
-                        type: "success",
-                    });
+                    
                     this.form.reset();
                     this.productEntryFound = null;
                 },

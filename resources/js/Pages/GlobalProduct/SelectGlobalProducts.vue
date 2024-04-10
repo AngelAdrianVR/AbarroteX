@@ -4,7 +4,7 @@
       <!-- tabs -->
       <div class="flex justify-between mb-5 mx-2">
         <Back />
-        <div class="flex items-center justify-center">
+        <div class="flex items-center justify-center text-sm">
             <button @click="$inertia.get(route('products.index'))" class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Mis productos</button>
             <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -ml-5 cursor-default">Catálogo base</button>
         </div>
@@ -36,6 +36,7 @@
             :titles="['Catálogo base', 'Mis productos']"
             :data="globalProducts"
             @left-check-change="handleLeftCheckChange"
+            @right-check-change="handleLeftCheckChange"
           >
             <template #left-footer>
                 <!-- boton filtro izquierdo -->
@@ -76,17 +77,17 @@
             </figure>
 
             <div class="mt-7 text-sm flex">
-              <div class="space-y-1 w-24">
+              <div class="space-y-1 w-32">
                 <p>Nombre:</p>
                 <p>Categoría:</p>
                 <p>Marca:</p>
-                <p>Precio:</p>
+                <p>Precio sugerido:</p>
                 <p>Código:</p>
               </div>
               <div class="space-y-1 font-bold">
                 <p>{{ productInfo?.name ?? '-' }}</p>
                 <p>{{ productInfo?.category?.name ?? '-' }}</p>
-                <p>{{ productInfo?.brand ?? '-' }}</p>
+                <p>{{ productInfo?.brand?.name ?? '-' }}</p>
                 <p>${{ productInfo?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
                 <p>{{ productInfo?.code ?? 'N/A' }}</p>
               </div>
@@ -94,38 +95,42 @@
           </div>
         </div>
         <!-- Boton para transferir los poductos -->
-        <div class="col-span-full text-center mt-7">
-          <PrimaryButton :disabled="!products.length" @click="searchSales">Transferir productos</PrimaryButton>
+        <div class="flex space-x-2 items-center justify-center col-span-full mt-7">
+          <el-tooltip content="Revertir cambios" placement="left">
+            <button @click="revertChanges" class="rounded-full size-9 border border-[#c4c4c4] flex items-center justify-center"><i class="fa-solid fa-rotate-right"></i></button>
+          </el-tooltip>
+          <PrimaryButton :disabled="!products.length" @click="transferProducts">Transferir productos</PrimaryButton>
         </div>
       </section>
     </div>
 
+
     <!-- ventana de filtro izquierdo -->
     <div v-if="showLeftFilter"
-        class="absolute bottom-24 left-5 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-50 w-80">
-        <div>
-            <InputLabel value="Categoría" class="ml-3 mb-1" />
-            <el-select v-model="leftFilterCategory" clearable filterable placeholder="Seleccione"
-                no-data-text="No hay opciones registradas"
-                no-match-text="No se encontraron coincidencias">
-                <el-option v-for="item in categories" :key="item" :label="item.name"
-                    :value="item.id" />
-            </el-select>
-        </div>
-        <div class="my-3">
-            <InputLabel value="Marca" class="ml-3 mb-1" />
-            <el-select v-model="leftFilterBrand" clearable filterable placeholder="Seleccione"
-                no-data-text="No hay opciones registradas"
-                no-match-text="No se encontraron coincidencias">
-                <el-option v-for="item in brands" :key="item" :label="item"
-                    :value="item" />
-            </el-select>
-        </div>
-        <div class="flex space-x-2">
-          <PrimaryButton @click="filterGlobalProducts" class="!py-1">Aplicar</PrimaryButton>
-          <CancelButton @click="showLeftFilter = false" class="!py-1">Cancelar</CancelButton>
-        </div>
+      class="absolute bottom-24 left-5 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-50 w-80">
+      <div>
+          <InputLabel value="Categoría" class="ml-3 mb-1" />
+          <el-select v-model="leftFilterCategory" clearable filterable placeholder="Seleccione"
+              no-data-text="No hay opciones registradas"
+              no-match-text="No se encontraron coincidencias">
+              <el-option v-for="item in categories" :key="item" :label="item.name"
+                  :value="item.id" />
+          </el-select>
       </div>
+      <div class="my-3">
+          <InputLabel value="Marca" class="ml-3 mb-1" />
+          <el-select v-model="leftFilterBrand" clearable filterable placeholder="Seleccione"
+              no-data-text="No hay opciones registradas"
+              no-match-text="No se encontraron coincidencias">
+              <el-option v-for="item in brands" :key="item.id" :label="item.name"
+                  :value="item.id" />
+          </el-select>
+      </div>
+      <div class="flex space-x-2">
+        <PrimaryButton @click="filterGlobalProducts" class="!py-1">Aplicar</PrimaryButton>
+        <CancelButton @click="showLeftFilter = false" class="!py-1">Cancelar</CancelButton>
+      </div>
+    </div>
   </AppLayout>
 </template>
 
@@ -149,7 +154,6 @@ export default {
       showRightFilter: false, //muestra filtro derecho
       leftFilterCategory: null, //información para fltrar por categoría izquierdo
       leftFilterBrand: null, //información para fltrar por marca izquierdo
-      brands: ['La costeña', 'Coca-cola', 'Otra'],
     };
   },
   components: {
@@ -167,13 +171,22 @@ export default {
     brands: Array,
   },
   methods: {
-    myProductsFormater() {
-      this.products = this.my_products.map(product => ({
-        key: product.id,
-        label: product.name
-      }));
+    //recorre el arreglo de productos globales revisando que productos estan guardados en la tienda
+    //y guarda en el arreglo products el (index + 1) del producto en el primer arreglo para mostrarlo en 
+    //la parte derecha del transfer.
+    localProductsFormater() {
+      this.products =  [];
+      // Utiliza map en lugar de forEach para transformar los datos
+      this.global_products.map((globalProduct, index) => {
+        // Verifica si el nombre del producto global está presente en my_products
+        if (this.my_products.some(myProduct => myProduct.global_product.name === globalProduct.name)) {
+          // Si está presente, agrega el índice al arreglo foundIndexes
+          this.products.push(index + 1);
+        }
+      });
     },
     globalProductsFormater() {
+      this.globalProducts = null;
       this.globalProducts = this.global_products.map(product => ({
         key: product.id,
         label: product.name
@@ -185,6 +198,29 @@ export default {
         const lastSelection = checkedProducts[checkedProducts.length - 1]; // Obtener el último elemento del arreglo
 
         this.getLeftProductCheckedInfo(lastSelection);
+      }
+    },
+    revertChanges() {
+      // location.reload();
+      this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
+      this.globalProductsFormater(); //formatea los productos globales para que el transfer los renderice
+    },
+    async filterGlobalProducts() {
+      try {
+        const response = await axios.get(route('global-products.filter', {category_id: this.leftFilterCategory, brand_id: this.leftFilterBrand}));
+        if ( response.status === 200 ) {
+          this.globalProducts = response.data.items;
+          this.leftFilterCategory = null;
+          this.leftFilterBrand = null;
+          this.showLeftFilter = false;
+          //formatea el nuevo arreglo de productos globales filtrado
+          this.globalProducts = this.globalProducts.map(product => ({
+            key: product.id,
+            label: product.name
+          }));
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
     // recupera la informacion del producto seleccionado
@@ -207,9 +243,30 @@ export default {
         this.loadingProduct = false;
       }
     },
+    transferProducts() {    
+      // Enviar la solicitud POST con los datos en el cuerpo
+      axios.post(route('global-product-store.transfer-products'), { products: this.products })
+          .then(response => {
+              this.$notify({
+                  title: "Éxito",
+                  message: "¡Se han transferido los productos a tu tienda!",
+                  type: "success",
+              });
+              this.$inertia.get(route('products.index'));
+          })
+          .catch(error => {
+              // Manejar errores si es necesario
+              console.error(error);
+              this.$notify({
+                  title: "No se pudo completar la petición",
+                  message: "Algo salió mal, vuelve a intentarlo más tarde",
+                  type: "success",
+              });
+          });
+    }
   },
   mounted() {
-    // this.myProductsFormater();
+    this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
     this.globalProductsFormater(); //formatea los productos globales para que el transfer los renderice
   }
 };

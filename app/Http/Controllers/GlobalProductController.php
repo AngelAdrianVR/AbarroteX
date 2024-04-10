@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\GlobalProduct;
+use App\Models\GlobalProductStore;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -14,11 +15,11 @@ class GlobalProductController extends Controller
     public function selectGlobalProducts()
     {
         $global_products = GlobalProduct::all(['id', 'name']);
-        $my_products = Product::all(['id', 'name']);
+        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
         $categories = Category::all(['id', 'name']);
         $brands = Brand::all(['id', 'name']);
 
-        // return $categories;
+        // return $my_products;
         return inertia('GlobalProduct/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }
 
@@ -45,8 +46,8 @@ class GlobalProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:200',
-            'code' => 'nullable|string|max:200',
+            'name' => 'required|string|max:100|unique:global_products,name',
+            'code' => 'nullable|string|max:100|unique:global_products,code',
             'public_price' => 'required|string|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
@@ -63,7 +64,7 @@ class GlobalProductController extends Controller
     
     public function show($global_product_id)
     {
-        $global_product = GlobalProduct::with(['media', 'category'])->find($global_product_id);
+        $global_product = GlobalProduct::with(['media', 'category', 'brand'])->find($global_product_id);
         $global_products = GlobalProduct::all(['id', 'name']);
 
         return inertia('GlobalProduct/Show', compact('global_product', 'global_products'));
@@ -83,9 +84,9 @@ class GlobalProductController extends Controller
     public function update(Request $request, GlobalProduct $global_product)
     {
         $request->validate([
-            'name' => 'required|string|max:200',
-            'code' => 'nullable|string|max:200',
-            'public_price' => 'required|string|max:200',
+            'name' => 'required|string|max:100|unique:global_products,name,'.$global_product->id,
+            'code' => 'nullable|string|max:100|unique:global_products,code,'.$global_product->id,
+            'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
         ]);
@@ -98,16 +99,16 @@ class GlobalProductController extends Controller
             $global_product->clearMediaCollection('imageCover');
         }
 
-        return to_route('global_products.show', $global_product->id);
+        return to_route('global-products.index');
     }
 
 
     public function updateWithMedia(Request $request, GlobalProduct $global_product)
     {
         $request->validate([
-            'name' => 'required|string|max:200',
-            'code' => 'nullable|string|max:200',
-            'public_price' => 'required|string|max:200',
+            'name' => 'required|string|max:100|unique:global_products,name,'.$global_product->id,
+            'code' => 'nullable|string|max:100|unique:global_products,code,'.$global_product->id,
+            'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
         ]);
@@ -125,7 +126,7 @@ class GlobalProductController extends Controller
             $global_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
-        return to_route('global_products.index');
+        return to_route('global-products.index');
     }
 
     
@@ -150,8 +151,35 @@ class GlobalProductController extends Controller
 
     public function fetchProductInfo($global_product_id)
     {
-        $global_product = GlobalProduct::with('category', 'media')->find($global_product_id);
+        $global_product = GlobalProduct::with('category', 'media', 'brand')->find($global_product_id);
 
         return response()->json(['item' => $global_product]);
+    }
+
+
+    public function filter(Request $request)
+    {
+        // Obtener los parámetros de la solicitud
+        $category_id = request('category_id');
+        $brand_id = request('brand_id');
+
+        // Consultar los productos globales con los filtros aplicados
+        $filtered_global_products = GlobalProduct::query();
+
+        // Aplicar el filtro por categoría si está presente
+        if ($category_id !== null) {
+            $filtered_global_products->where('category_id', $category_id);
+        }
+
+        // Aplicar el filtro por marca si está presente
+        if ($brand_id !== null) {
+            $filtered_global_products->where('brand_id', $brand_id);
+        }
+
+        // Obtener los resultados filtrados
+        $filtered_global_products = $filtered_global_products->get();
+
+        // Devolver los resultados como una respuesta JSON
+        return response()->json(['items' => $filtered_global_products]);
     }
 }

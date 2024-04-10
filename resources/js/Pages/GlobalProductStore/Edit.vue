@@ -1,14 +1,14 @@
 <template>
-    <AppLayout title="Nuevo producto">
+    <AppLayout title="Editar produco">
         <div class="px-10 py-7">
             <Back />
 
-            <form v-if="products_quantity < 650" @submit.prevent="store"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
-                <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
+            <form @submit.prevent="update"
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid grid-cols-2 gap-x-3">
+                <h1 class="font-bold ml-2 col-span-full">Editar producto transferido</h1>
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
-                    <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
+                    <el-input disabled v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
                     <InputError :message="form.errors.name" />
                 </div>
                 <div class="mt-3">
@@ -46,13 +46,13 @@
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Categoría*" class="ml-3 mb-1" />
-                        <button
+                        <!-- <button
                             @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
-                        </button>
+                        </button> -->
                     </div>
-                    <el-select class="w-1/2" v-model="form.category_id" clearable
+                    <el-select disabled class="w-1/2" v-model="form.category_id" clearable
                         placeholder="Seleccione" no-data-text="No hay opciones registradas"
                         no-match-text="No se encontraron coincidencias">
                         <el-option v-for="category in localCategories" :key="category" :label="category.name" :value="category.id" />
@@ -63,13 +63,13 @@
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Marca*" class="ml-3 mb-1" />
-                        <button
+                        <!-- <button
                             @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
-                        </button>
+                        </button> -->
                     </div>
-                    <el-select class="w-1/2" v-model="form.brand_id" clearable
+                    <el-select disabled class="w-1/2" v-model="form.brand_id" clearable
                         placeholder="Seleccione" no-data-text="No hay opciones registradas"
                         no-match-text="No se encontraron coincidencias">
                         <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
@@ -99,12 +99,15 @@
 
                 <div>
                     <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
-                    <InputFilePreview @imagen="saveImage" @cleared="form.imageCover = null" />
+                    <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
+                        @cleared="form.imageCover = null; form.imageCoverCleared = true"
+                        :imageUrl="global_product_store.global_product?.media[0]?.original_url"
+                        :disabled="true" />
                 </div>
 
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
-                    <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
+                    <el-input disabled v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
                         <template #prefix>
                             <i class="fa-solid fa-barcode"></i>
                         </template>
@@ -113,18 +116,13 @@
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar producto</PrimaryButton>
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar cambios</PrimaryButton>
                 </div>
             </form>
-            <div v-else class="text-center text-gray-500">
-                <p class="text-3xl mb-3">¡Lo sentimos!</p>
-                <p class="">Has llegado al límite de productos disponibles (650). Para poder aumentar el límite ponte en
-                    contacto con el equipo de DTW</p>
-            </div>
         </div>
 
         <!-- category form -->
-        <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
+        <!-- <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
             <template #title> Agregar categoría </template>
             <template #content>
             <form @submit.prevent="storeCategory" ref="categoryForm">
@@ -141,10 +139,10 @@
                     <PrimaryButton @click="storeCategory()" :disabled="categoryForm.processing">Crear</PrimaryButton>
                 </div>
             </template>
-        </DialogModal>
+        </DialogModal> -->
 
         <!-- brand form -->
-        <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
+        <!-- <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
             <template #title> Agregar marca </template>
             <template #content>
             <form @submit.prevent="storeBrand">
@@ -161,7 +159,7 @@
                     <PrimaryButton @click="storeBrand()" :disabled="brandForm.processing">Crear</PrimaryButton>
                 </div>
             </template>
-        </DialogModal>
+        </DialogModal> -->
     </AppLayout>
 </template>
 
@@ -179,30 +177,31 @@ import { useForm } from "@inertiajs/vue3";
 export default {
     data() {
         const form = useForm({
-            name: null,
-            code: null,
-            public_price: null,
-            cost: null,
-            current_stock: null,
-            category_id: null,
-            brand_id: null,
-            min_stock: null,
-            max_stock: null,
+            name: this.global_product_store.global_product?.name,
+            code: this.global_product_store.global_product?.code,
+            public_price: this.global_product_store.public_price,
+            cost: this.global_product_store.cost,
+            current_stock: this.global_product_store.current_stock,
+            category_id: this.global_product_store.global_product?.category_id,
+            brand_id: this.global_product_store.global_product?.brand_id,
+            min_stock: this.global_product_store.min_stock,
+            max_stock: this.global_product_store.max_stock,
             imageCover: null,
+            imageCoverCleared: false
         });
 
-        const categoryForm = useForm({
-            name: null,
-        });
+        // const categoryForm = useForm({
+        //     name: null,
+        // });
 
-        const brandForm = useForm({
-            name: null,
-        });
+        // const brandForm = useForm({
+        //     name: null,
+        // });
 
         return {
             form,
-            brandForm,
-            categoryForm,
+            // brandForm,
+            // categoryForm,
             localCategories: this.categories,
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
@@ -220,62 +219,62 @@ export default {
         Back
     },
     props: {
-        products_quantity: Number, // para validar los productos limite
+        global_product_store: Object,
         categories: Array,
         brands: Array
     },
     methods: {
-        store() {
-            this.form.post(route("products.store"), {
+        update() {
+            this.form.put(route("global-product-store.update", this.global_product_store.id), {
                 onSuccess: () => {
-                    this.$notify({
-                        title: "Correcto",
-                        message: "Se ha agregado un nuevo producto",
-                        type: "success",
+                    ElNotification({
+                        title: 'Correcto',
+                        message: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
+                        type: 'success',
                     });
                 },
             });
         },
-        async storeCategory() {
-            try {
-                const response = await axios.post(route('categories.store'), {
-                    name: this.categoryForm.name
-                });
-                if (response.status === 200) {
-                    this.$notify({
-                        title: "Éxito",
-                        message: "Se ha creado una nueva categoría",
-                        type: "success",
-                    });
-                    this.form.category_id = response.data.item.id;
-                    this.localCategories.push(response.data.item);
-                    this.showCategoryFormModal = false;
-                    this.categoryForm.reset();
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        },
-        async storeBrand() {
-            try {
-                const response = await axios.post(route('brands.store'), {
-                    name: this.brandForm.name
-                });
-                if (response.status === 200) {
-                    this.$notify({
-                        title: "Éxito",
-                        message: "Se ha creado una nueva marca",
-                        type: "success",
-                    });
-                    this.localBrands.push(response.data.item);
-                    this.form.brand_id = response.data.item.id;
-                    this.showBrandFormModal = false;
-                    this.brandForm.reset();
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        },
+        // async storeCategory() {
+        //     try {
+        //         const response = await axios.post(route('categories.store'), {
+        //             name: this.categoryForm.name
+        //         });
+        //         if (response.status === 200) {
+        //             this.$notify({
+        //                 title: "Éxito",
+        //                 message: "Se ha creado una nueva categoría",
+        //                 type: "success",
+        //             });
+        //             this.form.category_id = response.data.item.id;
+        //             this.localCategories.push(response.data.item);
+        //             this.showCategoryFormModal = false;
+        //             this.categoryForm.reset();
+        //         }
+        //     } catch (error) {
+        //         console.log(error)
+        //     }
+        // },
+        // async storeBrand() {
+        //     try {
+        //         const response = await axios.post(route('brands.store'), {
+        //             name: this.brandForm.name
+        //         });
+        //         if (response.status === 200) {
+        //             this.$notify({
+        //                 title: "Éxito",
+        //                 message: "Se ha creado una nueva marca",
+        //                 type: "success",
+        //             });
+        //             this.localBrands.push(response.data.item);
+        //             this.form.brand_id = response.data.item.id;
+        //             this.showBrandFormModal = false;
+        //             this.brandForm.reset();
+        //         }
+        //     } catch (error) {
+        //         console.log(error)
+        //     }
+        // },
         saveImage(image) {
             this.form.imageCover = image;
         },

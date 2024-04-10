@@ -1,14 +1,12 @@
 <template>
-    <AppLayout :title="product.data.name">
+    <AppLayout :title="global_product_store.global_product?.name">
         <div class="px-2 lg:px-10 py-7">
             <!-- header botones -->
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
-                    <ThirthButton @click="openEntryModal">Entrada de producto
-                    </ThirthButton>
-                    <PrimaryButton @click="$inertia.get(route('products.edit', product.data.id))" class="!rounded-full">
-                        Editar</PrimaryButton>
+                    <ThirthButton @click="openEntryModal">Entrada de producto</ThirthButton>
+                    <PrimaryButton @click="$inertia.get(route('global-product-store.edit', global_product_store.id))" class="!rounded-full">Editar</PrimaryButton>
                 </div>
             </div>
             <div class="lg:w-1/4 relative">
@@ -36,7 +34,7 @@
                 <!-- fotografia de producto -->
                 <section class="mt-7">
                     <figure class="border border-grayD9 rounded-lg">
-                        <img class="size-96 mx-auto object-contain" :src="product.data.imageCover[0]?.original_url" alt="">
+                        <img class="size-96 mx-auto object-contain" :src="global_product_store.global_product.media[0]?.original_url" alt="">
                     </figure>
                 </section>
 
@@ -65,8 +63,8 @@
                             <div class="flex space-x-4 items-center">
                                 <p class="text-gray37 flex items-center">
                                     <span class="mr-2">Código</span>
-                                    <span class="font-bold">{{ product.data.code ?? 'N/A' }}</span>
-                                    <el-tooltip v-if="product.data.code" content="Copiar código" placement="right">
+                                    <span class="font-bold">{{ global_product_store.global_product?.code ?? 'N/A' }}</span>
+                                    <el-tooltip v-if="global_product_store.code" content="Copiar código" placement="right">
                                         <button @click="copyToClipboard"
                                             class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -78,32 +76,32 @@
                                     </el-tooltip>
                                 </p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Categoría: <span class="font-bold">{{ product.data.category?.name }}</span></p>
+                                <p class="text-gray37">Categoría: <span class="font-bold">{{ global_product_store.global_product?.category?.name }}</span></p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Marca: <span class="font-bold">{{ product.data.brand?.name }}</span></p>
+                                <p class="text-gray37">Marca: <span class="font-bold">{{ global_product_store.global_product?.brand?.name }}</span></p>
                             </div>
-                            <p class="text-gray37 mt-3 lg:mt-0">Fecha de alta: <strong class="ml-5">{{ product.data.created_at
+                            <p class="text-gray37 mt-3 lg:mt-0">Fecha de alta: <strong class="ml-5">{{ global_product_store.created_at
                             }}</strong></p>
                         </div>
-                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ product.data.name }}</h1>
+                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ global_product_store.global_product?.name }}</h1>
 
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de compra:</p>
-                                <p class="text-right font-bold">${{ product.data.cost ?? '-' }}</p>
+                                <p class="text-right font-bold">${{ global_product_store.cost ?? '-' }}</p>
                             </div>
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de venta: </p>
-                                <p class="text-right font-bold">${{ product.data.public_price }}</p>
+                                <p class="text-right font-bold">${{ global_product_store.public_price }}</p>
                             </div>
-                            <div v-if="product.data.current_stock >= product.data.min_stock"
+                            <div v-if="global_product_store.current_stock >= global_product_store.min_stock"
                                 class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-[#5FCB1F]">{{ product.data.current_stock ?? '-' }}</p>
+                                <p class="text-right font-bold text-[#5FCB1F]">{{ global_product_store.current_stock ?? '-' }}</p>
                             </div>
                             <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-primary">{{ product.data.current_stock ?? '-' }}<i
+                                <p class="text-right font-bold text-primary">{{ global_product_store.current_stock ?? '-' }}<i
                                         class="fa-solid fa-arrow-down text-xs ml-2"></i></p>
                                 <p class="absolute top-2 -right-16 text-xs font-bold text-primary">Bajo stock</p>
                             </div>
@@ -112,11 +110,11 @@
 
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Cantidad mínima:</p>
-                                <p class="text-right font-bold">{{ product.data.min_stock ?? '-' }}</p>
+                                <p class="text-right font-bold">{{ global_product_store.min_stock ?? '-' }}</p>
                             </div>
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Cantidad máxima:</p>
-                                <p class="text-right font-bold">{{ product.data.max_stock ?? '-' }}</p>
+                                <p class="text-right font-bold">{{ global_product_store.max_stock ?? '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -126,7 +124,7 @@
                     <!-- pestaña 2 historial de producto -->
                     <div v-if="currentTab == 2" class="mt-7 mx-16">
                         <!-- estado de carga -->
-                        <div v-if="loading" class="flex justify-center items-center py-10">
+                        <!-- <div v-if="loading" class="flex justify-center items-center py-10">
                             <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
                         </div>
                         <div v-else>
@@ -137,7 +135,7 @@
                                         v-html="getIcon(activity.type)"></span>{{ activity.description + ' ' +
                                             activity.created_at }}</p>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <!-- ---------------------------------- -->
                 </section>
@@ -219,11 +217,11 @@ export default {
         Back
     },
     props: {
-        product: Object
+        global_product_store: Object
     },
     methods: {
         copyToClipboard() {
-            const textToCopy = this.product.data.code;
+            const textToCopy = this.global_product_store.code;
 
             // Create a temporary input element
             const input = document.createElement("input");
@@ -241,7 +239,7 @@ export default {
 
             this.$notify({
                 title: "Éxito",
-                message: this.product.data.code + " copiado",
+                message: this.global_product_store.code + " copiado",
                 type: "success",
             });
         },
@@ -272,13 +270,13 @@ export default {
             });
         },
         entryProduct() {
-            this.form.put(route('products.entry', this.product.data?.id), {
+            this.form.put(route('global-product-store.entry', this.global_product_store.id), {
                 onSuccess: () => {
                     this.form.reset();
                     this, this.entryProductModal = false;
                     this.$notify({
                         title: 'Correcto',
-                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
+                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
                         type: 'success',
                     });
                 },
@@ -287,7 +285,7 @@ export default {
         async fetchHistory() {
             this.loading = true;
             try {
-                const response = await axios.get(route("products.fetch-history", this.product.data.id));
+                const response = await axios.get(route("products.fetch-history", this.global_product_store.id));
                 if (response.status === 200) {
                     this.productHistory = response.data.items;
                 }

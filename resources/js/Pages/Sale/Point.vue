@@ -48,7 +48,7 @@
               class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50">
               <ul v-if="productsFound?.length > 0 && !loading">
                 <li @click="productFoundSelected = product; searchQuery = null" v-for="(product, index) in productsFound"
-                  :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.name }}</li>
+                  :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ? product.global_product?.name : product.name }}</li>
               </ul>
               <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias
               </p>
@@ -65,15 +65,17 @@
               <i @click="productFoundSelected = null"
                 class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
               <figure class="h-32">
-                <img class="object-contain w-32 mx-auto" :src="productFoundSelected?.imageCover[0]?.original_url">
+                <img class="object-contain w-32 mx-auto" 
+                  :src="productFoundSelected?.global_product_id ? productFoundSelected?.global_product?.media[0]?.original_url : productFoundSelected?.media[0]?.original_url">
               </figure>
               <div class="flex justify-between items-center mt-2 mb-4">
-                <p class="font-bold">{{ productFoundSelected?.name }}</p>
+                <p class="font-bold">{{ productFoundSelected?.global_product_id ? productFoundSelected?.global_product?.name : productFoundSelected?.name }}</p>
                 <p class="text-[#5FCB1F]">${{ productFoundSelected?.public_price }}</p>
               </div>
               <div class="flex justify-between items-center">
                 <p class="text-gray99">Cantidad</p>
-                <el-input-number v-model="quantity" :min="0" :max="productFoundSelected.current_stock" :precision="2" />
+                <!-- <el-input-number v-model="quantity" :min="0" :max="productFoundSelected.current_stock" :precision="2" /> en caso de tomar en cuenta stock -->
+                <el-input-number v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null" class="!rounded-full !px-24">Agregar
@@ -250,30 +252,42 @@ export default {
     },
     async getProductByCode() {
       this.scanning = true;
-      let productScaned = this.products.find(item => item.code === this.scannerQuery);
+      //buscar primero en productos transferidos del catalogo con el codigo escaneado
+      let productScaned = this.products.find(item => item.global_product?.code === this.scannerQuery);
+      let is_local_product = false;
 
-      try {
-        if (productScaned && productScaned.id) {
-          const response = await axios.get(route('products.get-product-scaned', productScaned.id));
+      //si no se encontró en productos transferidos se busca en productos locales
+      if ( productScaned == null ) {
+        productScaned = this.products.find(item => item.code === this.scannerQuery);
+        is_local_product = true;
+      }
 
-          if (response.status === 200 && response.data && response.data.item) {
-            this.productSelected = response.data.item;
-            this.addSaleProduct(this.productSelected);
-          } else {
-            console.error('La respuesta no tiene el formato esperado.');
-          }
-        } else {
-          this.$notify({
-            title: "Poducto no encontrado",
-            message: "El producto escaneado no esta registrado en la base de datos",
-            type: "warning"
-          });
-          console.error('El producto escaneado no tiene la propiedad "id".');
-          this.scannerQuery = null;
+      // si no se encontró el producto escaneado aparece un mensaje y no busca en la bd para no tardar más
+      if ( productScaned != null ) {
+          try {
+            if (productScaned && productScaned.id) {
+              const response = await axios.get(route('products.get-product-scaned', productScaned.id), { is_local_product: is_local_product });
+
+              if (response.status === 200 && response.data && response.data.item) {
+                this.productSelected = response.data.item;
+                this.addSaleProduct(this.productSelected);
+              } else {
+                console.error('La respuesta no tiene el formato esperado.');
+              }
+            } 
+        } catch (error) {
+          console.error('Error al realizar la solicitud:', error);
+        } finally {
+          this.scanning = false;
         }
-      } catch (error) {
-        console.error('Error al realizar la solicitud:', error);
-      } finally {
+      } else {
+        this.$notify({
+          title: "Poducto no encontrado",
+          message: "El producto escaneado no esta registrado en la base de datos",
+          type: "warning"
+        });
+        console.error('El producto escaneado no tiene la propiedad "id".');
+        this.scannerQuery = null;
         this.scanning = false;
       }
     },
