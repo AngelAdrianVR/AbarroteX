@@ -208,8 +208,10 @@ class ProductController extends Controller
 
     public function getProductScaned($product_id)
     {
-        // Realiza la búsqueda en la base de datos
-        $product = ProductResource::make(Product::with(['category', 'brand'])->find($product_id));
+        return request();
+        // Realiza la búsqueda en la base de datos para productos locales y productos globales registrados en la tienda
+        $product = Product::with(['category', 'brand', 'media'])->find($product_id);
+        // $product = GlobalProductStore::with([ 'globalProduct' =>['category', 'brand']])->find($product_id);
 
         return response()->json(['item' => $product]);
     }

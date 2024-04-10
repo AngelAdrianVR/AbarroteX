@@ -3,18 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SaleResource;
+use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
 use App\Notifications\BasicNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class SaleController extends Controller
 {
     public function pointIndex()
     {
-        $products = Product::all(['id', 'name', 'code']);
+        // $products = Product::all(['id', 'name', 'code']);
+
+        // productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::where('store_id', auth()->user()->store_id)
+                ->latest()
+                ->get(['id', 'name','code']);
+
+        // productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])->where('store_id', auth()->user()->store_id)->get(['id','global_product_id']);
+        
+        // Convertimos $local_products a un arreglo asociativo
+        $local_products_array = $local_products->toArray();
+
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
 
         // return $products;
         return inertia('Sale/Point', compact('products'));
