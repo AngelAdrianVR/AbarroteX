@@ -208,10 +208,16 @@ class ProductController extends Controller
 
     public function getProductScaned($product_id)
     {
-        return request();
-        // Realiza la búsqueda en la base de datos para productos locales y productos globales registrados en la tienda
-        $product = Product::with(['category', 'brand', 'media'])->find($product_id);
-        // $product = GlobalProductStore::with([ 'globalProduct' =>['category', 'brand']])->find($product_id);
+        $is_local_product = request()->boolean('is_local_product');
+        
+        // si es producto local busca en la tabla de productos locales, si no, en la tabla de productos transferidos del catálogo
+        if ( $is_local_product == '1' ) {
+            $product = Product::with(['category', 'brand', 'media'])->find($product_id);
+        } else {
+            $product = GlobalProductStore::whereHas('globalProduct', function ($query) use ($product_id) {
+                $query->where('id', $product_id);
+            })->with(['globalProduct.category', 'globalProduct.brand', 'globalProduct.media'])->first();
+        }
 
         return response()->json(['item' => $product]);
     }

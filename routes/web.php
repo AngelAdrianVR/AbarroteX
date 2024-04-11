@@ -52,6 +52,16 @@ Route::middleware([
 });
 
 
+//Global products routes (Catálgo base)----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+Route::resource('global-products', GlobalProductController::class)->middleware('auth');
+Route::post('products/update-with-media/{global_product}', [GlobalProductController::class, 'updateWithMedia'])->name('products.update-with-media')->middleware('auth');
+Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('global-products.select')->middleware('auth');
+Route::get('global-products-get-by-page/{currentPage}', [GlobalProductController::class, 'getItemsByPage'])->name('global-products.get-by-page')->middleware('auth');
+Route::get('global-products-fetch-product-info/{global_product_id}', [GlobalProductController::class, 'fetchProductInfo'])->name('global-products.fetch-info-product')->middleware('auth');
+Route::get('global-products-filter', [GlobalProductController::class, 'filter'])->name('global-products.filter')->middleware('auth');
+
+
 //products routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 Route::resource('products', ProductController::class)->middleware('auth');
@@ -63,22 +73,12 @@ Route::get('products-fetch-history/{product_id}', [ProductController::class, 'fe
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
 
 
-//Global products routes----------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------
-Route::resource('global-products', GlobalProductController::class)->middleware('auth');
-Route::post('products/update-with-media/{global_product}', [GlobalProductController::class, 'updateWithMedia'])->name('products.update-with-media')->middleware('auth');
-Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('global-products.select')->middleware('auth');
-Route::get('global-products-get-by-page/{currentPage}', [GlobalProductController::class, 'getItemsByPage'])->name('global-products.get-by-page')->middleware('auth');
-Route::get('global-products-fetch-product-info/{global_product_id}', [GlobalProductController::class, 'fetchProductInfo'])->name('global-products.fetch-info-product')->middleware('auth');
-Route::get('global-products-filter', [GlobalProductController::class, 'filter'])->name('global-products.filter')->middleware('auth');
-
-
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
 Route::post('global-product-store/transfer-products', [GlobalProductStoreController::class, 'transferProducts'])->name('global-product-store.transfer-products')->middleware('auth');
-Route::put('global-product-store-entry/{product_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
-
+Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
+Route::get('global-product-store-fetch-history/{global_product_store_id}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
 
 //categories routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------

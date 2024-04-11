@@ -124,7 +124,7 @@
                     <!-- pestaña 2 historial de producto -->
                     <div v-if="currentTab == 2" class="mt-7 mx-16">
                         <!-- estado de carga -->
-                        <!-- <div v-if="loading" class="flex justify-center items-center py-10">
+                        <div v-if="loading" class="flex justify-center items-center py-10">
                             <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
                         </div>
                         <div v-else>
@@ -135,7 +135,7 @@
                                         v-html="getIcon(activity.type)"></span>{{ activity.description + ' ' +
                                             activity.created_at }}</p>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
                     <!-- ---------------------------------- -->
                 </section>
@@ -279,13 +279,14 @@ export default {
                         text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
                         type: 'success',
                     });
+                    this.fetchHistory();
                 },
             });
         },
         async fetchHistory() {
             this.loading = true;
             try {
-                const response = await axios.get(route("products.fetch-history", this.global_product_store.id));
+                const response = await axios.get(route("global-product-store.fetch-history", this.global_product_store.id));
                 if (response.status === 200) {
                     this.productHistory = response.data.items;
                 }

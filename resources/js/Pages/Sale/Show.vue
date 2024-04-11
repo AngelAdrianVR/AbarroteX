@@ -33,7 +33,7 @@
                     <p class="font-bold ml-8">Total</p>
 
                     <div class="mt-2">
-                        <p @click="viewProduct(product.product_id)" class="text-primary underline cursor-pointer text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">{{ product.name }}</p>
+                        <p @click="viewProduct(product)" class="text-primary underline cursor-pointer text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">{{ product.name }}</p>
                     </div>
                     <div class="mt-2">
                         <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">{{ product.quantity }}</p>
@@ -127,8 +127,12 @@ methods:{
         const [day, month, year] = dateString.split('-');
         return `${day}-${months[month]}-${year}`;
     },
-    viewProduct(productId) {
-        window.open(route('products.show', productId), '_blank');
+    viewProduct(product) {
+        if ( product.is_global_product ) {
+            window.open(route('global-product-store.show', product.product_id), '_blank');
+        } else {
+            window.open(route('products.show', product.product_id), '_blank');
+        }
     },
     print(sale) {
         window.open(route('sales.print-ticket', sale.id), '_blank');

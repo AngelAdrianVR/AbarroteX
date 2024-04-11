@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductHistoryResource;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Expense;
@@ -63,16 +64,17 @@ class GlobalProductStoreController extends Controller
             'brand_id' => 'required',
         ]);
 
-        // //precio actual para checar si se cambió el precio y registrarlo
-        // $current_price = $product->public_price;
+        //precio actual para checar si se cambió el precio y registrarlo
+        $current_price = $global_product_store->public_price;
 
-        // if ($current_price != $request->public_price) {
-        //     ProductHistory::create([
-        //         'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
-        //         'type' => 'Precio',
-        //         'product_id' => $product->id
-        //     ]);
-        // }
+        if ($current_price != $request->public_price) {
+            ProductHistory::create([
+                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'type' => 'Precio',
+                'product_id' => null,
+                'global_product_store_id' => $global_product_store->id
+            ]);
+        }
 
         $global_product_store->update($request->except('imageCover'));
 
@@ -122,29 +124,46 @@ class GlobalProductStoreController extends Controller
     }
 
 
-    public function entryStock(Request $request, $product_id)
+    public function entryStock(Request $request, $global_product_store_id)
     {
-        $product = GlobalProductStore::with('globalProduct')->find($product_id);
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
-        $product->current_stock += intval($request->quantity);
+        $global_product_store->current_stock += intval($request->quantity);
 
         // Guarda el producto
-        $product->save();
+        $global_product_store->save();
 
         // Crear entrada
-        // ProductHistory::create([
-        //     'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
-        //     'type' => 'Entrada',
-        //     'product_id' => $product_id
-        // ]);
+        ProductHistory::create([
+            'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
+            'type' => 'Entrada',
+            'product_id' => null,
+            'global_product_store_id' => $global_product_store->id
+        ]);
 
         // Crear egreso
         Expense::create([
-            'concept' => 'Compra de producto: ' . $product->globalProduct->name,
-            'current_price' => $product->cost,
+            'concept' => 'Compra de producto: ' . $global_product_store->globalProduct->name,
+            'current_price' => $global_product_store->cost,
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
         ]);
+    }
+
+
+    public function fetchHistory($global_product_store_id)
+    {
+        $product_history = ProductHistoryResource::collection(ProductHistory::where('global_product_store_id', $global_product_store_id)->latest()->get());
+
+        // Agrupar por mes y año
+        $groupedHistory = $product_history->groupBy(function ($item) {
+            return $item->created_at->format('F Y');
+        });
+
+        // Convierte el grupo en un array
+        $groupedHistoryArray = $groupedHistory->toArray();
+
+        return response()->json(['items' => $groupedHistoryArray]);
     }
 }

@@ -7,7 +7,7 @@
             <div class="w-[30%]"></div>
         </div>
         <div>
-            <div v-for="(sale, index) in sales" :key="sale.id" class="*:p-3 h-12 cursor-pointer flex items-center space-x-4 border rounded-full mb-2 hover:border-primarylight" 
+            <div v-for="(sale, index) in sales" :key="sale.id" class="*:p-3 h-12 cursor-pointer flex items-center space-x-4 border rounded-full mb-2 hover:border-primary" 
             @click="$inertia.get(route('sales.show', sale.sales[0]?.created_at))">
                 <div class="w-[20%] text-center rounded-l-full">{{  formatDate(index) }}</div>
                 <div class="w-[20%] text-center rounded-l-full">{{ sale.total_quantity }}</div>
