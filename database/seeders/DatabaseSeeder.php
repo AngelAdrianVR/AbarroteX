@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             'contact_name' => 'Contacto 1',
             'contact_phone' => '3312457896',
             'address' => 'Direccion 1',
-            'plan' => 'Plan 1',
+            'plan' => 'Plan Básico',
             'next_payment' => now()->addDays(10),
         ]);
 

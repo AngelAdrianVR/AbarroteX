@@ -173,5 +173,7 @@ return [
         'quantity' => 'cantidad',
         'category_id' => 'categoría',
         'brand_id' => 'marca',
+        'store_name' => 'nombre de tu tienda',
+        'terms' => 'terminos y condiciones',
     ],
 ];

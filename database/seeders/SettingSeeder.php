@@ -16,6 +16,5 @@ class SettingSeeder extends Seeder
         Setting::create(['key' => 'Escanear productos', 'type' => 'Bool', 'module' => 'Punto de venta', 'description' => 'Mostrar barra de búsqueda por código']);
         Setting::create(['key' => 'Hacer descuentos', 'type' => 'Bool', 'module' => 'Punto de venta', 'description' => 'Poder hacer descuento sobre el monto total al registrar la venta']);
 
-        
     }
 }

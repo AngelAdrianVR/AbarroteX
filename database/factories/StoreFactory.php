@@ -21,7 +21,6 @@ class StoreFactory extends Factory
             'contact_name' => $this->faker->name(),
             'contact_phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
-            'plan' => 'Plan 1',
             'next_payment' => now()->addDays($this->faker->randomNumber(2)),
         ];
     }
