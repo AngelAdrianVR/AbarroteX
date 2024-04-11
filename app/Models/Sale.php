@@ -13,14 +13,20 @@ class Sale extends Model
     protected $fillable = [
         'current_price',
         'quantity',
-        'product_id',
         'store_id',
+        'product_id',
+        'global_product_store_id',
     ];
 
     //relationships
     public function product() :BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function globalProductStore() :BelongsTo
+    {
+        return $this->belongsTo(GlobalProductStore::class);
     }
 
 }
