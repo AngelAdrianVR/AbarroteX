@@ -31,6 +31,7 @@
                   </template>
                 </el-popconfirm>
                 <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
+                {{ tab.saleProducts }}
               </el-tab-pane>
             </el-tabs>
           </div>
@@ -265,8 +266,8 @@ export default {
       // si no se encontró el producto escaneado aparece un mensaje y no busca en la bd para no tardar más
       if ( productScaned != null ) {
           try {
-            if (productScaned && productScaned.id) {
-              const response = await axios.get(route('products.get-product-scaned', productScaned.id), { is_local_product: is_local_product });
+            if ( is_local_product ) {
+              const response = await axios.get(route('products.get-product-scaned', [productScaned.id, {is_local_product: is_local_product}]));
 
               if (response.status === 200 && response.data && response.data.item) {
                 this.productSelected = response.data.item;
@@ -274,7 +275,16 @@ export default {
               } else {
                 console.error('La respuesta no tiene el formato esperado.');
               }
-            } 
+            } else {
+                const response = await axios.get(route('products.get-product-scaned', [productScaned.global_product.id, {is_local_product: is_local_product}]));
+
+                if (response.status === 200 && response.data && response.data.item) {
+                  this.productSelected = response.data.item;
+                  this.addSaleProduct(this.productSelected);
+                } else {
+                  console.error('La respuesta no tiene el formato esperado.');
+                }
+            }
         } catch (error) {
           console.error('Error al realizar la solicitud:', error);
         } finally {

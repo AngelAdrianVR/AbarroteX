@@ -73,34 +73,46 @@ class SaleController extends Controller
 
     
     public function store(Request $request)
-    {
+    {   
+        // return $request;
         foreach ($request->data['saleProducts'] as $sale) {
+
+             // Verifica si 'global_product_id' existe en 'product'
+            if (isset($sale['product']['global_product_id'])) {
+                // Si existe, asigna el valor de 'global_product_id'
+                $product_id = $sale['product']['global_product_id'];
+            } else {
+                // Si no existe, asigna el valor de 'id' dentro de 'product'
+                $product_id = $sale['product']['id'];
+            }
+
             //regiatra cada producto vendido
             Sale::create([
                 'current_price' => $sale['product']['public_price'],
                 'quantity' => $sale['quantity'],
-                'product_id' => $sale['product']['id'],
+                'product_id' => $product_id,
+                'store_id' => auth()->user()->store_id,
             ]);
 
             //Registra el historial de venta de cada producto
-            ProductHistory::create([
-                'description' => 'Registro de venta. ' . $sale['quantity'] . ' piezas',
-                'type' => 'Venta',
-                'product_id' => $sale['product']['id']
-            ]);
+            // ProductHistory::create([
+            //     'description' => 'Registro de venta. ' . $sale['quantity'] . ' piezas',
+            //     'type' => 'Venta',
+            //     'product_id' => $sale['product']['id']
+            // ]);
 
             //rebaja del stock la cantidad de piezas vendidas
-            $product = Product::find($sale['product']['id']);
-            $product->decrement('current_stock', $sale['quantity']);
+            // $product = Product::find($sale['product']['id']);
+            // $product->decrement('current_stock', $sale['quantity']);
 
             // notificar si ha llegado al limite de existencias bajas
-            if ($product->current_stock <= $product->min_stock) {
-                $title = "Bajo stock";
-                $description = "Producto <span class='text-primary'>$product->name</span> alcanzó el nivel mínimo establecido";
-                $url = route('products.show', $product->id);
+            // if ($product->current_stock <= $product->min_stock) {
+            //     $title = "Bajo stock";
+            //     $description = "Producto <span class='text-primary'>$product->name</span> alcanzó el nivel mínimo establecido";
+            //     $url = route('products.show', $product->id);
 
-                auth()->user()->notify(new BasicNotification($title, $description, $url));
-            }
+            //     auth()->user()->notify(new BasicNotification($title, $description, $url));
+            // }
 
         }
     }

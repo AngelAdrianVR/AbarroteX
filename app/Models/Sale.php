@@ -14,6 +14,7 @@ class Sale extends Model
         'current_price',
         'quantity',
         'product_id',
+        'store_id',
     ];
 
     //relationships
