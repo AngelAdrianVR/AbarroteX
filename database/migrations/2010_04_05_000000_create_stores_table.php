@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('contact_name');
-            $table->string('contact_phone');
-            $table->string('address');
-            $table->string('plan');
-            $table->timestamp('next_payment')->nullable();
+            $table->string('contact_phone')->nullable();
+            $table->string('address')->nullable();
+            $table->string('plan')->default('Plan Básico');
+            $table->date('next_payment')->nullable()->default(now()->addDays(15)->toDateString());
             $table->timestamps();
         });
     }

@@ -1,57 +1,38 @@
-<script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
-import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm.vue';
-import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOtherBrowserSessionsForm.vue';
-import SectionBorder from '@/Components/SectionBorder.vue';
-import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
-import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
-import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
-
-defineProps({
-    confirmsTwoFactorAuthentication: Boolean,
-    sessions: Array,
-});
-</script>
-
 <template>
-    <AppLayout title="Profile">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Profile
-            </h2>
-        </template>
-
-        <div>
-            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-                <div v-if="$page.props.jetstream.canUpdateProfileInformation">
-                    <UpdateProfileInformationForm :user="$page.props.auth.user" />
-
-                    <SectionBorder />
+    <AppLayout title="Perfil">
+        <main class="mx-2 md:mx-56 mt-10 text-sm">
+            <section>
+                <h1 class="ml-3">Información básica</h1>
+                <div class="rounded-[5px] border border-grayD9 px-3 py-4 mt-3">
+                    <h2>Información de la Tienda</h2>
+                    <div class="grid grid-cols-3 gap-1 mt-2">
+                        <b>Nombre de la Tienda </b>
+                        <b class="col-span-2">Nombre de la Tienda </b>
+                        <p>{{ $page.props.auth.user.store.name }}</p>
+                        <p class="col-span-2">Nombre de la Tienda </p>
+                    </div>  
                 </div>
-
-                <div v-if="$page.props.jetstream.canUpdatePassword">
-                    <UpdatePasswordForm class="mt-10 sm:mt-0" />
-
-                    <SectionBorder />
-                </div>
-
-                <div v-if="$page.props.jetstream.canManageTwoFactorAuthentication">
-                    <TwoFactorAuthenticationForm
-                        :requires-confirmation="confirmsTwoFactorAuthentication"
-                        class="mt-10 sm:mt-0"
-                    />
-
-                    <SectionBorder />
-                </div>
-
-                <LogoutOtherBrowserSessionsForm :sessions="sessions" class="mt-10 sm:mt-0" />
-
-                <template v-if="$page.props.jetstream.hasAccountDeletionFeatures">
-                    <SectionBorder />
-
-                    <DeleteUserForm class="mt-10 sm:mt-0" />
-                </template>
-            </div>
-        </div>
+            </section>
+        </main>
     </AppLayout>
 </template>
+<script>
+import AppLayout from '@/Layouts/AppLayout.vue';
+
+export default {
+    data() {
+        return {
+
+        }
+    },
+    components: {
+        AppLayout,
+    },
+    props: {
+        user: Object,
+    },
+    methods: {
+
+    }
+}
+</script>
