@@ -39,10 +39,10 @@ class SaleController extends Controller
     
     public function index()
     {
-         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
+        // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         $days_ago = Carbon::now()->subDays(5);
 
-        // Obtener las ventas registradas en los últimos 7 días
+        // Obtener las ventas registradas en los últimos x días
         $sales = Sale::whereDate('created_at', '>=', $days_ago)->latest()->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
@@ -229,7 +229,7 @@ class SaleController extends Controller
         $startDate = Carbon::parse($queryDate[0])->startOfDay();
         $endDate = Carbon::parse($queryDate[1])->endOfDay();
 
-        // Obtener las ventas registradas en los últimos 7 días
+        // Obtener las ventas registradas en el rango de fechas requerido por el filtro
         $sales = Sale::whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
@@ -247,23 +247,6 @@ class SaleController extends Controller
                 'sales' => $sales,
             ];
         });
-
-        // Filtro para busqueda de ventas
-
-        // // Filtrar por rango de fechas si se proporciona
-        // if (!empty($queryDate) && count($queryDate) === 2) {
-        //     $startDate = Carbon::parse($queryDate[0])->startOfDay();
-        //     $endDate = Carbon::parse($queryDate[1])->endOfDay();
-        //     $salesQuery->whereBetween('created_at', [$startDate, $endDate]);
-        // }
-
-        // // Filtrar por cliente si se proporciona
-        // if (!empty($queryClient)) {
-        //     $salesQuery->where('client_id', $queryClient);
-        // }
-
-        // // Realizar la consulta y devolver los resultados
-        // $sales = SaleResource::collection($salesQuery->take(20)->get());
 
         return response()->json(['items' => $groupedSales]);
     }

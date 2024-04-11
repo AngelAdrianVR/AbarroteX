@@ -1,9 +1,9 @@
 <template>
-    <AppLayout title="Ventas">
+    <AppLayout title="Egresos">
         <div class="px-2 lg:px-10 py-7">
             <!-- header botones -->
             <div class="flex justify-between items-center mx-3">
-                <h1 class="font-bold text-lg">Ventas registradas</h1>
+                <h1 class="font-bold text-lg">Egresos</h1>
                 <div class="relative">
                     <!-- filtro -->
                     <button @click.stop="showFilter = !showFilter"
@@ -38,18 +38,15 @@
 
             <Loading v-if="loading" class="mt-20" />
             <div v-else class="mt-8 lg:w-11/12">
-                <!-- <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
+                <p v-if="Object.keys(localExpenses)?.length" class="text-gray66 text-[11px]">{{ Object.keys(localExpenses)?.length }} de {{ total_expenses }}
                     elementos
-                </p> -->
-                <RegisteredSalesTable :sales="localSales" />
-                <!-- <SaleMobileIndex v-for="item in localSales" :key="item.id" :saleId="item.id" class="md:hidden" /> -->
-                <!-- <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
-                    elementos
-                </p> -->
+                </p>
+                <RegisteredExpensesTable :expenses="localExpenses" />
+                <!-- <SaleMobileIndex v-for="item in localExpenses" :key="item.id" :saleId="item.id" class="md:hidden" /> -->
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button
+                <button v-if="Object.keys(localExpenses)?.length < total_expenses"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
             </div>
         </div>
@@ -58,8 +55,8 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import RegisteredSalesTable from '@/Components/MyComponents/Sale/RegisteredSalesTable.vue';  
-// import SaleMobileIndex from '@/Components/MyComponents/Sale/SaleMobileIndex.vue';    
+import RegisteredExpensesTable from '@/Components/MyComponents/Expense/RegisteredExpensesTable.vue';  
+// import SaleMobileIndex from '@/Components/MyComponents/Expense/SaleMobileIndex.vue';    
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
@@ -69,33 +66,33 @@ export default {
     data() {
         return {
             loading: false,
-            localSales: this.groupedSales,
+            localExpenses: this.groupedExpenses,
             showFilter: false, //filtro opciones
             searchDate: null, //filtro fechas
-            // searchClient: null, //filtro cliente
+            searchClient: null, //filtro cliente
             loadingItems: false, //para paginación
             currentPage: 1, //para paginación
         }
     },
     components: {
         AppLayout,
-        RegisteredSalesTable,    
+        RegisteredExpensesTable,
         // SaleMobileIndex, 
         PrimaryButton,
         InputLabel,
         Loading
     },
     props: {
-        groupedSales: Object,
-        total_sales: Number
+        groupedExpenses: Object,
+        total_expenses: Number
     },
     methods: {
         async searchSales() {
             this.loading = true;
             try {
-                const response = await axios.get(route('sales.search'), { params: { queryDate: this.searchDate } });
+                const response = await axios.get(route('expenses.filter'), { params: { queryDate: this.searchDate } });
                 if (response.status == 200) {
-                    this.localSales = response.data.items;
+                    this.localExpenses = response.data.items;
                 }
 
             } catch (error) {
@@ -108,10 +105,10 @@ export default {
         async fetchItemsByPage() {
             try {
                 this.loadingItems = true;
-                const response = await axios.get(route('sales.get-by-page', this.currentPage));
+                const response = await axios.get(route('expenses.get-by-page', this.currentPage));
 
                 if (response.status === 200) {
-                    this.localSales = {...this.localSales, ...response.data.items};
+                    this.localExpenses = {...this.localExpenses, ...response.data.items};
                     this.currentPage++;
                 }
             } catch (error) {

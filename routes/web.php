@@ -4,6 +4,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
 use App\Http\Controllers\PaymentController;
@@ -98,6 +99,13 @@ Route::get('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsB
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
 
 
+//expenses routes-------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+Route::resource('expenses', ExpenseController::class)->middleware('auth');
+Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
+Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
+
+
 //clients routes-------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------
 // Route::resource('clients', ClientController::class)->middleware('auth');
@@ -122,6 +130,7 @@ Route::resource('product-histories', ProductHistoryController::class)->middlewar
 Route::resource('stores', StoreController::class)->middleware('auth');
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
+
 
 // User routes-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------

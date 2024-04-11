@@ -140,8 +140,17 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                 Análisis de venta
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('sales.index')" :active="route().current('sales.*')">
+                                Ventas registradas
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
+                                Gastos
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*')">
                                 Productos
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">
+                                Configuraciones
                             </ResponsiveNavLink>
                         </div>
 
