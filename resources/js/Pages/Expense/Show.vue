@@ -1,33 +1,32 @@
 <template>
-    <AppLayout :title="'Venta del día'">
+    <AppLayout :title="'Egresos del día'">
         <div class="md:px-10 px-2 py-7 text-sm md:text-base">
             <div class="flex justify-between items-center">
                 <Back />
                 <div class="flex items-center space-x-2">
-                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="print(sale)">
+                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="print(expense)">
                         <template #reference>
                             <i @click.stop class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                         </template>
                     </el-popconfirm>
-                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="deleteItem(Object.values(day_sales)[0].sales[0]?.id)">
+                     <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="deleteItem(Object.values(day_expenses)[0].expenses[0]?.id)">
                         <template #reference>
                             <i @click.stop class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
                         </template>
-                    </el-popconfirm>
+                    </el-popconfirm> -->
                 </div>
             </div>
 
             <!-- Información de la venta -->
-            <div class="mt-7 lg:mx-16">
+            <!-- <div class="mt-7 lg:mx-16">
                 <p class="font-bold px-2">Fecha de venta: <span class="font-thin ml-2 text-gray-600">{{ formatDate(Object.keys(day_sales)[0]) }}</span></p>
                 <p class="font-bold px-2">Total de productos vendidos: <span class="font-thin ml-2 text-gray-600">{{ Object.values(day_sales)[0].total_quantity }}</span></p>
                 <p class="font-bold px-2">Total de venta: <span class="!font-thin ml-2 text-gray-600">${{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-
-            </div>
+            </div> -->
 
                 <!-- Productos -->
                 <!-- detalle de productos -->
-                <div class="grid grid-cols-3 lg:ml-16 mr-3 self-start mt-9">
+                <!-- <div class="grid grid-cols-3 lg:ml-16 mr-3 self-start mt-9">
                     <p class="font-bold">Producto</p>
                     <p class="font-bold">Cantidad</p>
                     <p class="font-bold ml-8">Total</p>
@@ -43,7 +42,7 @@
                     </div>
                     <div class="border-b border-primary w-28 col-start-3 my-3"></div>
                     <p class="col-start-3 text-sm font-bold">Total: <span class="ml-2">${{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-                </div>
+                </div> -->
         </div>
     </AppLayout>
 </template>
@@ -60,7 +59,7 @@ import { useForm } from "@inertiajs/vue3";
 export default {
 data() {
     const form = useForm({
-        sale_id: this.day_sales.id,
+        sale_id: this.day_sales?.id,
         amount: null,
         notes: null,
         date: null,
@@ -80,7 +79,7 @@ InputLabel,
 Back
 },
 props:{
-day_sales: Object,
+day_expenses: Object,
 },
 methods:{
     async deleteItem(saleId) {

@@ -61,9 +61,18 @@ class ExpenseController extends Controller
         ]);
     }
 
-    public function show(Expense $expense)
+    public function show($created_at)
     {
-        //
+        // Parsear la fecha recibida para obtener solo la parte de la fecha
+        $date = Carbon::parse($created_at)->toDateString();
+
+        // Obtener las ventas registradas en la fecha recibida
+        $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+
+        // return $expenses;
+
+        $day_expenses = null;
+        return inertia('Expense/Show', compact('day_expenses'));
     }
 
     public function edit(Expense $expense)
@@ -82,7 +91,7 @@ class ExpenseController extends Controller
         $expenseDate = $expense->created_at->toDateString();
 
         // Eliminar todos los registros que tengan la misma fecha de creación
-        Expense::whereDate('created_at', $expenseDate)->delete();
+        Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $expenseDate)->delete();
 
         // Eliminar el registro de egreso enviado como referencia
         $expense->delete();
@@ -95,7 +104,7 @@ class ExpenseController extends Controller
         $endDate = Carbon::parse($queryDate[1])->endOfDay();
 
         // Obtener los egresos registrados en el rango de fechas requerido por el filtro
-        $expenses = Expense::whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
+        $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
 
         // Agrupar los egresos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
@@ -127,7 +136,7 @@ class ExpenseController extends Controller
          $days_befor = Carbon::now()->subDays($skip_days);
 
          // Obtener las ventas registradas en los últimos 7 días
-         $expenses = Expense::whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
+         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
  
         // Agrupar los egresos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {

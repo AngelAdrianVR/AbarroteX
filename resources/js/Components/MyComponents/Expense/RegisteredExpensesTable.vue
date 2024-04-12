@@ -1,5 +1,5 @@
 <template>
-    <div v-if="expenses" class="w-full mx-auto text-[11px] md:text-sm overflow-auto">
+    <div v-if="Object.keys(expenses)?.length" class="w-full mx-auto text-[11px] md:text-sm overflow-auto">
         <div class="text-center md:text-base flex items-center space-x-4 mb-2">
             <div class="font-bold w-[20%]">Fecha</div>
             <div class="font-bold w-[20%]">Movimientos</div>

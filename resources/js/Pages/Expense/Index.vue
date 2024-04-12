@@ -31,7 +31,7 @@
                             <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
                                 start-placeholder="Fecha de inicio" end-placeholder="Fecha de fin" class="!w-full" />
                         </div>
-                        <PrimaryButton @click="searchSales" class="!py-1">Aplicar</PrimaryButton>
+                        <PrimaryButton @click="filterExpenses" class="!py-1">Aplicar</PrimaryButton>
                     </div>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-if="Object.keys(localExpenses)?.length < total_expenses"
+                <button v-if="(Object.keys(localExpenses)?.length < total_expenses) && !filtered"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
             </div>
         </div>
@@ -72,6 +72,7 @@ export default {
             searchClient: null, //filtro cliente
             loadingItems: false, //para paginación
             currentPage: 1, //para paginación
+            filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
         }
     },
     components: {
@@ -87,12 +88,13 @@ export default {
         total_expenses: Number
     },
     methods: {
-        async searchSales() {
+        async filterExpenses() {
             this.loading = true;
             try {
                 const response = await axios.get(route('expenses.filter'), { params: { queryDate: this.searchDate } });
                 if (response.status == 200) {
                     this.localExpenses = response.data.items;
+                    this.filtered = true;
                 }
 
             } catch (error) {
