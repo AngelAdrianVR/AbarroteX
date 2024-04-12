@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
+use App\Http\Controllers\MyPaymentController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
@@ -134,3 +137,13 @@ Route::post('users-delete-notifications', [UserController::class, 'deleteNotific
 //----------------------------------------------------------------------------------------------------
 Route::resource('settings', SettingController::class)->middleware('auth');
 Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
+
+
+//cards routes-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::resource('cards', CardController::class)->middleware('auth');
+
+
+//ezy profile routes-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::put('ezy-profile/update-basic', [EzyProfileController::class, 'updateBasic'])->middleware('auth')->name('ezy-profile.update-basic');
