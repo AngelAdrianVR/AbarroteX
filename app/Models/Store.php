@@ -17,6 +17,7 @@ class Store extends Model
         'contact_phone',
         'address',
         'plan',
+        'is_active',
         'next_payment',
     ];
 
