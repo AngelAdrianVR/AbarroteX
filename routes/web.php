@@ -5,6 +5,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
@@ -83,6 +84,7 @@ Route::post('global-product-store/transfer-products', [GlobalProductStoreControl
 Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
 Route::get('global-product-store-fetch-history/{global_product_store_id}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
 
+
 //categories routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('categories', CategoryController::class)->middleware('auth');
@@ -99,6 +101,15 @@ Route::resource('sales', SaleController::class)->middleware('auth');
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware('auth');
 Route::get('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
+Route::get('sales-print-ticket/{sale_id}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
+
+
+//expenses routes-------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+Route::resource('expenses', ExpenseController::class)->middleware('auth');
+Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
+Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
+Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
 
 
 //clients routes-------------------------------------------------------------------------------------
@@ -125,6 +136,7 @@ Route::resource('product-histories', ProductHistoryController::class)->middlewar
 Route::resource('stores', StoreController::class)->middleware('auth');
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
+
 
 // User routes-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------

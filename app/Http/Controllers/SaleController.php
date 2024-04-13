@@ -11,13 +11,12 @@ use App\Notifications\BasicNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
     public function pointIndex()
     {
-        // $products = Product::all(['id', 'name', 'code']);
-
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::where('store_id', auth()->user()->store_id)
                 ->latest()
@@ -39,11 +38,20 @@ class SaleController extends Controller
     
     public function index()
     {
-         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
+        // Obtener todos las ventas registradas y contar el número de agrupaciones por día
+        $total_sales = DB::table('sales')
+            ->select(DB::raw('DATE(created_at) as date'))
+            ->where('store_id', auth()->user()->store_id)
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->get()
+            ->count();
+
+
+        // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         $days_ago = Carbon::now()->subDays(5);
 
-        // Obtener las ventas registradas en los últimos 7 días
-        $sales = Sale::whereDate('created_at', '>=', $days_ago)->latest()->get();
+        // Obtener las ventas registradas en los últimos x días
+        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $sales->groupBy(function ($sale) {
@@ -62,7 +70,7 @@ class SaleController extends Controller
         });
 
         // return $groupedSales;
-        return inertia('Sale/Index', compact('groupedSales'));
+        return inertia('Sale/Index', compact('groupedSales', 'total_sales'));
     }
 
     
@@ -94,17 +102,18 @@ class SaleController extends Controller
                 'global_product_store_id' => isset($sale['product']['global_product_id']) ? $sale['product']['id'] : null, // en caso de vender un producto transferido del catálogo
             ]);
 
-             // Verifica si 'global_product_id' existe en 'product'
-             if (isset($sale['product']['global_product_id'])) {
-                // Si existe, recupera el producto global de la tienda'
-                $product = GlobalProductStore::find($sale['product']['id']);
-                $product->decrement('current_stock', $sale['quantity']);
-            } else {
-                // Si no existe, asigna el valor de 'id' dentro de 'product'
-                //rebaja del stock la cantidad de piezas vendidas
-                $product = Product::find($sale['product']['id']);
-                $product->decrement('current_stock', $sale['quantity']);
-            }
+            //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
+            // Verifica si 'global_product_id' existe en 'product'
+            // if (isset($sale['product']['global_product_id'])) {
+            //     // Si existe, recupera el producto global de la tienda'
+            //     $product = GlobalProductStore::find($sale['product']['id']);
+            //     $product->decrement('current_stock', $sale['quantity']);
+            // } else {
+            //     // Si no existe, asigna el valor de 'id' dentro de 'product'
+            //     //rebaja del stock la cantidad de piezas vendidas
+            //     $product = Product::find($sale['product']['id']);
+            //     $product->decrement('current_stock', $sale['quantity']);
+            // }
             
 
             // // notificar si ha llegado al limite de existencias bajas
@@ -126,7 +135,7 @@ class SaleController extends Controller
         $date = Carbon::parse($created_at)->toDateString();
 
         // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::with(['product:id,name', 'globalProductStore.globalProduct'])->whereDate('created_at', $date)->get();
+        $sales = Sale::where('store_id', auth()->user()->store_id)->with(['product:id,name', 'globalProductStore.globalProduct'])->whereDate('created_at', $date)->get();
 
         // return $sales;
 
@@ -216,7 +225,7 @@ class SaleController extends Controller
         $saleDate = $sale->created_at->toDateString();
 
         // Eliminar todos los registros que tengan la misma fecha de creación
-        Sale::whereDate('created_at', $saleDate)->delete();
+        Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $saleDate)->delete();
 
         // Eliminar el registro de venta enviado como referencia
         $sale->delete();
@@ -229,8 +238,8 @@ class SaleController extends Controller
         $startDate = Carbon::parse($queryDate[0])->startOfDay();
         $endDate = Carbon::parse($queryDate[1])->endOfDay();
 
-        // Obtener las ventas registradas en los últimos 7 días
-        $sales = Sale::whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
+        // Obtener las ventas registradas en el rango de fechas requerido por el filtro
+        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $sales->groupBy(function ($sale) {
@@ -248,31 +257,14 @@ class SaleController extends Controller
             ];
         });
 
-        // Filtro para busqueda de ventas
-
-        // // Filtrar por rango de fechas si se proporciona
-        // if (!empty($queryDate) && count($queryDate) === 2) {
-        //     $startDate = Carbon::parse($queryDate[0])->startOfDay();
-        //     $endDate = Carbon::parse($queryDate[1])->endOfDay();
-        //     $salesQuery->whereBetween('created_at', [$startDate, $endDate]);
-        // }
-
-        // // Filtrar por cliente si se proporciona
-        // if (!empty($queryClient)) {
-        //     $salesQuery->where('client_id', $queryClient);
-        // }
-
-        // // Realizar la consulta y devolver los resultados
-        // $sales = SaleResource::collection($salesQuery->take(20)->get());
-
         return response()->json(['items' => $groupedSales]);
     }
 
 
     public function getItemsByPage($currentPage)
     {
-        $offset = 5 + $currentPage * 5; //multiplica por 2 para traer de 2 dias en 2 dias. suma 5 dias porque son los que ya se cargaron
-        $skip_days = $currentPage * 5; //multiplica por 2 para traer de 2 dias en 2 dias
+        $offset = 5 + $currentPage * 5; //multiplica por 5 para traer de 5 dias en 5 dias. suma 5 dias porque son los que ya se cargaron
+        $skip_days = $currentPage * 5; //multiplica por 5 para traer de 5 dias en 5 dias
 
          // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
          $days_ago = Carbon::now()->subDays($offset);
@@ -280,7 +272,7 @@ class SaleController extends Controller
          $days_befor = Carbon::now()->subDays($skip_days);
 
          // Obtener las ventas registradas en los últimos 7 días
-         $sales = Sale::whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
+         $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
  
          // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
          $groupedSales = $sales->groupBy(function ($sale) {
@@ -299,5 +291,13 @@ class SaleController extends Controller
          });
 
         return response()->json(['items' => $groupedSales]);
+    }
+
+    public function printTicket($sale_id)
+    {
+        // $sale = SaleResource::make(Sale::with(['products'])->find($sale_id));
+
+        // // return $sale;
+        // return inertia('Sale/PrintTicket', compact('sale'));
     }
 }

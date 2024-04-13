@@ -20,7 +20,7 @@
           </div>
           <!-- Pestañas -->
           <div class="mx-7">
-            <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs" @keydown.enter="this.scanInputFocus();">
+            <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
               <el-tab-pane v-for="tab in editableTabs" :key="tab.name" :label="tab.title" :name="tab.name">
                 <el-popconfirm v-if="tab.saleProducts.length" confirm-button-text="Si" cancel-button-text="No"
                   icon-color="#C30303" title="Se eliminará todo el registro de productos ¿Deseas continuar?"
@@ -31,7 +31,6 @@
                   </template>
                 </el-popconfirm>
                 <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
-                {{ tab.saleProducts }}
               </el-tab-pane>
             </el-tabs>
           </div>
@@ -93,14 +92,14 @@
                 <p>Subtotal</p>
                 <p class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal() }}</strong></p>
               </div>
-              <div class="flex items-center justify-between text-lg mx-5">
+              <!-- <div class="flex items-center justify-between text-lg mx-5">
                 <p class="text-[#999999]">Descuento</p>
                 <el-input v-model="editableTabs[this.editableTabsValue - 1].discount" type="number" class="!w-24 !h-8" placeholder="0.00">
                     <template #prefix>
                         <i class="fa-solid fa-dollar-sign"></i>
                     </template>
                 </el-input>
-              </div>
+              </div> -->
               <div class="flex items-center justify-between text-lg mx-5">
                 <p class="font-bold">Total</p>
                 <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0" class="text-red-600 text-xs">El descuento es más grande que el total</p>
