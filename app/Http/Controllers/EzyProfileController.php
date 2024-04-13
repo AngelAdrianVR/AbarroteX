@@ -28,6 +28,5 @@ class EzyProfileController extends Controller
             'contact_name' => $request->input('name'),
         ]);
 
-        return response()->json([]);
     }
 }
