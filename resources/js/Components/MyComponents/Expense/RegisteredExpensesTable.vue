@@ -21,7 +21,7 @@
                             <i @click.stop class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
                         </template>
                     </el-popconfirm>
-                    <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="print(expense)">
+                    <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="print(expense.expenses[0]?.id)">
                         <template #reference>
                             <i @click.stop class="fa-solid fa-print text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
                         </template>
@@ -91,8 +91,8 @@ methods:{
             const [day, month, year] = dateString.split('-');
             return `${day}-${months[month]}-${year}`;
         },
-    print(expense) {
-        window.open(route('expenses.print-ticket', expense.id), '_blank');
+    print(expenseId) {
+        window.open(route('expenses.print-expenses', expenseId), '_blank');
     }
 }
 }

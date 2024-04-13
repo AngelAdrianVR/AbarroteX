@@ -11,13 +11,12 @@ use App\Notifications\BasicNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
     public function pointIndex()
     {
-        // $products = Product::all(['id', 'name', 'code']);
-
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::where('store_id', auth()->user()->store_id)
                 ->latest()
@@ -39,6 +38,15 @@ class SaleController extends Controller
     
     public function index()
     {
+        // Obtener todos las ventas registradas y contar el número de agrupaciones por día
+        $total_sales = DB::table('sales')
+            ->select(DB::raw('DATE(created_at) as date'))
+            ->where('store_id', auth()->user()->store_id)
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->get()
+            ->count();
+
+
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         $days_ago = Carbon::now()->subDays(5);
 
@@ -62,7 +70,7 @@ class SaleController extends Controller
         });
 
         // return $groupedSales;
-        return inertia('Sale/Index', compact('groupedSales'));
+        return inertia('Sale/Index', compact('groupedSales', 'total_sales'));
     }
 
     
@@ -94,17 +102,18 @@ class SaleController extends Controller
                 'global_product_store_id' => isset($sale['product']['global_product_id']) ? $sale['product']['id'] : null, // en caso de vender un producto transferido del catálogo
             ]);
 
-             // Verifica si 'global_product_id' existe en 'product'
-             if (isset($sale['product']['global_product_id'])) {
-                // Si existe, recupera el producto global de la tienda'
-                $product = GlobalProductStore::find($sale['product']['id']);
-                $product->decrement('current_stock', $sale['quantity']);
-            } else {
-                // Si no existe, asigna el valor de 'id' dentro de 'product'
-                //rebaja del stock la cantidad de piezas vendidas
-                $product = Product::find($sale['product']['id']);
-                $product->decrement('current_stock', $sale['quantity']);
-            }
+            //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
+            // Verifica si 'global_product_id' existe en 'product'
+            // if (isset($sale['product']['global_product_id'])) {
+            //     // Si existe, recupera el producto global de la tienda'
+            //     $product = GlobalProductStore::find($sale['product']['id']);
+            //     $product->decrement('current_stock', $sale['quantity']);
+            // } else {
+            //     // Si no existe, asigna el valor de 'id' dentro de 'product'
+            //     //rebaja del stock la cantidad de piezas vendidas
+            //     $product = Product::find($sale['product']['id']);
+            //     $product->decrement('current_stock', $sale['quantity']);
+            // }
             
 
             // // notificar si ha llegado al limite de existencias bajas
@@ -282,5 +291,13 @@ class SaleController extends Controller
          });
 
         return response()->json(['items' => $groupedSales]);
+    }
+
+    public function printTicket($sale_id)
+    {
+        // $sale = SaleResource::make(Sale::with(['products'])->find($sale_id));
+
+        // // return $sale;
+        // return inertia('Sale/PrintTicket', compact('sale'));
     }
 }

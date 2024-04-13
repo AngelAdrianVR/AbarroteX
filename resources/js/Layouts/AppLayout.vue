@@ -47,7 +47,7 @@ const logout = () => {
             <main class="w-full">
                 <nav class="bg-white border-b border-gray-100">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="flex justify-between h-16">
+                        <div class="flex justify-between h-12">
                             <div class="flex">
                                 <!-- Logo -->
                                 <div class="md:hidden shrink-0 flex items-center">
@@ -75,8 +75,13 @@ const logout = () => {
                                             <span v-else class="inline-flex rounded-md">
                                                 <button type="button"
                                                     class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="size-4 mr-1">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                                                    </svg>
                                                     {{ $page.props.auth.user.store.name }}
-
                                                     <svg class="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                                                         fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                                         stroke="currentColor">
@@ -94,7 +99,7 @@ const logout = () => {
                                             </div>
 
                                             <DropdownLink :href="route('profile.show')">
-                                                Perfil
+                                                Perfil y suscripción
                                             </DropdownLink>
                                             <div class="border-t border-gray-200" />
 
@@ -159,7 +164,8 @@ const logout = () => {
                             <div class="flex items-center px-4">
                                 <div v-if="$page.props.jetstream.managesProfilePhotos" class="shrink-0 me-3">
                                     <img class="h-10 w-10 rounded-full object-cover"
-                                        :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.store.name">
+                                        :src="$page.props.auth.user.profile_photo_url"
+                                        :alt="$page.props.auth.user.store.name">
                                 </div>
 
                                 <div>
@@ -173,7 +179,8 @@ const logout = () => {
                             </div>
 
                             <div class="mt-3 space-y-1">
-                                <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
+                                <ResponsiveNavLink :href="route('profile.show')"
+                                    :active="route().current('profile.show')">
                                     Perfil
                                 </ResponsiveNavLink>
 
@@ -189,9 +196,10 @@ const logout = () => {
                     </div>
                 </nav>
 
-            <div class="overflow-y-auto h-[calc(100vh-4.1rem)] bg-white">
-                <slot />
-            </div>
-        </main>
+                <div class="overflow-y-auto h-[calc(100vh-4.1rem)] bg-white">
+                    <slot />
+                </div>
+            </main>
+        </div>
     </div>
-</div></template>
+</template>

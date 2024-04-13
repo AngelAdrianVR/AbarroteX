@@ -38,18 +38,14 @@
 
             <Loading v-if="loading" class="mt-20" />
             <div v-else class="mt-8 lg:w-11/12">
-                <!-- <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
+                <p v-if="Object.keys(localSales)?.length" class="text-gray66 text-[11px]">{{ Object.keys(localSales)?.length }} de {{ total_sales }}
                     elementos
-                </p> -->
+                </p>
                 <RegisteredSalesTable :sales="localSales" />
-                <!-- <SaleMobileIndex v-for="item in localSales" :key="item.id" :saleId="item.id" class="md:hidden" /> -->
-                <!-- <p v-if="localSales.length" class="text-gray66 text-[11px]">{{ localSales.length }} de {{ total_sales }}
-                    elementos
-                </p> -->
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button
+                <button v-if="(Object.keys(localSales)?.length < total_sales) && !filtered"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
             </div>
         </div>
@@ -72,9 +68,9 @@ export default {
             localSales: this.groupedSales,
             showFilter: false, //filtro opciones
             searchDate: null, //filtro fechas
-            // searchClient: null, //filtro cliente
             loadingItems: false, //para paginación
             currentPage: 1, //para paginación
+            filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
         }
     },
     components: {
@@ -96,6 +92,7 @@ export default {
                 const response = await axios.get(route('sales.search'), { params: { queryDate: this.searchDate } });
                 if (response.status == 200) {
                     this.localSales = response.data.items;
+                    this.filtered = true;
                 }
 
             } catch (error) {

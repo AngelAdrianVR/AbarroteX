@@ -4,45 +4,45 @@
             <div class="flex justify-between items-center">
                 <Back />
                 <div class="flex items-center space-x-2">
-                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="print(expense)">
+                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="print(expenses[0].id)">
                         <template #reference>
                             <i @click.stop class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                         </template>
                     </el-popconfirm>
-                     <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="deleteItem(Object.values(day_expenses)[0].expenses[0]?.id)">
+                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="deleteItem(expenses[0].id)">
                         <template #reference>
                             <i @click.stop class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
                         </template>
-                    </el-popconfirm> -->
+                    </el-popconfirm>
                 </div>
             </div>
 
-            <!-- Información de la venta -->
-            <!-- <div class="mt-7 lg:mx-16">
-                <p class="font-bold px-2">Fecha de venta: <span class="font-thin ml-2 text-gray-600">{{ formatDate(Object.keys(day_sales)[0]) }}</span></p>
-                <p class="font-bold px-2">Total de productos vendidos: <span class="font-thin ml-2 text-gray-600">{{ Object.values(day_sales)[0].total_quantity }}</span></p>
-                <p class="font-bold px-2">Total de venta: <span class="!font-thin ml-2 text-gray-600">${{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-            </div> -->
+            <!-- Información de egreso -->
+            <div class="mt-7 lg:mx-16">
+                <p class="font-bold px-2">Fecha: <span class="font-thin ml-2 text-gray-600">{{ expenses[0].created_at }}</span></p>
+                <p class="font-bold px-2">Total de movimientos: <span class="font-thin ml-2 text-gray-600">{{ expenses.length }}</span></p>
+                <p class="font-bold px-2">Egreso total: <span class="!font-thin ml-2 text-gray-600">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+            </div>
 
                 <!-- Productos -->
                 <!-- detalle de productos -->
-                <!-- <div class="grid grid-cols-3 lg:ml-16 mr-3 self-start mt-9">
-                    <p class="font-bold">Producto</p>
+                <div class="grid grid-cols-4 lg:ml-16 mr-3 self-start mt-9">
+                    <p class="font-bold col-span-2">Concepto</p>
                     <p class="font-bold">Cantidad</p>
                     <p class="font-bold ml-8">Total</p>
 
-                    <div class="mt-2">
-                        <p @click="viewProduct(product)" class="text-primary underline cursor-pointer text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">{{ product.name }}</p>
+                    <div class="mt-2 col-span-2">
+                        <p class="text-primary text-sm" v-for="expense in expenses" :key="expense">{{ expense.concept }}</p>
                     </div>
                     <div class="mt-2">
-                        <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">{{ product.quantity }}</p>
+                        <p class="text-sm" v-for="expense in expenses" :key="expense">{{ expense.quantity }}</p>
                     </div>
                     <div class="mt-2 ml-8">
-                        <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">${{ (product.quantity * product.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                        <p class="text-sm" v-for="expense in expenses" :key="expense">${{ (expense.quantity * expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     </div>
-                    <div class="border-b border-primary w-28 col-start-3 my-3"></div>
-                    <p class="col-start-3 text-sm font-bold">Total: <span class="ml-2">${{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-                </div> -->
+                    <div class="border-b border-primary w-28 col-start-4 my-3"></div>
+                    <p class="col-start-4 text-sm font-bold">Total: <span class="ml-2">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+                </div>
         </div>
     </AppLayout>
 </template>
@@ -59,7 +59,6 @@ import { useForm } from "@inertiajs/vue3";
 export default {
 data() {
     const form = useForm({
-        sale_id: this.day_sales?.id,
         amount: null,
         notes: null,
         date: null,
@@ -67,7 +66,6 @@ data() {
 
     return {
         form,
-        paymentModal: false,
     }
 },
 components:{
@@ -79,61 +77,42 @@ InputLabel,
 Back
 },
 props:{
-day_expenses: Object,
+expenses: Object,
 },
 methods:{
-    async deleteItem(saleId) {
+    async deleteItem(expenseId) {
         try {
-            const response = await axios.delete(route('sales.destroy', saleId));
+            const response = await axios.delete(route('expenses.destroy', expenseId));
             if (response.status == 200) {
 
                 this.$notify({
                     title: 'Correcto',
-                    message: 'Se ha eliminado la venta del día',
+                    message: 'Se han eliminado los egresos del día',
                     type: 'success',
-                    position: 'bottom-right',
+                    position: 'top-right',
             });
 
-            this.$inertia.get(route('sales.index'));
+            this.$inertia.get(route('expenses.index'));
             }
         } catch (error) {
             console.log(error);
             this.$notify({
                 title: 'Error',
-                message: 'No se pudo eliminar la venta. Inténte más tarde',
+                message: 'No se pudo eliminar el registro de egresos. Inténte más tarde',
                 type: 'error',
-                position: 'bottom-right',
+                position: 'top-right',
             });
         }
     },
-    formatDate(dateString) {
-        const months = {
-            'January': 'Enero',
-            'February': 'Febrero',
-            'March': 'Marzo',
-            'April': 'Abril',
-            'May': 'Mayo',
-            'June': 'Junio',
-            'July': 'Julio',
-            'August': 'Agosto',
-            'September': 'Septiembre',
-            'October': 'Octubre',
-            'November': 'Noviembre',
-            'December': 'Diciembre'
-        };
-
-        const [day, month, year] = dateString.split('-');
-        return `${day}-${months[month]}-${year}`;
+    print(expenseId) {
+        window.open(route('expenses.print-expenses', expenseId), '_blank');
     },
-    viewProduct(product) {
-        if ( product.is_global_product ) {
-            window.open(route('global-product-store.show', product.product_id), '_blank');
-        } else {
-            window.open(route('products.show', product.product_id), '_blank');
-        }
-    },
-    print(sale) {
-        window.open(route('sales.print-ticket', sale.id), '_blank');
+    totalExpenses() {
+        let total = 0;
+        this.expenses.forEach(expense => {
+            total += expense.quantity * expense.current_price;
+        });
+        return total;
     }
 },
 }

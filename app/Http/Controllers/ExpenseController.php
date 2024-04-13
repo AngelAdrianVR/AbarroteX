@@ -70,9 +70,7 @@ class ExpenseController extends Controller
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
         // return $expenses;
-
-        $day_expenses = null;
-        return inertia('Expense/Show', compact('day_expenses'));
+        return inertia('Expense/Show', compact('expenses'));
     }
 
     public function edit(Expense $expense)
@@ -155,6 +153,14 @@ class ExpenseController extends Controller
         });
 
         return response()->json(['items' => $groupedExpenses]);
+    }
+
+    public function printExpenses($expense_id)
+    {
+        // $expense = Expense::with('products')->find($expense_id);
+        $expense = null;
+        // return $expense;
+        return inertia('Expense/PrintExpenses', compact('expense'));
     }
 
 }

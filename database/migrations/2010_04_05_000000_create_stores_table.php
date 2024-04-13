@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('contact_phone')->nullable();
             $table->string('address')->nullable();
             $table->string('plan')->default('Plan Básico');
+            $table->boolean('is_active')->default(true);
             $table->date('next_payment')->nullable()->default(now()->addDays(15)->toDateString());
             $table->timestamps();
         });
