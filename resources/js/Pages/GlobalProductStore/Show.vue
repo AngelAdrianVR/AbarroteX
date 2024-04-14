@@ -18,9 +18,9 @@
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
                     <Loading v-if="searchLoading" />
                     <ul v-else-if="productsFound?.length > 0">
-                        <li @click.stop="$inertia.get(route('products.show', product.id))"
+                        <li @click.stop="handleProductSelected(product)"
                             v-for="(product, index) in productsFound" :key="index"
-                            class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.name }}</li>
+                            class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ? product.global_product?.name : product.name }}</li>
                     </ul>
                     <p v-else class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias</p>
                 </div>
@@ -327,6 +327,13 @@ export default {
 
             return `${translatedMonth} ${year}`;
         },
+        handleProductSelected(product) {
+            if ( product.global_product_id ) {
+                this.$inertia.get(route('global-product-store.show', product.id))
+            } else {
+                this.$inertia.get(route('products.show', product.id))
+            }
+        }
     },
     mounted() {
         this.fetchHistory();

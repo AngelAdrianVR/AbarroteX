@@ -19,16 +19,17 @@
 
             <!-- Información de egreso -->
             <div class="mt-7 lg:mx-16">
-                <p class="font-bold px-2">Fecha: <span class="font-thin ml-2 text-gray-600">{{ expenses[0].created_at }}</span></p>
+                <p class="font-bold px-2">Fecha: <span class="font-thin ml-2 text-gray-600">{{ expenses[0]?.created_at }}</span></p>
                 <p class="font-bold px-2">Total de movimientos: <span class="font-thin ml-2 text-gray-600">{{ expenses.length }}</span></p>
                 <p class="font-bold px-2">Egreso total: <span class="!font-thin ml-2 text-gray-600">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
             </div>
 
                 <!-- Productos -->
                 <!-- detalle de productos -->
-                <div class="grid grid-cols-4 lg:ml-16 mr-3 self-start mt-9">
+                <div class="grid grid-cols-5 lg:ml-16 mr-3 self-start mt-9">
                     <p class="font-bold col-span-2">Concepto</p>
                     <p class="font-bold">Cantidad</p>
+                    <p class="font-bold">Costo</p>
                     <p class="font-bold ml-8">Total</p>
 
                     <div class="mt-2 col-span-2">
@@ -37,11 +38,14 @@
                     <div class="mt-2">
                         <p class="text-sm" v-for="expense in expenses" :key="expense">{{ expense.quantity }}</p>
                     </div>
+                    <div class="mt-2">
+                        <p class="text-sm" v-for="expense in expenses" :key="expense">${{ expense.current_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    </div>
                     <div class="mt-2 ml-8">
                         <p class="text-sm" v-for="expense in expenses" :key="expense">${{ (expense.quantity * expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     </div>
-                    <div class="border-b border-primary w-28 col-start-4 my-3"></div>
-                    <p class="col-start-4 text-sm font-bold">Total: <span class="ml-2">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+                    <div class="border-b border-primary w-28 col-start-5 my-3"></div>
+                    <p class="col-start-5 text-sm font-bold">Total: <span class="ml-2">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
                 </div>
         </div>
     </AppLayout>

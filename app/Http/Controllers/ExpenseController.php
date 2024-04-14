@@ -27,6 +27,7 @@ class ExpenseController extends Controller
         // Obtener los egresos registrados en los últimos 7 días
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
 
+        
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
             return Carbon::parse($expense->created_at)->format('d-F-Y');
@@ -35,36 +36,47 @@ class ExpenseController extends Controller
             $totalExpense = $expenses->sum(function ($expense) {
                 return $expense->quantity * $expense->current_price;
             });
-
+            
             return [
                 'total_quantity' => $totalQuantity,
                 'total_expense' => $totalExpense,
                 'expenses' => $expenses,
             ];
         });
-            
+
         // return $groupedExpenses;
         return inertia('Expense/Index', compact('groupedExpenses', 'total_expenses'));
     }
 
     public function create()
     {
-        //
+        return inertia('Expense/Create');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'concept' => 'required|string|max:255',
-            'quantity' => 'required|numeric|max:999999.99',
-            'cost' => 'required|numeric|max:999999.99',
-        ]);
+        // return $request;
+        // Itera sobre cada egreso recibido en la lista
+        foreach ($request->expenses as $expenseData) {
+            Expense::create([
+                'concept' => $expenseData['concept'],
+                'quantity' => $expenseData['quantity'],
+                'current_price' => $expenseData['current_price'],
+                'created_at' => $expenseData['date'],
+                'store_id' => auth()->user()->store_id,
+            ]);
+        }
+        return to_route('expenses.index');
     }
 
-    public function show($created_at)
+    public function show($expense_id)
     {
+        $expense = Expense::find($expense_id);
+        // return $expense;
+        
+
         // Parsear la fecha recibida para obtener solo la parte de la fecha
-        $date = Carbon::parse($created_at)->toDateString();
+        $date = Carbon::parse($expense->created_at)->toDateString();
 
         // Obtener las ventas registradas en la fecha recibida
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();

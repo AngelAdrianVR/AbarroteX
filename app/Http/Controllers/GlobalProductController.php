@@ -26,7 +26,7 @@ class GlobalProductController extends Controller
 
     public function index()
     {   
-        $global_products = GlobalProduct::with(['media', 'category'])->latest()->get()->take(20);;
+        $global_products = GlobalProduct::with(['media', 'category'])->get()->take(20);;
         $total_products = GlobalProduct::all()->count();
 
         // return $global_products;
@@ -181,5 +181,19 @@ class GlobalProductController extends Controller
 
         // Devolver los resultados como una respuesta JSON
         return response()->json(['items' => $filtered_global_products]);
+    }
+
+    public function searchProduct(Request $request)
+    {
+        $query = $request->input('query');
+    
+        // Realiza la búsqueda en la base de datos local
+        $global_products = GlobalProduct::with(['category', 'brand', 'media'])
+            ->where('name', 'like', "%$query%")
+            ->orWhere('code', $query)
+            ->take(20)
+            ->get();
+
+        return response()->json(['items' => $global_products]);
     }
 }

@@ -1,5 +1,5 @@
 <template>
-    <div v-if="products.length" class="w-full mx-auto text-[11px] md:text-sm overflow-auto">
+    <div v-if="Object.keys(products)?.length" class="w-full mx-auto text-[11px] md:text-sm overflow-auto">
         <div class="text-center md:text-base flex items-center space-x-4 mb-2">
             <div class="hidden md:block w-[10%]"></div>
             <div class="font-bold pb-3 pl-2 text-left w-[18%] md:w-[13%]">Código</div>
