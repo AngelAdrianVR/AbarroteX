@@ -9,20 +9,25 @@
         <div class="rounded-[5px] border border-grayD9 px-4 py-4 mt-3">
             <article>
                 <div class="flex items-start space-x-3 justify-between">
-                    <div class="grid grid-cols-2 gap-2 w-5/6">
-                        <p class="flex flex-col">
-                            <b>Suscripción mensual</b>
-                            <span>Próxima factura: {{ formatDate($page.props.auth.user.store.next_payment)
-                                }}</span>
-                        </p>
-                        <p class="flex flex-col">
-                            <b>$269.00</b>
-                            <span></span>
-                        </p>
-                        <div v-if="edit" class="flex flex-col space-y-3 col-span-full mt-3">
+                    <div class="w-5/6">
+                        <div v-if="!edit" class="grid grid-cols-2 gap-2">
+                            <p class="flex flex-col">
+                                <b>Suscripción <span class="lowercase">{{ $page.props.auth.user.store.suscription_period }}</span></b>
+                                <span class="text-xs">
+                                    Próxima factura: {{ formatDate($page.props.auth.user.store.next_payment) }}
+                                </span>
+                            </p>
+                            <p class="flex flex-col">
+                                <b>
+                                    {{ $page.props.auth.user.store.suscription_period == 'Mensual' ? '$269.00' :
+                                    '$2,690.00' }}
+                                </b>
+                            </p>
+                        </div>
+                        <div v-else class="flex flex-col space-y-3 col-span-full mt-3">
                             <div v-for="(item, index) in suscriptions" :key="index" class="flex">
                                 <div class="flex items-center h-5">
-                                    <input v-model="form.suscription" :id="'suscription-' + index"
+                                    <input v-model="form.suscription_period" :id="'suscription-' + index"
                                         :aria-describedby="'suscription-text-' + index" type="radio" :value="item.name"
                                         class="size-3 text-primary border-gray-300 focus:ring-0">
                                 </div>
@@ -34,6 +39,8 @@
                                         {{ item.description }}
                                     </p>
                                 </div>
+                                <p v-if="$page.props.auth.user.store.suscription_period == item.name"
+                                    class="ml-4 text-xs text-green-600">Actual</p>
                             </div>
                         </div>
                     </div>
@@ -41,7 +48,7 @@
                         <div v-if="edit"
                             class="flex items-center space-x-1 *:size-5 *:rounded-full *:flex *:items-center *:justify-center *:border">
                             <el-tooltip content="Cancelar" placement="left">
-                                <button @click="edit = false"
+                                <button @click="edit = false; form.reset()"
                                     class="text-gray-600 text-[9px] hover:bg-gray-100 transition-all duration-150"><i
                                         class="fa-solid fa-x"></i></button>
                             </el-tooltip>
@@ -59,38 +66,37 @@
                     </p>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-4">
-                    <div class="flex flex-col space-y-1">
+                    <div v-if="!edit" class="flex flex-col space-y-1">
                         <b>Método de pago</b>
                         <div class="flex items-center space-x-2">
                             <figure class="size-8 flex items-center justify-center rounded-full border border-grayD9">
-                                <img src="@/../../public/images/visa.jpg" class="size-6 rounded-full">
+                                <img :src="getInstitutionImage(getDefultCard.institution)" class="size-6 rounded-full">
                             </figure>
                             <div class="flex flex-col text-xs">
-                                <span>Tarjeta de débito terminada en 0141</span>
-                                <span>BBVA</span>
+                                <span>{{ getDefultCard.name }}</span>
+                                <span>{{ getDefultCard.bank }}</span>
                             </div>
                         </div>
                     </div>
-                    <div v-if="edit" class="flex flex-col space-y-3 col-span-full mt-3">
+                    <div v-else class="flex flex-col space-y-3 col-span-full mt-3">
                         <h1 class="mx-3">
                             <span>Mis tarjetas guardadas</span>
                         </h1>
                         <div v-for="(item, index) in cards" :key="index" class="flex mt-2">
                             <div class="flex items-center">
-                                <input v-model="form.card" :id="'card-' + index"
+                                <input v-model="form.default_card_id" :id="'card-' + index"
                                     :aria-describedby="'card-text-' + index" type="radio" :value="item.id"
                                     class="size-3 text-primary border-gray-300 focus:ring-0">
                             </div>
                             <div class="ms-2 text-sm w-full">
                                 <label :for="'card-' + index" class="font-medium text-gray-900">
-                                    <div
-                                        class="flex items-center space-x-3 justify-between">
+                                    <div class="flex items-center space-x-3 justify-between">
                                         <div class="grid grid-cols-2 gap-2">
                                             <div class="flex flex-col">
                                                 <div class="flex items-center space-x-2">
                                                     <figure
                                                         class="size-8 flex items-center justify-center rounded-full border border-grayD9">
-                                                        <img src="@/../../public/images/visa.jpg"
+                                                        <img :src="getInstitutionImage(item.institution)"
                                                             class="size-6 rounded-full">
                                                     </figure>
                                                     <div class="flex flex-col text-xs">
@@ -99,85 +105,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <p v-if="form.card == item.id" class="text-xs text-green-600">Predeterminado</p>
+                                            <p v-if="$page.props.auth.user.store.default_card_id == item.id"
+                                                class="ml-4 text-xs text-green-600">Predeterminado</p>
                                         </div>
                                         <button class="text-primary text-xs">Editar</button>
                                     </div>
                                 </label>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </article>
-            <!-- <article v-if="edit" class="mt-5">
-                <div>
-                    <h1 class="mx-3">
-                        <span>Mis tarjetas guardadas</span>
-                    </h1>
-                    <div class="rounded-[5px] border border-grayD9 px-4 py-4 mt-3">
-                        <article>
-                            <div class="flex items-center space-x-3 justify-between border-b border-grayD9 pb-5">
-                                <div class="grid grid-cols-2 gap-2 w-5/6">
-                                    <div class="flex flex-col">
-                                        <div class="flex items-center space-x-2">
-                                            <figure
-                                                class="size-8 flex items-center justify-center rounded-full border border-grayD9">
-                                                <img src="@/../../public/images/visa.jpg" class="size-6 rounded-full">
-                                            </figure>
-                                            <div class="flex flex-col text-xs">
-                                                <span>Tarjeta de débito terminada en 0141</span>
-                                                <span>BBVA</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <p class="text-[10px] leading-snug text-green-600">
-                                            {{ defaultCard == 1 ? 'Predeterminado' : '' }}</p>
-                                        <button @click="changeDefaultCard(1)"
-                                            class="size-4 rounded-full border text-white flex items-center justify-center"
-                                            :class="defaultCard == 1 ? 'border-green-600 bg-green-600' : 'border-grayD9'">
-                                            <i class="fa-solid fa-check text-[8px]"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button class="text-primary text-xs">Editar</button>
-                            </div>
-                        </article>
-                        <article class="mt-4">
-                            <div class="flex items-center space-x-3 justify-between">
-                                <div class="grid grid-cols-2 gap-2 mt-2 w-5/6">
-                                    <div class="flex flex-col">
-                                        <div class="flex items-center space-x-2">
-                                            <figure
-                                                class="size-8 flex items-center justify-center rounded-full border border-grayD9">
-                                                <img src="@/../../public/images/mastercard.png"
-                                                    class="size-6 rounded-full">
-                                            </figure>
-                                            <div class="flex flex-col text-xs">
-                                                <span>Tarjeta de débito terminada en 0177</span>
-                                                <span>BANORTE</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <p class="text-[10px] leading-snug text-green-600">
-                                            {{ defaultCard == 2 ? 'Predeterminado' : '' }}</p>
-                                        <button @click="changeDefaultCard(2)"
-                                            class="size-4 rounded-full border text-white flex items-center justify-center"
-                                            :class="defaultCard == 2 ? 'border-green-600 bg-green-600' : 'border-grayD9'">
-                                            <i class="fa-solid fa-check text-[8px]"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button class="text-primary text-xs">Editar</button>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-                <div>
-                    <div @click="$inertia.visit(route('cards.create'))"
-                        class="rounded-[5px] border border-grayD9 px-4 py-4 mt-2 cursor-pointer">
-                        <article>
+                        <div @click="$inertia.visit(route('cards.create'))"
+                            class="rounded-[5px] border border-grayD9 px-5 py-2 mt-2 cursor-pointer">
                             <div class="flex items-center space-x-3 justify-between">
                                 <div class="grid grid-cols-2 gap-2 w-5/6">
                                     <div class="flex flex-col">
@@ -206,10 +143,10 @@
                                 </div>
                                 <button class="text-primary text-xs"><i class="fa-solid fa-chevron-right"></i></button>
                             </div>
-                        </article>
+                        </div>
                     </div>
                 </div>
-            </article> -->
+            </article>
         </div>
     </section>
 </template>
@@ -217,12 +154,15 @@
 import { useForm } from '@inertiajs/vue3';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import visaImage from "@/../../public/images/visa.jpg";
+import mastercardImage from "@/../../public/images/mastercard.png";
+import americanExpressImage from "@/../../public/images/american_express.png";
 
 export default {
     data() {
         const form = useForm({
-            suscription: '1',
-            card: 1,
+            suscription_period: this.$page.props.auth.user.store.suscription_period,
+            default_card_id: this.$page.props.auth.user.store.default_card_id,
         });
 
         return {
@@ -246,27 +186,43 @@ export default {
                     id: 1,
                     name: "Tarjeta de débito terminada en 0141",
                     bank: "BBVA",
-                    type: "visa",
+                    institution: 'visa',
                 },
                 {
                     id: 2,
                     name: "Tarjeta de crédito terminada en 1187",
                     bank: "BANORTE",
-                    type: "Mastercard",
+                    institution: 'mastercard',
+                },
+                {
+                    id: 3,
+                    name: "Tarjeta de crédito terminada en 1780",
+                    bank: "NU",
+                    institution: 'american_express',
                 },
             ],
-            defaultCard: 1,
+            images: {
+                visa: visaImage,
+                mastercard: mastercardImage,
+                american_express: americanExpressImage,
+            },
         };
-    },
-    components: {
     },
     props: {
         user: Object,
     },
+    computed: {
+        getDefultCard() {
+            return this.cards.find(item => item.id == this.$page.props.auth.user.store.default_card_id);
+        }
+    },
     methods: {
+        getInstitutionImage(institution) {
+            return this.images[institution];
+        },
         store() {
             this.loading = true;
-            this.form.put(route('ezy-profile.update-basic'), {
+            this.form.put(route('ezy-profile.update-suscription'), {
                 onSuccess: () => {
                     this.$notify({
                         title: 'Correcto',
@@ -280,9 +236,6 @@ export default {
         },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
-        },
-        changeDefaultCard(cardId) {
-            this.defaultCard = cardId;
         },
     }
 }

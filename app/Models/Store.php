@@ -19,6 +19,8 @@ class Store extends Model
         'plan',
         'is_active',
         'next_payment',
+        'suscription_period',
+        'default_card_id',
     ];
 
     protected $casts = [
