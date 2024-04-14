@@ -27,9 +27,10 @@
 
                 <!-- Productos -->
                 <!-- detalle de productos -->
-                <div class="grid grid-cols-3 lg:ml-16 mr-3 self-start mt-9">
+                <div class="grid grid-cols-4 lg:ml-16 mr-3 self-start mt-9">
                     <p class="font-bold">Producto</p>
                     <p class="font-bold">Cantidad</p>
+                    <p class="font-bold">Precio</p>
                     <p class="font-bold ml-8">Total</p>
 
                     <div class="mt-2">
@@ -38,11 +39,14 @@
                     <div class="mt-2">
                         <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">{{ product.quantity }}</p>
                     </div>
+                    <div class="mt-2">
+                        <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">${{ product.current_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    </div>
                     <div class="mt-2 ml-8">
                         <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">${{ (product.quantity * product.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     </div>
-                    <div class="border-b border-primary w-28 col-start-3 my-3"></div>
-                    <p class="col-start-3 text-sm font-bold">Total: <span class="ml-2">${{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+                    <div class="border-b border-primary w-28 col-start-4 my-3"></div>
+                    <p class="col-start-4 text-sm font-bold">Total: <span class="ml-2">${{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
                 </div>
         </div>
     </AppLayout>
@@ -60,7 +64,6 @@ import { useForm } from "@inertiajs/vue3";
 export default {
 data() {
     const form = useForm({
-        client_id: this.day_sales.client?.id,
         sale_id: this.day_sales.id,
         amount: null,
         notes: null,
@@ -136,7 +139,6 @@ methods:{
     },
     print(sale) {
         window.open(route('sales.print-ticket', sale.id), '_blank');
-        // this.$inertia.get(route('sales.print-ticket', sale.id));
     }
 },
 }

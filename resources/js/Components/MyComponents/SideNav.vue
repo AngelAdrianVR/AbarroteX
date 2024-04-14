@@ -96,6 +96,15 @@ export default {
                     show: true
                 },
                 {
+                    label: 'Gastos',
+                    icon: '<i class="fa-solid fa-sack-xmark text-lg"></i>',
+                    route: route('expenses.index'),
+                    active: route().current('expenses.*'),
+                    options: [],
+                    dropdown: false,
+                    show: true
+                },
+                {
                     label: 'Productos',
                     icon: '<i class="fa-regular fa-clipboard text-lg"></i>',
                     route: route('products.index'),
