@@ -6,13 +6,19 @@
                 {{ $page.props.auth.user.store.is_active ? 'Activa' : 'Inactiva' }}
             </el-tag>
         </h1>
-        <div class="rounded-[5px] border border-grayD9 px-4 py-4 mt-3">
-            <article>
+        <div class="rounded-[5px] border border-grayD9 px-4 py-4 mt-3 relative">
+            <!-- etiqueta -->
+            <p
+                class="absolute top-2 left-0 py-1 px-4 rounded-e-full text-xs text-white bg-gradient-to-r from-[#2e19af] from-10% via-[#670ff7] via-40% to-[#853ff9] to-80%">
+                Suscripción desde {{ formatDate($page.props.auth.user.store.created_at) }}
+            </p>
+            <article class="mt-6">
                 <div class="flex items-start space-x-3 justify-between">
                     <div class="w-5/6">
                         <div v-if="!edit" class="grid grid-cols-2 gap-2">
                             <p class="flex flex-col">
-                                <b>Suscripción <span class="lowercase">{{ $page.props.auth.user.store.suscription_period }}</span></b>
+                                <b>Suscripción <span class="lowercase">{{ $page.props.auth.user.store.suscription_period
+                                        }}</span></b>
                                 <span class="text-xs">
                                     Próxima factura: {{ formatDate($page.props.auth.user.store.next_payment) }}
                                 </span>
@@ -20,7 +26,7 @@
                             <p class="flex flex-col">
                                 <b>
                                     {{ $page.props.auth.user.store.suscription_period == 'Mensual' ? '$269.00' :
-                                    '$2,690.00' }}
+                                        '$2,690.00' }}
                                 </b>
                             </p>
                         </div>
