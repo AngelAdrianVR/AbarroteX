@@ -8,7 +8,7 @@
         </div>
         <div>
             <div v-for="(expense, index) in expenses" :key="expense.id" class="*:p-3 h-12 cursor-pointer flex items-center space-x-4 border rounded-full mb-2 hover:border-primary" 
-            @click="$inertia.get(route('expenses.show', expense.expenses[0]?.created_at))">
+            @click="$inertia.get(route('expenses.show', expense.expenses[0]?.id))">
                 <div class="w-[20%] text-center rounded-l-full">{{  formatDate(index) }}</div>
                 <div class="w-[20%] text-center rounded-l-full">{{ expense.total_quantity }}</div>
                 <div class="w-[20%]">${{ expense.total_expense?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</div>

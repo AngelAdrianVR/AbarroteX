@@ -188,13 +188,13 @@ class ProductController extends Controller
             ->take(20)
             ->get();
     
-            $global_products = GlobalProductStore::with(['globalProduct.media'])
-                ->whereHas('globalProduct', function (Builder $queryBuilder) use ($query) {
-                    $queryBuilder->where('name', 'like', "%$query%")
-                                ->orWhere('code', $query);
-                })
-                ->take(20)
-                ->get();
+        $global_products = GlobalProductStore::with(['globalProduct.media'])
+            ->whereHas('globalProduct', function (Builder $queryBuilder) use ($query) {
+                $queryBuilder->where('name', 'like', "%$query%")
+                            ->orWhere('code', $query);
+            })
+            ->take(20)
+            ->get();
     
         // Combinar los resultados en una colección
         $combined_products = $local_products->merge($global_products);

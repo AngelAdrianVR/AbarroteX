@@ -4,7 +4,9 @@
             <!-- header botones -->
             <div class="flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Egresos</h1>
-                <div class="relative">
+                <div class="flex space-x-2 items-center relative">
+                    <!-- Boton para crear egreso -->
+                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="!py-1">Crear</PrimaryButton>
                     <!-- filtro -->
                     <button @click.stop="showFilter = !showFilter"
                         class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">

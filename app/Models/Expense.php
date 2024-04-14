@@ -15,6 +15,7 @@ class Expense extends Model
         'quantity',
         'current_price',
         'store_id',
+        'created_at', // para poderponer cambiar la fecha desde el registro
     ];
 
     //relationships 
