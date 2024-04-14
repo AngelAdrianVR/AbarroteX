@@ -29,6 +29,7 @@ export default {
                 grayD9: '#D9D9D9',
                 gray99: '#999999',
                 grayF2: '#F2F2F2',
+                gray77: '#777777',
                 gray37: '#373737',
             },
         },

@@ -101,6 +101,9 @@ const logout = () => {
                                             <DropdownLink :href="route('profile.show')">
                                                 Perfil y suscripción
                                             </DropdownLink>
+                                            <DropdownLink :href="route('supports.index')">
+                                                Soporte
+                                            </DropdownLink>
                                             <div class="border-t border-gray-200" />
 
                                             <!-- Authentication -->

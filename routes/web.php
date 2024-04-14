@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -148,3 +149,9 @@ Route::resource('cards', CardController::class)->middleware('auth');
 //----------------------------------------------------------------------------------------------------
 Route::put('ezy-profile/update-basic', [EzyProfileController::class, 'updateBasic'])->middleware('auth')->name('ezy-profile.update-basic');
 Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'updateSuscription'])->middleware('auth')->name('ezy-profile.update-suscription');
+
+
+//soporte routes-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::get('support/index', [SupportController::class, 'index'])->middleware('auth')->name('supports.index');
+Route::get('support/faqs', [SupportController::class, 'faqs'])->middleware('auth')->name('supports.faqs');
