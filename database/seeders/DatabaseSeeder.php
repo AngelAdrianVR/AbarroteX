@@ -31,6 +31,8 @@ class DatabaseSeeder extends Seeder
             'address' => 'Direccion 1',
             'plan' => 'Plan Básico',
             'next_payment' => now()->addDays(10),
+            'suscription_period' => 'Mensual',
+            'default_card_id' => 1,
         ]);
 
         // crear el primer usuario

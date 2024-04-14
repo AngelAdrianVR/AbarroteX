@@ -22,6 +22,8 @@ class StoreFactory extends Factory
             'contact_phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
             'next_payment' => now()->addDays($this->faker->randomNumber(2)),
+            'suscription_period' => $this->faker->randomElement(['Mensual', 'Anual']),
+            'default_card_id' => 1,
         ];
     }
 }

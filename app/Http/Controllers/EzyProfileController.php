@@ -28,6 +28,16 @@ class EzyProfileController extends Controller
             'contact_name' => $request->input('name'),
         ]);
 
-        return response()->json([]);
+    }
+    
+    public function updateSuscription(Request $request)
+    {
+        $validated = $request->validate([
+            'suscription_period' => 'required|string|max:255',
+            'default_card_id' => 'nullable|numeric|min:1',
+        ]);
+
+        $store = auth()->user()->store;
+        $store->update($validated);
     }
 }

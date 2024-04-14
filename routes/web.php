@@ -147,3 +147,4 @@ Route::resource('cards', CardController::class)->middleware('auth');
 //ezy profile routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::put('ezy-profile/update-basic', [EzyProfileController::class, 'updateBasic'])->middleware('auth')->name('ezy-profile.update-basic');
+Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'updateSuscription'])->middleware('auth')->name('ezy-profile.update-suscription');
