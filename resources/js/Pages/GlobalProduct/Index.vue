@@ -78,6 +78,24 @@ methods:{
             this.loadingItems = false;
         }
     },
+    async searchProducts() {
+            if ( this.searchQuery != '') {
+                try {
+                    this.loading = true;
+                const response = await axios.get(route('global-products.search'), { params: { query: this.searchQuery } });
+                if (response.status == 200) {
+                    this.localProducts = response.data.items;
+                }
+
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    this.loading = false;
+                }
+            } else {
+                this.localProducts = this.global_products;
+            }
+        },
 }
 }
 </script>
