@@ -16,6 +16,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -155,3 +156,8 @@ Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'upda
 //----------------------------------------------------------------------------------------------------
 Route::get('support/index', [SupportController::class, 'index'])->middleware('auth')->name('supports.index');
 Route::get('support/faqs', [SupportController::class, 'faqs'])->middleware('auth')->name('supports.faqs');
+Route::get('support/create-report', [SupportController::class, 'createReport'])->middleware('auth')->name('supports.create-report');
+
+//soporte report routes-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::resource('support-reports', SupportReportController::class)->middleware('auth');

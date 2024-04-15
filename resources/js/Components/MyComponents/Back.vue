@@ -1,10 +1,10 @@
 <template>
-  <button v-if="route == null" @click="goBack" class="flex justify-center items-center rounded-full py-[9px] px-3 focus:outline-none hover-3dbuttom bg-[#373737]">
-        <i class="fa-solid fa-angle-left text-white"></i>
+  <button v-if="route == null" @click="goBack" class="flex justify-center items-center rounded-full size-6 focus:outline-none hover-3dbuttom bg-[#373737]">
+        <i class="fa-solid fa-angle-left text-white text-xs"></i>
   </button>
 
-  <button v-else @click="goToRoute" class="flex justify-center items-center rounded-full py-[9px] px-3 focus:outline-none hover-3dbuttom bg-[#373737]">
-        <i class="fa-solid fa-angle-left text-white"></i>
+  <button v-else @click="goToRoute" class="flex justify-center items-center rounded-full size-6 focus:outline-none hover-3dbuttom bg-[#373737]">
+        <i class="fa-solid fa-angle-left text-white text-xs"></i>
   </button>
 </template>
 

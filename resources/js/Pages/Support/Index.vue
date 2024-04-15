@@ -7,8 +7,8 @@
         </header>
         <main class="mx-2 md:mx-56 my-5 text-sm">
             <section class="flex items-center justify-center space-x-4">
-                <IconTextButton v-for="(item, index) in categories" :key="index" :icon="item.icon" :routeName="item.routeName"
-                    :title="item.title" />
+                <IconTextButton v-for="(item, index) in categories" :key="index" :icon="item.icon"
+                    :routeName="item.routeName" :title="item.title" />
             </section>
         </main>
     </AppLayout>

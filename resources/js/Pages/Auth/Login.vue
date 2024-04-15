@@ -97,7 +97,7 @@ const submit = () => {
             </div>
 
             <div class="block mt-4 ml-6">
-                <el-checkbox v-model:checked="form.remember" name="remember" label="Mantener sesión abierta"
+                <el-checkbox v-model="form.remember" name="remember" label="Mantener sesión abierta"
                     size="small" />
             </div>
 
