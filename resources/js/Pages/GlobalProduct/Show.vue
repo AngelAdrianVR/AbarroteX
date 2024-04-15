@@ -3,7 +3,7 @@
         <div class="px-2 lg:px-10 py-7">
             <!-- header botones -->
             <div class="flex justify-between items-center mx-3">
-                <h1 class="font-bold text-lg">Productos globales</h1>
+                <h1 class="font-bold text-lg">Catálogo base</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
                     <PrimaryButton @click="$inertia.get(route('global-products.edit', global_product.id))" class="!rounded-full">Editar</PrimaryButton>
                 </div>
