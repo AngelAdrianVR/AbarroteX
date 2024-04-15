@@ -123,7 +123,7 @@ export default {
                     show: true
                 },
                 {
-                    label: 'Productos globales',
+                    label: 'Catálogo base',
                     icon: '<i class="fa-solid fa-earth-americas text-lg"></i>',
                     route: route('global-products.index'),
                     active: route().current('global-products.*'),

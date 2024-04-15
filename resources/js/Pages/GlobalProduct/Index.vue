@@ -1,10 +1,10 @@
 <template>
-    <AppLayout title="Productos globales">
+    <AppLayout title="Catálogo base">
         <div class="px-2 lg:px-10 py-7">
             <!-- header botones -->
             <div class="flex justify-between items-center mx-3 mb-3">
-                <h1 class="font-bold text-lg">Productos globales</h1>
-                <PrimaryButton @click="$inertia.get(route('global-products.create'))" class="!rounded-full">Nuevo producto global</PrimaryButton>
+                <h1 class="font-bold text-lg">Catálogo base</h1>
+                <PrimaryButton @click="$inertia.get(route('global-products.create'))" class="!rounded-full">Nuevo producto</PrimaryButton>
             </div>
 
             <!-- buscador -->
