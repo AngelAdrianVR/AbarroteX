@@ -67,8 +67,8 @@
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
                                 <p class="text-gray37">Marca: <span class="font-bold">{{ global_product.brand?.name }}</span></p>
                             </div>
-                            <p class="text-gray37 mt-3 lg:mt-0">Fecha de alta: <strong class="ml-5">{{ global_product.created_at.split('T')[0]}}</strong></p>
                         </div>
+                            <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ formatDate(global_product.created_at)}}</strong></p>
                         <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ global_product.name }}</h1>
 
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
@@ -89,6 +89,8 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Back from "@/Components/MyComponents/Back.vue";
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
 data() {
@@ -129,6 +131,9 @@ methods:{
                 message: this.global_product.code + " copiado",
                 type: "success",
             });
+        },
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
 }
 }

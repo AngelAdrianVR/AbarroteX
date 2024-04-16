@@ -19,7 +19,7 @@
 
             <!-- Información de egreso -->
             <div class="mt-7 lg:mx-16">
-                <p class="font-bold px-2">Fecha: <span class="font-thin ml-2 text-gray-600">{{ expenses[0]?.created_at }}</span></p>
+                <p class="font-bold px-2">Fecha: <span class="font-thin ml-2 text-gray-600">{{ formatDate(expenses[0]?.created_at) }}</span></p>
                 <p class="font-bold px-2">Total de movimientos: <span class="font-thin ml-2 text-gray-600">{{ expenses.length }}</span></p>
                 <p class="font-bold px-2">Egreso total: <span class="!font-thin ml-2 text-gray-600">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
             </div>
@@ -59,6 +59,8 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
 data() {
@@ -107,6 +109,9 @@ methods:{
                 position: 'top-right',
             });
         }
+    },
+    formatDate(dateString) {
+        return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
     },
     print(expenseId) {
         window.open(route('expenses.print-expenses', expenseId), '_blank');

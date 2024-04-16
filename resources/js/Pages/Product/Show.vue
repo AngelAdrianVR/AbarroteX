@@ -35,9 +35,14 @@
             <div class="lg:grid grid-cols-3 gap-x-12 mx-10">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
-                    <figure class="border border-grayD9 rounded-lg">
-                        <img class="size-96 mx-auto object-contain" :src="product.data.imageCover[0]?.original_url" alt="">
+                    <figure class="border size-96 border-grayD9 rounded-lg flex justify-center items-center">
+                        <img v-if="product.data.imageCover?.length" class="w-full mx-auto object-contain" :src="product.data.imageCover[0]?.original_url" alt="">
+                        <div v-else>
+                            <i class="fa-regular fa-image text-9xl text-gray-200"></i>
+                            <p class="text-sm text-gray-300">Imagen no disponible</p>
+                        </div>
                     </figure>
+
                 </section>
 
                 <!-- informacion de producto -->
@@ -82,9 +87,8 @@
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
                                 <p class="text-gray37">Marca: <span class="font-bold">{{ product.data.brand?.name }}</span></p>
                             </div>
-                            <p class="text-gray37 mt-3 lg:mt-0">Fecha de alta: <strong class="ml-5">{{ product.data.created_at
-                            }}</strong></p>
                         </div>
+                        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.data.created_at }}</strong></p>
                         <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ product.data.name }}</h1>
 
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
@@ -134,7 +138,7 @@
                                 <PrimaryButton @click="loadPreviousMonth"><i class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
                                 <PrimaryButton @click="loadNextMonth"><i class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
                             </div>
-                            <div v-if="Object.keys(productHistory)?.length">
+                            <div v-if="Object?.keys(productHistory)?.length">
                                 <div v-for="(history, index) in productHistory" :key="history">
                                     
                                         <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
@@ -176,7 +180,7 @@
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
-                        <PrimaryButton @click="entryProduct" class="!rounded-full">Ingresar producto</PrimaryButton>
+                        <PrimaryButton :disabled="form.processing" @click="entryProduct" class="!rounded-full">Ingresar producto</PrimaryButton>
                         <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
                     </div>
                 </section>
@@ -292,6 +296,7 @@ export default {
                         text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
                         type: 'success',
                     });
+                    this.fetchHistory();
                 },
             });
         },

@@ -95,9 +95,7 @@
                     <InputError :message="form.errors.max_stock" />
                 </div>
 
-                <h2 class="font-bold col-span-full text-sm my-5">Cantidades de stock permitidas</h2>
-
-                <div>
+                <div class="mt-7">
                     <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
                     <InputFilePreview @imagen="saveImage" @cleared="form.imageCover = null" />
                 </div>

@@ -6,7 +6,7 @@
                 <h1 class="font-bold text-lg">Egresos</h1>
                 <div class="flex space-x-2 items-center relative">
                     <!-- Boton para crear egreso -->
-                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="!py-1">Crear</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="">Crear</PrimaryButton>
                     <!-- filtro -->
                     <button @click.stop="showFilter = !showFilter"
                         class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
@@ -27,7 +27,7 @@
                         <p class="text-sm ml-2">Filtrar</p>
                     </button>
                     <div v-if="showFilter"
-                        class="absolute top-9 right-0 lg:-left-64 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-10 w-80">
+                        class="absolute top-9 right-0 lg:-left-40 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-10 w-80">
                         <div class="mb-3">
                             <InputLabel value="Rango de fechas" class="ml-3 mb-1" />
                             <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
