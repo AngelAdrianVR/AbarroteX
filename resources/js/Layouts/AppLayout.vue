@@ -47,7 +47,7 @@ const logout = () => {
             <main class="w-full">
                 <nav class="bg-white border-b border-gray-100">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="flex justify-between h-16">
+                        <div class="flex justify-between h-12">
                             <div class="flex">
                                 <!-- Logo -->
                                 <div class="md:hidden shrink-0 flex items-center">
@@ -69,14 +69,19 @@ const logout = () => {
                                                 class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
                                                 <img class="h-8 w-8 rounded-full object-cover"
                                                     :src="$page.props.auth.user.profile_photo_url"
-                                                    :alt="$page.props.auth.user.name">
+                                                    :alt="$page.props.auth.user.store.name">
                                             </button>
 
                                             <span v-else class="inline-flex rounded-md">
                                                 <button type="button"
                                                     class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
-                                                    {{ $page.props.auth.user.name }}
-
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="size-4 mr-1">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                                                    </svg>
+                                                    {{ $page.props.auth.user.store.name }}
                                                     <svg class="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                                                         fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                                         stroke="currentColor">
@@ -94,14 +99,11 @@ const logout = () => {
                                             </div>
 
                                             <DropdownLink :href="route('profile.show')">
-                                                Perfil
+                                                Perfil y suscripción
                                             </DropdownLink>
-
-                                            <DropdownLink v-if="$page.props.jetstream.hasApiFeatures"
-                                                :href="route('api-tokens.index')">
-                                                API Tokens
+                                            <DropdownLink :href="route('supports.index')">
+                                                Soporte
                                             </DropdownLink>
-
                                             <div class="border-t border-gray-200" />
 
                                             <!-- Authentication -->
@@ -146,8 +148,17 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                 Análisis de venta
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('sales.index')" :active="route().current('sales.*')">
+                                Ventas registradas
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
+                                Gastos
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*')">
                                 Productos
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">
+                                Configuraciones
                             </ResponsiveNavLink>
                         </div>
 
@@ -156,12 +167,13 @@ const logout = () => {
                             <div class="flex items-center px-4">
                                 <div v-if="$page.props.jetstream.managesProfilePhotos" class="shrink-0 me-3">
                                     <img class="h-10 w-10 rounded-full object-cover"
-                                        :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
+                                        :src="$page.props.auth.user.profile_photo_url"
+                                        :alt="$page.props.auth.user.store.name">
                                 </div>
 
                                 <div>
                                     <div class="font-medium text-base text-gray-800">
-                                        {{ $page.props.auth.user.name }}
+                                        {{ $page.props.auth.user.store.name }}
                                     </div>
                                     <div class="font-medium text-sm text-gray-500">
                                         {{ $page.props.auth.user.email }}
@@ -170,13 +182,9 @@ const logout = () => {
                             </div>
 
                             <div class="mt-3 space-y-1">
-                                <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
+                                <ResponsiveNavLink :href="route('profile.show')"
+                                    :active="route().current('profile.show')">
                                     Perfil
-                                </ResponsiveNavLink>
-
-                                <ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures"
-                                    :href="route('api-tokens.index')" :active="route().current('api-tokens.index')">
-                                    API Tokens
                                 </ResponsiveNavLink>
 
                                 <!-- Authentication -->
@@ -186,59 +194,15 @@ const logout = () => {
                                     </ResponsiveNavLink>
                                 </form>
 
-                                <!-- Team Management -->
-                                <template v-if="$page.props.jetstream.hasTeamFeatures">
-                                    <div class="border-t border-gray-200" />
-
-                                    <div class="block px-4 py-2 text-xs text-gray-400">
-                                        Manage Team
-                                    </div>
-
-                                    <!-- Team Settings -->
-                                    <ResponsiveNavLink :href="route('teams.show', $page.props.auth.user.current_team)"
-                                        :active="route().current('teams.show')">
-                                        Team Settings
-                                    </ResponsiveNavLink>
-
-                                    <ResponsiveNavLink v-if="$page.props.jetstream.canCreateTeams"
-                                        :href="route('teams.create')" :active="route().current('teams.create')">
-                                        Create New Team
-                                    </ResponsiveNavLink>
-
-                                    <!-- Team Switcher -->
-                                    <template v-if="$page.props.auth.user.all_teams.length > 1">
-                                        <div class="border-t border-gray-200" />
-
-                                        <div class="block px-4 py-2 text-xs text-gray-400">
-                                            Switch Teams
-                                        </div>
-
-                                        <template v-for="team in $page.props.auth.user.all_teams" :key="team.id">
-                                            <form @submit.prevent="switchToTeam(team)">
-                                                <ResponsiveNavLink as="button">
-                                                    <div class="flex items-center">
-                                                        <svg v-if="team.id == $page.props.auth.user.current_team_id"
-                                                            class="me-2 h-5 w-5 text-green-400"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <div>{{ team.name }}</div>
-                                                    </div>
-                                                </ResponsiveNavLink>
-                                            </form>
-                                        </template>
-                                    </template>
-                                </template>
                             </div>
                         </div>
                     </div>
                 </nav>
 
-            <div class="overflow-y-auto h-[calc(100vh-4.1rem)] bg-white">
-                <slot />
-            </div>
-        </main>
+                <div class="overflow-y-auto h-[calc(100vh-4.1rem)] bg-white">
+                    <slot />
+                </div>
+            </main>
+        </div>
     </div>
-</div></template>
+</template>

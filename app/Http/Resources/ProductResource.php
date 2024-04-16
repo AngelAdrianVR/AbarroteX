@@ -23,7 +23,10 @@ class ProductResource extends JsonResource
             'min_stock' => $this->min_stock,
             'max_stock' => $this->max_stock,
             'current_stock' => $this->current_stock,
+            'store_id' => $this->store_id,
             'imageCover' => $this->getMedia('imageCover')->all(),
+            'category' => $this->whenLoaded('category'),
+            'brand' => $this->whenLoaded('brand'),
             'created_at' => $this->created_at?->isoFormat('DD MMM YYYY'),
             'updated_at' => $this->updated_at?->isoFormat('DD MMM YYYY'),
         ];

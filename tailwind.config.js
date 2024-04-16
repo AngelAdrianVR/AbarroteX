@@ -18,8 +18,8 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                primary: '#131F8C',
-                primarylight: '#D2D6F9',
+                primary: '#F68C0F',
+                primarylight: '#FCDCB5',
                 secondary: '#25346D',
                 secondarylight: '#25346D',
                 redpad: '#C1202A',
@@ -29,6 +29,7 @@ export default {
                 grayD9: '#D9D9D9',
                 gray99: '#999999',
                 grayF2: '#F2F2F2',
+                gray77: '#777777',
                 gray37: '#373737',
             },
         },
