@@ -1,6 +1,6 @@
 <template>
     <AppLayout title="Perfil">
-        <main class="mx-2 md:mx-56 my-10 text-sm">
+        <main class="mx-2 lg:mx-56 my-10 text-sm">
             <BasicInfo />
             <Suscription class="mt-7" />
         </main>

@@ -3,14 +3,11 @@
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
-use App\Http\Controllers\MyPaymentController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\SaleController;
