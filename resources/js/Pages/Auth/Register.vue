@@ -34,7 +34,7 @@ const submit = () => {
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
-            <h1 class="font-extrabold mt-3 text-center text-2xl text-primary">VentaProX</h1>
+            <h1 class="font-extrabold mt-3 text-center text-2xl text-primary">Ezy Ventas</h1>
         </template>
 
         <div class="flex items-center justify-around mt-5 mb-8 mx-11 border-b text-sm">
