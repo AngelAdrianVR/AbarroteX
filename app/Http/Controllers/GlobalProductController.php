@@ -139,7 +139,7 @@ class GlobalProductController extends Controller
     public function getItemsByPage($currentPage)
     {
         $offset = $currentPage * 20;
-        $global_products = GlobalProduct::with('media')
+        $global_products = GlobalProduct::with('category', 'media', 'brand')
             ->latest()
             ->skip($offset)
             ->take(20)

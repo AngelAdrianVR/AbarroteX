@@ -128,13 +128,22 @@
                             <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
                         </div>
                         <div v-else>
-                            <div v-for="(history, index) in productHistory" :key="history">
-                                <h2 class="rounded-full text-sm bg-gray99 font-bold px-3 py-1 my-4 w-36">{{
-                                    translateMonth(index) }}</h2>
-                                <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span class="mr-2"
-                                        v-html="getIcon(activity.type)"></span>{{ activity.description + ' ' +
-                                            activity.created_at }}</p>
+                            <div class="flex items-center justify-center space-x-3">
+                                <PrimaryButton @click="loadPreviousMonth"><i class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
+                                <PrimaryButton @click="loadNextMonth"><i class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
                             </div>
+                            <div v-if="Object.keys(productHistory)?.length">
+                                <div v-for="(history, index) in productHistory" :key="history">
+                                    
+                                        <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
+                                            translateMonth(index) }}</h2>
+                                        <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span class="mr-2"
+                                            v-html="getIcon(activity.type)"></span>{{ activity.description + ' ' +
+                                            activity.created_at }}
+                                        </p>
+                                    </div>
+                                </div>
+                            <p v-else class="text-xs text-gray-500 mt-5 text-center">No hay actividad en esta fecha</p>
                         </div>
                     </div>
                     <!-- ---------------------------------- -->
@@ -203,6 +212,8 @@ export default {
             productHistory: null,
             loading: null,
             searchLoading: false,
+            currentMonth: new Date().getMonth() + 1, // El mes actual
+            currentYear: new Date().getFullYear(), // El año actual
         };
     },
     components: {
@@ -286,7 +297,11 @@ export default {
         async fetchHistory() {
             this.loading = true;
             try {
-                const response = await axios.get(route("global-product-store.fetch-history", this.global_product_store.id));
+                const response = await axios.get(route("global-product-store.fetch-history", { 
+                    global_product_store_id: this.global_product_store.id,
+                    month: this.currentMonth,
+                    year: this.currentYear,
+                }));
                 if (response.status === 200) {
                     this.productHistory = response.data.items;
                 }
@@ -295,6 +310,24 @@ export default {
             } finally {
                 this.loading = false;
             }
+        },
+        async loadPreviousMonth() {
+            if (this.currentMonth === 1) {
+                this.currentMonth = 12;
+                this.currentYear -= 1;
+            } else {
+                this.currentMonth -= 1;
+            }
+            await this.fetchHistory();
+        },
+        async loadNextMonth() {
+            if (this.currentMonth === 12) {
+                this.currentMonth = 1;
+                this.currentYear += 1;
+            } else {
+                this.currentMonth += 1;
+            }
+            await this.fetchHistory();
         },
         getIcon(type) {
             if (type === 'Precio') {
