@@ -104,27 +104,28 @@ class SaleController extends Controller
 
             //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
             // Verifica si 'global_product_id' existe en 'product'
-            // if (isset($sale['product']['global_product_id'])) {
-            //     // Si existe, recupera el producto global de la tienda'
-            //     $product = GlobalProductStore::find($sale['product']['id']);
-            //     $product->decrement('current_stock', $sale['quantity']);
-            // } else {
-            //     // Si no existe, asigna el valor de 'id' dentro de 'product'
-            //     //rebaja del stock la cantidad de piezas vendidas
-            //     $product = Product::find($sale['product']['id']);
-            //     $product->decrement('current_stock', $sale['quantity']);
-            // }
-            
-
-            // // notificar si ha llegado al limite de existencias bajas
-            // if ($product->current_stock <= $product->min_stock) {
-            //     $title = "Bajo stock";
-            //     $description = "Producto <span class='text-primary'>$product->name</span> alcanzó el nivel mínimo establecido";
-            //     $url = route('products.show', $product->id);
-
-            //     auth()->user()->notify(new BasicNotification($title, $description, $url));
-            // }
-
+            $is_inventory_on = auth()->user()->store->settings()->where('name', 'Llevar inventario')->first()->value;
+            if ($is_inventory_on) {
+                if (isset($sale['product']['global_product_id'])) {
+                    // Si existe, recupera el producto global de la tienda'
+                    $product = GlobalProductStore::find($sale['product']['id']);
+                    $product->decrement('current_stock', $sale['quantity']);
+                } else {
+                    // Si no existe, asigna el valor de 'id' dentro de 'product'
+                    //rebaja del stock la cantidad de piezas vendidas
+                    $product = Product::find($sale['product']['id']);
+                    $product->decrement('current_stock', $sale['quantity']);
+                }
+    
+                // notificar si ha llegado al limite de existencias bajas
+                if ($product->current_stock <= $product->min_stock) {
+                    $title = "Bajo stock";
+                    $description = "Producto <span class='text-primary'>$product->name</span> alcanzó el nivel mínimo establecido";
+                    $url = route('products.show', $product->id);
+    
+                    auth()->user()->notify(new BasicNotification($title, $description, $url));
+                }
+            }
         }
     }
 
@@ -136,8 +137,6 @@ class SaleController extends Controller
 
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::where('store_id', auth()->user()->store_id)->with(['product:id,name', 'globalProductStore.globalProduct'])->whereDate('created_at', $date)->get();
-
-        // return $sales;
 
         $localSales = collect();
         $globalSales = collect();

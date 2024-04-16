@@ -28,8 +28,9 @@
       <!-- transfer -->
       <section class="mt-10 grid lg:grid-cols-2 gap-3">
 
-        <div class="mx-auto">
+        <div class="mx-auto w-full">
           <el-transfer
+            class="w-full"
             v-model="products"
             filterable
             filter-placeholder="Buscar producto"
@@ -97,7 +98,7 @@
         <!-- Boton para transferir los poductos -->
         <div class="flex space-x-2 items-center justify-center col-span-full mt-7">
           <el-tooltip content="Revertir cambios" placement="left">
-            <button @click="revertChanges" class="rounded-full size-9 border border-[#c4c4c4] flex items-center justify-center"><i class="fa-solid fa-rotate-right"></i></button>
+            <button @click="revertChanges" class="rounded-full size-9 border border-[#c4c4c4] flex items-center justify-center"><i class="fa-solid fa-rotate-left"></i></button>
           </el-tooltip>
           <PrimaryButton :disabled="!products.length" @click="transferProducts">Transferir productos</PrimaryButton>
         </div>

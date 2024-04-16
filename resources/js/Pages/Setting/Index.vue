@@ -11,7 +11,7 @@
                 <el-tab-pane label="Punto de venta" name="1">
                     <Point />
                 </el-tab-pane>
-                <el-tab-pane label="Cuentas" name="2">
+                <!-- <el-tab-pane label="Cuentas" name="2">
                     cuentas
                 </el-tab-pane>
                 <el-tab-pane label="Ventas registradas" name="3">
@@ -22,7 +22,7 @@
                 </el-tab-pane>
                 <el-tab-pane label="Notificaciones" name="5">
                     Notificaciones
-                </el-tab-pane>
+                </el-tab-pane> -->
             </el-tabs>
         </div>
     </AppLayout>
