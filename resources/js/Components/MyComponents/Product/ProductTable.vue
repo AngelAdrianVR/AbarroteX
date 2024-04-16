@@ -90,10 +90,10 @@ methods:{
                 }
 
                 ElNotification({
-                title: 'Success',
+                title: 'Correcto',
                 message: 'Se ha eliminado el producto',
                 type: 'success',
-                position: 'bottom-right',
+                position: 'top-right',
             });
             }
         } catch (error) {
@@ -102,7 +102,7 @@ methods:{
                 title: 'Error',
                 message: 'No se pudo eliminar el producto. Inténte más tarde',
                 type: 'error',
-                position: 'bottom-right',
+                position: 'top-right',
             });
         }
     }
