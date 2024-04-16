@@ -115,6 +115,7 @@ class GlobalProductStoreController extends Controller
                 'public_price' => $product->public_price,
                 'cost' => 0,
                 'current_stock' => 1,
+                'min_stock' => 1,
                 'global_product_id' => $productId,
                 'store_id' => auth()->user()->store_id,
             ]);
@@ -151,17 +152,29 @@ class GlobalProductStoreController extends Controller
         ]);
     }
 
-
-    public function fetchHistory($global_product_store_id)
+    public function fetchHistory($global_product_store_id, $month = null, $year = null)
     {
-        $product_history = ProductHistoryResource::collection(ProductHistory::where('global_product_store_id', $global_product_store_id)->latest()->get());
+        // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
+        $query = ProductHistory::where('global_product_store_id', $global_product_store_id);
+        
+        if ($month && $year) {
+            $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
+        } else {
+            // Obtener el mes y el año actuales
+            $currentMonth = date('m');
+            $currentYear = date('Y');
+            $query->whereMonth('created_at', $currentMonth)->whereYear('created_at', $currentYear);
+        }
+
+        // Obtener el historial ordenado por fecha de creación
+        $product_history = ProductHistoryResource::collection($query->latest()->get());
 
         // Agrupar por mes y año
         $groupedHistory = $product_history->groupBy(function ($item) {
             return $item->created_at->format('F Y');
         });
 
-        // Convierte el grupo en un array
+        // Convertir el grupo en un array
         $groupedHistoryArray = $groupedHistory->toArray();
 
         return response()->json(['items' => $groupedHistoryArray]);

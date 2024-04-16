@@ -20,6 +20,8 @@
                     title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' />
             </section>
         </main>
+
+        <p class="my-9">{{salesCurrentPeriod}}</p>
     </AppLayout>
 </template>
 <script>
@@ -180,7 +182,13 @@ export default {
             return [
                 {
                     colors: ['#C30303', '#373737', '#999999', '#5FCB1F', '#2387FC'],
-                    labels: this.topProductsCurrentPeriod.map((item) => item.product.name),
+                    labels: this.topProductsCurrentPeriod.map((item) => {
+                        if (item.hasOwnProperty('global_product_store_id')) {
+                            return item.global_product_store?.global_product?.name;
+                        } else {
+                            return item.product.name;
+                        }
+                    }),
                     series: this.topProductsCurrentPeriod.map((item) => item.total_quantity),
                 },
             ]

@@ -45,7 +45,7 @@
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
             <!-- Resultados de la búsqueda -->
             <div v-if="searchFocus && searchQuery"
-              class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50">
+              class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 h-48 overflow-auto">
               <ul v-if="productsFound?.length > 0 && !loading">
                 <li @click="productFoundSelected = product; searchQuery = null" v-for="(product, index) in productsFound"
                   :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ? product.global_product?.name : product.name }}</li>
