@@ -97,7 +97,7 @@
             <div v-if="!editableTabs[this.editableTabsValue - 1]?.paying">
               <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
-                <p class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal() }}</strong></p>
+                <p class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</strong></p>
               </div>
               <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p class="text-[#999999]">Descuento</p>
@@ -111,9 +111,9 @@
                 <p class="font-bold">Total</p>
                 <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
                   class="text-red-600 text-xs">El descuento es más grande que el total</p>
-                <p v-else class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal() -
-                  editableTabs[this.editableTabsValue
-                    - 1].discount }}</strong></p>
+                <p v-else class="text-gray-99">$ <strong class="ml-3">{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
+                        minimumFractionDigits: 2
+                  }) }}</strong></p>
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="receive()"
@@ -124,8 +124,9 @@
 
             <!-- cobrando -->
             <div v-else>
-              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ calculateTotal() -
-                editableTabs[this.editableTabsValue - 1].discount }}</strong>
+              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
+                        minimumFractionDigits: 2
+                  }) }}</strong>
               </p>
               <div class="flex items-center justify-between mx-5 space-x-10">
                 <p>Entregado</p>
@@ -357,7 +358,8 @@ export default {
       }, 0);
 
       // Formatear el resultado al final
-      return total?.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      // return total?.toLocaleString('en-US', { minimumFractionDigits: 2 }); formatea el total con comas pero me manda a NaN despues de 1000
+      return total;
     },
     receive() {
       this.editableTabs[this.editableTabsValue - 1].paying = true;
