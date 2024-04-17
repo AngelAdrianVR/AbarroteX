@@ -158,7 +158,7 @@ const submit = () => {
             </div>
 
             <div class="flex items-center justify-center mt-6 px-9 disabled:cursor-not-allowed disabled:opacity-25">
-                <PrimaryButton class="w-full" :disabled="form.processing">
+                <PrimaryButton class="w-full" :disabled="form.processing || !form.terms">
                     Registrarme
                 </PrimaryButton>
             </div>
@@ -170,16 +170,16 @@ const submit = () => {
                 </Link>
             </div>
 
-            <el-divider class="mt-4">ó</el-divider>
+            <!-- <el-divider class="mt-4">ó</el-divider> -->
 
-            <div class="flex items-center justify-center mt-4">
+            <!-- <div class="flex items-center justify-center mt-4">
                 <button
                     class="w-full border border-grayD9 rounded-full flex items-center justify-center space-x-3 py-1 text-sm text-[#777777] disabled:opacity-25 disabled:cursor-not-allowed"
                     :disabled="form.processing">
                     <img src="@/../../public/images/google_logo.png" width="25" alt="Logo de google">
                     <span>Continuar con Google</span>
                 </button>
-            </div>
+            </div> -->
         </form>
     </AuthenticationCard>
 </template>
