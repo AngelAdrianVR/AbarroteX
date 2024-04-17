@@ -104,7 +104,7 @@ class SaleController extends Controller
 
             //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
             // Verifica si 'global_product_id' existe en 'product'
-            $is_inventory_on = auth()->user()->store->settings()->where('name', 'Llevar inventario')->first()->value;
+            $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
             if ($is_inventory_on) {
                 if (isset($sale['product']['global_product_id'])) {
                     // Si existe, recupera el producto global de la tienda'

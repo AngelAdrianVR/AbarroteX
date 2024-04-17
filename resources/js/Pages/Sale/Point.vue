@@ -41,16 +41,20 @@
           <!-- buscador de productos -->
           <div class="relative">
             <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
-              ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto" type="search">
+              ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
+              type="search">
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
             <!-- Resultados de la búsqueda -->
             <div v-if="searchFocus && searchQuery"
               class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 h-48 overflow-auto">
               <ul v-if="productsFound?.length > 0 && !loading">
-                <li @click="productFoundSelected = product; searchQuery = null" v-for="(product, index) in productsFound"
-                  :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ? product.global_product?.name : product.name }}</li>
+                <li @click="productFoundSelected = product; searchQuery = null"
+                  v-for="(product, index) in productsFound" :key="index"
+                  class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ?
+                    product.global_product?.name : product.name }}</li>
               </ul>
-              <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias
+              <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron
+                coincidencias
               </p>
               <!-- estado de carga -->
               <div v-if="loading" class="flex justify-center items-center py-10">
@@ -65,11 +69,13 @@
               <i @click="productFoundSelected = null"
                 class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
               <figure class="h-32">
-                <img class="object-contain w-32 mx-auto" 
+                <img class="object-contain w-32 mx-auto"
                   :src="productFoundSelected?.global_product_id ? productFoundSelected?.global_product?.media[0]?.original_url : productFoundSelected?.media[0]?.original_url">
               </figure>
               <div class="flex justify-between items-center mt-2 mb-4">
-                <p class="font-bold">{{ productFoundSelected?.global_product_id ? productFoundSelected?.global_product?.name : productFoundSelected?.name }}</p>
+                <p class="font-bold">{{ productFoundSelected?.global_product_id ?
+                  productFoundSelected?.global_product?.name :
+                  productFoundSelected?.name }}</p>
                 <p class="text-[#5FCB1F]">${{ productFoundSelected?.public_price }}</p>
               </div>
               <div class="flex justify-between items-center">
@@ -78,7 +84,8 @@
                 <el-input-number v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
-                <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null" class="!rounded-full !px-24">Agregar
+                <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null"
+                  class="!rounded-full !px-24">Agregar
                 </PrimaryButton>
               </div>
             </div>
@@ -86,24 +93,27 @@
           </div>
 
           <!-- Total por cobrar -->
-          <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
+          <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length" class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
             <div v-if="!editableTabs[this.editableTabsValue - 1]?.paying">
-              <div class="flex items-center justify-between text-lg mx-5">
+              <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
                 <p class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal() }}</strong></p>
               </div>
-              <!-- <div class="flex items-center justify-between text-lg mx-5">
+              <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p class="text-[#999999]">Descuento</p>
                 <el-input v-model="editableTabs[this.editableTabsValue - 1].discount" type="number" class="!w-24 !h-8" placeholder="0.00">
                     <template #prefix>
                         <i class="fa-solid fa-dollar-sign"></i>
                     </template>
                 </el-input>
-              </div> -->
+              </div>
               <div class="flex items-center justify-between text-lg mx-5">
                 <p class="font-bold">Total</p>
-                <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0" class="text-red-600 text-xs">El descuento es más grande que el total</p>
-                <p v-else class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal() - editableTabs[this.editableTabsValue - 1].discount }}</strong></p>
+                <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
+                  class="text-red-600 text-xs">El descuento es más grande que el total</p>
+                <p v-else class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal() -
+                  editableTabs[this.editableTabsValue
+                    - 1].discount }}</strong></p>
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="receive()"
@@ -114,7 +124,8 @@
 
             <!-- cobrando -->
             <div v-else>
-              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ calculateTotal() - editableTabs[this.editableTabsValue - 1].discount }}</strong>
+              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ calculateTotal() -
+                editableTabs[this.editableTabsValue - 1].discount }}</strong>
               </p>
               <div class="flex items-center justify-between mx-5 space-x-10">
                 <p>Entregado</p>
@@ -123,17 +134,22 @@
               </div>
               <div class="flex items-center justify-between mx-5 my-2 relative">
                 <p>Cambio</p>
-                <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived">${{
-                  (editableTabs[this.editableTabsValue - 1]?.moneyReceived - (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
-                    minimumFractionDigits: 2
+                <p
+                  v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived">
+                  ${{
+                    (editableTabs[this.editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
+                      editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
+                        minimumFractionDigits: 2
                   }) }}</p>
               </div>
               <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
-                class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una cantidad
+                class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una
+                cantidad
                 igual o mayor al total de compra.</p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
-                <PrimaryButton :disabled="storeProcessing || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived" 
+                <PrimaryButton
+                  :disabled="storeProcessing || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived"
                   @click="store" class="!rounded-full">Aceptar</PrimaryButton>
               </div>
             </div>
@@ -156,6 +172,8 @@ export default {
   data() {
 
     return {
+      // descuentos activados
+      isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
       storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
       loading: false, //cargando la busqueda de productos
@@ -257,33 +275,33 @@ export default {
       let is_local_product = false;
 
       //si no se encontró en productos transferidos se busca en productos locales
-      if ( productScaned == null ) {
+      if (productScaned == null) {
         productScaned = this.products.find(item => item.code === this.scannerQuery);
         is_local_product = true;
       }
 
       // si no se encontró el producto escaneado aparece un mensaje y no busca en la bd para no tardar más
-      if ( productScaned != null ) {
-          try {
-            if ( is_local_product ) {
-              const response = await axios.get(route('products.get-product-scaned', [productScaned.id, {is_local_product: is_local_product}]));
+      if (productScaned != null) {
+        try {
+          if (is_local_product) {
+            const response = await axios.get(route('products.get-product-scaned', [productScaned.id, { is_local_product: is_local_product }]));
 
-              if (response.status === 200 && response.data && response.data.item) {
-                this.productSelected = response.data.item;
-                this.addSaleProduct(this.productSelected);
-              } else {
-                console.error('La respuesta no tiene el formato esperado.');
-              }
+            if (response.status === 200 && response.data && response.data.item) {
+              this.productSelected = response.data.item;
+              this.addSaleProduct(this.productSelected);
             } else {
-                const response = await axios.get(route('products.get-product-scaned', [productScaned.global_product.id, {is_local_product: is_local_product}]));
-
-                if (response.status === 200 && response.data && response.data.item) {
-                  this.productSelected = response.data.item;
-                  this.addSaleProduct(this.productSelected);
-                } else {
-                  console.error('La respuesta no tiene el formato esperado.');
-                }
+              console.error('La respuesta no tiene el formato esperado.');
             }
+          } else {
+            const response = await axios.get(route('products.get-product-scaned', [productScaned.global_product.id, { is_local_product: is_local_product }]));
+
+            if (response.status === 200 && response.data && response.data.item) {
+              this.productSelected = response.data.item;
+              this.addSaleProduct(this.productSelected);
+            } else {
+              console.error('La respuesta no tiene el formato esperado.');
+            }
+          }
         } catch (error) {
           console.error('Error al realizar la solicitud:', error);
         } finally {

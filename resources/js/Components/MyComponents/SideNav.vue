@@ -1,41 +1,43 @@
 <template>
     <!-- sidebar -->
     <div class="h-screen hidden md:block shadow-lg relative">
-        <i @click="small = false" v-if="small" class="fa-solid fa-angle-right text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
-        <i @click="small = true" v-else class="fa-solid fa-angle-left text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
+        <i @click="small = false" v-if="small"
+            class="fa-solid fa-angle-right text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
+        <i @click="small = true" v-else
+            class="fa-solid fa-angle-left text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
         <div class="bg-[#232323] h-full overflow-auto">
             <!-- Logo -->
             <div class="flex items-center justify-center mt-7">
                 <Link v-if="small" :href="route('sales.index')">
-                    <!-- <ApplicationMark /> -->
-                    <figure class="">
-                        <img class="w-16 px-2 mb-[52px]" src="@/../../public/images/isologo.png" alt="logo">
-                    </figure>
+                <figure class="">
+                    <img class="w-16 px-2 mb-[52px]" src="@/../../public/images/isologo.png" alt="logo">
+                </figure>
                 </Link>
                 <Link v-else :href="route('sales.index')">
-                    <figure class="">
-                        <img class="w-32 px-2 mb-8" src="@/../../public/images/white_logo.png" alt="logo">
-                    </figure>
+                <figure class="">
+                    <img class="w-32 px-2 mb-8" src="@/../../public/images/white_logo.png" alt="logo">
+                </figure>
                 </Link>
             </div>
             <nav class="pr-2 text-white">
                 <!-- Con barra pequeña -->
-                <template v-if="small">
+                <section v-if="small">
                     <div v-for="(menu, index) in menus" :key="index">
-                        <button v-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active" :title="menu.label"
+                        <button v-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active"
+                            :title="menu.label"
                             class="w-full text-center py-2 pr-3 pl-5 justify-between rounded-r-[10px] mt-2 transition ease-linear duration-150"
                             :class="menu.active ? 'bg-[#393939] text-primary border-l-2 border-primary' : 'hover:text-primary hover:bg-[#393939] text-[#9A9A9A]'">
                             <span v-html="menu.icon"></span>
                         </button>
                     </div>
-                </template>
+                </section>
 
                 <!-- Con barra grande -->
-                <template v-else v-for="(menu, index) in menus" :key="index">
+                <section v-else v-for="(menu, index) in menus" :key="index">
                     <!-- Con submenues -->
                     <div v-if="menu.show">
-                        <Accordion v-if="menu.options.length" :icon="menu.icon" :active="menu.active" :title="menu.label"
-                            :id="index">
+                        <Accordion v-if="menu.options.length" :icon="menu.icon" :active="menu.active"
+                            :title="menu.label" :id="index">
                             <div v-for="(option, index2) in menu.options" :key="index2">
                                 <button @click="goToRoute(option.route)" v-if="option.show" :active="option.active"
                                     :title="option.label"
@@ -46,16 +48,17 @@
                             </div>
                         </Accordion>
                         <!-- Sin submenues -->
-                        <button v-else-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active" :title="menu.label"
+                        <button v-else-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active"
+                            :title="menu.label"
                             class="w-full text-start pl-5 pr-3 py-2 mt-2 border-l-2 text-xs rounded-r-[10px] transition ease-linear duration-150"
                             :class="menu.active ? 'bg-[#393939] text-primary border-primary' : 'hover:text-primary border-transparent hover:bg-[#393939] text-[#9A9A9A]'">
                             <p class="w-full truncate flex items-center">
-                                <span class="mr-2" v-html="menu.icon"></span> 
+                                <span class="mr-2" v-html="menu.icon"></span>
                                 <span>{{ menu.label }}</span>
                             </p>
                         </button>
                     </div>
-                </template>
+                </section>
             </nav>
         </div>
     </div>
@@ -137,8 +140,8 @@ export default {
                     dropdown: false,
                     show: true
                 },
-               
-               //ejemplo para usar submenues
+
+                //ejemplo para usar submenues
                 //     label: 'Comunidad',
                 //     icon: '<i class="fa-solid fa-people-roof text-sm mr-2"></i>',
                 //     // route: route('posts.index'),
@@ -184,13 +187,13 @@ export default {
             } else {
                 this.goToRoute(this.menus[index].route)
             }
-            },
-            goToRoute(route) {
-                this.$inertia.get(route);
-            },
-            logout() {
-                this.$inertia.post(route('logout'));
-            }
+        },
+        goToRoute(route) {
+            this.$inertia.get(route);
+        },
+        logout() {
+            this.$inertia.post(route('logout'));
+        }
     },
     mounted() {
     }

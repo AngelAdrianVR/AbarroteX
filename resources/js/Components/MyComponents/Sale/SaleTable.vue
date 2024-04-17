@@ -19,7 +19,7 @@
           <template v-if="editMode !== index">
             ${{ sale.product.public_price }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
-            <button @click.stop="startEditing(sale, index)"
+            <button v-if="isDiscountOn" @click.stop="startEditing(sale, index)"
               class="flex items-center justify-center text-primary bg-gray-200 size-5 rounded-full ml-2 mr-1">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-[14px]">
@@ -131,6 +131,8 @@
 export default {
   data() {
     return {
+      // descuentos activados
+      isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
       quantity: 1,
       editMode: null,
       editedPrice: null

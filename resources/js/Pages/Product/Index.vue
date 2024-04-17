@@ -27,7 +27,7 @@
             </div>
 
             <Loading v-if="loading" class="mt-20" />
-            <div v-else class="mt-8 lg:w-11/12">
+            <div v-else class="mt-8">
                 <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
                     total_products }} elementos
                 </p>

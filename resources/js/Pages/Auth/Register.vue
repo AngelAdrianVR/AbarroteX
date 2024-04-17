@@ -34,10 +34,9 @@ const submit = () => {
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
-            <h1 class="font-extrabold mt-3 text-center text-2xl text-primary">Ezy Ventas</h1>
         </template>
 
-        <div class="flex items-center justify-around mt-5 mb-8 mx-11 border-b text-sm">
+        <div class="flex items-center justify-around mt-2 mb-8 mx-11 border-b text-sm">
             <button @click="$inertia.visit(route('login'))" type="button" class="text-[#777777] px-2">Iniciar
                 sesión</button>
             <span class="text-primary px-2 border-b border-primary">Registrarse</span>
