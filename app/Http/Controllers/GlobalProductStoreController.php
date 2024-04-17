@@ -89,42 +89,6 @@ class GlobalProductStoreController extends Controller
     }
 
 
-    public function transferProducts(Request $request)
-    {   
-        // Mis productos ya registrados
-        $my_products = GlobalProductStore::where('store_id', auth()->user()->store_id)
-            ->pluck('global_product_id'); // Obtenemos solo los ids de los productos registrados
-        
-        // Obtener el arreglo de productos del cuerpo de la solicitud
-        $product_ids = $request->input('products');
-
-        // Filtrar los productos del catálogo para excluir aquellos que ya existen en mi tienda
-        $new_product_ids = collect($product_ids)->reject(function ($productId) use ($my_products) {
-            return $my_products->contains(function ($myProductId) use ($productId) {
-                return $myProductId == $productId;
-            });
-        });
-
-        // Aquí puedes manipular el arreglo de productos como desees
-        // Por ejemplo, puedes iterar sobre el arreglo y hacer lo que necesites
-        foreach ($new_product_ids as $productId) {
-            // Se obtiene el producto global con el id recibido
-            $product = GlobalProduct::with(['category', 'brand'])->find($productId);
-
-            GlobalProductStore::create([
-                'public_price' => $product->public_price,
-                'cost' => 0,
-                'current_stock' => 1,
-                'min_stock' => 1,
-                'global_product_id' => $productId,
-                'store_id' => auth()->user()->store_id,
-            ]);
-        }
-
-        return to_route('products.index');
-    }
-
-
     public function entryStock(Request $request, $global_product_store_id)
     {
         $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);

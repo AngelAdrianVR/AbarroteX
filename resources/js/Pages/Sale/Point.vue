@@ -13,9 +13,9 @@
       <div class="lg:flex space-x-5 my-5">
         <!-- scaner de código  -->
         <section class="lg:w-[70%]">
-          <div class="relative lg:w-1/2 mx-auto mb-4">
+          <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
             <input v-model="scannerQuery" :disabled="scanning" @keydown.enter="getProductByCode" ref="scanInput"
-              class="input w-full pl-9" placeholder="Escanea el producto" type="text">
+              class="input w-full pl-9" placeholder="Escanea o teclea el código del producto" type="text">
             <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <!-- Pestañas -->
@@ -93,27 +93,33 @@
           </div>
 
           <!-- Total por cobrar -->
-          <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length" class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
+          <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
+            class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
             <div v-if="!editableTabs[this.editableTabsValue - 1]?.paying">
               <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
-                <p class="text-gray-99">$ <strong class="ml-3">{{ calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</strong></p>
+                <p class="text-gray-99">$ <strong class="ml-3">{{
+                  calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                    ",") }}</strong></p>
               </div>
               <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p class="text-[#999999]">Descuento</p>
-                <el-input v-model="editableTabs[this.editableTabsValue - 1].discount" type="number" class="!w-24 !h-8" placeholder="0.00">
-                    <template #prefix>
-                        <i class="fa-solid fa-dollar-sign"></i>
-                    </template>
+                <el-input v-model="editableTabs[this.editableTabsValue - 1].discount" type="number" class="!w-24 !h-8"
+                  placeholder="0.00">
+                  <template #prefix>
+                    <i class="fa-solid fa-dollar-sign"></i>
+                  </template>
                 </el-input>
               </div>
               <div class="flex items-center justify-between text-lg mx-5">
                 <p class="font-bold">Total</p>
                 <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
                   class="text-red-600 text-xs">El descuento es más grande que el total</p>
-                <p v-else class="text-gray-99">$ <strong class="ml-3">{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
-                        minimumFractionDigits: 2
-                  }) }}</strong></p>
+                <p v-else class="text-gray-99">$ <strong class="ml-3">{{ (calculateTotal() -
+                  editableTabs[this.editableTabsValue
+                    - 1].discount)?.toLocaleString('en-US', {
+                    minimumFractionDigits: 2
+                    }) }}</strong></p>
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="receive()"
@@ -124,8 +130,9 @@
 
             <!-- cobrando -->
             <div v-else>
-              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
-                        minimumFractionDigits: 2
+              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() -
+                editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
+                  minimumFractionDigits: 2
                   }) }}</strong>
               </p>
               <div class="flex items-center justify-between mx-5 space-x-10">
@@ -141,7 +148,7 @@
                     (editableTabs[this.editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
                       editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
                         minimumFractionDigits: 2
-                  }) }}</p>
+                      }) }}</p>
               </div>
               <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
                 class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una
@@ -175,6 +182,8 @@ export default {
     return {
       // descuentos activados
       isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
+      // escaneo de codigos activado
+      isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
       storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
       loading: false, //cargando la busqueda de productos
@@ -337,7 +346,7 @@ export default {
       this.scannerQuery = null;
       this.quantity = 1;
       this.scanning = false;
-      this.scanInputFocus();
+      this.inputFocus();
     },
     clearTab() {
       this.searchQuery = null;
@@ -349,7 +358,7 @@ export default {
       this.editableTabs[this.editableTabsValue - 1].paying = false;
       this.editableTabs[this.editableTabsValue - 1].discount = 0;
       this.editableTabs[this.editableTabsValue - 1].moneyReceived = null;
-      this.scanInputFocus();
+      this.inputFocus();
     },
     calculateTotal() {
       // Suma de los productos del precio y la cantidad para cada elemento en saleProducts
@@ -365,9 +374,13 @@ export default {
       this.editableTabs[this.editableTabsValue - 1].paying = true;
       this.receivedInputFocus();
     },
-    scanInputFocus() {
+    inputFocus() {
       this.$nextTick(() => {
-        this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
+        if (this.isScanOn) {
+          this.$refs.scanInput.focus();
+        } else {
+          this.$refs.searchInput.focus();
+        }
       });
     },
     receivedInputFocus() {
@@ -377,7 +390,11 @@ export default {
     },
   },
   mounted() {
-    this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
+    if (this.isScanOn) {
+      this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
+    } else {
+      this.$refs.searchInput.focus(); // Enfocar el input de buscar producto cuando se abre el modal
+    }
   }
 }
 </script>
