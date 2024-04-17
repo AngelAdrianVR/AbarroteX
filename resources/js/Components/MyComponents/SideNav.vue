@@ -7,11 +7,14 @@
             <!-- Logo -->
             <div class="flex items-center justify-center mt-7">
                 <Link v-if="small" :href="route('sales.index')">
-                    <ApplicationMark />
+                    <!-- <ApplicationMark /> -->
+                    <figure class="">
+                        <img class="w-16" src="@/../../public/images/isologo_blanco.png" alt="logo">
+                    </figure>
                 </Link>
                 <Link v-else :href="route('sales.index')">
                     <figure class="">
-                        <img class="w-36 px-2" src="@/../../public/images/logo.png" alt="logo">
+                        <img class="w-36 px-2" src="@/../../public/images/isologo_blanco.png" alt="logo">
                     </figure>
                 </Link>
             </div>

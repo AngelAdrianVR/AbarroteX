@@ -118,7 +118,7 @@ const submit = () => {
                 Crear cuenta
                 </Link>
             </div>
-
+<!-- 
             <el-divider class="mt-4">ó</el-divider>
 
             <div class="flex items-center justify-center mt-4">
@@ -128,7 +128,7 @@ const submit = () => {
                     <img src="@/../../public/images/google_logo.png" width="25" alt="Logo de google">
                     <span>Continuar con Google</span>
                 </button>
-            </div>
+            </div> -->
         </form>
     </AuthenticationCard>
 </template>
