@@ -5,7 +5,8 @@
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
-                    <ThirthButton @click="openEntryModal">Entrada de producto
+                    <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
+                        Entrada de producto
                     </ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('products.edit', product.data.id))" class="!rounded-full">
                         Editar</PrimaryButton>
@@ -20,9 +21,9 @@
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
                     <Loading v-if="searchLoading" />
                     <ul v-else-if="productsFound?.length > 0">
-                        <li @click.stop="handleProductSelected(product)"
-                            v-for="(product, index) in productsFound" :key="index"
-                            class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ? product.global_product?.name : product.name }}</li>
+                        <li @click.stop="handleProductSelected(product)" v-for="(product, index) in productsFound"
+                            :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
+                                product.global_product_id ? product.global_product?.name : product.name }}</li>
                     </ul>
                     <p v-else class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias</p>
                 </div>
@@ -36,7 +37,8 @@
                 <!-- fotografia de producto -->
                 <section class="mt-7">
                     <figure class="border size-96 border-grayD9 rounded-lg flex justify-center items-center">
-                        <img v-if="product.data.imageCover?.length" class="w-full mx-auto object-contain" :src="product.data.imageCover[0]?.original_url" alt="">
+                        <img v-if="product.data.imageCover?.length" class="w-full mx-auto object-contain"
+                            :src="product.data.imageCover[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                             <p class="text-sm text-gray-300">Imagen no disponible</p>
@@ -83,15 +85,17 @@
                                     </el-tooltip>
                                 </p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Categoría: <span class="font-bold">{{ product.data.category?.name }}</span></p>
+                                <p class="text-gray37">Categoría: <span class="font-bold">{{ product.data.category?.name
+                                        }}</span></p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Marca: <span class="font-bold">{{ product.data.brand?.name }}</span></p>
+                                <p class="text-gray37">Marca: <span class="font-bold">{{ product.data.brand?.name
+                                        }}</span></p>
                             </div>
                         </div>
-                        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.data.created_at }}</strong></p>
-                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ product.data.name }}</h1>
-
-                        <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
+                        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.data.created_at
+                                }}</strong></p>
+                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ product.data.name }}</h1>
+                        <div class="lg:w-1/2 mt-3 lg:mt-3 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de compra:</p>
                                 <p class="text-right font-bold">${{ product.data.cost ?? '-' }}</p>
@@ -100,16 +104,19 @@
                                 <p class="text-gray37">Precio de venta: </p>
                                 <p class="text-right font-bold">${{ product.data.public_price }}</p>
                             </div>
-                            <div v-if="product.data.current_stock >= product.data.min_stock"
+                            <div v-if="product.data.current_stock >= product.data.min_stock || !isInventoryOn"
                                 class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-[#5FCB1F]">{{ product.data.current_stock ?? '-' }}</p>
+                                <p class="text-right font-bold text-[#5FCB1F]">{{ product.data.current_stock ?? '-' }}
+                                </p>
                             </div>
                             <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-primary">{{ product.data.current_stock ?? '-' }}<i
-                                        class="fa-solid fa-arrow-down text-xs ml-2"></i></p>
-                                <p class="absolute top-2 -right-16 text-xs font-bold text-primary">Bajo stock</p>
+                                <p class="text-right font-bold text-redDanger">
+                                    <span>{{ product.data.current_stock ?? '-' }}</span>
+                                    <i class="fa-solid fa-arrow-down text-xs ml-2"></i>
+                                </p>
+                                <p class="absolute top-2 -right-16 text-xs font-bold text-redDanger">Bajo stock</p>
                             </div>
 
                             <h2 class="pt-5 ml-5 font-bold text-lg">Cantidades de stock permitidas</h2>
@@ -135,20 +142,23 @@
                         </div>
                         <div v-else>
                             <div class="flex items-center justify-center space-x-3">
-                                <PrimaryButton @click="loadPreviousMonth"><i class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
-                                <PrimaryButton @click="loadNextMonth"><i class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
+                                <PrimaryButton @click="loadPreviousMonth"><i
+                                        class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
+                                <PrimaryButton @click="loadNextMonth"><i
+                                        class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
                             </div>
                             <div v-if="Object?.keys(productHistory)?.length">
                                 <div v-for="(history, index) in productHistory" :key="history">
-                                    
-                                        <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
-                                            translateMonth(index) }}</h2>
-                                        <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span class="mr-2"
-                                            v-html="getIcon(activity.type)"></span>{{ activity.description + ' ' +
-                                            activity.created_at }}
-                                        </p>
-                                    </div>
+
+                                    <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
+                                        translateMonth(index) }}</h2>
+                                    <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span
+                                            class="mr-2" v-html="getIcon(activity.type)"></span>{{ activity.description
+                                                + ' ' +
+                                                activity.created_at }}
+                                    </p>
                                 </div>
+                            </div>
                             <p v-else class="text-xs text-gray-500 mt-5 text-center">No hay actividad en esta fecha</p>
                         </div>
                     </div>
@@ -156,8 +166,6 @@
                 </section>
             </div>
         </div>
-
-
         <!-- -------------- Modal starts----------------------- -->
         <Modal :show="entryProductModal" @close="entryProductModal = false">
             <div class="p-4 relative">
@@ -180,7 +188,9 @@
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
-                        <PrimaryButton :disabled="form.processing" @click="entryProduct" class="!rounded-full">Ingresar producto</PrimaryButton>
+                        <PrimaryButton :disabled="form.processing" @click="entryProduct" class="!rounded-full">Ingresar
+                            producto
+                        </PrimaryButton>
                         <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
                     </div>
                 </section>
@@ -220,6 +230,8 @@ export default {
             searchLoading: false,
             currentMonth: new Date().getMonth() + 1, // El mes actual
             currentYear: new Date().getFullYear(), // El año actual
+            // control de inventario activado
+            isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
         };
     },
     components: {
@@ -260,20 +272,6 @@ export default {
                 type: "success",
             });
         },
-        async searchProducts() {
-            this.searchLoading = true;
-            try {
-                const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
-                if (response.status == 200) {
-                    this.productsFound = response.data.items;
-                }
-
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.searchLoading = false;
-            }
-        },
         handleBlur() {
             // Introducir un retraso para dar tiempo al evento click de ejecutarse antes del blur
             setTimeout(() => {
@@ -299,41 +297,6 @@ export default {
                     this.fetchHistory();
                 },
             });
-        },
-         async fetchHistory() {
-            this.loading = true;
-            try {
-                const response = await axios.get(route("products.fetch-history", { 
-                    product_id:  this.product.data.id,
-                    month: this.currentMonth,
-                    year: this.currentYear,
-                }));
-                if (response.status === 200) {
-                    this.productHistory = response.data.items;
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
-            }
-        },
-         async loadPreviousMonth() {
-            if (this.currentMonth === 1) {
-                this.currentMonth = 12;
-                this.currentYear -= 1;
-            } else {
-                this.currentMonth -= 1;
-            }
-            await this.fetchHistory();
-        },
-        async loadNextMonth() {
-            if (this.currentMonth === 12) {
-                this.currentMonth = 1;
-                this.currentYear += 1;
-            } else {
-                this.currentMonth += 1;
-            }
-            await this.fetchHistory();
         },
         getIcon(type) {
             if (type === 'Precio') {
@@ -367,12 +330,61 @@ export default {
             return `${translatedMonth} ${year}`;
         },
         handleProductSelected(product) {
-            if ( product.global_product_id ) {
+            if (product.global_product_id) {
                 this.$inertia.get(route('global-product-store.show', product.id))
             } else {
                 this.$inertia.get(route('products.show', product.id))
             }
-        }
+        },
+        async fetchHistory() {
+            this.loading = true;
+            try {
+                const response = await axios.get(route("products.fetch-history", {
+                    product_id: this.product.data.id,
+                    month: this.currentMonth,
+                    year: this.currentYear,
+                }));
+                if (response.status === 200) {
+                    this.productHistory = response.data.items;
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async loadPreviousMonth() {
+            if (this.currentMonth === 1) {
+                this.currentMonth = 12;
+                this.currentYear -= 1;
+            } else {
+                this.currentMonth -= 1;
+            }
+            await this.fetchHistory();
+        },
+        async loadNextMonth() {
+            if (this.currentMonth === 12) {
+                this.currentMonth = 1;
+                this.currentYear += 1;
+            } else {
+                this.currentMonth += 1;
+            }
+            await this.fetchHistory();
+        },
+        async searchProducts() {
+            this.searchLoading = true;
+            try {
+                const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
+                if (response.status == 200) {
+                    this.productsFound = response.data.items;
+                }
+
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.searchLoading = false;
+            }
+        },
     },
     mounted() {
         this.fetchHistory();

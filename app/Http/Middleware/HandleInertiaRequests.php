@@ -41,8 +41,19 @@ class HandleInertiaRequests extends Middleware
                 if ($request->user()) {
                     return $request->user()->store;
                 }
-
                 return null;
+            },
+            'auth.user.store.settings' => function () use ($request) {
+                if ($request->user()) {
+                    return $request->user()->store->settings->map(function ($setting) {
+                        return [
+                            'id' => $setting->id,
+                            'name' => $setting->key,
+                            'value' => $setting->pivot->value,
+                        ];
+                    });
+                }
+                return [];
             },
         ]);
     }
