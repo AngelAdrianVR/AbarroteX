@@ -47,7 +47,7 @@
                         </Accordion>
                         <!-- Sin submenues -->
                         <button v-else-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active" :title="menu.label"
-                            class="w-full text-start pl-4 pr-3 mt-2 border-l-2 flex items-center justify-between text-xs rounded-r-[10px] py-1 transition ease-linear duration-150"
+                            class="w-full text-start pl-4 pr-3 py-2 mt-2 border-l-2 flex items-center justify-between text-xs rounded-r-[10px] transition ease-linear duration-150"
                             :class="menu.active ? 'bg-[#393939] text-primary border-primary' : 'hover:text-primary border-transparent hover:bg-[#393939] text-[#9A9A9A]'">
                             <p class="w-full text-sm truncate"><span class="mr-2" v-html="menu.icon"></span> {{ menu.label }}</p>
                         </button>

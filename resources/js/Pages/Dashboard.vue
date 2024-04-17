@@ -20,8 +20,6 @@
                     title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' />
             </section>
         </main>
-
-        <p class="my-9">{{salesCurrentPeriod}}</p>
     </AppLayout>
 </template>
 <script>

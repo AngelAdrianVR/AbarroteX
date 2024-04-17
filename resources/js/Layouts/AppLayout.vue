@@ -199,7 +199,7 @@ const logout = () => {
                     </div>
                 </nav>
 
-                <div class="overflow-y-auto h-[calc(100vh-4.1rem)] bg-white">
+                <div class="overflow-y-auto h-[calc(100vh-3rem)] bg-white">
                     <slot />
                 </div>
             </main>
