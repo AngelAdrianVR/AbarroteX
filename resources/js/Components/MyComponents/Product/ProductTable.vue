@@ -22,7 +22,7 @@
                 <div class="w-[35%] md:w-[30%]">{{ product.global_product_id ? product.global_product?.name :
                     product.name }}</div>
                 <div class="w-[10%]">${{ product.public_price }}</div>
-                <div :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-primary' : ''" class="w-[10%]">
+                <div :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''" class="w-[10%]">
                     {{ product.current_stock ?? '-' }}
                     <i v-if="product.current_stock < product.min_stock && isInventoryOn"
                         class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>

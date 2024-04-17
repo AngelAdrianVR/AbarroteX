@@ -12,9 +12,9 @@
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="my-4 lg:my-0 flex items-center space-x-3">
-                    <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
+                    <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
-                    </ThirthButton>
+                    </ThirthButton> -->
                     <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">Nuevo producto
                     </PrimaryButton>
                 </div>
@@ -55,7 +55,7 @@
                     <div class="mt-3 col-span-2">
                         <InputLabel value="Código del producto*" class="ml-3 mb-1" />
                         <el-input v-model="form.code" @keydown.enter="getProduct" ref="codeInput"
-                            placeholder="Escanea el código del producto" :maxlength="100" clearable>
+                            placeholder="Escanea o teclea el código del producto" :maxlength="100" clearable>
                             <template #prefix>
                                 <i class="fa-solid fa-barcode"></i>
                             </template>
