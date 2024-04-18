@@ -1,17 +1,19 @@
 <template>
     <AppLayout title="Inicio">
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
-        <section class="flex items-center justify-around">
+        <section class="flex flex-col md:flex-row items-center justify-around">
             <el-radio-group v-model="period" @change="handleChangePeriod"
                 class="!flex justify-center my-8 mx-2 lg:mx-14">
-                <el-radio label="Hoy">Hoy</el-radio>
-                <el-radio label="Semanal">Semanal</el-radio>
-                <el-radio label="Mensual">Mensual</el-radio>
+                <el-radio value="Hoy">Hoy</el-radio>
+                <el-radio value="Semanal">Semanal</el-radio>
+                <el-radio value="Mensual">Mensual</el-radio>
             </el-radio-group>
-            <el-date-picker v-if="period == 'Hoy'" v-model="periodRange" type="date" placeholder="Elige un día" />
-            <el-date-picker v-else-if="period == 'Semanal'" v-model="periodRange" type="week" format="[Semana] ww" placeholder="Elige una semana" />
-            <el-date-picker v-else-if="period == 'Mensual'" v-model="periodRange" type="month" placeholder="Elige un mes" />
-            {{ periodRange }}
+            <el-date-picker v-if="period == 'Hoy'" v-model="periodRange" type="date" placeholder="Elige un día"
+                format="DD/MM/YYYY" value-format="YYYY-MM-DD" />
+            <el-date-picker v-else-if="period == 'Semanal'" v-model="periodRange" type="week" format="[Semana] ww"
+                value-format="YYYY-MM-DD" placeholder="Elige una semana" />
+            <el-date-picker v-else-if="period == 'Mensual'" v-model="periodRange" type="month" format="MM/YYYY"
+                value-format="YYYY-MM-DD" placeholder="Elige un mes" />
         </section>
         <Loading v-if="loading" class="my-16" />
         <main v-else class="mx-2 lg:mx-14 mt-6">
@@ -36,14 +38,15 @@ import PieChart from '@/Components/MyComponents/Charts/PieChart.vue';
 import Kpi from '@/Components/MyComponents/Dashboard/Kpi.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import BarChart from "@/Components/MyComponents/Charts/BarChart.vue";
-import { format, subHours } from 'date-fns';
+import { format, subHours, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 import axios from 'axios';
 
 export default {
     data() {
         return {
             period: 'Hoy',
-            periodRange: new Date(),
+            periodRange: null,
 
             // sales
             salesCurrentPeriod: [],
@@ -201,6 +204,10 @@ export default {
         },
     },
     methods: {
+        getCurrentDate() {
+            const today = new Date();
+            return format(today, 'yyyy-MM-dd');
+        },
         setElementsWithNumberFormat(set) {
             return set.map(item => item.toFixed(2));
         },
@@ -288,13 +295,13 @@ export default {
         },
         handleChangePeriod() {
             if (this.period == 'Semanal') {
-                this.periodRange = new Date();
+                this.periodRange = this.getCurrentDate();
                 this.fetchWeekData();
             } else if (this.period == 'Mensual') {
-                this.periodRange = new Date();
+                this.periodRange = this.getCurrentDate();
                 this.fetchMonthData();
             } else {
-                this.periodRange = new Date();
+                this.periodRange = this.getCurrentDate();
                 this.fetchDailyData();
             }
         },
@@ -364,6 +371,7 @@ export default {
         }
     },
     mounted() {
+        this.periodRange = this.getCurrentDate();
         this.fetchDailyData();
     }
 }
