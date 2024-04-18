@@ -28,7 +28,7 @@
     }
 
     .hover-3dbuttom {
-        @apply hover:shadow-md shadow-gray-900/100 transition ease-in-out duration-300 hover:-translate-y-2;
+        @apply hover:shadow-md shadow-gray-900/100 transition ease-in-out duration-300 hover:-translate-y-1;
     }
 
 }

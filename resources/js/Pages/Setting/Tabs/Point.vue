@@ -1,18 +1,18 @@
 <template>
     <Loading v-if="loading" class="my-12" />
-    <div v-else class="text-sm">
+    <div v-else class="text-xs md:text-sm">
         <p>
             En esta sección, puedes personalizar diferentes aspectos de la aplicación activando o desactivando diversas
             configuraciones. Cada configuración tiene un nombre y una breve descripción que explica su
             efecto en la aplicación.
         </p>
 
-        <section class="mt-5 *:flex *:items-center *:space-y-2">
-            <div v-for="(item, index) in settings" :key="item.id">
-                <p class="w-[15%]">{{ item.key }}</p>
+        <section class="mt-5 *:flex *:items-start">
+            <div v-for="(item, index) in settings" :key="item.id" class="mb-3">
+                <p class="w-[20%] md:w-[15%]">{{ item.key }}</p>
                 <el-switch @change="updateSettingValue(index)" v-model="values[index]" :loading="settingLoading[index]"
-                    size="small" class="w-[6%]" />
-                <p class="text-gray99 text-[11px] w-[79%]">{{ item.description }}</p>
+                    size="small" class="w-[12%] md:w-[6%]" />
+                <p class="text-gray99 text-[9px] md:text-[11px] w-[79%]">{{ item.description }}</p>
             </div>
         </section>
     </div>

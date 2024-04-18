@@ -22,6 +22,8 @@ return new class extends Migration
             $table->unsignedBigInteger('default_card_id')->nullable();
             $table->boolean('is_active')->default(true);
             $table->date('next_payment')->nullable()->default(now()->addDays(15)->toDateString());
+            $table->string('status')->default('Pagado');
+            $table->foreignId('seller_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }

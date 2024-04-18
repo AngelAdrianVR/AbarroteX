@@ -7,7 +7,7 @@
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[80%] mx-auto mt-7 lg:grid lg:grid-cols-2 gap-5">
                 <h1 class="font-bold ml-2 col-span-full">Agregar egreso</h1>
 
-                <div class="bg-gray-200 p-4 rounded-lg my-5 lg:my-0" v-for="(expense, index) in form.expenses" :key="index">
+                <div class="border border-grayD9 p-4 rounded-lg my-5 lg:my-0" v-for="(expense, index) in form.expenses" :key="index">
                     <div v-if="form.expenses.length > 1" class="text-right">
                         <button class="text-red-600 text-xs" @click="removeExpense(index)"><i class="fa-solid fa-x"></i></button>
                     </div>
@@ -38,7 +38,7 @@
 
                     <div class="mt-3">
                         <InputLabel :value="'Costo por unidad de egreso ' + (index + 1) + '*'" class="ml-3 mb-1 text-sm" />
-                        <el-input v-model="expense.current_price" required type="number" placeholder="Ingresa el costo">
+                        <el-input v-model="expense.current_price" required type="number" step="0.1" placeholder="Ingresa el costo">
                             <template #prefix>
                                 <i class="fa-solid fa-dollar-sign"></i>
                             </template>
