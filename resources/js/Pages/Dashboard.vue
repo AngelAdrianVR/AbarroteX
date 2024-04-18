@@ -1,16 +1,23 @@
 <template>
     <AppLayout title="Inicio">
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
-        <el-radio-group v-model="period" @change="handleChangePeriod" class="!flex justify-center my-8 mx-2 lg:mx-14">
-            <el-radio label="Hoy">Hoy</el-radio>
-            <el-radio label="Semanal">Semanal</el-radio>
-            <el-radio label="Mensual">Mensual</el-radio>
-        </el-radio-group>
+        <section class="flex items-center justify-around">
+            <el-radio-group v-model="period" @change="handleChangePeriod"
+                class="!flex justify-center my-8 mx-2 lg:mx-14">
+                <el-radio label="Hoy">Hoy</el-radio>
+                <el-radio label="Semanal">Semanal</el-radio>
+                <el-radio label="Mensual">Mensual</el-radio>
+            </el-radio-group>
+            <el-date-picker v-if="period == 'Hoy'" v-model="periodRange" type="date" placeholder="Elige un día" />
+            <el-date-picker v-else-if="period == 'Semanal'" v-model="periodRange" type="week" format="[Semana] ww" placeholder="Elige una semana" />
+            <el-date-picker v-else-if="period == 'Mensual'" v-model="periodRange" type="month" placeholder="Elige un mes" />
+            {{ periodRange }}
+        </section>
         <Loading v-if="loading" class="my-16" />
         <main v-else class="mx-2 lg:mx-14 mt-6">
             <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
-                <SimpleKPI v-for="(item, index) in getSimpleKpisOptions" :key="index" :title="item.title" :icon="item.icon"
-                    class="self-start" :value="item.value" />
+                <SimpleKPI v-for="(item, index) in getSimpleKpisOptions" :key="index" :title="item.title"
+                    :icon="item.icon" class="self-start" :value="item.value" />
                 <Kpi v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
             </section>
             <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
@@ -36,6 +43,7 @@ export default {
     data() {
         return {
             period: 'Hoy',
+            periodRange: new Date(),
 
             // sales
             salesCurrentPeriod: [],
@@ -280,10 +288,13 @@ export default {
         },
         handleChangePeriod() {
             if (this.period == 'Semanal') {
+                this.periodRange = new Date();
                 this.fetchWeekData();
             } else if (this.period == 'Mensual') {
+                this.periodRange = new Date();
                 this.fetchMonthData();
             } else {
+                this.periodRange = new Date();
                 this.fetchDailyData();
             }
         },
