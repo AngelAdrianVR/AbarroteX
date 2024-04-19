@@ -22,8 +22,9 @@ return new class extends Migration
             $table->unsignedBigInteger('default_card_id')->nullable();
             $table->boolean('is_active')->default(true);
             $table->date('next_payment')->nullable()->default(now()->addDays(15)->toDateString());
-            $table->foreignId('admin_id')->nullable()->constrained()->cascadeOnDelete(); // se agregó en este proyecto la migracion de admins 
+            $table->foreignId('seller_id')->nullable()->constrained('admins')->cascadeOnDelete(); // se agregó en este proyecto la migracion de admins 
                                                                                         // porque al migrar las tablas tiene que ir en primer lugar
+            $table->string('status')->default('Pagado');
             $table->timestamps();
         });
     }

@@ -1,16 +1,25 @@
 <template>
     <AppLayout title="Inicio">
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
-        <el-radio-group v-model="period" @change="handleChangePeriod" class="!flex justify-center my-8 mx-2 lg:mx-14">
-            <el-radio label="Hoy">Hoy</el-radio>
-            <el-radio label="Semanal">Semanal</el-radio>
-            <el-radio label="Mensual">Mensual</el-radio>
-        </el-radio-group>
+        <section class="flex flex-col md:flex-row items-center justify-around">
+            <el-radio-group v-model="period" @change="handleChangePeriod"
+                class="!flex justify-center my-8 mx-2 lg:mx-14">
+                <el-radio value="Hoy">Hoy</el-radio>
+                <el-radio value="Semanal">Semanal</el-radio>
+                <el-radio value="Mensual">Mensual</el-radio>
+            </el-radio-group>
+            <el-date-picker v-if="period == 'Hoy'" v-model="periodRange" type="date" placeholder="Elige un día"
+                format="DD/MM/YYYY" value-format="YYYY-MM-DD" />
+            <el-date-picker v-else-if="period == 'Semanal'" v-model="periodRange" type="week" format="[Semana] ww"
+                value-format="YYYY-MM-DD" placeholder="Elige una semana" />
+            <el-date-picker v-else-if="period == 'Mensual'" v-model="periodRange" type="month" format="MM/YYYY"
+                value-format="YYYY-MM-DD" placeholder="Elige un mes" />
+        </section>
         <Loading v-if="loading" class="my-16" />
         <main v-else class="mx-2 lg:mx-14 mt-6">
             <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
-                <SimpleKPI v-for="(item, index) in getSimpleKpisOptions" :key="index" :title="item.title" :icon="item.icon"
-                    class="self-start" :value="item.value" />
+                <SimpleKPI v-for="(item, index) in getSimpleKpisOptions" :key="index" :title="item.title"
+                    :icon="item.icon" class="self-start" :value="item.value" />
                 <Kpi v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
             </section>
             <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
@@ -29,13 +38,15 @@ import PieChart from '@/Components/MyComponents/Charts/PieChart.vue';
 import Kpi from '@/Components/MyComponents/Dashboard/Kpi.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import BarChart from "@/Components/MyComponents/Charts/BarChart.vue";
-import { format, subHours } from 'date-fns';
+import { format, subHours, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 import axios from 'axios';
 
 export default {
     data() {
         return {
             period: 'Hoy',
+            periodRange: null,
 
             // sales
             salesCurrentPeriod: [],
@@ -193,6 +204,10 @@ export default {
         },
     },
     methods: {
+        getCurrentDate() {
+            const today = new Date();
+            return format(today, 'yyyy-MM-dd');
+        },
         setElementsWithNumberFormat(set) {
             return set.map(item => item.toFixed(2));
         },
@@ -280,10 +295,13 @@ export default {
         },
         handleChangePeriod() {
             if (this.period == 'Semanal') {
+                this.periodRange = this.getCurrentDate();
                 this.fetchWeekData();
             } else if (this.period == 'Mensual') {
+                this.periodRange = this.getCurrentDate();
                 this.fetchMonthData();
             } else {
+                this.periodRange = this.getCurrentDate();
                 this.fetchDailyData();
             }
         },
@@ -353,6 +371,7 @@ export default {
         }
     },
     mounted() {
+        this.periodRange = this.getCurrentDate();
         this.fetchDailyData();
     }
 }
