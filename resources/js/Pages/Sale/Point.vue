@@ -89,7 +89,10 @@
                 </PrimaryButton>
               </div>
             </div>
-            <p v-else class="text-center text-gray-500 text-sm">Sin información de producto</p>
+            <p v-else class="text-center text-gray99 text-sm">
+              Busca el producto
+              <i class="fa-regular fa-hand-point-up ml-3"></i>
+            </p>
           </div>
 
           <!-- Total por cobrar -->
@@ -118,7 +121,7 @@
                 <p v-else class="text-gray-99">$ <strong class="ml-3">{{ (calculateTotal() -
                   editableTabs[this.editableTabsValue
                     - 1].discount)?.toLocaleString('en-US', {
-                    minimumFractionDigits: 2
+                      minimumFractionDigits: 2
                     }) }}</strong></p>
               </div>
               <div class="text-center mt-7">
@@ -133,7 +136,7 @@
               <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() -
                 editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
                   minimumFractionDigits: 2
-                  }) }}</strong>
+                }) }}</strong>
               </p>
               <div class="flex items-center justify-between mx-5 space-x-10">
                 <p>Entregado</p>

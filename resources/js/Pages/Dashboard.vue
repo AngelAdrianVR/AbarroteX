@@ -3,7 +3,7 @@
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
         <section class="flex items-center justify-center">
             <el-radio-group v-model="period" @change="handleChangePeriod"
-                class="flex flex-col md:flex-row !items-start my-8 lg:mx-14">
+                class="flex flex-col md:flex-row !items-start my-5 lg:mx-14">
                 <el-radio value="Hoy">
                     <span v-if="period != 'Hoy'">Hoy</span>
                     <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="date" placeholder="Elige un día"
@@ -22,14 +22,14 @@
             </el-radio-group>
         </section>
         <Loading v-if="loading" class="my-16" />
-        <main v-else class="mx-2 lg:mx-14 mt-6">
+        <main v-else class="mx-2 lg:mx-14 my-6">
             <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
                 <SimpleKPI v-for="(item, index) in getSimpleKpisOptions" :key="index" :title="item.title"
                     :icon="item.icon" class="self-start" :value="item.value" />
                 <Kpi v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
             </section>
             <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
-                <BarChart v-for="(item, index) in getBarChartOptions" :key="index" :options="item"
+                <ComparisonBarChart v-for="(item, index) in getBarChartOptions" :key="index" :options="item"
                     :title="getBarChartTitle(item.title)" />
                 <PieChart v-for="(item, index) in getPieChartOptions" :key="index" :options="item"
                     title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' />
@@ -43,7 +43,7 @@ import SimpleKPI from '@/Components/MyComponents/Dashboard/SimpleKPI.vue';
 import PieChart from '@/Components/MyComponents/Charts/PieChart.vue';
 import Kpi from '@/Components/MyComponents/Dashboard/Kpi.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
-import BarChart from "@/Components/MyComponents/Charts/BarChart.vue";
+import ComparisonBarChart from "@/Components/MyComponents/Charts/ComparisonBarChart.vue";
 import { format, subHours, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
@@ -76,7 +76,7 @@ export default {
         PieChart,
         SimpleKPI,
         Kpi,
-        BarChart,
+        ComparisonBarChart,
         Loading,
     },
     computed: {

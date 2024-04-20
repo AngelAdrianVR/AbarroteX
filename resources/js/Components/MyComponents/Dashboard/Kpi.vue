@@ -16,7 +16,7 @@
                 </el-tooltip>
             </section>
             <section :class="options.currentVal - options.refVal < 0 ? 'text-red-600' : 'text-green-600'"
-                class="w-1/3 text-2xl text-center">
+                class="w-1/3 flex flex-col items-center text-xl">
                 <span>{{
                     calcPercentage() }}%</span>
                 <svg v-if="options.currentVal - options.refVal >= 0" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -54,7 +54,15 @@ export default {
         calcPercentage() {
             const dif = this.options.currentVal - this.options.refVal;
             const percentage = dif * 100 / this.options.refVal;
-            return percentage.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (!percentage) {
+                return '0';
+            } else if (percentage == Infinity) {
+                return '100';
+            } else if (percentage == -Infinity) {
+                return '-100';
+            } else {
+                return Math.round(percentage);
+            }
         }
     }
 }

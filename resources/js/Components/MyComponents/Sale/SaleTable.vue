@@ -123,14 +123,24 @@
       </div>
     </div>
   </div>
-  <p class="text-center text-gray-500 text-sm mt-14" v-if="saleProducts?.length == 0">Escanea un producto para comenzar a
-    generar la venta</p>
+  <div class="text-center text-gray-500 text-sm mt-14" v-if="saleProducts?.length == 0">
+    <p v-if="isScanOn" class="flex items-center justify-center text-gray99 text-sm">
+      Escanea un producto para comenzar la venta
+      <i class="fa-regular fa-hand-point-up ml-3"></i>
+    </p>  
+    <p v-else class="flex items-center justify-center text-gray99 text-sm">
+      Busca un producto para comenzar la venta
+      <i class="fa-regular fa-hand-point-right ml-3"></i>
+    </p>  
+  </div>
 </template>
 
 <script>
 export default {
   data() {
     return {
+      // escaneo de codigos activado
+      isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
       // descuentos activados
       isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
       quantity: 1,
