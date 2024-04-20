@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Sale extends Model
 {
@@ -14,8 +15,8 @@ class Sale extends Model
         'current_price',
         'quantity',
         'store_id',
-        'product_id',
-        'global_product_store_id',
+        // 'product_id',
+        // 'global_product_store_id',
     ];
 
     //relationships
@@ -29,4 +30,11 @@ class Sale extends Model
         return $this->belongsTo(GlobalProductStore::class);
     }
 
+    /**
+     * Get the parent saleable model (product or globalProduct).
+     */
+    public function saleable(): MorphTo
+    {
+        return $this->morphTo();
+    }
 }
