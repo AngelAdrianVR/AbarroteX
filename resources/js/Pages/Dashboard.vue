@@ -1,19 +1,25 @@
 <template>
     <AppLayout title="Inicio">
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
-        <section class="flex flex-col md:flex-row items-center justify-around">
+        <section class="flex items-center justify-center">
             <el-radio-group v-model="period" @change="handleChangePeriod"
-                class="!flex justify-center my-8 mx-2 lg:mx-14">
-                <el-radio value="Hoy">Hoy</el-radio>
-                <el-radio value="Semanal">Semanal</el-radio>
-                <el-radio value="Mensual">Mensual</el-radio>
+                class="flex flex-col md:flex-row !items-start my-8 lg:mx-14">
+                <el-radio value="Hoy">
+                    <span v-if="period != 'Hoy'">Hoy</span>
+                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="date" placeholder="Elige un día"
+                        format="DD/MM/YYYY" value-format="YYYY-MM-DD" size="small" />
+                </el-radio>
+                <el-radio value="Semanal">
+                    <span v-if="period != 'Semanal'">Semanal</span>
+                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="week" format="[Semana] ww"
+                        value-format="YYYY-MM-DD" placeholder="Elige una semana" size="small" />
+                </el-radio>
+                <el-radio value="Mensual">
+                    <span v-if="period != 'Mensual'">Mensual</span>
+                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="month" format="MM/YYYY"
+                        value-format="YYYY-MM-DD" placeholder="Elige un mes" size="small" />
+                </el-radio>
             </el-radio-group>
-            <el-date-picker v-if="period == 'Hoy'" v-model="periodRange" type="date" placeholder="Elige un día"
-                format="DD/MM/YYYY" value-format="YYYY-MM-DD" />
-            <el-date-picker v-else-if="period == 'Semanal'" v-model="periodRange" type="week" format="[Semana] ww"
-                value-format="YYYY-MM-DD" placeholder="Elige una semana" />
-            <el-date-picker v-else-if="period == 'Mensual'" v-model="periodRange" type="month" format="MM/YYYY"
-                value-format="YYYY-MM-DD" placeholder="Elige un mes" />
         </section>
         <Loading v-if="loading" class="my-16" />
         <main v-else class="mx-2 lg:mx-14 mt-6">
@@ -119,14 +125,14 @@ export default {
             ]
         },
         getKpiOptions() {
-            let last = "ayer";
-            let current = "hoy";
+            let last = "dia anterior";
+            let current = "dia seleccionado";
             if (this.period == 'Semanal') {
-                current = "esta semana";
-                last = "semana pasada";
+                current = "semana seleccionada";
+                last = "semana anterior";
             } else if (this.period == 'Mensual') {
-                current = "este mes";
-                last = "mes pasado";
+                current = "mes seleccionado";
+                last = "mes anterior";
             }
 
             return [
@@ -141,17 +147,17 @@ export default {
         },
         getTimeLine() {
             let timeLine = ['6AM', '7AM', '8AM', '9PM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM'];
-            let last = { name: "Ayer", data: { sales: this.calculateHourlySales(this.salesLastPeriod), expenses: this.calculateHourlySales(this.expensesLastPeriod) } };
-            let current = { name: "Hoy", data: { sales: this.calculateHourlySales(this.salesCurrentPeriod), expenses: this.calculateHourlySales(this.expensesCurrentPeriod) } };
+            let last = { name: "Día anterior", data: { sales: this.calculateHourlySales(this.salesLastPeriod), expenses: this.calculateHourlySales(this.expensesLastPeriod) } };
+            let current = { name: "Día seleccionado", data: { sales: this.calculateHourlySales(this.salesCurrentPeriod), expenses: this.calculateHourlySales(this.expensesCurrentPeriod) } };
 
             if (this.period == 'Semanal') {
                 timeLine = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
-                last = { name: "Semana pasada", data: { sales: this.calculateDailySales(this.salesLastPeriod), expenses: this.calculateDailySales(this.expensesLastPeriod) } };
-                current = { name: "Esta semana", data: { sales: this.calculateDailySales(this.salesCurrentPeriod), expenses: this.calculateDailySales(this.expensesCurrentPeriod) } };
+                last = { name: "Semana anterior", data: { sales: this.calculateDailySales(this.salesLastPeriod), expenses: this.calculateDailySales(this.expensesLastPeriod) } };
+                current = { name: "Semana seleccionada", data: { sales: this.calculateDailySales(this.salesCurrentPeriod), expenses: this.calculateDailySales(this.expensesCurrentPeriod) } };
             } else if (this.period == 'Mensual') {
                 timeLine = ['Del 1 al 7', 'Del 8 al 14', 'Del 15 al 21', 'Del 22 al 28', 'Del 29 al 31'];
-                last = { name: "Mes pasado", data: { sales: this.calculateWeeklySales(this.salesLastPeriod), expenses: this.calculateWeeklySales(this.expensesLastPeriod) } };
-                current = { name: "Este mes", data: { sales: this.calculateWeeklySales(this.salesCurrentPeriod), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod) } };
+                last = { name: "Mes anterior", data: { sales: this.calculateWeeklySales(this.salesLastPeriod), expenses: this.calculateWeeklySales(this.expensesLastPeriod) } };
+                current = { name: "Mes seleccionado", data: { sales: this.calculateWeeklySales(this.salesCurrentPeriod), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod) } };
             }
 
             return { timeline: timeLine, last: last, current: current };
@@ -293,6 +299,15 @@ export default {
 
             return sales - expenses;
         },
+        handleChangePeriodRange() {
+            if (this.period == 'Semanal') {
+                this.fetchWeekData();
+            } else if (this.period == 'Mensual') {
+                this.fetchMonthData();
+            } else {
+                this.fetchDailyData();
+            }
+        },
         handleChangePeriod() {
             if (this.period == 'Semanal') {
                 this.periodRange = this.getCurrentDate();
@@ -306,19 +321,19 @@ export default {
             }
         },
         getKPITitle() {
-            if (this.period == 'Hoy') return "Ganancias de hoy vs ayer";
-            if (this.period == 'Semanal') return "Ganancias de esta semana vs semana pasada";
-            if (this.period == 'Mensual') return "Ganancias de este mes vs mes pasado";
+            if (this.period == 'Hoy') return "Ganancias de día seleccionado vs anterior";
+            if (this.period == 'Semanal') return "Ganancias de semana seleccionada vs anterior";
+            if (this.period == 'Mensual') return "Ganancias de mes seleccionado vs anterior";
         },
         getBarChartTitle(concept) {
-            if (this.period == 'Hoy') return concept + " de hoy vs ayer";
-            if (this.period == 'Semanal') return concept + " de esta semana vs semana pasada";
-            if (this.period == 'Mensual') return concept + " de este mes vs mes pasado";
+            if (this.period == 'Hoy') return concept + " de día seleccionado vs anterior";
+            if (this.period == 'Semanal') return concept + " de semana seleccionada vs anterior";
+            if (this.period == 'Mensual') return concept + " de mes seleccionado vs anterior";
         },
         async fetchDailyData() {
             this.loading = true;
             try {
-                const response = await axios.get(route('dashboard.get-day-data'));
+                const response = await axios.get(route('dashboard.get-day-data', {date: this.periodRange}));
 
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
@@ -336,7 +351,7 @@ export default {
         async fetchWeekData() {
             this.loading = true;
             try {
-                const response = await axios.get(route('dashboard.get-week-data'));
+                const response = await axios.get(route('dashboard.get-week-data', {date: this.periodRange}));
 
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
@@ -354,7 +369,7 @@ export default {
         async fetchMonthData() {
             this.loading = true;
             try {
-                const response = await axios.get(route('dashboard.get-month-data'));
+                const response = await axios.get(route('dashboard.get-month-data', {date: this.periodRange}));
 
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
