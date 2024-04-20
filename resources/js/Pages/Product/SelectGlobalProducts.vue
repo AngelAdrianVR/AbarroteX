@@ -89,14 +89,13 @@
         </div>
 
         <!-- vista previa de producto -->
-        <div v-if="productInfo" class="rounded-lg border border-[#D9D9D9] md:w-[500px] h-[400px] mx-auto">
+        <Loading v-if="loadingProduct" class="mt-28" />
+        <div v-else-if="productInfo" class="rounded-lg border border-[#D9D9D9] md:w-[500px] h-[400px] mx-auto">
           <p class="border-b border-[#D9D9D9] font-bold px-5 py-2">Vista previa del producto</p>
-          <Loading v-if="loadingProduct" class="mt-28" />
-          <div class="py-3 px-7 h-full w-full" v-else>
+          <div class="py-3 px-7 h-full w-full">
             <figure class="h-1/2">
               <img class="h-full mx-auto rounded-md" :src="productInfo?.media[0]?.original_url" alt="">
             </figure>
-
             <div class="mt-7 text-sm flex">
               <div class="space-y-1 w-32">
                 <p>Nombre:</p>
@@ -245,7 +244,7 @@ export default {
     transferProducts() {
       // Enviar la solicitud POST con los datos en el cuerpo
       this.processing = true;
-      axios.post(route('global-product-store.transfer-products'), { products: this.products })
+      axios.post(route('products.transfer'), { products: this.products })
         .then(response => {
           this.$notify({
             title: "Éxito",
