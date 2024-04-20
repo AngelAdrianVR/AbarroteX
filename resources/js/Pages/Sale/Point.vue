@@ -80,8 +80,8 @@
               </div>
               <div class="flex justify-between items-center">
                 <p class="text-gray99">Cantidad</p>
-                <!-- <el-input-number v-model="quantity" :min="0" :max="productFoundSelected.current_stock" :precision="2" /> en caso de tomar en cuenta stock -->
-                <el-input-number v-model="quantity" :min="0" :precision="2" />
+                <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0" :max="productFoundSelected.current_stock" :precision="2" />
+                <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null"
@@ -183,10 +183,13 @@ export default {
   data() {
 
     return {
+      // inventario de codigos activado
+      isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
       // descuentos activados
       isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
       // escaneo de codigos activado
       isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
+
       storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
       loading: false, //cargando la busqueda de productos

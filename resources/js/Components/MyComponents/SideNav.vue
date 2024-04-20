@@ -131,15 +131,15 @@ export default {
                     dropdown: false,
                     show: true
                 },
-                // {
-                //     label: 'Catálogo base',
-                //     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="22" width="22" id="Database-Check--Streamline-Core"><desc>Database Check Streamline Icon: https://streamlinehq.com</desc><g id="database-check--raid-storage-code-disk-programming-database-array-hard-disc-check-approve"><path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M9.552857142857142 7.5467571428571425c4.836245378571428 0 8.756785714285714 -1.5111983142857142 8.756785714285714 -3.375342857142857S14.389102521428573 0.7960714285714285 9.552857142857142 0.7960714285714285 0.7960714285714285 2.3072697428571427 0.7960714285714285 4.1714142857142855 4.716611764285714 7.5467571428571425 9.552857142857142 7.5467571428571425Z" stroke-width="1.71"></path><path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 11.941262485714285v-7.769657142857143" stroke-width="1.71"></path><path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.7960714285714285 4.171605342857143v10.762885714285714c0 1.5921110142857142 2.834014285714286 2.9135895857142855 6.671078571428572 3.2797824428571425" stroke-width="1.71"></path><path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 9.552857142857142C18.309642857142855 11.415664285714286 14.329285714285714 12.928199999999999 9.552857142857142 12.928199999999999S0.7960714285714285 11.415664285714286 0.7960714285714285 9.552857142857142" stroke-width="1.71"></path><path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m21.49392857142857 14.329285714285714 -6.368571428571428 7.164642857142857 -3.184285714285714 -2.3882142857142856" stroke-width="1.71"></path></g></svg>',
-                //     route: route('global-products.index'),
-                //     active: route().current('global-products.*'),
-                //     options: [],
-                //     dropdown: false,
-                //     show: true
-                // },
+                {
+                    label: 'Catálogo base',
+                    icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="22" width="22" id="Database-Check--Streamline-Core"><desc>Database Check Streamline Icon: https://streamlinehq.com</desc><g id="database-check--raid-storage-code-disk-programming-database-array-hard-disc-check-approve"><path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M9.552857142857142 7.5467571428571425c4.836245378571428 0 8.756785714285714 -1.5111983142857142 8.756785714285714 -3.375342857142857S14.389102521428573 0.7960714285714285 9.552857142857142 0.7960714285714285 0.7960714285714285 2.3072697428571427 0.7960714285714285 4.1714142857142855 4.716611764285714 7.5467571428571425 9.552857142857142 7.5467571428571425Z" stroke-width="1.71"></path><path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 11.941262485714285v-7.769657142857143" stroke-width="1.71"></path><path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.7960714285714285 4.171605342857143v10.762885714285714c0 1.5921110142857142 2.834014285714286 2.9135895857142855 6.671078571428572 3.2797824428571425" stroke-width="1.71"></path><path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 9.552857142857142C18.309642857142855 11.415664285714286 14.329285714285714 12.928199999999999 9.552857142857142 12.928199999999999S0.7960714285714285 11.415664285714286 0.7960714285714285 9.552857142857142" stroke-width="1.71"></path><path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m21.49392857142857 14.329285714285714 -6.368571428571428 7.164642857142857 -3.184285714285714 -2.3882142857142856" stroke-width="1.71"></path></g></svg>',
+                    route: route('global-products.index'),
+                    active: route().current('global-products.*'),
+                    options: [],
+                    dropdown: false,
+                    show: true
+                },
 
                 //ejemplo para usar submenues
                 //     label: 'Comunidad',

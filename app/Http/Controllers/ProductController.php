@@ -120,7 +120,8 @@ class ProductController extends Controller
             ProductHistory::create([
                 'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
                 'type' => 'Precio',
-                'product_id' => $product->id
+                'historicable_id' => $product->id,
+                'historicable_type' => Product::class
             ]);
         }
 
@@ -155,7 +156,8 @@ class ProductController extends Controller
             ProductHistory::create([
                 'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
                 'type' => 'Precio',
-                'product_id' => $product->id
+                'historicable_id' => $product->id,
+                'historicable_type' => Product::class
             ]);
         }
 
@@ -242,7 +244,8 @@ class ProductController extends Controller
         ProductHistory::create([
             'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
             'type' => 'Entrada',
-            'product_id' => $product_id
+            'historicable_id' => $product_id,
+            'historicable_type' => Product::class
         ]);
 
         // Crear egreso

@@ -45,9 +45,8 @@
           </template>
         </div>
         <div class="w-[20%]">
-          <!-- descomentar el primero y validar con condicional dependiendo de la configuracion seleccionada para tomar o no el stock disponible -->
-          <!-- <el-input-number v-model="sale.quantity" :min="0" size="small" :max="sale.product.current_stock" :precision="2" /> -->
-          <el-input-number v-model="sale.quantity" :min="0" :precision="2" size="small" />
+          <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small" :max="sale.product.current_stock" :precision="2" />
+          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
         </div>
         <div class="text-[#5FCB1F] font-bold w-[15%]">${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
           minimumFractionDigits: 2
@@ -104,9 +103,8 @@
             </div>
           </template>
         </div>
-          <!-- descomentar el primero y validar con condicional dependiendo de la configuracion seleccionada para tomar o no el stock disponible -->
-          <!-- <el-input-number v-model="sale.quantity" :min="0" size="small" :max="sale.product.current_stock" :precision="2" /> -->
-          <el-input-number v-model="sale.quantity" :min="0" :precision="2" size="small" />
+          <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small" :max="sale.product.current_stock" :precision="2" />
+          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
         <div class="text-[#5FCB1F] font-bold">${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
           minimumFractionDigits: 2
         }) }}</div>
@@ -139,6 +137,8 @@
 export default {
   data() {
     return {
+      // inventario de codigos activado
+      isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
       // escaneo de codigos activado
       isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
       // descuentos activados

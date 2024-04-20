@@ -21,7 +21,7 @@
                     <Checkbox v-model:checked="allItems" @change="handleChange" class="size-3 mr-2" />
                     <span>Seleccionar todos</span>
                 </label>
-                <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#D72C8A"
+                <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#373737"
                     :title="'¿Desea eliminar las notificaciones seleccionadas (' + selectedItems.length + ')?'"
                     @confirm="deleteNotifications()">
                     <template #reference>

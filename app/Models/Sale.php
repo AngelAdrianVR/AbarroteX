@@ -12,26 +12,16 @@ class Sale extends Model
     use HasFactory;
 
     protected $fillable = [
+        'saleable_id',
+        'saleable_type',
         'current_price',
         'quantity',
         'store_id',
-        // 'product_id',
-        // 'global_product_store_id',
     ];
 
     //relationships
-    public function product() :BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function globalProductStore() :BelongsTo
-    {
-        return $this->belongsTo(GlobalProductStore::class);
-    }
-
     /**
-     * Get the parent saleable model (product or globalProduct).
+     * Get the parent saleable model (product or globalProductStore).
      */
     public function saleable(): MorphTo
     {
