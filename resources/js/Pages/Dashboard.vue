@@ -31,8 +31,8 @@
             <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
                 <ComparisonBarChart v-for="(item, index) in getBarChartOptions" :key="index" :options="item"
                     :title="getBarChartTitle(item.title)" />
-                <PieChart v-for="(item, index) in getPieChartOptions" :key="index" :options="item"
-                    title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' />
+                <!-- <PieChart v-for="(item, index) in getPieChartOptions" :key="index" :options="item"
+                    title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' /> -->
             </section>
         </main>
     </AppLayout>
@@ -198,10 +198,10 @@ export default {
                 {
                     colors: ['#C30303', '#373737', '#999999', '#5FCB1F', '#2387FC'],
                     labels: this.topProductsCurrentPeriod.map((item) => {
-                        if (item.hasOwnProperty('global_product_store_id')) {
-                            return item.global_product_store?.global_product?.name;
+                        if (item.saleable_type == 'App\\Models\\GlobalProductStore') {
+                            return 'item.saleable.global_product?.name';
                         } else {
-                            return item.product.name;
+                            return 'item.saleable';
                         }
                     }),
                     series: this.topProductsCurrentPeriod.map((item) => item.total_quantity),

@@ -129,67 +129,36 @@ class SaleController extends Controller
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::where('store_id', auth()->user()->store_id)->with(['saleable'])->whereDate('created_at', $date)->get();
 
-        $localSales = collect();
-        $globalSales = collect();
-
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $sales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->format('d-F-Y');
-        })->map(function ($sales) use ($localSales, $globalSales) {
-            // Iterar sobre las ventas y separarlas en ventas locales y globales
-            $sales->each(function ($sale) use ($localSales, $globalSales) {
-                if ($sale->global_product_store_id !== null) {
-                    $globalSales->push($sale);
-                } else {
-                    $localSales->push($sale);
-                }
-            });
-
-            // Procesar las ventas locales
-            $localGroupedSales = $localSales->groupBy('product_id')->map(function ($productSales) {
+        })->map(function ($sales) {
+            // Procesar las ventas
+            $groupedSales = $sales->map(function ($currentSale) {
+                $is_global_product = $currentSale->saleable_type == GlobalProductStore::class;
                 return [
-                    'id' => $productSales->first()->id,
-                    'name' => $productSales->first()->product->name,
-                    'current_price' => $productSales->first()->current_price,
-                    'quantity' => $productSales->sum('quantity'),
-                    'product_id' => $productSales->first()->product_id,
-                    'is_global_product' => false,
-                    'created_at' => $productSales->first()->created_at,
+                    'id' => $currentSale->id,
+                    'name' => $is_global_product 
+                        ? $currentSale->saleable->globalProduct->name
+                        : $currentSale->saleable->name,
+                    'current_price' => $currentSale->current_price,
+                    'quantity' => $currentSale->quantity,
+                    'product_id' => $currentSale->saleable_id,
+                    'is_global_product' => $is_global_product,
+                    'created_at' => $currentSale->created_at,
                 ];
             });
 
-            // Procesar las ventas globales
-            $globalGroupedSales = $globalSales->groupBy('global_product_store_id')->map(function ($productSales) {
-                return [
-                    'id' => $productSales->first()->id,
-                    'name' => $productSales->first()->globalProductStore->globalProduct->name,
-                    'current_price' => $productSales->first()->current_price,
-                    'quantity' => $productSales->sum('quantity'),
-                    'product_id' => $productSales->first()->global_product_store_id,
-                    'is_global_product' => true,
-                    'created_at' => $productSales->first()->created_at,
-                ];
-            });
-
-            // Calcular totales para ventas locales
-            $localTotalQuantity = $localGroupedSales->sum('quantity');
-            $localTotalSale = $localGroupedSales->sum(function ($productSale) {
+            // Calcular totales
+            $totalQuantity = $groupedSales->sum('quantity');
+            $totalSale = $groupedSales->sum(function ($productSale) {
                 return $productSale['quantity'] * $productSale['current_price'];
             });
-
-            // Calcular totales para ventas globales
-            $globalTotalQuantity = $globalGroupedSales->sum('quantity');
-            $globalTotalSale = $globalGroupedSales->sum(function ($productSale) {
-                return $productSale['quantity'] * $productSale['current_price'];
-            });
-
-            // Fusionar los arreglos de ventas locales y globales
-            $mergedGroupedSales = $localGroupedSales->merge($globalGroupedSales);
 
             return [
-                'total_quantity' => $localTotalQuantity + $globalTotalQuantity,
-                'total_sale' => $localTotalSale + $globalTotalSale,
-                'sales' => $mergedGroupedSales->values(), // Convertir el mapa en un arreglo indexado
+                'total_quantity' => $totalQuantity,
+                'total_sale' => $totalSale,
+                'sales' => $groupedSales->values(), // Convertir el mapa en un arreglo indexado
             ];
         });
 

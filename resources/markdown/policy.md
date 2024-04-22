@@ -1,25 +1,18 @@
-# Privacy Policy
+# Politicas de privacidad
 
-1. **Información del Responsable del Tratamiento de Datos**: Declaración sobre quién es el responsable del tratamiento de los datos personales recopilados a través del punto de venta, incluida la información de contacto relevante.
+En Ezy Ventas, nos comprometemos a proteger la privacidad y seguridad de los datos personales de nuestros usuarios. Esta política describe cómo recopilamos, utilizamos y protegemos la información que nos proporciona al utilizar nuestros servicios.
 
-2. **Tipo de Datos Recopilados**: Descripción de los tipos de datos personales que se recopilan, como nombres, direcciones, direcciones de correo electrónico, números de teléfono, datos de pago, etc.
+Recopilación de Información
+Al registrarse en Ezy Ventas, recopilamos cierta información personal, como nombre, dirección de correo electrónico y datos de contacto. Esta información es necesaria para crear y gestionar su cuenta, así como para proporcionarle nuestros servicios de manera efectiva.
 
-3. **Finalidad del Tratamiento**: Explicación de las finalidades para las cuales se recopilan y utilizan los datos personales, como procesar pedidos, proporcionar servicios de atención al cliente, enviar comunicaciones de marketing, etc.
+Uso de la Información
+Utilizamos la información recopilada para gestionar su cuenta, personalizar su experiencia en nuestra plataforma y proporcionarle los servicios solicitados. Además, podemos utilizar esta información para enviarle comunicaciones relacionadas con el servicio, actualizaciones y ofertas especiales.
 
-4. **Base Legal para el Tratamiento**: Indicación de la base legal en la que se fundamenta el tratamiento de los datos personales, como el consentimiento del usuario, el cumplimiento de un contrato, el interés legítimo del responsable, etc.
+Seguridad de la Información
+En Ezy Ventas, garantizamos la privacidad y seguridad de la información de nuestros Usuarios mediante tecnologías avanzadas de encriptación y medidas de seguridad en la transmisión, almacenamiento y mantenimiento de los datos.Tomamos medidas de seguridad razonables para proteger la información personal de nuestros usuarios contra el acceso no autorizado, la alteración, la divulgación o la destrucción. Esto incluye el uso de tecnologías de cifrado y la implementación de políticas y procedimientos de seguridad.
 
-5. **Consentimiento del Usuario**: Información sobre cómo se obtiene el consentimiento del usuario para el tratamiento de sus datos personales, incluidas las opciones para revocar el consentimiento en cualquier momento.
+Derechos del Usuario
+Los usuarios tienen derecho a acceder, corregir, actualizar o eliminar su información personal en cualquier momento. También pueden optar por no recibir comunicaciones promocionales de nuestra parte.
 
-6. **Derechos del Usuario**: Descripción de los derechos que tienen los usuarios en relación con sus datos personales, como el derecho de acceso, rectificación, supresión, portabilidad y oposición al tratamiento.
-
-7. **Compartir Datos con Terceros**: Revelación de si los datos personales se comparten con terceros, como proveedores de servicios, procesadores de pagos, agencias de envío, etc., y con qué fines se comparten.
-
-8. **Transferencias Internacionales de Datos**: Información sobre si los datos personales se transfieren a países fuera del Espacio Económico Europeo (EEE) u otras jurisdicciones con leyes de protección de datos diferentes, y las medidas de seguridad aplicadas para garantizar una protección adecuada.
-
-9. **Periodo de Retención de Datos**: Especificación del período durante el cual se conservarán los datos personales, o los criterios utilizados para determinar dicho período.
-
-10. **Medidas de Seguridad**: Descripción de las medidas de seguridad implementadas para proteger los datos personales contra el acceso no autorizado, la divulgación, la alteración o la destrucción.
-
-11. **Contacto para Consultas y Quejas**: Información de contacto para que los usuarios puedan plantear preguntas, inquietudes o quejas sobre el tratamiento de sus datos personales.
-
-12. **Cambios en el Aviso de Privacidad**: Reserva del derecho de realizar cambios en el aviso de privacidad en cualquier momento, con notificación adecuada a los usuarios.
+Cambios en la Política de Privacidad
+Nos reservamos el derecho de modificar esta política en cualquier momento. Cualquier cambio será efectivo inmediatamente después de la publicación de la política revisada en nuestra plataforma. Le recomendamos que revise periódicamente esta página para estar al tanto de cualquier cambio.

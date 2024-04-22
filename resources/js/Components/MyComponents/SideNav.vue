@@ -8,12 +8,12 @@
         <div class="bg-[#232323] h-full overflow-auto">
             <!-- Logo -->
             <div class="flex items-center justify-center mt-7">
-                <Link v-if="small" :href="route('sales.index')">
+                <Link v-if="small" :href="route('sales.point')">
                 <figure class="">
                     <img class="w-16 px-2 mb-[52px]" src="@/../../public/images/isologo.png" alt="logo">
                 </figure>
                 </Link>
-                <Link v-else :href="route('sales.index')">
+                <Link v-else :href="route('sales.point')">
                 <figure class="">
                     <img class="w-32 px-2 mb-8" src="@/../../public/images/white_logo.png" alt="logo">
                 </figure>

@@ -260,7 +260,7 @@ class ProductController extends Controller
     public function fetchHistory($product_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('product_id', $product_id);
+        $query = ProductHistory::where('historicable_id', $product_id);
 
         if ($month && $year) {
             $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
