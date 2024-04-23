@@ -78,6 +78,7 @@ Route::get('products-fetch-history/{product_id}/{month}/{year}', [ProductControl
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
 Route::get('products-select', [ProductController::class, 'selectGlobalProducts'])->name('products.select')->middleware('auth');
 
+
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
@@ -111,20 +112,6 @@ Route::resource('expenses', ExpenseController::class)->middleware('auth');
 Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
 Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
 Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
-
-
-//clients routes-------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-// Route::resource('clients', ClientController::class)->middleware('auth');
-// Route::get('clients-get-pendent-amount/{client}', [ClientController::class, 'getClientPendentAmount'])->name('clients.get-pendent-amount')->middleware('auth');
-// Route::get('clients-get-by-id/{client}', [ClientController::class, 'getById'])->middleware('auth')->name('clients.get-by-id');
-// Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
-// Route::get('clients-search', [ClientController::class, 'search'])->name('clients.search')->middleware('auth');
-
-
-//payments routes-------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------
-// Route::resource('payments', PaymentController::class)->middleware('auth');
 
 
 //history routes-------------------------------------------------------------------------------------
@@ -168,6 +155,7 @@ Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'upda
 Route::get('support/index', [SupportController::class, 'index'])->middleware('auth')->name('supports.index');
 Route::get('support/faqs', [SupportController::class, 'faqs'])->middleware('auth')->name('supports.faqs');
 Route::get('support/create-report', [SupportController::class, 'createReport'])->middleware('auth')->name('supports.create-report');
+
 
 //soporte report routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------

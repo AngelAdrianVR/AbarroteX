@@ -4,9 +4,31 @@
       <!-- header botones -->
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
-        <div class="my-4 lg:my-0 flex items-center space-x-3">
+        <div class="border border-primary rounded-full px-4 pt-[3px]">
+         <el-col :span="3">
+          <el-dropdown>
+            <span class="text-sm text-primary w-44 flex items-center">
+              <svg class="mr-2" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <mask id="mask0_9380_424" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12" height="12">
+                  <rect width="12" height="12" fill="#D9D9D9"/>
+                </mask>
+                <g mask="url(#mask0_9380_424)">
+                  <path d="M2.5 10.5C2.225 10.5 1.98958 10.4021 1.79375 10.2063C1.59792 10.0104 1.5 9.775 1.5 9.5V2.5C1.5 2.225 1.59792 1.98958 1.79375 1.79375C1.98958 1.59792 2.225 1.5 2.5 1.5H9.5C9.775 1.5 10.0104 1.59792 10.2063 1.79375C10.4021 1.98958 10.5 2.225 10.5 2.5V9.5C10.5 9.775 10.4021 10.0104 10.2063 10.2063C10.0104 10.4021 9.775 10.5 9.5 10.5H2.5ZM6 8C6.31667 8 6.60417 7.90833 6.8625 7.725C7.12083 7.54167 7.3 7.3 7.4 7H9.5V2.5H2.5V7H4.6C4.7 7.3 4.87917 7.54167 5.1375 7.725C5.39583 7.90833 5.68333 8 6 8Z" fill="#F68C0F"/>
+                </g>
+              </svg>
+              Movimientos de caja
+              <i class="fa-solid fa-angle-down text-xs ml-2"></i>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
+                <el-dropdown-item><i class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer corte</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          </el-col>
         </div>
-        <span></span>
       </div>
 
       <!-- cuerpo de la pagina -->
@@ -168,6 +190,41 @@
         </section>
       </div>
     </div>
+
+    <!-- -------------- Modal starts----------------------- -->
+    <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
+      <div class="p-4 relative">
+        <i @click="cashRegisterModal = false"
+          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+
+        <form class="mt-5 mb-2 md:grid grid-cols-2 gap-3" @submit.prevent="storeCashRegisterMovement">
+          <h2 v-if="form.cashRegisterMovementType === 'Ingreso'" class="font-bold col-span-full">Ingresar efectivo a caja</h2>
+          <h2 v-if="form.cashRegisterMovementType === 'Retiro'" class="font-bold col-span-full">Retirar efectivo a caja</h2>
+
+          <div class="mt-2">
+              <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar" class="ml-3 mb-1 text-sm" />
+              <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar" class="ml-3 mb-1 text-sm" />
+              <el-input v-model="form.registerAmount" type="number" placeholder="ingresa el monto">
+                  <template #prefix>
+                  <i class="fa-solid fa-dollar-sign"></i>
+                  </template>
+              </el-input>
+          </div>
+
+          <div class="col-span-full mt-2">
+              <InputLabel value="Motivo (opcional)" class="text-sm ml-2" />
+              <el-input v-model="form.registerNotes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                  placeholder="Escribe tus notas" :maxlength="200" show-word-limit clearable />
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-2 pb-1 py-2 col-span-full">
+              <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
+              <PrimaryButton :disabled="!form.registerAmount || form.processing">Confirmar</PrimaryButton>
+          </div>
+        </form>
+      </div>
+    </Modal>
+    <!-- --------------------------- Modal ends ------------------------------------ -->
   </AppLayout>
 </template>
 
@@ -175,14 +232,25 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import InputLabel from "@/Components/InputLabel.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import SaleTable from '@/Components/MyComponents/Sale/SaleTable.vue';
+import Modal from "@/Components/Modal.vue";
+import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 
 export default {
   data() {
 
+    const form = useForm({
+        cashRegisterMovementType: null, //que tipo de movimiento es
+        registerAmount: null, //Dinero ingresado o sacado de caja
+        registerNotes: null, //notas al entrar o sacar dinero
+    });
+
     return {
+      form,
+      cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
       // inventario de codigos activado
       isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
       // descuentos activados
@@ -235,7 +303,9 @@ export default {
     PrimaryButton,
     ThirthButton,
     CancelButton,
-    SaleTable
+    InputLabel,
+    SaleTable,
+    Modal
   },
   props: {
     products: Array
@@ -261,6 +331,9 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+    storeCashRegisterMovement() {
+      // this.form.post(route());
     },
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);

@@ -40,6 +40,11 @@ class Store extends Model
         return $this->hasMany(Product::class);
     }
 
+    public function cashRegisters() :HasMany
+    {
+        return $this->hasMany(CashRegister::class);
+    }
+
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
