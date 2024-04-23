@@ -29,19 +29,14 @@ class ProductController extends Controller
         // productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
 
-        // Convertimos $local_products a un arreglo asociativo
-        $local_products_array = $local_products->toArray();
-
-
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
-        $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
+        $products = new Collection(array_merge($local_products->toArray(), $transfered_products->toArray()));
 
         $total_products = $products->count();
 
         //tomar solo 30 productos
         $products = $products->take(30);
 
-        // return $products;
         return inertia('Product/Index', compact('products', 'total_products'));
     }
 
@@ -260,7 +255,8 @@ class ProductController extends Controller
     public function fetchHistory($product_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('historicable_id', $product_id);
+        $query = ProductHistory::where('historicable_id', $product_id)
+            ->where('historicable_type', Product::class);
 
         if ($month && $year) {
             $query->whereMonth('created_at', $month)->whereYear('created_at', $year);

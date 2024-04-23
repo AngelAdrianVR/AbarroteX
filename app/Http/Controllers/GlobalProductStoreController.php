@@ -13,33 +13,33 @@ use Illuminate\Http\Request;
 
 class GlobalProductStoreController extends Controller
 {
-    
+
     public function index()
     {
         //
     }
 
-    
+
     public function create()
     {
         //
     }
 
-    
+
     public function store(Request $request)
     {
         //
     }
 
-    
+
     public function show($global_product_store_id)
-    {   
-        $global_product_store = GlobalProductStore::with(['globalProduct'=>['media', 'category', 'brand']])->find($global_product_store_id);
+    {
+        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])->find($global_product_store_id);
 
         return inertia('GlobalProductStore/Show', compact('global_product_store'));
     }
 
-    
+
     public function edit($global_product_store_id)
     {
         $global_product_store = GlobalProductStore::with('globalProduct.media')->find($global_product_store_id);
@@ -49,7 +49,7 @@ class GlobalProductStoreController extends Controller
         return inertia('GlobalProductStore/Edit', compact('global_product_store', 'categories', 'brands'));
     }
 
-    
+
     public function update(Request $request, GlobalProductStore $global_product_store)
     {
         $request->validate([
@@ -71,8 +71,8 @@ class GlobalProductStoreController extends Controller
             ProductHistory::create([
                 'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
                 'type' => 'Precio',
-                'product_id' => null,
-                'global_product_store_id' => $global_product_store->id
+                'historicable_id' => $global_product_store->id,
+                'historicable_type' => GlobalProductStore::class
             ]);
         }
 
@@ -82,7 +82,7 @@ class GlobalProductStoreController extends Controller
         return to_route('products.index');
     }
 
-   
+
     public function destroy(GlobalProductStore $global_product_store)
     {
         $global_product_store->delete();
@@ -103,8 +103,8 @@ class GlobalProductStoreController extends Controller
         ProductHistory::create([
             'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
             'type' => 'Entrada',
-            'product_id' => null,
-            'global_product_store_id' => $global_product_store->id
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
         ]);
 
         // Crear egreso
@@ -119,8 +119,9 @@ class GlobalProductStoreController extends Controller
     public function fetchHistory($global_product_store_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('global_product_store_id', $global_product_store_id);
-        
+        $query = ProductHistory::where('historicable_id', $global_product_store_id)
+            ->where('historicable_type', GlobalProductStore::class);
+
         if ($month && $year) {
             $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
         } else {
