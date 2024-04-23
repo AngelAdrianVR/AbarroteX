@@ -16,6 +16,7 @@ class CashCut extends Model
         'expected_cash',
         'counted_cash',
         'difference',
+        'notes',
         'cash_register_id',
     ];
 

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedFloat('started_cash');
             $table->unsignedFloat('expected_cash');
             $table->unsignedFloat('counted_cash');
-            $table->unsignedFloat('difference');
+            $table->float('difference');
+            $table->string('notes')->nullable();
             $table->foreignId('cash_register_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

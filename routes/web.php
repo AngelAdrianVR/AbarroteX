@@ -179,3 +179,4 @@ Route::resource('cash-register-movements', CashRegisterMovementController::class
 //Cash cuts routes----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('cash-cuts', CashCutController::class)->middleware('auth');
+Route::get('cash-cuts-fetch-total-sales-for-cash-cut', [CashCutController::class, 'fetchTotalSaleForCashCut'])->middleware('auth')->name('cash-cuts.fetch-total-sales-for-cash-cut');
