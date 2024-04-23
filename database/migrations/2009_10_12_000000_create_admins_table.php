@@ -22,6 +22,8 @@ return new class extends Migration
             $table->rememberToken();
             $table->string('phone');
             $table->boolean('is_active')->default(true);
+            $table->timestamp('disabled_date')->nullable();
+            $table->string('disabled_reason')->nullable();
             $table->json('employee_properties')->nullable();
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();

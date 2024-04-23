@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashRegister;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -32,7 +33,10 @@ class SaleController extends Controller
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
 
-        return inertia('Sale/Point', compact('products'));
+        //recupera la primera caja registradora de la tienda para mandar su info como current_cash
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+        return inertia('Sale/Point', compact('products', 'cash_register'));
     }
 
 
@@ -81,6 +85,10 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
+        // obtiene la primera caja registradora de la tienda
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+        //recorre el arreglo de productos.
         foreach ($request->data['saleProducts'] as $sale) {
             $model = isset($sale['product']['global_product_id']) ? GlobalProductStore::class : Product::class;
             //regiatra cada producto vendido
@@ -91,6 +99,10 @@ class SaleController extends Controller
                 'saleable_type' => $model,
                 'store_id' => auth()->user()->store_id,
             ]);
+
+            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+            $cash_register->current_cash += $sale['product']['public_price'] * $sale['quantity'];
+            $cash_register->save();
 
             //Registra el historial de venta de cada producto
             ProductHistory::create([

@@ -35,6 +35,14 @@ class DatabaseSeeder extends Seeder
             'default_card_id' => 1,
         ]);
 
+        // crear la primera caja registradora de la tienda
+        Store::create([
+            'started_cash' => 0,
+            'current_cash' => 0,
+            'max_cash' => 5000,
+            'store_id' => 1,
+        ]);
+
         // crear el primer usuario
         User::factory()->create([
             'name' => 'Angel Vazquez',
