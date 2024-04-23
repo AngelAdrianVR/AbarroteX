@@ -38,10 +38,13 @@
 
             <Loading v-if="loading" class="mt-20" />
             <div v-else class="mt-8">
-                <p v-if="Object.keys(localSales)?.length" class="text-gray66 text-[11px]">{{ Object.keys(localSales)?.length }} de {{ total_sales }}
+                <p v-if="Object.keys(localSales)?.length" class="text-gray66 text-[11px] mb-3">{{ Object.keys(localSales)?.length }} de {{ total_sales }}
                     elementos
                 </p>
                 <RegisteredSalesTable :sales="localSales" />
+                <p v-if="Object.keys(localSales)?.length" class="text-gray66 text-[11px] mt-1">{{ Object.keys(localSales)?.length }} de {{ total_sales }}
+                    elementos
+                </p>
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>

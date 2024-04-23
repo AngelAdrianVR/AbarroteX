@@ -80,10 +80,10 @@ Route::get('products-select', [ProductController::class, 'selectGlobalProducts']
 
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-// Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
-// Route::post('global-product-store/transfer-products', [GlobalProductStoreController::class, 'transferProducts'])->name('global-product-store.transfer-products')->middleware('auth');
-// Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
-// Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
+Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
+Route::post('global-product-store/transfer-products', [GlobalProductStoreController::class, 'transferProducts'])->name('global-product-store.transfer-products')->middleware('auth');
+Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
+Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
 
 
 //categories routes----------------------------------------------------------------------------------

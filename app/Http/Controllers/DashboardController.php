@@ -18,20 +18,23 @@ class DashboardController extends Controller
     public function getDayData($date)
     {
         $prev_date = Carbon::parse($date)->subDay()->toDateString();
-        $sales = Sale::with('product', 'globalProductStore.globalProduct')->where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
-        $last_period_sales = Sale::with('product', 'globalProductStore.globalProduct')->where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
+        $sales = Sale::with('saleable')->where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+        $last_period_sales = Sale::with('saleable')->where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
         $last_period_expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
-        $top_products = Sale::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
-            ->where('store_id', auth()->user()->store_id)
-            ->whereDate('created_at', $date)
-            ->groupBy('product_id')
-            ->orderByDesc('total_quantity')
-            ->take(5)
-            ->get();
+        // $top_products = Sale::with('saleable')
+        //     ->select('saleable_id', DB::raw('SUM(quantity) as total_quantity'))
+        //     ->where('store_id', auth()->user()->store_id)
+        //     ->whereDate('created_at', $date)
+        //     ->groupBy('saleable_id')
+        //     ->orderByDesc('total_quantity')
+        //     ->take(5)
+        //     ->get();
 
         // cargar los datos del producto asociado
-        $top_products->load('product');
+        // $top_products->load('saleable');
+        // return $top_products;
+        $top_products = [];
 
         return response()->json(compact('sales', 'last_period_sales', 'top_products', 'expenses', 'last_period_expenses'));
     }

@@ -44,7 +44,6 @@ class ExpenseController extends Controller
             ];
         });
 
-        // return $groupedExpenses;
         return inertia('Expense/Index', compact('groupedExpenses', 'total_expenses'));
     }
 
