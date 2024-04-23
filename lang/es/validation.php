@@ -176,5 +176,6 @@ return [
         'store_name' => 'nombre de tu tienda',
         'terms' => 'terminos y condiciones',
         'type' => 'tipo',
+        'registerAmount' => 'El monto es mayor que el dinero en caja,',
     ],
 ];

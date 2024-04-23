@@ -2,9 +2,24 @@
   <AppLayout title="Registrar venta">
     <div class="px-2 lg:px-6 py-7">
       <!-- header botones -->
-      <div class="lg:flex justify-between items-center mx-3">
+      <div class="md:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
-        <div class="border border-primary rounded-full px-4 pt-[3px]">
+        <div class="flex cursor-pointer items-center space-x-3">
+          <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="!showCashRegisterMoney" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.5" stroke="currentColor" class="size-4 text-[#777777]">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+          <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.5" stroke="currentColor" class="size-4 text-[#777777]">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+          </svg>
+          <p class="text-base font-semibold" :class="showCashRegisterMoney ? 'blur-sm' : ''">Caja: ${{ localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+        </div>
+        <div class="border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
          <el-col :span="3">
           <el-dropdown>
             <span class="text-sm text-primary w-44 flex items-center">
@@ -127,7 +142,7 @@
                   calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",") }}</strong></p>
               </div>
-              <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
+              <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p class="text-[#999999]">Descuento</p>
                 <el-input v-model="editableTabs[this.editableTabsValue - 1].discount" type="number" class="!w-24 !h-8"
                   placeholder="0.00">
@@ -135,7 +150,7 @@
                     <i class="fa-solid fa-dollar-sign"></i>
                   </template>
                 </el-input>
-              </div>
+              </div> -->
               <div class="flex items-center justify-between text-lg mx-5">
                 <p class="font-bold">Total</p>
                 <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
@@ -191,7 +206,7 @@
       </div>
     </div>
 
-    <!-- -------------- Modal starts----------------------- -->
+    <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
     <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
       <div class="p-4 relative">
         <i @click="cashRegisterModal = false"
@@ -204,11 +219,12 @@
           <div class="mt-2">
               <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar" class="ml-3 mb-1 text-sm" />
               <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar" class="ml-3 mb-1 text-sm" />
-              <el-input v-model="form.registerAmount" type="number" placeholder="ingresa el monto">
+              <el-input v-model="form.registerAmount" step="0.01" type="number" placeholder="ingresa el monto">
                   <template #prefix>
                   <i class="fa-solid fa-dollar-sign"></i>
                   </template>
               </el-input>
+              <InputError :message="form.errors.registerAmount" />
           </div>
 
           <div class="col-span-full mt-2">
@@ -224,7 +240,7 @@
         </form>
       </div>
     </Modal>
-    <!-- --------------------------- Modal ends ------------------------------------ -->
+    <!-- --------------------------- Modal Ingreso o retiro de dinero en caja ends ------------------------------------ -->
   </AppLayout>
 </template>
 
@@ -235,6 +251,7 @@ import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import SaleTable from '@/Components/MyComponents/Sale/SaleTable.vue';
+import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
@@ -250,6 +267,8 @@ export default {
 
     return {
       form,
+      showCashRegisterMoney: true, //muestra u oculta el dinero de caja
+      localCurrentCash: this.cash_register.current_cash, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
       // inventario de codigos activado
       isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
@@ -304,11 +323,13 @@ export default {
     ThirthButton,
     CancelButton,
     InputLabel,
+    InputError,
     SaleTable,
     Modal
   },
   props: {
-    products: Array
+    products: Array,
+    cash_register: Object
   },
   methods: {
     async store() {
@@ -327,17 +348,38 @@ export default {
           });
           this.storeProcessing = false;
           this.clearTab();
+          this.fetchCurrentCash();
         }
       } catch (error) {
         console.log(error);
       }
     },
     storeCashRegisterMovement() {
-      // this.form.post(route());
+      this.form.post(route('cash-register-movements.store'), {
+          onSuccess: () => {
+              this.$notify({
+                  title: "Correcto",
+                  message: "Se ha registrado el movimiento de caja",
+                  type: "success",
+              });
+              this.cashRegisterModal = false;
+              this.form.reset();
+          },
+      });
     },
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
       this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
+    },
+    async fetchCurrentCash() {
+      try {
+        const response = await axios.get(route('cash-registers.fetch-current-cash'));
+        if (response.status === 200) {
+          this.localCurrentCash = response.data.item;
+        }
+      } catch (error) { 
+        console.log(error);
+      }
     },
     async searchProducts() {
       try {
