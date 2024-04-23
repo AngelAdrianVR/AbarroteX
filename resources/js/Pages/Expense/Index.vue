@@ -6,7 +6,7 @@
                 <h1 class="font-bold text-lg">Egresos</h1>
                 <div class="flex space-x-2 items-center relative">
                     <!-- Boton para crear egreso -->
-                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="">Crear</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="!py-[6px]">Crear</PrimaryButton>
                     <!-- filtro -->
                     <button @click.stop="showFilter = !showFilter"
                         class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
@@ -40,16 +40,21 @@
 
             <Loading v-if="loading" class="mt-20" />
             <div v-else class="mt-8">
-                <p v-if="Object.keys(localExpenses)?.length" class="text-gray66 text-[11px]">{{ Object.keys(localExpenses)?.length }} de {{ total_expenses }}
+                <p v-if="Object.keys(localExpenses)?.length" class="text-gray66 text-[11px] mb-3">
+                    {{ Object.keys(localExpenses)?.length }} de {{ total_expenses }}
                     elementos
                 </p>
                 <RegisteredExpensesTable :expenses="localExpenses" />
-                <!-- <SaleMobileIndex v-for="item in localExpenses" :key="item.id" :saleId="item.id" class="md:hidden" /> -->
+                <p v-if="Object.keys(localExpenses)?.length" class="text-gray66 text-[11px] mt-1">
+                    {{ Object.keys(localExpenses)?.length }} de {{ total_expenses }}
+                    elementos
+                </p>
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
                 <button v-if="(Object.keys(localExpenses)?.length < total_expenses) && !filtered"
-                    @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
+                    @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
+                    elementos</button>
             </div>
         </div>
     </AppLayout>
@@ -57,8 +62,7 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import RegisteredExpensesTable from '@/Components/MyComponents/Expense/RegisteredExpensesTable.vue';  
-// import SaleMobileIndex from '@/Components/MyComponents/Expense/SaleMobileIndex.vue';    
+import RegisteredExpensesTable from '@/Components/MyComponents/Expense/RegisteredExpensesTable.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
@@ -112,7 +116,7 @@ export default {
                 const response = await axios.get(route('expenses.get-by-page', this.currentPage));
 
                 if (response.status === 200) {
-                    this.localExpenses = {...this.localExpenses, ...response.data.items};
+                    this.localExpenses = { ...this.localExpenses, ...response.data.items };
                     this.currentPage++;
                 }
             } catch (error) {
