@@ -179,19 +179,16 @@
                         <el-input v-model="form.quantity" ref="quantityInput" @keydown.enter="entryProduct"
                             placeholder="Cantidad que entra a almacén"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                            :parser="(value) => value.replace(/\$\s?|(,*)/g, '')">
-                            <template #prefix>
-                                <i class="fa-solid fa-hashtag"></i>
-                            </template>
+                            :parser="(value) => value.replace(/\D/g, '')">
                         </el-input>
                         <InputError :message="form.errors.quantity" />
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
-                        <PrimaryButton :disabled="form.processing" @click="entryProduct" class="!rounded-full">Ingresar
+                        <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
+                        <PrimaryButton :disabled="form.processing || !form.quantity" @click="entryProduct" class="!rounded-full">Ingresar
                             producto
                         </PrimaryButton>
-                        <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
                     </div>
                 </section>
             </div>

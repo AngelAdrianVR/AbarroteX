@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('description');
             $table->string('type');
-            $table->foreignId('product_id')->nullable()->constrained()->cascadeOnDelete(); // en caso de vender un producto local
-            $table->foreignId('global_product_store_id')->nullable()->constrained()->cascadeOnDelete(); // en caso de vender un producto transferido del catálogo
+            $table->morphs('historicable');
             $table->timestamps();
         });
     }

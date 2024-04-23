@@ -16,8 +16,7 @@ return new class extends Migration
             $table->unsignedFloat('current_price');
             $table->unsignedFloat('quantity');
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->nullable()->constrained()->cascadeOnDelete(); // en caso de vender un producto local
-            $table->foreignId('global_product_store_id')->nullable()->constrained()->cascadeOnDelete(); // en caso de vender un producto transferido del catálogo
+            $table->morphs('saleable');
             $table->timestamps();
         });
     }

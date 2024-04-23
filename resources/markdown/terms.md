@@ -1,22 +1,28 @@
-# Terms of Service
+# Términos y condiciones 
 
+La suscripción al sistema Ezy Ventas es completamente voluntaria y el usuario tiene la libertad de elegir entre distintos planes de suscripción, según los ofrecidos por el proveedor.
+Al suscribirse, el usuario acepta cumplir con los términos y condiciones vigentes durante el uso del sistema.
 
-1. **Responsabilidad del Usuario**: El usuario es responsable de mantener la seguridad de sus credenciales de acceso al sistema y cualquier actividad realizada con ellas.
+El usuario es responsable de mantener la confidencialidad de su cuenta y contraseña, así como de cualquier actividad que ocurra bajo su cuenta.
+Es responsabilidad del usuario asegurarse de que la información proporcionada al sistema sea precisa y actualizada.
+El usuario no debe utilizar el sistema para actividades ilegales, fraudulentas o que violen los derechos de terceros.
+El usuario no debe intentar acceder o dañar los sistemas o datos del proveedor de servicios ni de otros usuarios.
 
-2. **Uso Aceptable**: Establecer reglas claras sobre el uso aceptable del sistema, incluidas restricciones sobre actividades ilegales, abuso del sistema o violación de los derechos de propiedad intelectual.
+El usuario puede cancelar su suscripción en cualquier momento. Para hacerlo, el usuario simplemente debe dejar de utilizar su cuenta o no renovar la suscripción.
+La responsabilidad de dejar de utilizar la cuenta y cualquier consecuencia derivada de la continuidad del uso antes de la finalización del período de facturación actual recae exclusivamente en el usuario
 
-3. **Privacidad y Protección de Datos**: Declaración sobre cómo se recopilan, almacenan y utilizan los datos de los clientes y usuarios, y cómo se protegen estos datos de accesos no autorizados.
+El Usuario puede acceder al sistema desde múltiples dispositivos.
 
-4. **Pago y Facturación**: Condiciones sobre los métodos de pago aceptados, tarifas, plazos de pago y políticas de facturación.
+El proveedor de servicios se reserva el derecho de modificar, actualizar o cambiar los términos y condiciones en cualquier momento y sin previo aviso.
+Los cambios en los términos y condiciones serán comunicados a los usuarios a través de notificaciones en el sistema o por otros medios de contacto proporcionados por el usuario.
+El uso continuado del sistema después de la entrada en vigor de los cambios se considerará como aceptación de los nuevos términos y condiciones.
+El Proveedor se reserva el derecho de realizar actualizaciones en el Software sin previo aviso al Usuario.
 
-5. **Entrega y Envío**: Si el punto de venta incluye opciones de venta en línea, se deben establecer términos y condiciones relacionados con la entrega de productos, costos de envío, plazos de entrega y responsabilidades del vendedor y del comprador.
+El Proveedor ofrece los siguientes servicios:
+Acceso al sistema las 24 horas del día, los 365 días del año.
+Actualizaciones remotas del sistema.
+Soporte técnico y capacitación remota para usuarios con suscripción.
 
-6. **Devoluciones y Reembolsos**: Políticas de devolución y reembolso para productos comprados, incluidas las condiciones bajo las cuales se aceptan devoluciones y se procesan los reembolsos.
+El Proveedor se compromete a mantener el sistema en funcionamiento constante, salvo por causas de fuerza mayor. 
 
-7. **Garantías y Limitaciones de Responsabilidad**: Declaración sobre las garantías (si las hay) ofrecidas para los productos o servicios vendidos a través del punto de venta, así como las limitaciones de responsabilidad en caso de daños o pérdidas.
-
-8. **Derechos de Autor y Propiedad Intelectual**: Aviso sobre los derechos de autor y propiedad intelectual relacionados con el contenido del sitio web o la aplicación de punto de venta, así como las condiciones de uso de dicho contenido por parte de los usuarios.
-
-9. **Cambios en los Términos y Condiciones**: Reserva del derecho de realizar cambios en los términos y condiciones en cualquier momento, con notificación adecuada a los usuarios.
-
-10. **Jurisdicción y Ley Aplicable**: Declaración sobre la jurisdicción que rige los términos y condiciones, así como la ley aplicable en caso de disputas legales.
+El sistema se ofrece en modalidades de suscripción mensual o anual, con servicios adicionales incluidos según el tipo de suscripción.

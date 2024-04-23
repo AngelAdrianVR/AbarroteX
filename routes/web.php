@@ -49,9 +49,9 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard-get-day-data', [DashboardController::class, 'getDayData'])->name('dashboard.get-day-data');
-    Route::get('/dashboard-get-week-data', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
-    Route::get('/dashboard-get-month-data', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
+    Route::get('/dashboard-get-day-data/{date}', [DashboardController::class, 'getDayData'])->name('dashboard.get-day-data');
+    Route::get('/dashboard-get-week-data/{date}', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
+    Route::get('/dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
 
@@ -80,10 +80,10 @@ Route::get('products-select', [ProductController::class, 'selectGlobalProducts']
 
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-// Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
-// Route::post('global-product-store/transfer-products', [GlobalProductStoreController::class, 'transferProducts'])->name('global-product-store.transfer-products')->middleware('auth');
-// Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
-// Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
+Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
+Route::post('global-product-store/transfer-products', [GlobalProductStoreController::class, 'transferProducts'])->name('global-product-store.transfer-products')->middleware('auth');
+Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
+Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
 
 
 //categories routes----------------------------------------------------------------------------------

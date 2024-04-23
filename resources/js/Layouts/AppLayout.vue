@@ -52,7 +52,7 @@ const logout = () => {
                                 <!-- Logo -->
                                 <div class="md:hidden shrink-0 flex items-center">
                                     <Link :href="route('dashboard')">
-                                <ApplicationMark class="block h-11 w-auto" />
+                                    <ApplicationMark class="block h-11 w-auto" />
                                     </Link>
                                 </div>
                             </div>
@@ -148,13 +148,14 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                 Análisis de venta
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('sales.index')" :active="route().current('sales.index') || route().current('sales.show')">
+                            <ResponsiveNavLink :href="route('sales.index')"
+                                :active="route().current('sales.index') || route().current('sales.show')">
                                 Ventas registradas
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
                                 Gastos
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*')">
+                            <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">

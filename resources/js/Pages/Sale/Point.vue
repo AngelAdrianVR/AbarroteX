@@ -80,8 +80,8 @@
               </div>
               <div class="flex justify-between items-center">
                 <p class="text-gray99">Cantidad</p>
-                <!-- <el-input-number v-model="quantity" :min="0" :max="productFoundSelected.current_stock" :precision="2" /> en caso de tomar en cuenta stock -->
-                <el-input-number v-model="quantity" :min="0" :precision="2" />
+                <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0" :max="productFoundSelected.current_stock" :precision="2" />
+                <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null"
@@ -89,7 +89,10 @@
                 </PrimaryButton>
               </div>
             </div>
-            <p v-else class="text-center text-gray-500 text-sm">Sin información de producto</p>
+            <p v-else class="text-center text-gray99 text-sm">
+              Busca el producto
+              <i class="fa-regular fa-hand-point-up ml-3"></i>
+            </p>
           </div>
 
           <!-- Total por cobrar -->
@@ -118,7 +121,7 @@
                 <p v-else class="text-gray-99">$ <strong class="ml-3">{{ (calculateTotal() -
                   editableTabs[this.editableTabsValue
                     - 1].discount)?.toLocaleString('en-US', {
-                    minimumFractionDigits: 2
+                      minimumFractionDigits: 2
                     }) }}</strong></p>
               </div>
               <div class="text-center mt-7">
@@ -133,7 +136,7 @@
               <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() -
                 editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
                   minimumFractionDigits: 2
-                  }) }}</strong>
+                }) }}</strong>
               </p>
               <div class="flex items-center justify-between mx-5 space-x-10">
                 <p>Entregado</p>
@@ -180,10 +183,13 @@ export default {
   data() {
 
     return {
+      // inventario de codigos activado
+      isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
       // descuentos activados
       isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
       // escaneo de codigos activado
       isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
+
       storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
       loading: false, //cargando la busqueda de productos
