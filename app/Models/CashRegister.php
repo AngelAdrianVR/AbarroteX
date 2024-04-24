@@ -24,9 +24,9 @@ class CashRegister extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function cashRegisterMovements() :HasMany
+    public function movements() :HasMany
     {
-        return $this->hasMany(CashRegister::class);
+        return $this->hasMany(CashRegisterMovement::class);
     }
 
     public function cashCuts() :HasMany

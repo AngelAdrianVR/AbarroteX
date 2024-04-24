@@ -12,7 +12,12 @@ class CashCutController extends Controller
     
     public function index()
     {
-        //
+        // obtiene la primera caja registradora de la tienda
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+        $cash_cuts = CashCut::where('cash_register_id', $cash_register->id)->latest()->get();
+
+        // return $cash_cuts;
+        return inertia('CashCut/Index', compact('cash_cuts'));
     }
 
     
@@ -25,12 +30,18 @@ class CashCutController extends Controller
     public function store(Request $request)
     {
         // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+        $cash_register = CashRegister::with(['movements'])->where('store_id', auth()->user()->store_id)->first();
+
+        //suma algebraica de todo el dinero que ingresó y salió de caja
+        $expected_cash = $cash_register->started_cash
+                            + $request->totalCashMovements 
+                            + $request->totalSaleForCashCut;
 
         //Crea el registro de corte de caja
         CashCut::create([
             'started_cash' => $cash_register->started_cash,
-            'expected_cash' => $request->totalSaleForCashCut,
+            'expected_cash' => $expected_cash, //suma de ventas, ingresos, retiros de caja y dinero inicial.
+            'sales_cash' => $request->totalSaleForCashCut,
             'counted_cash' => $request->counted_cash,
             'difference' => $request->difference * -1,
             'notes' => $request->notes,
@@ -38,14 +49,19 @@ class CashCutController extends Controller
         ]);
 
         //se asigna el dinero contado al dinero inicial de caja registradora para el próximo corte 
-        $cash_register->started_cash = $request->counted_cash;
+        //el dinero contado menos el dinero retirado.
+        $cash_register->started_cash = $request->counted_cash - $request->amount_withdrawn;
+        $cash_register->current_cash = $request->counted_cash - $request->amount_withdrawn;
         $cash_register->save();
     }
 
     
-    public function show(CashCut $cash_cut)
+    public function show($cash_cut_id)
     {
-        //
+        $cash_cut = CashCut::with(['cashRegister.movements'])->find($cash_cut_id);
+
+        // return $cash_cut;
+        return inertia('CashCut/Show', compact('cash_cut'));
     }
 
     
@@ -63,7 +79,7 @@ class CashCutController extends Controller
     
     public function destroy(CashCut $cash_cut)
     {
-        //
+        $cash_cut->delete();
     }
 
 
