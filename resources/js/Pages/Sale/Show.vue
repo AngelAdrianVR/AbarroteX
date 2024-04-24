@@ -50,22 +50,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(product, index2) in group" :key="index2" class="*:px-2">
+                                <tr v-for="(sale, index2) in group" :key="index2" class="*:px-2">
                                     <td>
-                                        <button @click="viewProduct(product)" class="text-primary underline">{{
-                                            product.name
-                                            }}</button>
+                                        <button v-if="sale.product_id" @click="viewProduct(sale)"
+                                            class="text-primary underline">
+                                            {{ sale.product_name }}
+                                        </button>
+                                        <el-tooltip v-else content="El producto fue eliminado" placement="left">
+                                            <span>{{ sale.product_name }}</span>
+                                        </el-tooltip>
                                     </td>
-                                    <td>{{ product.current_price }}</td>
-                                    <td>{{ product.quantity }}</td>
-                                    <td class="text-end">${{ (product.current_price *
-                                        product.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                    <td>${{ sale.current_price }}</td>
+                                    <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                    <td class="text-end">${{ (sale.current_price *
+                                        sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="text-end">
-                        <!-- descomentar cuado se guarden los descuentos sobre la venta total -->
+                        <!--*** descomentar cuado se guarden los descuentos sobre la venta total ***-->
                         <!-- <div class="text-gray99 flex items-center justify-end space-x-2 *:w-12 px-3">
                             <span>Subtotal:</span>
                             <span class="text-gray37">$</span>
@@ -79,43 +83,11 @@
                         <div class="text-gray37 font-black flex items-center justify-end space-x-2 *:w-12 px-2">
                             <span class="text-start">Total:</span>
                             <span>$</span>
-                            <span>{{ calcTotal(group).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span>
+                            <span>{{ calcTotal(group).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </div>
                     </div>
                 </article>
             </section>
-
-
-            <!-- detalle de productos -->
-            <!-- <div class="grid grid-cols-4 lg:ml-16 mr-3 self-start mt-9">
-                <p class="font-bold">Producto</p>
-                <p class="font-bold">Cantidad</p>
-                <p class="font-bold">Precio</p>
-                <p class="font-bold ml-8">Total</p>
-
-                <div class="mt-2">
-                    <p @click="viewProduct(product)" class="text-primary underline cursor-pointer text-sm"
-                        v-for="product in Object.values(day_sales)[0].sales" :key="product">{{ product.name }}</p>
-                </div>
-                <div class="mt-2">
-                    <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">{{
-                        product.quantity }}
-                    </p>
-                </div>
-                <div class="mt-2">
-                    <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">${{
-                        product.current_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                </div>
-                <div class="mt-2 ml-8">
-                    <p class="text-sm" v-for="product in Object.values(day_sales)[0].sales" :key="product">${{
-                        (product.quantity *
-                            product.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                </div>
-                <div class="border-b border-primary w-28 col-start-4 my-3"></div>
-                <p class="col-start-4 text-sm font-bold">Total: <span class="ml-2">${{
-                    Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}</span></p>
-            </div> -->
         </div>
     </AppLayout>
 </template>

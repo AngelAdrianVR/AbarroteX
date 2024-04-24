@@ -46,7 +46,6 @@ class SaleController extends Controller
             ->get()
             ->count();
 
-
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         $days_ago = Carbon::now()->subDays(5);
 
@@ -82,13 +81,19 @@ class SaleController extends Controller
     public function store(Request $request)
     {
         foreach ($request->data['saleProducts'] as $sale) {
-            $model = isset($sale['product']['global_product_id']) ? GlobalProductStore::class : Product::class;
+            $is_global_product = isset($sale['product']['global_product_id']);
+
+            $product_name = $is_global_product
+                ? GlobalProductStore::find($sale['product']['id'])->globalProduct->name
+                : Product::find($sale['product']['id'])->name;
+
             //regiatra cada producto vendido
-            $created_sale = Sale::create([
+            Sale::create([
                 'current_price' => $sale['product']['public_price'],
                 'quantity' => $sale['quantity'],
-                'saleable_id' => $sale['product']['id'],
-                'saleable_type' => $model,
+                'product_name' => $product_name,
+                'product_id' => $sale['product']['id'],
+                'is_global_product' => $is_global_product,
                 'store_id' => auth()->user()->store_id,
             ]);
 
@@ -97,19 +102,23 @@ class SaleController extends Controller
                 'description' => 'Registro de venta. ' . $sale['quantity'] . ' piezas',
                 'type' => 'Venta',
                 'historicable_id' => $sale['product']['id'],
-                'historicable_type' => $model,
+                'historicable_type' => $is_global_product
+                    ? GlobalProductStore::class
+                    : Product::class,
             ]);
 
             //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
             // Verifica si 'global_product_id' existe en 'product'
             $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
             if ($is_inventory_on) {
-                $product = $created_sale->saleable;
+                $product = $is_global_product
+                    ? GlobalProductStore::find($sale['product']['id'])
+                    : Product::find($sale['product']['id']);
+
                 $product->decrement('current_stock', $sale['quantity']);
 
                 // notificar si ha llegado al limite de existencias bajas
                 if ($product->current_stock <= $product->min_stock) {
-                    $product_name = $model == Product::class ? $product->name : $product->globalProduct->name;
                     $title = "Bajo stock";
                     $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
                     $url = route('products.show', $product->id);
@@ -127,38 +136,22 @@ class SaleController extends Controller
         $date = Carbon::parse($created_at)->toDateString();
 
         // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::where('store_id', auth()->user()->store_id)->with(['saleable'])->whereDate('created_at', $date)->get();
+        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $sales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->format('d-F-Y');
         })->map(function ($sales) {
-            // Procesar las ventas
-            $groupedSales = $sales->map(function ($currentSale) {
-                $is_global_product = $currentSale->saleable_type == GlobalProductStore::class;
-                return [
-                    'id' => $currentSale->id,
-                    'name' => $is_global_product 
-                        ? $currentSale->saleable->globalProduct->name
-                        : $currentSale->saleable->name,
-                    'current_price' => $currentSale->current_price,
-                    'quantity' => $currentSale->quantity,
-                    'product_id' => $currentSale->saleable_id,
-                    'is_global_product' => $is_global_product,
-                    'created_at' => $currentSale->created_at,
-                ];
-            });
-
             // Calcular totales
-            $totalQuantity = $groupedSales->sum('quantity');
-            $totalSale = $groupedSales->sum(function ($productSale) {
+            $totalQuantity = $sales->sum('quantity');
+            $totalSale = $sales->sum(function ($productSale) {
                 return $productSale['quantity'] * $productSale['current_price'];
             });
 
             return [
                 'total_quantity' => $totalQuantity,
                 'total_sale' => $totalSale,
-                'sales' => $groupedSales->values(), // Convertir el mapa en un arreglo indexado
+                'sales' => $sales->values(), // Convertir el mapa en un arreglo indexado
             ];
         });
 
