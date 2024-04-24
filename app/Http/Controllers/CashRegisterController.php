@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\CashRegister;
-use App\Models\CashRegisterMovement;
 use Illuminate\Http\Request;
 
 class CashRegisterController extends Controller
@@ -11,12 +10,7 @@ class CashRegisterController extends Controller
     
     public function index()
     {   
-        // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
-        $cash_register_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->latest()->get();
-
-        // return $cash_register_movements;
-        return inertia('CashRegister/Index', compact('cash_register_movements'));
+        //
     }
 
    

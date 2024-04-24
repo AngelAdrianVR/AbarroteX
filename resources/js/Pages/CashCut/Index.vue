@@ -3,10 +3,10 @@
         <section class="mt-16 mx-auto xl:w-2/3">
             <el-tabs class="mx-3" v-model="activeTab">
                 <el-tab-pane label="Caja principal" name="1">
-                    <!-- <GeneralUserInfo :user="user" /> -->
+                    <MainCashRegister />
                 </el-tab-pane>
                 <el-tab-pane label="Historial" name="2">
-                    <!-- <CashRegisterMovements :movements="cash_register_movements" /> -->
+                    <CashCutsTable :items="cash_cuts" />
                 </el-tab-pane>
             </el-tabs>
         </section>
@@ -16,7 +16,8 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import CashRegisterMovements from '@/Pages/CashRegister/Tabs/CashRegisterMovements.vue';
+import CashCutsTable from '@/Pages/CashCut/Tabs/CashCutsTable.vue';
+import MainCashRegister from '@/Pages/CashCut/Tabs/MainCashRegister.vue';
 
 export default {
 data() {
@@ -26,11 +27,12 @@ data() {
 },
 components:{
 AppLayout,
-CashRegisterMovements,
+CashCutsTable,
+MainCashRegister,
 PrimaryButton, 
 },
 props:{
-cash_register_movements: Array
+cash_cuts: Array
 },
 methods:{
 

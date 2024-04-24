@@ -262,7 +262,10 @@
               <p>Diferencia</p>
             </div>
             <div class="w-44 space-y-2">
-              <p>${{ cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+              <div v-if="cutLoading">
+                <i  class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+              </div>
+              <p v-else>${{ (cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
               <el-input @input="difference()" v-model="cutForm.counted_cash" type="number" step="0.01" class="!w-24 !h-6"
                 placeholder="0.00">
                 <template #prefix>
@@ -293,6 +296,19 @@
               </p>
             </div>
           </section>
+
+          <div v-if="cutForm.counted_cash" class="flex items-center space-x-3 mt-3">
+            <div class="w-full">
+              <InputLabel value="Monto a retirar de caja" class="text-sm ml-2" />
+              <el-input v-model="cutForm.amount_withdrawn" type="number" step="0.01" class="!w-1/2 !h-6"
+                placeholder="0.00">
+                <template #prefix>
+                  <i class="fa-solid fa-dollar-sign"></i>
+                </template>
+              </el-input>
+            </div>
+            <p v-if="cutForm.amount_withdrawn" class="w-full mt-3 text-sm font-bold">Efectivo que dejarás en caja: ${{ (cutForm.counted_cash - cutForm.amount_withdrawn)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+          </div>
 
 
           <div class="col-span-full mt-2">
@@ -338,6 +354,8 @@ export default {
         difference: null,
         notes: null,
         totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
+        totalCashMovements: null, //dinero de movimientos de caja para hacer corte
+        amount_withdrawn: null, //dinero retirado de caja tras haber hecho el corte
     });
 
     return {
@@ -358,6 +376,7 @@ export default {
       storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
       loading: false, //cargando la busqueda de productos
+      cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
       searchQuery: null, //buscador
       searchFocus: false, //buscador
@@ -442,6 +461,7 @@ export default {
               });
               this.cashRegisterModal = false;
               this.form.reset();
+              this.fetchCurrentCash();
           },
       });
     },
@@ -460,7 +480,7 @@ export default {
     },
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
-      this.cutForm.difference = this.cutForm.totalSaleForCashCut - this.cutForm.counted_cash
+      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements) - this.cutForm.counted_cash
     },  
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
@@ -498,8 +518,21 @@ export default {
         console.log(error);
       }
     },
+    async fetchTotalCashMovements() {
+      try {
+        this.cutLoading = true;
+        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements'));
+        if ( response.status === 200 ) {
+          this.cutForm.totalCashMovements = response.data;
+          this.cutLoading = false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
     handleCashCut() {
       this.fetchTotalSaleForCashCut();
+      this.fetchTotalCashMovements();
       this.cashCutModal = true;
     },
     handleBlur() {
