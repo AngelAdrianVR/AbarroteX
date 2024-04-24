@@ -89,7 +89,7 @@
             </template>
             <template #content>
                 <p>
-                    Se eliminará el producto seleccionado de tu tienda, esto es un proceso irreversible. ¿Continuar
+                    Se eliminará de tu tienda el producto seleccionado, esto es un proceso irreversible. ¿Continuar
                     de todas formas?
                 </p>
             </template>
