@@ -18,8 +18,8 @@ class DashboardController extends Controller
     public function getDayData($date)
     {
         $prev_date = Carbon::parse($date)->subDay()->toDateString();
-        $sales = Sale::with('saleable')->where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
-        $last_period_sales = Sale::with('saleable')->where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
+        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+        $last_period_sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
         $last_period_expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
         // $top_products = Sale::with('saleable')

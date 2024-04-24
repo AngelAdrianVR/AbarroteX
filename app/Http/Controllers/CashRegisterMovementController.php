@@ -30,7 +30,9 @@ class CashRegisterMovementController extends Controller
         $request->validate([
             'cashRegisterMovementType' => 'required|string',
             //En caso de retirar dinero de la caja el monto máximo es lo que se tenga registrado en current_cash, es decir lo que hay en caja
-            'registerAmount' => $request->cashRegisterMovementType === 'Ingreso' ? 'required|numeric|min:0|max:10000' : 'required|numeric|min:0|max:' . $cash_register->current_cash,
+            'registerAmount' => $request->cashRegisterMovementType === 'Ingreso'
+                ? 'required|numeric|min:0|max:10000'
+                : 'required|numeric|min:0|max:' . $cash_register->current_cash,
             'registerNotes' => 'nullable|string|max:255',
         ]);
 
@@ -43,7 +45,7 @@ class CashRegisterMovementController extends Controller
         ]);
 
         //En caso de ser ingreso, suma la cantidad al dinero actual de la caja, en caso contrario lo resta
-        if( $request->cashRegisterMovementType === 'Ingreso' ) {
+        if ($request->cashRegisterMovementType === 'Ingreso') {
             $cash_register->current_cash += $request->registerAmount;
         } else {
             $cash_register->current_cash -= $request->registerAmount;
@@ -51,7 +53,6 @@ class CashRegisterMovementController extends Controller
 
         //Guarda la cantidad modificada
         $cash_register->save();
-
     }
 
 
@@ -66,7 +67,7 @@ class CashRegisterMovementController extends Controller
         //
     }
 
-    
+
     public function update(Request $request, CashRegisterMovement $cash_register_movement)
     {
         //
