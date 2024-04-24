@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
             $table->unsignedFloat('current_price');
+            $table->string('product_name');
+            $table->unsignedMediumInteger('product_id')->nullable();
+            $table->boolean('is_global_product');
             $table->unsignedFloat('quantity');
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->nullable()->constrained()->cascadeOnDelete(); // en caso de vender un producto local
-            $table->foreignId('global_product_store_id')->nullable()->constrained()->cascadeOnDelete(); // en caso de vender un producto transferido del catálogo
             $table->timestamps();
         });
     }

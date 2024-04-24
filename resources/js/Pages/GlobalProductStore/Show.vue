@@ -6,7 +6,8 @@
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
                     <ThirthButton @click="openEntryModal">Entrada de producto</ThirthButton>
-                    <PrimaryButton @click="$inertia.get(route('global-product-store.edit', global_product_store.id))" class="!rounded-full">Editar</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('global-product-store.edit', global_product_store.id))"
+                        class="!rounded-full">Editar</PrimaryButton>
                 </div>
             </div>
             <div class="lg:w-1/4 relative">
@@ -18,9 +19,9 @@
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
                     <Loading v-if="searchLoading" />
                     <ul v-else-if="productsFound?.length > 0">
-                        <li @click.stop="handleProductSelected(product)"
-                            v-for="(product, index) in productsFound" :key="index"
-                            class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ? product.global_product?.name : product.name }}</li>
+                        <li @click.stop="handleProductSelected(product)" v-for="(product, index) in productsFound"
+                            :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
+                                product.global_product_id ? product.global_product?.name : product.name }}</li>
                     </ul>
                     <p v-else class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias</p>
                 </div>
@@ -33,8 +34,14 @@
             <div class="lg:grid grid-cols-3 gap-x-12 mx-10">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
-                    <figure class="border border-grayD9 rounded-lg">
-                        <img class="size-96 mx-auto object-contain" :src="global_product_store.global_product.media[0]?.original_url" alt="">
+                    <figure class="size-96 border border-grayD9 rounded-lg flex justify-center items-center">
+                        <img v-if="global_product_store.global_product.media?.length"
+                            class="h-[380px] mx-auto object-contain"
+                            :src="global_product_store.global_product.media[0]?.original_url" alt="">
+                        <div v-else>
+                            <i class="fa-regular fa-image text-9xl text-gray-200"></i>
+                            <p class="text-sm text-gray-300">Imagen no disponible</p>
+                        </div>
                     </figure>
                 </section>
 
@@ -63,8 +70,10 @@
                             <div class="flex space-x-4 items-center">
                                 <p class="text-gray37 flex items-center">
                                     <span class="mr-2">Código</span>
-                                    <span class="font-bold">{{ global_product_store.global_product?.code ?? 'N/A' }}</span>
-                                    <el-tooltip v-if="global_product_store.code" content="Copiar código" placement="right">
+                                    <span class="font-bold">{{ global_product_store.global_product?.code ?? 'N/A'
+                                        }}</span>
+                                    <el-tooltip v-if="global_product_store.code" content="Copiar código"
+                                        placement="right">
                                         <button @click="copyToClipboard"
                                             class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -76,14 +85,17 @@
                                     </el-tooltip>
                                 </p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Categoría: <span class="font-bold">{{ global_product_store.global_product?.category?.name }}</span></p>
+                                <p class="text-gray37">Categoría: <span class="font-bold">{{
+                                        global_product_store.global_product?.category?.name }}</span></p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Marca: <span class="font-bold">{{ global_product_store.global_product?.brand?.name }}</span></p>
+                                <p class="text-gray37">Marca: <span class="font-bold">{{
+                                        global_product_store.global_product?.brand?.name }}</span></p>
                             </div>
-                            <p class="text-gray37 mt-3 lg:mt-0">Fecha de alta: <strong class="ml-5">{{ global_product_store.created_at
-                            }}</strong></p>
                         </div>
-                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ global_product_store.global_product?.name }}</h1>
+                        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{
+                            formatDate(global_product_store.created_at) }}</strong></p>
+                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{
+                            global_product_store.global_product?.name }}</h1>
 
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
@@ -94,18 +106,21 @@
                                 <p class="text-gray37">Precio de venta: </p>
                                 <p class="text-right font-bold">${{ global_product_store.public_price }}</p>
                             </div>
-                            <div v-if="global_product_store.current_stock >= global_product_store.min_stock"
+                            <div v-if="global_product_store.current_stock >= global_product_store.min_stock || !isInventoryOn"
                                 class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-[#5FCB1F]">{{ global_product_store.current_stock ?? '-' }}</p>
+                                <p class="text-right font-bold text-[#5FCB1F]">{{ global_product_store.current_stock ??
+                                    '-' }}
+                                </p>
                             </div>
                             <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">
                                 <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-primary">{{ global_product_store.current_stock ?? '-' }}<i
-                                        class="fa-solid fa-arrow-down text-xs ml-2"></i></p>
-                                <p class="absolute top-2 -right-16 text-xs font-bold text-primary">Bajo stock</p>
+                                <p class="text-right font-bold text-redDanger">
+                                    <span>{{ global_product_store.current_stock ?? '-' }}</span>
+                                    <i class="fa-solid fa-arrow-down text-xs ml-2"></i>
+                                </p>
+                                <p class="absolute top-2 -right-16 text-xs font-bold text-redDanger">Bajo stock</p>
                             </div>
-
                             <h2 class="pt-5 ml-5 font-bold text-lg">Cantidades de stock permitidas</h2>
 
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
@@ -129,20 +144,23 @@
                         </div>
                         <div v-else>
                             <div class="flex items-center justify-center space-x-3">
-                                <PrimaryButton @click="loadPreviousMonth"><i class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
-                                <PrimaryButton @click="loadNextMonth"><i class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
+                                <PrimaryButton @click="loadPreviousMonth"><i
+                                        class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
+                                <PrimaryButton @click="loadNextMonth"><i
+                                        class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
                             </div>
-                            <div v-if="Object.keys(productHistory)?.length">
+                            <div v-if="Object?.keys(productHistory)?.length">
                                 <div v-for="(history, index) in productHistory" :key="history">
-                                    
-                                        <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
-                                            translateMonth(index) }}</h2>
-                                        <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span class="mr-2"
-                                            v-html="getIcon(activity.type)"></span>{{ activity.description + ' ' +
-                                            activity.created_at }}
-                                        </p>
-                                    </div>
+
+                                    <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
+                                        translateMonth(index) }}</h2>
+                                    <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span
+                                            class="mr-2" v-html="getIcon(activity.type)"></span>{{ activity.description
+                                                + ' ' +
+                                        activity.created_at }}
+                                    </p>
                                 </div>
+                            </div>
                             <p v-else class="text-xs text-gray-500 mt-5 text-center">No hay actividad en esta fecha</p>
                         </div>
                     </div>
@@ -150,7 +168,6 @@
                 </section>
             </div>
         </div>
-
 
         <!-- -------------- Modal starts----------------------- -->
         <Modal :show="entryProductModal" @close="entryProductModal = false">
@@ -165,17 +182,21 @@
                         <el-input v-model="form.quantity" ref="quantityInput" @keydown.enter="entryProduct"
                             placeholder="Cantidad que entra a almacén"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                            :parser="(value) => value.replace(/\$\s?|(,*)/g, '')">
-                            <template #prefix>
-                                <i class="fa-solid fa-hashtag"></i>
-                            </template>
+                            :parser="(value) => value.replace(/\D/g, '')">
                         </el-input>
                         <InputError :message="form.errors.quantity" />
                     </div>
 
+                    <div class="text-left mt-4 ml-6">
+                        <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register" label="Se paga con dinero de caja"
+                            size="small" />
+                    </div>
+
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
-                        <PrimaryButton @click="entryProduct" class="!rounded-full">Ingresar producto</PrimaryButton>
                         <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
+                        <PrimaryButton :disabled="form.processing || !form.quantity" @click="entryProduct" class="!rounded-full">Ingresar
+                            producto
+                        </PrimaryButton>
                     </div>
                 </section>
             </div>
@@ -196,11 +217,14 @@ import Modal from "@/Components/Modal.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
 import { useForm } from "@inertiajs/vue3";
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
     data() {
         const form = useForm({
             quantity: null,
+            is_paid_by_cash_register: false //es pagado con dinero de caja? para hacer el registro de movimiento
         });
         return {
             form,
@@ -214,6 +238,8 @@ export default {
             searchLoading: false,
             currentMonth: new Date().getMonth() + 1, // El mes actual
             currentYear: new Date().getFullYear(), // El año actual
+            // control de inventario activado
+            isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
         };
     },
     components: {
@@ -297,7 +323,7 @@ export default {
         async fetchHistory() {
             this.loading = true;
             try {
-                const response = await axios.get(route("global-product-store.fetch-history", { 
+                const response = await axios.get(route("global-product-store.fetch-history", {
                     global_product_store_id: this.global_product_store.id,
                     month: this.currentMonth,
                     year: this.currentYear,
@@ -361,12 +387,15 @@ export default {
             return `${translatedMonth} ${year}`;
         },
         handleProductSelected(product) {
-            if ( product.global_product_id ) {
+            if (product.global_product_id) {
                 this.$inertia.get(route('global-product-store.show', product.id))
             } else {
                 this.$inertia.get(route('products.show', product.id))
             }
-        }
+        },
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+        },
     },
     mounted() {
         this.fetchHistory();

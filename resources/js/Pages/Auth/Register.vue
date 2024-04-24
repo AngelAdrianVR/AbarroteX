@@ -34,10 +34,9 @@ const submit = () => {
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
-            <h1 class="font-extrabold mt-3 text-center text-2xl text-primary">Ezy Ventas</h1>
         </template>
 
-        <div class="flex items-center justify-around mt-5 mb-8 mx-11 border-b text-sm">
+        <div class="flex items-center justify-around mt-2 mb-8 mx-11 border-b text-sm">
             <button @click="$inertia.visit(route('login'))" type="button" class="text-[#777777] px-2">Iniciar
                 sesión</button>
             <span class="text-primary px-2 border-b border-primary">Registrarse</span>
@@ -151,14 +150,14 @@ const submit = () => {
                         He leído y acepto los <a target="_blank" :href="route('terms.show')"
                             class="underline focus:outline-none text-primary">Términos y Condiciones</a> <br>
                         y el <a target="_blank" :href="route('policy.show')"
-                            class="underline focus:outline-none text-primary">Aviso de privacidad</a> de VentaProX
+                            class="underline focus:outline-none text-primary">Aviso de privacidad</a> de Ezy Ventas
                     </div>
                 </el-checkbox>
                 <InputError :message="form.errors.terms" />
             </div>
 
             <div class="flex items-center justify-center mt-6 px-9 disabled:cursor-not-allowed disabled:opacity-25">
-                <PrimaryButton class="w-full" :disabled="form.processing">
+                <PrimaryButton class="w-full" :disabled="form.processing || !form.terms">
                     Registrarme
                 </PrimaryButton>
             </div>
@@ -170,16 +169,16 @@ const submit = () => {
                 </Link>
             </div>
 
-            <el-divider class="mt-4">ó</el-divider>
+            <!-- <el-divider class="mt-4">ó</el-divider> -->
 
-            <div class="flex items-center justify-center mt-4">
+            <!-- <div class="flex items-center justify-center mt-4">
                 <button
                     class="w-full border border-grayD9 rounded-full flex items-center justify-center space-x-3 py-1 text-sm text-[#777777] disabled:opacity-25 disabled:cursor-not-allowed"
                     :disabled="form.processing">
                     <img src="@/../../public/images/google_logo.png" width="25" alt="Logo de google">
                     <span>Continuar con Google</span>
                 </button>
-            </div>
+            </div> -->
         </form>
     </AuthenticationCard>
 </template>

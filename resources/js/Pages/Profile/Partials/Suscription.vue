@@ -71,7 +71,7 @@
                         Cargando...
                     </p>
                 </div>
-                <div class="grid grid-cols-2 gap-2 mt-4">
+                <!-- <div class="grid grid-cols-2 gap-2 mt-4">
                     <div v-if="!edit" class="flex flex-col space-y-1">
                         <b>Método de pago</b>
                         <div class="flex items-center space-x-2">
@@ -151,7 +151,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </article>
         </div>
     </section>

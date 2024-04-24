@@ -11,19 +11,6 @@ use Illuminate\Http\Request;
 
 class GlobalProductController extends Controller
 {
-    
-    public function selectGlobalProducts()
-    {
-        $global_products = GlobalProduct::all(['id', 'name']);
-        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
-        $categories = Category::all(['id', 'name']);
-        $brands = Brand::all(['id', 'name']);
-
-        // return $my_products;
-        return inertia('GlobalProduct/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
-    }
-
-
     public function index()
     {   
         $global_products = GlobalProduct::with(['media', 'category'])->get()->take(20);;

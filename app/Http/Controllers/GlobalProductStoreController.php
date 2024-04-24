@@ -9,37 +9,38 @@ use App\Models\Expense;
 use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
 use App\Models\ProductHistory;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 
 class GlobalProductStoreController extends Controller
 {
-    
+
     public function index()
     {
         //
     }
 
-    
+
     public function create()
     {
         //
     }
 
-    
+
     public function store(Request $request)
     {
         //
     }
 
-    
+
     public function show($global_product_store_id)
-    {   
-        $global_product_store = GlobalProductStore::with(['globalProduct'=>['media', 'category', 'brand']])->find($global_product_store_id);
+    {
+        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])->find($global_product_store_id);
 
         return inertia('GlobalProductStore/Show', compact('global_product_store'));
     }
 
-    
+
     public function edit($global_product_store_id)
     {
         $global_product_store = GlobalProductStore::with('globalProduct.media')->find($global_product_store_id);
@@ -49,7 +50,7 @@ class GlobalProductStoreController extends Controller
         return inertia('GlobalProductStore/Edit', compact('global_product_store', 'categories', 'brands'));
     }
 
-    
+
     public function update(Request $request, GlobalProductStore $global_product_store)
     {
         $request->validate([
@@ -71,8 +72,8 @@ class GlobalProductStoreController extends Controller
             ProductHistory::create([
                 'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
                 'type' => 'Precio',
-                'product_id' => null,
-                'global_product_store_id' => $global_product_store->id
+                'historicable_id' => $global_product_store->id,
+                'historicable_type' => GlobalProductStore::class
             ]);
         }
 
@@ -82,46 +83,15 @@ class GlobalProductStoreController extends Controller
         return to_route('products.index');
     }
 
-   
+
     public function destroy(GlobalProductStore $global_product_store)
     {
+        // indicar a la venta que el producto fue eliminado
+        $related_sales = Sale::where('product_id', $global_product_store->id)->get();
+        $related_sales->each(fn ($sale) => $sale->update(['product_id' => null]));
+
+        // eliminar producto
         $global_product_store->delete();
-    }
-
-
-    public function transferProducts(Request $request)
-    {   
-        // Mis productos ya registrados
-        $my_products = GlobalProductStore::where('store_id', auth()->user()->store_id)
-            ->pluck('global_product_id'); // Obtenemos solo los ids de los productos registrados
-        
-        // Obtener el arreglo de productos del cuerpo de la solicitud
-        $product_ids = $request->input('products');
-
-        // Filtrar los productos del catálogo para excluir aquellos que ya existen en mi tienda
-        $new_product_ids = collect($product_ids)->reject(function ($productId) use ($my_products) {
-            return $my_products->contains(function ($myProductId) use ($productId) {
-                return $myProductId == $productId;
-            });
-        });
-
-        // Aquí puedes manipular el arreglo de productos como desees
-        // Por ejemplo, puedes iterar sobre el arreglo y hacer lo que necesites
-        foreach ($new_product_ids as $productId) {
-            // Se obtiene el producto global con el id recibido
-            $product = GlobalProduct::with(['category', 'brand'])->find($productId);
-
-            GlobalProductStore::create([
-                'public_price' => $product->public_price,
-                'cost' => 0,
-                'current_stock' => 1,
-                'min_stock' => 1,
-                'global_product_id' => $productId,
-                'store_id' => auth()->user()->store_id,
-            ]);
-        }
-
-        return to_route('products.index');
     }
 
 
@@ -139,8 +109,8 @@ class GlobalProductStoreController extends Controller
         ProductHistory::create([
             'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
             'type' => 'Entrada',
-            'product_id' => null,
-            'global_product_store_id' => $global_product_store->id
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
         ]);
 
         // Crear egreso
@@ -155,8 +125,9 @@ class GlobalProductStoreController extends Controller
     public function fetchHistory($global_product_store_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('global_product_store_id', $global_product_store_id);
-        
+        $query = ProductHistory::where('historicable_id', $global_product_store_id)
+            ->where('historicable_type', GlobalProductStore::class);
+
         if ($month && $year) {
             $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
         } else {

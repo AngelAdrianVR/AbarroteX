@@ -1,8 +1,8 @@
 <template>
   <div class="inline">
     <figure @click="triggerImageInput"
-      class="flex items-center justify-center rounded-md border border-grayD9 w-48 h-36 cursor-pointer relative"
-      :class="disabled ? 'cursor-not-allowed' : '' ">
+      class="flex items-center justify-center rounded-md border border-grayD9 w-48 h-36 relative"
+      :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer' ">
       <i v-if="image && canDelete && !disabled" @click.stop="clearImage"
         class="fa-solid fa-xmark absolute p-1 top-1 right-1 z-10 text-sm"></i>
       <i v-if="!image" class="fa-solid fa-camera text-gray-400 text-xl"></i>

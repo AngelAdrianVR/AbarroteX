@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\SaleResource;
+use App\Models\CashRegister;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -19,23 +19,27 @@ class SaleController extends Controller
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::where('store_id', auth()->user()->store_id)
-                ->latest()
-                ->get(['id', 'name','code']);
+            ->latest()
+            ->get(['id', 'name', 'code']);
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])->where('store_id', auth()->user()->store_id)->get(['id','global_product_id']);
-        
+        $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])
+            ->where('store_id', auth()->user()->store_id)
+            ->get(['id', 'global_product_id']);
+
         // Convertimos $local_products a un arreglo asociativo
         $local_products_array = $local_products->toArray();
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
 
-        // return $products;
-        return inertia('Sale/Point', compact('products'));
+        //recupera la primera caja registradora de la tienda para mandar su info como current_cash
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+        return inertia('Sale/Point', compact('products', 'cash_register'));
     }
 
-    
+
     public function index()
     {
         // Obtener todos las ventas registradas y contar el número de agrupaciones por día
@@ -45,7 +49,6 @@ class SaleController extends Controller
             ->groupBy(DB::raw('DATE(created_at)'))
             ->get()
             ->count();
-
 
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         $days_ago = Carbon::now()->subDays(5);
@@ -69,156 +72,117 @@ class SaleController extends Controller
             ];
         });
 
-        // return $groupedSales;
         return inertia('Sale/Index', compact('groupedSales', 'total_sales'));
     }
 
-    
+
     public function create()
     {
         //
     }
 
-    
+
     public function store(Request $request)
-    {   
-        // return $request;
+    {
+        // obtiene la primera caja registradora de la tienda
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+        //recorre el arreglo de productos.
         foreach ($request->data['saleProducts'] as $sale) {
+            $is_global_product = isset($sale['product']['global_product_id']);
+
+            $product_name = $is_global_product
+                ? GlobalProductStore::find($sale['product']['id'])->globalProduct->name
+                : Product::find($sale['product']['id'])->name;
 
             //regiatra cada producto vendido
             Sale::create([
                 'current_price' => $sale['product']['public_price'],
                 'quantity' => $sale['quantity'],
-                'product_id' => isset($sale['product']['global_product_id']) ? null : $sale['product']['id'], // en caso de vender un producto local
-                'global_product_store_id' => isset($sale['product']['global_product_id']) ? $sale['product']['id'] : null, // en caso de vender un producto transferido del catálogo
+                'product_name' => $product_name,
+                'product_id' => $sale['product']['id'],
+                'is_global_product' => $is_global_product,
                 'store_id' => auth()->user()->store_id,
             ]);
+
+            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+            $cash_register->current_cash += $sale['product']['public_price'] * $sale['quantity'];
+            $cash_register->save();
 
             //Registra el historial de venta de cada producto
             ProductHistory::create([
                 'description' => 'Registro de venta. ' . $sale['quantity'] . ' piezas',
                 'type' => 'Venta',
-                'product_id' => isset($sale['product']['global_product_id']) ? null : $sale['product']['id'], // en caso de vender un producto local
-                'global_product_store_id' => isset($sale['product']['global_product_id']) ? $sale['product']['id'] : null, // en caso de vender un producto transferido del catálogo
+                'historicable_id' => $sale['product']['id'],
+                'historicable_type' => $is_global_product
+                    ? GlobalProductStore::class
+                    : Product::class,
             ]);
 
             //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
             // Verifica si 'global_product_id' existe en 'product'
-            // if (isset($sale['product']['global_product_id'])) {
-            //     // Si existe, recupera el producto global de la tienda'
-            //     $product = GlobalProductStore::find($sale['product']['id']);
-            //     $product->decrement('current_stock', $sale['quantity']);
-            // } else {
-            //     // Si no existe, asigna el valor de 'id' dentro de 'product'
-            //     //rebaja del stock la cantidad de piezas vendidas
-            //     $product = Product::find($sale['product']['id']);
-            //     $product->decrement('current_stock', $sale['quantity']);
-            // }
-            
+            $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+            if ($is_inventory_on) {
+                $product = $is_global_product
+                    ? GlobalProductStore::find($sale['product']['id'])
+                    : Product::find($sale['product']['id']);
 
-            // // notificar si ha llegado al limite de existencias bajas
-            // if ($product->current_stock <= $product->min_stock) {
-            //     $title = "Bajo stock";
-            //     $description = "Producto <span class='text-primary'>$product->name</span> alcanzó el nivel mínimo establecido";
-            //     $url = route('products.show', $product->id);
+                $product->decrement('current_stock', $sale['quantity']);
 
-            //     auth()->user()->notify(new BasicNotification($title, $description, $url));
-            // }
+                // notificar si ha llegado al limite de existencias bajas
+                if ($product->current_stock <= $product->min_stock) {
+                    $title = "Bajo stock";
+                    $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
+                    $url = route('products.show', $product->id);
 
+                    auth()->user()->notify(new BasicNotification($title, $description, $url));
+                }
+            }
         }
     }
 
-    
+
     public function show($created_at)
     {
         // Parsear la fecha recibida para obtener solo la parte de la fecha
         $date = Carbon::parse($created_at)->toDateString();
 
         // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::where('store_id', auth()->user()->store_id)->with(['product:id,name', 'globalProductStore.globalProduct'])->whereDate('created_at', $date)->get();
-
-        // return $sales;
-
-        $localSales = collect();
-        $globalSales = collect();
+        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $sales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->format('d-F-Y');
-        })->map(function ($sales) use ($localSales, $globalSales) {
-            // Iterar sobre las ventas y separarlas en ventas locales y globales
-            $sales->each(function ($sale) use ($localSales, $globalSales) {
-                if ($sale->global_product_store_id !== null) {
-                    $globalSales->push($sale);
-                } else {
-                    $localSales->push($sale);
-                }
-            });
-
-            // Procesar las ventas locales
-            $localGroupedSales = $localSales->groupBy('product_id')->map(function ($productSales) {
-                return [
-                    'id' => $productSales->first()->id,
-                    'name' => $productSales->first()->product->name,
-                    'current_price' => $productSales->first()->current_price,
-                    'quantity' => $productSales->sum('quantity'),
-                    'product_id' => $productSales->first()->product_id,
-                    'is_global_product' => false,
-                    'created_at' => $productSales->first()->created_at,
-                ];
-            });
-
-            // Procesar las ventas globales
-            $globalGroupedSales = $globalSales->groupBy('global_product_store_id')->map(function ($productSales) {
-                return [
-                    'id' => $productSales->first()->id,
-                    'name' => $productSales->first()->globalProductStore->globalProduct->name,
-                    'current_price' => $productSales->first()->current_price,
-                    'quantity' => $productSales->sum('quantity'),
-                    'product_id' => $productSales->first()->global_product_store_id,
-                    'is_global_product' => true,
-                    'created_at' => $productSales->first()->created_at,
-                ];
-            });
-
-            // Calcular totales para ventas locales
-            $localTotalQuantity = $localGroupedSales->sum('quantity');
-            $localTotalSale = $localGroupedSales->sum(function ($productSale) {
+        })->map(function ($sales) {
+            // Calcular totales
+            $totalQuantity = $sales->sum('quantity');
+            $totalSale = $sales->sum(function ($productSale) {
                 return $productSale['quantity'] * $productSale['current_price'];
             });
-
-            // Calcular totales para ventas globales
-            $globalTotalQuantity = $globalGroupedSales->sum('quantity');
-            $globalTotalSale = $globalGroupedSales->sum(function ($productSale) {
-                return $productSale['quantity'] * $productSale['current_price'];
-            });
-
-            // Fusionar los arreglos de ventas locales y globales
-            $mergedGroupedSales = $localGroupedSales->merge($globalGroupedSales);
 
             return [
-                'total_quantity' => $localTotalQuantity + $globalTotalQuantity,
-                'total_sale' => $localTotalSale + $globalTotalSale,
-                'sales' => $mergedGroupedSales->values(), // Convertir el mapa en un arreglo indexado
+                'total_quantity' => $totalQuantity,
+                'total_sale' => $totalSale,
+                'sales' => $sales->values(), // Convertir el mapa en un arreglo indexado
             ];
         });
-        // return $day_sales;
+
         return inertia('Sale/Show', compact('day_sales'));
     }
 
-    
+
     public function edit(Sale $sale)
     {
         //
     }
 
-    
+
     public function update(Request $request, Sale $sale)
     {
         //
     }
 
-    
+
     public function destroy(Sale $sale)
     {
         // Obtener la fecha de creación del registro de venta
@@ -266,29 +230,29 @@ class SaleController extends Controller
         $offset = 5 + $currentPage * 5; //multiplica por 5 para traer de 5 dias en 5 dias. suma 5 dias porque son los que ya se cargaron
         $skip_days = $currentPage * 5; //multiplica por 5 para traer de 5 dias en 5 dias
 
-         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
-         $days_ago = Carbon::now()->subDays($offset);
-         // ignorar esa cantidad de dias porque ya se cargaron.
-         $days_befor = Carbon::now()->subDays($skip_days);
+        // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
+        $days_ago = Carbon::now()->subDays($offset);
+        // ignorar esa cantidad de dias porque ya se cargaron.
+        $days_befor = Carbon::now()->subDays($skip_days);
 
-         // Obtener las ventas registradas en los últimos 7 días
-         $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
- 
-         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-         $groupedSales = $sales->groupBy(function ($sale) {
-             return Carbon::parse($sale->created_at)->format('d-F-Y');
-         })->map(function ($sales) {
-             $totalQuantity = $sales->sum('quantity');
-             $totalSale = $sales->sum(function ($sale) {
-                 return $sale->quantity * $sale->current_price;
-             });
- 
-             return [
-                 'total_quantity' => $totalQuantity,
-                 'total_sale' => $totalSale,
-                 'sales' => $sales,
-             ];
-         });
+        // Obtener las ventas registradas en los últimos 7 días
+        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
+
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        $groupedSales = $sales->groupBy(function ($sale) {
+            return Carbon::parse($sale->created_at)->format('d-F-Y');
+        })->map(function ($sales) {
+            $totalQuantity = $sales->sum('quantity');
+            $totalSale = $sales->sum(function ($sale) {
+                return $sale->quantity * $sale->current_price;
+            });
+
+            return [
+                'total_quantity' => $totalQuantity,
+                'total_sale' => $totalSale,
+                'sales' => $sales,
+            ];
+        });
 
         return response()->json(['items' => $groupedSales]);
     }

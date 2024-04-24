@@ -4,8 +4,8 @@ import { Link } from '@inertiajs/vue3';
 
 <template>
     <Link :href="'/'">
-        <figure class="mt-20">
-            <img class="" src="@/../../public/images/logo.png" alt="logo">
+        <figure class="mt-20 mx-auto w-1/3">
+            <img class="" src="@/../../public/images/black_logo.png" alt="logo">
         </figure>
     </Link>
 </template>

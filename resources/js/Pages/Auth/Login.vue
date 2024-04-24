@@ -39,10 +39,9 @@ const submit = () => {
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
-            <h1 class="font-extrabold mt-3 text-center text-2xl text-primary">Ezy Ventas</h1>
         </template>
 
-        <div class="flex items-center justify-around mt-5 mb-8 mx-11 border-b text-sm">
+        <div class="flex items-center justify-around mt-2 mb-8 mx-11 border-b text-sm">
             <span class="text-primary px-2 border-b border-primary">Iniciar sesión</span>
             <button @click="$inertia.visit(route('register'))" type="button"
                 class="text-[#777777] px-2">Registrarse</button>
@@ -119,7 +118,7 @@ const submit = () => {
                 </Link>
             </div>
 
-            <el-divider class="mt-4">ó</el-divider>
+            <!-- <el-divider class="mt-4">ó</el-divider>
 
             <div class="flex items-center justify-center mt-4">
                 <button
@@ -128,7 +127,7 @@ const submit = () => {
                     <img src="@/../../public/images/google_logo.png" width="25" alt="Logo de google">
                     <span>Continuar con Google</span>
                 </button>
-            </div>
+            </div> -->
         </form>
     </AuthenticationCard>
 </template>

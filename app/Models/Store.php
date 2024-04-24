@@ -19,6 +19,8 @@ class Store extends Model
         'plan',
         'is_active',
         'next_payment',
+        'status',
+        'seller_id',
         'suscription_period',
         'default_card_id',
     ];
@@ -36,6 +38,11 @@ class Store extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function cashRegisters() :HasMany
+    {
+        return $this->hasMany(CashRegister::class);
     }
 
     public function expenses(): HasMany

@@ -52,7 +52,7 @@ const logout = () => {
                                 <!-- Logo -->
                                 <div class="md:hidden shrink-0 flex items-center">
                                     <Link :href="route('dashboard')">
-                                    <ApplicationMark class="block h-9 w-auto" />
+                                    <ApplicationMark class="block h-11 w-auto" />
                                     </Link>
                                 </div>
                             </div>
@@ -122,9 +122,9 @@ const logout = () => {
                                 <!-- notifications -->
                                 <NotificationsCenter />
                                 <button
-                                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
+                                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
                                     @click="showingNavigationDropdown = !showingNavigationDropdown">
-                                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                    <svg class="size-5" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                         <path
                                             :class="{ 'hidden': showingNavigationDropdown, 'inline-flex': !showingNavigationDropdown }"
                                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -142,20 +142,24 @@ const logout = () => {
                     <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }"
                         class="sm:hidden">
                         <div class="pt-2 pb-3 space-y-1">
-                            <ResponsiveNavLink :href="route('sales.index')" :active="route().current('sales.*')">
+                            <ResponsiveNavLink :href="route('sales.point')" :active="route().current('sales.point')">
                                 Punto de venta
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                Análisis de venta
+                               Reportes
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('sales.index')" :active="route().current('sales.*')">
+                            <ResponsiveNavLink :href="route('sales.index')"
+                                :active="route().current('sales.index') || route().current('sales.show')">
                                 Ventas registradas
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
                                 Gastos
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*')">
+                            <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('cash-cuts.index')" :active="route().current('cash-cuts.*')">
+                                Caja
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">
                                 Configuraciones
@@ -199,7 +203,7 @@ const logout = () => {
                     </div>
                 </nav>
 
-                <div class="overflow-y-auto h-[calc(100vh-4.1rem)] bg-white">
+                <div class="overflow-y-auto h-[calc(100vh-3rem)] bg-white">
                     <slot />
                 </div>
             </main>

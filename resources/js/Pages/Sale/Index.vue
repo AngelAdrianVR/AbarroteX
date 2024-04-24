@@ -13,13 +13,13 @@
                             <desc>Filter Sort Lines Descending Streamline Icon: https://streamlinehq.com</desc>
                             <defs></defs>
                             <title>filter</title>
-                            <path d="M0.73 4.2791H23.27" fill="none" stroke="#000000" stroke-linecap="round"
+                            <path d="M0.73 4.2791H23.27" fill="none" stroke="currentColor" stroke-linecap="round"
                                 stroke-linejoin="round" stroke-width="1"></path>
-                            <path d="M3.131 9.426H20.869" fill="none" stroke="#000000" stroke-linecap="round"
+                            <path d="M3.131 9.426H20.869" fill="none" stroke="currentColor" stroke-linecap="round"
                                 stroke-linejoin="round" stroke-width="1"></path>
-                            <path d="M8.7141 19.7209H15.2859" fill="none" stroke="#000000" stroke-linecap="round"
+                            <path d="M8.7141 19.7209H15.2859" fill="none" stroke="currentColor" stroke-linecap="round"
                                 stroke-linejoin="round" stroke-width="1"></path>
-                            <path d="M5.531 14.573H18.469" fill="none" stroke="#000000" stroke-linecap="round"
+                            <path d="M5.531 14.573H18.469" fill="none" stroke="currentColor" stroke-linecap="round"
                                 stroke-linejoin="round" stroke-width="1"></path>
                         </svg>
                         <p class="text-sm ml-2">Filtrar</p>
@@ -37,11 +37,14 @@
             </div>
 
             <Loading v-if="loading" class="mt-20" />
-            <div v-else class="mt-8 lg:w-11/12">
-                <p v-if="Object.keys(localSales)?.length" class="text-gray66 text-[11px]">{{ Object.keys(localSales)?.length }} de {{ total_sales }}
+            <div v-else class="mt-8">
+                <p v-if="Object.keys(localSales)?.length" class="text-gray66 text-[11px] mb-3">{{ Object.keys(localSales)?.length }} de {{ total_sales }}
                     elementos
                 </p>
                 <RegisteredSalesTable :sales="localSales" />
+                <p v-if="Object.keys(localSales)?.length" class="text-gray66 text-[11px] mt-1">{{ Object.keys(localSales)?.length }} de {{ total_sales }}
+                    elementos
+                </p>
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>

@@ -1,111 +1,196 @@
 <template>
-    <div v-if="Object.keys(products)?.length" class="w-full mx-auto text-[11px] md:text-sm overflow-auto">
-        <div class="text-center md:text-base flex items-center space-x-4 mb-2">
-            <div class="hidden md:block w-[10%]"></div>
-            <div class="font-bold pb-3 pl-2 text-left w-[18%] md:w-[13%]">Código</div>
-            <div class="font-bold pb-3 text-left w-[35%] md:w-[30%]">Nombre de producto</div>
-            <div class="font-bold pb-3 text-left w-[10%]">Precio</div>
-            <div class="font-bold pb-3 text-left w-[10%]">Existencias</div>
-            <div class="font-bold pb-3 text-left w-[10%]">Existencias mínimas</div>
-            <div class="w-[17%]"></div>
-        </div>
-        <div>
-            <div v-for="product in products" :key="product.id" class="*:px-2 *:py-1 cursor-pointer flex items-center hover:border-primary space-x-4 border rounded-full mb-2" 
-            @click="handleShow(product)">
-                <div class="hidden md:block w-[10%] h-14 rounded-l-full">
-                    <img class="mx-auto h-12 object-contain rounded-lg" 
-                        :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+    <div>
+        <table v-if="Object.keys(products)?.length" class="w-full">
+            <thead>
+                <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">
+                    <th></th>
+                    <th>Código</th>
+                    <th>Nombre de producto</th>
+                    <th>Precio</th>
+                    <th>Existencias</th>
+                    <th>Existencias mínimas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr @click="handleShow(product)" v-for="(product, index) in products" :key="product.id"
+                    class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
+                    <td class="rounded-s-full">
+                        <img class="h-10 object-contain rounded-md"
+                            :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                    </td>
+                    <td>
+                        {{ product.global_product_id ? product.global_product?.code : product.code }}
+                    </td>
+                    <td>
+                        {{ product.global_product_id ? product.global_product?.name : product.name }}
+                    </td>
+                    <td>
+                        ${{ product.public_price }}
+                    </td>
+                    <td>
+                        <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
+                            {{ product.current_stock ?? '-' }}
+                            <i v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
+                            <span v-if="product.current_stock < product.min_stock && isInventoryOn" class="text-[11px]">Bajo
+                                stock</span>
+                        </p>
+                    </td>
+                    <td>
+                        {{ product.min_stock ?? '-' }}
+                    </td>
+                    <td class="rounded-e-full text-end">
+                        <el-dropdown trigger="click" @command="handleCommand">
+                            <button @click.stop
+                                class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item :command="'see|' + index">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                        <span class="text-xs">Ver</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item :command="'edit|' + index">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                        </svg>
+                                        <span class="text-xs">Editar</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item :command="'delete|' + index">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor"
+                                            class="size-[14px] mr-2 text-red-600">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        <span class="text-xs text-red-600">Eliminar</span>
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <el-empty v-else description="No hay productos registrados" />
+
+        <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
+            <template #title>
+                <h1>Eliminar producto</h1>
+            </template>
+            <template #content>
+                <p>
+                    Se eliminará de tu tienda el producto seleccionado, esto es un proceso irreversible. ¿Continuar
+                    de todas formas?
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
+                    <DangerButton @click="deleteItem">Eliminar</DangerButton>
                 </div>
-                <div class="w-[18%] md:w-[13%]">{{ product.global_product_id ? product.global_product?.code : product.code }}</div>
-                <div class="w-[35%] md:w-[30%]">{{ product.global_product_id ? product.global_product?.name : product.name }}</div>
-                <div class="w-[10%]">${{ product.public_price }}</div>
-                <div :class="product.current_stock < product.min_stock ? 'text-primary' : ''" class="w-[10%]">
-                    {{ product.current_stock ?? '-' }}
-                    <i v-if="product.current_stock < product.min_stock" class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
-                    <span v-if="product.current_stock < product.min_stock" class="text-[11px]">Bajo stock</span>
-                </div>
-                <div class="w-[10%]">{{ product.min_stock ?? '-' }}</div>
-                <div class="rounded-r-full w-[17%] text-right">
-                    <i @click.stop="handleEdit(product)" class="fa-solid fa-pencil text-primary cursor-pointer hover:bg-gray-200 rounded-full mr-1 p-2"></i>
-                    <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?" @confirm="deleteItem(product)">
-                        <template #reference>
-                            <i @click.stop class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
-                        </template>
-                    </el-popconfirm>
-                </div>
-            </div>
-        </div>
+            </template>
+        </ConfirmationModal>
     </div>
-    <el-empty v-else description="No hay productos registrados" />
 </template>
 
 <script>
-import { ElNotification } from 'element-plus'
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DangerButton from "@/Components/DangerButton.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
 
 export default {
-data() {
-    return {
-
-    };
-},
-components:{
-
-},
-props:{
-products: Object
-},
-methods:{
-    handleEdit(product) {
-        if ( product.global_product_id ) {
-            this.$inertia.get(route('global-product-store.edit', product.id ));
-        } else {
-            this.$inertia.get(route('products.edit', product.id))
-        }
+    data() {
+        return {
+            showDeleteConfirm: false,
+            itemToDelete: null,
+            // control de inventario activado
+            isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+        };
     },
-    handleShow(product) {
-        if ( product.global_product_id ) {
-            this.$inertia.get(route('global-product-store.show', product.id ));
-        } else {
-            this.$inertia.get(route('products.show', product.id))
-        }
+    components: {
+        ConfirmationModal,
+        DangerButton,
+        CancelButton,
     },
-    async deleteItem(product) {
-        let routePage;
-    
-        if ( product.global_product_id ) {
-            routePage = 'global-product-store.show';
-        } else {
-            routePage = 'products.show';
-        }
-        try {
-            const response = await axios.delete(route(routePage, product.id));
-            if (response.status == 200) {
-                if ( product.global_product_id ) {
-                    const indexToDelete = this.products.findIndex(item => item.global_product?.name == product.global_product?.name);
-                    this.products.splice(indexToDelete, 1);
-                } else {
-                    const indexToDelete = this.products.findIndex(item => item.name == product.id);
-                    this.products.splice(indexToDelete, 1);
-                }
+    props: {
+        products: Object
+    },
+    methods: {
+        handleCommand(command) {
+            const commandName = command.split('|')[0];
+            const index = command.split('|')[1];
+            const product = this.products[index];
 
-                ElNotification({
-                title: 'Success',
-                message: 'Se ha eliminado el producto',
-                type: 'success',
-                position: 'bottom-right',
-            });
+            if (commandName == 'see') {
+                this.handleShow(product);
+            } else if (commandName == 'edit') {
+                this.handleEdit(product);
+            } else if (commandName == 'delete') {
+                this.showDeleteConfirm = true;
+                this.itemToDelete = product;
             }
-        } catch (error) {
-            console.log(error);
-            ElNotification({
-                title: 'Error',
-                message: 'No se pudo eliminar el producto. Inténte más tarde',
-                type: 'error',
-                position: 'bottom-right',
-            });
+        },
+        handleEdit(product) {
+            if (product.global_product_id) {
+                this.$inertia.get(route('global-product-store.edit', product.id));
+            } else {
+                this.$inertia.get(route('products.edit', product.id))
+            }
+        },
+        handleShow(product) {
+            if (product.global_product_id) {
+                this.$inertia.get(route('global-product-store.show', product.id));
+            } else {
+                this.$inertia.get(route('products.show', product.id))
+            }
+        },
+        async deleteItem() {
+            let routePage;
+
+            if (this.itemToDelete.global_product_id) {
+                routePage = 'global-product-store.show';
+            } else {
+                routePage = 'products.show';
+            }
+
+            try {
+                const response = await axios.delete(route(routePage, this.itemToDelete.id));
+                if (response.status == 200) {
+                    if (this.itemToDelete.global_product_id) {
+                        const indexToDelete = this.products.findIndex(item => item.global_product?.name == this.itemToDelete.global_product?.name);
+                        this.products.splice(indexToDelete, 1);
+                    } else {
+                        const indexToDelete = this.products.findIndex(item => item.name == this.itemToDelete.id);
+                        this.products.splice(indexToDelete, 1);
+                    }
+
+                    this.showDeleteConfirm = false;
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha eliminado el producto',
+                        type: 'success',
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'El servidor no pudo procesar la petición',
+                    message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
+                    type: 'error',
+                });
+            }
         }
     }
-}
 }
 </script>
