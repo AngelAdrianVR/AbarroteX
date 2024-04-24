@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\CashRegister;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Setting;
@@ -36,7 +37,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // crear la primera caja registradora de la tienda
-        Store::create([
+        CashRegister::create([
             'started_cash' => 0,
             'current_cash' => 0,
             'max_cash' => 5000,

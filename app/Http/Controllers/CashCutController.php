@@ -29,6 +29,10 @@ class CashCutController extends Controller
     
     public function store(Request $request)
     {
+        $request->validate([
+            'withdrawn_cash' => 'nullable|numeric|min:0|max:' . $request->counted_cash, 
+        ]);
+
         // obtiene la primera caja registradora de la tienda
         $cash_register = CashRegister::with(['movements'])->where('store_id', auth()->user()->store_id)->first();
 
@@ -50,8 +54,8 @@ class CashCutController extends Controller
 
         //se asigna el dinero contado al dinero inicial de caja registradora para el próximo corte 
         //el dinero contado menos el dinero retirado.
-        $cash_register->started_cash = $request->counted_cash - $request->amount_withdrawn;
-        $cash_register->current_cash = $request->counted_cash - $request->amount_withdrawn;
+        $cash_register->started_cash = $request->counted_cash - $request->withdrawn_cash;
+        $cash_register->current_cash = $request->counted_cash - $request->withdrawn_cash;
         $cash_register->save();
     }
 

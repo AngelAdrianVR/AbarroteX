@@ -64,7 +64,7 @@
   </div>
 
   <!-- vista movil -->
-  <div class="overflow-y-auto h-[230px] md:hidden text-[11px]">
+  <div :class="saleProducts?.length ? 'h-[230px]' : 'h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-2 border rounded-md items-center relative">
       <figure>

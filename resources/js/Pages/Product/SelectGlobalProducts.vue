@@ -27,7 +27,7 @@
       </p>
 
       <!-- transfer -->
-      <section class="mt-10 grid lg:grid-cols-2 gap-3">
+      <section class="mt-10 grid xl:grid-cols-2 gap-3">
 
         <div class="mx-auto w-full relative">
           <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
