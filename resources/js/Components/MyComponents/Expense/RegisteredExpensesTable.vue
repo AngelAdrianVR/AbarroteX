@@ -128,8 +128,8 @@ export default {
             } catch (error) {
                 console.log(error);
                 this.$notify({
-                    title: 'Error',
-                    message: 'No se pudo eliminar. Inténte más tarde',
+                    title: 'El servidor no pudo procesar la petición',
+                    message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
                     type: 'error',
                 });
             }

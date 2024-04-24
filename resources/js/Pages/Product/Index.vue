@@ -32,7 +32,7 @@
                     total_products }} elementos
                 </p>
                 <ProductTable :products="localProducts" />
-                <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
+                <p v-if="localProducts.length" class="text-gray66 text-[11px] mt-3">{{ localProducts.length }} de {{
                     total_products }} elementos
                 </p>
                 <p v-if="loadingItems" class="text-xs my-4 text-center">

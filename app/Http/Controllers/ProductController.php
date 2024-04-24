@@ -11,6 +11,7 @@ use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
@@ -175,6 +176,11 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        // indicar a la venta que el producto fue eliminado
+        $related_sales = Sale::where('product_id', $product->id)->get();
+        $related_sales->each(fn ($sale) => $sale->update(['product_id' => null]));
+
+        // eliminar producto
         $product->delete();
     }
 

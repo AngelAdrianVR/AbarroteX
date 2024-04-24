@@ -36,7 +36,7 @@
                 <section class="mt-7">
                     <figure class="size-96 border border-grayD9 rounded-lg flex justify-center items-center">
                         <img v-if="global_product_store.global_product.media?.length"
-                            class="w-full mx-auto object-contain"
+                            class="h-[380px] mx-auto object-contain"
                             :src="global_product_store.global_product.media[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
