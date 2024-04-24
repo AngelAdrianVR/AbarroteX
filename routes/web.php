@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\CashCutController;
+use App\Http\Controllers\CashRegisterController;
+use App\Http\Controllers\CashRegisterMovementController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -78,6 +81,7 @@ Route::get('products-fetch-history/{product_id}/{month}/{year}', [ProductControl
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
 Route::get('products-select', [ProductController::class, 'selectGlobalProducts'])->name('products.select')->middleware('auth');
 
+
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
@@ -106,33 +110,19 @@ Route::get('sales-print-ticket/{sale_id}', [SaleController::class, 'printTicket'
 
 
 //expenses routes-------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 Route::resource('expenses', ExpenseController::class)->middleware('auth');
 Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
 Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
 Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
 
 
-//clients routes-------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-// Route::resource('clients', ClientController::class)->middleware('auth');
-// Route::get('clients-get-pendent-amount/{client}', [ClientController::class, 'getClientPendentAmount'])->name('clients.get-pendent-amount')->middleware('auth');
-// Route::get('clients-get-by-id/{client}', [ClientController::class, 'getById'])->middleware('auth')->name('clients.get-by-id');
-// Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
-// Route::get('clients-search', [ClientController::class, 'search'])->name('clients.search')->middleware('auth');
-
-
-//payments routes-------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------
-// Route::resource('payments', PaymentController::class)->middleware('auth');
-
-
-//history routes-------------------------------------------------------------------------------------
+//history routes---------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::resource('product-histories', ProductHistoryController::class)->middleware('auth');
 
 
-//store routes-------------------------------------------------------------------------------------
+//store routes-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::resource('stores', StoreController::class)->middleware('auth');
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
@@ -152,23 +142,41 @@ Route::resource('settings', SettingController::class)->middleware('auth');
 Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
 
 
-//cards routes-------------------------------------------------------------------------------------
+//cards routes----------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('cards', CardController::class)->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
 Route::put('ezy-profile/update-basic', [EzyProfileController::class, 'updateBasic'])->middleware('auth')->name('ezy-profile.update-basic');
 Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'updateSuscription'])->middleware('auth')->name('ezy-profile.update-suscription');
 
 
-//soporte routes-------------------------------------------------------------------------------------
+//soporte routes--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::get('support/index', [SupportController::class, 'index'])->middleware('auth')->name('supports.index');
 Route::get('support/faqs', [SupportController::class, 'faqs'])->middleware('auth')->name('supports.faqs');
 Route::get('support/create-report', [SupportController::class, 'createReport'])->middleware('auth')->name('supports.create-report');
 
+
 //soporte report routes-------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------
 Route::resource('support-reports', SupportReportController::class)->middleware('auth');
+
+
+//Cash register routes--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------
+Route::resource('cash-registers', CashRegisterController::class)->middleware('auth');
+Route::get('cash-registers-fetch-current-cash', [CashRegisterController::class, 'fetchCurrentCash'])->middleware('auth')->name('cash-registers.fetch-current-cash');
+
+
+//Cash register movements routes--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('cash-register-movements', CashRegisterMovementController::class)->middleware('auth');
+
+
+//Cash cuts routes----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('cash-cuts', CashCutController::class)->middleware('auth');
+Route::get('cash-cuts-fetch-total-sales-for-cash-cut', [CashCutController::class, 'fetchTotalSaleForCashCut'])->middleware('auth')->name('cash-cuts.fetch-total-sales-for-cash-cut');

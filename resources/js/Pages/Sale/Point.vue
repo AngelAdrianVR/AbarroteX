@@ -2,11 +2,50 @@
   <AppLayout title="Registrar venta">
     <div class="px-2 lg:px-6 py-7">
       <!-- header botones -->
-      <div class="lg:flex justify-between items-center mx-3">
+      <div class="md:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
-        <div class="my-4 lg:my-0 flex items-center space-x-3">
+        <!-- Dinero en caja -->
+        <div class="flex items-center space-x-3">
+          <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="!showCashRegisterMoney" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.5" stroke="currentColor" class="size-4 text-[#777777] cursor-pointer">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+          <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.5" stroke="currentColor" class="size-4 text-[#777777] cursor-pointer">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+          </svg>
+          <p class="text-base font-semibold" :class="showCashRegisterMoney ? 'blur-sm' : ''">Caja: ${{ localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
         </div>
-        <span></span>
+        <!-- Dropdon -->
+        <div class="border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
+         <el-col :span="3">
+          <el-dropdown>
+            <span class="text-sm text-primary w-44 flex items-center">
+              <svg class="mr-2" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <mask id="mask0_9380_424" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12" height="12">
+                  <rect width="12" height="12" fill="#D9D9D9"/>
+                </mask>
+                <g mask="url(#mask0_9380_424)">
+                  <path d="M2.5 10.5C2.225 10.5 1.98958 10.4021 1.79375 10.2063C1.59792 10.0104 1.5 9.775 1.5 9.5V2.5C1.5 2.225 1.59792 1.98958 1.79375 1.79375C1.98958 1.59792 2.225 1.5 2.5 1.5H9.5C9.775 1.5 10.0104 1.59792 10.2063 1.79375C10.4021 1.98958 10.5 2.225 10.5 2.5V9.5C10.5 9.775 10.4021 10.0104 10.2063 10.2063C10.0104 10.4021 9.775 10.5 9.5 10.5H2.5ZM6 8C6.31667 8 6.60417 7.90833 6.8625 7.725C7.12083 7.54167 7.3 7.3 7.4 7H9.5V2.5H2.5V7H4.6C4.7 7.3 4.87917 7.54167 5.1375 7.725C5.39583 7.90833 5.68333 8 6 8Z" fill="#F68C0F"/>
+                </g>
+              </svg>
+              Movimientos de caja
+              <i class="fa-solid fa-angle-down text-xs ml-2"></i>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
+                <el-dropdown-item @click="handleCashCut"><i class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer corte</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          </el-col>
+        </div>
       </div>
 
       <!-- cuerpo de la pagina -->
@@ -102,10 +141,9 @@
               <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
                 <p class="text-gray-99">$ <strong class="ml-3">{{
-                  calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                    ",") }}</strong></p>
+                  calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</strong></p>
               </div>
-              <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
+              <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p class="text-[#999999]">Descuento</p>
                 <el-input v-model="editableTabs[this.editableTabsValue - 1].discount" type="number" class="!w-24 !h-8"
                   placeholder="0.00">
@@ -113,7 +151,7 @@
                     <i class="fa-solid fa-dollar-sign"></i>
                   </template>
                 </el-input>
-              </div>
+              </div> -->
               <div class="flex items-center justify-between text-lg mx-5">
                 <p class="font-bold">Total</p>
                 <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
@@ -168,6 +206,109 @@
         </section>
       </div>
     </div>
+
+    <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
+    <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
+      <div class="p-4 relative">
+        <i @click="cashRegisterModal = false"
+          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+
+        <form class="mt-5 mb-2 md:grid grid-cols-2 gap-3" @submit.prevent="storeCashRegisterMovement">
+          <h2 v-if="form.cashRegisterMovementType === 'Ingreso'" class="font-bold col-span-full">Ingresar efectivo a caja</h2>
+          <h2 v-if="form.cashRegisterMovementType === 'Retiro'" class="font-bold col-span-full">Retirar efectivo a caja</h2>
+
+          <div class="mt-2">
+              <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar" class="ml-3 mb-1 text-sm" />
+              <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar" class="ml-3 mb-1 text-sm" />
+              <el-input v-model="form.registerAmount" step="0.01" type="number" placeholder="ingresa el monto">
+                  <template #prefix>
+                  <i class="fa-solid fa-dollar-sign"></i>
+                  </template>
+              </el-input>
+              <InputError :message="form.errors.registerAmount" />
+          </div>
+
+          <div class="col-span-full mt-2">
+              <InputLabel value="Motivo (opcional)" class="text-sm ml-2" />
+              <el-input v-model="form.registerNotes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                  placeholder="Escribe tus notas" :maxlength="200" show-word-limit clearable />
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-2 pb-1 py-2 col-span-full">
+              <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
+              <PrimaryButton :disabled="!form.registerAmount || form.processing">Confirmar</PrimaryButton>
+          </div>
+        </form>
+      </div>
+    </Modal>
+    <!-- --------------------------- Modal Ingreso o retiro de dinero en caja ends ------------------------------------ -->
+
+
+    <!-- -------------- Modal corte de caja starts----------------------- -->
+    <Modal :show="cashCutModal" @close="cashCutModal = false; form.reset">
+      <div class="p-4 relative">
+        <i @click="cashCutModal = false; cutForm.reset()"
+          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+
+        <form class="mt-5 mb-2" @submit.prevent="storeCashCut">
+          <h2 class="font-bold col-span-full">Hacer corte de caja</h2>
+          <p class="col-span-full">Por favor, cuenta el dinero en caja e ingrésalo para proceder con el corte.</p>
+          <div class="rounded-full h-3 bg-[#F2F2F2] my-2"></div>
+
+          <section class="w-full flex justify-end space-x-3 text-sm">
+            <div class="w-44 space-y-2">
+              <p>Efectivo esperado en caja</p>
+              <p>Recuento manual</p>
+              <p>Diferencia</p>
+            </div>
+            <div class="w-44 space-y-2">
+              <p>${{ cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+              <el-input @input="difference()" v-model="cutForm.counted_cash" type="number" step="0.01" class="!w-24 !h-6"
+                placeholder="0.00">
+                <template #prefix>
+                  <i class="fa-solid fa-dollar-sign"></i>
+                </template>
+              </el-input>
+              <p v-if="cutForm.counted_cash" :class="{
+                  'text-green-500': (cutForm.difference) === 0,
+                  'text-blue-500': (cutForm.difference) < 0,
+                  'text-red-500': (cutForm.difference) > 0
+              }">
+                  <!-- Se multiplica por -1 para cambiar el signo y si sobra sea positivo y si falta negativo -->
+                  ${{ (cutForm.difference * -1 )?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}
+              </p>
+              <p v-if="cutForm.counted_cash" :class="{
+                  'text-green-500 bg-green-100': (cutForm.difference) === 0,
+                  'text-blue-500 bg-blue-100': (cutForm.difference) < 0,
+                  'text-red-500 bg-red-100': (cutForm.difference) > 0
+              }" class="rounded-full text-xs inline py-[2px] px-2">
+                  <!-- Icono de marca de verificación si la diferencia es 0 -->
+                  <i v-if="(cutForm.difference) === 0" class="fa-solid fa-check mr-1"></i>
+                  <!-- Icono de sobrante en caja si la diferencia es negativa -->
+                  <i v-else-if="(cutForm.difference) < 0" class="fa-solid fa-plus mr-1"></i>
+                  <!-- Icono de faltante de efectivo si la diferencia es positiva -->
+                  <i v-else class="fa-solid fa-xmark mr-1"></i>
+                  <!-- Muestra el mensaje correspondiente -->
+                  {{ (cutForm.difference) === 0 ? 'Todo bien' : ((cutForm.difference) < 0 ? 'Sobrante en caja' : 'Faltante de efectivo') }}
+              </p>
+            </div>
+          </section>
+
+
+          <div class="col-span-full mt-2">
+              <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
+              <el-input v-model="cutForm.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                  placeholder="Escribe auí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit clearable />
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-2 pb-1 py-2 col-span-full">
+              <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
+              <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing">Hacer corte</PrimaryButton>
+          </div>
+        </form>
+      </div>
+    </Modal>
+    <!-- --------------------------- Modal corte de caja ends ------------------------------------ -->
   </AppLayout>
 </template>
 
@@ -175,14 +316,38 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import InputLabel from "@/Components/InputLabel.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import SaleTable from '@/Components/MyComponents/Sale/SaleTable.vue';
+import InputError from "@/Components/InputError.vue";
+import Modal from "@/Components/Modal.vue";
+import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 
 export default {
   data() {
 
+    const form = useForm({
+        cashRegisterMovementType: null, //que tipo de movimiento es
+        registerAmount: null, //Dinero ingresado o sacado de caja
+        registerNotes: null, //notas al entrar o sacar dinero
+    });
+
+    const cutForm = useForm({
+        counted_cash: null,
+        difference: null,
+        notes: null,
+        totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
+    });
+
     return {
+      form,
+      cutForm,
+      
+      showCashRegisterMoney: true, //muestra u oculta el dinero de caja
+      localCurrentCash: this.cash_register.current_cash, //dinero de caja local
+      cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
+      cashCutModal: false, //muestra el modal para el corte de caja
       // inventario de codigos activado
       isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
       // descuentos activados
@@ -235,10 +400,14 @@ export default {
     PrimaryButton,
     ThirthButton,
     CancelButton,
-    SaleTable
+    InputLabel,
+    InputError,
+    SaleTable,
+    Modal
   },
   props: {
-    products: Array
+    products: Array,
+    cash_register: Object
   },
   methods: {
     async store() {
@@ -257,14 +426,55 @@ export default {
           });
           this.storeProcessing = false;
           this.clearTab();
+          this.fetchCurrentCash();
         }
       } catch (error) {
         console.log(error);
       }
     },
+    storeCashRegisterMovement() {
+      this.form.post(route('cash-register-movements.store'), {
+          onSuccess: () => {
+              this.$notify({
+                  title: "Correcto",
+                  message: "Se ha registrado el movimiento de caja",
+                  type: "success",
+              });
+              this.cashRegisterModal = false;
+              this.form.reset();
+          },
+      });
+    },
+    storeCashCut() {
+      this.cutForm.post(route('cash-cuts.store'), {
+          onSuccess: () => {
+              this.$notify({
+                  title: "Correcto",
+                  message: "Se ha realizado el corte de caja",
+                  type: "success",
+              });
+              this.cashCutModal = false;
+              this.cutForm.reset();
+          },
+      });
+    },
+    difference() {
+      //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
+      this.cutForm.difference = this.cutForm.totalSaleForCashCut - this.cutForm.counted_cash
+    },  
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
       this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
+    },
+    async fetchCurrentCash() {
+      try {
+        const response = await axios.get(route('cash-registers.fetch-current-cash'));
+        if (response.status === 200) {
+          this.localCurrentCash = response.data.item;
+        }
+      } catch (error) { 
+        console.log(error);
+      }
     },
     async searchProducts() {
       try {
@@ -277,6 +487,20 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+    async fetchTotalSaleForCashCut() {
+      try {
+        const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut'));
+        if ( response.status === 200 ) {
+          this.cutForm.totalSaleForCashCut = response.data;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    handleCashCut() {
+      this.fetchTotalSaleForCashCut();
+      this.cashCutModal = true;
     },
     handleBlur() {
       // Introducir un retraso para dar tiempo al evento click de ejecutarse antes del blur

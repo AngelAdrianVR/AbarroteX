@@ -18,10 +18,10 @@ Los cambios en los términos y condiciones serán comunicados a los usuarios a t
 El uso continuado del sistema después de la entrada en vigor de los cambios se considerará como aceptación de los nuevos términos y condiciones.
 El Proveedor se reserva el derecho de realizar actualizaciones en el Software sin previo aviso al Usuario.
 
-El Proveedor ofrece los siguientes servicios:
-Acceso al sistema las 24 horas del día, los 365 días del año.
-Actualizaciones remotas del sistema.
-Soporte técnico y capacitación remota para usuarios con suscripción.
+**El Proveedor ofrece los siguientes servicios:**
+* cceso al sistema las 24 horas del día, los 365 días del año.
+* Actualizaciones remotas del sistema.
+* Soporte técnico y capacitación remota para usuarios con suscripción.
 
 El Proveedor se compromete a mantener el sistema en funcionamiento constante, salvo por causas de fuerza mayor. 
 

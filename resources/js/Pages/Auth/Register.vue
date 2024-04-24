@@ -150,7 +150,7 @@ const submit = () => {
                         He leído y acepto los <a target="_blank" :href="route('terms.show')"
                             class="underline focus:outline-none text-primary">Términos y Condiciones</a> <br>
                         y el <a target="_blank" :href="route('policy.show')"
-                            class="underline focus:outline-none text-primary">Aviso de privacidad</a> de VentaProX
+                            class="underline focus:outline-none text-primary">Aviso de privacidad</a> de Ezy Ventas
                     </div>
                 </el-checkbox>
                 <InputError :message="form.errors.terms" />
