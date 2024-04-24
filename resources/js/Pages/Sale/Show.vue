@@ -56,8 +56,8 @@
                                             class="text-primary underline">
                                             {{ sale.product_name }}
                                         </button>
-                                        <el-tooltip v-else content="El producto fue eliminado" placement="left">
-                                            <span>{{ sale.product_name }}</span>
+                                        <el-tooltip v-else content="El producto fue eliminado" placement="right">
+                                            <span class="text-red-700">{{ sale.product_name }}</span>
                                         </el-tooltip>
                                     </td>
                                     <td>${{ sale.current_price }}</td>
