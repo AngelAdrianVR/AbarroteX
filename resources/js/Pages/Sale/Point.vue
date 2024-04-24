@@ -2,10 +2,10 @@
   <AppLayout title="Registrar venta">
     <div class="px-2 lg:px-6 py-7">
       <!-- header botones -->
-      <div class="md:flex justify-between items-center mx-3">
+      <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <!-- Dinero en caja -->
-        <div v-if="isShowCahsOn" class="flex items-center space-x-3 text-gray99">
+        <div v-if="isShowCahsOn" class="mt-4 lg:mt-0 flex items-center justify-center  space-x-3 text-gray99">
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
             class="size-4 cursor-pointer">
@@ -18,7 +18,7 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
           </svg>
-          <p class="text-sm">
+          <p class="text-xs">
             Efectivo en caja:
             <b>
               {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
@@ -27,10 +27,10 @@
           </p>
         </div>
         <!-- Dropdon -->
-        <div class="border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
+        <div class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
           <el-col :span="3">
-            <el-dropdown>
-              <span class="text-sm text-primary w-44 flex items-center">
+            <el-dropdown trigger="click">
+              <p class="text-sm text-primary w-44 flex items-center">
                 <svg class="mr-2" width="12" height="12" viewBox="0 0 12 12" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
                   <mask id="mask0_9380_424" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12"
@@ -43,9 +43,9 @@
                       fill="#F68C0F" />
                   </g>
                 </svg>
-                Movimientos de caja
-                <i class="fa-solid fa-angle-down text-xs ml-2"></i>
-              </span>
+                <span>Movimientos de caja</span>
+                <i class="fa-solid fa-angle-down text-[10px] ml-2 mt-px"></i>
+              </p>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
@@ -235,11 +235,13 @@
           </h2>
 
           <div class="mt-2">
-            <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar"
+            <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar *"
               class="ml-3 mb-1 text-sm" />
-            <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar"
+            <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar *"
               class="ml-3 mb-1 text-sm" />
-            <el-input v-model="form.registerAmount" step="0.01" type="number" placeholder="ingresa el monto">
+            <el-input v-model="form.registerAmount" type="text" placeholder="ingresa el monto"
+              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+              :parser="(value) => value.replace(/\D/g, '')">
               <template #prefix>
                 <i class="fa-solid fa-dollar-sign"></i>
               </template>
@@ -250,10 +252,10 @@
           <div class="col-span-full mt-2">
             <InputLabel value="Motivo (opcional)" class="text-sm ml-2" />
             <el-input v-model="form.registerNotes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-              placeholder="Escribe tus notas" :maxlength="200" show-word-limit clearable />
+              placeholder="Escribe tus notas" :maxlength="255" show-word-limit clearable />
           </div>
 
-          <div class="flex justify-end space-x-3 pt-2 pb-1 py-2 col-span-full">
+          <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
             <PrimaryButton :disabled="!form.registerAmount || form.processing">Confirmar</PrimaryButton>
           </div>
@@ -461,6 +463,14 @@ export default {
             message: "Se ha registrado el movimiento de caja",
             type: "success",
           });
+
+          // Actualizar dinero en caja
+          if (this.form.cashRegisterMovementType == 'Ingreso') {
+            this.localCurrentCash += parseInt(this.form.registerAmount);
+          } else {
+            this.localCurrentCash -= parseInt(this.form.registerAmount);
+          }
+
           this.cashRegisterModal = false;
           this.form.reset();
         },
