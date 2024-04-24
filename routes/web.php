@@ -174,6 +174,7 @@ Route::get('cash-registers-fetch-current-cash', [CashRegisterController::class, 
 //Cash register movements routes--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('cash-register-movements', CashRegisterMovementController::class)->middleware('auth');
+Route::get('cash-register-movements-fetch-total-cash-movements', [CashRegisterMovementController::class, 'fetchTotalCashMovements'])->middleware('auth')->name('cash-register-movements.fetch-total-cash-movements');
 
 
 //Cash cuts routes----------------------------------------------------------------------------------------------------

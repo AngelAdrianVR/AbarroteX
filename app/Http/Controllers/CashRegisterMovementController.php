@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use Illuminate\Http\Request;
@@ -29,7 +30,9 @@ class CashRegisterMovementController extends Controller
         $request->validate([
             'cashRegisterMovementType' => 'required|string',
             //En caso de retirar dinero de la caja el monto máximo es lo que se tenga registrado en current_cash, es decir lo que hay en caja
-            'registerAmount' => $request->cashRegisterMovementType === 'Ingreso' ? 'required|numeric|min:0|max:10000' : 'required|numeric|min:0|max:' . $cash_register->current_cash,
+            'registerAmount' => $request->cashRegisterMovementType === 'Ingreso'
+                ? 'required|numeric|min:0|max:10000'
+                : 'required|numeric|min:0|max:' . $cash_register->current_cash,
             'registerNotes' => 'nullable|string|max:255',
         ]);
 
@@ -42,7 +45,7 @@ class CashRegisterMovementController extends Controller
         ]);
 
         //En caso de ser ingreso, suma la cantidad al dinero actual de la caja, en caso contrario lo resta
-        if( $request->cashRegisterMovementType === 'Ingreso' ) {
+        if ($request->cashRegisterMovementType === 'Ingreso') {
             $cash_register->current_cash += $request->registerAmount;
         } else {
             $cash_register->current_cash -= $request->registerAmount;
@@ -50,7 +53,6 @@ class CashRegisterMovementController extends Controller
 
         //Guarda la cantidad modificada
         $cash_register->save();
-
     }
 
 
@@ -65,7 +67,7 @@ class CashRegisterMovementController extends Controller
         //
     }
 
-    
+
     public function update(Request $request, CashRegisterMovement $cash_register_movement)
     {
         //
@@ -75,5 +77,37 @@ class CashRegisterMovementController extends Controller
     public function destroy(CashRegisterMovement $cash_register_movement)
     {
         //
+    }
+
+
+    public function fetchTotalCashMovements()
+    {
+        // obtiene la primera caja registradora de la tienda
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+        //recupera el último corte realizado
+        $last_cash_cut = CashCut::where('cash_register_id', $cash_register->id)->latest()->first();
+
+         // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
+        if ($last_cash_cut !== null) {
+            $movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
+                        ->where('created_at', '>', $last_cash_cut->created_at)
+                        ->get();
+        } else {
+            $movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->get();
+        }
+
+        // Calcula el total de movimientos
+        $total_cash_movements = 0;
+
+        foreach ($movements as $movement) {
+            if ($movement->type === 'Ingreso') {
+                $total_cash_movements += $movement->amount;
+            } else if ($movement->type === 'Retiro') {
+                $total_cash_movements -= $movement->amount;
+            }
+        }
+
+        return $total_cash_movements;
     }
 }

@@ -128,7 +128,8 @@
     </p>  
     <p v-else class="flex items-center justify-center text-gray99 text-sm">
       Busca un producto para comenzar la venta
-      <i class="fa-regular fa-hand-point-right ml-3"></i>
+      <i class="hidden lg:inline fa-regular fa-hand-point-right ml-3"></i>
+      <i class="lg:hidden fa-regular fa-hand-point-down ml-3"></i>
     </p>  
   </div>
 </template>
