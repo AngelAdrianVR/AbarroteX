@@ -177,5 +177,6 @@ return [
         'terms' => 'terminos y condiciones',
         'type' => 'tipo',
         'registerAmount' => 'El monto es mayor que el dinero en caja,',
+        'withdrawn_cash' => 'El monto a retirar es mayor que el dinero en caja,',
     ],
 ];

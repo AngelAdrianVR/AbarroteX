@@ -95,19 +95,24 @@ export default {
     },
     methods: {
         async filterExpenses() {
-            this.loading = true;
-            try {
-                const response = await axios.get(route('expenses.filter'), { params: { queryDate: this.searchDate } });
+            //si hay fecha de filtro hace la peticion, si no, muestra todos los gastos
+            if ( this.searchDate !=null ) {
+                this.loading = true;
+                try {
+                    const response = await axios.get(route('expenses.filter'), { params: { queryDate: this.searchDate } });
                 if (response.status == 200) {
                     this.localExpenses = response.data.items;
                     this.filtered = true;
                 }
 
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
-                this.showFilter = false;
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    this.loading = false;
+                    this.showFilter = false;
+                }
+            } else {
+                 this.localExpenses = this.groupedExpenses;
             }
         },
         async fetchItemsByPage() {

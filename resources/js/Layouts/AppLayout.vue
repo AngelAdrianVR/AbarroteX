@@ -146,7 +146,7 @@ const logout = () => {
                                 Punto de venta
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                Análisis de venta
+                               Reportes
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('sales.index')"
                                 :active="route().current('sales.index') || route().current('sales.show')">
@@ -157,6 +157,9 @@ const logout = () => {
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('cash-cuts.index')" :active="route().current('cash-cuts.*')">
+                                Caja
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">
                                 Configuraciones

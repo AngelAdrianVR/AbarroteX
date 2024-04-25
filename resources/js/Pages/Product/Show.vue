@@ -184,6 +184,11 @@
                         <InputError :message="form.errors.quantity" />
                     </div>
 
+                    <div class="text-left mt-4 ml-6">
+                        <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register" label="Se paga con dinero de caja"
+                            size="small" />
+                    </div>
+
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
                         <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
                         <PrimaryButton :disabled="form.processing || !form.quantity" @click="entryProduct" class="!rounded-full">Ingresar
@@ -214,6 +219,7 @@ export default {
     data() {
         const form = useForm({
             quantity: null,
+            is_paid_by_cash_register: false //es pagado con dinero de caja? para hacer el registro de movimiento
         });
         return {
             form,
