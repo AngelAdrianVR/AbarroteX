@@ -290,11 +290,12 @@
             </div>
             <div class="w-44 space-y-2">
               <div v-if="cutLoading">
-                <i  class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
               </div>
-              <p v-else>${{ (cash_register.started_cash + cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
-              <el-input @input="difference()" v-model="cutForm.counted_cash" type="number" step="0.01" class="!w-24 !h-6"
-                placeholder="0.00">
+              <p v-else>${{ (cutForm.totalSaleForCashCut +
+                cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+              <el-input @input="difference()" v-model="cutForm.counted_cash" type="number" step="0.01"
+                class="!w-24 !h-6" placeholder="0.00">
                 <template #prefix>
                   <i class="fa-solid fa-dollar-sign"></i>
                 </template>
@@ -335,10 +336,9 @@
               </el-input>
               <InputError :message="cutForm.errors.withdrawn_cash" />
             </div>
-            <p v-if="cutForm.withdrawn_cash" class="w-full mt-3 text-sm font-bold">Efectivo que dejarás en caja: ${{ (cutForm.counted_cash - cutForm.withdrawn_cash)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+            <p v-if="cutForm.amount_withdrawn" class="w-full mt-3 text-sm font-bold">Efectivo que dejarás en caja: ${{
+              (cutForm.counted_cash - cutForm.amount_withdrawn)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
           </div>
-
-
           <div class="col-span-full mt-2">
             <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
             <el-input v-model="cutForm.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
@@ -399,12 +399,12 @@ export default {
     });
 
     const cutForm = useForm({
-        counted_cash: null,
-        difference: null,
-        notes: null,
-        totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
-        totalCashMovements: null, //dinero de movimientos de caja para hacer corte
-        withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
+      counted_cash: null,
+      difference: null,
+      notes: null,
+      totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
+      totalCashMovements: null, //dinero de movimientos de caja para hacer corte
+      amount_withdrawn: null, //dinero retirado de caja tras haber hecho el corte
     });
 
     return {
@@ -506,16 +506,16 @@ export default {
     },
     storeCashRegisterMovement() {
       this.form.post(route('cash-register-movements.store'), {
-          onSuccess: () => {
-              this.$notify({
-                  title: "Correcto",
-                  message: "Se ha registrado el movimiento de caja",
-                  type: "success",
-              });
-              this.cashRegisterModal = false;
-              this.form.reset();
-              this.fetchCurrentCash();
-          },
+        onSuccess: () => {
+          this.$notify({
+            title: "Correcto",
+            message: "Se ha registrado el movimiento de caja",
+            type: "success",
+          });
+          this.cashRegisterModal = false;
+          this.form.reset();
+          this.fetchCurrentCash();
+        },
       });
     },
     storeCashCut() {
@@ -579,7 +579,7 @@ export default {
       try {
         this.cutLoading = true;
         const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements'));
-        if ( response.status === 200 ) {
+        if (response.status === 200) {
           this.cutForm.totalCashMovements = response.data;
           this.cutLoading = false;
         }
