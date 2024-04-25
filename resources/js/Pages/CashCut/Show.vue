@@ -15,8 +15,8 @@
                             <p class="font-bold mb-3">Recuento manual de efectivo</p>
                             <p class="text-gray99">Efectivo inicial</p>
                             <p class="text-gray99">Ventas</p>
-                            <p v-for="cashRegisterMovement in cash_cut.cash_register?.movements" :key="cashRegisterMovement" class="text-gray99 truncate">
-                                {{ cashRegisterMovement.type + 'de efectivo. Motivo: ' + cashRegisterMovement.notes + ' ' + formatDateHour(cashRegisterMovement.created_at) }}
+                            <p v-for="cashRegisterMovement in cash_cut.cash_register?.movements" :key="cashRegisterMovement" :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)" class="text-gray99 truncate">
+                                {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
                             </p>
                         </div>
                         <div class="w-1/4 space-y-1">

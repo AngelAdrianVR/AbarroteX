@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashRegister;
+use App\Models\CashRegisterMovement;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ class ExpenseController extends Controller
         // Obtener los egresos registrados en los últimos 7 días
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
 
-        
+
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
             return Carbon::parse($expense->created_at)->format('d-F-Y');
@@ -36,7 +38,7 @@ class ExpenseController extends Controller
             $totalExpense = $expenses->sum(function ($expense) {
                 return $expense->quantity * $expense->current_price;
             });
-            
+
             return [
                 'total_quantity' => $totalQuantity,
                 'total_expense' => $totalExpense,
@@ -49,12 +51,14 @@ class ExpenseController extends Controller
 
     public function create()
     {
-        return inertia('Expense/Create');
+        //recupera la primera caja registradora de la tienda para mandar su info como current_cash
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+        return inertia('Expense/Create', compact('cash_register'));
     }
 
     public function store(Request $request)
     {
-        // return $request;
         // Itera sobre cada egreso recibido en la lista
         foreach ($request->expenses as $expenseData) {
             Expense::create([
@@ -64,6 +68,21 @@ class ExpenseController extends Controller
                 'created_at' => $expenseData['date'],
                 'store_id' => auth()->user()->store_id,
             ]);
+
+            // crear retiro de dinero en caja si el dinero se toma de ahi
+            if ($expenseData['from_cash_register']) {
+                // obtiene la primera caja registradora de la tienda
+                $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+                // Crea el movimiento de la caja obtenida anteriormente. En caso de haber varias cajas ajustar lógica
+                CashRegisterMovement::create([
+                    'amount' => $expenseData['current_price'],
+                    'type' => 'Retiro',
+                    'notes' => 'Registro de egreso',
+                    'cash_register_id' => $cash_register->id,
+                ]);
+                //actualizar el dinero actual de la caja
+                $cash_register->decrement('current_cash', $expenseData['current_price']);
+            }
         }
         return to_route('expenses.index');
     }
@@ -71,8 +90,6 @@ class ExpenseController extends Controller
     public function show($expense_id)
     {
         $expense = Expense::find($expense_id);
-        // return $expense;
-        
 
         // Parsear la fecha recibida para obtener solo la parte de la fecha
         $date = Carbon::parse($expense->created_at)->toDateString();
@@ -80,7 +97,6 @@ class ExpenseController extends Controller
         // Obtener las ventas registradas en la fecha recibida
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
-        // return $expenses;
         return inertia('Expense/Show', compact('expenses'));
     }
 
@@ -139,14 +155,14 @@ class ExpenseController extends Controller
         $offset = 4 + $currentPage * 4; //multiplica por 4 para traer de 4 dias en 4 dias. suma 4 dias porque son los que ya se cargaron
         $skip_days = $currentPage * 4; //multiplica por 4 para traer de 4 dias en 4 dias
 
-         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
-         $days_ago = Carbon::now()->subDays($offset);
-         // ignorar esa cantidad de dias porque ya se cargaron.
-         $days_befor = Carbon::now()->subDays($skip_days);
+        // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
+        $days_ago = Carbon::now()->subDays($offset);
+        // ignorar esa cantidad de dias porque ya se cargaron.
+        $days_befor = Carbon::now()->subDays($skip_days);
 
-         // Obtener las ventas registradas en los últimos 7 días
-         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
- 
+        // Obtener las ventas registradas en los últimos 7 días
+        $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
+
         // Agrupar los egresos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
             return Carbon::parse($expense->created_at)->format('d-F-Y');
@@ -170,8 +186,7 @@ class ExpenseController extends Controller
     {
         // $expense = Expense::with('products')->find($expense_id);
         $expense = null;
-        // return $expense;
+
         return inertia('Expense/PrintExpenses', compact('expense'));
     }
-
 }
