@@ -294,7 +294,7 @@
               <div v-if="cutLoading">
                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
               </div>
-              <p v-else>${{ (cutForm.totalSaleForCashCut +
+              <p v-else>${{ (cash_register.started_cash + cutForm.totalSaleForCashCut +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               <el-input @input="difference()" v-model="cutForm.counted_cash" type="number" step="0.01"
                 class="!w-24 !h-6" placeholder="0.00">
@@ -338,8 +338,8 @@
               </el-input>
               <InputError :message="cutForm.errors.withdrawn_cash" />
             </div>
-            <p v-if="cutForm.amount_withdrawn" class="w-full mt-3 text-sm font-bold">Efectivo que dejarás en caja: ${{
-              (cutForm.counted_cash - cutForm.amount_withdrawn)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+            <p v-if="cutForm.withdrawn_cash" class="w-full mt-3 text-sm font-bold">Efectivo que dejarás en caja: ${{
+              (cutForm.counted_cash - cutForm.withdrawn_cash)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
           </div>
           <div class="col-span-full mt-2">
             <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
@@ -406,7 +406,7 @@ export default {
       notes: null,
       totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
       totalCashMovements: null, //dinero de movimientos de caja para hacer corte
-      amount_withdrawn: null, //dinero retirado de caja tras haber hecho el corte
+      withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
     });
 
     return {
@@ -552,7 +552,7 @@ export default {
         const response = await axios.get(route('cash-registers.fetch-cash-register'));
         if (response.status === 200) {
           this.localCurrentCash = response.data.item.current_cash;
-          if ((this.localCurrentCash >= this.cash_register.max_cash) && isMaxCashOn) {
+          if ((this.localCurrentCash >= this.cash_register.max_cash) && this.isMaxCashOn) {
             this.showLimitCashModal = true;
           }
         }
