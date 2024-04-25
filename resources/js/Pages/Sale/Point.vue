@@ -19,15 +19,18 @@
               d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
           </svg>
           <p class="text-sm flex items-center space-x-2">
-            Efectivo en caja: 
+            Efectivo en caja:
             <b :class="localCurrentCash >= cash_register.max_cash ? 'text-red-600' : ''" class="ml-2">
               {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
                 '*****' }}
             </b>
-            <el-tooltip content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="right">
-              <svg v-if="localCurrentCash >= cash_register.max_cash" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            <el-tooltip content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte"
+              placement="right">
+              <svg v-if="localCurrentCash >= cash_register.max_cash" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                 :class="localCurrentCash >= cash_register.max_cash ? 'text-red-600' : ''" class="size-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
               </svg>
             </el-tooltip>
           </p>
@@ -293,7 +296,7 @@
                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
               </div>
               <p v-else>${{ (cutForm.totalSaleForCashCut +
-                cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               <el-input @input="difference()" v-model="cutForm.counted_cash" type="number" step="0.01"
                 class="!w-24 !h-6" placeholder="0.00">
                 <template #prefix>
@@ -337,7 +340,7 @@
               <InputError :message="cutForm.errors.withdrawn_cash" />
             </div>
             <p v-if="cutForm.amount_withdrawn" class="w-full mt-3 text-sm font-bold">Efectivo que dejarás en caja: ${{
-              (cutForm.counted_cash - cutForm.amount_withdrawn)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+              (cutForm.counted_cash - cutForm.amount_withdrawn)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
           </div>
           <div class="col-span-full mt-2">
             <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
@@ -357,20 +360,20 @@
 
     <!-- Modal para advertir que se ha excedido del dinero permitido en caja -->
     <ConfirmationModal :show="showLimitCashModal" @close="showLimitCashModal = false">
-        <template #title>
-            <h1>Se ha llegado al límite de dinero permitido en caja</h1>
-        </template>
-        <template #content>
-            <p>
-                ¿Deseas realizar corte para no exceder eñ límite de dinero permitido en caja?
-            </p>
-        </template>
-        <template #footer>
-            <div class="flex items-center space-x-1">
-                <CancelButton @click="showLimitCashModal = false">Cancelar</CancelButton>
-                <PrimaryButton @click="showLimitCashModal = false; handleCashCut()">Hacer corte</PrimaryButton>
-            </div>
-        </template>
+      <template #title>
+        <h1>Se ha llegado al límite de dinero permitido en caja</h1>
+      </template>
+      <template #content>
+        <p>
+          ¿Deseas realizar corte para no exceder eñ límite de dinero permitido en caja?
+        </p>
+      </template>
+      <template #footer>
+        <div class="flex items-center space-x-1">
+          <CancelButton @click="showLimitCashModal = false">Cancelar</CancelButton>
+          <PrimaryButton @click="showLimitCashModal = false; handleCashCut()">Hacer corte</PrimaryButton>
+        </div>
+      </template>
     </ConfirmationModal>
     <!-- Modal para advertir que se ha excedido del dinero permitido en caja -->
   </AppLayout>
@@ -499,6 +502,9 @@ export default {
           this.storeProcessing = false;
           this.clearTab();
           this.fetchCurrentCash();
+
+          // resetear variable de local storage a false
+          localStorage.setItem('pendentProcess', false);
         }
       } catch (error) {
         console.log(error);
@@ -535,7 +541,7 @@ export default {
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
       this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.cash_register.started_cash) - this.cutForm.counted_cash
-    },  
+    },
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
       this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
@@ -545,7 +551,7 @@ export default {
         const response = await axios.get(route('cash-registers.fetch-current-cash'));
         if (response.status === 200) {
           this.localCurrentCash = response.data.item;
-          if ( this.localCurrentCash >= this.cash_register.max_cash ) {
+          if (this.localCurrentCash >= this.cash_register.max_cash) {
             this.showLimitCashModal = true;
           }
         }
@@ -667,6 +673,13 @@ export default {
       this.quantity = 1;
       this.scanning = false;
       this.inputFocus();
+
+      // indicar al navegador mediante el local storage que hay proceso pendiente
+      const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
+      if (!pendentProcess) {
+        // guardar el valor en el localStorage
+        localStorage.setItem('pendentProcess', true);
+      }
     },
     clearTab() {
       this.searchQuery = null;
@@ -715,6 +728,9 @@ export default {
     } else {
       this.$refs.searchInput.focus(); // Enfocar el input de buscar producto cuando se abre el modal
     }
+
+    // resetear variable de local storage a false
+    localStorage.setItem('pendentProcess', false);
   }
 }
 </script>
