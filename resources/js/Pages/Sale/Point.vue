@@ -20,15 +20,14 @@
           </svg>
           <p class="text-sm flex items-center space-x-2">
             Efectivo en caja:
-            <b :class="localCurrentCash >= cash_register.max_cash ? 'text-red-600' : ''" class="ml-2">
+            <b :class="(localCurrentCash >= cash_register.max_cash) && isMaxCashOn ? 'text-red-600' : ''" class="ml-2">
               {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
                 '*****' }}
             </b>
-            <el-tooltip content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte"
-              placement="right">
-              <svg v-if="localCurrentCash >= cash_register.max_cash" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                :class="localCurrentCash >= cash_register.max_cash ? 'text-red-600' : ''" class="size-5">
+            <el-tooltip v-if="(localCurrentCash >= cash_register.max_cash) && isMaxCashOn && showCashRegisterMoney"
+              content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="size-4 text-red-600">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
               </svg>
@@ -365,7 +364,7 @@
       </template>
       <template #content>
         <p>
-          ¿Deseas realizar corte para no exceder eñ límite de dinero permitido en caja?
+          ¿Deseas realizar corte para no exceder el límite de dinero permitido en caja?
         </p>
       </template>
       <template #footer>
@@ -427,6 +426,8 @@ export default {
       isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
       // escaneo de codigos activado
       isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
+      // monto maximo en caja activado
+      isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
 
       storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
@@ -501,7 +502,7 @@ export default {
           });
           this.storeProcessing = false;
           this.clearTab();
-          this.fetchCurrentCash();
+          this.fetchCashRegister();
 
           // resetear variable de local storage a false
           localStorage.setItem('pendentProcess', false);
@@ -520,7 +521,7 @@ export default {
           });
           this.cashRegisterModal = false;
           this.form.reset();
-          this.fetchCurrentCash();
+          this.fetchCashRegister();
         },
       });
     },
@@ -533,7 +534,7 @@ export default {
             type: "success",
           });
           this.cashCutModal = false;
-          this.fetchCurrentCash();
+          this.fetchCashRegister();
           this.cutForm.reset();
         },
       });
@@ -546,12 +547,12 @@ export default {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
       this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
     },
-    async fetchCurrentCash() {
+    async fetchCashRegister() {
       try {
-        const response = await axios.get(route('cash-registers.fetch-current-cash'));
+        const response = await axios.get(route('cash-registers.fetch-cash-register'));
         if (response.status === 200) {
-          this.localCurrentCash = response.data.item;
-          if (this.localCurrentCash >= this.cash_register.max_cash) {
+          this.localCurrentCash = response.data.item.current_cash;
+          if ((this.localCurrentCash >= this.cash_register.max_cash) && isMaxCashOn) {
             this.showLimitCashModal = true;
           }
         }
