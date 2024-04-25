@@ -23,7 +23,7 @@
                 <!-- Con barra pequeña -->
                 <section v-if="small">
                     <div v-for="(menu, index) in menus" :key="index">
-                        <button v-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active"
+                        <button v-if="menu.show" @click="handleClickInMenu(index)" :active="menu.active"
                             :title="menu.label"
                             class="w-full text-center py-2 pr-3 pl-5 justify-between rounded-r-[10px] mt-2 transition ease-linear duration-150"
                             :class="menu.active ? 'bg-[#393939] text-primary border-l-2 border-primary' : 'hover:text-primary hover:bg-[#393939] text-[#9A9A9A]'">
@@ -39,7 +39,7 @@
                         <Accordion v-if="menu.options.length" :icon="menu.icon" :active="menu.active"
                             :title="menu.label" :id="index">
                             <div v-for="(option, index2) in menu.options" :key="index2">
-                                <button @click="goToRoute(option.route)" v-if="option.show" :active="option.active"
+                                <button @click="handleClickInMenu(index)" v-if="option.show" :active="option.active"
                                     :title="option.label"
                                     class="w-full text-start pl-6 pr-2 mt-2 flex justify-between text-xs rounded-md py-1 transition ease-linear duration-150"
                                     :class="option.active ? 'bg-[#393939] text-primary' : 'hover:text-primary hover:bg-gradient-to-r from-gray-800 to-black1 text-gray-700'">
@@ -48,7 +48,7 @@
                             </div>
                         </Accordion>
                         <!-- Sin submenues -->
-                        <button v-else-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active"
+                        <button v-else-if="menu.show" @click="handleClickInMenu(index)" :active="menu.active"
                             :title="menu.label"
                             class="w-full text-start pl-5 pr-3 py-2 mt-2 border-l-2 text-xs rounded-r-[10px] transition ease-linear duration-150"
                             :class="menu.active ? 'bg-[#393939] text-primary border-primary' : 'hover:text-primary border-transparent hover:bg-[#393939] text-[#9A9A9A]'">
@@ -62,6 +62,24 @@
             </nav>
         </div>
     </div>
+
+    <ConfirmationModal :show="showGoToRouteConfirmation" @close="showGoToRouteConfirmation = false">
+        <template #title>
+            <h1>Proceso pendiente</h1>
+        </template>
+        <template #content>
+            <p>
+                Tienes un proceso sin completar en esta vista. Si cambias de vista, se borrarán los los cambios o
+                procesos que no has finalizado. ¿Continuar de todas formas?
+            </p>
+        </template>
+        <template #footer>
+            <div class="flex items-center space-x-1">
+                <CancelButton @click="showGoToRouteConfirmation = false">Cancelar</CancelButton>
+                <DangerButton @click="goToRoute()">Continuar</DangerButton>
+            </div>
+        </template>
+    </ConfirmationModal>
 </template>
 
 <script>
@@ -70,12 +88,17 @@ import { Link } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DangerButton from "@/Components/DangerButton.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 
 export default {
     data() {
         return {
             small: true,
             collapsedMenu: null,
+            routeToGo: null,
+            showGoToRouteConfirmation: false,
             menus: [
                 {
                     label: 'Punto de venta',
@@ -183,7 +206,10 @@ export default {
         Accordion,
         DropdownLink,
         Dropdown,
-        Link
+        Link,
+        ConfirmationModal,
+        DangerButton,
+        CancelButton,
     },
     methods: {
         handleClickInMenu(index) {
@@ -194,11 +220,26 @@ export default {
                     this.collapsedMenu = index;
                 }
             } else {
-                this.goToRoute(this.menus[index].route)
+                // revisar si hay proceso pendiente para no cambiar de vista sin preguntar
+                const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
+                if (pendentProcess) {
+                    this.routeToGo = this.menus[index].route;
+                    this.showGoToRouteConfirmation = true;
+                } else {
+                    this.goToRoute(this.menus[index].route)
+                }
             }
         },
-        goToRoute(route) {
-            this.$inertia.get(route);
+        goToRoute(route = null) {
+            // resetear variable de local storage a false
+            localStorage.setItem('pendentProcess', false);
+
+            // ir a la ruta solicitada
+            if (route) {
+                this.$inertia.get(route);
+            } else {
+                this.$inertia.get(this.routeToGo);
+            }
         },
         logout() {
             this.$inertia.post(route('logout'));

@@ -168,7 +168,7 @@ Route::resource('support-reports', SupportReportController::class)->middleware('
 //Cash register routes--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
 Route::resource('cash-registers', CashRegisterController::class)->middleware('auth');
-Route::get('cash-registers-fetch-current-cash', [CashRegisterController::class, 'fetchCurrentCash'])->middleware('auth')->name('cash-registers.fetch-current-cash');
+Route::get('cash-registers-fetch-cash-register', [CashRegisterController::class, 'fetchCashRegister'])->middleware('auth')->name('cash-registers.fetch-cash-register');
 
 
 //Cash register movements routes--------------------------------------------------------------------------------------

@@ -36,7 +36,7 @@
                 </div>
 
                 <div class="mt-7 lg:mt-0 mx-auto lg:mx-0 w-96 border border-grayD9 rounded-lg self-start">
-                    <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold">Corte {{ formatDate(cash_cut.created_at) }}</h2>
+                    <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-t-lg">Corte {{ formatDate(cash_cut.created_at) }}</h2>
                     <div class="flex justify-between space-x-1 p-5">
                         <div class="font-semibold space-y-1">
                             <p class="mb-5">Hora de corte</p>
