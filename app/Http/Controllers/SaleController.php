@@ -51,10 +51,11 @@ class SaleController extends Controller
             ->count();
 
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
-        $days_ago = Carbon::now()->subDays(5);
-
+        // $days_ago = Carbon::now()->subDays(5);
         // Obtener las ventas registradas en los últimos x días
-        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
+        // $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
+        
+        $sales = Sale::where('store_id', auth()->user()->store_id)->latest()->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $sales->groupBy(function ($sale) {
@@ -70,7 +71,7 @@ class SaleController extends Controller
                 'total_sale' => $totalSale,
                 'sales' => $sales,
             ];
-        });
+        })->take(15);
 
         return inertia('Sale/Index', compact('groupedSales', 'total_sales'));
     }
@@ -227,8 +228,8 @@ class SaleController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = 5 + $currentPage * 5; //multiplica por 5 para traer de 5 dias en 5 dias. suma 5 dias porque son los que ya se cargaron
-        $skip_days = $currentPage * 5; //multiplica por 5 para traer de 5 dias en 5 dias
+        $offset = 15 + $currentPage * 15; //multiplica por 15 para traer de 15 dias en 15 dias. suma 15 dias porque son los que ya se cargaron
+        $skip_days = $currentPage * 15; //multiplica por 15 para traer de 15 dias en 15 dias
 
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         $days_ago = Carbon::now()->subDays($offset);

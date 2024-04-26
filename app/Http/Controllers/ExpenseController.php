@@ -24,11 +24,10 @@ class ExpenseController extends Controller
 
 
         // Calcular la fecha hace x días para recuperar los egresos de x dias atras hasta la fecha de hoy
-        $days_ago = Carbon::now()->subDays(4);
-
+        // $days_ago = Carbon::now()->subDays(15);
         // Obtener los egresos registrados en los últimos 7 días
-        $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
-
+        // $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
+        $expenses = Expense::where('store_id', auth()->user()->store_id)->latest()->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
@@ -44,7 +43,7 @@ class ExpenseController extends Controller
                 'total_expense' => $totalExpense,
                 'expenses' => $expenses,
             ];
-        });
+        })->take(15);
 
         return inertia('Expense/Index', compact('groupedExpenses', 'total_expenses'));
     }
@@ -152,8 +151,8 @@ class ExpenseController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = 4 + $currentPage * 4; //multiplica por 4 para traer de 4 dias en 4 dias. suma 4 dias porque son los que ya se cargaron
-        $skip_days = $currentPage * 4; //multiplica por 4 para traer de 4 dias en 4 dias
+        $offset = 15 + $currentPage * 15; //multiplica por 4 para traer de 4 dias en 4 dias. suma 4 dias porque son los que ya se cargaron
+        $skip_days = $currentPage * 15; //multiplica por 4 para traer de 4 dias en 4 dias
 
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         $days_ago = Carbon::now()->subDays($offset);

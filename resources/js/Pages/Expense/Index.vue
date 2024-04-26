@@ -6,7 +6,8 @@
                 <h1 class="font-bold text-lg">Egresos</h1>
                 <div class="flex space-x-2 items-center relative">
                     <!-- Boton para crear egreso -->
-                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="!py-[6px]">Crear</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="!py-[6px]">Crear
+                    </PrimaryButton>
                     <!-- filtro -->
                     <button @click.stop="showFilter = !showFilter"
                         class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
@@ -52,7 +53,7 @@
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-if="(Object.keys(localExpenses)?.length < total_expenses) && !filtered"
+                <button v-else-if="Object.keys(localExpenses)?.length && total_expenses > 15 && Object.keys(localExpenses)?.length < total_expenses && !filtered"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
                     elementos</button>
             </div>
@@ -96,14 +97,14 @@ export default {
     methods: {
         async filterExpenses() {
             //si hay fecha de filtro hace la peticion, si no, muestra todos los gastos
-            if ( this.searchDate !=null ) {
+            if (this.searchDate != null) {
                 this.loading = true;
                 try {
                     const response = await axios.get(route('expenses.filter'), { params: { queryDate: this.searchDate } });
-                if (response.status == 200) {
-                    this.localExpenses = response.data.items;
-                    this.filtered = true;
-                }
+                    if (response.status == 200) {
+                        this.localExpenses = response.data.items;
+                        this.filtered = true;
+                    }
 
                 } catch (error) {
                     console.log(error);
@@ -112,7 +113,7 @@ export default {
                     this.showFilter = false;
                 }
             } else {
-                 this.localExpenses = this.groupedExpenses;
+                this.localExpenses = this.groupedExpenses;
             }
         },
         async fetchItemsByPage() {

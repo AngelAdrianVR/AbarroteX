@@ -48,7 +48,7 @@
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-if="(Object.keys(localSales)?.length < total_sales) && !filtered"
+                <button v-else-if="Object.keys(localSales)?.length && total_sales > 15 && Object.keys(localSales)?.length < total_sales && !filtered"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
             </div>
         </div>
