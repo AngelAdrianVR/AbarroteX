@@ -8,18 +8,20 @@
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
-                    <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
+                    <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100"
+                        clearable />
                     <InputError :message="form.errors.name" />
                 </div>
                 <div class="mt-3">
-                    <div class="flex items-center ml-3 mb-1">
-                        <InputLabel value="Precio de compra" class="text-sm" />
+                    <div class="flex items-center">
+                        <InputLabel value="Precio de compra" class="ml-3 mb-1" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
-                            <i class="fa-regular fa-circle-question ml-2 text-primary text-xs"></i>
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
                     </div>
                     <el-input v-model="form.cost" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -29,49 +31,49 @@
                 <div class="mt-3">
                     <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')"
+                        class="!self-end !justify-self-end">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
                     </el-input>
                     <InputError :message="form.errors.public_price" />
                 </div>
-                <div class="mt-3 col-span-full w-1/2">
+                <div class="mt-3">
                     <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" />
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
-
+                <div></div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Categoría*" class="ml-3 mb-1" />
-                        <button
-                            @click="showCategoryFormModal = true" type="button"
+                        <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" v-model="form.category_id" clearable
-                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                        no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="category in localCategories" :key="category" :label="category.name" :value="category.id" />
+                    <el-select class="w-1/2" v-model="form.category_id" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="category in localCategories" :key="category" :label="category.name"
+                            :value="category.id" />
                     </el-select>
                     <InputError :message="form.errors.category_id" />
                 </div>
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Marca*" class="ml-3 mb-1" />
-                        <button
-                            @click="showBrandFormModal = true" type="button"
+                        <InputLabel value="Proveedor *" class="ml-3 mb-1" />
+                        <button @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" v-model="form.brand_id" clearable
-                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                        no-match-text="No se encontraron coincidencias">
+                    <el-select class="w-1/2" v-model="form.brand_id" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
                     </el-select>
                     <InputError :message="form.errors.brand_id" />
@@ -102,7 +104,8 @@
 
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
-                    <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
+                    <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100"
+                        clearable>
                         <template #prefix>
                             <i class="fa-solid fa-barcode"></i>
                         </template>
@@ -125,17 +128,19 @@
         <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
             <template #title> Agregar categoría </template>
             <template #content>
-            <form @submit.prevent="storeCategory" ref="categoryForm">
-                <div>
-                <label class="text-sm ml-3">Nombre de la categoría *</label>
-                <el-input v-model="categoryForm.name" placeholder="Escribe el nombre de la categoría" :maxlength="100" required clearable />
-                <InputError :message="categoryForm.errors.name" />
-                </div>
-            </form>
+                <form @submit.prevent="storeCategory" ref="categoryForm">
+                    <div>
+                        <label class="text-sm ml-3">Nombre de la categoría *</label>
+                        <el-input v-model="categoryForm.name" placeholder="Escribe el nombre de la categoría"
+                            :maxlength="100" required clearable />
+                        <InputError :message="categoryForm.errors.name" />
+                    </div>
+                </form>
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="showCategoryFormModal = false" :disabled="categoryForm.processing">Cancelar</CancelButton>
+                    <CancelButton @click="showCategoryFormModal = false" :disabled="categoryForm.processing">Cancelar
+                    </CancelButton>
                     <PrimaryButton @click="storeCategory()" :disabled="categoryForm.processing">Crear</PrimaryButton>
                 </div>
             </template>
@@ -143,19 +148,21 @@
 
         <!-- brand form -->
         <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
-            <template #title> Agregar marca </template>
+            <template #title> Agregar proveedor </template>
             <template #content>
-            <form @submit.prevent="storeBrand">
-                <div>
-                <label class="text-sm ml-3">Nombre de la marca*</label>
-                <el-input v-model="brandForm.name" placeholder="Escribe el nombre de la marca" :maxlength="100" required clearable />
-                <InputError :message="brandForm.errors.name" />
-                </div>
-            </form>
+                <form @submit.prevent="storeBrand">
+                    <div>
+                        <label class="text-sm ml-3">Nombre del proveedor *</label>
+                        <el-input v-model="brandForm.name" placeholder="Escribe el nombre del proveedor"
+                            :maxlength="100" required clearable />
+                        <InputError :message="brandForm.errors.name" />
+                    </div>
+                </form>
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="showBrandFormModal = false" :disabled="brandForm.processing">Cancelar</CancelButton>
+                    <CancelButton @click="showBrandFormModal = false" :disabled="brandForm.processing">Cancelar
+                    </CancelButton>
                     <PrimaryButton @click="storeBrand()" :disabled="brandForm.processing">Crear</PrimaryButton>
                 </div>
             </template>
@@ -204,7 +211,7 @@ export default {
             localCategories: this.categories,
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
-            showBrandFormModal: false, //muestra formulario para agregar marca
+            showBrandFormModal: false, //muestra formulario para agregar proveedor
         };
     },
     components: {
@@ -262,7 +269,7 @@ export default {
                 if (response.status === 200) {
                     this.$notify({
                         title: "Éxito",
-                        message: "Se ha creado una nueva marca",
+                        message: "Se ha creado una nueva proveedor",
                         type: "success",
                     });
                     this.localBrands.push(response.data.item);

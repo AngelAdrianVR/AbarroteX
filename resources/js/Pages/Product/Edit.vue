@@ -7,15 +7,15 @@
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Editar producto</h1>
                 <div class="mt-3 col-span-2">
-                    <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre del producto*" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
                     <InputError :message="form.errors.name" />
                 </div>
                 <div class="mt-3">
-                    <div class="flex items-center ml-3 mb-1">
-                        <InputLabel value="Precio de compra" class="text-sm" />
+                    <div class="flex items-center">
+                        <InputLabel value="Precio de compra" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
-                            <i class="fa-regular fa-circle-question ml-2 text-primary text-xs"></i>
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
                     </div>
                     <el-input v-model="form.cost" placeholder="ingresa el precio"
@@ -27,7 +27,7 @@
                     <InputError :message="form.errors.cost" />
                 </div>
                 <div class="mt-3">
-                    <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Precio de venta al público*" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
                         <template #prefix>
@@ -36,16 +36,16 @@
                     </el-input>
                     <InputError :message="form.errors.public_price" />
                 </div>
-                <div class="mt-3 col-span-full w-1/2">
-                    <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
+                <div class="mt-3">
+                    <InputLabel value="Existencia actual" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
-
+                <div></div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría*" class="ml-3 mb-1" />
+                        <InputLabel value="Categoría*" />
                         <button
                             @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -62,7 +62,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Marca*" class="ml-3 mb-1" />
+                        <InputLabel value="Proveedor *" />
                         <button
                             @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -80,7 +80,7 @@
                 <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
 
                 <div class="mt-3">
-                    <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Cantidad mínima" />
                     <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                         :parser="(value) => value.replace(/\D/g, '')" />
@@ -88,7 +88,7 @@
                 </div>
 
                 <div class="mt-3">
-                    <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Cantidad máxima" />
                     <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                         :parser="(value) => value.replace(/\D/g, '')" />
@@ -98,14 +98,14 @@
                 <h2 class="font-bold col-span-full text-sm my-5">Cantidades de stock permitidas</h2>
 
                 <div>
-                    <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
+                    <InputLabel value="Agregar imagen" />
                     <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
                         @cleared="form.imageCover = null; form.imageCoverCleared = true"
                         :imageUrl="product.data.imageCover[0]?.original_url" />
                 </div>
 
                 <div class="mt-3 col-span-2">
-                    <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
+                    <InputLabel value="Código del producto (en caso de tener)" />
                     <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
                         <template #prefix>
                             <i class="fa-solid fa-barcode"></i>
@@ -142,12 +142,12 @@
 
         <!-- brand form -->
         <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
-            <template #title> Agregar marca </template>
+            <template #title> Agregar proveedor </template>
             <template #content>
             <form @submit.prevent="storeBrand">
                 <div>
-                <label class="text-sm ml-3">Nombre de la marca*</label>
-                <el-input v-model="brandForm.name" placeholder="Escribe el nombre de la marca" :maxlength="100" required clearable />
+                <label class="text-sm ml-3">Nombre del proveedor*</label>
+                <el-input v-model="brandForm.name" placeholder="Escribe el nombre del proveedor" :maxlength="100" required clearable />
                 <InputError :message="brandForm.errors.name" />
                 </div>
             </form>
@@ -204,7 +204,7 @@ export default {
             localCategories: this.categories,
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
-            showBrandFormModal: false, //muestra formulario para agregar marca
+            showBrandFormModal: false, //muestra formulario para agregar proveedor
         };
     },
     components: {
@@ -275,7 +275,7 @@ export default {
                 if (response.status === 200) {
                     this.$notify({
                         title: "Éxito",
-                        message: "Se ha creado una nueva marca",
+                        message: "Se ha creado una nueva proveedor",
                         type: "success",
                     });
                     this.localBrands.push(response.data.item);

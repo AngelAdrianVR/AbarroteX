@@ -2,7 +2,7 @@
     <AppLayout title="Caja">
         <section class="mt-5 mx-2 lg:mx-8">
             <el-tabs class="mx-3" v-model="activeTab">
-                <el-tab-pane label="Caja principal" name="1">
+                <el-tab-pane label="Caja" name="1">
                     <CashRegister />
                 </el-tab-pane>
                 <el-tab-pane label="Historial" name="2">

@@ -65,7 +65,7 @@
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
                                 <p class="text-gray37">Categoría: <span class="font-bold">{{ global_product.category?.name }}</span></p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Marca: <span class="font-bold">{{ global_product.brand?.name }}</span></p>
+                                <p class="text-gray37">Proveedor: <span class="font-bold">{{ global_product.brand?.name }}</span></p>
                             </div>
                         </div>
                             <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ formatDate(global_product.created_at)}}</strong></p>
