@@ -172,7 +172,7 @@ return [
         'code' => 'código de producto',
         'quantity' => 'cantidad',
         'category_id' => 'categoría',
-        'brand_id' => 'marca',
+        'brand_id' => 'proveedor',
         'store_name' => 'nombre de tu tienda',
         'terms' => 'terminos y condiciones',
         'type' => 'tipo',

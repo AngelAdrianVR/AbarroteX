@@ -316,7 +316,7 @@
                 'text-blue-500 bg-blue-100': (cutForm.difference) < 0,
                 'text-red-500 bg-red-100': (cutForm.difference) > 0
               }" class="rounded-full text-xs inline py-[2px] px-2">
-                <!-- Icono de marca de verificación si la diferencia es 0 -->
+                <!-- Icono de proveedor de verificación si la diferencia es 0 -->
                 <i v-if="(cutForm.difference) === 0" class="fa-solid fa-check mr-1"></i>
                 <!-- Icono de sobrante en caja si la diferencia es negativa -->
                 <i v-else-if="(cutForm.difference) < 0" class="fa-solid fa-plus mr-1"></i>

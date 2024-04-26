@@ -75,7 +75,7 @@
               </el-select>
             </div>
             <div class="my-3">
-              <InputLabel value="Marca" class="ml-3 mb-1" />
+              <InputLabel value="Proveedor" class="ml-3 mb-1" />
               <el-select v-model="leftFilterBrand" clearable filterable placeholder="Seleccione"
                 no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                 <el-option v-for="item in brands" :key="item.id" :label="item.name" :value="item.id" />
@@ -100,7 +100,7 @@
               <div class="space-y-1 w-32">
                 <p>Nombre:</p>
                 <p>Categoría:</p>
-                <p>Marca:</p>
+                <p>Proveedor:</p>
                 <p>Precio sugerido:</p>
                 <p>Código:</p>
               </div>
@@ -151,7 +151,7 @@ export default {
       showLeftFilter: false, //muestra filtro izquierdo
       showRightFilter: false, //muestra filtro derecho
       leftFilterCategory: null, //información para fltrar por categoría izquierdo
-      leftFilterBrand: null, //información para fltrar por marca izquierdo
+      leftFilterBrand: null, //información para fltrar por Proveedor izquierdo
     };
   },
   components: {

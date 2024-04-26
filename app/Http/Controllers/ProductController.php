@@ -20,23 +20,12 @@ class ProductController extends Controller
 {
 
     public function index()
-    {
-        // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
-            ->where('store_id', auth()->user()->store_id)
-            ->latest()
-            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
-
-        // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
-
-        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
-        $products = new Collection(array_merge($local_products->toArray(), $transfered_products->toArray()));
-
-        $total_products = $products->count();
-
-        //tomar solo 1 productos
-        $products = $products->take(1);
+    {   
+        $all_products = $this->getAllProducts();
+        $total_products = $all_products->count();
+        
+        //tomar solo 30 productos
+        $products = $all_products->take(30);
 
         return inertia('Product/Index', compact('products', 'total_products'));
     }
@@ -289,12 +278,13 @@ class ProductController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 1;
+        $offset = $currentPage * 30;
 
         // obtener todo los productos
-        $products = $this->getAllProducts();
+        $all_products = $this->getAllProducts();
+        $products = $all_products->splice($offset)->take(30);
 
-        return response()->json(['items' => $products->splice($offset - 1)->take(1)]);
+        return response()->json(['items' => $products]);
     }
 
     public function selectGlobalProducts()
@@ -345,21 +335,17 @@ class ProductController extends Controller
     public function getAllProducts()
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
-        // $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
-        //     ->where('store_id', auth()->user()->store_id)
-        //     ->latest()
-        //     ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
-
-        // // productos transferidos desde el catálogo base
-        // $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
-
-        // // Creamos un nuevo arreglo combinando los dos conjuntos de datos
-        // $products = new Collection(array_merge($local_products->toArray(), $transfered_products->toArray()));
-
-        $products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])
+        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
             ->where('store_id', auth()->user()->store_id)
             ->latest()
-            ->get();
+            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
+
+        // productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
+
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
+        $products = collect($merged);
 
         return $products;
     }

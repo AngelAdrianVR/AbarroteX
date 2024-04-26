@@ -9,7 +9,7 @@
                 <td>Diferencia</td>
                 <td></td>
             </tr>
-            <tr @click="$inertia.get(route('cash-cuts.show', item.id))" class="*:py-2 *:px-4 cursor-pointer hover:bg-primarylight" v-for="item in items" :key="item">
+            <tr @click="$inertia.get(route('cash-cuts.show', item.id))" class="*:py-2 *:px-4 text-xs cursor-pointer hover:bg-primarylight" v-for="item in items" :key="item">
                 <td class="rounded-l-full">{{ formatDate(item.created_at) }}</td>
                 <td>${{ item.started_cash }}</td>
                 <td>${{ item.expected_cash }}</td>
