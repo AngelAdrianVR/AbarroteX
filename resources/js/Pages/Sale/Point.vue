@@ -250,7 +250,7 @@
               class="ml-3 mb-1 text-sm" />
             <el-input v-model="form.registerAmount" type="text" placeholder="ingresa el monto"
               :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-              :parser="(value) => value.replace(/\D/g, '')">
+              :parser="(value) => value.replace(/[^\d.]/g, '')">
               <template #prefix>
                 <i class="fa-solid fa-dollar-sign"></i>
               </template>
@@ -296,8 +296,9 @@
               </div>
               <p v-else>${{ (cash_register.started_cash + cutForm.totalSaleForCashCut +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-              <el-input @input="difference()" v-model="cutForm.counted_cash" type="number" step="0.01"
-                class="!w-24 !h-6" placeholder="0.00">
+              <el-input @input="difference()" v-model="cutForm.counted_cash" type="text" placeholder="0.00"
+                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                :parser="(value) => value.replace(/[^\d.]/g, '')" class="!w-24 !h-6">
                 <template #prefix>
                   <i class="fa-solid fa-dollar-sign"></i>
                 </template>
@@ -348,7 +349,7 @@
               clearable />
           </div>
 
-          <div class="flex justify-end space-x-3 pt-2 pb-1 py-2 col-span-full">
+          <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
             <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing">Hacer corte</PrimaryButton>
           </div>
