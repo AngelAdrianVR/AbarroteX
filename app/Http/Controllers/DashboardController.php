@@ -49,13 +49,11 @@ class DashboardController extends Controller
         $endOfWeek = $date->copy()->endOfWeek(Carbon::SATURDAY)->toDateString();
 
         // Ventas y egresos de la semana seleccionada
-        $sales = Sale::with('product', 'globalProductStore.globalProduct', 'globalProductStore.globalProduct')
-            ->where('store_id', auth()->user()->store_id)
+        $sales = Sale::where('store_id', auth()->user()->store_id)
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->get();
 
-        $last_period_sales = Sale::with('product', 'globalProductStore.globalProduct')
-            ->where('store_id', auth()->user()->store_id)
+        $last_period_sales = Sale::where('store_id', auth()->user()->store_id)
             ->whereBetween('created_at', [
                 Carbon::parse($prev_date)->startOfWeek(Carbon::SUNDAY)->toDateString(),
                 Carbon::parse($prev_date)->endOfWeek(Carbon::SATURDAY)->toDateString()
@@ -71,16 +69,17 @@ class DashboardController extends Controller
                 Carbon::parse($prev_date)->endOfWeek(Carbon::SATURDAY)->toDateString()
             ])->get();
 
-        $top_products = Sale::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
-            ->where('store_id', auth()->user()->store_id)
-            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-            ->groupBy('product_id')
-            ->orderByDesc('total_quantity')
-            ->take(5)
-            ->get();
+        // $top_products = Sale::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
+        //     ->where('store_id', auth()->user()->store_id)
+        //     ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+        //     ->groupBy('product_id')
+        //     ->orderByDesc('total_quantity')
+        //     ->take(5)
+        //     ->get();
 
         // Cargar los datos del producto asociado
-        $top_products->load('product');
+        // $top_products->load('product');
+        $top_products = [];
 
         return response()->json(compact('sales', 'last_period_sales', 'top_products', 'expenses', 'last_period_expenses'));
     }
@@ -91,13 +90,11 @@ class DashboardController extends Controller
         $current_month = Carbon::parse($date);
         $prev_month = Carbon::parse($date)->subMonth();
 
-        $sales = Sale::with('product', 'globalProductStore.globalProduct')
-            ->whereYear('created_at', $current_month->year)
+        $sales = Sale::whereYear('created_at', $current_month->year)
             ->whereMonth('created_at', $current_month->month)
             ->get();
 
-        $last_period_sales = Sale::with('product', 'globalProductStore.globalProduct')
-            ->whereYear('created_at', $prev_month->year)
+        $last_period_sales = Sale::whereYear('created_at', $prev_month->year)
             ->whereMonth('created_at', $prev_month->month)
             ->get();
 
@@ -109,16 +106,17 @@ class DashboardController extends Controller
             ->whereMonth('created_at', $prev_month->month)
             ->get();
 
-        $top_products = Sale::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
-            ->whereYear('created_at', $current_month->year)
-            ->whereMonth('created_at', $current_month->month)
-            ->groupBy('product_id')
-            ->orderByDesc('total_quantity')
-            ->take(5)
-            ->get();
+        // $top_products = Sale::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
+        //     ->whereYear('created_at', $current_month->year)
+        //     ->whereMonth('created_at', $current_month->month)
+        //     ->groupBy('product_id')
+        //     ->orderByDesc('total_quantity')
+        //     ->take(5)
+        //     ->get();
 
         // Puedes cargar los datos del producto asociado si lo necesitas
-        $top_products->load('product');
+        // $top_products->load('product');
+        $top_products = [];
 
         return response()->json(compact('sales', 'last_period_sales', 'top_products', 'expenses', 'last_period_expenses'));
     }
