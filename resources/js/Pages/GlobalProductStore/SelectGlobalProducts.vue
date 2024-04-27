@@ -18,21 +18,19 @@
         <!-- Tabs -->
         <div class="flex items-center space-x-2"></div>
       </div>
-
-      <p>
-        Selecciona todos los productos disponibles en tu tienda, agrégalos a tu inventario
-        y personalízalos según tus necesidades. Puedes editarlos en cualquier momento,
-        añadir información como el precio de venta y las existencias, ¡y estarán listos
-        para vender!
+      <p class="text-sm">
+        Selecciona los productos disponibles en el catálogo base que vendas en tu tienda,
+        transfierelos a tu tienda y personalízalos según tus necesidades. Puedes editarlos
+        en cualquier momento, añadir información como el precio de venta y las existencias,
+        ¡y estarán listos para vender!
       </p>
 
       <!-- transfer -->
       <section class="mt-10 grid xl:grid-cols-2 gap-3">
-
         <div class="mx-auto w-full relative">
           <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
-            :titles="['Catálogo base', 'Mis productos']" :data="globalProducts"
-            @left-check-change="handleLeftCheckChange" @right-check-change="handleLeftCheckChange">
+            :titles="['Catálogo base', 'Mi tienda']" :data="globalProducts" @left-check-change="handleLeftCheckChange"
+            @right-check-change="handleLeftCheckChange">
             <template #left-footer>
               <!-- boton filtro izquierdo -->
               <button @click.stop="showLeftFilter = !showLeftFilter"
@@ -52,16 +50,20 @@
             </template>
             <template #right-footer>
               <!-- boton filtro derecho -->
-              <!-- <button @click.stop="showRightFilter = !showRightFilter" class="rounded-full border border-[#c4c4c4] size-7 flex items-center justify-center mx-auto my-2">
-                  <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <mask id="mask0_8826_331" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14" height="14">
-                    <rect width="14" height="14" fill="#D9D9D9"/>
-                    </mask>
-                    <g mask="url(#mask0_8826_331)">
-                      <path d="M5.83333 10.5V9.33333H8.16667V10.5H5.83333ZM3.5 7.58333V6.41667H10.5V7.58333H3.5ZM1.75 4.66667V3.5H12.25V4.66667H1.75Z" fill="#999999"/>
-                    </g>
-                  </svg>
-                </button> -->
+              <button @click.stop="showRightFilter = !showRightFilter"
+                class="rounded-full border border-[#c4c4c4] size-7 flex items-center justify-center mx-auto my-2">
+                <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <mask id="mask0_8826_331" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14"
+                    height="14">
+                    <rect width="14" height="14" fill="#D9D9D9" />
+                  </mask>
+                  <g mask="url(#mask0_8826_331)">
+                    <path
+                      d="M5.83333 10.5V9.33333H8.16667V10.5H5.83333ZM3.5 7.58333V6.41667H10.5V7.58333H3.5ZM1.75 4.66667V3.5H12.25V4.66667H1.75Z"
+                      fill="#999999" />
+                  </g>
+                </svg>
+              </button>
             </template>
           </el-transfer>
           <!-- ventana de filtro izquierdo -->
@@ -86,8 +88,41 @@
               <CancelButton @click="showLeftFilter = false" class="!py-1">Cancelar</CancelButton>
             </div>
           </div>
+          <!-- ventana de filtro derecho -->
+          <div v-if="showRightFilter"
+            class="absolute bottom-10 left-36 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-50 w-80">
+            <div>
+              <InputLabel value="Categoría" class="ml-3 mb-1" />
+              <el-select v-model="rightFilterCategory" clearable filterable placeholder="Seleccione"
+                no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                <el-option v-for="item in categories" :key="item" :label="item.name" :value="item.id" />
+              </el-select>
+            </div>
+            <div class="my-3">
+              <InputLabel value="Proveedor" class="ml-3 mb-1" />
+              <el-select v-model="rightFilterBrand" clearable filterable placeholder="Seleccione"
+                no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                <el-option v-for="item in brands" :key="item.id" :label="item.name" :value="item.id" />
+              </el-select>
+            </div>
+            <div class="flex space-x-2">
+              <PrimaryButton @click="filterGlobalProducts" class="!py-1">Aplicar</PrimaryButton>
+              <CancelButton @click="showRightFilter = false" class="!py-1">Cancelar</CancelButton>
+            </div>
+          </div>
+          <!-- Boton para transferir los poductos -->
+          <transition enter-active-class="transition ease-in duration-300" enter-from-class="opacity-0"
+            enter-to-class="opacity-100">
+            <div v-if="productListHasChange" class="flex space-x-2 items-center col-span-full mt-3">
+              <el-tooltip content="Revertir cambios" placement="left">
+                <button @click="revertChanges"
+                  class="rounded-full size-9 border border-[#c4c4c4] flex items-center justify-center"><i
+                    class="fa-solid fa-rotate-left"></i></button>
+              </el-tooltip>
+              <PrimaryButton :disabled="processing" @click="showConfirmModal = true">Guardar cambios</PrimaryButton>
+            </div>
+          </transition>
         </div>
-
         <!-- vista previa de producto -->
         <Loading v-if="loadingProduct" class="mt-28" />
         <div v-else-if="productInfo" class="rounded-lg border border-[#D9D9D9] md:w-[500px] h-[400px] mx-auto">
@@ -114,20 +149,27 @@
             </div>
           </div>
         </div>
-        <!-- Boton para transferir los poductos -->
-        <transition enter-active-class="transition ease-in duration-300" enter-from-class="opacity-0"
-          enter-to-class="opacity-100">
-          <div v-if="products.length" class="flex space-x-2 items-center justify-center col-span-full mt-7">
-            <el-tooltip content="Revertir cambios" placement="left">
-              <button @click="revertChanges"
-                class="rounded-full size-9 border border-[#c4c4c4] flex items-center justify-center"><i
-                  class="fa-solid fa-rotate-left"></i></button>
-            </el-tooltip>
-            <PrimaryButton :disabled="processing" @click="transferProducts">Transferir productos</PrimaryButton>
-          </div>
-        </transition>
       </section>
     </div>
+
+    <ConfirmationModal :show="showConfirmModal" @close="showConfirmModal = false">
+      <template #title>
+        Transferir productos
+      </template>
+      <template #content>
+        <p>
+          Los productos de catálogo base movidos a tu tienda ya estarán disponibles para crear ventas. <br>
+          Los productos de tu tienda movidos a catálogo base ya no se mostrarán.
+          ¿Deseas guardar los cambios?
+        </p>
+      </template>
+      <template #footer>
+        <div class="flex items-center space-x-1">
+          <CancelButton @click="showConfirmModal = false" :disabled="processing">Cancelar</CancelButton>
+          <PrimaryButton @click="transferProducts" :disabled="processing">Si, continuar</PrimaryButton>
+        </div>
+      </template>
+    </ConfirmationModal>
   </AppLayout>
 </template>
 
@@ -139,11 +181,13 @@ import InputLabel from "@/Components/InputLabel.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 export default {
   data() {
     return {
       products: [],
+      initialProducts: [],
       globalProducts: [],
       productInfo: null,
       processing: false,
@@ -152,6 +196,9 @@ export default {
       showRightFilter: false, //muestra filtro derecho
       leftFilterCategory: null, //información para fltrar por categoría izquierdo
       leftFilterBrand: null, //información para fltrar por Proveedor izquierdo
+      rightFilterCategory: null, //información para fltrar por categoría derecho
+      rightFilterBrand: null, //información para fltrar por Proveedor derecho
+      showConfirmModal: false,
     };
   },
   components: {
@@ -160,7 +207,8 @@ export default {
     CancelButton,
     InputLabel,
     Loading,
-    Back
+    Back,
+    ConfirmationModal,
   },
   props: {
     global_products: Array,
@@ -168,7 +216,36 @@ export default {
     categories: Array,
     brands: Array,
   },
+  computed: {
+    productListHasChange() {
+      const hasChanged = !this.arraysAreEqual(this.initialProducts, this.products);
+
+      // indicar al navegador mediante el local storage que hay proceso pendiente
+      const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
+      if (!pendentProcess && hasChanged) {
+        // guardar el valor en el localStorage
+        localStorage.setItem('pendentProcess', true);
+      }
+
+      return hasChanged;
+    },
+  },
   methods: {
+    arraysAreEqual(arr1, arr2) {
+      // Si la longitud de los arrays es diferente, retornar false
+      if (arr1.length !== arr2.length) {
+        return false;
+      }
+
+      // Ordenar los arrays de menor a mayor
+      const sortedArr1 = arr1.slice().sort();
+      const sortedArr2 = arr2.slice().sort();
+
+      // Verificar si cada elemento es igual en valor
+      return sortedArr1.every((element, index) => {
+        return element === sortedArr2[index];
+      });
+    },
     //recorre el arreglo de productos globales revisando que productos estan guardados en la tienda
     //y guarda en el arreglo products el (index + 1) del producto en el primer arreglo para mostrarlo en 
     //la parte derecha del transfer.
@@ -182,6 +259,8 @@ export default {
           this.products.push(index + 1);
         }
       });
+      // inicializar numero de productos en la tienda para saber si se quitan o agregan
+      this.initialProducts = this.products;
     },
     globalProductsFormater() {
       this.globalProducts = null;
@@ -199,7 +278,9 @@ export default {
       }
     },
     revertChanges() {
-      // location.reload();
+      // resetear variable de local storage a false
+      localStorage.setItem('pendentProcess', false);
+      
       this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
       this.globalProductsFormater(); //formatea los productos globales para que el transfer los renderice
     },
@@ -239,32 +320,44 @@ export default {
         });
       } finally {
         this.loadingProduct = false;
+
       }
     },
-    transferProducts() {
-      // Enviar la solicitud POST con los datos en el cuerpo
-      this.processing = true;
-      axios.post(route('products.transfer'), { products: this.products })
-        .then(response => {
+    async transferProducts() {
+      try {
+        // Enviar la solicitud POST con los datos en el cuerpo
+        this.processing = true;
+        const response = await axios.post(route('global-product-store.transfer'), { products: this.products });
+
+        if (response.status === 200) {
           this.$notify({
             title: "Éxito",
             message: "¡Se han transferido los productos a tu tienda!",
             type: "success",
           });
-          this.$inertia.get(route('products.index'));
-        })
-        .catch(error => {
-          // Manejar errores si es necesario
-          console.error(error);
-          this.$notify({
-            title: "No se pudo completar la petición",
-            message: "Algo salió mal, vuelve a intentarlo más tarde",
-            type: "success",
-          });
+
+          this.showConfirmModal = false;
+          this.initialProducts = this.products;
+
+          // resetear variable de local storage a false
+          localStorage.setItem('pendentProcess', false);
+        }
+      } catch (error) {
+        console.log(error);
+        this.$notify({
+          title: "No se pudo completar la petición",
+          message: "Algo salió mal, vuelve a intentarlo más tarde",
+          type: "error",
         });
-    }
+      } finally {
+        this.processing = false;
+      }
+    },
   },
   mounted() {
+    // resetear variable de local storage a false
+    localStorage.setItem('pendentProcess', false);
+
     this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
     this.globalProductsFormater(); //formatea los productos globales para que el transfer los renderice
   }

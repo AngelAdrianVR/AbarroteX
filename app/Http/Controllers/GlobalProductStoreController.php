@@ -86,10 +86,7 @@ class GlobalProductStoreController extends Controller
 
     public function destroy(GlobalProductStore $global_product_store)
     {
-        // indicar a la venta que el producto fue eliminado
-        $related_sales = Sale::where('product_id', $global_product_store->id)->get();
-        $related_sales->each(fn ($sale) => $sale->update(['product_id' => null]));
-
+        // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
         // eliminar producto
         $global_product_store->delete();
     }
@@ -149,5 +146,53 @@ class GlobalProductStoreController extends Controller
         $groupedHistoryArray = $groupedHistory->toArray();
 
         return response()->json(['items' => $groupedHistoryArray]);
+    }
+
+    public function selectGlobalProducts()
+    {
+        $global_products = GlobalProduct::all(['id', 'name']);
+        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
+        $categories = Category::all(['id', 'name']);
+        $brands = Brand::all(['id', 'name']);
+
+        return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
+    }
+
+    public function transfer(Request $request)
+    {
+        // Mis productos ya registrados
+        $my_products = GlobalProductStore::where('store_id', auth()->user()->store_id)
+            ->pluck('global_product_id'); // Obtenemos solo los ids de los productos registrados
+
+        // Obtener el arreglo de productos del cuerpo de la solicitud
+        $product_ids = $request->input('products');
+
+        // eliminar productos de la tienda que se regresaron a catalogo base
+        // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
+        GlobalProductStore::whereNotIn('global_product_id', $product_ids)
+            ->get()
+            ->each(fn ($prd) => $prd->delete());
+
+        // Filtrar los productos del catálogo para excluir aquellos que ya existen en mi tienda
+        $new_product_ids = collect($product_ids)->reject(function ($productId) use ($my_products) {
+            return $my_products->contains(function ($myProductId) use ($productId) {
+                return $myProductId == $productId;
+            });
+        });
+
+        // agregar nuevos productos
+        foreach ($new_product_ids as $productId) {
+            // Se obtiene el producto global con el id recibido
+            $product = GlobalProduct::with(['category', 'brand'])->find($productId);
+
+            GlobalProductStore::create([
+                'public_price' => $product->public_price,
+                'cost' => 0,
+                'current_stock' => 1,
+                'min_stock' => 1,
+                'global_product_id' => $productId,
+                'store_id' => auth()->user()->store_id,
+            ]);
+        }
     }
 }

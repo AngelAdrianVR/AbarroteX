@@ -5,7 +5,7 @@
             <div class="flex items-center justify-center text-sm">
                 <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -mr-5 cursor-default">Mis
                     productos</button>
-                <button @click="$inertia.get(route('products.select'))"
+                <button @click="$inertia.get(route('global-product-store.select'))"
                     class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Catálogo base</button>
             </div>
             <!-- header botones -->
@@ -15,7 +15,8 @@
                     <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton> -->
-                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">Nuevo producto
+                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
+                        Nuevo producto
                     </PrimaryButton>
                 </div>
             </div>

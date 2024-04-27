@@ -28,36 +28,47 @@ class Product extends Model implements HasMedia
     ];
 
     //relationships
-    public function history() :HasMany
+    public function history(): HasMany
     {
         return $this->hasMany(ProductHistory::class);
     }
 
-    public function sales() :HasMany
+    public function sales(): HasMany
     {
         return $this->hasMany(Sale::class);
     }
 
-    public function store() :BelongsTo
+    public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
-    public function category() :BelongsTo
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function brand() :BelongsTo
+    public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
-    /**
-     * Obtener ventas de este producto.
-     */
-    public function comments(): MorphMany
+    // events
+    protected static function boot()
     {
-        return $this->morphMany(Sale::class, 'saleable');
+        parent::boot();
+
+        // Definir el evento de eliminación
+        static::deleting(function ($product) {
+            // Obtener todas las ventas relacionadas
+            $relatedSales = Sale::where('product_id', $product->id)
+            ->where('is_global_product', false)
+            ->get();
+
+            // Actualizar las ventas relacionadas
+            $relatedSales->each(function ($sale) {
+                $sale->update(['product_id' => null]);
+            });
+        });
     }
 }
