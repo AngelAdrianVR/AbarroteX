@@ -49,7 +49,7 @@
             </tr>
         </table>
     </section>
-    <p class="text-sm text-center text-gray-400 mt-5" v-else>No hay cortes registrados</p>
+    <el-empty v-else description="No hay cortes registrados" />
 
     <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
         <template #title>

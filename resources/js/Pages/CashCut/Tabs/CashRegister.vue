@@ -2,9 +2,10 @@
     <Loading v-if="loading" />
     <div v-else class="min-h-32">
         <section class="flex justify-end space-x-3 mt-2">
-            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'" class="!rounded-md"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo
+            <!-- <ThirthButton class="!rounded-md"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo
             </ThirthButton>
-            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'" class="!rounded-md"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</ThirthButton>
+            <ThirthButton class="!rounded-md"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</ThirthButton>
+            <PrimaryButton>Hacer corte de caja</PrimaryButton> -->
         </section>
         <section v-if="isMaxCashOn" class="mt-5">
             <form @submit.prevent="update">
