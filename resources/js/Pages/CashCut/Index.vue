@@ -5,7 +5,7 @@
                 <el-tab-pane label="Caja" name="1">
                     <CashRegister />
                 </el-tab-pane>
-                <el-tab-pane label="Historial" name="2">
+                <el-tab-pane label="Historial de cortes" name="2">
                     <CashCutsTable :items="cash_cuts" />
                 </el-tab-pane>
             </el-tabs>
