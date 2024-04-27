@@ -16,8 +16,11 @@ return new class extends Migration
             $table->string('type');
             $table->text('description');
             $table->boolean('first_report')->default(true);
+            $table->string('status')->default('Pendiente'); // 1. Pendiente, 2. En proceso, 3. Resuelto.
+            $table->string('notes')->nullable();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('seller_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('store_id')->nullable()->constrained()->cascadeOnDelete();
+            // $table->foreignId('seller_id')->nullable()->constrained('users')->cascadeOnDelete(); //ya tiene la relacion la tienda
             $table->timestamps();
         });
     }

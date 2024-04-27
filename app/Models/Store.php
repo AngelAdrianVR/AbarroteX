@@ -55,6 +55,11 @@ class Store extends Model
         return $this->hasMany(Sale::class);
     }
 
+    public function supportReports(): HasMany
+    {
+        return $this->hasMany(SupportReport::class);
+    }
+
     public function settings(): BelongsToMany
     {
         return $this->belongsToMany(Setting::class)
