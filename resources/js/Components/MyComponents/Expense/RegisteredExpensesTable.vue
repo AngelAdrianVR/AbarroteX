@@ -72,7 +72,7 @@
             <template #footer>
                 <div class="flex items-center space-x-1">
                     <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
-                    <DangerButton @click="deleteItem">Eliminar</DangerButton>
+                    <PrimaryButton @click="deleteItem">Eliminar</PrimaryButton>
                 </div>
             </template>
         </ConfirmationModal>
@@ -81,7 +81,7 @@
 
 <script>
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import DangerButton from "@/Components/DangerButton.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
 
@@ -94,7 +94,7 @@ export default {
     },
     components: {
         ConfirmationModal,
-        DangerButton,
+        PrimaryButton,
         CancelButton,
     },
     props: {

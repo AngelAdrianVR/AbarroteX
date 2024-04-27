@@ -9,7 +9,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('sales.show', sale.sales[0]?.created_at))"
+                <tr @click="$inertia.visit(route('sales.show', formatBaseDate(index)))"
                     v-for="(sale, index) in sales" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ formatDate(index) }}</td>
@@ -23,7 +23,7 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item :command="'see|' + sale.sales[0]?.created_at">
+                                    <el-dropdown-item :command="'see|' + formatBaseDate(index)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -152,6 +152,25 @@ export default {
 
             const [day, month, year] = dateString.split('-');
             return `${day} ${months[month]}, ${year}`;
+        },
+        formatBaseDate(dateString) {
+            const months = {
+                'January': '01',
+                'February': '02',
+                'March': '03',
+                'April': '04',
+                'May': '05',
+                'June': '06',
+                'July': '07',
+                'August': '08',
+                'September': '09',
+                'October': '10',
+                'November': '11',
+                'December': '12'
+            };
+
+            const [day, month, year] = dateString.split('-');
+            return `${year}-${months[month]}-${day}`;
         },
         print(saleId) {
             window.open(route('sales.print-ticket', saleId), '_blank');

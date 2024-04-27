@@ -69,7 +69,7 @@
         </template>
         <template #content>
             <p>
-                Tienes un proceso sin completar en esta vista. Si cambias de vista, se borrarán los los cambios o
+                Tienes un proceso sin completar en esta vista. Si cambias de vista, se borrarán los cambios o
                 procesos que no has finalizado. ¿Continuar de todas formas?
             </p>
         </template>

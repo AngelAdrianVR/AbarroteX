@@ -38,12 +38,4 @@ class GlobalProduct extends Model implements HasMedia
     {
         return $this->belongsToMany(Store::class, 'global_product_store');
     }
-
-    /**
-     * Obtener ventas de este producto de catalogo base.
-     */
-    public function comments(): MorphMany
-    {
-        return $this->morphMany(Sale::class, 'saleable');
-    }
 }
