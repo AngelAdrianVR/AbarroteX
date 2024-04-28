@@ -55,6 +55,11 @@ class Store extends Model
         return $this->hasMany(Sale::class);
     }
 
+    public function supportReports(): HasMany
+    {
+        return $this->hasMany(SupportReport::class);
+    }
+
     public function settings(): BelongsToMany
     {
         return $this->belongsToMany(Setting::class)
@@ -65,8 +70,9 @@ class Store extends Model
 
     public function globalProducts() :BelongsToMany
     {
-        return $this->belongsToMany(GlobalProduct::class, 'global_product_store')
+        return $this->belongsToMany(GlobalProduct::class, 'global_product_stores')
             ->withPivot([
+                'id',
                 'public_price',
                 'cost',
                 'min_stock',

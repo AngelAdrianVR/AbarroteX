@@ -13,7 +13,6 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 
 class ProductController extends Controller
@@ -21,22 +20,11 @@ class ProductController extends Controller
 
     public function index()
     {
-        // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
-            ->where('store_id', auth()->user()->store_id)
-            ->latest()
-            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
-
-        // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
-
-        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
-        $products = new Collection(array_merge($local_products->toArray(), $transfered_products->toArray()));
-
-        $total_products = $products->count();
+        $all_products = $this->getAllProducts();
+        $total_products = $all_products->count();
 
         //tomar solo 30 productos
-        $products = $products->take(30);
+        $products = $all_products->take(30);
 
         return inertia('Product/Index', compact('products', 'total_products'));
     }
@@ -176,10 +164,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // indicar a la venta que el producto fue eliminado
-        $related_sales = Sale::where('product_id', $product->id)->get();
-        $related_sales->each(fn ($sale) => $sale->update(['product_id' => null]));
-
+        // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
         // eliminar producto
         $product->delete();
     }
@@ -289,80 +274,30 @@ class ProductController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        //si es la primera consulta cuenta cuantos productos locales existen para tomarlo
-        //en cuenta para el offset de la siguiente consulta
-        if ($currentPage === '1') {
-            $local_products = Product::where('store_id', auth()->user()->store_id)
-                ->get(['id', 'name'])
-                ->count();
+        $offset = $currentPage * 30;
 
-            // si hay mas de 30 productos locales 
-            if ($local_products > 30) {
-                $offset = $currentPage * 30;
-                $products = Product::with(['category:id,name', 'brand:id,name', 'media'])
-                    ->where('store_id', auth()->user()->store_id)
-                    ->latest()
-                    ->skip($offset)
-                    ->get((['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']));
-            }
+        // obtener todo los productos
+        $all_products = $this->getAllProducts();
+        $products = $all_products->splice($offset)->take(30);
 
-            $offset = ($currentPage * 30) - $local_products;
-        } else {
+        return response()->json(['items' => $products]);
+    }
 
-            $offset = $currentPage * 30;
-        }
-        $products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])
+    public function getAllProducts()
+    {
+        // productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
             ->where('store_id', auth()->user()->store_id)
             ->latest()
-            ->skip($offset)
-            ->take(30)
-            ->get();
+            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
 
-        return response()->json(['items' =>  $products]);
-    }
+        // productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
 
-    public function selectGlobalProducts()
-    {
-        $global_products = GlobalProduct::all(['id', 'name']);
-        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
-        $categories = Category::all(['id', 'name']);
-        $brands = Brand::all(['id', 'name']);
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
+        $products = collect($merged);
 
-        return inertia('Product/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
-    }
-
-    public function transfer(Request $request)
-    {
-        // Mis productos ya registrados
-        $my_products = GlobalProductStore::where('store_id', auth()->user()->store_id)
-            ->pluck('global_product_id'); // Obtenemos solo los ids de los productos registrados
-
-        // Obtener el arreglo de productos del cuerpo de la solicitud
-        $product_ids = $request->input('products');
-
-        // Filtrar los productos del catálogo para excluir aquellos que ya existen en mi tienda
-        $new_product_ids = collect($product_ids)->reject(function ($productId) use ($my_products) {
-            return $my_products->contains(function ($myProductId) use ($productId) {
-                return $myProductId == $productId;
-            });
-        });
-
-        // Aquí puedes manipular el arreglo de productos como desees
-        // Por ejemplo, puedes iterar sobre el arreglo y hacer lo que necesites
-        foreach ($new_product_ids as $productId) {
-            // Se obtiene el producto global con el id recibido
-            $product = GlobalProduct::with(['category', 'brand'])->find($productId);
-
-            GlobalProductStore::create([
-                'public_price' => $product->public_price,
-                'cost' => 0,
-                'current_stock' => 1,
-                'min_stock' => 1,
-                'global_product_id' => $productId,
-                'store_id' => auth()->user()->store_id,
-            ]);
-        }
-
-        return to_route('products.index');
+        return $products;
     }
 }

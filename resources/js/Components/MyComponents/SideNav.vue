@@ -23,7 +23,7 @@
                 <!-- Con barra pequeña -->
                 <section v-if="small">
                     <div v-for="(menu, index) in menus" :key="index">
-                        <button v-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active"
+                        <button v-if="menu.show" @click="handleClickInMenu(index)" :active="menu.active"
                             :title="menu.label"
                             class="w-full text-center py-2 pr-3 pl-5 justify-between rounded-r-[10px] mt-2 transition ease-linear duration-150"
                             :class="menu.active ? 'bg-[#393939] text-primary border-l-2 border-primary' : 'hover:text-primary hover:bg-[#393939] text-[#9A9A9A]'">
@@ -39,7 +39,7 @@
                         <Accordion v-if="menu.options.length" :icon="menu.icon" :active="menu.active"
                             :title="menu.label" :id="index">
                             <div v-for="(option, index2) in menu.options" :key="index2">
-                                <button @click="goToRoute(option.route)" v-if="option.show" :active="option.active"
+                                <button @click="handleClickInMenu(index)" v-if="option.show" :active="option.active"
                                     :title="option.label"
                                     class="w-full text-start pl-6 pr-2 mt-2 flex justify-between text-xs rounded-md py-1 transition ease-linear duration-150"
                                     :class="option.active ? 'bg-[#393939] text-primary' : 'hover:text-primary hover:bg-gradient-to-r from-gray-800 to-black1 text-gray-700'">
@@ -48,7 +48,7 @@
                             </div>
                         </Accordion>
                         <!-- Sin submenues -->
-                        <button v-else-if="menu.show" @click="goToRoute(menu.route)" :active="menu.active"
+                        <button v-else-if="menu.show" @click="handleClickInMenu(index)" :active="menu.active"
                             :title="menu.label"
                             class="w-full text-start pl-5 pr-3 py-2 mt-2 border-l-2 text-xs rounded-r-[10px] transition ease-linear duration-150"
                             :class="menu.active ? 'bg-[#393939] text-primary border-primary' : 'hover:text-primary border-transparent hover:bg-[#393939] text-[#9A9A9A]'">
@@ -62,6 +62,24 @@
             </nav>
         </div>
     </div>
+
+    <ConfirmationModal :show="showGoToRouteConfirmation" @close="showGoToRouteConfirmation = false">
+        <template #title>
+            <h1>Proceso pendiente</h1>
+        </template>
+        <template #content>
+            <p>
+                Tienes un proceso sin completar en esta vista. Si cambias de vista, se borrarán los cambios o
+                procesos que no has finalizado. ¿Continuar de todas formas?
+            </p>
+        </template>
+        <template #footer>
+            <div class="flex items-center space-x-1">
+                <CancelButton @click="showGoToRouteConfirmation = false">Cancelar</CancelButton>
+                <DangerButton @click="goToRoute()">Continuar</DangerButton>
+            </div>
+        </template>
+    </ConfirmationModal>
 </template>
 
 <script>
@@ -70,12 +88,17 @@ import { Link } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DangerButton from "@/Components/DangerButton.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 
 export default {
     data() {
         return {
             small: true,
             collapsedMenu: null,
+            routeToGo: null,
+            showGoToRouteConfirmation: false,
             menus: [
                 {
                     label: 'Punto de venta',
@@ -124,7 +147,7 @@ export default {
                 },
                 {
                     label: 'Caja',
-                    icon: '<svg width="20" height="20" viewBox="0 0 15 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7.5H3.57333C3.85187 7.50007 4.12488 7.57769 4.36178 7.72417C4.59869 7.87065 4.79013 8.08019 4.91467 8.32933L5.08533 8.67067C5.20992 8.91991 5.40147 9.12952 5.6385 9.27601C5.87554 9.42249 6.14869 9.50005 6.42733 9.5H8.57267C8.85131 9.50005 9.12446 9.42249 9.3615 9.27601C9.59853 9.12952 9.79008 8.91991 9.91467 8.67067L10.0853 8.32933C10.2099 8.08009 10.4015 7.87048 10.6385 7.72399C10.8755 7.57751 11.1487 7.49995 11.4273 7.5H14M1 7.72533V10.5C1 10.8978 1.15804 11.2794 1.43934 11.5607C1.72064 11.842 2.10218 12 2.5 12H12.5C12.8978 12 13.2794 11.842 13.5607 11.5607C13.842 11.2794 14 10.8978 14 10.5V7.72533C14 7.576 13.9773 7.42733 13.9333 7.28467L12.3267 2.05867C12.2323 1.75216 12.0422 1.48397 11.7842 1.29343C11.5263 1.1029 11.214 1.00006 10.8933 1H4.10733C3.78663 1.00006 3.47439 1.1029 3.21643 1.29343C2.95847 1.48397 2.76836 1.75216 2.674 2.05867L1.06667 7.28467C1.02262 7.42742 1.00015 7.57594 1 7.72533Z" stroke="#9A9A9A" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                    icon: '<svg width="20" height="20" viewBox="0 0 15 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7.5H3.57333C3.85187 7.50007 4.12488 7.57769 4.36178 7.72417C4.59869 7.87065 4.79013 8.08019 4.91467 8.32933L5.08533 8.67067C5.20992 8.91991 5.40147 9.12952 5.6385 9.27601C5.87554 9.42249 6.14869 9.50005 6.42733 9.5H8.57267C8.85131 9.50005 9.12446 9.42249 9.3615 9.27601C9.59853 9.12952 9.79008 8.91991 9.91467 8.67067L10.0853 8.32933C10.2099 8.08009 10.4015 7.87048 10.6385 7.72399C10.8755 7.57751 11.1487 7.49995 11.4273 7.5H14M1 7.72533V10.5C1 10.8978 1.15804 11.2794 1.43934 11.5607C1.72064 11.842 2.10218 12 2.5 12H12.5C12.8978 12 13.2794 11.842 13.5607 11.5607C13.842 11.2794 14 10.8978 14 10.5V7.72533C14 7.576 13.9773 7.42733 13.9333 7.28467L12.3267 2.05867C12.2323 1.75216 12.0422 1.48397 11.7842 1.29343C11.5263 1.1029 11.214 1.00006 10.8933 1H4.10733C3.78663 1.00006 3.47439 1.1029 3.21643 1.29343C2.95847 1.48397 2.76836 1.75216 2.674 2.05867L1.06667 7.28467C1.02262 7.42742 1.00015 7.57594 1 7.72533Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                     route: route('cash-cuts.index'),
                     active: route().current('cash-cuts.*'),
                     options: [],
@@ -140,15 +163,15 @@ export default {
                     dropdown: false,
                     show: true
                 },
-                {
-                    label: 'Catálogo base',
-                    icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="22" width="22" id="Database-Check--Streamline-Core"><desc>Database Check Streamline Icon: https://streamlinehq.com</desc><g id="database-check--raid-storage-code-disk-programming-database-array-hard-disc-check-approve"><path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M9.552857142857142 7.5467571428571425c4.836245378571428 0 8.756785714285714 -1.5111983142857142 8.756785714285714 -3.375342857142857S14.389102521428573 0.7960714285714285 9.552857142857142 0.7960714285714285 0.7960714285714285 2.3072697428571427 0.7960714285714285 4.1714142857142855 4.716611764285714 7.5467571428571425 9.552857142857142 7.5467571428571425Z" stroke-width="1.71"></path><path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 11.941262485714285v-7.769657142857143" stroke-width="1.71"></path><path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.7960714285714285 4.171605342857143v10.762885714285714c0 1.5921110142857142 2.834014285714286 2.9135895857142855 6.671078571428572 3.2797824428571425" stroke-width="1.71"></path><path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 9.552857142857142C18.309642857142855 11.415664285714286 14.329285714285714 12.928199999999999 9.552857142857142 12.928199999999999S0.7960714285714285 11.415664285714286 0.7960714285714285 9.552857142857142" stroke-width="1.71"></path><path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m21.49392857142857 14.329285714285714 -6.368571428571428 7.164642857142857 -3.184285714285714 -2.3882142857142856" stroke-width="1.71"></path></g></svg>',
-                    route: route('global-products.index'),
-                    active: route().current('global-products.*'),
-                    options: [],
-                    dropdown: false,
-                    show: true
-                },
+                // {
+                //     label: 'Catálogo base',
+                //     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="22" width="22" id="Database-Check--Streamline-Core"><desc>Database Check Streamline Icon: https://streamlinehq.com</desc><g id="database-check--raid-storage-code-disk-programming-database-array-hard-disc-check-approve"><path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M9.552857142857142 7.5467571428571425c4.836245378571428 0 8.756785714285714 -1.5111983142857142 8.756785714285714 -3.375342857142857S14.389102521428573 0.7960714285714285 9.552857142857142 0.7960714285714285 0.7960714285714285 2.3072697428571427 0.7960714285714285 4.1714142857142855 4.716611764285714 7.5467571428571425 9.552857142857142 7.5467571428571425Z" stroke-width="1.71"></path><path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 11.941262485714285v-7.769657142857143" stroke-width="1.71"></path><path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.7960714285714285 4.171605342857143v10.762885714285714c0 1.5921110142857142 2.834014285714286 2.9135895857142855 6.671078571428572 3.2797824428571425" stroke-width="1.71"></path><path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M18.309642857142855 9.552857142857142C18.309642857142855 11.415664285714286 14.329285714285714 12.928199999999999 9.552857142857142 12.928199999999999S0.7960714285714285 11.415664285714286 0.7960714285714285 9.552857142857142" stroke-width="1.71"></path><path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m21.49392857142857 14.329285714285714 -6.368571428571428 7.164642857142857 -3.184285714285714 -2.3882142857142856" stroke-width="1.71"></path></g></svg>',
+                //     route: route('global-products.index'),
+                //     active: route().current('global-products.*'),
+                //     options: [],
+                //     dropdown: false,
+                //     show: true
+                // },
 
                 //ejemplo para usar submenues
                 //     label: 'Comunidad',
@@ -183,7 +206,10 @@ export default {
         Accordion,
         DropdownLink,
         Dropdown,
-        Link
+        Link,
+        ConfirmationModal,
+        DangerButton,
+        CancelButton,
     },
     methods: {
         handleClickInMenu(index) {
@@ -194,11 +220,26 @@ export default {
                     this.collapsedMenu = index;
                 }
             } else {
-                this.goToRoute(this.menus[index].route)
+                // revisar si hay proceso pendiente para no cambiar de vista sin preguntar
+                const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
+                if (pendentProcess) {
+                    this.routeToGo = this.menus[index].route;
+                    this.showGoToRouteConfirmation = true;
+                } else {
+                    this.goToRoute(this.menus[index].route)
+                }
             }
         },
-        goToRoute(route) {
-            this.$inertia.get(route);
+        goToRoute(route = null) {
+            // resetear variable de local storage a false
+            localStorage.setItem('pendentProcess', false);
+
+            // ir a la ruta solicitada
+            if (route) {
+                this.$inertia.get(route);
+            } else {
+                this.$inertia.get(this.routeToGo);
+            }
         },
         logout() {
             this.$inertia.post(route('logout'));

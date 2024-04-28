@@ -15,7 +15,8 @@
                 <tr @click="handleShow(product)" v-for="(product, index) in products" :key="product.id"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">
-                        <img class="h-10 object-contain rounded-md"
+                        <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
+                            class="size-10 bg-white object-contain rounded-md"
                             :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
                     </td>
                     <td>
@@ -32,7 +33,8 @@
                             {{ product.current_stock ?? '-' }}
                             <i v-if="product.current_stock < product.min_stock && isInventoryOn"
                                 class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
-                            <span v-if="product.current_stock < product.min_stock && isInventoryOn" class="text-[11px]">Bajo
+                            <span v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                class="text-[11px]">Bajo
                                 stock</span>
                         </p>
                     </td>
@@ -96,7 +98,7 @@
             <template #footer>
                 <div class="flex items-center space-x-1">
                     <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
-                    <DangerButton @click="deleteItem">Eliminar</DangerButton>
+                    <PrimaryButton @click="deleteItem">Eliminar</PrimaryButton>
                 </div>
             </template>
         </ConfirmationModal>
@@ -105,7 +107,7 @@
 
 <script>
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import DangerButton from "@/Components/DangerButton.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
 
@@ -120,7 +122,7 @@ export default {
     },
     components: {
         ConfirmationModal,
-        DangerButton,
+        PrimaryButton,
         CancelButton,
     },
     props: {

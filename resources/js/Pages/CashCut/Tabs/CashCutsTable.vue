@@ -1,15 +1,15 @@
 <template>
-    <section v-if="items.length" class="mt-7 text-sm w-full overflow-auto">
-        <table>
-            <tr class="font-bold *:pb-3 *:px-2">
-                <td class="w-44">Fecha</td>
-                <td class="w-40">Efectivo al iniciar</td>
-                <td class="w-40">Efectivo esperado</td>
-                <td class="w-36">Recuento manual</td>
-                <td class="w-36">Diferencia</td>
+    <section v-if="items.length" class="mt-4 text-sm w-full overflow-auto">
+        <table class="w-full">
+            <tr class="font-bold *:pb-3 *:px-4">
+                <td>Fecha</td>
+                <td>Efectivo al iniciar</td>
+                <td>Efectivo esperado</td>
+                <td>Recuento manual</td>
+                <td>Diferencia</td>
                 <td></td>
             </tr>
-            <tr @click="$inertia.get(route('cash-cuts.show', item.id))" class="*:px-2 cursor-pointer hover:bg-primarylight" v-for="item in items" :key="item">
+            <tr @click="$inertia.get(route('cash-cuts.show', item.id))" class="*:py-2 *:px-4 text-xs cursor-pointer hover:bg-primarylight" v-for="item in items" :key="item">
                 <td class="rounded-l-full">{{ formatDate(item.created_at) }}</td>
                 <td>${{ item.started_cash }}</td>
                 <td>${{ item.expected_cash }}</td>
@@ -49,7 +49,7 @@
             </tr>
         </table>
     </section>
-    <p class="text-sm text-center text-gray-400 mt-5" v-else>No hay cortes registrados</p>
+    <el-empty v-else description="No hay cortes registrados" />
 
     <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
         <template #title>

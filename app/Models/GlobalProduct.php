@@ -24,26 +24,51 @@ class GlobalProduct extends Model implements HasMedia
     ];
 
     //relationships
-    public function category() :BelongsTo
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function brand() :BelongsTo
+    public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
-    public function stores() :BelongsToMany
+    public function stores(): BelongsToMany
     {
-        return $this->belongsToMany(Store::class, 'global_product_store');
+        return $this->belongsToMany(GlobalProduct::class, 'global_product_stores')
+            ->withPivot([
+                'id',
+                'public_price',
+                'cost',
+                'min_stock',
+                'max_stock',
+                'current_stock',
+            ])->withTimestamps();
     }
 
-    /**
-     * Obtener ventas de este producto de catalogo base.
-     */
-    public function comments(): MorphMany
+    // events
+    protected static function boot()
     {
-        return $this->morphMany(Sale::class, 'saleable');
+        parent::boot();
+
+        // Definir el evento de actualización
+        static::updated(function ($globalProduct) {
+            // Obtener el nombre del producto antes de la actualización
+            $oldProductName = $globalProduct->getOriginal('name');
+
+            // Obtener el nombre del producto después de la actualización
+            $newProductName = $globalProduct->name;
+
+            // Verificar si el nombre del producto ha cambiado
+            if ($oldProductName !== $newProductName) {
+                // obtener los ids de los productos de cada tienda creado con este producto de catalogo base
+                $ids = $globalProduct->stores->map(fn ($store) => $store->pivot->id);
+                // Actualizar la propiedad product_name en las ventas relacionadas
+                Sale::whereIn('product_id', $ids)
+                    ->where('is_global_product', true)
+                    ->update(['product_name' => $newProductName]);
+            }
+        });
     }
 }

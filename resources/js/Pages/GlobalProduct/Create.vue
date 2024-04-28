@@ -31,7 +31,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Marca*" class="ml-3 mb-1" />
+                        <InputLabel value="Proveedor *" class="ml-3 mb-1" />
                         <button
                             @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -100,12 +100,12 @@
 
         <!-- brand form -->
         <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
-            <template #title> Agregar marca </template>
+            <template #title> Agregar proveedor </template>
             <template #content>
             <form @submit.prevent="storeBrand">
                 <div>
-                <label class="text-sm ml-3">Nombre de la marca*</label>
-                <el-input v-model="brandForm.name" placeholder="Escribe el nombre de la marca" :maxlength="100" required clearable />
+                <label class="text-sm ml-3">Nombre del proveedor *</label>
+                <el-input v-model="brandForm.name" placeholder="Escribe el nombre del proveedor" :maxlength="100" required clearable />
                 <InputError :message="brandForm.errors.name" />
                 </div>
             </form>
@@ -158,7 +158,7 @@ export default {
             localCategories: this.categories,
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
-            showBrandFormModal: false, //muestra formulario para agregar marca
+            showBrandFormModal: false, //muestra formulario para agregar proveedor
         };
     },
     components: {
@@ -216,7 +216,7 @@ export default {
                 if (response.status === 200) {
                     this.$notify({
                         title: "Éxito",
-                        message: "Se ha creado una nueva marca",
+                        message: "Se ha creado un nuevo proveedor",
                         type: "success",
                     });
                     this.localBrands.push(response.data.item);

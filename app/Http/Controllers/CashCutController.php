@@ -16,7 +16,6 @@ class CashCutController extends Controller
         $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
         $cash_cuts = CashCut::where('cash_register_id', $cash_register->id)->latest()->get();
 
-        // return $cash_cuts;
         return inertia('CashCut/Index', compact('cash_cuts'));
     }
 

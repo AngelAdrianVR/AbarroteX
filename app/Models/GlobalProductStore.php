@@ -22,18 +22,32 @@ class GlobalProductStore extends Model
     ];
 
     //relationships
-    public function globalProduct() :BelongsTo
+    public function globalProduct(): BelongsTo
     {
         return $this->belongsTo(GlobalProduct::class);
     }
 
-    public function sales() :HasMany
+    public function sales(): HasMany
     {
         return $this->hasMany(Sale::class);
     }
 
-    public function history() :HasMany
+    public function history(): HasMany
     {
         return $this->hasMany(ProductHistory::class);
+    }
+
+    // events
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Definir el evento de eliminación
+        static::deleting(function ($globalProductStore) {
+            // Obtener todas las ventas relacionadas
+            Sale::where('product_id', $globalProductStore->id)
+                ->where('is_global_product', true)
+                ->update(['product_id' => null]);
+        });
     }
 }

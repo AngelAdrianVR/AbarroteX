@@ -88,7 +88,7 @@
                                 <p class="text-gray37">Categoría: <span class="font-bold">{{ product.data.category?.name
                                         }}</span></p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Marca: <span class="font-bold">{{ product.data.brand?.name
+                                <p class="text-gray37">Proveedor: <span class="font-bold">{{ product.data.brand?.name
                                         }}</span></p>
                             </div>
                         </div>
