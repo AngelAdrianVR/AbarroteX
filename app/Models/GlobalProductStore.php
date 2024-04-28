@@ -45,14 +45,9 @@ class GlobalProductStore extends Model
         // Definir el evento de eliminación
         static::deleting(function ($globalProductStore) {
             // Obtener todas las ventas relacionadas
-            $relatedSales = Sale::where('product_id', $globalProductStore->id)
-            ->where('is_global_product', true)
-            ->get();
-
-            // Actualizar las ventas relacionadas
-            $relatedSales->each(function ($sale) {
-                $sale->update(['product_id' => null]);
-            });
+            Sale::where('product_id', $globalProductStore->id)
+                ->where('is_global_product', true)
+                ->update(['product_id' => null]);
         });
     }
 }
