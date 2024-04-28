@@ -60,15 +60,27 @@ class Product extends Model implements HasMedia
 
         // Definir el evento de eliminación
         static::deleting(function ($product) {
-            // Obtener todas las ventas relacionadas
-            $relatedSales = Sale::where('product_id', $product->id)
-            ->where('is_global_product', false)
-            ->get();
+            // Obtener todas las ventas relacionadas y camviar el nombre a null para saber que se eliminó el producto
+            Sale::where('product_id', $product->id)
+                ->where('is_global_product', false)
+                ->update(['product_id' => null]);
+        });
 
-            // Actualizar las ventas relacionadas
-            $relatedSales->each(function ($sale) {
-                $sale->update(['product_id' => null]);
-            });
+        // Definir el evento de actualización
+        static::updated(function ($product) {
+            // Obtener el nombre del producto antes de la actualización
+            $oldProductName = $product->getOriginal('name');
+
+            // Obtener el nombre del producto después de la actualización
+            $newProductName = $product->name;
+
+            // Verificar si el nombre del producto ha cambiado
+            if ($oldProductName !== $newProductName) {
+                // Actualizar la propiedad product_name en las ventas relacionadas
+                Sale::where('product_id', $product->id)
+                    ->where('is_global_product', false)
+                    ->update(['product_name' => $newProductName]);
+            }
         });
     }
 }

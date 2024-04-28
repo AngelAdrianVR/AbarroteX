@@ -658,7 +658,13 @@ export default {
     },
     addSaleProduct(product) {
       //revisa si el producto escaneado ya esta dentro del arreglo
-      const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === product.id);
+      const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
+        if (product.global_product_id) {
+          return sale.product.global_product_id == product.global_product_id;
+        } else {
+          return sale.product.id == product.id && !sale.product.global_product_id;
+        }
+      });
       if (existingIndex !== -1) {
         this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
           ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],

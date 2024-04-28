@@ -50,7 +50,8 @@
             </template>
             <template #right-footer>
               <!-- boton filtro derecho -->
-              <button @click.stop="showRightFilter = !showRightFilter"
+              <span></span>
+              <!-- <button @click.stop="showRightFilter = !showRightFilter"
                 class="rounded-full border border-[#c4c4c4] size-7 flex items-center justify-center mx-auto my-2">
                 <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <mask id="mask0_8826_331" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14"
@@ -63,12 +64,12 @@
                       fill="#999999" />
                   </g>
                 </svg>
-              </button>
+              </button> -->
             </template>
           </el-transfer>
           <!-- ventana de filtro izquierdo -->
           <div v-if="showLeftFilter"
-            class="absolute bottom-10 left-36 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-50 w-80">
+            class="absolute bottom-20 left-0 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-50 w-80">
             <div>
               <InputLabel value="Categoría" class="ml-3 mb-1" />
               <el-select v-model="leftFilterCategory" clearable filterable placeholder="Seleccione"
@@ -90,7 +91,7 @@
           </div>
           <!-- ventana de filtro derecho -->
           <div v-if="showRightFilter"
-            class="absolute bottom-10 left-36 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-50 w-80">
+            class="absolute bottom-20 -right-8 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-50 w-80">
             <div>
               <InputLabel value="Categoría" class="ml-3 mb-1" />
               <el-select v-model="rightFilterCategory" clearable filterable placeholder="Seleccione"

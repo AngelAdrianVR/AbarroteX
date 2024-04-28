@@ -70,8 +70,9 @@ class Store extends Model
 
     public function globalProducts() :BelongsToMany
     {
-        return $this->belongsToMany(GlobalProduct::class, 'global_product_store')
+        return $this->belongsToMany(GlobalProduct::class, 'global_product_stores')
             ->withPivot([
+                'id',
                 'public_price',
                 'cost',
                 'min_stock',
