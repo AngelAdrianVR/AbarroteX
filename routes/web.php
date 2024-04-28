@@ -20,6 +20,7 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -180,3 +181,10 @@ Route::get('cash-register-movements-fetch-total-cash-movements', [CashRegisterMo
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('cash-cuts', CashCutController::class)->middleware('auth');
 Route::get('cash-cuts-fetch-total-sales-for-cash-cut', [CashCutController::class, 'fetchTotalSaleForCashCut'])->middleware('auth')->name('cash-cuts.fetch-total-sales-for-cash-cut');
+
+
+// comandos Artisan
+Route::get('/backup', function () {
+    Artisan::call('storage:link');
+    return 'linked!!';
+});
