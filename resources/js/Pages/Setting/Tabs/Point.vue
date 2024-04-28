@@ -11,7 +11,7 @@
             <div v-for="(item, index) in settings" :key="item.id" class="mb-3">
                 <p class="w-[20%] md:w-[15%]">{{ item.key }}</p>
                 <el-switch @change="updateSettingValue(index)" v-model="values[index]" :loading="settingLoading[index]"
-                    size="small" class="w-[12%] md:w-[6%]" />
+                    size="small" class="w-[12%] md:w-[6%] justify-center" />
                 <p class="text-gray99 text-[9px] md:text-[11px] w-[79%]">{{ item.description }}</p>
             </div>
         </section>

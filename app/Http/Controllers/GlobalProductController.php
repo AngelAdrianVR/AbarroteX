@@ -16,7 +16,6 @@ class GlobalProductController extends Controller
         $global_products = GlobalProduct::with(['media', 'category'])->get()->take(20);;
         $total_products = GlobalProduct::all()->count();
 
-        // return $global_products;
         return inertia('GlobalProduct/Index', compact('global_products', 'total_products'));
     }
 

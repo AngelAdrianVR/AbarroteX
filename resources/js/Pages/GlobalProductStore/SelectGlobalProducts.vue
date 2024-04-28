@@ -33,7 +33,7 @@
             @right-check-change="handleLeftCheckChange">
             <template #left-footer>
               <!-- boton filtro izquierdo -->
-              <button @click.stop="showLeftFilter = !showLeftFilter"
+              <!-- <button @click.stop="showLeftFilter = !showLeftFilter"
                 class="rounded-full border border-[#c4c4c4] size-7 flex items-center justify-center mx-auto my-2">
                 <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <mask id="mask0_8826_331" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14"
@@ -46,11 +46,10 @@
                       fill="#999999" />
                   </g>
                 </svg>
-              </button>
+              </button> -->
             </template>
             <template #right-footer>
               <!-- boton filtro derecho -->
-              <span></span>
               <!-- <button @click.stop="showRightFilter = !showRightFilter"
                 class="rounded-full border border-[#c4c4c4] size-7 flex items-center justify-center mx-auto my-2">
                 <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
