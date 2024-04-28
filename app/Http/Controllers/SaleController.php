@@ -18,8 +18,6 @@ class SaleController extends Controller
 {
     public function pointIndex()
     {
-        $ids = collect();
-        return GlobalProduct::all()->each(fn ($gp) => $ids->merge($gp->stores->map(fn ($store) => $store->pivot->id)));
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::where('store_id', auth()->user()->store_id)
             ->latest()
