@@ -7,13 +7,10 @@ use App\Http\Resources\ProductResource;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Expense;
-use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
-use App\Models\Sale;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Builder;
 
 class ProductController extends Controller
 {
@@ -23,7 +20,7 @@ class ProductController extends Controller
         $all_products = $this->getAllProducts();
         $total_products = $all_products->count();
 
-        //tomar solo 30 productos
+        //tomar solo primeros 30 productos
         $products = $all_products->take(30);
 
         return inertia('Product/Index', compact('products', 'total_products'));
@@ -277,6 +274,17 @@ class ProductController extends Controller
         // obtener todo los productos
         $all_products = $this->getAllProducts();
         $products = $all_products->splice($offset)->take(30);
+
+        return response()->json(['items' => $products]);
+    }
+
+    public function getAllUntilPage($currentPage)
+    {
+        $items = $currentPage * 30;
+        
+        // obtener todo los productos
+        $all_products = $this->getAllProducts();
+        $products = $all_products->take($items);
 
         return response()->json(['items' => $products]);
     }

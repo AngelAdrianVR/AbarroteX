@@ -176,6 +176,13 @@ export default {
                 if (response.status === 200) {
                     this.localProducts = [...this.localProducts, ...response.data.items];
                     this.currentPage++;
+
+                    // Actualiza la URL con la pagina
+                    if (this.currentPage > 1) {
+                        const currentURL = new URL(window.location.href);
+                        currentURL.searchParams.set('page', this.currentPage);
+                        window.history.replaceState({}, document.title, currentURL.href);
+                    }
                 }
             } catch (error) {
                 console.log(error)
@@ -264,7 +271,32 @@ export default {
             this.form.reset();
             this.productEntryFound = null;
             this.entryProductModal = false;
-        }
+        },
+        async fetchAllItemsForCurrentPage() {
+            try {
+                this.loading = true;
+                const response = await axios.get(route('products.get-all-until-page', this.currentPage));
+
+                if (response.status === 200) {
+                    this.localProducts = response.data.items;
+                }
+            } catch (error) {
+                console.log(error)
+            } finally {
+                this.loading = false;
+            }
+        },
     },
+    mounted() {
+        // Obtener la URL actual
+        const currentURL = new URL(window.location.href);
+        // Extraer el valor de 'currentTab' de los parámetros de búsqueda
+        const currentTabFromURL = currentURL.searchParams.get('page');
+
+        if (currentTabFromURL) {
+            this.currentPage = currentTabFromURL;
+            this.fetchAllItemsForCurrentPage();
+        }
+    }
 }
 </script>
