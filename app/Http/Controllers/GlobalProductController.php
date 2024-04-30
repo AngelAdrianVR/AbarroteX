@@ -12,14 +12,14 @@ use Illuminate\Http\Request;
 class GlobalProductController extends Controller
 {
     public function index()
-    {   
-        $global_products = GlobalProduct::with(['media', 'category'])->get()->take(20);;
+    {
+        $global_products = GlobalProduct::with(['media', 'category'])->get()->take(30);
         $total_products = GlobalProduct::all()->count();
 
         return inertia('GlobalProduct/Index', compact('global_products', 'total_products'));
     }
 
-    
+
     public function create()
     {
         $categories = Category::all();
@@ -28,7 +28,7 @@ class GlobalProductController extends Controller
         return inertia('GlobalProduct/Create', compact('categories', 'brands'));
     }
 
-    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -47,7 +47,7 @@ class GlobalProductController extends Controller
         }
     }
 
-    
+
     public function show($global_product_id)
     {
         $global_product = GlobalProduct::with(['media', 'category', 'brand'])->find($global_product_id);
@@ -56,22 +56,22 @@ class GlobalProductController extends Controller
         return inertia('GlobalProduct/Show', compact('global_product', 'global_products'));
     }
 
-    
+
     public function edit($global_product_id)
-    {   
+    {
         $global_product = GlobalProduct::with('media')->find($global_product_id);
         $categories = Category::all();
         $brands = Brand::all(['id', 'name']);
-        
+
         return inertia('GlobalProduct/Edit', compact('global_product', 'categories', 'brands'));
     }
 
-    
+
     public function update(Request $request, GlobalProduct $global_product)
     {
         $request->validate([
-            'name' => 'required|string|max:100|unique:global_products,name,'.$global_product->id,
-            'code' => 'nullable|string|max:100|unique:global_products,code,'.$global_product->id,
+            'name' => 'required|string|max:100|unique:global_products,name,' . $global_product->id,
+            'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
             'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
@@ -92,8 +92,8 @@ class GlobalProductController extends Controller
     public function updateWithMedia(Request $request, GlobalProduct $global_product)
     {
         $request->validate([
-            'name' => 'required|string|max:100|unique:global_products,name,'.$global_product->id,
-            'code' => 'nullable|string|max:100|unique:global_products,code,'.$global_product->id,
+            'name' => 'required|string|max:100|unique:global_products,name,' . $global_product->id,
+            'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
             'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
@@ -115,7 +115,7 @@ class GlobalProductController extends Controller
         return to_route('global-products.index');
     }
 
-    
+
     public function destroy(GlobalProduct $global_product)
     {
         $global_product->delete();
@@ -124,12 +124,12 @@ class GlobalProductController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 20;
+        $offset = $currentPage * 30;
         $global_products = GlobalProduct::with('category', 'media', 'brand')
             ->latest()
-            ->skip($offset)
-            ->take(20)
-            ->get();
+            ->get()
+            ->splice($offset)
+            ->take(30);
 
         return response()->json(['items' => $global_products]);
     }
@@ -172,7 +172,7 @@ class GlobalProductController extends Controller
     public function searchProduct(Request $request)
     {
         $query = $request->input('query');
-    
+
         // Realiza la búsqueda en la base de datos local
         $global_products = GlobalProduct::with(['category', 'brand', 'media'])
             ->where('name', 'like', "%$query%")

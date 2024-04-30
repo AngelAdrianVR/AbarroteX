@@ -20,6 +20,7 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -78,6 +79,7 @@ Route::get('products-search', [ProductController::class, 'searchProduct'])->name
 Route::get('products-get-product-scaned/{product_id}', [ProductController::class, 'getProductScaned'])->name('products.get-product-scaned')->middleware('auth');
 Route::get('products-fetch-history/{product_id}/{month}/{year}', [ProductController::class, 'fetchHistory'])->name('products.fetch-history')->middleware('auth');
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
+Route::get('products-get-all-until-page/{currentPage}', [ProductController::class, 'getAllUntilPage'])->name('products.get-all-until-page')->middleware('auth');
 
 
 //global-product-store routes----------------------------------------------------------------------------------
@@ -180,3 +182,10 @@ Route::get('cash-register-movements-fetch-total-cash-movements', [CashRegisterMo
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('cash-cuts', CashCutController::class)->middleware('auth');
 Route::get('cash-cuts-fetch-total-sales-for-cash-cut', [CashCutController::class, 'fetchTotalSaleForCashCut'])->middleware('auth')->name('cash-cuts.fetch-total-sales-for-cash-cut');
+
+
+// comandos Artisan
+Route::get('/backup', function () {
+    Artisan::call('storage:link');
+    return 'linked!!';
+});
