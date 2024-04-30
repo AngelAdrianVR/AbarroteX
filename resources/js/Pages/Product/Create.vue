@@ -1,6 +1,6 @@
 <template>
     <AppLayout title="Nuevo producto">
-        <div class="px-10 py-7">
+        <div class="px-3 md:px-10 py-7">
             <Back />
 
             <form v-if="products_quantity < 650" @submit.prevent="store"
