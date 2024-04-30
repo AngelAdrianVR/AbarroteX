@@ -1,6 +1,6 @@
 <template>
     <AppLayout title="Nuevo egreso">
-        <div class="md:px-10 lg-px-1 py-7">
+        <div class="px-3 md:px-10 lg-px-1 py-7">
             <Back />
 
             <form @submit.prevent="store"

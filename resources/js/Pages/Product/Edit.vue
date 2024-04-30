@@ -1,6 +1,6 @@
 <template>
     <AppLayout title="Editar produco">
-        <div class="px-10 py-7">
+        <div class="px-3 md:px-10 py-7">
             <Back />
 
             <form @submit.prevent="update"
