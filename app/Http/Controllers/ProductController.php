@@ -177,23 +177,21 @@ class ProductController extends Controller
         // Realiza la búsqueda en la base de datos local
         $local_products = Product::with(['category', 'brand', 'media'])
             ->where('name', 'like', "%$query%")
-            ->orWhere('code', $query)
-            ->take(20)
+            ->orWhere('code', 'like', "%$query%")
             ->get();
 
         $global_products = GlobalProductStore::with(['globalProduct.media'])
-            ->whereHas('globalProduct', function (Builder $queryBuilder) use ($query) {
+            ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
                 $queryBuilder->where('name', 'like', "%$query%")
                     ->orWhere('code', $query);
             })
-            ->take(20)
             ->get();
 
         // Combinar los resultados en una colección
         $combined_products = $local_products->merge($global_products);
 
         // Tomar solo los primeros 20 elementos del arreglo combinado
-        $products = $combined_products->take(20);
+        $products = $combined_products;
 
         return response()->json(['items' => $products]);
     }

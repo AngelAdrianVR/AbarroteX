@@ -25,8 +25,8 @@
                             </p>
                             <p class="flex flex-col">
                                 <b>
-                                    {{ $page.props.auth.user.store.suscription_period == 'Mensual' ? '$269.00' :
-                                        '$2,690.00' }}
+                                    {{ $page.props.auth.user.store.suscription_period == 'Mensual' ? '$199.00' :
+                                        '$1,990.00' }}
                                 </b>
                             </p>
                         </div>
@@ -178,13 +178,13 @@ export default {
             suscriptions: [
                 {
                     name: "Mensual",
-                    amount: "$269.00",
-                    description: "Pagas $269.00 cada mes",
+                    amount: "$199.00",
+                    description: "Pagas $199.00 cada mes",
                 },
                 {
                     name: "Anual",
-                    amount: "$2,690.00",
-                    description: "Ahorra dos mensualidades en la suscripción anual. Pagas $224.16 cada mes",
+                    amount: "$1,990.00",
+                    description: "Ahorra dos mensualidades en la suscripción anual. Pagas $165.83 cada mes",
                 },
             ],
             cards: [

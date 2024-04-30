@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="overflow-auto">
         <table v-if="Object.keys(sales)?.length" class="w-full">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">

@@ -20,7 +20,7 @@
                 <div class="w-[18%] md:w-[13%]">{{ product.category?.name }}</div>
                 <div class="w-[10%]">${{ product.public_price }}</div>
                 <div class="rounded-r-full w-[17%] text-right">
-                    <i @click.stop="$inertia.get(route('global-products.edit', product.id))"
+                    <i @click.stop="$inertia.visit(route('global-products.edit', product.id))"
                         class="fa-solid fa-pencil text-primary cursor-pointer hover:bg-gray-200 rounded-full mr-1 p-2"></i>
                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                         title="¿Continuar?" @confirm="deleteItem(product.id)">
