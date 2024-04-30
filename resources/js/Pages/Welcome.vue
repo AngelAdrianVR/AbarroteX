@@ -25,7 +25,7 @@ defineProps({
                     </div>
                 </div>
 
-                <p>¡15 días de prueba gratuitos!</p>
+                <p class="py-1 px-3 bg-gradient-to-r from-[#dfb464] to-primary text-white font-bold">¡15 días de prueba gratuitos!</p>
 
                 <div class="hidden sm:flex sm:items-center space-x-2 sm:ms-6">
                     <Link :href="$page.props.auth.user ? route('dashboard') : route('login')"><PrimaryButton>Ingresar</PrimaryButton></Link>
@@ -252,7 +252,7 @@ defineProps({
         <section class="my-20">
             <figure class="mt-4 relative">
                 <img class="mx-auto w-screen" src="@/../../public/images/landing-02.png" alt="">
-                <Link :href="route('register')"><PrimaryButton class="absolute bottom-[14%] right-[37%]">Comienza gratis</PrimaryButton></Link>
+                <Link class="hidden md:block" :href="route('register')"><PrimaryButton class="absolute bottom-[14%] right-[37%]">Comienza gratis</PrimaryButton></Link>
             </figure>
         </section>
 
@@ -274,12 +274,12 @@ defineProps({
         </div>
         <div class="flex items-center justify-between">
             <figure class="mt-4">
-                <img class="w-[40%]" src="@/../../public/images/white_logo.png" alt="">
+                <img class="w-24 lg:w-[40%]" src="@/../../public/images/white_logo.png" alt="">
             </figure>
             <figure class="mt-4 cursor-pointer">
                 <a class="flex justify-end items-center" href="https://app.dtw.com.mx/" target="_blank">
                     <p class="text-white text-xl">BY</p>
-                    <img class="w-[10%]" src="@/../../public/images/DTW_logo_blanco.png" alt="">
+                    <img class="w-24 lg:w-[10%]" src="@/../../public/images/DTW_logo_blanco.png" alt="">
                 </a>
             </figure>
         </div>
