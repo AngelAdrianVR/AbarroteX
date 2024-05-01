@@ -18,6 +18,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
+use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
@@ -182,6 +183,11 @@ Route::get('cash-register-movements-fetch-total-cash-movements', [CashRegisterMo
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('cash-cuts', CashCutController::class)->middleware('auth');
 Route::get('cash-cuts-fetch-total-sales-for-cash-cut', [CashCutController::class, 'fetchTotalSaleForCashCut'])->middleware('auth')->name('cash-cuts.fetch-total-sales-for-cash-cut');
+
+
+//Tutorial routes----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('tutorials', TutorialController::class)->middleware('auth');
 
 
 // comandos Artisan
