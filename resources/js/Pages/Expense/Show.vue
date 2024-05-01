@@ -3,13 +3,14 @@
         <section class="mx-2 lg:mx-10 mt-7">
             <Back />
             <div class="flex items-center justify-end space-x-1">
-                <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
+                <!-- ** descomentar cuando se haga una plantilla para imprimir todos los egresos del día **  -->
+                <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
                     @confirm="print(expenses[0].id)">
                     <template #reference>
                         <i @click.stop
                             class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                     </template>
-                </el-popconfirm>
+                </el-popconfirm> -->
                 <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
                     @confirm="deleteItem(expenses[0].id)">
                     <template #reference>
