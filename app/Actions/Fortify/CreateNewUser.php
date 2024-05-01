@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\CashRegister;
+use App\Models\Setting;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -33,6 +34,12 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['store_name'],
             'contact_name' => $input['name'],
         ]);
+
+        // agregar las configuraciones iniciales a la tienda
+        $settings = Setting::all();
+            $settings->each(function($setting) use ($store){
+                $store->settings()->attach($setting->id, ['value' => null]);
+            });
 
         CashRegister::create([
             'started_cash' => 0,
