@@ -22,7 +22,7 @@ class Store extends Model
         'status',
         'seller_id',
         'suscription_period',
-        'default_card_id',
+        'default_card_id', //tarjata para pagar
     ];
 
     protected $casts = [

@@ -53,7 +53,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'activeSuscription']);
     Route::get('/dashboard-get-day-data/{date}', [DashboardController::class, 'getDayData'])->name('dashboard.get-day-data');
     Route::get('/dashboard-get-week-data/{date}', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
     Route::get('/dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
@@ -73,7 +73,7 @@ Route::get('global-products-filter', [GlobalProductController::class, 'filter'])
 
 //products routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('products', ProductController::class)->middleware('auth');
+Route::resource('products', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription']);
 Route::post('products/update-with-media/{product}', [ProductController::class, 'updateWithMedia'])->name('products.update-with-media')->middleware('auth');
 Route::put('products-entry/{product_id}', [ProductController::class, 'entryStock'])->name('products.entry')->middleware('auth');
 Route::get('products-search', [ProductController::class, 'searchProduct'])->name('products.search')->middleware('auth');
@@ -85,7 +85,7 @@ Route::get('products-get-all-until-page/{currentPage}', [ProductController::clas
 
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-Route::resource('global-product-store', GlobalProductStoreController::class)->middleware('auth');
+Route::resource('global-product-store', GlobalProductStoreController::class)->middleware(['auth', 'activeSuscription']);
 Route::get('global-product-select', [GlobalProductStoreController::class, 'selectGlobalProducts'])->name('global-product-store.select')->middleware('auth');
 Route::post('global-product-store/transfer', [GlobalProductStoreController::class, 'transfer'])->name('global-product-store.transfer')->middleware('auth');
 Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
@@ -104,8 +104,8 @@ Route::resource('brands', BrandController::class)->middleware('auth');
 
 //sales routes-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('sales', SaleController::class)->middleware('auth');
-Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware('auth');
+Route::resource('sales', SaleController::class)->middleware('auth')->middleware(['auth', 'activeSuscription']);
+Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription']);
 Route::get('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
 Route::get('sales-print-ticket/{sale_id}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
@@ -113,7 +113,7 @@ Route::get('sales-print-ticket/{sale_id}', [SaleController::class, 'printTicket'
 
 //expenses routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('expenses', ExpenseController::class)->middleware('auth');
+Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription']);
 Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
 Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
 Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
@@ -140,7 +140,7 @@ Route::post('users-delete-notifications', [UserController::class, 'deleteNotific
 
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('settings', SettingController::class)->middleware('auth');
+Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription']);
 Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
 
 
@@ -181,7 +181,7 @@ Route::get('cash-register-movements-fetch-total-cash-movements', [CashRegisterMo
 
 //Cash cuts routes----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
-Route::resource('cash-cuts', CashCutController::class)->middleware('auth');
+Route::resource('cash-cuts', CashCutController::class)->middleware(['auth', 'activeSuscription']);
 Route::get('cash-cuts-fetch-total-sales-for-cash-cut', [CashCutController::class, 'fetchTotalSaleForCashCut'])->middleware('auth')->name('cash-cuts.fetch-total-sales-for-cash-cut');
 
 
