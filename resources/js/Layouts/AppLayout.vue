@@ -3,12 +3,13 @@ import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import SideNav from '@/Components/MyComponents/SideNav.vue';
 import NotificationsCenter from '@/Components/MyComponents/NotificationsCenter.vue';
+// import NavLink from '@/Components/NavLink.vue';
 import axios from 'axios';
 
 defineProps({
@@ -17,12 +18,20 @@ defineProps({
 
 const showingNavigationDropdown = ref(false);
 
-const switchToTeam = (team) => {
-    router.put(route('current-team.update'), {
-        team_id: team.id,
-    }, {
-        preserveState: false,
-    });
+const calculateDaysSinceStoreCreated = (date) => {
+    const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
+    const startDate = new Date(date);
+    const currentDate = new Date();
+
+    // Calcula la diferencia en días
+    const diffDays = Math.round(Math.abs((currentDate - startDate) / oneDay));
+
+    return diffDays;
+};
+
+const calculateRemainigFreeDays = (date) => {
+    const trialDays = 15;
+    return trialDays - calculateDaysSinceStoreCreated(date);
 };
 
 const logout = () => {
@@ -48,6 +57,26 @@ const logout = () => {
                 <nav class="bg-white border-b border-gray-100">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-12">
+                            <!-- Dias de prueba -->
+                            <section
+                                class="hidden md:flex space-x-4 bg-primarylight font-bold px-6 py-2 rounded-[5px] text-xs">
+                                <p v-if="calculateRemainigFreeDays($page.props.auth.user.store.created_at) > 0">
+                                    Te quedan {{ calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
+                                    días de tu prueba gratuita <br>
+                                    ¡Suscribete en cualquier momento! Tu pago comenzarsá a contar al finalizar el
+                                    periodo de
+                                    prueba.
+                                </p>
+                                <p v-else>
+                                    Tus días de prueba han expirado. <br>
+                                    Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
+                                    tu suscripción.
+                                </p>
+                                <PrimaryButton class="!py-1 self-end">
+                                    Pagar suscripción
+                                    <i class="fa-solid fa-arrow-right-long"></i>
+                                </PrimaryButton>
+                            </section>
                             <div class="flex">
                                 <!-- Logo -->
                                 <div class="md:hidden shrink-0 flex items-center">
@@ -56,8 +85,8 @@ const logout = () => {
                                     </Link>
                                 </div>
                             </div>
-
                             <div class="hidden sm:flex sm:items-center sm:ms-6">
+
                                 <!-- notifications -->
                                 <NotificationsCenter />
 
@@ -146,7 +175,7 @@ const logout = () => {
                                 Punto de venta
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                               Reportes
+                                Reportes
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('sales.index')"
                                 :active="route().current('sales.index') || route().current('sales.show')">
@@ -155,10 +184,12 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
                                 Gastos
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('products.index')" :active="route().current('products.*') || route().current('global-product-store.*')">
+                            <ResponsiveNavLink :href="route('products.index')"
+                                :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('cash-cuts.index')" :active="route().current('cash-cuts.*')">
+                            <ResponsiveNavLink :href="route('cash-cuts.index')"
+                                :active="route().current('cash-cuts.*')">
                                 Caja
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">
