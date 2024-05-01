@@ -4,13 +4,14 @@
             <div class="flex justify-between items-center">
                 <Back />
                 <div class="flex items-center space-x-2">
-                    <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
-                        title="¿Continuar?" @confirm="print(sale)">
+                    <!-- ** descomentar cuando se haga una plantilla para imprimir todas las ventas del día **  -->
+                    <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
+                        title="¿Continuar?" @confirm="print(Object.values(day_sales)[0].sales[0]?.created_at)">
                         <template #reference>
                             <i @click.stop
                                 class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                         </template>
-                    </el-popconfirm>
+                    </el-popconfirm> -->
                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                         title="¿Continuar?" @confirm="deleteItem(Object.values(day_sales)[0].sales[0]?.id)">
                         <template #reference>
@@ -100,6 +101,7 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+
 
 export default {
     data() {
@@ -205,8 +207,8 @@ export default {
                 window.open(route('products.show', product.product_id), '_blank');
             }
         },
-        print(sale) {
-            window.open(route('sales.print-ticket', sale.id), '_blank');
+        print(daySales) {
+            window.open(route('sales.print-ticket', daySales), '_blank');
         }
     },
 }

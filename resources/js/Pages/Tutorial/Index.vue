@@ -2,83 +2,36 @@
 <Head title="Ezy Ventas tutorial" />
     <div class="">
         <Modal :maxWidth="'3xl'" :show="tutorialModal">
-            <div class="py-4 px-7 relative">
-                <h1 class="font-bold text-center mb-5">Bienvenido (a) Abarrotes Doña Juanita</h1>
+            <div class="py-8 px-7 relative">
+                <h1 class="font-bold text-2xl text-center mb-5">Bienvenido (a) {{ $page.props.auth.user.store.name }}</h1>
                 <p class="font-bold">Configura tu tienda.</p>
                 <p class="text-sm">La configuración inicial te permite personalizar tu experiencia de venta según tus necesidades. Puedes omitir este paso y ajustarlo más tarde en el módulo de configuraciones</p>
 
                 <!-- Barra de progreso -->
                 <!-- <div class="rounded-full border border-[#D9D9D9] h-5"></div>   -->
 
-                <form class="mt-5 mb-2 space-y-3" @submit.prevent="storeCashCut">
-                    <!-- escaner -->
-                    <section>
+                <section class="mt-5">
+                    <div v-for="(item, index) in settings" :key="item.id" class="mb-3">
                         <div class="flex items-center justify-between">
-                            <p class="font-semibold">Escanear productos</p>
-                            <el-switch
-                                v-model="form.scanner"
-                                class="ml-2"
+                            <p class="font-semibold">{{ item.key }}</p>
+                            <el-switch 
+                                @change="updateSettingValue(index)" 
                                 inline-prompt
                                 style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #CCCCCC"
                                 active-text=" Habilitado "
                                 inactive-text=" Deshabilitado "
-                            />
+                                v-model="values[index]" 
+                                :loading="settingLoading[index]"
+                                size="small" class="ml-2" />
                         </div>
-                        <p class="text-sm">Si cuentas con un lector de códigos de barras puedes habilitar esta opción.</p>
-                    </section>
-
-                    <!-- Descuentos -->
-                    <section>
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold">Descuentos</p>
-                            <el-switch
-                                v-model="form.discounts"
-                                class="ml-2"
-                                inline-prompt
-                                style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #CCCCCC"
-                                active-text=" Habilitado "
-                                inactive-text=" Deshabilitado "
-                            />
-                        </div>
-                        <p class="text-sm">Al habilitar esta opción puedes aplicar descuentos a tus ventas.</p>
-                    </section>
-
-                    <!-- Inventario -->
-                    <section>
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold">Inventario</p>
-                            <el-switch
-                                v-model="form.stock"
-                                class="ml-2"
-                                inline-prompt
-                                style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #CCCCCC"
-                                active-text=" Habilitado "
-                                inactive-text=" Deshabilitado "
-                            />
-                        </div>
-                        <p class="text-sm">Al habilita esta opción podrás mantener un control de las existencias de tus productos.</p>
-                    </section>
-
-                    <!-- Monto máximo en caja -->
-                    <section>
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold">Monto máximo en caja</p>
-                            <el-switch
-                                v-model="form.max_cash"
-                                class="ml-2"
-                                inline-prompt
-                                style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #CCCCCC"
-                                active-text=" Habilitado "
-                                inactive-text=" Deshabilitado "
-                            />
-                        </div>
-                        <p class="text-sm">Tienes la posibilidad de agregar una cantidad máxima que se deba tener en caja, el sistema te notificará cuando hayas pasado este máximo y te pedirá hacer corte de caja.</p>
-                    </section>
-                    <div class="flex justify-end space-x-5 pt-2 pb-1 py-3 col-span-full">
-                        <button class="text-primary" @click="tutorialModal = false">Omitir</button>
-                        <PrimaryButton :disabled="form.processing">Continuar</PrimaryButton>
+                        <p class="text-gray99 text-sm">{{ configDescriptions[index] }}</p>
                     </div>
-                </form>
+                </section>
+
+                <div class="flex justify-end space-x-5 pt-2 pb-1 py-3 mt-9">
+                    <button class="text-primary" @click="tutorialModal = false; finishModal = true">Omitir</button>
+                    <PrimaryButton @click="tutorialModal = false; finishModal = true">Continuar</PrimaryButton>
+                </div>
             </div>
         </Modal>
 
@@ -96,7 +49,7 @@
                 </div>
                 
                 <div class="text-center">
-                    <PrimaryButton class="!px-12" @click="$inertia.get(route('dashbard'))">Seguir explorando</PrimaryButton>
+                    <PrimaryButton class="!px-12" @click="$inertia.get(route('sales.point'))">¡Comenzar ahora!</PrimaryButton>
                 </div>
 
                 <p class="text-xs text-center mt-8">¡Descubre lo que Ezy Ventas puede hacer por ti y tu negocio!</p>
@@ -108,35 +61,79 @@
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Modal from "@/Components/Modal.vue";
-import { useForm } from "@inertiajs/vue3";
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
+import axios from 'axios';
 
 export default {
 data() {
-    const form = useForm({
-        scanner: false,
-        discounts: false,
-        stock: false,
-        max_cash: false,
-    });
-
     return {
-        form,
-        tutorialModal: false,
-        finishModal: true
+        tutorialModal: true,
+        finishModal: false,
+        loading: false,
+        settingLoading: [],
+        settings: [],
+        values: [],
+        configDescriptions: [ //descripciones cortas de cada configuración.
+            'Si cuentas con un lector de códigos de barras puedes habilitar esta opción.',
+            'Al habilitar esta opción puedes aplicar descuentos a tus ventas.',
+            'Al habilita esta opción podrás mantener un control de las existencias de tus productos.',
+            'Muestra el dinero en tiempo real que hay en tu caja',
+            'Tienes la posibilidad de agregar una cantidad máxima que se deba tener en caja, el sistema te notificará cuando hayas pasado este máximo y te pedirá hacer corte de caja.'
+        ]
     }
 },
 components:{
 PrimaryButton,
 Modal,
-Head,
-Link 
+Head
 },
 props:{
 
 },
 methods:{
+    async fetchModuleSettings() {
+        try {
+            this.loading = true;
+            const response = await axios.get(route('stores.get-settings-by-module', {
+                store: this.$page.props.auth.user.store_id, module: 'Punto de venta'
+            }));
 
+            if (response.status === 200) {
+                this.settings = response.data.items;
+                this.settingLoading = new Array(response.data.items.length).fill(false);
+                this.values = response.data.items.map(item => {
+                    return item.type == 'Bool'
+                        ? Boolean(item.pivot.value)
+                        : item.pivot.value;
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.loading = false;
+        }
+    },
+    async updateSettingValue(index) {
+        try {
+            this.settingLoading[index] = true
+            const response = await axios.put(route('stores.toggle-setting-value', {
+                store: this.$page.props.auth.user.store_id,
+                setting_id: this.settings[index].id
+            }), { value: this.values[index] });
+
+            if (response.status === 200) {
+                // por lo pronto no se requiere hacer nada
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.settingLoading[index] = false;
+            return true;
+        }
+    },
+},
+mounted() {
+    this.fetchModuleSettings();
 }
 }
 </script>
