@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\CashRegister;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -31,6 +32,13 @@ class CreateNewUser implements CreatesNewUsers
         $store = Store::create([
             'name' => $input['store_name'],
             'contact_name' => $input['name'],
+        ]);
+
+        CashRegister::create([
+            'started_cash' => 0,
+            'current_cash' => 0,
+            'max_cash' => 5000,
+            'store_id' => $store->id,
         ]);
 
         return User::create([
