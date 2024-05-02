@@ -1,14 +1,66 @@
 <template>  
 <Head title="Ezy Ventas tutorial" />
-    <div class="">
+    <div>
+
+        <!-- Videos del tutorial  -->
         <Modal :maxWidth="'3xl'" :show="tutorialModal">
-            <div class="py-8 px-7 relative">
-                <h1 class="font-bold text-2xl text-center mb-5">Bienvenido (a) {{ $page.props.auth.user.store.name }}</h1>
-                <p class="font-bold">Configura tu tienda.</p>
-                <p class="text-sm">La configuración inicial te permite personalizar tu experiencia de venta según tus necesidades. Puedes omitir este paso y ajustarlo más tarde en el módulo de configuraciones</p>
+            <div class="py-7 px-7 relative">
+                <button v-if="step !== 1" @click="prevStep" class="hover:bg-grayD9 cursor-pointer rounded-full size-7"><i class="fa-solid fa-chevron-left"></i></button>
+                <figure class="mx-auto w-40">
+                    <img class="" src="@/../../public/images/black_logo.png" alt="logo">
+                </figure>
+                <h1 class="font-bold text-2xl text-center mb-2">Bienvenido (a) {{ $page.props.auth.user.store.name }}</h1>
+                <p class="mb-5 text-center">Completa el siguiente tutorial para poder comenzar a utilizar Ezy Ventas</p>
 
                 <!-- Barra de progreso -->
-                <!-- <div class="rounded-full border border-[#D9D9D9] h-5"></div>   -->
+                <div class="grid grid-cols-4 gap-x-3 mb-4 mx-12">
+                    <template v-for="index in 4" :key="index">
+                        <div :class="{'border-2 border-primary w-full': index <= step, 'border-2 w-full': index > step}"></div>
+                    </template>
+                </div>
+
+                <p class="font-bold" v-text="tutorialContent[step - 1].title"></p>
+
+                <video v-if="step === 1" controls>
+                    <source src="@/../../public/Videos/Tutorial_point_EzyV.mp4" type="video/mp4">
+                    Tu navegador no soporta la etiqueta de video.
+                </video>
+
+                <video v-if="step === 2" controls>
+                    <source src="@/../../public/Videos/Tutorial_productos_EzyV.mp4" type="video/mp4">
+                    Tu navegador no soporta la etiqueta de video.
+                </video>
+
+                <video v-if="step === 3" controls>
+                    <source src="@/../../public/Videos/Tutorial_graficas_EzyV.mp4" type="video/mp4">
+                    Tu navegador no soporta la etiqueta de video.
+                </video>
+
+                <div class="flex justify-end space-x-5 pt-2 pb-1 py-3 mt-9">
+                    <PrimaryButton @click="nextStep">Continuar</PrimaryButton>
+                </div>
+            </div>
+        </Modal>
+
+        <!-- Configuraciones de la tienda -->
+        <Modal :maxWidth="'3xl'" :show="configModal">
+            <div class="py-8 px-7 relative">
+                <button @click="tutorialModal = true; configModal = false" class="hover:bg-grayD9 cursor-pointer rounded-full size-7"><i class="fa-solid fa-chevron-left"></i></button>
+                <figure class="mx-auto w-40">
+                    <img class="" src="@/../../public/images/black_logo.png" alt="logo">
+                </figure>
+                <h1 class="font-bold text-2xl text-center mb-5">Bienvenido (a) {{ $page.props.auth.user.store.name }}</h1>
+
+                <!-- Barra de progreso -->
+                <div class="grid grid-cols-4 gap-x-3 mb-4 mx-12">
+                    <div class="border-2 border-primary w-full"></div>
+                    <div class="border-2 border-primary w-full"></div>
+                    <div class="border-2 border-primary w-full"></div>
+                    <div class="border-2 border-primary w-full"></div>
+                </div>
+
+                <p class="font-bold">Configura tu tienda.</p>
+                <p class="text-sm">La configuración inicial te permite personalizar tu experiencia de venta según tus necesidades. Puedes omitir este paso y ajustarlo más tarde en el módulo de configuraciones</p>
 
                 <section class="mt-5">
                     <div v-for="(item, index) in settings" :key="item.id" class="mb-3">
@@ -29,8 +81,8 @@
                 </section>
 
                 <div class="flex justify-end space-x-5 pt-2 pb-1 py-3 mt-9">
-                    <button class="text-primary" @click="tutorialModal = false; finishModal = true">Omitir</button>
-                    <PrimaryButton @click="tutorialModal = false; finishModal = true">Continuar</PrimaryButton>
+                    <button class="text-primary" @click="configModal = false; finishModal = true">Omitir</button>
+                    <PrimaryButton @click="configModal = false; finishModal = true">Continuar</PrimaryButton>
                 </div>
             </div>
         </Modal>
@@ -68,6 +120,13 @@ export default {
 data() {
     return {
         tutorialModal: true,
+        step: 1,
+        tutorialContent: [
+            { title: 'Video tutorial para realizar tus ventas' },
+            { title: 'Video tutorial para cargar tus productos' },
+            { title: 'Video tutorial de análisis de ventas y egresos' }
+        ],
+        configModal: false,
         finishModal: false,
         loading: false,
         settingLoading: [],
@@ -130,6 +189,17 @@ methods:{
             this.settingLoading[index] = false;
             return true;
         }
+    },
+    nextStep() {
+        if ( this.step < 3 ) { 
+            this.step++;
+        } else {
+            this.tutorialModal = false;
+            this.configModal= true;
+        }
+    },
+    prevStep() {
+        this.step--;
     },
 },
 mounted() {
