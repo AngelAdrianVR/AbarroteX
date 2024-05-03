@@ -33,13 +33,13 @@
                         <div v-else class="flex flex-col space-y-3 col-span-full mt-7">
                             <div v-for="(item, index) in suscriptions" :key="index" class="relative">
                                 <!-- mensaje de mejor opcion -->
-                                <div v-if="item.title == 'Anual'" class="bg-primarylight absolute top-0 -left-4 w-48">
+                                <div v-if="item.name == 'Anual'" class="bg-primarylight absolute top-0 -left-4 w-48">
                                     <div class="relative">
                                         <p class="text-primary font-bold text-center">Mejor opción</p>
                                         <i class="fa-solid fa-play text-lg text-white absolute right-0 -bottom-1 rotate-180"></i>
                                     </div>
                                 </div>
-                                <div :class="item.title == 'Anual' ? 'mt-7' : ''" class="flex">
+                                <div :class="item.name == 'Anual' ? 'mt-7' : ''" class="flex">
                                     <div class="flex items-center h-5">
                                         <input v-model="form.suscription_period" :id="'suscription-' + index"
                                             :aria-describedby="'suscription-text-' + index" type="radio" :value="item.name"
