@@ -34,7 +34,7 @@
             </el-tooltip>
           </p>
         </div>
-        <!-- Dropdon -->
+        <!-- Dropdown -->
         <div class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
           <el-col :span="3">
             <el-dropdown trigger="click">

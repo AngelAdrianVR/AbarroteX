@@ -3,7 +3,7 @@
         <section class="mt-5 mx-2 lg:mx-8">
             <el-tabs class="mx-3" v-model="activeTab">
                 <el-tab-pane label="Caja" name="1">
-                    <CashRegister />
+                    <CashRegister :cash_register="cash_register" :currentMovements="current_movements" />
                 </el-tab-pane>
                 <el-tab-pane label="Historial de cortes" name="2">
                     <CashCutsTable :items="cash_cuts" />
@@ -32,7 +32,9 @@ export default {
         PrimaryButton,
     },
     props: {
-        cash_cuts: Array
+        cash_cuts: Array,
+        cash_register: Object,
+        current_movements: Array
     },
     methods: {
 
