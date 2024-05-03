@@ -2,29 +2,96 @@
     <Loading v-if="loading" />
     <div v-else class="min-h-32">
         <section class="flex justify-end space-x-3 mt-2">
-            <!-- <ThirthButton class="!rounded-md"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo
+            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'" class="!rounded-md"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo
             </ThirthButton>
-            <ThirthButton class="!rounded-md"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</ThirthButton>
-            <PrimaryButton>Hacer corte de caja</PrimaryButton> -->
+            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'" class="!rounded-md"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</ThirthButton>
+            <PrimaryButton @click="handleCashCut">Hacer corte de caja</PrimaryButton>
         </section>
-        <section v-if="isMaxCashOn" class="mt-5">
-            <form @submit.prevent="update">
-                <div>
-                    <InputLabel value="Máxima cantidad en caja permitida *" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.max_cash" type="text" placeholder="Ingresa el monto"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/\D/g, '')">
-                        <template #prefix>
-                            <i class="fa-solid fa-dollar-sign"></i>
-                        </template>
-                    </el-input>
-                    <InputError :message="form.errors.max_cash" />
+
+        <!-- Información de caja -->
+        <section class="lg:flex lg:space-x-7 md:w-[90%] mx-auto text-sm mt-7">
+                <div class="w-full border border-grayD9 rounded-lg self-start">
+                    <div class="p-4 flex items-center space-x-2">
+                        <div class="w-3/4 space-y-1">
+                            <p class="font-bold mb-3">Efectivo esperado</p>
+                            <p class="text-gray99">Efectivo inicial</p>
+                            <p class="text-gray99">Ventas</p>
+                            <p v-for="cashRegisterMovement in currentMovements"
+                                :key="cashRegisterMovement"
+                                :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
+                                class="text-gray99 truncate">
+                                {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ??
+                                    'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
+                            </p>
+                        </div>
+                        <div class="w-1/4 space-y-1">
+                            <div v-if="cutLoading">
+                                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                            </div>
+                            <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
+                                (cash_register.started_cash + cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            <p class="text-gray99"><span class="text-gray99 mr-3"><i
+                                        class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                            cash_register.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                            <div v-if="cutLoading">
+                                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                            </div>
+                            <p v-else class="text-gray99"><span class="text-gray99 mr-3"><i
+                                        class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                            cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            <p v-for="cashRegisterMovement in currentMovements"
+                                :key="cashRegisterMovement" class="text-gray99">
+                                <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
+                                    class="fa-solid text-xs px-1"></i>
+                                <span class="text-gray99 mr-3">$</span>{{
+                                    cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
+                            </p>
+                        </div>
+                    </div>
+                    <footer class="bg-[#F2F2F2] text-gray99 py-2 flex px-2">
+                        <p class="w-3/4 text-right pr-7">Total</p>
+                        <div v-if="cutLoading">
+                            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                        </div>
+                        <p v-else class="w-1/4 pl-4">
+                            <span class="mr-3">
+                                $
+                            </span>
+                            <b>{{ (cash_register.started_cash + cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
+                        </p>
+                    </footer>
                 </div>
-                <div class="mt-2">
-                    <PrimaryButton type="submit" :disabled="form.processing">Guardar</PrimaryButton>
+
+                <div v-if="isMaxCashOn" class="mt-7 py-3 lg:mt-0 mx-auto lg:mx-0 w-96 border border-grayD9 rounded-lg self-start relative">
+                    <h2 class="py-2 text-center text-sm font-bold">Efectivo máximo en caja</h2>
+                    <i v-if="!edit_max_cash" @click="editMaxCash" class="fa-solid fa-pen text-xs text-primary cursor-pointer hover:bg-gray-200 rounded-full py-1 px-[5px] absolute top-2 right-2"></i>
+                    <p v-if="!edit_max_cash" class="text-center mb-1">$ {{ cash_register.max_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <div v-else>
+                        <el-input v-model="form.max_cash" type="text" placeholder="Ingresa el monto" class="px-10"
+                            :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                            :parser="(value) => value.replace(/\D/g, '')">
+                            <template #prefix>
+                                <i class="fa-solid fa-dollar-sign"></i>
+                            </template>
+                        </el-input>
+                        <InputError :message="form.errors.max_cash" />
+                        <div class="flex justify-center space-x-4 my-2">
+                            <el-tooltip content="Cancelar" placement="left">
+                                <button @click="edit_max_cash = false;"
+                                    class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
+                                    <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
+                                </button>
+                            </el-tooltip>
+                            <el-tooltip content="Guardar" placement="right">
+                                <button @click="update"
+                                    class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
+                                        class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
+                            </el-tooltip>
+                        </div>
+                    </div>
+                    <p class="text-gray99 text-xs text-center">Se notificará cuando haya alcanzado el máximo permitido para hacer corte de caja.</p>
                 </div>
-            </form>
-        </section>
+            </section>
     </div>
 
     <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
@@ -69,6 +136,91 @@
       </div>
     </Modal>
     <!-- --------------------------- Modal Ingreso o retiro de dinero en caja ends ------------------------------------ -->
+
+    <!-- -------------- Modal corte de caja starts----------------------- -->
+    <Modal :show="cashCutModal" @close="cashCutModal = false; form.reset">
+      <div class="p-4 relative">
+        <i @click="cashCutModal = false; cutForm.reset()"
+          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+
+        <form class="mt-5 mb-2" @submit.prevent="storeCashCut">
+          <h2 class="font-bold col-span-full">Hacer corte de caja</h2>
+          <p class="col-span-full">Por favor, cuenta el dinero en caja e ingrésalo para proceder con el corte.</p>
+          <div class="rounded-full h-3 bg-[#F2F2F2] my-2"></div>
+
+          <section class="w-full flex justify-end space-x-3 text-sm">
+            <div class="w-44 space-y-2">
+              <p>Efectivo esperado en caja</p>
+              <p>Recuento manual</p>
+              <p>Diferencia</p>
+            </div>
+            <div class="w-44 space-y-2">
+              <div v-if="cutLoading">
+                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+              </div>
+              <p v-else>${{ (cash_register.started_cash + cutForm.totalSaleForCashCut +
+                cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+              <el-input @input="difference()" v-model="cutForm.counted_cash" type="text" placeholder="0.00"
+                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                :parser="(value) => value.replace(/[^\d.]/g, '')" class="!w-24 !h-6">
+                <template #prefix>
+                  <i class="fa-solid fa-dollar-sign"></i>
+                </template>
+              </el-input>
+              <p v-if="cutForm.counted_cash" :class="{
+                'text-green-500': (cutForm.difference) === 0,
+                'text-blue-500': (cutForm.difference) < 0,
+                'text-red-500': (cutForm.difference) > 0
+              }">
+                <!-- Se multiplica por -1 para cambiar el signo y si sobra sea positivo y si falta negativo -->
+                ${{ (cutForm.difference * -1)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+              </p>
+              <p v-if="cutForm.counted_cash" :class="{
+                'text-green-500 bg-green-100': (cutForm.difference) === 0,
+                'text-blue-500 bg-blue-100': (cutForm.difference) < 0,
+                'text-red-500 bg-red-100': (cutForm.difference) > 0
+              }" class="rounded-full text-xs inline py-[2px] px-2">
+                <!-- Icono de proveedor de verificación si la diferencia es 0 -->
+                <i v-if="(cutForm.difference) === 0" class="fa-solid fa-check mr-1"></i>
+                <!-- Icono de sobrante en caja si la diferencia es negativa -->
+                <i v-else-if="(cutForm.difference) < 0" class="fa-solid fa-plus mr-1"></i>
+                <!-- Icono de faltante de efectivo si la diferencia es positiva -->
+                <i v-else class="fa-solid fa-xmark mr-1"></i>
+                <!-- Muestra el mensaje correspondiente -->
+                {{ (cutForm.difference) === 0 ? 'Todo bien' : ((cutForm.difference) < 0 ? 'Sobrante en caja'
+                  : 'Faltante de efectivo') }} </p>
+            </div>
+          </section>
+
+          <div v-if="cutForm.counted_cash" class="flex items-center space-x-3 mt-3">
+            <div class="w-full">
+              <InputLabel value="Monto a retirar de caja" class="text-sm ml-2" />
+              <el-input v-model="cutForm.withdrawn_cash" type="number" step="0.01" class="!w-1/2 !h-6"
+                placeholder="0.00">
+                <template #prefix>
+                  <i class="fa-solid fa-dollar-sign"></i>
+                </template>
+              </el-input>
+              <InputError :message="cutForm.errors.withdrawn_cash" />
+            </div>
+            <p v-if="cutForm.withdrawn_cash" class="w-full mt-3 text-sm font-bold">Efectivo que dejarás en caja: ${{
+              (cutForm.counted_cash - cutForm.withdrawn_cash)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+          </div>
+          <div class="col-span-full mt-2">
+            <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
+            <el-input v-model="cutForm.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+              placeholder="Escribe auí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit
+              clearable />
+          </div>
+
+          <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
+            <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
+            <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing">Hacer corte</PrimaryButton>
+          </div>
+        </form>
+      </div>
+    </Modal>
+    <!-- --------------------------- Modal corte de caja ends ------------------------------------ -->
 </template>
 
 <script>
@@ -79,79 +231,156 @@ import Loading from '@/Components/MyComponents/Loading.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 import { useForm } from "@inertiajs/vue3";
 
 export default {
-    data() {
-        const form = useForm({
-            max_cash: null,
-            cashRegisterMovementType: null,
-            registerAmount: null,
-        });
+data() {
+    const form = useForm({
+        max_cash: null,
+        cashRegisterMovementType: null,
+        registerAmount: null,
+    });
 
-        return {
-            form,
-            cashRegister: null,
-            loading: true,
-            cashRegisterModal: false,
+    const cutForm = useForm({
+      counted_cash: null,
+      difference: null,
+      notes: null,
+      totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
+      totalCashMovements: null, //dinero de movimientos de caja para hacer corte
+      withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
+    });
 
-            // monto maximo en caja activado
-            isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
-        }
-    },
-    components: {
-        PrimaryButton,
-        ThirthButton,
-        CancelButton,
-        InputLabel,
-        InputError,
-        Loading,
-        Modal
-    },
-    methods: {
-        update() {
-            this.form.put(route('cash-registers.update', this.cashRegister.id), {
-                onSuccess: () => {
-                    this.$notify({
-                        title: "Correcto",
-                        message: "",
-                        type: "success",
-                    });
-                }
-            });
-        },
-        storeCashRegisterMovement() {
-            this.form.post(route('cash-register-movements.store'), {
-                onSuccess: () => {
+    return {
+        form,
+        cutForm,
+        edit_max_cash: false, //bandera para editar el maximo dinero de caja
+        cashRegister: null,
+        loading: true,
+        cutLoading: false,
+        cashRegisterModal: false,
+        cashCutModal: false,
+
+        // monto maximo en caja activado
+        isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
+    }
+},
+components: {
+    PrimaryButton,
+    ThirthButton,
+    CancelButton,
+    InputLabel,
+    InputError,
+    Loading,
+    Modal
+},
+props: {
+cash_register: Object,
+currentMovements: Array
+},
+methods: {
+    update() {
+        this.form.put(route('cash-registers.update', this.cashRegister.id), {
+            onSuccess: () => {
                 this.$notify({
                     title: "Correcto",
-                    message: "Se ha registrado el movimiento de caja",
+                    message: "",
                     type: "success",
                 });
-                this.cashRegisterModal = false;
-                this.cashRegisterMovementType = null;
-                this.registerAmount = null;
-                },
-            });
-        },
-        async fetchCashRegister() {
-            try {
-                this.loading = true;
-                const response = await axios.get(route('cash-registers.fetch-cash-register'));
-                if (response.status === 200) {
-                    this.cashRegister = response.data.item;
-                    this.form.max_cash = this.cashRegister.max_cash;
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
+                this.edit_max_cash = false;
             }
-        },
+        });
     },
-    mounted() {
-        this.fetchCashRegister();
+    storeCashRegisterMovement() {
+        this.form.post(route('cash-register-movements.store'), {
+            onSuccess: () => {
+            this.$notify({
+                title: "Correcto",
+                message: "Se ha registrado el movimiento de caja",
+                type: "success",
+            });
+            this.cashRegisterModal = false;
+            this.cashRegisterMovementType = null;
+            this.registerAmount = null;
+            this.fetchTotalCashMovements();
+            },
+        });
+    },
+    editMaxCash() {
+        this.edit_max_cash = true;
+    },
+    async fetchCashRegister() {
+        try {
+            this.loading = true;
+            const response = await axios.get(route('cash-registers.fetch-cash-register'));
+            if (response.status === 200) {
+                this.cashRegister = response.data.item;
+                this.form.max_cash = this.cashRegister.max_cash;
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.loading = false;
+        }
+    },
+    handleCashCut() {
+        this.fetchTotalSaleForCashCut();
+        this.fetchTotalCashMovements();
+        this.cashCutModal = true;
+    },
+    async fetchTotalSaleForCashCut() {
+        try {
+            const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut'));
+            if (response.status === 200) {
+            this.cutForm.totalSaleForCashCut = response.data;
+            }
+        } catch (error) {
+            console.log(error);
     }
+    },
+    async fetchTotalCashMovements() {
+      try {
+        this.cutLoading = true;
+        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements'));
+        if (response.status === 200) {
+          this.cutForm.totalCashMovements = response.data;
+          this.cutLoading = false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    storeCashCut() {
+      this.cutForm.post(route('cash-cuts.store'), {
+        onSuccess: () => {
+          this.$notify({
+            title: "Correcto",
+            message: "Se ha realizado el corte de caja",
+            type: "success",
+          });
+          this.cashCutModal = false;
+          this.fetchCashRegister();
+          this.cutForm.reset();
+        },
+      });
+    },
+    formatDateHour(dateString) {
+        return format(parseISO(dateString), 'h:mm a', { locale: es });
+    },
+    formatDate(dateString) {
+        return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+    },
+    difference() {
+      //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
+      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.cash_register.started_cash) - this.cutForm.counted_cash
+    },
+},
+mounted() {
+    this.fetchCashRegister();
+    this.fetchTotalSaleForCashCut();
+    this.fetchTotalCashMovements();
+}
 
 }
 </script>

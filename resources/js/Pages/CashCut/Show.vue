@@ -15,7 +15,7 @@
                             <p class="font-bold mb-3">Recuento manual de efectivo</p>
                             <p class="text-gray99">Efectivo inicial</p>
                             <p class="text-gray99">Ventas</p>
-                            <p v-for="cashRegisterMovement in cash_cut.cash_register?.movements"
+                            <p v-for="cashRegisterMovement in cash_cut_movements"
                                 :key="cashRegisterMovement"
                                 :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
                                 class="text-gray99 truncate">
@@ -32,7 +32,7 @@
                             <p class="text-gray99"><span class="text-gray99 mr-3"><i
                                         class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
                                             cash_cut.sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                            <p v-for="cashRegisterMovement in cash_cut.cash_register?.movements"
+                            <p v-for="cashRegisterMovement in cash_cut_movements"
                                 :key="cashRegisterMovement" class="text-gray99">
                                 <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
                                     class="fa-solid text-xs px-1"></i>
@@ -121,7 +121,8 @@ export default {
         Back
     },
     props: {
-        cash_cut: Array
+        cash_cut: Array,
+        cash_cut_movements: Array
     },
     methods: {
         formatDateHour(dateString) {
