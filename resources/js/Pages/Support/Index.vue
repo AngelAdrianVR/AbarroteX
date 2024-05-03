@@ -51,12 +51,12 @@ export default {
                     </svg>
                     `,
                     title: "Guía",
-                    routeName: 'supports.faqs',
+                    routeName: 'tutorials.index',
                 },
                 {
                     icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-1 -1 28 28" height="28" width="28" id="Receipt-Check--Streamline-Core"><desc>Receipt Check Streamline Icon: https://streamlinehq.com</desc><g id="receipt-check--shop-shopping-pay-payment-store-cash-bill-receipt-check-confirm"><path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m5.107142857142858 13 3.7142857142857144 2.7857142857142856 6.5 -7.428571428571429" stroke-width="2"></path><path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M22.285714285714285 0.9285714285714286H4.642857142857143c-0.9850842857142856 0 -1.9298314285714286 0.39132600000000006 -2.6263900000000002 1.0878957142857144C1.3198974285714284 2.7130257142857146 0.9285714285714286 3.657772857142857 0.9285714285714286 4.642857142857143v20.42857142857143L5.571428571428571 22.285714285714285l4.642857142857143 2.7857142857142856L14.857142857142858 22.285714285714285l4.642857142857143 2.7857142857142856V3.7142857142857144c0 -0.7388085714285715 0.2934285714285714 -1.4473828571428573 0.8158428571428572 -1.9697971428571428C20.83825714285714 1.2220650000000002 21.546942857142856 0.9285714285714286 22.285714285714285 0.9285714285714286c0.7387714285714285 0 1.4474571428571428 0.29349357142857146 1.9698714285714285 0.8159171428571429 0.5224142857142857 0.5224142857142857 0.8158428571428572 1.2309885714285715 0.8158428571428572 1.9697971428571428v6.5h-5.571428571428571" stroke-width="2"></path></g></svg>`,
                     title: "Suscripción",
-                    routeName: 'supports.faqs',
+                    routeName: 'supports.index',
                 },
 
             ]

@@ -34,7 +34,7 @@
             </el-tooltip>
           </p>
         </div>
-        <!-- Dropdon -->
+        <!-- Dropdown -->
         <div class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
           <el-col :span="3">
             <el-dropdown trigger="click">
@@ -87,7 +87,7 @@
                   @confirm="clearTab()">
                   <template #reference>
                     <ThirthButton class="!text-[#F80505] !border-[#F80505] !py-1 !px-2 mb-2"><i
-                        class="fa-regular fa-trash-can mr-2"></i> Limpiar registros</ThirthButton>
+                        class="fa-regular fa-trash-can mr-2"></i> Limpiar registro</ThirthButton>
                   </template>
                 </el-popconfirm>
                 <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
@@ -604,7 +604,7 @@ export default {
       // Introducir un retraso para dar tiempo al evento click de ejecutarse antes del blur
       setTimeout(() => {
         this.searchFocus = false;
-      }, 80);
+      }, 100);
     },
     async getProductByCode() {
       this.scanning = true;

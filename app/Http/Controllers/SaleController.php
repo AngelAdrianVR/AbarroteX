@@ -8,6 +8,7 @@ use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
+use App\Models\User;
 use App\Notifications\BasicNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -258,11 +259,32 @@ class SaleController extends Controller
         return response()->json(['items' => $groupedSales]);
     }
 
-    public function printTicket($sale_id)
+    public function printTicket($created_at)
     {
-        // $sale = SaleResource::make(Sale::with(['products'])->find($sale_id));
+        // Parsear la fecha recibida para obtener solo la parte de la fecha
+        $date = Carbon::parse($created_at)->toDateString();
 
-        // // return $sale;
-        // return inertia('Sale/PrintTicket', compact('sale'));
+        // Obtener las ventas registradas en la fecha recibida
+        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        $day_sales = $sales->groupBy(function ($sale) {
+            return Carbon::parse($sale->created_at)->format('d-F-Y');
+        })->map(function ($sales) {
+            // Calcular totales
+            $totalQuantity = $sales->sum('quantity');
+            $totalSale = $sales->sum(function ($productSale) {
+                return $productSale['quantity'] * $productSale['current_price'];
+            });
+
+            return [
+                'total_quantity' => $totalQuantity,
+                'total_sale' => $totalSale,
+                'sales' => $sales->values(), // Convertir el mapa en un arreglo indexado
+            ];
+        });
+
+        // return $day_sales;
+        return inertia('Sale/PrintTicket', compact('day_sales'));
     }
 }

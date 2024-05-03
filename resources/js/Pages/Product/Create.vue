@@ -56,7 +56,7 @@
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" v-model="form.category_id" clearable placeholder="Seleccione"
+                    <el-select class="w-1/2" filterable v-model="form.category_id" clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="category in localCategories" :key="category" :label="category.name"
                             :value="category.id" />
@@ -72,7 +72,7 @@
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" v-model="form.brand_id" clearable placeholder="Seleccione"
+                    <el-select class="w-1/2" v-model="form.brand_id" filterable clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
                     </el-select>

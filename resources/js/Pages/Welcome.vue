@@ -38,7 +38,7 @@ defineProps({
     <main class="relative bg-center selection:bg-primary selection:text-white">
         <section class="lg:flex">
             <div class="self-start mt-28 ml-10">
-                <h1 class="text-5xl font-bold"><strong class="text-primary">Ezy Ventas </strong>el mejor punto de venta de México</h1> <br>
+                <h1 class="text-5xl font-bold"><strong class="text-primary">Ezy Ventas </strong>el punto de venta más accesible y fácil de usar</h1> <br>
                 <p class="text-xl mb-10">Potencia tu negocio con nuestro Punto de Venta, donde cada transacción es el comienzo de una historia exitosa.</p>
                 <Link :href="route('register')"><PrimaryButton>Pruébalo ahora</PrimaryButton></Link>
             </div>
