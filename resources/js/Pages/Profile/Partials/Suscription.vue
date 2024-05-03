@@ -14,7 +14,7 @@
             </p>
             <article class="mt-6">
                 <div class="flex items-start space-x-3 justify-between">
-                    <div class="w-5/6">
+                    <div class="w-[100%] lg:w-5/6">
                         <div v-if="!edit" class="grid grid-cols-2 gap-2">
                             <p class="flex flex-col">
                                 <b>Suscripción <span class="lowercase">{{ $page.props.auth.user.store.suscription_period
@@ -30,23 +30,64 @@
                                 </b>
                             </p>
                         </div>
-                        <div v-else class="flex flex-col space-y-3 col-span-full mt-3">
-                            <div v-for="(item, index) in suscriptions" :key="index" class="flex">
-                                <div class="flex items-center h-5">
-                                    <input v-model="form.suscription_period" :id="'suscription-' + index"
-                                        :aria-describedby="'suscription-text-' + index" type="radio" :value="item.name"
-                                        class="size-3 text-primary border-gray-300 focus:ring-0">
+                        <div v-else class="flex flex-col space-y-3 col-span-full mt-7">
+                            <div v-for="(item, index) in suscriptions" :key="index" class="relative">
+                                <!-- mensaje de mejor opcion -->
+                                <div v-if="item.title == 'Anual'" class="bg-primarylight absolute top-0 -left-4 w-48">
+                                    <div class="relative">
+                                        <p class="text-primary font-bold text-center">Mejor opción</p>
+                                        <i class="fa-solid fa-play text-lg text-white absolute right-0 -bottom-1 rotate-180"></i>
+                                    </div>
                                 </div>
-                                <div class="ms-2 text-sm">
-                                    <label :for="'suscription-' + index" class="font-medium text-gray-900">
-                                        {{ item.name }}
-                                    </label>
-                                    <p :id="'suscription-text-' + index" class="text-xs font-normal text-gray-500">
-                                        {{ item.description }}
-                                    </p>
+                                <div :class="item.title == 'Anual' ? 'mt-7' : ''" class="flex">
+                                    <div class="flex items-center h-5">
+                                        <input v-model="form.suscription_period" :id="'suscription-' + index"
+                                            :aria-describedby="'suscription-text-' + index" type="radio" :value="item.name"
+                                            class="size-3 text-primary border-gray-300 focus:ring-0">
+                                    </div>
+                                    <div class="ms-2 text-sm">
+                                        <div class="grid grid-cols-2 w-[480px]">
+                                            <label :for="'suscription-' + index" class="font-medium text-gray-900">{{ item.title }}</label>
+                                            <label :for="'suscription-' + index" class="font-bold text-gray-900">{{ item.amount }}</label>
+                                        </div>
+                                        <p :id="'suscription-text-' + index" class="text-xs font-normal text-gray-500">
+                                            {{ item.description }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <p v-if="$page.props.auth.user.store.suscription_period == item.name"
+                                <p v-if="$page.props.auth.user.store.suscription_period == item.title"
                                     class="ml-4 text-xs text-green-600">Actual</p>
+                            </div>
+
+                            <div class="pl-5 pt-7 pb-3 bg-grayF2 rounded-lg">
+                                <p>Para completar el pago de tu suscripción, por favor, deposita o transfiere el dinero a los siguientes datos bancarios:</p>
+
+                                <div class="flex">
+                                    <div class="w-44 pt-5 space-y-1">
+                                        <p>Número de cuenta:</p>
+                                        <p>Clabe interbancaria:</p>
+                                        <p>Nombre de beneficiario:</p>
+                                        <p>Banco:</p>
+                                        <p>Monto de pago:</p>
+                                    </div>
+                                    <div class="w-44 pt-5 space-y-1">
+                                        <p>537286726492</p>
+                                        <p>678679678665342245</p>
+                                        <p>Miguel O. Vazquez</p>
+                                        <p>Nu</p>
+                                        <p class="font-bold">{{ amountToPay }}</p>
+                                    </div>
+                                </div>
+                                <p class="pt-5">A continuación, ingresa una foto del comprobante de pago, es importante que se muestren todos los datos.</p>
+                                
+                                <div class="my-2">
+                                    <InputFilePreview @imagen="saveImage" @cleared="form.imageCover = null" />
+                                </div>
+                                <p class="text-gray99">Tu información será validada en un plazo de 24 horas. Una vez confirmada, podrás continuar disfrutando de tu suscripción. Puedes verificar el estado de tu suscripción en cualquier momento.</p>
+                                
+                                <div class="text-right mx-4 mt-2">
+                                    <PrimaryButton>Enviar comprobante de pago</PrimaryButton>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -157,6 +198,8 @@
     </section>
 </template>
 <script>
+import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useForm } from '@inertiajs/vue3';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
@@ -169,6 +212,7 @@ export default {
         const form = useForm({
             suscription_period: this.$page.props.auth.user.store.suscription_period,
             default_card_id: this.$page.props.auth.user.store.default_card_id,
+            image: null
         });
 
         return {
@@ -176,15 +220,29 @@ export default {
             edit: false,
             loading: false,
             suscriptions: [
-                {
+                {   
                     name: "Mensual",
+                    title: "Mensual (30 días)",
                     amount: "$199.00",
                     description: "Pagas $199.00 cada mes",
                 },
+                {   
+                    name: "Trimestral",
+                    title: "Trimestral (3 meses) + 5 días gratis",
+                    amount: "$597.00",
+                    description: "Pagas $192.58 cada mes",
+                },
                 {
-                    name: "Anual",
-                    amount: "$1,990.00",
-                    description: "Ahorra dos mensualidades en la suscripción anual. Pagas $165.83 cada mes",
+                    name: "Semestral",
+                    title: "Semestral (6 meses) + 14 días gratis",
+                    amount: "$1,494.00",
+                    description: "Pagas $184.64 cada mes",
+                },
+                {
+                    name:"Anual",
+                    title: "Anual (12 meses) + 65 días gratis",
+                    amount: "$2,421.00",
+                    description: "Pagas $157.89 cada mes",
                 },
             ],
             cards: [
@@ -217,9 +275,24 @@ export default {
     props: {
         user: Object,
     },
+    components:{
+        PrimaryButton,
+        InputFilePreview
+    },
     computed: {
         getDefultCard() {
             return this.cards.find(item => item.id == this.$page.props.auth.user.store.default_card_id);
+        },
+        amountToPay() {
+            if ( this.form.suscription_period == 'Mensual' ) {
+                return '$199.00';
+            } else if ( this.form.suscription_period == 'Trimestral' ) {
+                return '$597.00';
+            } else if ( this.form.suscription_period == 'Semestral' ) {
+                return '$1,494.00';
+            } else if ( this.form.suscription_period == 'Anual' ) {
+                return '$2,421.00';
+            }  
         }
     },
     methods: {
@@ -242,6 +315,9 @@ export default {
         },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+        },
+        saveImage(image) {
+            this.form.image = image;
         },
     }
 }

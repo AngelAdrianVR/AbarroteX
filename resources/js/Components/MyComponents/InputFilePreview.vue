@@ -1,11 +1,16 @@
 <template>
   <div class="inline">
     <figure @click="triggerImageInput"
-      class="flex items-center justify-center rounded-md border border-grayD9 w-48 h-36 relative"
-      :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer' ">
+      class="flex items-center justify-center rounded-md border border-grayD9 relative"
+      :class="{
+        'cursor-not-allowed': disabled,
+        'cursor-pointer': !disabled,
+        'w-48 h-36': image,
+        'size-14': !image
+      }">
       <i v-if="image && canDelete && !disabled" @click.stop="clearImage"
         class="fa-solid fa-xmark absolute p-1 top-1 right-1 z-10 text-sm"></i>
-      <i v-if="!image" class="fa-solid fa-camera text-gray-400 text-xl"></i>
+      <i v-if="!image" class="fa-solid fa-plus text-gray-400 text-xl"></i>
       <img v-if="image" :src="image" :alt="alt" class="w-full h-full object-contain bg-no-repeat rounded-md opacity-50" />
       <input :disabled="disabled" ref="fileInput" type="file" @change="handleImageUpload" class="hidden" />
     </figure>
