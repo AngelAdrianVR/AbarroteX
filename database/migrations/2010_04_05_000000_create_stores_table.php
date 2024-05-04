@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('contact_phone')->nullable();
             $table->string('address')->nullable();
             $table->string('plan')->default('Plan Básico');
-            $table->string('suscription_period')->default('Mensual');
+            $table->string('suscription_period')->default('Periodo de prueba');
             $table->unsignedBigInteger('default_card_id')->nullable();
             $table->boolean('is_active')->default(true);
             $table->date('next_payment')->nullable()->default(now()->addDays(15)->toDateString());

@@ -80,4 +80,9 @@ class Store extends Model
                 'current_stock',
             ])->withTimestamps();
     }
+
+    public function lastPayment()
+    {
+        return $this->hasOne(Payment::class)->latest();
+    }
 }

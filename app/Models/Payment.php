@@ -18,7 +18,7 @@ class Payment extends Model implements HasMedia
         'suscription_period',
         'store_id',
         'status',
-        'rejected_reazon',
+        'rejected_reason',
         'notes',
         'days_gifted',
         'validated_at',
