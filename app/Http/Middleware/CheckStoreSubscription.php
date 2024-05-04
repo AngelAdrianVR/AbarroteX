@@ -20,7 +20,8 @@ class CheckStoreSubscription
         // Obtener la diferencia en días de la fecha de siguiente pago a hoy
         $days = now()->diffInDays($store->next_payment, false);
 
-        if (!$store->is_active || $days < -3) {
+        // revisar tambien dias de atraso en el pago por si falla comando para actualizar actividad de las cuentas
+        if (!$store->is_active || $days <= 0) {
             return redirect()->route('profile.show'); // Redirige a la ruta de pago de suscripción
         }
 

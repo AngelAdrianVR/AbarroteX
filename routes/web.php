@@ -11,6 +11,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\SaleController;
@@ -165,6 +166,11 @@ Route::get('support/create-report', [SupportController::class, 'createReport'])-
 //soporte report routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
 Route::resource('support-reports', SupportReportController::class)->middleware('auth');
+
+
+//payments routes-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------
+Route::resource('payments', PaymentController::class)->middleware('auth');
 
 
 //Cash register routes--------------------------------------------------------------------------------------
