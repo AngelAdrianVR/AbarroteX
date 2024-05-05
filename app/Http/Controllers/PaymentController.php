@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use App\Models\Payment;
+use App\Notifications\AdminBasicNotification;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -48,6 +50,13 @@ class PaymentController extends Controller
             'suscription_period' => $validated['suscription_period'],
             'next_payment' => $store->next_payment->addDays($days)->toDateString(),
         ]);
+
+        // Notificar a dirección
+        $admins = Admin::where('employee_properties->department', 'Dirección')->get();
+        $title = "Nuevo pago registrado";
+        $description = "La tienda '$store->name' ha pagado una suscripción {$validated['suscription_period']} ($ {$validated['amount']}).";
+        $url = 'https://admin.ezyventas.com/suscriptions';
+        $admins->each(fn ($admin) => $admin->notify(new AdminBasicNotification($title, $description, $url)));
     }
 
 

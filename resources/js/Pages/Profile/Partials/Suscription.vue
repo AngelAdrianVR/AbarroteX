@@ -37,7 +37,7 @@
                                     <p v-else-if="$page.props.auth.user.store.last_payment.status === 'Aprobado'">Tu
                                         pago ha sido aprobado. Disfruta de tu
                                         suscripción</p>
-                                    <p v-else>
+                                    <p v-else style="white-space: pre-line;">
                                         <b>Tu pago ha sido rechazado por el siguiente motivo:</b>
                                         <br> {{ $page.props.auth.user.store.last_payment.rejected_reason }}
                                         <br> <button @click="prepareReUpload()" class="text-primary underline">

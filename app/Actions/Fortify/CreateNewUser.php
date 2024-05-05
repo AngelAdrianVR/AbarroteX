@@ -33,6 +33,7 @@ class CreateNewUser implements CreatesNewUsers
         $store = Store::create([
             'name' => $input['store_name'],
             'contact_name' => $input['name'],
+            'next_payment' => now()->addDays(15),
         ]);
 
         // agregar las configuraciones iniciales a la tienda
