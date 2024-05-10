@@ -1,6 +1,14 @@
 <template>
   <AppLayout title="Registrar venta">
     <div class="px-2 lg:px-6 py-7">
+      <!-- mensaje de conexion a internet -->
+      <div v-if="!isOnline" class="mb-2 px-4 py-1 bg-gray-500 text-white text-xs">
+        <p class="text-sm font-semibold">Sin conexión a Internet</p>
+        <p class="text-xs">
+          Las ventas que realices se almacenarán localmente y cuando tengas conexión a
+          internet se guardarán automáticamente en la nube, asi que no te preocupes, no perderás información.
+        </p>
+      </div>
       <!-- header botones -->
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
@@ -68,7 +76,6 @@
           </el-col>
         </div>
       </div>
-
       <!-- cuerpo de la pagina -->
       <div class="lg:flex space-x-5 my-5">
         <!-- scaner de código  -->
@@ -414,6 +421,10 @@ export default {
       form,
       cutForm,
 
+      // conexion a internet
+      isOnline: navigator.onLine, // Verificar el estado de conexión al cargar el componente
+      syncingData: false,
+
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
       localCurrentCash: this.cash_register.current_cash, //dinero de caja local
@@ -488,28 +499,36 @@ export default {
   },
   methods: {
     async store() {
-      try {
+      if (this.isOnline) {
         this.storeProcessing = true;
-        const response = await axios.post(route('sales.store'), {
-          data: {
-            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
-          }
-        });
-        if (response.status === 200) {
-          this.$notify({
-            title: "Correcto",
-            text: "Se ha registrado la venta con éxito!",
-            type: "success",
+        try {
+          const response = await axios.post(route('sales.store'), {
+            data: {
+              saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+            }
           });
-          this.storeProcessing = false;
-          this.clearTab();
-          this.fetchCashRegister();
+          if (response.status === 200) {
+            this.$notify({
+              title: "Correcto",
+              text: "Se ha registrado la venta con éxito!",
+              type: "success",
+            });
+            this.clearTab();
+            this.fetchCashRegister();
 
-          // resetear variable de local storage a false
-          localStorage.setItem('pendentProcess', false);
+            // resetear variable de local storage a false
+            localStorage.setItem('pendentProcess', false);
+          }
+        } catch (error) {
+          console.log(error);
+        } finally {
+          this.storeProcessing = false;
         }
-      } catch (error) {
-        console.log(error);
+      } else {
+        this.saveToLocalStorage();
+        this.storeProcessing = false;
+        this.clearTab();
+        this.fetchCashRegister();
       }
     },
     storeCashRegisterMovement() {
@@ -729,6 +748,63 @@ export default {
         this.$refs.receivedInput.focus(); // Enfocar el input de código cuando se abre el modal
       });
     },
+    handleOnline() {
+      const storedData = JSON.parse(localStorage.getItem('sales')) || [];
+      this.isOnline = true;
+      if (storedData.length) {
+        console.log('sync');
+        this.syncData();
+      }
+      console.log('No sync');
+    },
+    handleOffline() {
+      this.isOnline = false;
+    },
+    saveToLocalStorage() {
+      // Obtén los datos actuales almacenados en el Local Storage
+      let storedData = JSON.parse(localStorage.getItem('sales')) || [];
+
+      const dataToStore = {
+        saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+      };
+
+      // Agrega el nuevo objeto al arreglo
+      storedData.push(dataToStore);
+
+      // Vuelve a guardar el arreglo en el Local Storage
+      localStorage.setItem('sales', JSON.stringify(storedData));
+      this.form.reset();
+
+      this.$notify({
+        title: 'Correcto',
+        message: 'Se registró la venta en almacenamiento local. Cuando tengas conexión a internet se guardarán en la nube',
+        type: 'success'
+      });
+    },
+    async syncData() {
+      this.syncingData = true;
+      try {
+        const localStorageItems = JSON.parse(localStorage.getItem('sales'));
+        const response = await axios.post(route('sales.sync-localstorage'), {
+          sales: localStorageItems,
+        });
+
+        if (response.status === 200) {
+          this.$notify({
+            title: 'Correcto',
+            message: response.data.message,
+            type: 'success'
+          });
+
+          // eliminar datos en almacenamiento local
+          localStorage.removeItem('sales');
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.syncingData = false;
+      }
+    },
   },
   mounted() {
     if (this.isScanOn) {
@@ -739,6 +815,15 @@ export default {
 
     // resetear variable de local storage a false
     localStorage.setItem('pendentProcess', false);
-  }
+
+    // Agregar escuchadores de eventos online/offline
+    window.addEventListener('online', this.handleOnline);
+    window.addEventListener('offline', this.handleOffline);
+  },
+  beforeUnmount() {
+    // Eliminar los escuchadores de eventos al desmontar el componente
+    window.removeEventListener('online', this.handleOnline);
+    window.removeEventListener('offline', this.handleOffline);
+  },
 }
 </script>
