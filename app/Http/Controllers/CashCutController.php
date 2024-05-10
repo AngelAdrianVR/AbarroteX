@@ -13,24 +13,7 @@ class CashCutController extends Controller
     
     public function index()
     {
-        // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
-        $cash_cuts = CashCut::where('cash_register_id', $cash_register->id)->latest()->get();
-
-        //----------- Recuperar los movimientos de caja desde el ultimo corte hasta ahora.------------
-         //recupera el último corte realizado
-         $last_cash_cut = CashCut::where('cash_register_id', $cash_register->id)->latest()->first();
-
-         // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
-        if ($last_cash_cut !== null) {
-            $current_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-                        ->where('created_at', '>', $last_cash_cut->created_at)
-                        ->get();
-        } else {
-            $current_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->get();
-        }
-        
-        return inertia('CashCut/Index', compact('cash_cuts', 'cash_register', 'current_movements'));
+        //
     }
 
     

@@ -73,7 +73,7 @@
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar producto</PrimaryButton>
+                    <PrimaryButton :disabled="form.processing">Guardar producto</PrimaryButton>
                 </div>
             </form>
         </div>

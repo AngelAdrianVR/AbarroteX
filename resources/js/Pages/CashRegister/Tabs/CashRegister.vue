@@ -2,10 +2,15 @@
     <Loading v-if="loading" />
     <div v-else class="min-h-32">
         <section class="flex justify-end space-x-3 mt-2">
-            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'" class="!rounded-md"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo
-            </ThirthButton>
-            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'" class="!rounded-md"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</ThirthButton>
-            <PrimaryButton @click="handleCashCut">Hacer corte de caja</PrimaryButton>
+          <el-dropdown split-button type="primary" @click="handleCashCut">
+            Hacer cortre de caja
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </section>
 
         <!-- Información de caja -->

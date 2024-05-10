@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('cash_registers', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->unsignedFloat('started_cash')->nullable();
             $table->unsignedFloat('current_cash');
-            $table->unsignedFloat('max_cash');
+            $table->unsignedFloat('max_cash')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

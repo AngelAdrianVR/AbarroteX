@@ -188,8 +188,8 @@ const logout = () => {
                                 :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('cash-cuts.index')"
-                                :active="route().current('cash-cuts.*')">
+                            <ResponsiveNavLink :href="route('cash-registers.index')"
+                                :active="route().current('cash-registers.*')">
                                 Caja
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">

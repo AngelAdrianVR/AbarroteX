@@ -12,9 +12,11 @@ class CashRegister extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'started_cash',
         'current_cash',
         'max_cash',
+        'is_active',
         'store_id',
     ];
 
