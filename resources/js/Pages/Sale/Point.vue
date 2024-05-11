@@ -9,6 +9,9 @@
           internet se guardarán automáticamente en la nube, asi que no te preocupes, no perderás información.
         </p>
       </div>
+      <div v-if="syncingData">
+        sincronizando datos a la nube
+      </div>
       <!-- header botones -->
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
@@ -398,6 +401,7 @@ import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
+import { format } from 'date-fns';
 
 export default {
   data() {
@@ -572,7 +576,7 @@ export default {
         const response = await axios.get(route('cash-registers.fetch-cash-register'));
         if (response.status === 200) {
           this.localCurrentCash = response.data.item.current_cash;
-          if ((this.localCurrentCash >= this.cash_register.max_cash) && this.isMaxCashOn) {
+          if ((this.localCurrentCash >= this.cash_register.max_cash) && this.isMaxCashOn && this.isOnline) {
             this.showLimitCashModal = true;
           }
         }
@@ -765,6 +769,7 @@ export default {
       let storedData = JSON.parse(localStorage.getItem('sales')) || [];
 
       const dataToStore = {
+        created_at: format(new Date(), 'yyyy-MM-dd HH:mm'),
         saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
       };
 
@@ -790,12 +795,6 @@ export default {
         });
 
         if (response.status === 200) {
-          this.$notify({
-            title: 'Correcto',
-            message: response.data.message,
-            type: 'success'
-          });
-
           // eliminar datos en almacenamiento local
           localStorage.removeItem('sales');
         }

@@ -16,5 +16,6 @@ class Sale extends Model
         'product_id',
         'is_global_product',
         'store_id',
+        'created_at',
     ];
 }

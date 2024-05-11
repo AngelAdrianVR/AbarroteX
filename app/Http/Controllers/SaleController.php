@@ -87,61 +87,64 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
-        // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+        //recorre el arreglo de productos registrados en la venta.
+        $this->storeEachProductSold($request->data['saleProducts']);
 
-        //recorre el arreglo de productos.
-        foreach ($request->data['saleProducts'] as $sale) {
-            $is_global_product = isset($sale['product']['global_product_id']);
+        // // obtiene la primera caja registradora de la tienda
+        // $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
 
-            $product_name = $is_global_product
-                ? GlobalProductStore::find($sale['product']['id'])->globalProduct->name
-                : Product::find($sale['product']['id'])->name;
+        // //recorre el arreglo de productos.
+        // foreach ($request->data['saleProducts'] as $sale) {
+        //     $is_global_product = isset($sale['product']['global_product_id']);
 
-            //regiatra cada producto vendido
-            Sale::create([
-                'current_price' => $sale['product']['public_price'],
-                'quantity' => $sale['quantity'],
-                'product_name' => $product_name,
-                'product_id' => $sale['product']['id'],
-                'is_global_product' => $is_global_product,
-                'store_id' => auth()->user()->store_id,
-            ]);
+        //     $product_name = $is_global_product
+        //         ? GlobalProductStore::find($sale['product']['id'])->globalProduct->name
+        //         : Product::find($sale['product']['id'])->name;
 
-            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
-            $cash_register->current_cash += $sale['product']['public_price'] * $sale['quantity'];
-            $cash_register->save();
+        //     //regiatra cada producto vendido
+        //     Sale::create([
+        //         'current_price' => $sale['product']['public_price'],
+        //         'quantity' => $sale['quantity'],
+        //         'product_name' => $product_name,
+        //         'product_id' => $sale['product']['id'],
+        //         'is_global_product' => $is_global_product,
+        //         'store_id' => auth()->user()->store_id,
+        //     ]);
 
-            //Registra el historial de venta de cada producto
-            ProductHistory::create([
-                'description' => 'Registro de venta. ' . $sale['quantity'] . ' piezas',
-                'type' => 'Venta',
-                'historicable_id' => $sale['product']['id'],
-                'historicable_type' => $is_global_product
-                    ? GlobalProductStore::class
-                    : Product::class,
-            ]);
+        //     //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+        //     $cash_register->current_cash += $sale['product']['public_price'] * $sale['quantity'];
+        //     $cash_register->save();
 
-            //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
-            // Verifica si 'global_product_id' existe en 'product'
-            $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
-            if ($is_inventory_on) {
-                $product = $is_global_product
-                    ? GlobalProductStore::find($sale['product']['id'])
-                    : Product::find($sale['product']['id']);
+        //     //Registra el historial de venta de cada producto
+        //     ProductHistory::create([
+        //         'description' => 'Registro de venta. ' . $sale['quantity'] . ' piezas',
+        //         'type' => 'Venta',
+        //         'historicable_id' => $sale['product']['id'],
+        //         'historicable_type' => $is_global_product
+        //             ? GlobalProductStore::class
+        //             : Product::class,
+        //     ]);
 
-                $product->decrement('current_stock', $sale['quantity']);
+        //     //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
+        //     // Verifica si 'global_product_id' existe en 'product'
+        //     $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+        //     if ($is_inventory_on) {
+        //         $product = $is_global_product
+        //             ? GlobalProductStore::find($sale['product']['id'])
+        //             : Product::find($sale['product']['id']);
 
-                // notificar si ha llegado al limite de existencias bajas
-                if ($product->current_stock <= $product->min_stock) {
-                    $title = "Bajo stock";
-                    $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
-                    $url = route('products.show', $product->id);
+        //         $product->decrement('current_stock', $sale['quantity']);
 
-                    auth()->user()->notify(new BasicNotification($title, $description, $url));
-                }
-            }
-        }
+        //         // notificar si ha llegado al limite de existencias bajas
+        //         if ($product->current_stock <= $product->min_stock) {
+        //             $title = "Bajo stock";
+        //             $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
+        //             $url = route('products.show', $product->id);
+
+        //             auth()->user()->notify(new BasicNotification($title, $description, $url));
+        //         }
+        //     }
+        // }
     }
 
 
@@ -286,5 +289,74 @@ class SaleController extends Controller
 
         // return $day_sales;
         return inertia('Sale/PrintTicket', compact('day_sales'));
+    }
+
+    public function syncLocalstorage(Request $request)
+    {
+        //recorre el arreglo de ventas registradas.
+        foreach ($request->sales as $sale) {
+            //recorre el arreglo de productos registrados en la venta.
+            $this->storeEachProductSold($sale['saleProducts'], $sale['created_at']);
+        }
+    }
+
+    private function storeEachProductSold($sold_products, $created_at = null)
+    {
+        // obtiene la primera caja registradora de la tienda
+        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+        foreach ($sold_products as $product) {
+            $is_global_product = isset($product['product']['global_product_id']);
+
+            $product_name = $is_global_product
+                ? GlobalProductStore::find($product['product']['id'])->globalProduct->name
+                : Product::find($product['product']['id'])->name;
+
+            //regiatra cada producto vendido
+            Sale::create([
+                'current_price' => $product['product']['public_price'],
+                'quantity' => $product['quantity'],
+                'product_name' => $product_name,
+                'product_id' => $product['product']['id'],
+                'is_global_product' => $is_global_product,
+                'store_id' => auth()->user()->store_id,
+                'created_at' => $created_at ?? now(),
+            ]);
+
+            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+            $cash_register->current_cash += $product['product']['public_price'] * $product['quantity'];
+            $cash_register->save();
+
+            //Registra el historial de venta de cada producto
+            ProductHistory::create([
+                'description' => 'Registro de venta. ' . $product['quantity'] . ' piezas',
+                'type' => 'Venta',
+                'historicable_id' => $product['product']['id'],
+                'historicable_type' => $is_global_product
+                    ? GlobalProductStore::class
+                    : Product::class,
+                'created_at' => $created_at ?? now(),
+            ]);
+
+            //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
+            // Verifica si 'global_product_id' existe en 'product'
+            $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+            if ($is_inventory_on) {
+                $product = $is_global_product
+                    ? GlobalProductStore::find($product['product']['id'])
+                    : Product::find($product['product']['id']);
+
+                $product->decrement('current_stock', $product['quantity']);
+
+                // notificar si ha llegado al limite de existencias bajas
+                if ($product->current_stock <= $product->min_stock) {
+                    $title = "Bajo stock";
+                    $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
+                    $url = route('products.show', $product->id);
+
+                    auth()->user()->notify(new BasicNotification($title, $description, $url));
+                }
+            }
+        }
     }
 }
