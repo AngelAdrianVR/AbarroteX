@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\CashRegister;
-use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
-use App\Models\User;
 use App\Notifications\BasicNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -35,10 +33,10 @@ class SaleController extends Controller
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
 
-        //recupera la primera caja registradora de la tienda para mandar su info como current_cash
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+        //recupera todas las cajas registradoras de la tienda
+        $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
 
-        return inertia('Sale/Point', compact('products', 'cash_register'));
+        return inertia('Sale/Point', compact('products', 'cash_registers'));
     }
 
 
@@ -88,7 +86,7 @@ class SaleController extends Controller
     public function store(Request $request)
     {
         // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+        $cash_register = CashRegister::find($request->cash_register_id);
 
         //recorre el arreglo de productos.
         foreach ($request->data['saleProducts'] as $sale) {
@@ -106,6 +104,8 @@ class SaleController extends Controller
                 'product_id' => $sale['product']['id'],
                 'is_global_product' => $is_global_product,
                 'store_id' => auth()->user()->store_id,
+                'cash_register_id' => auth()->user()->cash_register_id,
+                'user_id' => auth()->id(),
             ]);
 
             //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja

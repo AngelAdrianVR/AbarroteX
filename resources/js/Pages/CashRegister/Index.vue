@@ -6,8 +6,9 @@
         </div>
             <el-tabs class="mx-3" v-model="activeTab">
                 <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="index">
-                    <CashRegister :cash_register="item" :currentMovements="current_movements" />
+                    <CashRegister :cash_register="item" />
                 </el-tab-pane>
+                <!-- cambiar name al historial de cortes al numero dinamico correspondiente -->
                 <el-tab-pane label="Historial de cortes" name="2">
                     <CashCutsTable :items="cash_cuts" />
                 </el-tab-pane>
@@ -37,9 +38,8 @@ export default {
         CashRegister
     },
     props: {
-        cash_cuts: Array,
         cash_registers: Array,
-        current_movements: Array
+        cash_cuts: Array,
     },
     methods: {
 

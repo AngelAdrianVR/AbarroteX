@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CashRegisterController extends Controller
@@ -14,22 +15,11 @@ class CashRegisterController extends Controller
     {   
         // obtiene las cajas registradoras de la tienda
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
+
+        //obtiene los cortes de todas las cajas de la tienda
         $cash_cuts = CashCut::where('cash_register_id', $cash_registers[0]->id)->latest()->get();
-
-        //----------- Recuperar los movimientos de caja desde el ultimo corte hasta ahora.------------
-         //recupera el último corte realizado
-         $last_cash_cut = CashCut::where('cash_register_id', $cash_registers[0]->id)->latest()->first();
-
-         // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
-        if ($last_cash_cut !== null) {
-            $current_movements = CashRegisterMovement::where('cash_register_id', $cash_registers[0]->id)
-                        ->where('created_at', '>', $last_cash_cut->created_at)
-                        ->get();
-        } else {
-            $current_movements = CashRegisterMovement::where('cash_register_id', $cash_registers[0]->id)->get();
-        }
         
-        return inertia('CashRegister/Index', compact('cash_cuts', 'cash_registers', 'current_movements'));
+        return inertia('CashRegister/Index', compact('cash_registers', 'cash_cuts'));
     }
 
    
@@ -69,6 +59,8 @@ class CashRegisterController extends Controller
     {
         $validated = $request->validate([
             'max_cash' => 'required|numeric|min:0|max:999999.99',
+            'name' => 'required|string|max:100',
+            'is_active' => 'boolean',
         ]);
 
         $cash_register->update($validated);
@@ -81,11 +73,19 @@ class CashRegisterController extends Controller
     }
 
 
-    public function fetchCashRegister()
+    public function fetchCashRegister($cash_register_id)
     {
         //recupera la primera caja registradora de la tienda para mandar su info como current_cash
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+        $cash_register = CashRegister::find($cash_register_id);
 
         return response()->json(['item' => $cash_register]);
+    }
+
+
+    public function asignCashRegister(User $user, $cash_register_id)
+    {
+        $user->update([
+            'cash_register_id' => $cash_register_id
+        ]);
     }
 }

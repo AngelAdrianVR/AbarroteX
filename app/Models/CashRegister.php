@@ -35,4 +35,9 @@ class CashRegister extends Model
     {
         return $this->hasMany(CashCut::class);
     }
+
+    public function sales() :HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
 }

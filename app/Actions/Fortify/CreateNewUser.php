@@ -43,7 +43,7 @@ class CreateNewUser implements CreatesNewUsers
             });
 
         CashRegister::create([
-            'name' => 'Caja 1',
+            'name' => 'Nueva caja',
             'started_cash' => 0,
             'current_cash' => 0,
             'max_cash' => 5000,
