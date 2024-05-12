@@ -16,6 +16,7 @@ class ProductHistory extends Model
         'historicable_type',
         'description',
         'type',
+        'created_at',
     ];
 
     //relationships

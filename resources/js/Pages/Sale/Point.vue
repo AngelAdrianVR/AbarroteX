@@ -1,20 +1,66 @@
 <template>
   <AppLayout title="Registrar venta">
+    <div v-if="!isOnline" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-[#232323] text-white text-xs">
+      <p class="text-sm flex items-center space-x-3 font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24"
+          id="Wifi-Disabled--Streamline-Core" height="16" width="16">
+          <desc>Wifi Disabled Streamline Icon: https://streamlinehq.com</desc>
+          <g id="wifi-disabled--wireless-wifi-internet-server-network-disabled-off-offline-connection">
+            <path id="Vector 2432" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="m0.7960714285714285 0.7960714285714285 20.697857142857142 20.697857142857142" stroke-width="2.1">
+            </path>
+            <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M11.145 21.09573364285714c1.151915357142857 0 2.0857071428571428 -0.9337917857142857 2.0857071428571428 -2.0857071428571428s-0.9337917857142857 -2.0857071428571428 -2.0857071428571428 -2.0857071428571428c-1.1518994357142855 0 -2.0857071428571428 0.9337917857142857 -2.0857071428571428 2.0857071428571428s0.9338077071428571 2.0857071428571428 2.0857071428571428 2.0857071428571428Z"
+              stroke-width="2.1"></path>
+            <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M7.212454907142857 14.32936532142857c0.5177170928571428 -0.53150505 1.1366626285714285 -0.9539483142857142 1.820281007142857 -1.2423809142857143"
+              stroke-width="2.1"></path>
+            <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M3.757441221428571 11.6385006c0.9691532785714285 -0.9748053857142858 2.0014509428571428 -1.5694389 2.0014509428571428 -1.5694389"
+              stroke-width="2.1"></path>
+            <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M8.83744367142857 8.825040878571428s0.9409086642857143 -0.26260804285714284 2.3155170428571425 -0.26260804285714284c1.3745924571428572 0 2.7356357785714285 0.2717628642857143 4.004828378571428 0.7996378285714286 1.2691448357142856 0.5278749642857142 2.4215378357142856 1.3014812571428571 3.390675192857143 2.276286642857143"
+              stroke-width="2.1"></path>
+            <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M5.543936957142857 5.503400999999999c1.775701007142857 -0.7357929 3.678980421428571 -1.1145159214285714 5.601094885714286 -1.1145159214285714 1.9221144642857142 0 3.8253938785714285 0.3787230214285714 5.601126728571429 1.1145159214285714 1.7757169285714285 0.7357929 3.389035285714286 1.8142308642857141 4.74777 3.1737298071428572"
+              stroke-width="2.1"></path>
+            <path id="Vector_6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M0.7960714285714285 8.677305942857142c0.57410124 -0.5744133 1.1653052785714284 -1.0461015428571427 1.87291725 -1.5767946"
+              stroke-width="2.1"></path>
+          </g>
+        </svg>
+        <span>Sin conexión a Internet</span>
+      </p>
+      <p class="text-xs">
+        Las ventas que realices se guardan en el dispositivo que estas utilizando y
+        luego se transfieren automáticamente a la nube cuando tengas internet.
+        ¡Así nunca perderán información!.
+      </p>
+    </div>
+    <div v-if="syncingData" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
+      <p class="text-sm flex items-center space-x-3 font-semibold">
+        <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="Rotate-Right--Streamline-Sharp" height="16" width="16"><desc>Rotate Right Streamline Icon: https://streamlinehq.com</desc><g id="rotate-right"><path id="Vector 2754" stroke="currentColor" d="M20.2047 0.5135V4.8893H15.8289" stroke-width="2"></path><path id="Ellipse 1206" stroke="currentColor" d="M20.2047 4.764C18.2001 2.4929 15.2674 1.0605 12.0001 1.0605C5.9583 1.0605 1.0605 5.9583 1.0605 12C1.0605 16.194 3.4207 19.8367 6.8853 21.6726" stroke-width="2"></path><path id="Ellipse 1207" stroke="currentColor" d="M9.1081 22.5533C10.0293 22.8051 10.999 22.9395 11.9999 22.9395C13.4231 22.9395 14.7826 22.6678 16.0297 22.1734" stroke-width="2"></path><path id="Ellipse 1208" stroke="currentColor" d="M17.7655 21.2986C19.2694 20.3641 20.5299 19.0749 21.4301 17.548" stroke-width="2"></path><path id="Ellipse 1209" stroke="currentColor" d="M22.9395 12C22.9395 13.2879 22.717 14.5237 22.3083 15.6713" stroke-width="2"></path></g></svg>
+        <span>Sincronizando datos</span>
+      </p>
+      <p class="text-xs">
+        Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
+      </p>
+    </div>
     <div class="px-2 lg:px-6 py-7">
       <!-- header botones -->
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <!-- Dinero en caja -->
-        <div v-if="isShowCahsOn" class="mt-4 lg:mt-0 flex items-center justify-center  space-x-3 text-gray99">
+        <div v-if="isShowCahsOn" class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
-            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
             class="size-4 cursor-pointer">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
           </svg>
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
-            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 cursor-pointer">
+            fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
           </svg>
@@ -26,7 +72,7 @@
             </b>
             <el-tooltip v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
               content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="size-4 text-red-600">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
@@ -68,7 +114,6 @@
           </el-col>
         </div>
       </div>
-
       <!-- cuerpo de la pagina -->
       <div class="lg:flex space-x-5 my-5">
         <!-- scaner de código  -->
@@ -415,6 +460,7 @@ import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
+import { format } from 'date-fns';
 
 export default {
   data() {
@@ -441,6 +487,11 @@ export default {
       selectedCashRegisterId: null, //id de la caja registradora seleccionada
       asignedCashRegister: null, // caja registradora asignada a la venta de el usuario logueado
       showCashRegisterSelectionModal: false, //muestra u oculta el modal de selección de caja
+      
+      // conexion a internet
+      isOnline: navigator.onLine, // Verificar el estado de conexión al cargar el componente
+      syncingData: false,
+
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
       localCurrentCash: 0, //dinero de caja local
@@ -515,28 +566,36 @@ export default {
   },
   methods: {
     async store() {
-      try {
+      if (this.isOnline) {
         this.storeProcessing = true;
+      try {
         const response = await axios.post(route('sales.store', {cash_register_id: this.asignedCashRegister?.id}), {
           data: {
             saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
           }
         });
-        if (response.status === 200) {
-          this.$notify({
-            title: "Correcto",
-            text: "Se ha registrado la venta con éxito!",
-            type: "success",
-          });
-          this.storeProcessing = false;
-          this.clearTab();
-          this.fetchCashRegister();
+          if (response.status === 200) {
+            this.$notify({
+              title: "Correcto",
+              text: "Se ha registrado la venta con éxito!",
+              type: "success",
+            });
+            this.clearTab();
+            this.fetchCashRegister();
 
-          // resetear variable de local storage a false
-          localStorage.setItem('pendentProcess', false);
+            // resetear variable de local storage a false
+            localStorage.setItem('pendentProcess', false);
+          }
+        } catch (error) {
+          console.log(error);
+        } finally {
+          this.storeProcessing = false;
         }
-      } catch (error) {
-        console.log(error);
+      } else {
+        this.saveToLocalStorage();
+        this.storeProcessing = false;
+        this.clearTab();
+        this.fetchCashRegister();
       }
     },
     async asignCashRegister() {
@@ -597,7 +656,7 @@ export default {
         const response = await axios.get(route('cash-registers.fetch-cash-register', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.localCurrentCash = response.data.item.current_cash;
-          if ((this.localCurrentCash >= this.asignedCashRegister?.max_cash) && this.isMaxCashOn) {
+          if ((this.localCurrentCash >= this.asignedCashRegister?.max_cash) && this.isMaxCashOn && this.isOnline) {
             this.showLimitCashModal = true;
           }
         }
@@ -773,6 +832,56 @@ export default {
         this.$refs.receivedInput.focus(); // Enfocar el input de código cuando se abre el modal
       });
     },
+    handleOnline() {
+      const storedData = JSON.parse(localStorage.getItem('sales')) || [];
+      this.isOnline = true;
+      if (storedData.length) {
+        this.syncData();
+      }
+    },
+    handleOffline() {
+      this.isOnline = false;
+    },
+    saveToLocalStorage() {
+      // Obtén los datos actuales almacenados en el Local Storage
+      let storedData = JSON.parse(localStorage.getItem('sales')) || [];
+
+      const dataToStore = {
+        created_at: format(new Date(), 'yyyy-MM-dd HH:mm'),
+        saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+      };
+
+      // Agrega el nuevo objeto al arreglo
+      storedData.push(dataToStore);
+
+      // Vuelve a guardar el arreglo en el Local Storage
+      localStorage.setItem('sales', JSON.stringify(storedData));
+      this.form.reset();
+
+      this.$notify({
+        title: 'Correcto',
+        message: 'Se registró la venta en almacenamiento local. Cuando tengas conexión a internet se guardarán en la nube',
+        type: 'success'
+      });
+    },
+    async syncData() {
+      this.syncingData = true;
+      try {
+        const localStorageItems = JSON.parse(localStorage.getItem('sales'));
+        const response = await axios.post(route('sales.sync-localstorage'), {
+          sales: localStorageItems,
+        });
+
+        if (response.status === 200) {
+          // eliminar datos en almacenamiento local
+          localStorage.removeItem('sales');
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.syncingData = false;
+      }
+    },
   },
   mounted() {
     //verificar si el usuario tiene una caja asignada
@@ -790,6 +899,15 @@ export default {
 
     // resetear variable de local storage a false
     localStorage.setItem('pendentProcess', false);
-  }
+
+    // Agregar escuchadores de eventos online/offline
+    window.addEventListener('online', this.handleOnline);
+    window.addEventListener('offline', this.handleOffline);
+  },
+  beforeUnmount() {
+    // Eliminar los escuchadores de eventos al desmontar el componente
+    window.removeEventListener('online', this.handleOnline);
+    window.removeEventListener('offline', this.handleOffline);
+  },
 }
 </script>

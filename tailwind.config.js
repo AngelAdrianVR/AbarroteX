@@ -20,8 +20,8 @@ export default {
             colors: {
                 primary: '#F68C0F',
                 primarylight: '#FCDCB5',
-                secondary: '#25346D',
-                secondarylight: '#25346D',
+                secondary: '#E9A527',
+                secondarylight: '#F8E2BA',
                 redDanger: '#F80505',
                 grayD9: '#D9D9D9',
                 gray99: '#999999',

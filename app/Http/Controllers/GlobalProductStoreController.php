@@ -110,7 +110,7 @@ class GlobalProductStoreController extends Controller
             'historicable_type' => GlobalProductStore::class
         ]);
 
-        // Crear egreso
+        // Crear gasto
         Expense::create([
             'concept' => 'Compra de producto: ' . $global_product_store->globalProduct->name,
             'current_price' => $global_product_store->cost,

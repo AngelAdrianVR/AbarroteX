@@ -11,10 +11,12 @@ use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\MessageBag;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ProductController extends Controller
 {
-
     public function index()
     {
         $all_products = $this->getAllProducts();
@@ -173,8 +175,11 @@ class ProductController extends Controller
 
         // Realiza la búsqueda en la base de datos local
         $local_products = Product::with(['category', 'brand', 'media'])
-            ->where('name', 'like', "%$query%")
-            ->orWhere('code', 'like', "%$query%")
+            ->where('store_id', auth()->user()->store_id)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%$query%")
+                    ->orWhere('code', 'like', "%$query%");
+            })
             ->get();
 
         $global_products = GlobalProductStore::with(['globalProduct.media'])
@@ -182,6 +187,7 @@ class ProductController extends Controller
                 $queryBuilder->where('name', 'like', "%$query%")
                     ->orWhere('code', $query);
             })
+            ->where('store_id', auth()->user()->store_id)
             ->get();
 
         // Combinar los resultados en una colección
@@ -229,7 +235,7 @@ class ProductController extends Controller
             'historicable_type' => Product::class
         ]);
 
-        // Crear egreso
+        // Crear gasto
         Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
             'current_price' => $product->cost,
@@ -254,7 +260,7 @@ class ProductController extends Controller
         }
 
         // Obtener el historial ordenado por fecha de creación
-        $product_history = ProductHistoryResource::collection($query->latest()->get());
+        $product_history = ProductHistoryResource::collection($query->latest('id')->get());
 
         // Agrupar por mes y año
         $groupedHistory = $product_history->groupBy(function ($item) {
@@ -281,7 +287,7 @@ class ProductController extends Controller
     public function getAllUntilPage($currentPage)
     {
         $items = $currentPage * 30;
-        
+
         // obtener todo los productos
         $all_products = $this->getAllProducts();
         $products = $all_products->take($items);
@@ -294,7 +300,7 @@ class ProductController extends Controller
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
             ->where('store_id', auth()->user()->store_id)
-            ->latest()
+            ->latest('id')
             ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
 
         // productos transferidos desde el catálogo base
@@ -305,5 +311,81 @@ class ProductController extends Controller
         $products = collect($merged);
 
         return $products;
+    }
+
+    public function import(Request $request)
+    {
+        // Validar el archivo Excel
+        $request->validate([
+            // 'file' => 'required|mimes:xlsx,xls',
+            'file' => 'required',
+        ]);
+
+        // Obtener el archivo Excel
+        $file = $request->file('file');
+
+        if (is_array($file)) {
+            // Si se enviaron múltiples archivos, toma el primero
+            $file = reset($file);
+        }
+
+        // Guardar el archivo en el almacenamiento temporal de Laravel
+        $path = $file->store('temp');
+
+        // Obtener la ruta completa del archivo
+        $filePath = Storage::path($path);
+
+        // Cargar el archivo Excel
+        $spreadsheet = IOFactory::load($filePath);
+
+        // Obtener la primera hoja de trabajo
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        // Obtener datos y guardar en la base de datos
+        $firstRowSkipped = false; // Variable para controlar si la primera fila se ha saltado
+        foreach ($worksheet->getRowIterator() as $row) {
+            if (!$firstRowSkipped) {
+                $firstRowSkipped = true;
+                continue; // Saltar la primera fila
+            }
+
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            $data = [];
+            foreach ($cellIterator as $cell) {
+                $data[] = $cell->getValue();
+            }
+
+            try {
+                // Guardar en la base de datos
+                Product::create([
+                    'name' => $data[0],
+                    'public_price' => $data[1] ?? 1,
+                    'cost' => $data[2] ?? 1,
+                    'code' => $data[3],
+                    'min_stock' => $data[4] ?? 1,
+                    'max_stock' => $data[5] ?? 1,
+                    'current_stock' => $data[6] ?? 1,
+                    'store_id' => auth()->user()->store_id,
+                    'category_id' => 1, //Abarrotes por defecto
+                    'brand_id' => 1, //Generico por defecto
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                $errors = new MessageBag();
+
+                if ($e->errorInfo[1] === 1062) {
+                    // Clave duplicada
+                    $errors->add('code', 'Codigo de producto duplicado');
+                } else {
+                    // Otro tipo de error
+                    $errors->add('database', 'Error de base de datos');
+                }
+
+                session()->flash('errors', $errors);
+
+                return back();
+            }
+        }
     }
 }

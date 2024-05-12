@@ -43,9 +43,10 @@ class CashCutController extends Controller
             'expected_cash' => $expected_cash, //suma de ventas, ingresos, retiros de caja y dinero inicial.
             'sales_cash' => $request->totalSaleForCashCut,
             'counted_cash' => $request->counted_cash,
-            'difference' => $request->difference * -1,
+            'difference' => $request->difference * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
             'notes' => $request->notes,
             'cash_register_id' => $cash_register->id,
+            'store_id' => auth()->user()->store_id,
         ]);
 
         //se asigna el dinero contado al dinero inicial de caja registradora para el próximo corte 

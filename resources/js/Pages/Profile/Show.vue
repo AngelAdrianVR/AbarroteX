@@ -26,7 +26,11 @@ export default {
         user: Object,
     },
     methods: {
-       
+
+    },
+    mounted() {
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
 }
 </script>

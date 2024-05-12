@@ -19,6 +19,7 @@ class Sale extends Model
         'cash_register_id',
         'store_id',
         'user_id',
+        'created_at',
     ];
 
     //relationships

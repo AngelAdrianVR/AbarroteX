@@ -82,6 +82,7 @@ Route::get('products-get-product-scaned/{product_id}', [ProductController::class
 Route::get('products-fetch-history/{product_id}/{month}/{year}', [ProductController::class, 'fetchHistory'])->name('products.fetch-history')->middleware('auth');
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
 Route::get('products-get-all-until-page/{currentPage}', [ProductController::class, 'getAllUntilPage'])->name('products.get-all-until-page')->middleware('auth');
+Route::post('products/import', [ProductController::class, 'import'])->name('products.import')->middleware('auth');
 
 
 //global-product-store routes----------------------------------------------------------------------------------
@@ -110,6 +111,7 @@ Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.po
 Route::get('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
 Route::get('sales-print-ticket/{created_at}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
+Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage'])->middleware('auth')->name('sales.sync-localstorage');
 
 
 //expenses routes-------------------------------------------------------------------------------------
