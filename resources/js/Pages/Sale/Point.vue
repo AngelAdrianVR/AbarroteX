@@ -65,12 +65,12 @@
               d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
           </svg>
           <p class="text-sm flex items-center space-x-2">
-            Efectivo en caja:
-            <b :class="(localCurrentCash >= cash_register.max_cash) && isMaxCashOn ? 'text-red-600' : ''" class="ml-2">
+            Efectivo en "{{ asignedCashRegister?.name }}":
+            <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''" class="ml-2">
               {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
                 '*****' }}
             </b>
-            <el-tooltip v-if="(localCurrentCash >= cash_register.max_cash) && isMaxCashOn && showCashRegisterMoney"
+            <el-tooltip v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
               content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="size-4 text-red-600">
@@ -275,6 +275,30 @@
       </div>
     </div>
 
+    <!-- -------------- Modal selección de caja starts----------------------- -->
+    <Modal :show="showCashRegisterSelectionModal">
+      <div class="p-4 relative">
+
+          <h1 class="font-bold mb-5 mt-2 text-center">No tienes una caja registradora asignada. Por favor selecciona una:</h1>
+
+          <section class="flex justify-between space-x-7 w-2/3 mx-auto text-sm">
+            <div class="flex flex-col items-center" v-for="(item, index) in cash_registers" :key="item">
+              <input :disabled="!item.is_active" v-model="selectedCashRegisterId" :id="'suscription-' + index"
+                :aria-describedby="'suscription-text-' + index" type="radio"
+                :value="item.id" class="size-3 text-primary focus:ring-0 disabled:cursor-not-allowed">
+                <label :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-gray9A'" :for="'suscription-' + index">{{ item.name }}</label>
+                <label :for="'suscription-' + index"><i :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-gray9A'" class="fa-solid fa-cash-register text-7xl mt-3"></i></label>
+            </div>
+          </section>
+
+          <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
+            <PrimaryButton @click="asignCashRegister">Asignar caja</PrimaryButton>
+          </div>
+      </div>
+    </Modal>
+    <!-- --------------------------- Modal selección de caja ends ------------------------------------ -->
+
+
     <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
     <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
       <div class="p-4 relative">
@@ -339,7 +363,7 @@
               <div v-if="cutLoading">
                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
               </div>
-              <p v-else>${{ (cash_register.started_cash + cutForm.totalSaleForCashCut +
+              <p v-else>${{ (asignedCashRegister?.started_cash + cutForm.totalSaleForCashCut +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               <el-input @input="difference()" v-model="cutForm.counted_cash" type="text" placeholder="0.00"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
@@ -460,13 +484,17 @@ export default {
       form,
       cutForm,
 
+      selectedCashRegisterId: null, //id de la caja registradora seleccionada
+      asignedCashRegister: null, // caja registradora asignada a la venta de el usuario logueado
+      showCashRegisterSelectionModal: false, //muestra u oculta el modal de selección de caja
+      
       // conexion a internet
       isOnline: navigator.onLine, // Verificar el estado de conexión al cargar el componente
       syncingData: false,
 
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
-      localCurrentCash: this.cash_register.current_cash, //dinero de caja local
+      localCurrentCash: 0, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
       cashCutModal: false, //muestra el modal para el corte de caja
       // inventario de codigos activado
@@ -534,18 +562,18 @@ export default {
   },
   props: {
     products: Array,
-    cash_register: Object
+    cash_registers: Array
   },
   methods: {
     async store() {
       if (this.isOnline) {
         this.storeProcessing = true;
-        try {
-          const response = await axios.post(route('sales.store'), {
-            data: {
-              saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
-            }
-          });
+      try {
+        const response = await axios.post(route('sales.store', {cash_register_id: this.asignedCashRegister?.id}), {
+          data: {
+            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+          }
+        });
           if (response.status === 200) {
             this.$notify({
               title: "Correcto",
@@ -570,8 +598,25 @@ export default {
         this.fetchCashRegister();
       }
     },
+    async asignCashRegister() {
+      try {
+        const response = await axios.put(route('cash-registers.asign', [this.$page.props.auth?.user.id, this.selectedCashRegisterId]));
+        if ( response.status === 200 ) {
+          this.$notify({
+            title: "Correcto",
+            text: "Se te asignó una caja con éxito!",
+            type: "success",
+          });
+          this.asignedCashRegister = this.cash_registers.find(item => item.id == this.selectedCashRegisterId);
+          this.localCurrentCash = this.asignedCashRegister.current_cash;
+          this.showCashRegisterSelectionModal = false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
     storeCashRegisterMovement() {
-      this.form.post(route('cash-register-movements.store'), {
+      this.form.post(route('cash-register-movements.store', {cash_register_id: this.asignedCashRegister?.id}), {
         onSuccess: () => {
           this.$notify({
             title: "Correcto",
@@ -585,7 +630,7 @@ export default {
       });
     },
     storeCashCut() {
-      this.cutForm.post(route('cash-cuts.store'), {
+      this.cutForm.post(route('cash-cuts.store',{cash_register_id: this.asignedCashRegister?.id}), {
         onSuccess: () => {
           this.$notify({
             title: "Correcto",
@@ -600,7 +645,7 @@ export default {
     },
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
-      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.cash_register.started_cash) - this.cutForm.counted_cash
+      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
     },
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
@@ -608,10 +653,10 @@ export default {
     },
     async fetchCashRegister() {
       try {
-        const response = await axios.get(route('cash-registers.fetch-cash-register'));
+        const response = await axios.get(route('cash-registers.fetch-cash-register', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.localCurrentCash = response.data.item.current_cash;
-          if ((this.localCurrentCash >= this.cash_register.max_cash) && this.isMaxCashOn && this.isOnline) {
+          if ((this.localCurrentCash >= this.asignedCashRegister?.max_cash) && this.isMaxCashOn && this.isOnline) {
             this.showLimitCashModal = true;
           }
         }
@@ -633,7 +678,7 @@ export default {
     },
     async fetchTotalSaleForCashCut() {
       try {
-        const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut'));
+        const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.cutForm.totalSaleForCashCut = response.data;
         }
@@ -644,7 +689,7 @@ export default {
     async fetchTotalCashMovements() {
       try {
         this.cutLoading = true;
-        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements'));
+        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.cutForm.totalCashMovements = response.data;
           this.cutLoading = false;
@@ -839,6 +884,13 @@ export default {
     },
   },
   mounted() {
+    //verificar si el usuario tiene una caja asignada
+    if ( !this.$page.props.auth?.user?.cash_register_id ) {
+      this.showCashRegisterSelectionModal = true;
+    } else {
+      this.asignedCashRegister = this.cash_registers.find(item => item.id == this.$page.props.auth?.user?.cash_register_id);
+      this.localCurrentCash = this.asignedCashRegister?.current_cash;
+    }
     if (this.isScanOn) {
       this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
     } else {

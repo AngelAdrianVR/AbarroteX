@@ -13,24 +13,7 @@ class CashCutController extends Controller
     
     public function index()
     {
-        // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
-        $cash_cuts = CashCut::where('cash_register_id', $cash_register->id)->latest()->get();
-
-        //----------- Recuperar los movimientos de caja desde el ultimo corte hasta ahora.------------
-         //recupera el último corte realizado
-         $last_cash_cut = CashCut::where('cash_register_id', $cash_register->id)->latest()->first();
-
-         // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
-        if ($last_cash_cut !== null) {
-            $current_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-                        ->where('created_at', '>', $last_cash_cut->created_at)
-                        ->get();
-        } else {
-            $current_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->get();
-        }
-        
-        return inertia('CashCut/Index', compact('cash_cuts', 'cash_register', 'current_movements'));
+        //
     }
 
     
@@ -41,13 +24,13 @@ class CashCutController extends Controller
 
     
     public function store(Request $request)
-    {
+    {           
         $request->validate([
             'withdrawn_cash' => 'nullable|numeric|min:0|max:' . $request->counted_cash, 
         ]);
 
-        // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::with(['movements'])->where('store_id', auth()->user()->store_id)->first();
+        // obtiene la caja registradora de la tienda a la cual se hará el corte
+        $cash_register = CashRegister::with(['movements'])->find($request->cash_register_id);
 
         //suma algebraica de todo el dinero que ingresó y salió de caja
         $expected_cash = $cash_register->started_cash
@@ -60,9 +43,10 @@ class CashCutController extends Controller
             'expected_cash' => $expected_cash, //suma de ventas, ingresos, retiros de caja y dinero inicial.
             'sales_cash' => $request->totalSaleForCashCut,
             'counted_cash' => $request->counted_cash,
-            'difference' => $request->difference * -1,
+            'difference' => $request->difference * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
             'notes' => $request->notes,
             'cash_register_id' => $cash_register->id,
+            'store_id' => auth()->user()->store_id,
         ]);
 
         //se asigna el dinero contado al dinero inicial de caja registradora para el próximo corte 
@@ -126,21 +110,18 @@ class CashCutController extends Controller
     }
 
 
-    public function fetchTotalSaleForCashCut()
+    public function fetchTotalSaleForCashCut($cash_register_id)
     {
-        // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
-
         //recupera el último corte realizado
-        $last_cash_cut = CashCut::where('cash_register_id', $cash_register->id)->latest()->first();
+        $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
 
          // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
         if ($last_cash_cut !== null) {
-            $sales = Sale::where('store_id', auth()->user()->store_id)
+            $sales = Sale::where('cash_register_id', $cash_register_id)
                         ->where('created_at', '>', $last_cash_cut->created_at)
                         ->get();
         } else {
-            $sales = Sale::where('store_id', auth()->user()->store_id)->get();
+            $sales = Sale::where('cash_register_id', $cash_register_id)->get();
         }
 
         // Calcula el total de ventas

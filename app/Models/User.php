@@ -31,6 +31,7 @@ class User extends Authenticatable
         'password',
         'employee_properties',
         'store_id',
+        'cash_register_id'
     ];
 
     /**
@@ -68,6 +69,16 @@ class User extends Authenticatable
     public function store() :BelongsTo
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function cashRegister() :BelongsTo
+    {
+        return $this->belongsTo(CashRegister::class);
+    }
+
+    public function sales() :HasMany
+    {
+        return $this->hasMany(Sale::class);
     }
 
 }

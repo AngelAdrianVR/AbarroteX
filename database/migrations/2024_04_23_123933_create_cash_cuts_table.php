@@ -21,6 +21,7 @@ return new class extends Migration
             $table->float('difference'); //diferencia entre el dinero esperado y el contado manualmente
             $table->string('notes')->nullable();
             $table->foreignId('cash_register_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

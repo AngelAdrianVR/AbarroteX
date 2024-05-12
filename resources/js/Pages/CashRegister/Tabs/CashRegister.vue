@@ -1,97 +1,142 @@
 <template>
     <Loading v-if="loading" />
     <div v-else class="min-h-32">
-        <section class="flex justify-end space-x-3 mt-2">
-            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'" class="!rounded-md"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo
-            </ThirthButton>
-            <ThirthButton @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'" class="!rounded-md"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</ThirthButton>
-            <PrimaryButton @click="handleCashCut">Hacer corte de caja</PrimaryButton>
+        <section class="flex justify-between space-x-3 mt-2">
+          <!-- Boton para activar/desactivar caja registradora -->
+          <el-tooltip :content="cash_register.is_active ? 'Deshabilitar caja' : 'Habilitar caja'" placement="right">
+            <button class="flex justify-center items-center rounded-full size-8 bg-grayF2 active:scale-90">
+              <i @click="form.is_active = false; update()" v-if="cash_register.is_active" class="fa-solid fa-ban text-primary"></i>
+              <i v-else @click="form.is_active = true; update()" class="fa-solid fa-check text-primary"></i>
+            </button>
+          </el-tooltip>
+          
+          <p v-if="!cash_register.is_active" class="text-red-500 px-2 bg-red-50 self-start">Caja deshabilitada</p>
+          <p v-else class="text-green-500 px-2 bg-green-50 self-start">Caja Habilitada</p>
+
+          <el-dropdown :disabled="!cash_register.is_active" split-button type="primary" @click="handleCashCut">
+            Hacer cortre de caja
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </section>
 
         <!-- Información de caja -->
         <section class="lg:flex lg:space-x-7 md:w-[90%] mx-auto text-sm mt-7">
-                <div class="w-full border border-grayD9 rounded-lg self-start">
-                    <div class="p-4 flex items-center space-x-2">
-                        <div class="w-3/4 space-y-1">
-                            <p class="font-bold mb-3">Efectivo esperado</p>
-                            <p class="text-gray99">Efectivo inicial</p>
-                            <p class="text-gray99">Ventas</p>
-                            <p v-for="cashRegisterMovement in currentMovements"
-                                :key="cashRegisterMovement"
-                                :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
-                                class="text-gray99 truncate">
-                                {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ??
-                                    'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
-                            </p>
-                        </div>
-                        <div class="w-1/4 space-y-1">
-                            <div v-if="cutLoading">
-                                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-                            </div>
-                            <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
-                                (cash_register.started_cash + cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                            <p class="text-gray99"><span class="text-gray99 mr-3"><i
-                                        class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
-                                            cash_register.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                            <div v-if="cutLoading">
-                                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-                            </div>
-                            <p v-else class="text-gray99"><span class="text-gray99 mr-3"><i
-                                        class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
-                            cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                            <p v-for="cashRegisterMovement in currentMovements"
-                                :key="cashRegisterMovement" class="text-gray99">
-                                <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
-                                    class="fa-solid text-xs px-1"></i>
-                                <span class="text-gray99 mr-3">$</span>{{
-                                    cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
-                            </p>
-                        </div>
-                    </div>
-                    <footer class="bg-[#F2F2F2] text-gray99 py-2 flex px-2">
-                        <p class="w-3/4 text-right pr-7">Total</p>
-                        <div v-if="cutLoading">
-                            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-                        </div>
-                        <p v-else class="w-1/4 pl-4">
-                            <span class="mr-3">
-                                $
-                            </span>
-                            <b>{{ (cash_register.started_cash + cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
-                        </p>
-                    </footer>
-                </div>
+          <div class="w-full border border-grayD9 rounded-lg self-start">
+              <div class="p-4 flex items-center space-x-2">
+                  <div class="w-3/4 space-y-1">
+                      <p class="font-bold mb-3">Efectivo esperado</p>
+                      <p class="text-gray99">Efectivo inicial</p>
+                      <p class="text-gray99">Ventas</p>
+                      <p v-for="cashRegisterMovement in currentMovements"
+                          :key="cashRegisterMovement"
+                          :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
+                          class="text-gray99 truncate">
+                          {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ??
+                              'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
+                      </p>
+                  </div>
+                  <div class="w-1/4 space-y-1">
+                      <div v-if="cutLoading">
+                          <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                      </div>
+                      <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
+                          (cash_register.started_cash + cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                      <p class="text-gray99"><span class="text-gray99 mr-3"><i
+                                  class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                      cash_register.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                      <div v-if="cutLoading">
+                          <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                      </div>
+                      <p v-else class="text-gray99"><span class="text-gray99 mr-3"><i
+                                  class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                      cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                      <p v-for="cashRegisterMovement in currentMovements"
+                          :key="cashRegisterMovement" class="text-gray99">
+                          <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
+                              class="fa-solid text-xs px-1"></i>
+                          <span class="text-gray99 mr-3">$</span>{{
+                              cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
+                      </p>
+                  </div>
+              </div>
+              <footer class="bg-[#F2F2F2] text-gray99 py-2 flex px-2">
+                  <p class="w-3/4 text-right pr-7">Total</p>
+                  <div v-if="cutLoading">
+                      <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                  </div>
+                  <p v-else class="w-1/4 pl-4">
+                      <span class="mr-3">
+                          $
+                      </span>
+                      <b>{{ (cash_register.started_cash + cutForm.totalSaleForCashCut + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
+                  </p>
+              </footer>
+          </div>
 
-                <div v-if="isMaxCashOn" class="mt-7 py-3 lg:mt-0 mx-auto lg:mx-0 w-96 border border-grayD9 rounded-lg self-start relative">
-                    <h2 class="py-2 text-center text-sm font-bold">Efectivo máximo en caja</h2>
-                    <i v-if="!edit_max_cash" @click="editMaxCash" class="fa-solid fa-pen text-xs text-primary cursor-pointer hover:bg-gray-200 rounded-full py-1 px-[5px] absolute top-2 right-2"></i>
-                    <p v-if="!edit_max_cash" class="text-center mb-1">$ {{ cash_register.max_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <div v-else>
-                        <el-input v-model="form.max_cash" type="text" placeholder="Ingresa el monto" class="px-10"
-                            :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                            :parser="(value) => value.replace(/\D/g, '')">
-                            <template #prefix>
-                                <i class="fa-solid fa-dollar-sign"></i>
-                            </template>
-                        </el-input>
-                        <InputError :message="form.errors.max_cash" />
-                        <div class="flex justify-center space-x-4 my-2">
-                            <el-tooltip content="Cancelar" placement="left">
-                                <button @click="edit_max_cash = false;"
-                                    class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
-                                    <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
-                                </button>
-                            </el-tooltip>
-                            <el-tooltip content="Guardar" placement="right">
-                                <button @click="update"
-                                    class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
-                                        class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
-                            </el-tooltip>
-                        </div>
+          <div v-if="isMaxCashOn" class="w-96 space-y-3">
+            <!-- Editar cantidad maxima permitida en caja -->
+            <div class="mt-7 py-3 lg:mt-0 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
+                <h2 class="py-2 text-center text-sm font-bold">Efectivo máximo en caja</h2>
+                <i v-if="!edit_max_cash" @click="editMaxCash" class="fa-solid fa-pen text-xs text-primary cursor-pointer hover:bg-gray-200 rounded-full py-1 px-[5px] absolute top-2 right-2"></i>
+                <p v-if="!edit_max_cash" class="text-center mb-1">$ {{ cash_register.max_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                <div v-else>
+                    <el-input v-model="form.max_cash" type="text" placeholder="Ingresa el monto" class="px-10"
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/\D/g, '')"
+                        @keydown.enter="update">
+                        <template #prefix>
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </template>
+                    </el-input>
+                    <InputError :message="form.errors.max_cash" />
+                    <div class="flex justify-center space-x-4 my-2">
+                        <el-tooltip content="Cancelar" placement="left">
+                            <button @click="edit_max_cash = false;"
+                                class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
+                                <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
+                            </button>
+                        </el-tooltip>
+                        <el-tooltip content="Guardar" placement="right">
+                            <button @click="update"
+                                class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
+                                    class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
+                        </el-tooltip>
                     </div>
-                    <p class="text-gray99 text-xs text-center">Se notificará cuando haya alcanzado el máximo permitido para hacer corte de caja.</p>
                 </div>
-            </section>
+                <p class="text-gray99 text-xs text-center">Se notificará cuando haya alcanzado el máximo permitido para hacer corte de caja.</p>
+            </div>
+
+            <!-- Editar nombre de caja -->
+            <div class="mt-7 py-3 lg:mt-0 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
+                <h2 class="py-2 text-center text-sm font-bold">Nombre de caja</h2>
+                <i v-if="!edit_cash_register_name" @click="editName" class="fa-solid fa-pen text-xs text-primary cursor-pointer hover:bg-gray-200 rounded-full py-1 px-[5px] absolute top-2 right-2"></i>
+                <p v-if="!edit_cash_register_name" class="text-center mb-1">{{ cash_register.name }}</p>
+                <div v-else>
+                    <el-input v-model="form.name" type="text" placeholder="Ingresa el nuevo nombre" class="px-10" @keydown.enter="update">
+                    </el-input>
+                    <InputError :message="form.errors.name" />
+                    <div class="flex justify-center space-x-4 my-2">
+                        <el-tooltip content="Cancelar" placement="left">
+                            <button @click="edit_cash_register_name = false;"
+                                class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
+                                <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
+                            </button>
+                        </el-tooltip>
+                        <el-tooltip content="Guardar" placement="right">
+                            <button @click="update"
+                                class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
+                                    class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
+                        </el-tooltip>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </section>
     </div>
 
     <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
@@ -239,8 +284,11 @@ export default {
 data() {
     const form = useForm({
         max_cash: null,
+        name: null,
+        is_active: null,
         cashRegisterMovementType: null,
         registerAmount: null,
+        registerNotes: null,
     });
 
     const cutForm = useForm({
@@ -255,7 +303,9 @@ data() {
     return {
         form,
         cutForm,
+        currentMovements: null, //movimientos de caja hechos desde el último corte hasta ahora. Petición axios
         edit_max_cash: false, //bandera para editar el maximo dinero de caja
+        edit_cash_register_name: false, //bandera para editar el nombre de caja
         cashRegister: null,
         loading: true,
         cutLoading: false,
@@ -276,8 +326,7 @@ components: {
     Modal
 },
 props: {
-cash_register: Object,
-currentMovements: Array
+cash_register: Object
 },
 methods: {
     update() {
@@ -289,11 +338,12 @@ methods: {
                     type: "success",
                 });
                 this.edit_max_cash = false;
+                this.edit_cash_register_name = false;
             }
         });
     },
     storeCashRegisterMovement() {
-        this.form.post(route('cash-register-movements.store'), {
+        this.form.post(route('cash-register-movements.store', {cash_register_id: this.cash_register.id}), {
             onSuccess: () => {
             this.$notify({
                 title: "Correcto",
@@ -310,13 +360,18 @@ methods: {
     editMaxCash() {
         this.edit_max_cash = true;
     },
+    editName() {
+        this.edit_cash_register_name = true;
+    },
     async fetchCashRegister() {
         try {
             this.loading = true;
-            const response = await axios.get(route('cash-registers.fetch-cash-register'));
+            const response = await axios.get(route('cash-registers.fetch-cash-register', this.cash_register.id));
             if (response.status === 200) {
                 this.cashRegister = response.data.item;
                 this.form.max_cash = this.cashRegister.max_cash;
+                this.form.name = this.cashRegister.name;
+                this.form.is_active = this.cashRegister.is_active;
             }
         } catch (error) {
             console.log(error);
@@ -331,7 +386,7 @@ methods: {
     },
     async fetchTotalSaleForCashCut() {
         try {
-            const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut'));
+            const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.cash_register.id));
             if (response.status === 200) {
             this.cutForm.totalSaleForCashCut = response.data;
             }
@@ -342,7 +397,7 @@ methods: {
     async fetchTotalCashMovements() {
       try {
         this.cutLoading = true;
-        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements'));
+        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements', this.cash_register.id));
         if (response.status === 200) {
           this.cutForm.totalCashMovements = response.data;
           this.cutLoading = false;
@@ -351,8 +406,18 @@ methods: {
         console.log(error);
       }
     },
+    async fetchCurrentMovements() {
+      try {
+        const response = await axios.get(route('cash-register-movements.fetch-current-movements', this.cash_register.id));
+        if ( response.status == 200 ) {
+          this.currentMovements = response.data.items;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
     storeCashCut() {
-      this.cutForm.post(route('cash-cuts.store'), {
+      this.cutForm.post(route('cash-cuts.store', {cash_register_id: this.cash_register.id}), {
         onSuccess: () => {
           this.$notify({
             title: "Correcto",
@@ -377,9 +442,10 @@ methods: {
     },
 },
 mounted() {
-    this.fetchCashRegister();
-    this.fetchTotalSaleForCashCut();
-    this.fetchTotalCashMovements();
+    this.fetchCurrentMovements(); //obtiene los movimientos de caja que hay desde el ultimo corte hasta ahora
+    this.fetchCashRegister(); //obtiene el monto actual de dinero que hay en la caja registradora
+    this.fetchTotalSaleForCashCut(); //obtiene el monto total de venta que hay desde el ultimo corte hasta ahora
+    this.fetchTotalCashMovements(); //obtiene el monto total de movimientos desde el ultimo corte hasta ahora
 }
 
 }

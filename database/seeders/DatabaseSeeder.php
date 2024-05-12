@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
 
         // crear la primera caja registradora de la tienda
         CashRegister::create([
+            'name' => 'Caja 1',
             'started_cash' => 0,
             'current_cash' => 0,
             'max_cash' => 5000,

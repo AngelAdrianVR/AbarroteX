@@ -20,7 +20,7 @@
                             :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.code : product.code }}
+                        {{ product.global_product_id ? product.global_product?.code : product.code ?? 'N/A' }}
                     </td>
                     <td>
                         {{ product.global_product_id ? product.global_product?.name : product.name }}

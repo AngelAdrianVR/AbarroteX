@@ -20,11 +20,17 @@ class CashCut extends Model
         'difference',
         'notes',
         'cash_register_id',
+        'store_id',
     ];
 
     //relationships
     public Function cashRegister() :BelongsTo
     {
         return $this->belongsTo(CashRegister::class);
+    }
+
+    public Function store() :BelongsTo
+    {
+        return $this->belongsTo(Store::class);
     }
 }
