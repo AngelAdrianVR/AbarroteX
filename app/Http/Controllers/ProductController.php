@@ -12,7 +12,7 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\MessageBag;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ProductController extends Controller
@@ -341,51 +341,78 @@ class ProductController extends Controller
         // Obtener la primera hoja de trabajo
         $worksheet = $spreadsheet->getActiveSheet();
 
+        // Almacenar los errores de validación
+        $errorsBag = [];
+
+        // Variable para controlar si hay errores
+        $hasErrors = false;
+
+        $columnNames = [];
         // Obtener datos y guardar en la base de datos
-        $firstRowSkipped = false; // Variable para controlar si la primera fila se ha saltado
         foreach ($worksheet->getRowIterator() as $row) {
-            if (!$firstRowSkipped) {
-                $firstRowSkipped = true;
-                continue; // Saltar la primera fila
+            if ($row->getRowIndex() < 3) {
+                continue; // Saltar las primeras 2 filas
             }
 
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
 
-            $data = [];
-            foreach ($cellIterator as $cell) {
-                $data[] = $cell->getValue();
+            if ($row->getRowIndex() == 3) {
+                // Obtener los nombres de columna de la tercera fila del archivo Excel
+                foreach ($cellIterator as $cell) {
+                    $columnNames[] = $cell->getValue();
+                }
+                continue;
             }
 
-            try {
-                // Guardar en la base de datos
-                Product::create([
-                    'name' => $data[0],
-                    'public_price' => $data[1] ?? 1,
-                    'cost' => $data[2] ?? 1,
-                    'code' => $data[3],
-                    'min_stock' => $data[4] ?? 1,
-                    'max_stock' => $data[5] ?? 1,
-                    'current_stock' => $data[6] ?? 1,
-                    'store_id' => auth()->user()->store_id,
-                    'category_id' => 1, //Abarrotes por defecto
-                    'brand_id' => 1, //Generico por defecto
-                ]);
-            } catch (\Illuminate\Database\QueryException $e) {
-                $errors = new MessageBag();
+            $data = [];
+            $currentColumn = 0;
+            foreach ($cellIterator as $cell) {
+                $columnName = $columnNames[$currentColumn++]; // Obtener el nombre de columna
+                $data[$columnName] = $cell->getValue(); // Asignar el valor al array asociativo usando el nombre de columna
+            }
 
-                if ($e->errorInfo[1] === 1062) {
-                    // Clave duplicada
-                    $errors->add('code', 'Codigo de producto duplicado');
-                } else {
-                    // Otro tipo de error
-                    $errors->add('database', 'Error de base de datos');
-                }
+            // Validar los datos
+            $validator = Validator::make($data, [
+                $columnNames[0] => 'required|string|max:120|unique:products,name',
+                $columnNames[1] => 'required|numeric|min:0|max:9999',
+                $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:9999' : '',
+                $columnNames[3] => $data[$columnNames[3]] ? 'unique:products,code' : '',
+                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:9999' : '',
+                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:9999' : '',
+                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:9999' : '',
+            ]);
 
-                session()->flash('errors', $errors);
+            // Si la validación falla, almacenar los errores
+            if ($validator->fails()) {
+                $errorsBag[] = [
+                    'row' => $row->getRowIndex(),
+                    'errors' => $validator->errors()->all(),
+                ];
 
-                return back();
+                $hasErrors = true; // Marcar que hay errores
             }
         }
+
+        // Si hay errores, devolverlos al cliente
+        if ($hasErrors) {
+            return response()->json(['errors' => $errorsBag], 400);
+        } else {
+            return response()->json([], 200);
+        }
+
+        // Si no hay errores, proceder a guardar en la base de datos
+        // Product::create([
+        //     'name' => $data[0],
+        //     'public_price' => $data[1],
+        //     'cost' => $data[2] ?? 1,
+        //     'code' => $data[3],
+        //     'min_stock' => $data[4] ?? 1,
+        //     'max_stock' => $data[5] ?? 1,
+        //     'current_stock' => $data[6] ?? 1,
+        //     'store_id' => auth()->user()->store_id,
+        //     'category_id' => 1, //Abarrotes por defecto
+        //     'brand_id' => 1, //Generico por defecto
+        // ]);
     }
 }
