@@ -6,6 +6,7 @@ use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\Sale;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CashCutController extends Controller
@@ -47,6 +48,7 @@ class CashCutController extends Controller
             'notes' => $request->notes,
             'cash_register_id' => $cash_register->id,
             'store_id' => auth()->user()->store_id,
+            'user_id' => auth()->id(),
         ]);
 
         //se asigna el dinero contado al dinero inicial de caja registradora para el próximo corte 
@@ -57,39 +59,67 @@ class CashCutController extends Controller
     }
 
     
-    public function show(CashCut $cash_cut)
-    {
-        // obtiene la primera caja registradora de la tienda
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+    public function show($created_at)
+    {   
+        // Parsear la fecha recibida para obtener solo la parte de la fecha
+        $date = Carbon::parse($created_at)->toDateString();
 
-        // Se obtiene el ultimo corte para guardar los movimientos de caja hechos desdes de este ultimo corte
-        $last_cash_cut = CashCut::where('cash_register_id', $cash_register->id)->where('created_at', '<', $cash_cut->created_at)->latest()->first();
+        // Obtener los cortes registrados en la fecha recibida
+        $cash_cuts = CashCut::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
-        if ( $last_cash_cut !== null) {
-            //Se obtienen los movimientos de caja hechos despues del ultimo corte y antes de los cortes mas recientes
-            $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-                ->where('created_at', '>', $last_cash_cut->created_at )
-                ->where('created_at', '<', $cash_cut->created_at)
-                ->get();
-        } else {
-            // Se obtiene el segundo corte para limitar los movimientos del primer corte
-            $second_cash_cut = CashCut::where('cash_register_id', $cash_register->id)
-            ->skip(1)
-            ->first();
-
-            //Si existe este segundo corte entonces delimita los movimientos a esa fecha
-            if ( $second_cash_cut !== null ) {
-                $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-                    ->where('created_at', '<', $second_cash_cut->created_at)
-                    ->get();
-            } else { //Si no existe el segundo corte obtiene todos los registrados
-                $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->get();
-            }
-        }
+        // Agrupar los cortes por fecha con el nuevo formato de fecha y calcular el total de venta y la diferencia para cada fecha
+        $groupedCashCuts = $cash_cuts->groupBy(function($date) {
+            return $date->created_at->format('Y-m-d');
+        })
+        ->map(function($group) {
+            $total_sales = $group->sum('sales_cash');
+            $total_difference = $group->sum('difference');
+            
+            return [
+                'cuts' => $group,
+                'total_sales' => $total_sales,
+                'total_difference' => $total_difference
+            ];
+        });
         
-        // return $second_cash_cut;
-        return inertia('CashCut/Show', compact('cash_cut', 'cash_cut_movements'));
+        // return $groupedCashCuts;
+        return inertia('CashRegister/Show', compact('cash_cuts'));
     }
+
+
+    // public function show(CashCut $cash_cut)
+    // {
+    //     // obtiene la primera caja registradora de la tienda
+    //     $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+
+    //     // Se obtiene el ultimo corte para guardar los movimientos de caja hechos desdes de este ultimo corte
+    //     $last_cash_cut = CashCut::where('cash_register_id', $cash_register->id)->where('created_at', '<', $cash_cut->created_at)->latest()->first();
+
+    //     if ( $last_cash_cut !== null) {
+    //         //Se obtienen los movimientos de caja hechos despues del ultimo corte y antes de los cortes mas recientes
+    //         $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
+    //             ->where('created_at', '>', $last_cash_cut->created_at )
+    //             ->where('created_at', '<', $cash_cut->created_at)
+    //             ->get();
+    //     } else {
+    //         // Se obtiene el segundo corte para limitar los movimientos del primer corte
+    //         $second_cash_cut = CashCut::where('cash_register_id', $cash_register->id)
+    //         ->skip(1)
+    //         ->first();
+
+    //         //Si existe este segundo corte entonces delimita los movimientos a esa fecha
+    //         if ( $second_cash_cut !== null ) {
+    //             $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
+    //                 ->where('created_at', '<', $second_cash_cut->created_at)
+    //                 ->get();
+    //         } else { //Si no existe el segundo corte obtiene todos los registrados
+    //             $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->get();
+    //         }
+    //     }
+        
+    //     // return $second_cash_cut;
+    //     return inertia('CashRegister/Show', compact('cash_cut', 'cash_cut_movements'));
+    // }
 
     
     public function edit(CashCut $cash_cut)
@@ -130,5 +160,59 @@ class CashCutController extends Controller
         });
 
         return $total_sales;
+    }
+
+
+    public function filterCashCuts(Request $request)
+    {
+        $queryDate = $request->input('queryDate');
+        $startDate = Carbon::parse($queryDate[0])->startOfDay();
+        $endDate = Carbon::parse($queryDate[1])->endOfDay();
+
+        // Obtener los cortes registrados en el rango de fechas requerido por el filtro
+        $cash_cuts = CashCut::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
+
+        // Agrupar los cortes por fecha con el nuevo formato de fecha y calcular el total de venta y la diferencia para cada fecha
+        $groupedCashCuts = $cash_cuts->groupBy(function($date) {
+            return $date->created_at->format('Y-m-d');
+        })
+        ->map(function($group) {
+            $total_sales = $group->sum('sales_cash');
+            $total_difference = $group->sum('difference');
+            
+            return [
+                'cuts' => $group,
+                'total_sales' => $total_sales,
+                'total_difference' => $total_difference
+            ];
+        });
+
+        return response()->json(['items' => $groupedCashCuts]);
+    }
+
+
+    public function getItemsByPage($currentPage)
+    {
+        $offset = $currentPage * 7;
+
+        $cash_cuts = CashCut::where('store_id', auth()->user()->store_id)->latest()->get();
+
+        // Agrupar los cortes por fecha con el nuevo formato de fecha y calcular el total de venta y la diferencia para cada fecha
+        $groupedCashCuts = $cash_cuts->groupBy(function($date) {
+            return $date->created_at->format('Y-m-d');
+        })
+        ->map(function($group) {
+            $total_sales = $group->sum('sales_cash');
+            $total_difference = $group->sum('difference');
+            
+            return [
+                'cuts' => $group,
+                'total_sales' => $total_sales,
+                'total_difference' => $total_difference
+            ];
+        })->skip($offset)
+            ->take(7);
+
+        return response()->json(['items' => $groupedCashCuts]);
     }
 }

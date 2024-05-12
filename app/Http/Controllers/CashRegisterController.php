@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\CashCut;
 use App\Models\CashRegister;
-use App\Models\CashRegisterMovement;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CashRegisterController extends Controller
 {
@@ -16,10 +16,33 @@ class CashRegisterController extends Controller
         // obtiene las cajas registradoras de la tienda
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
 
+        // Obtener todos los cortes registrados y contar el número de agrupaciones por día
+        $total_cash_cuts = DB::table('cash_cuts')
+            ->select(DB::raw('DATE(created_at) as date'))
+            ->where('store_id', auth()->user()->store_id)
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->get()
+            ->count();
+            
         //obtiene los cortes de todas las cajas de la tienda
-        $cash_cuts = CashCut::where('cash_register_id', $cash_registers[0]->id)->latest()->get();
+        $cash_cuts = CashCut::where('store_id', auth()->user()->store_id)
+                    ->latest()
+                    ->get()
+                    ->groupBy(function($date) {
+                        return $date->created_at->format('Y-m-d');
+                    })
+                    ->map(function($group) {
+                        $total_sales = $group->sum('sales_cash');
+                        $total_difference = $group->sum('difference');
+                        
+                        return [
+                            'cuts' => $group,
+                            'total_sales' => $total_sales,
+                            'total_difference' => $total_difference
+                        ];
+                    })->take(7);
         
-        return inertia('CashRegister/Index', compact('cash_registers', 'cash_cuts'));
+        return inertia('CashRegister/Index', compact('cash_registers', 'cash_cuts', 'total_cash_cuts'));
     }
 
    

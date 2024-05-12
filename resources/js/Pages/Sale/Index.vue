@@ -90,19 +90,26 @@ export default {
     },
     methods: {
         async searchSales() {
-            this.loading = true;
-            try {
-                const response = await axios.get(route('sales.search'), { params: { queryDate: this.searchDate } });
-                if (response.status == 200) {
-                    this.localSales = response.data.items;
-                    this.filtered = true;
-                }
+            if ( this.searchDate != null) {
+                this.loading = true;
+                try {
+                    const response = await axios.get(route('sales.search'), { params: { queryDate: this.searchDate } });
+                    if (response.status == 200) {
+                        this.localSales = response.data.items;
+                        this.filtered = true;
+                    }
 
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    this.loading = false;
+                    this.showFilter = false;
+                }
+            } else {
+                this.localSales = this.groupedSales;
                 this.showFilter = false;
+                this.filtered = false;
+                this.currentPage = 1;
             }
         },
         async fetchItemsByPage() {
