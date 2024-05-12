@@ -341,11 +341,22 @@ class ProductController extends Controller
         // Obtener la primera hoja de trabajo
         $worksheet = $spreadsheet->getActiveSheet();
 
+        // validar informacion
+        $errorsBag = $this->validateProductsFromFile($worksheet);
+
+        // Si hay errores, devolverlos al cliente
+        if ($errorsBag) {
+            return response()->json(['errors' => $errorsBag], 400);
+        } else {
+            // Si no hay errores, proceder a guardar en la base de datos
+            $this->storeProductsFromFile($worksheet);
+        }
+    }
+
+    private function validateProductsFromFile($worksheet)
+    {
         // Almacenar los errores de validación
         $errorsBag = [];
-
-        // Variable para controlar si hay errores
-        $hasErrors = false;
 
         $columnNames = [];
         // Obtener datos y guardar en la base de datos
@@ -375,12 +386,12 @@ class ProductController extends Controller
             // Validar los datos
             $validator = Validator::make($data, [
                 $columnNames[0] => 'required|string|max:120|unique:products,name',
-                $columnNames[1] => 'required|numeric|min:0|max:9999',
-                $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:9999' : '',
+                $columnNames[1] => 'required|numeric|min:0|max:999999',
+                $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:999999' : '',
                 $columnNames[3] => $data[$columnNames[3]] ? 'unique:products,code' : '',
-                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:9999' : '',
-                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:9999' : '',
-                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:9999' : '',
+                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999' : '',
+                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999' : '',
+                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '',
             ]);
 
             // Si la validación falla, almacenar los errores
@@ -389,30 +400,47 @@ class ProductController extends Controller
                     'row' => $row->getRowIndex(),
                     'errors' => $validator->errors()->all(),
                 ];
-
-                $hasErrors = true; // Marcar que hay errores
             }
         }
 
-        // Si hay errores, devolverlos al cliente
-        if ($hasErrors) {
-            return response()->json(['errors' => $errorsBag], 400);
-        } else {
-            return response()->json([], 200);
-        }
+        return $errorsBag;
+    }
 
-        // Si no hay errores, proceder a guardar en la base de datos
-        // Product::create([
-        //     'name' => $data[0],
-        //     'public_price' => $data[1],
-        //     'cost' => $data[2] ?? 1,
-        //     'code' => $data[3],
-        //     'min_stock' => $data[4] ?? 1,
-        //     'max_stock' => $data[5] ?? 1,
-        //     'current_stock' => $data[6] ?? 1,
-        //     'store_id' => auth()->user()->store_id,
-        //     'category_id' => 1, //Abarrotes por defecto
-        //     'brand_id' => 1, //Generico por defecto
-        // ]);
+    private function storeProductsFromFile($worksheet)
+    {
+        foreach ($worksheet->getRowIterator() as $row) {
+            if ($row->getRowIndex() < 3) {
+                continue; // Saltar las primeras 2 filas
+            }
+
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            if ($row->getRowIndex() == 3) {
+                // Obtener los nombres de columna de la tercera fila del archivo Excel
+                foreach ($cellIterator as $cell) {
+                    $columnNames[] = $cell->getValue();
+                }
+                continue;
+            }
+
+            $data = [];
+            foreach ($cellIterator as $cell) {
+                $data[] = $cell->getValue(); // Asignar el valor al array asociativo usando el nombre de columna
+            }
+
+            Product::create([
+                'name' => $data[0],
+                'public_price' => $data[1],
+                'cost' => $data[2] ?? 1,
+                'code' => $data[3],
+                'min_stock' => $data[4] ?? 1,
+                'max_stock' => $data[5] ?? 1,
+                'current_stock' => $data[6] ?? 1,
+                'store_id' => auth()->user()->store_id,
+                'category_id' => 1, //Abarrotes por defecto
+                'brand_id' => 1, //Generico por defecto
+            ]);
+        }
     }
 }
