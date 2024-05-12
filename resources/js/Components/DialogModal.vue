@@ -38,7 +38,7 @@ const close = () => {
                 </button>
             </div>
 
-            <div class="mt-4 text-sm text-gray37 text-justify">
+            <div class="mt-4 text-sm text-gray37">
                 <slot name="content" />
             </div>
         </div>

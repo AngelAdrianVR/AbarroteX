@@ -34,21 +34,25 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Point from '@/Pages/Setting/Tabs/Point.vue';
 
 export default {
-data() {
-    return {
-        activeTab: '1',
+    data() {
+        return {
+            activeTab: '1',
+        }
+    },
+    components: {
+        AppLayout,
+        PrimaryButton,
+        Point
+    },
+    props: {
+
+    },
+    methods: {
+
+    },
+    mounted() {
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
-},
-components:{
-AppLayout,
-PrimaryButton,
-Point
-},
-props:{
-
-},
-methods:{
-
-}
 }
 </script>

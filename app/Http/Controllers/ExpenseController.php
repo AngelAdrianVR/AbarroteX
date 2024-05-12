@@ -14,7 +14,7 @@ class ExpenseController extends Controller
 
     public function index()
     {
-        // Obtener todos los egresos registrados y contar el número de agrupaciones por día
+        // Obtener todos los gastos registrados y contar el número de agrupaciones por día
         $total_expenses = DB::table('expenses')
             ->select(DB::raw('DATE(created_at) as date'))
             ->where('store_id', auth()->user()->store_id)
@@ -23,9 +23,9 @@ class ExpenseController extends Controller
             ->count();
 
 
-        // Calcular la fecha hace x días para recuperar los egresos de x dias atras hasta la fecha de hoy
+        // Calcular la fecha hace x días para recuperar los gastos de x dias atras hasta la fecha de hoy
         // $days_ago = Carbon::now()->subDays(30);
-        // Obtener los egresos registrados en los últimos 7 días
+        // Obtener los gastos registrados en los últimos 7 días
         // $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
         $expenses = Expense::where('store_id', auth()->user()->store_id)->latest()->get();
 
@@ -58,7 +58,7 @@ class ExpenseController extends Controller
 
     public function store(Request $request)
     {
-        // Itera sobre cada egreso recibido en la lista
+        // Itera sobre cada gasto recibido en la lista
         foreach ($request->expenses as $expenseData) {
             Expense::create([
                 'concept' => $expenseData['concept'],
@@ -76,7 +76,7 @@ class ExpenseController extends Controller
                 CashRegisterMovement::create([
                     'amount' => $expenseData['current_price'],
                     'type' => 'Retiro',
-                    'notes' => 'Registro de egreso',
+                    'notes' => 'Registro de gasto',
                     'cash_register_id' => $cash_register->id,
                 ]);
                 //actualizar el dinero actual de la caja
@@ -111,13 +111,13 @@ class ExpenseController extends Controller
 
     public function destroy(Expense $expense)
     {
-        // Obtener la fecha de creación del registro de egreso
+        // Obtener la fecha de creación del registro de gasto
         $expenseDate = $expense->created_at->toDateString();
 
         // Eliminar todos los registros que tengan la misma fecha de creación
         Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $expenseDate)->delete();
 
-        // Eliminar el registro de egreso enviado como referencia
+        // Eliminar el registro de gasto enviado como referencia
         $expense->delete();
     }
 
@@ -127,10 +127,10 @@ class ExpenseController extends Controller
         $startDate = Carbon::parse($queryDate[0])->startOfDay();
         $endDate = Carbon::parse($queryDate[1])->endOfDay();
 
-        // Obtener los egresos registrados en el rango de fechas requerido por el filtro
+        // Obtener los gastos registrados en el rango de fechas requerido por el filtro
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
 
-        // Agrupar los egresos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        // Agrupar los gastos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
             return Carbon::parse($expense->created_at)->format('d-F-Y');
         })->map(function ($expenses) {
@@ -163,7 +163,7 @@ class ExpenseController extends Controller
 
         $expenses = Expense::where('store_id', auth()->user()->store_id)->latest()->get();
 
-        // Agrupar los egresos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        // Agrupar los gastos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
             return Carbon::parse($expense->created_at)->format('d-F-Y');
         })->map(function ($expenses) {

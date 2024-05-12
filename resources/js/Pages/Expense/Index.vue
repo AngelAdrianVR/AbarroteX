@@ -1,11 +1,11 @@
 <template>
-    <AppLayout title="Egresos">
+    <AppLayout title="Gastos">
         <div class="px-2 lg:px-10 py-7">
             <!-- header botones -->
             <div class="flex justify-between items-center mx-3">
-                <h1 class="font-bold text-lg">Egresos</h1>
+                <h1 class="font-bold text-lg">Gastos</h1>
                 <div class="flex space-x-2 items-center relative">
-                    <!-- Boton para crear egreso -->
+                    <!-- Boton para crear gasto -->
                     <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="!py-[6px]">Crear
                     </PrimaryButton>
                     <!-- filtro -->
@@ -53,7 +53,8 @@
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                 </p>
-                <button v-else-if="Object.keys(localExpenses)?.length && total_expenses > 30 && Object.keys(localExpenses)?.length < total_expenses && !filtered"
+                <button
+                    v-else-if="Object.keys(localExpenses)?.length && total_expenses > 30 && Object.keys(localExpenses)?.length < total_expenses && !filtered"
                     @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
                     elementos</button>
             </div>
@@ -131,6 +132,10 @@ export default {
                 this.loadingItems = false;
             }
         },
+    },
+    mounted() {
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
 }
 </script>

@@ -113,7 +113,7 @@
             </template>
             <template #footer>
                 <div v-if="!importForm.processing && !importForm.wasSuccessful" class="flex items-center space-x-2">
-                    <CancelButton @click="showImportModal = false; importForm.file = null"
+                    <CancelButton @click="showImportModal = false; importForm.file = []"
                         :disabled="importForm.processing">
                         Cancelar
                     </CancelButton>
@@ -255,10 +255,11 @@ export default {
         importProducts() {
             this.importForm.post(route('products.import'), {
                 onSuccess: () => {
-                    window.location.reload();
+                    // window.location.reload();
+                    console.log(this.importForm)
                 },
                 onError: () => {
-                    console.log(this.importForm.errors)
+                    console.log(this.importForm)
                 }
             });
         },
@@ -397,6 +398,9 @@ export default {
             this.currentPage = currentTabFromURL;
             this.fetchAllItemsForCurrentPage();
         }
+
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
 }
 </script>

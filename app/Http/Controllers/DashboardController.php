@@ -48,7 +48,7 @@ class DashboardController extends Controller
         $startOfWeek = $date->copy()->startOfWeek(Carbon::SUNDAY)->toDateString();
         $endOfWeek = $date->copy()->endOfWeek(Carbon::SATURDAY)->toDateString();
 
-        // Ventas y egresos de la semana seleccionada
+        // Ventas y gastos de la semana seleccionada
         $sales = Sale::where('store_id', auth()->user()->store_id)
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->get();

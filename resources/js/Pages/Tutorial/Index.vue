@@ -124,7 +124,7 @@ data() {
         tutorialContent: [
             { title: 'Video tutorial para realizar tus ventas' },
             { title: 'Video tutorial para cargar tus productos' },
-            { title: 'Video tutorial de análisis de ventas y egresos' }
+            { title: 'Video tutorial de análisis de ventas y gastos' }
         ],
         configModal: false,
         finishModal: false,

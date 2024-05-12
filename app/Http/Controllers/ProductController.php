@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\MessageBag;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ProductController extends Controller
@@ -174,8 +175,11 @@ class ProductController extends Controller
 
         // Realiza la búsqueda en la base de datos local
         $local_products = Product::with(['category', 'brand', 'media'])
-            ->where('name', 'like', "%$query%")
-            ->orWhere('code', 'like', "%$query%")
+            ->where('store_id', auth()->user()->store_id)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%$query%")
+                    ->orWhere('code', 'like', "%$query%");
+            })
             ->get();
 
         $global_products = GlobalProductStore::with(['globalProduct.media'])
@@ -183,6 +187,7 @@ class ProductController extends Controller
                 $queryBuilder->where('name', 'like', "%$query%")
                     ->orWhere('code', $query);
             })
+            ->where('store_id', auth()->user()->store_id)
             ->get();
 
         // Combinar los resultados en una colección
@@ -230,7 +235,7 @@ class ProductController extends Controller
             'historicable_type' => Product::class
         ]);
 
-        // Crear egreso
+        // Crear gasto
         Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
             'current_price' => $product->cost,
@@ -367,14 +372,19 @@ class ProductController extends Controller
                     'brand_id' => 1, //Generico por defecto
                 ]);
             } catch (\Illuminate\Database\QueryException $e) {
-                return $data;
-                // if ($e->errorInfo[1] === 1062) {
-                //     // Clave duplicada
-                //     // return response()->json(['error' => 'duplicate_code'], 400);
-                // } else {
-                //     // Otro tipo de error
-                //     // return response()->json(['error' => 'database_error'], 500);
-                // }
+                $errors = new MessageBag();
+
+                if ($e->errorInfo[1] === 1062) {
+                    // Clave duplicada
+                    $errors->add('code', 'Codigo de producto duplicado');
+                } else {
+                    // Otro tipo de error
+                    $errors->add('database', 'Error de base de datos');
+                }
+
+                session()->flash('errors', $errors);
+
+                return back();
             }
         }
     }

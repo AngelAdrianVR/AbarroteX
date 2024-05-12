@@ -6,18 +6,18 @@
                 class="flex flex-col md:flex-row !items-start my-5 lg:mx-14">
                 <el-radio value="Hoy">
                     <span v-if="period != 'Hoy'">Hoy</span>
-                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="date" placeholder="Elige un día"
-                        format="DD/MM/YYYY" value-format="YYYY-MM-DD" size="small" />
+                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="date"
+                        placeholder="Elige un día" format="DD/MM/YYYY" value-format="YYYY-MM-DD" size="small" />
                 </el-radio>
                 <el-radio value="Semanal">
                     <span v-if="period != 'Semanal'">Semanal</span>
-                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="week" format="[Semana] ww"
-                        value-format="YYYY-MM-DD" placeholder="Elige una semana" size="small" />
+                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="week"
+                        format="[Semana] ww" value-format="YYYY-MM-DD" placeholder="Elige una semana" size="small" />
                 </el-radio>
                 <el-radio value="Mensual">
                     <span v-if="period != 'Mensual'">Mensual</span>
-                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="month" format="MM/YYYY"
-                        value-format="YYYY-MM-DD" placeholder="Elige un mes" size="small" />
+                    <el-date-picker v-else @change="handleChangePeriodRange" v-model="periodRange" type="month"
+                        format="MM/YYYY" value-format="YYYY-MM-DD" placeholder="Elige un mes" size="small" />
                 </el-radio>
             </el-radio-group>
         </section>
@@ -113,7 +113,7 @@ export default {
                     value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
                 {
-                    title: "Compras (Egresos)",
+                    title: "Compras (Gastos)",
                     icon: "fa-solid fa-dollar-sign",
                     value: "$" + this.calculateTotalExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
@@ -179,7 +179,7 @@ export default {
                     }],
                 },
                 {
-                    title: 'Egresos (compras)',
+                    title: 'Gastos (compras)',
                     colors: ['#C30303', '#F07209'],
                     categories: timeline.timeline,
                     series: [{
@@ -333,7 +333,7 @@ export default {
         async fetchDailyData() {
             this.loading = true;
             try {
-                const response = await axios.get(route('dashboard.get-day-data', {date: this.periodRange}));
+                const response = await axios.get(route('dashboard.get-day-data', { date: this.periodRange }));
 
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
@@ -351,7 +351,7 @@ export default {
         async fetchWeekData() {
             this.loading = true;
             try {
-                const response = await axios.get(route('dashboard.get-week-data', {date: this.periodRange}));
+                const response = await axios.get(route('dashboard.get-week-data', { date: this.periodRange }));
 
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
@@ -369,7 +369,7 @@ export default {
         async fetchMonthData() {
             this.loading = true;
             try {
-                const response = await axios.get(route('dashboard.get-month-data', {date: this.periodRange}));
+                const response = await axios.get(route('dashboard.get-month-data', { date: this.periodRange }));
 
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
@@ -388,6 +388,8 @@ export default {
     mounted() {
         this.periodRange = this.getCurrentDate();
         this.fetchDailyData();
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
 }
 </script>

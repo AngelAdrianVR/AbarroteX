@@ -109,7 +109,9 @@
                                         <p>678679678665342245</p>
                                         <p>Miguel O. Vazquez</p>
                                         <p>Nu México</p>
-                                        <p class="font-bold">{{ amountToPay }}</p>
+                                        <p class="font-bold">
+                                            ${{ amountToPay }}
+                                        </p>
                                     </div>
                                 </div>
                                 <p class="pt-5">A continuación, ingresa una foto del comprobante de pago, es importante
@@ -277,27 +279,27 @@ export default {
                 },
                 {
                     name: "Trimestral",
-                    title: "Trimestral (3 meses) + 5 días gratis",
-                    amount: 597.00,
-                    description: "Pagas $192.58 cada mes",
+                    title: "Trimestral (3 meses)",
+                    amount: 499.00,
+                    description: "Pagas $166.33 cada mes",
                     days: 90,
-                    daysGifted: 5,
+                    daysGifted: 0,
                 },
                 {
                     name: "Semestral",
-                    title: "Semestral (6 meses) + 14 días gratis",
-                    amount: 1494.00,
-                    description: "Pagas $184.64 cada mes",
+                    title: "Semestral (6 meses)",
+                    amount: 899.00,
+                    description: "Pagas $149.83 cada mes",
                     days: 180,
-                    daysGifted: 14,
+                    daysGifted: 0,
                 },
                 {
                     name: "Anual",
-                    title: "Anual (12 meses) + 65 días gratis",
-                    amount: 2421.00,
-                    description: "Pagas $157.89 cada mes",
+                    title: "Anual (12 meses)",
+                    amount: 1699.00,
+                    description: "Pagas $141.58 cada mes",
                     days: 365,
-                    daysGifted: 65,
+                    daysGifted: 0,
                 },
             ],
             cards: [
@@ -339,15 +341,7 @@ export default {
             return this.cards.find(item => item.id == this.$page.props.auth.user.store.default_card_id);
         },
         amountToPay() {
-            if (this.form.suscription_period == 'Mensual') {
-                return '$199.00';
-            } else if (this.form.suscription_period == 'Trimestral') {
-                return '$597.00';
-            } else if (this.form.suscription_period == 'Semestral') {
-                return '$1,494.00';
-            } else if (this.form.suscription_period == 'Anual') {
-                return '$2,421.00';
-            }
+            return this.suscriptions.find(item => item.name == this.form.suscription_period)?.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         }
     },
     methods: {
