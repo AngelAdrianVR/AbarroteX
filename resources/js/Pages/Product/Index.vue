@@ -15,6 +15,9 @@
                     <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton> -->
+                    <PrimaryButton @click="showImportModal = true" class="!rounded-full">
+                        Importar productos
+                    </PrimaryButton>
                     <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
                         Nuevo producto
                     </PrimaryButton>
@@ -44,6 +47,82 @@
                     elementos</button>
             </div>
         </div>
+
+        <DialogModal :show="showImportModal" @close="showImportModal = false">
+            <template #title> Importar productos </template>
+            <template #content>
+                <div v-if="!importForm.processing && !importForm.wasSuccessful">
+                    {{ importForm }}
+                    <p class="text-gray99">
+                        ¡Bienvenido a la función de importación de productos! Para facilitar el proceso y asegurar que
+                        todos
+                        los datos se ingresen correctamente, te recomendamos seguir estos pasos simples.
+                    </p>
+                    <p class="mt-5 mb-1">
+                        Primero, descarga la plantilla de importación haciendo click en el siguiente enlace:
+                    </p>
+                    <a href="@/../../files/tabla_productos.xlsx" target="_blank" class="underline text-primary">Descarga
+                        la
+                        plantilla</a>
+                    <p class="mt-5 mb-1">
+                        Una vez que hayas agregado todos los productos a la plantilla, guarda los cambios y adjunta el
+                        archivo.
+                        El sistema se encargará automáticamente de procesar la información y agregar tus productos.
+                    </p>
+                    <form @submit.prevent="importProducts" ref="importForm" class="mt-4">
+                        <div>
+                            <FileUploader @files-selected="importForm.file = $event" :multiple="false" />
+                            <InputError :message="importForm.errors.file" />
+                        </div>
+                    </form>
+                </div>
+                <div v-else-if="!importForm.wasSuccessful" class="flex flex-col items-center justify-center">
+                    {{ importForm }}
+                    <p>Procesando productos</p>
+                    <p class="text-gray99">Esto podría tardar un momento, gracias por la espera.</p>
+                    <svg class="animate-spin text-primary mt-4 text-center" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24" id="Rotate-Right--Streamline-Sharp" height="20" width="20">
+                        <desc>Rotate Right Streamline Icon: https://streamlinehq.com</desc>
+                        <g id="rotate-right">
+                            <path id="Vector 2754" stroke="currentColor" d="M20.2047 0.5135V4.8893H15.8289"
+                                stroke-width="2"></path>
+                            <path id="Ellipse 1206" stroke="currentColor"
+                                d="M20.2047 4.764C18.2001 2.4929 15.2674 1.0605 12.0001 1.0605C5.9583 1.0605 1.0605 5.9583 1.0605 12C1.0605 16.194 3.4207 19.8367 6.8853 21.6726"
+                                stroke-width="2"></path>
+                            <path id="Ellipse 1207" stroke="currentColor"
+                                d="M9.1081 22.5533C10.0293 22.8051 10.999 22.9395 11.9999 22.9395C13.4231 22.9395 14.7826 22.6678 16.0297 22.1734"
+                                stroke-width="2"></path>
+                            <path id="Ellipse 1208" stroke="currentColor"
+                                d="M17.7655 21.2986C19.2694 20.3641 20.5299 19.0749 21.4301 17.548" stroke-width="2">
+                            </path>
+                            <path id="Ellipse 1209" stroke="currentColor"
+                                d="M22.9395 12C22.9395 13.2879 22.717 14.5237 22.3083 15.6713" stroke-width="2"></path>
+                        </g>
+                    </svg>
+                </div>
+                <div v-else class="flex flex-col items-center justify-center">
+                    {{ importForm }}
+                    <p>¡Listo!</p>
+                    <p class="text-gray99">Tus productos se han subido con éxito.</p>
+                    <svg class="mt-2" width="24" height="24" viewBox="0 0 54 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12.5263 42.0011C8.73489 31.147 0.492597 22.5137 0.0263141 22.0011C-0.439969 21.4884 5.33881 20.5148 13.5263 29.0011C29.0463 11.4303 44.0918 -0.0470468 52.5263 0.00107837C52.8512 -0.0320255 53.3498 0.705849 53.0263 1.00108C34.3519 9.89275 24.0145 25.6913 15.0263 42.0011C14.9721 42.4953 12.5049 42.397 12.5263 42.0011Z"
+                            fill="#189203" />
+                    </svg>
+                </div>
+            </template>
+            <template #footer>
+                <div v-if="!importForm.processing && !importForm.wasSuccessful" class="flex items-center space-x-2">
+                    <CancelButton @click="showImportModal = false; importForm.file = null"
+                        :disabled="importForm.processing">
+                        Cancelar
+                    </CancelButton>
+                    <PrimaryButton @click="importProducts()" :disabled="!importForm.file.length">
+                        Importar
+                    </PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
 
         <!-- -------------- Modal starts----------------------- -->
         <Modal :show="entryProductModal" @close="entryProductModal = false">
@@ -120,8 +199,10 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ProductTable from '@/Components/MyComponents/Product/ProductTable.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
+import FileUploader from '@/Components/MyComponents/FileUploader.vue';
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
+import DialogModal from "@/Components/DialogModal.vue";
 import { useForm } from "@inertiajs/vue3";
 
 export default {
@@ -131,10 +212,15 @@ export default {
             quantity: null,
         });
 
+        const importForm = useForm({
+            file: [],
+        });
+
         return {
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             form,
+            importForm,
             loading: false,
             searchQuery: null,
             searchFocus: false,
@@ -144,6 +230,8 @@ export default {
             // paginacion
             loadingItems: false,
             currentPage: 1,
+            // modals
+            showImportModal: false,
         };
     },
     components: {
@@ -155,13 +243,25 @@ export default {
         InputError,
         InputLabel,
         Loading,
-        Modal
+        Modal,
+        DialogModal,
+        FileUploader,
     },
     props: {
         products: Object,
         total_products: Number,
     },
     methods: {
+        importProducts() {
+            this.importForm.post(route('products.import'), {
+                onSuccess: () => {
+                    window.location.reload();
+                },
+                onError: () => {
+                    console.log(this.importForm.errors)
+                }
+            });
+        },
         openEntryModal() {
             this.entryProductModal = true;
             this.$nextTick(() => {
