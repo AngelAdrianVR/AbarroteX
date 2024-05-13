@@ -39,4 +39,5 @@ class CashCut extends Model
     {
         return $this->belongsTo(user::class);
     }
+    
 }
