@@ -21,6 +21,7 @@ class CashCut extends Model
         'notes',
         'cash_register_id',
         'store_id',
+        'user_id',
     ];
 
     //relationships
@@ -33,4 +34,10 @@ class CashCut extends Model
     {
         return $this->belongsTo(Store::class);
     }
+
+    public Function user() :BelongsTo
+    {
+        return $this->belongsTo(user::class);
+    }
+    
 }

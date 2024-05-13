@@ -76,6 +76,11 @@ class User extends Authenticatable
         return $this->belongsTo(CashRegister::class);
     }
 
+    public function cashCuts() :BelongsTo
+    {
+        return $this->belongsTo(CashCut::class);
+    }
+
     public function sales() :HasMany
     {
         return $this->hasMany(Sale::class);

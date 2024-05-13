@@ -1,48 +1,72 @@
 <template>
     <AppLayout title="Detalles del corte">
         <div class="px-3 lg:px-14 py-5">
-            <h1 class="lg:ml-10">Detalles del corte</h1>
+            <h1 class="lg:ml-10">Detalles de cortes</h1>
 
             <!-- back -->
             <div class="my-4">
                 <Back />
             </div>
 
-            <section class="lg:flex lg:space-x-7 md:w-[90%] mx-auto text-sm">
+            <div class="flex mt-8 mb-10">
+                <div class="w-44 space-y-2">
+                    <p>Total de cortes</p>
+                    <p>Total de ventas</p>
+                    <p>Total de diferencias</p>
+                </div>
+                <div class="space-y-2">
+                    <p class="ml-4 font-bold">{{ Object.values(groupedCashCuts)[0].cuts?.length }}</p>
+                    <p class="ml-4 font-bold">${{ Object.values(groupedCashCuts)[0].total_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                    <p class="ml-4 font-bold">${{ Object.values(groupedCashCuts)[0].total_difference.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                </div>
+            </div>
+
+            <section v-for="cash_cut in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" class="lg:flex lg:space-x-7 md:w-[90%] mx-auto text-sm mt-5">
                 <div class="w-full border border-grayD9 rounded-lg self-start">
+                    <div class="flex justify-between border-b border-grayD9 py-2 px-4">
+                        <p>{{ cash_cut.cash_register.name + ' • ' + cash_cut.user.name }}</p>
+                        <p class="text-gray99">{{ formatDateHour(cash_cut.created_at) }}</p>
+                    </div>
                     <div class="p-4 flex items-center space-x-2">
                         <div class="w-3/4 space-y-1">
-                            <p class="font-bold mb-3">Recuento manual de efectivo</p>
+                            <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                             <p class="text-gray99">Efectivo inicial</p>
                             <p class="text-gray99">Ventas</p>
-                            <p v-for="cashRegisterMovement in cash_cut_movements"
+                            <p v-for="cashRegisterMovement in getCashCutMovements(cash_cut)" :key="cashRegisterMovement.id" class="text-gray99 truncate">
+                                {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
+                            </p>
+                            <!-- <p v-for="cashRegisterMovement in cash_cut_movements"
                                 :key="cashRegisterMovement"
                                 :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
                                 class="text-gray99 truncate">
                                 {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ??
                                     'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
-                            </p>
+                            </p> -->
                         </div>
                         <div class="w-1/4 space-y-1">
-                            <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
-                                cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                            <!-- <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
+                                cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
                             <p class="text-gray99"><span class="text-gray99 mr-3"><i
                                         class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
                                             cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                             <p class="text-gray99"><span class="text-gray99 mr-3"><i
                                         class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
                                             cash_cut.sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                            <p v-for="cashRegisterMovement in cash_cut_movements"
+                            <p v-for="cashRegisterMovement in getCashCutMovements(cash_cut)" :key="cashRegisterMovement.id" class="text-gray99">
+                                <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'" class="fa-solid text-xs px-1"></i>
+                                <span class="text-gray99 mr-3">$</span>{{ cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
+                            </p>
+                            <!-- <p v-for="cashRegisterMovement in cash_cut_movements"
                                 :key="cashRegisterMovement" class="text-gray99">
                                 <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
                                     class="fa-solid text-xs px-1"></i>
                                 <span class="text-gray99 mr-3">$</span>{{
                                     cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
-                            </p>
+                            </p> -->
                         </div>
                     </div>
-                    <footer class="bg-[#F2F2F2] text-gray99 py-2 flex px-2">
-                        <p class="w-3/4 text-right pr-7">Total</p>
+                    <footer class="bg-[#F2F2F2] text-black font-bold py-2 flex px-2">
+                        <p class="w-3/4 text-right pr-7">Efectivo esperado</p>
                         <p class="w-1/4 pl-4">
                             <span class="mr-3">
                                 $
@@ -57,7 +81,6 @@
                         formatDate(cash_cut.created_at) }}</h2>
                     <div class="flex justify-between space-x-1 p-5">
                         <div class="font-semibold space-y-1">
-                            <p class="mb-5">Hora de corte</p>
                             <p>Efectivo al iniciar</p>
                             <p>Esperado</p>
                             <p>Recuento manual</p>
@@ -66,14 +89,13 @@
                             <p>Restante en caja</p>
                         </div>
                         <div class="space-y-1 font-semibold">
-                            <p class="mb-5 text-gray99">{{ formatDateHour(cash_cut.created_at) }}</p>
                             <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.started_cash?.toLocaleString('en-US',
                                 {minimumFractionDigits: 2}) }}</p>
                             <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.expected_cash?.toLocaleString('en-US',
                                 {minimumFractionDigits: 2}) }}</p>
                             <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.counted_cash?.toLocaleString('en-US',
                                 {minimumFractionDigits: 2}) }}</p>
-                            <p class="pb-5" :class="differenceStyles()"><span class="pr-3">$</span>{{
+                            <p class="pb-5" :class="differenceStyles(cash_cut)"><span class="pr-3">$</span>{{
                                 (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US',
                                 {minimumFractionDigits: 2}) }}</p>
                             <p><span class="text-gray99 pr-3">$</span>{{
@@ -108,6 +130,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Back from "@/Components/MyComponents/Back.vue";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import axios from 'axios';
 
 export default {
     data() {
@@ -121,7 +144,7 @@ export default {
         Back
     },
     props: {
-        cash_cut: Array,
+        groupedCashCuts: Object,
         cash_cut_movements: Array
     },
     methods: {
@@ -131,13 +154,27 @@ export default {
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
-        differenceStyles() {
-            if (this.cash_cut.counted_cash - this.cash_cut.expected_cash < 0) {
+        differenceStyles(cash_cut) {
+            if (cash_cut.counted_cash - cash_cut.expected_cash < 0) {
                 return 'text-red-600';
-            } else if (this.cash_cut.counted_cash - this.cash_cut.expected_cash === 0) {
+            } else if (cash_cut.counted_cash - cash_cut.expected_cash === 0) {
                 return 'text-green-500';
-            } else if (this.cash_cut.counted_cash - this.cash_cut.expected_cash > 0) {
+            } else if (cash_cut.counted_cash - cash_cut.expected_cash > 0) {
                 return 'text-blue-600';
+            }
+        },
+        async getCashCutMovements(cash_cut) {
+            try {
+                // Realizar una solicitud para obtener los movimientos de caja asociados al corte actual
+                const response = await axios.get(route('cash-cuts.get-movements', cash_cut.id));
+                if ( response.status === 200 ) {
+                    // Devolver los movimientos de caja obtenidos de la respuesta
+                    console.log(response);
+                    return response.data.items;
+                }
+            } catch (error) {
+                console.error('Error al obtener los movimientos de caja:', error);
+                return []; // Devolver un array vacío en caso de error
             }
         }
     }
