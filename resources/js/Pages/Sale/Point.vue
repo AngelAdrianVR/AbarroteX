@@ -120,7 +120,7 @@
               </p>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="showCashRegisterSelectionModal = true">Cambiar de caja</el-dropdown-item>
+                  <el-dropdown-item @click="showCashRegisterSelectionModal = true"><i class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
                   <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
                       class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
                   <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i

@@ -26,6 +26,8 @@ class CreateNewUser implements CreatesNewUsers
             'store_name' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'address' => ['required', 'string', 'max:255'],
+            'contact_phone' => ['required', 'string', 'min:10', 'max:10'],
             'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
@@ -33,6 +35,8 @@ class CreateNewUser implements CreatesNewUsers
         $store = Store::create([
             'name' => $input['store_name'],
             'contact_name' => $input['name'],
+            'address' => $input['address'],
+            'contact_phone' => $input['contact_phone'],
             'next_payment' => now()->addDays(15),
         ]);
 

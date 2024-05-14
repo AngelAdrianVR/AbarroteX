@@ -427,6 +427,7 @@ methods: {
           this.cashCutModal = false;
           this.fetchCashRegister();
           this.cutForm.reset();
+          location.reload();
         },
       });
     },
