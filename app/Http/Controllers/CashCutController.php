@@ -210,6 +210,9 @@ class CashCutController extends Controller
             } else { //Si no existe el segundo corte obtiene todos los registrados
                 $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->get();
             }
+
+            return response()->json(['items' => $cash_cut_movements]);
         }
+    }
         
 }
