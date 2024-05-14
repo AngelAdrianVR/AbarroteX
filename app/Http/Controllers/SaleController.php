@@ -285,17 +285,17 @@ class SaleController extends Controller
             // Verifica si 'global_product_id' existe en 'product'
             $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
             if ($is_inventory_on) {
-                $product = $is_global_product
+                $current_product = $is_global_product
                     ? GlobalProductStore::find($product['product']['id'])
                     : Product::find($product['product']['id']);
-
-                $product->decrement('current_stock', $product['quantity']);
+                
+                $current_product->decrement('current_stock', $product['quantity']);
 
                 // notificar si ha llegado al limite de existencias bajas
-                if ($product->current_stock <= $product->min_stock) {
+                if ($current_product->current_stock <= $current_product->min_stock) {
                     $title = "Bajo stock";
                     $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
-                    $url = route('products.show', $product->id);
+                    $url = route('products.show', $current_product->id);
 
                     auth()->user()->notify(new BasicNotification($title, $description, $url));
                 }

@@ -163,17 +163,25 @@
                 </p>
                 <p class="mt-2 flex items-center space-x-2">
                     <i class="fa-solid fa-exclamation text-redDanger"></i>
-                    <span class="text-gray99">Nota: Los productos que Ezy ventas te facilita como catálogo base, no serán exportados.</span>
+                    <span class="text-gray99">Nota: Los productos que Ezy ventas te facilita como catálogo base, no
+                        serán exportados.</span>
                 </p>
+                <p v-if="products.filter(item => !item.global_product_id).length" class="mt-2">
+                    Hay
+                    <b class="text-primary">
+                        {{ products.filter(item => !item.global_product_id).length }}
+                    </b>
+                    producto(s) disponible(s) para exportar
+                </p>
+                <p v-else class="mt-2 text-redDanger">No hay productos para exportar</p>
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
                     <CancelButton @click="showExportModal = false">
                         Cancelar
                     </CancelButton>
-                    <a :href="route('products.export')"
-                        class="cursor-pointer text-center px-4 py-2 bg-primary border border-transparent rounded-full text-xs text-white tracking-widest active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:text-white disabled:bg-[#999999] focus:outline-none focus:ring-0 transition ease-in-out duration-100"
-                        :disabled="isExporting">
+                    <a v-if="products.filter(item => !item.global_product_id).length" :href="route('products.export')"
+                        class="cursor-pointer text-center px-4 py-2 bg-primary border border-transparent rounded-full text-xs text-white tracking-widest active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:text-white disabled:bg-[#999999] focus:outline-none focus:ring-0 transition ease-in-out duration-100">
                         Exportar
                     </a>
                 </div>
