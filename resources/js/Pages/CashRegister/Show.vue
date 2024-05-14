@@ -17,7 +17,7 @@
                 <div class="space-y-2">
                     <p class="ml-4 font-bold">{{ Object.values(groupedCashCuts)[0].cuts?.length }}</p>
                     <p class="ml-4 font-bold">${{ Object.values(groupedCashCuts)[0].total_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                    <p class="ml-4 font-bold">${{ Object.values(groupedCashCuts)[0].total_difference.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                    <p :class="getTextColorClass()" class="ml-4 font-bold">${{ Object.values(groupedCashCuts)[0].total_difference.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                 </div>
             </div>
 
@@ -162,6 +162,15 @@ export default {
                 return 'text-green-500';
             } else if (cash_cut.counted_cash - cash_cut.expected_cash > 0) {
                 return 'text-blue-600';
+            }
+        },
+        getTextColorClass(difference) {
+            if (difference < 0) {
+                return 'text-red-500'; // Rojo para diferencias negativas
+            } else if (difference === 0) {
+                return 'text-green-500'; // Verde para diferencias igual a 0
+            } else {
+                return 'text-blue-500'; // Azul para diferencias positivas
             }
         },
         async getCashCutMovements(cash_cut) {
