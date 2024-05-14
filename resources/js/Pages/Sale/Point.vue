@@ -102,7 +102,7 @@
               </p>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="showCashRegisterSelectionModal = true">Cambiar de caja</el-dropdown-item>
+                  <el-dropdown-item @click="showCashRegisterSelectionModal = true"><i class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
                   <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
                       class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
                   <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
@@ -293,7 +293,7 @@
           </section>
 
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
-            <PrimaryButton @click="asignCashRegister">Asignar caja</PrimaryButton>
+            <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Asignar caja</PrimaryButton>
           </div>
       </div>
     </Modal>
