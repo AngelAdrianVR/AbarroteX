@@ -17,7 +17,7 @@
                 <!-- Resultados de la búsqueda -->
                 <div v-if="searchFocus && searchQuery"
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
-                    <Loading v-if="searchLoading" />
+                    <Loading2 v-if="searchLoading" class="my-3" />
                     <ul v-else-if="productsFound?.length > 0">
                         <li @click.stop="handleProductSelected(product)" v-for="(product, index) in productsFound"
                             :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
@@ -72,7 +72,7 @@
                                     <span class="mr-2">Código</span>
                                     <span class="font-bold">{{ global_product_store.global_product?.code ?? 'N/A'
                                         }}</span>
-                                    <el-tooltip v-if="global_product_store.code" content="Copiar código"
+                                    <el-tooltip v-if="global_product_store.global_product?.code" content="Copiar código"
                                         placement="right">
                                         <button @click="copyToClipboard"
                                             class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
@@ -86,10 +86,10 @@
                                 </p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
                                 <p class="text-gray37">Categoría: <span class="font-bold">{{
-                                        global_product_store.global_product?.category?.name }}</span></p>
+                                    global_product_store.global_product?.category?.name }}</span></p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
                                 <p class="text-gray37">Proveedor: <span class="font-bold">{{
-                                        global_product_store.global_product?.brand?.name }}</span></p>
+                                    global_product_store.global_product?.brand?.name }}</span></p>
                             </div>
                         </div>
                         <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{
@@ -100,7 +100,8 @@
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de compra:</p>
-                                <p class="text-right font-bold">${{ global_product_store.cost ?? '-' }}</p>
+                                <p class="text-right font-bold">{{ global_product_store.cost ?
+                                    '$' +global_product_store.cost : '-' }}</p>
                             </div>
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de venta: </p>
@@ -157,7 +158,7 @@
                                     <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span
                                             class="mr-2" v-html="getIcon(activity.type)"></span>{{ activity.description
                                                 + ' ' +
-                                        activity.created_at }}
+                                                activity.created_at }}
                                     </p>
                                 </div>
                             </div>
@@ -186,15 +187,24 @@
                         </el-input>
                         <InputError :message="form.errors.quantity" />
                     </div>
-
+                    <div v-if="form.quantity && global_product_store.cost" class="text-sm mt-2">
+                        Total de compra: {{ form.quantity }} x ${{ global_product_store.cost }} => ${{
+                            (global_product_store.cost * form.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </div>
                     <div class="text-left mt-4 ml-6">
-                        <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register" label="Se paga con dinero de caja"
-                            size="small" />
+                        <p v-if="!global_product_store.cost" class="text-xs text-redDanger flex items-center space-x-2">
+                            <i class="fa-regular fa-hand-point-down"></i>
+                            <span>Para poder descontar de caja, primero se debe especificar un precio de compra al
+                                producto.</span>
+                        </p>
+                        <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register"
+                            label="Se paga con dinero de caja" size="small" :disabled="!global_product_store.cost" />
                     </div>
 
-                    <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
+                    <div class="flex justify-end space-x-2 pt-7 pb-1 py-2">
                         <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
-                        <PrimaryButton :disabled="form.processing || !form.quantity" @click="entryProduct" class="!rounded-full">Ingresar
+                        <PrimaryButton :disabled="form.processing || !form.quantity" @click="entryProduct"
+                            class="!rounded-full">Ingresar
                             producto
                         </PrimaryButton>
                     </div>
@@ -209,7 +219,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
-import Loading from '@/Components/MyComponents/Loading.vue';
+import Loading2 from '@/Components/MyComponents/Loading2.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
@@ -229,9 +239,9 @@ export default {
         return {
             form,
             currentTab: 1,
-            searchQuery: null,
+            searchQuery: this.global_product_store.global_product.name,
             searchFocus: false,
-            productsFound: null,
+            productsFound: [this.global_product_store],
             entryProductModal: false,
             productHistory: null,
             loading: null,
@@ -249,7 +259,7 @@ export default {
         ThirthButton,
         InputLabel,
         InputError,
-        Loading,
+        Loading2,
         Modal,
         Back
     },
@@ -258,7 +268,7 @@ export default {
     },
     methods: {
         copyToClipboard() {
-            const textToCopy = this.global_product_store.code;
+            const textToCopy = this.global_product_store.global_product?.code;
 
             // Create a temporary input element
             const input = document.createElement("input");
@@ -276,7 +286,7 @@ export default {
 
             this.$notify({
                 title: "Éxito",
-                message: this.global_product_store.code + " copiado",
+                message: this.global_product_store.global_product?.code + " copiado",
                 type: "success",
             });
         },

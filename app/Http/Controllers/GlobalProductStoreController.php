@@ -35,7 +35,9 @@ class GlobalProductStoreController extends Controller
 
     public function show($global_product_store_id)
     {
-        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])->find($global_product_store_id);
+        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($global_product_store_id);
 
         return inertia('GlobalProductStore/Show', compact('global_product_store'));
     }
@@ -43,7 +45,9 @@ class GlobalProductStoreController extends Controller
 
     public function edit($global_product_store_id)
     {
-        $global_product_store = GlobalProductStore::with('globalProduct.media')->find($global_product_store_id);
+        $global_product_store = GlobalProductStore::with('globalProduct.media')
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($global_product_store_id);
         $categories = Category::all();
         $brands = Brand::all(['id', 'name']);
 
@@ -169,7 +173,8 @@ class GlobalProductStoreController extends Controller
 
         // eliminar productos de la tienda que se regresaron a catalogo base
         // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
-        GlobalProductStore::whereNotIn('global_product_id', $product_ids)
+        GlobalProductStore::where('store_id', auth()->user()->store_id)
+            ->whereNotIn('global_product_id', $product_ids)
             ->get()
             ->each(fn ($prd) => $prd->delete());
 

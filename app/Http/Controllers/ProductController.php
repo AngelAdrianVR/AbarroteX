@@ -69,7 +69,9 @@ class ProductController extends Controller
 
     public function show($product_id)
     {
-        $product = ProductResource::make(Product::with('category', 'brand')->find($product_id));
+        $product = ProductResource::make(Product::with('category', 'brand')
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($product_id));
 
         return inertia('Product/Show', compact('product'));
     }
@@ -77,7 +79,9 @@ class ProductController extends Controller
 
     public function edit($product_id)
     {
-        $product = ProductResource::make(Product::with('category', 'brand')->find($product_id));
+        $product = ProductResource::make(Product::with('category', 'brand')
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($product_id));
         $categories = Category::all();
         $brands = Brand::all(['id', 'name']);
 
@@ -357,63 +361,63 @@ class ProductController extends Controller
     }
 
     public function export()
-{
-    $products = Product::where('store_id', auth()->user()->store_id)->get();
+    {
+        $products = Product::where('store_id', auth()->user()->store_id)->get();
 
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    // Add headers
-    $headers = [
-        'A3' => 'Nombre',
-        'B3' => 'Precio a publico',
-        'C3' => 'Precio de compra',
-        'D3' => 'Codigo',
-        'E3' => 'Stock minimo',
-        'F3' => 'Stock maximo',
-        'G3' => 'Stock actual',
-        'H3' => 'Categoria',
-        'I3' => 'Proveedor',
-        'J3' => 'Creado el'
-    ];
+        // Add headers
+        $headers = [
+            'A3' => 'Nombre',
+            'B3' => 'Precio a publico',
+            'C3' => 'Precio de compra',
+            'D3' => 'Codigo',
+            'E3' => 'Stock minimo',
+            'F3' => 'Stock maximo',
+            'G3' => 'Stock actual',
+            'H3' => 'Categoria',
+            'I3' => 'Proveedor',
+            'J3' => 'Creado el'
+        ];
 
-    foreach ($headers as $cell => $header) {
-        $sheet->setCellValue($cell, $header);
-        // Apply bold style to the header cells
-        $sheet->getStyle($cell)->getFont()->setBold(true);
+        foreach ($headers as $cell => $header) {
+            $sheet->setCellValue($cell, $header);
+            // Apply bold style to the header cells
+            $sheet->getStyle($cell)->getFont()->setBold(true);
+        }
+
+        // Add data rows
+        $row = 4;
+        foreach ($products as $product) {
+            $sheet->setCellValue('A' . $row, $product->name);
+            $sheet->setCellValue('B' . $row, $product->public_price);
+            $sheet->setCellValue('C' . $row, $product->cost);
+            $sheet->setCellValue('D' . $row, $product->code);
+            $sheet->setCellValue('E' . $row, $product->min_stock);
+            $sheet->setCellValue('F' . $row, $product->max_stock);
+            $sheet->setCellValue('G' . $row, $product->current_stock);
+            $sheet->setCellValue('H' . $row, $product->category->name);
+            $sheet->setCellValue('I' . $row, $product->brand->name);
+            $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY'));
+            $row++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        // Prepare the response as a streamed response
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, 'EZY_productos.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+            'Cache-Control' => 'max-age=1',
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'cache, must-revalidate',
+            'Pragma' => 'public',
+        ]);
     }
-
-    // Add data rows
-    $row = 4;
-    foreach ($products as $product) {
-        $sheet->setCellValue('A' . $row, $product->name);
-        $sheet->setCellValue('B' . $row, $product->public_price);
-        $sheet->setCellValue('C' . $row, $product->cost);
-        $sheet->setCellValue('D' . $row, $product->code);
-        $sheet->setCellValue('E' . $row, $product->min_stock);
-        $sheet->setCellValue('F' . $row, $product->max_stock);
-        $sheet->setCellValue('G' . $row, $product->current_stock);
-        $sheet->setCellValue('H' . $row, $product->category->name);
-        $sheet->setCellValue('I' . $row, $product->brand->name);
-        $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY'));
-        $row++;
-    }
-
-    $writer = new Xlsx($spreadsheet);
-
-    // Prepare the response as a streamed response
-    return response()->streamDownload(function () use ($writer) {
-        $writer->save('php://output');
-    }, 'EZY_productos.xlsx', [
-        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Cache-Control' => 'max-age=0',
-        'Cache-Control' => 'max-age=1',
-        'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-        'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
-        'Cache-Control' => 'cache, must-revalidate',
-        'Pragma' => 'public',
-    ]);
-}
 
     private function validateProductsFromFile($worksheet)
     {
