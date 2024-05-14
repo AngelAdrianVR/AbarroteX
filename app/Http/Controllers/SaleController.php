@@ -95,7 +95,7 @@ class SaleController extends Controller
         $date = Carbon::parse($created_at)->toDateString();
 
         // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+        $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])->where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $sales->groupBy(function ($sale) {
@@ -114,6 +114,7 @@ class SaleController extends Controller
             ];
         });
 
+        // return $day_sales;
         return inertia('Sale/Show', compact('day_sales'));
     }
 

@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder
 
         // crear la primera tienda
         Store::create([
-            'name' => 'Tienda 1',
-            'contact_name' => 'Contacto 1',
-            'contact_phone' => '3312457896',
-            'address' => 'Direccion 1',
+            'name' => 'Admin',
+            'contact_name' => 'Administrador',
+            'contact_phone' => '3312155731',
+            'address' => '---',
             'next_payment' => now()->addDays(15),
             'default_card_id' => 1,
         ]);
@@ -52,8 +52,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // agregar mas tiendas y usuarios desde el factory
-        Store::factory(10)->create();
-        User::factory(20)->create();
+        // Store::factory(10)->create();
+        // User::factory(20)->create();
 
         // agregar las configuraciones iniciales a las tiendas
         $stores = Store::all();
