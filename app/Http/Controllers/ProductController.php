@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
@@ -45,8 +44,8 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100|unique:products,name',
-            'code' => 'nullable|unique:products,code|string|max:100',
+            'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . auth()->user()->store_id,
+            'code' => 'nullable|unique:products,code,NULL,id,store_id,' . auth()->user()->store_id . '|string|max:100',
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'required|numeric|min:0|max:9999',
             'current_stock' => 'required|numeric|min:0|max:9999',
