@@ -21,7 +21,7 @@
                 </div>
             </div>
 
-            <section v-for="cash_cut in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" class="lg:flex lg:space-x-7 md:w-[90%] mx-auto text-sm mt-5">
+            <section v-for="(cash_cut, index) in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" class="lg:flex lg:space-x-7 md:w-[90%] mx-auto text-sm mt-5">
                 <div class="w-full border border-grayD9 rounded-lg self-start">
                     <div class="flex justify-between border-b border-grayD9 py-2 px-4">
                         <p>{{ cash_cut.cash_register.name + ' • ' + cash_cut.user.name }}</p>
@@ -32,37 +32,36 @@
                             <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                             <p class="text-gray99">Efectivo inicial</p>
                             <p class="text-gray99">Ventas</p>
-                            <p v-for="cashRegisterMovement in getCashCutMovements(cash_cut)" :key="cashRegisterMovement.id" class="text-gray99 truncate">
-                                {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
-                            </p>
-                            <!-- <p v-for="cashRegisterMovement in cash_cut_movements"
+                            <div v-if="loadingMovements">
+                                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                            </div>
+                            <p v-else v-for="cashRegisterMovement in cashCutMovements[index]"
                                 :key="cashRegisterMovement"
                                 :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
                                 class="text-gray99 truncate">
                                 {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ??
                                     'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
-                            </p> -->
+                            </p>
                         </div>
                         <div class="w-1/4 space-y-1">
                             <!-- <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
                                 cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
                             <p class="text-gray99"><span class="text-gray99 mr-3"><i
-                                        class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
-                                            cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                                class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                             <p class="text-gray99"><span class="text-gray99 mr-3"><i
-                                        class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
-                                            cash_cut.sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                            <p v-for="cashRegisterMovement in getCashCutMovements(cash_cut)" :key="cashRegisterMovement.id" class="text-gray99">
-                                <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'" class="fa-solid text-xs px-1"></i>
-                                <span class="text-gray99 mr-3">$</span>{{ cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
-                            </p>
-                            <!-- <p v-for="cashRegisterMovement in cash_cut_movements"
+                                class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                cash_cut.sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                            <div v-if="loadingMovements">
+                                <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                            </div>
+                            <p v-for="cashRegisterMovement in cashCutMovements[index]"
                                 :key="cashRegisterMovement" class="text-gray99">
                                 <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
                                     class="fa-solid text-xs px-1"></i>
                                 <span class="text-gray99 mr-3">$</span>{{
                                     cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
-                            </p> -->
+                            </p>
                         </div>
                     </div>
                     <footer class="bg-[#F2F2F2] text-black font-bold py-2 flex px-2">
@@ -135,7 +134,8 @@ import axios from 'axios';
 export default {
     data() {
         return {
-
+            loadingMovements: false,
+            cashCutMovements: [], // Arreglo para almacenar los movimientos de caja por corte
         }
     },
     components: {
@@ -144,8 +144,7 @@ export default {
         Back
     },
     props: {
-        groupedCashCuts: Object,
-        cash_cut_movements: Array
+        groupedCashCuts: Object
     },
     methods: {
         formatDateHour(dateString) {
@@ -164,19 +163,26 @@ export default {
             }
         },
         async getCashCutMovements(cash_cut) {
-            try {
-                // Realizar una solicitud para obtener los movimientos de caja asociados al corte actual
-                const response = await axios.get(route('cash-cuts.get-movements', cash_cut.id));
-                if ( response.status === 200 ) {
-                    // Devolver los movimientos de caja obtenidos de la respuesta
-                    console.log(response);
-                    return response.data.items;
+                this.loadingMovements = true;
+                try {
+                    // Realizar una solicitud para obtener los movimientos de caja asociados al corte actual
+                    const response = await axios.get(route('cash-cuts.get-movements', cash_cut.id));
+                    if (response.status === 200) {
+                        // Almacenar los movimientos de caja en el objeto cashCutMovements utilizando el ID del corte como clave
+                        this.cashCutMovements.push(response.data.items);
+                    }
+                } catch (error) {
+                    console.error('Error al obtener los movimientos de caja:', error);
+                } finally {
+                    this.loadingMovements = false;
                 }
-            } catch (error) {
-                console.error('Error al obtener los movimientos de caja:', error);
-                return []; // Devolver un array vacío en caso de error
-            }
         }
+    },
+    mounted() {
+        //se recorre el arreglo de cortes para obtener los movimientos de cada uno
+       Object.values(this.groupedCashCuts)[0].cuts.forEach(cut => {
+            this.getCashCutMovements(cut);
+        });
     }
 }
 </script>

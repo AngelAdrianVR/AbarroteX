@@ -48,7 +48,9 @@ class CashRegisterController extends Controller
    
     public function create()
     {
-        return inertia('CashRegister/Create');
+        $total_cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get()->count();
+
+        return inertia('CashRegister/Create', compact('total_cash_registers'));
     }
 
     

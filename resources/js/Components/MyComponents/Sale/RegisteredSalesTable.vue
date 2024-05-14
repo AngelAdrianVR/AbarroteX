@@ -4,7 +4,7 @@
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">
                     <th>Fecha</th>
-                    <th>Poroductos vendidos</th>
+                    <th>Productos vendidos</th>
                     <th>Total</th>
                 </tr>
             </thead>

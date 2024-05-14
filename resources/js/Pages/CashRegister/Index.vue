@@ -40,7 +40,10 @@
                                     <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
                                         start-placeholder="Fecha de inicio" end-placeholder="Fecha de fin" class="!w-full" />
                                 </div>
-                                <PrimaryButton @click="filterCashCuts" class="!py-1">Aplicar</PrimaryButton>
+                                <div class="flex space-x-3">
+                                    <PrimaryButton @click="filterCashCuts" class="!py-1">Aplicar</PrimaryButton>
+                                    <ThirthButton @click="searchDate = null; filterCashCuts()" class="!py-1">Limpiar</ThirthButton>
+                                </div>
                             </div>
                         </div>
                     </section>
