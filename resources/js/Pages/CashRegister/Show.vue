@@ -32,16 +32,23 @@
                             <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                             <p class="text-gray99">Efectivo inicial</p>
                             <p class="text-gray99">Ventas</p>
+
                             <div v-if="loadingMovements">
                                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                             </div>
                             <p v-else v-for="cashRegisterMovement in cashCutMovements[index]"
+
+                            <p v-for="cashRegisterMovement in getCashCutMovements(cash_cut)" :key="cashRegisterMovement.id" class="text-gray99 truncate">
+                                {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
+                            </p>
+                            <!-- <p v-for="cashRegisterMovement in cash_cut_movements"
+
                                 :key="cashRegisterMovement"
                                 :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
                                 class="text-gray99 truncate">
                                 {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ??
                                     'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
-                            </p>
+                            </p> -->
                         </div>
                         <div class="w-1/4 space-y-1">
                             <!-- <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
@@ -56,12 +63,21 @@
                                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                             </div>
                             <p v-for="cashRegisterMovement in cashCutMovements[index]"
+
+                                        class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                            cash_cut.sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                            <p v-for="cashRegisterMovement in getCashCutMovements(cash_cut)" :key="cashRegisterMovement.id" class="text-gray99">
+                                <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'" class="fa-solid text-xs px-1"></i>
+                                <span class="text-gray99 mr-3">$</span>{{ cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
+                            </p>
+                            <!-- <p v-for="cashRegisterMovement in cash_cut_movements"
+
                                 :key="cashRegisterMovement" class="text-gray99">
                                 <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
                                     class="fa-solid text-xs px-1"></i>
                                 <span class="text-gray99 mr-3">$</span>{{
                                     cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
-                            </p>
+                            </p> -->
                         </div>
                     </div>
                     <footer class="bg-[#F2F2F2] text-black font-bold py-2 flex px-2">
