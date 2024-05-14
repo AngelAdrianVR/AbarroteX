@@ -157,7 +157,7 @@
               class="ml-3 mb-1 text-sm" />
             <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar*"
               class="ml-3 mb-1 text-sm" />
-            <el-input v-model="form.registerAmount" type="text" placeholder="ingresa el monto"
+            <el-input @keydown.enter="storeCashRegisterMovement" v-model="form.registerAmount" type="text" placeholder="ingresa el monto"
               :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
               :parser="(value) => value.replace(/[^\d.]/g, '')">
               <template #prefix>

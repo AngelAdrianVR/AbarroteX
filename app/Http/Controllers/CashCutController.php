@@ -212,6 +212,4 @@ class CashCutController extends Controller
             }
         }
         
-        return response()->json(['items' => $cash_cut_movements]);
-    }
 }
