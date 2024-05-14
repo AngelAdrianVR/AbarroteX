@@ -39,7 +39,23 @@
     </div>
     <div v-if="syncingData" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
       <p class="text-sm flex items-center space-x-3 font-semibold">
-        <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="Rotate-Right--Streamline-Sharp" height="16" width="16"><desc>Rotate Right Streamline Icon: https://streamlinehq.com</desc><g id="rotate-right"><path id="Vector 2754" stroke="currentColor" d="M20.2047 0.5135V4.8893H15.8289" stroke-width="2"></path><path id="Ellipse 1206" stroke="currentColor" d="M20.2047 4.764C18.2001 2.4929 15.2674 1.0605 12.0001 1.0605C5.9583 1.0605 1.0605 5.9583 1.0605 12C1.0605 16.194 3.4207 19.8367 6.8853 21.6726" stroke-width="2"></path><path id="Ellipse 1207" stroke="currentColor" d="M9.1081 22.5533C10.0293 22.8051 10.999 22.9395 11.9999 22.9395C13.4231 22.9395 14.7826 22.6678 16.0297 22.1734" stroke-width="2"></path><path id="Ellipse 1208" stroke="currentColor" d="M17.7655 21.2986C19.2694 20.3641 20.5299 19.0749 21.4301 17.548" stroke-width="2"></path><path id="Ellipse 1209" stroke="currentColor" d="M22.9395 12C22.9395 13.2879 22.717 14.5237 22.3083 15.6713" stroke-width="2"></path></g></svg>
+        <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          id="Rotate-Right--Streamline-Sharp" height="16" width="16">
+          <desc>Rotate Right Streamline Icon: https://streamlinehq.com</desc>
+          <g id="rotate-right">
+            <path id="Vector 2754" stroke="currentColor" d="M20.2047 0.5135V4.8893H15.8289" stroke-width="2"></path>
+            <path id="Ellipse 1206" stroke="currentColor"
+              d="M20.2047 4.764C18.2001 2.4929 15.2674 1.0605 12.0001 1.0605C5.9583 1.0605 1.0605 5.9583 1.0605 12C1.0605 16.194 3.4207 19.8367 6.8853 21.6726"
+              stroke-width="2"></path>
+            <path id="Ellipse 1207" stroke="currentColor"
+              d="M9.1081 22.5533C10.0293 22.8051 10.999 22.9395 11.9999 22.9395C13.4231 22.9395 14.7826 22.6678 16.0297 22.1734"
+              stroke-width="2"></path>
+            <path id="Ellipse 1208" stroke="currentColor"
+              d="M17.7655 21.2986C19.2694 20.3641 20.5299 19.0749 21.4301 17.548" stroke-width="2"></path>
+            <path id="Ellipse 1209" stroke="currentColor" d="M22.9395 12C22.9395 13.2879 22.717 14.5237 22.3083 15.6713"
+              stroke-width="2"></path>
+          </g>
+        </svg>
         <span>Sincronizando datos</span>
       </p>
       <p class="text-xs">
@@ -66,11 +82,13 @@
           </svg>
           <p class="text-sm flex items-center space-x-2">
             Efectivo en "{{ asignedCashRegister?.name }}":
-            <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''" class="ml-2">
+            <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
+              class="ml-2">
               {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
                 '*****' }}
             </b>
-            <el-tooltip v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
+            <el-tooltip
+              v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
               content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="size-4 text-red-600">
@@ -154,8 +172,7 @@
             <div v-if="searchFocus && searchQuery"
               class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
               <ul v-if="productsFound?.length > 0 && !loading">
-                <li @click="productFoundSelected = product; searchQuery = null"
-                  v-for="(product, index) in productsFound" :key="index"
+                <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
                   class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ?
                     product.global_product?.name : product.name }}</li>
               </ul>
@@ -191,8 +208,9 @@
                 <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
-                <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null"
-                  class="!rounded-full !px-24">Agregar
+                <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
+                  class="!rounded-full !px-24" :disabled="quantity == 0">
+                  Agregar
                 </PrimaryButton>
               </div>
             </div>
@@ -205,7 +223,7 @@
           <!-- Total por cobrar -->
           <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
             class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-            <div v-if="!editableTabs[this.editableTabsValue - 1]?.paying">
+            <div v-if="!editableTabs[editableTabsValue - 1]?.paying">
               <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
                 <p class="text-gray-99">$ <strong class="ml-3">{{
@@ -280,21 +298,25 @@
     <Modal :show="showCashRegisterSelectionModal">
       <div class="p-4 relative">
 
-          <h1 class="font-bold mb-5 mt-2 text-center">No tienes una caja registradora asignada. Por favor selecciona una:</h1>
+        <h1 class="font-bold mb-5 mt-2 text-center">No tienes una caja registradora asignada. Por favor selecciona una:
+        </h1>
 
-          <section class="flex justify-between space-x-7 w-2/3 mx-auto text-sm">
-            <div class="flex flex-col items-center" v-for="(item, index) in cash_registers" :key="item">
-              <input :disabled="!item.is_active" v-model="selectedCashRegisterId" :id="'suscription-' + index"
-                :aria-describedby="'suscription-text-' + index" type="radio"
-                :value="item.id" class="size-3 text-primary focus:ring-0 disabled:cursor-not-allowed">
-                <label :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-gray9A'" :for="'suscription-' + index">{{ item.name }}</label>
-                <label :for="'suscription-' + index"><i :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-gray9A'" class="fa-solid fa-cash-register text-7xl mt-3"></i></label>
-            </div>
-          </section>
-
-          <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
-            <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Asignar caja</PrimaryButton>
+        <section class="flex justify-between space-x-7 w-2/3 mx-auto text-sm">
+          <div class="flex flex-col items-center" v-for="(item, index) in cash_registers" :key="item">
+            <input :disabled="!item.is_active" v-model="selectedCashRegisterId" :id="'suscription-' + index"
+              :aria-describedby="'suscription-text-' + index" type="radio" :value="item.id"
+              class="size-3 text-primary focus:ring-0 disabled:cursor-not-allowed">
+            <label :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-gray9A'"
+              :for="'suscription-' + index">{{ item.name }}</label>
+            <label :for="'suscription-' + index"><i
+                :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-gray9A'"
+                class="fa-solid fa-cash-register text-7xl mt-3"></i></label>
           </div>
+        </section>
+
+        <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
+          <PrimaryButton @click="asignCashRegister">Asignar caja</PrimaryButton>
+        </div>
       </div>
     </Modal>
     <!-- --------------------------- Modal selección de caja ends ------------------------------------ -->
@@ -488,7 +510,7 @@ export default {
       selectedCashRegisterId: null, //id de la caja registradora seleccionada
       asignedCashRegister: null, // caja registradora asignada a la venta de el usuario logueado
       showCashRegisterSelectionModal: false, //muestra u oculta el modal de selección de caja
-      
+
       // conexion a internet
       isOnline: navigator.onLine, // Verificar el estado de conexión al cargar el componente
       syncingData: false,
@@ -566,15 +588,26 @@ export default {
     cash_registers: Array
   },
   methods: {
+    selectProductFromList(product) {
+      this.productFoundSelected = product;
+      this.searchQuery = null;
+
+      // revisar si hay stock del producto para dejar 1 como default a vender
+      if (product.current_stock) {
+        this.quantity = 1;
+      } else {
+        this.quantity = 0;
+      }
+    },
     async store() {
       if (this.isOnline) {
         this.storeProcessing = true;
-      try {
-        const response = await axios.post(route('sales.store', {cash_register_id: this.asignedCashRegister?.id}), {
-          data: {
-            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
-          }
-        });
+        try {
+          const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
+            data: {
+              saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+            }
+          });
           if (response.status === 200) {
             this.$notify({
               title: "Correcto",
@@ -602,7 +635,7 @@ export default {
     async asignCashRegister() {
       try {
         const response = await axios.put(route('cash-registers.asign', [this.$page.props.auth?.user.id, this.selectedCashRegisterId]));
-        if ( response.status === 200 ) {
+        if (response.status === 200) {
           this.$notify({
             title: "Correcto",
             text: "Se te asignó una caja con éxito!",
@@ -617,7 +650,7 @@ export default {
       }
     },
     storeCashRegisterMovement() {
-      this.form.post(route('cash-register-movements.store', {cash_register_id: this.asignedCashRegister?.id}), {
+      this.form.post(route('cash-register-movements.store', { cash_register_id: this.asignedCashRegister?.id }), {
         onSuccess: () => {
           this.$notify({
             title: "Correcto",
@@ -631,7 +664,7 @@ export default {
       });
     },
     storeCashCut() {
-      this.cutForm.post(route('cash-cuts.store',{cash_register_id: this.asignedCashRegister?.id}), {
+      this.cutForm.post(route('cash-cuts.store', { cash_register_id: this.asignedCashRegister?.id }), {
         onSuccess: () => {
           this.$notify({
             title: "Correcto",
@@ -886,7 +919,7 @@ export default {
   },
   mounted() {
     //verificar si el usuario tiene una caja asignada
-    if ( !this.$page.props.auth?.user?.cash_register_id ) {
+    if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;
     } else {
       this.asignedCashRegister = this.cash_registers.find(item => item.id == this.$page.props.auth?.user?.cash_register_id);

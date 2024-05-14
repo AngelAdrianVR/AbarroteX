@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Admin;
 use App\Models\CashRegister;
 use App\Models\Product;
 use App\Models\Sale;
@@ -49,6 +50,14 @@ class DatabaseSeeder extends Seeder
             'email' => 'angel@gmail.com',
             'password' => bcrypt('321321321'),
             'store_id' => 1,
+        ]);
+        
+        // crear el primer vendedor
+        Admin::create([
+            'name' => 'Miguel Vazquez',
+            'email' => 'miguel@gmail.com',
+            'password' => bcrypt('321321321'),
+            'phone' => 3333034738,
         ]);
 
         // agregar mas tiendas y usuarios desde el factory
