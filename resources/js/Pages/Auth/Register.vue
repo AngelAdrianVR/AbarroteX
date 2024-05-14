@@ -103,7 +103,7 @@ const submit = () => {
 
                     <input v-model="form.type" type="text"
                         class="text-sm w-full placeholder:text-sm placeholder:text-[#777777] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full"
-                        placeholder="Giro de tu negocio" required autofocus>
+                        placeholder="Giro. Ejeplo. Carnicería" required autofocus>
                 </div>
                 <InputError :message="form.errors.type" />
             </div>
