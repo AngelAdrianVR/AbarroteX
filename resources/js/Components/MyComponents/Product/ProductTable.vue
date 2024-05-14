@@ -165,22 +165,21 @@ export default {
             } else {
                 routePage = 'products.show';
             }
-
             try {
                 const response = await axios.delete(route(routePage, this.itemToDelete.id));
-                if (response.status == 200) {
+                if (response.status === 200) {
                     if (this.itemToDelete.global_product_id) {
                         const indexToDelete = this.products.findIndex(item => item.global_product?.name == this.itemToDelete.global_product?.name);
                         this.products.splice(indexToDelete, 1);
                     } else {
-                        const indexToDelete = this.products.findIndex(item => item.name == this.itemToDelete.id);
+                        const indexToDelete = this.products.findIndex(item => item.id == this.itemToDelete.id);
                         this.products.splice(indexToDelete, 1);
                     }
 
                     this.showDeleteConfirm = false;
                     this.$notify({
                         title: 'Correcto',
-                        message: 'Se ha eliminado el producto',
+                        message: '',
                         type: 'success',
                     });
                 }
