@@ -15,12 +15,17 @@
                     <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton> -->
-                    <PrimaryButton @click="showImportModal = true" class="!rounded-full">
-                        Importar productos
-                    </PrimaryButton>
-                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
+                    <el-dropdown split-button type="primary" @click="$inertia.get(route('products.create'))"
+                        trigger="click" @command="handleCommand">
                         Nuevo producto
-                    </PrimaryButton>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <!-- <el-dropdown-item command="chekin">Dar entrada a producto</el-dropdown-item> -->
+                                <el-dropdown-item command="import">Importar productos</el-dropdown-item>
+                                <el-dropdown-item command="export">Exportar productos</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
                 </div>
             </div>
 
@@ -48,6 +53,7 @@
             </div>
         </div>
 
+        <!-- modal de importacion -->
         <DialogModal :show="showImportModal" @close="showImportModal = false">
             <template #title> Importar productos </template>
             <template #content>
@@ -55,7 +61,7 @@
                     <p>Se detectaron inconvnientes con la información</p>
                     <p class="text-gray99">
                         A continuación verás una lista de la información que necesitamos que revises
-                        para poder importar correctamente tus productos. Al editar tu archivo recuerda 
+                        para poder importar correctamente tus productos. Al editar tu archivo recuerda
                         guardar los cambios y vuelve a subirlo.
                     </p>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -124,7 +130,8 @@
                     </p>
                     <form @submit.prevent="importProducts" ref="importForm" class="mt-4">
                         <div>
-                            <FileUploader @files-selected="importForm.file = $event" :multiple="false" acceptedFormat="excel" />
+                            <FileUploader @files-selected="importForm.file = $event" :multiple="false"
+                                acceptedFormat="excel" />
                             <InputError :message="importForm.errors.file" />
                         </div>
                     </form>
@@ -140,9 +147,35 @@
                     </PrimaryButton>
                 </div>
                 <div v-if="importWasWrong" class="flex items-center space-x-2">
-                    <PrimaryButton @click="importWasWrong = false">
+                    <PrimaryButton @click="importWasWrong = false; importForm.file = []">
                         Ya corregí mi achivo
                     </PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
+
+        <!-- modal de exportacion -->
+        <DialogModal :show="showExportModal" @close="showExportModal = false">
+            <template #title> Exportar productos </template>
+            <template #content>
+                <p>
+                    Al seleccionar “Exportar” el archivo se descargará automáticamente a tu dispositivo.
+                </p>
+                <p class="mt-2 flex items-center space-x-2">
+                    <i class="fa-solid fa-exclamation text-redDanger"></i>
+                    <span class="text-gray99">Nota: Los productos que Ezy ventas te facilita como catálogo base, no serán exportados.</span>
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-2">
+                    <CancelButton @click="showExportModal = false">
+                        Cancelar
+                    </CancelButton>
+                    <a :href="route('products.export')"
+                        class="cursor-pointer text-center px-4 py-2 bg-primary border border-transparent rounded-full text-xs text-white tracking-widest active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:text-white disabled:bg-[#999999] focus:outline-none focus:ring-0 transition ease-in-out duration-100"
+                        :disabled="isExporting">
+                        Exportar
+                    </a>
                 </div>
             </template>
         </DialogModal>
@@ -260,6 +293,9 @@ export default {
             importWasSuccessful: false,
             importWasWrong: false,
             importErrors: [],
+            //exportacion
+            showExportModal: false,
+            isExporting: false,
         };
     },
     components: {
@@ -280,6 +316,30 @@ export default {
         total_products: Number,
     },
     methods: {
+        handleCommand(command) {
+            if (command == 'import') {
+                this.showImportModal = true;
+            } else if (command == 'export') {
+                this.showExportModal = true;
+            }
+        },
+        exportProducts() {
+            this.$inertia.visit(route('products.export'));
+        },
+        // async exportProducts() {
+        //     try {
+        //         this.isExporting = true;
+        //         const response = await axios.get(route('products.export'));
+
+        //         if (response.status === 200) {
+        //             console.log(response.data.file);
+        //         }
+        //     } catch (error) {
+        //         console.log(error)
+        //     } finally {
+        //         this.isExporting = false;
+        //     }
+        // },
         async importProducts() {
             try {
                 this.isImporting = true;

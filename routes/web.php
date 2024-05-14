@@ -83,6 +83,7 @@ Route::get('products-fetch-history/{product_id}/{month}/{year}', [ProductControl
 Route::get('products-get-by-page/{currentPage}', [ProductController::class, 'getItemsByPage'])->name('products.get-by-page')->middleware('auth');
 Route::get('products-get-all-until-page/{currentPage}', [ProductController::class, 'getAllUntilPage'])->name('products.get-all-until-page')->middleware('auth');
 Route::post('products/import', [ProductController::class, 'import'])->name('products.import')->middleware('auth');
+Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 
 
 //global-product-store routes----------------------------------------------------------------------------------
