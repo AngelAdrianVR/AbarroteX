@@ -172,7 +172,6 @@
             <div class="p-4 relative">
                 <i @click="entryProductModal = false"
                     class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
-
                 <h1 class="font-bold my-4">Ingresar producto a almacén</h1>
                 <section class="text-center mt-5 mb-2 mx-5">
                     <div class="mt-3">
@@ -249,10 +248,12 @@ export default {
             productsFound: [this.product.data],
             entryProductModal: false,
             productHistory: null,
-            loading: null,
-            searchLoading: false,
             currentMonth: new Date().getMonth() + 1, // El mes actual
             currentYear: new Date().getFullYear(), // El año actual
+            // loading
+            loading: false,
+            entryLoading: false,
+            searchLoading: false,
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // validaciones
@@ -323,18 +324,22 @@ export default {
             });
         },
         entryProduct() {
-            this.form.put(route('products.entry', this.product.data?.id), {
-                onSuccess: () => {
-                    this.form.reset();
-                    this, this.entryProductModal = false;
-                    this.$notify({
-                        title: 'Correcto',
-                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
-                        type: 'success',
-                    });
-                    this.fetchHistory();
-                },
-            });
+            if (!this.entryLoading) {
+                this.entryLoading = true;
+                this.form.put(route('products.entry', this.product.data?.id), {
+                    onSuccess: () => {
+                        this.form.reset();
+                        this, this.entryProductModal = false;
+                        this.$notify({
+                            title: 'Correcto',
+                            text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
+                            type: 'success',
+                        });
+                        this.fetchHistory();
+                        this.entryLoading = false;
+                    },
+                });
+            }
         },
         getIcon(type) {
             if (type === 'Precio') {

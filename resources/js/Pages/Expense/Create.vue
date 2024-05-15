@@ -7,7 +7,8 @@
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[80%] mx-auto mt-7 lg:grid lg:grid-cols-2 gap-5">
                 <section class="ml-2 col-span-full flex justify-between items-center">
                     <h1 class="font-bold">Agregar gasto</h1>
-                    <el-tooltip content="Para cambiar de caja, ve al punto de venta, click al botón movimientos de caja > cambiar de caja"
+                    <el-tooltip v-if="isShowCahsOn"
+                        content="Para cambiar de caja, ve al punto de venta, click al botón movimientos de caja > cambiar de caja"
                         placement="top">
                         <p class="text-gray99 text-xs">
                             Efectivo en "{{ cash_register?.name }}":
@@ -153,6 +154,8 @@ export default {
                     amount: 'Ej. 335',
                 },
             ],
+            // mostrar dinero en caja activado
+            isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
         };
     },
     components: {

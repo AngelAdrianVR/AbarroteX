@@ -509,8 +509,8 @@ export default {
       form,
       cutForm,
 
-      selectedCashRegisterId: null, //id de la caja registradora seleccionada
-      asignedCashRegister: null, // caja registradora asignada a la venta de el usuario logueado
+      selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
+      asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
       showCashRegisterSelectionModal: false, //muestra u oculta el modal de selección de caja
 
       // conexion a internet
@@ -602,36 +602,38 @@ export default {
       }
     },
     async store() {
-      if (this.isOnline) {
+      if (!this.storeProcessing) {
         this.storeProcessing = true;
-        try {
-          const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
-            data: {
-              saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
-            }
-          });
-          if (response.status === 200) {
-            this.$notify({
-              title: "Correcto",
-              text: "Se ha registrado la venta con éxito!",
-              type: "success",
+        if (this.isOnline) {
+          try {
+            const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
+              data: {
+                saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+              }
             });
-            this.clearTab();
-            this.fetchCashRegister();
-
-            // resetear variable de local storage a false
-            localStorage.setItem('pendentProcess', false);
+            if (response.status === 200) {
+              this.$notify({
+                title: "Correcto",
+                text: "Se ha registrado la venta con éxito!",
+                type: "success",
+              });
+              this.clearTab();
+              this.fetchCashRegister();
+  
+              // resetear variable de local storage a false
+              localStorage.setItem('pendentProcess', false);
+            }
+          } catch (error) {
+            console.log(error);
+          } finally {
+            this.storeProcessing = false;
           }
-        } catch (error) {
-          console.log(error);
-        } finally {
+        } else {
+          this.saveToLocalStorage();
           this.storeProcessing = false;
+          this.clearTab();
+          this.fetchCashRegister();
         }
-      } else {
-        this.saveToLocalStorage();
-        this.storeProcessing = false;
-        this.clearTab();
-        this.fetchCashRegister();
       }
     },
     async asignCashRegister() {

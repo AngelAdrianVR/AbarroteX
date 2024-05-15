@@ -253,10 +253,12 @@ export default {
             productsFound: [this.global_product_store],
             entryProductModal: false,
             productHistory: null,
-            loading: null,
-            searchLoading: false,
             currentMonth: new Date().getMonth() + 1, // El mes actual
             currentYear: new Date().getFullYear(), // El año actual
+            // loading
+            loading: false,
+            entryLoading: false,
+            searchLoading: false,
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // validaciones
@@ -282,11 +284,11 @@ export default {
         handleChangeCashAmount() {
             const total = this.global_product_store.cost * this.form.quantity;
             if (this.form.cash_amount > this.cash_register.current_cash) {
-                this.cashAmountMessage = 
-                'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+                this.cashAmountMessage =
+                    'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else if (this.form.cash_amount > total) {
-                this.cashAmountMessage = 
-                'El monto no debe superar el total del gato ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+                this.cashAmountMessage =
+                    'El monto no debe superar el total del gato ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else {
                 this.cashAmountMessage = null;
             }
@@ -341,18 +343,22 @@ export default {
             });
         },
         entryProduct() {
-            this.form.put(route('global-product-store.entry', this.global_product_store.id), {
-                onSuccess: () => {
-                    this.form.reset();
-                    this.entryProductModal = false;
-                    this.$notify({
-                        title: 'Correcto',
-                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
-                        type: 'success',
-                    });
-                    this.fetchHistory();
-                },
-            });
+            if (!this.entryLoading) {
+                this.entryLoading = true;
+                this.form.put(route('global-product-store.entry', this.global_product_store.id), {
+                    onSuccess: () => {
+                        this.form.reset();
+                        this.entryProductModal = false;
+                        this.$notify({
+                            title: 'Correcto',
+                            text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
+                            type: 'success',
+                        });
+                        this.fetchHistory();
+                        this.entryLoading = false;
+                    },
+                });
+            }
         },
         async fetchHistory() {
             this.loading = true;
