@@ -42,38 +42,39 @@ class SaleController extends Controller
 
     public function index()
     {
-        // Obtener todos las ventas registradas y contar el número de agrupaciones por día
-        $total_sales = DB::table('sales')
-            ->select(DB::raw('DATE(created_at) as date'))
-            ->where('store_id', auth()->user()->store_id)
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get()
-            ->count();
+        // // Obtener todos las ventas registradas y contar el número de agrupaciones por día
+        // $total_sales = DB::table('sales')
+        //     ->select(DB::raw('DATE(created_at) as date'))
+        //     ->where('store_id', auth()->user()->store_id)
+        //     ->groupBy(DB::raw('DATE(created_at)'))
+        //     ->get()
+        //     ->count();
 
-        // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
-        // $days_ago = Carbon::now()->subDays(5);
-        // Obtener las ventas registradas en los últimos x días
-        // $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
+        // $sales = Sale::where('store_id', auth()->user()->store_id)->latest()->get();
 
-        $sales = Sale::where('store_id', auth()->user()->store_id)->latest()->get();
+        // // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        // $groupedSales = $sales->groupBy(function ($sale) {
+        //     return Carbon::parse($sale->created_at)->format('d-F-Y');
+        // })->map(function ($sales) {
+        //     $totalQuantity = $sales->sum('quantity');
+        //     $totalSale = $sales->sum(function ($sale) {
+        //         return $sale->quantity * $sale->current_price;
+        //     });
 
-        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $sales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->format('d-F-Y');
-        })->map(function ($sales) {
-            $totalQuantity = $sales->sum('quantity');
-            $totalSale = $sales->sum(function ($sale) {
-                return $sale->quantity * $sale->current_price;
-            });
+        //     return [
+        //         'total_quantity' => $totalQuantity,
+        //         'total_sale' => $totalSale,
+        //         'sales' => $sales,
+        //     ];
+        // })->take(30);
 
-            return [
-                'total_quantity' => $totalQuantity,
-                'total_sale' => $totalSale,
-                'sales' => $sales,
-            ];
-        })->take(30);
 
-        return inertia('Sale/Index', compact('groupedSales', 'total_sales'));
+        // obtiene las cajas registradoras de la tienda
+        $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
+        $groupedSales = null;
+        $total_sales = 1;
+
+        return inertia('Sale/Index', compact('groupedSales', 'total_sales', 'cash_registers'));
     }
 
 
@@ -302,5 +303,43 @@ class SaleController extends Controller
                 }
             }
         }
+    }
+
+
+    public function fetchCashRegisterSales($cash_register_id)
+    {
+        // // Obtener todas las ventas registradas y contar el número de agrupaciones por día
+        $total_sales = DB::table('sales')
+            ->select(DB::raw('DATE(created_at) as date'))
+            ->where('store_id', auth()->user()->store_id)
+            ->where('cash_register_id', $cash_register_id)
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->get()
+            ->count();
+
+        // Filtrar las ventas por store_id y cash_register_id
+        $sales = Sale::where('store_id', auth()->user()->store_id)
+            ->where('cash_register_id', $cash_register_id)
+            ->latest()
+            ->get();
+
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        $groupedSales = $sales->groupBy(function ($sale) {
+            return Carbon::parse($sale->created_at)->format('d-F-Y');
+        })->map(function ($sales) {
+            $totalQuantity = $sales->sum('quantity');
+            $totalSale = $sales->sum(function ($sale) {
+                return $sale->quantity * $sale->current_price;
+            });
+
+            return [
+                'total_quantity' => $totalQuantity,
+                'total_sale' => $totalSale,
+                'sales' => $sales,
+            ];
+        })->take(30);
+
+        // Retornar los datos agrupados
+        return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);
     }
 }
