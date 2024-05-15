@@ -22,7 +22,6 @@ class ExpenseController extends Controller
             ->get()
             ->count();
 
-
         // Calcular la fecha hace x días para recuperar los gastos de x dias atras hasta la fecha de hoy
         // $days_ago = Carbon::now()->subDays(30);
         // Obtener los gastos registrados en los últimos 7 días
@@ -51,7 +50,7 @@ class ExpenseController extends Controller
     public function create()
     {
         //recupera la primera caja registradora de la tienda para mandar su info como current_cash
-        $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+        $cash_register = auth()->user()->cashRegister;
 
         return inertia('Expense/Create', compact('cash_register'));
     }
@@ -70,8 +69,8 @@ class ExpenseController extends Controller
 
             // crear retiro de dinero en caja si el dinero se toma de ahi
             if ($expenseData['from_cash_register']) {
-                // obtiene la primera caja registradora de la tienda
-                $cash_register = CashRegister::where('store_id', auth()->user()->store_id)->first();
+                // obtiene la caja registradora del usuario autenticado
+                $cash_register = auth()->user()->cashRegister;
                 // Crea el movimiento de la caja obtenida anteriormente. En caso de haber varias cajas ajustar lógica
                 CashRegisterMovement::create([
                     'amount' => $expenseData['current_price'],

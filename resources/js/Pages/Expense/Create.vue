@@ -5,7 +5,18 @@
 
             <form @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[80%] mx-auto mt-7 lg:grid lg:grid-cols-2 gap-5">
-                <h1 class="font-bold ml-2 col-span-full">Agregar gasto</h1>
+                <section class="ml-2 col-span-full flex justify-between items-center">
+                    <h1 class="font-bold">Agregar gasto</h1>
+                    <el-tooltip content="Para cambiar de caja, ve al punto de venta, click al botón movimientos de caja > cambiar de caja"
+                        placement="top">
+                        <p class="text-gray99 text-xs">
+                            Efectivo en "{{ cash_register?.name }}":
+                            <b class="ml-2">
+                                ${{ cash_register?.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </b>
+                        </p>
+                    </el-tooltip>
+                </section>
                 <p class="text-xs col-span-full">
                     Aqui no se registran las compras de tus productos para la venta. Esta sección es para registrar
                     gastos adicionales

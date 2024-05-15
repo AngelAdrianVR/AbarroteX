@@ -278,9 +278,9 @@
                       }) }}</p>
               </div>
               <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
-                class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una
-                cantidad
-                igual o mayor al total de compra.</p>
+                class="text-xs text-primary text-center mb-3">
+                La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
+              </p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
                 <PrimaryButton @click="store" class="!rounded-full">Aceptar</PrimaryButton>

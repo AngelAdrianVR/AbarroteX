@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductHistoryResource;
 use App\Models\Brand;
+use App\Models\CashRegisterMovement;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\GlobalProduct;
@@ -35,11 +36,12 @@ class GlobalProductStoreController extends Controller
 
     public function show($global_product_store_id)
     {
+        $cash_register = auth()->user()->cashRegister;
         $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])
             ->where('store_id', auth()->user()->store_id)
             ->findOrFail($global_product_store_id);
 
-        return inertia('GlobalProductStore/Show', compact('global_product_store'));
+        return inertia('GlobalProductStore/Show', compact('global_product_store', 'cash_register'));
     }
 
 
@@ -121,6 +123,21 @@ class GlobalProductStoreController extends Controller
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
         ]);
+
+         // restar de caja en caso de que el usuario asi lo haya especificado
+         if ($request->is_paid_by_cash_register) {
+            $unit = $request->quantity == 1 ? 'unidad' : 'unidades';
+            $cash_register = auth()->user()->cashRegister;
+            $cash_register->decrement('current_cash', $request->cash_amount);
+
+            // crear movimiento de caja
+            CashRegisterMovement::create([
+                'amount' => $request->cash_amount,
+                'type' => 'Retiro',
+                'notes' => "Compra de {$global_product_store->globalProduct->name} ($request->quantity $unit)",
+                'cash_register_id' => $cash_register->id,
+            ]);
+        }
     }
 
     public function fetchHistory($global_product_store_id, $month = null, $year = null)

@@ -32,7 +32,7 @@ class User extends Authenticatable
         'password',
         'employee_properties',
         'store_id',
-        'cash_register_id'
+        'cash_register_id',
     ];
 
     /**
@@ -86,5 +86,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Sale::class);
     }
-
 }
