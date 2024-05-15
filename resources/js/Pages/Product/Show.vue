@@ -19,7 +19,7 @@
                 <!-- Resultados de la búsqueda -->
                 <div v-if="searchFocus && searchQuery"
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
-                    <Loading v-if="searchLoading" />
+                    <Loading2 v-if="searchLoading" class="my-3" />
                     <ul v-else-if="productsFound?.length > 0">
                         <li @click.stop="handleProductSelected(product)" v-for="(product, index) in productsFound"
                             :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
@@ -98,7 +98,8 @@
                         <div class="lg:w-1/2 mt-3 lg:mt-3 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de compra:</p>
-                                <p class="text-right font-bold">${{ product.data.cost ?? '-' }}</p>
+                                <p class="text-right font-bold">{{ product.data.cost ? '$' + product.data.cost : '-' }}
+                                </p>
                             </div>
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de venta: </p>
@@ -184,14 +185,32 @@
                         <InputError :message="form.errors.quantity" />
                     </div>
 
+                    <div v-if="form.quantity && product.data.cost" class="text-sm mt-2">
+                        Total de compra: {{ form.quantity }} x ${{ product.data.cost }} => ${{ (product.data.cost *
+                            form.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </div>
+
                     <div class="text-left mt-4 ml-6">
-                        <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register" label="Se paga con dinero de caja"
-                            size="small" />
+                        <p v-if="!product.data.cost" class="text-xs text-redDanger">
+                            <i class="fa-regular fa-hand-point-down mr-2"></i>
+                            Para poder descontar de caja, primero se debe especificar un precio de compra al producto.
+                        </p>
+                        <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register"
+                            label="Se paga con dinero de caja" size="small" :disabled="!product.data.cost" />
+                        <div v-if="form.is_paid_by_cash_register" class="w-1/3 mt-3">
+                            <InputLabel value="Dinero a retirar de caja" class="ml-3 mb-1 text-sm" />
+                            <el-input v-model="form.cash_amount" @keyup="handleChangeCashAmount" placeholder="Ej. $190"
+                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                :parser="(value) => value.replace(/[^\d.]/g, '')">
+                            </el-input>
+                            <InputError :message="form.errors.cash_amount || cashAmountMessage" />
+                        </div>
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
                         <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
-                        <PrimaryButton :disabled="form.processing || !form.quantity" @click="entryProduct" class="!rounded-full">Ingresar
+                        <PrimaryButton :disabled="form.processing || !form.quantity || cashAmountMessage"
+                            @click="entryProduct" class="!rounded-full">Ingresar
                             producto
                         </PrimaryButton>
                     </div>
@@ -206,7 +225,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
-import Loading from '@/Components/MyComponents/Loading.vue';
+import Loading2 from '@/Components/MyComponents/Loading2.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
@@ -219,14 +238,15 @@ export default {
     data() {
         const form = useForm({
             quantity: null,
+            cash_amount: null,
             is_paid_by_cash_register: false //es pagado con dinero de caja? para hacer el registro de movimiento
         });
         return {
             form,
             currentTab: 1,
-            searchQuery: null,
+            searchQuery: this.product.data.name,
             searchFocus: false,
-            productsFound: null,
+            productsFound: [this.product.data],
             entryProductModal: false,
             productHistory: null,
             loading: null,
@@ -235,6 +255,8 @@ export default {
             currentYear: new Date().getFullYear(), // El año actual
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            // validaciones
+            cashAmountMessage: null,
         };
     },
     components: {
@@ -244,14 +266,27 @@ export default {
         ThirthButton,
         InputLabel,
         InputError,
-        Loading,
+        Loading2,
         Modal,
         Back
     },
     props: {
-        product: Object
+        product: Object,
+        cash_register: Object,
     },
     methods: {
+        handleChangeCashAmount() {
+            const total = this.product.data.cost * this.form.quantity;
+            if (this.form.cash_amount > this.cash_register.current_cash) {
+                this.cashAmountMessage = 
+                'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+            } else if (this.form.cash_amount > total) {
+                this.cashAmountMessage = 
+                'El monto no debe superar el total del gato ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+            } else {
+                this.cashAmountMessage = null;
+            }
+        },
         copyToClipboard() {
             const textToCopy = this.product.data.code;
 

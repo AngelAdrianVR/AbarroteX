@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ProductHistoryResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Brand;
+use App\Models\CashRegisterMovement;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\GlobalProductStore;
@@ -68,15 +69,20 @@ class ProductController extends Controller
 
     public function show($product_id)
     {
-        $product = ProductResource::make(Product::with('category', 'brand')->find($product_id));
+        $cash_register = auth()->user()->cashRegister;
+        $product = ProductResource::make(Product::with('category', 'brand')
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($product_id));
 
-        return inertia('Product/Show', compact('product'));
+        return inertia('Product/Show', compact('product', 'cash_register'));
     }
 
 
     public function edit($product_id)
     {
-        $product = ProductResource::make(Product::with('category', 'brand')->find($product_id));
+        $product = ProductResource::make(Product::with('category', 'brand')
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($product_id));
         $categories = Category::all();
         $brands = Brand::all(['id', 'name']);
 
@@ -244,6 +250,21 @@ class ProductController extends Controller
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
         ]);
+
+        // restar de caja en caso de que el usuario asi lo haya especificado
+        if ($request->is_paid_by_cash_register) {
+            $unit = $request->quantity == 1 ? 'unidad' : 'unidades';
+            $cash_register = auth()->user()->cashRegister;
+            $cash_register->decrement('current_cash', $request->cash_amount);
+
+            // crear movimiento de caja
+            CashRegisterMovement::create([
+                'amount' => $request->cash_amount,
+                'type' => 'Retiro',
+                'notes' => "Compra de $product->name ($request->quantity $unit)",
+                'cash_register_id' => $cash_register->id,
+            ]);
+        }
     }
 
     public function fetchHistory($product_id, $month = null, $year = null)
@@ -356,63 +377,63 @@ class ProductController extends Controller
     }
 
     public function export()
-{
-    $products = Product::where('store_id', auth()->user()->store_id)->get();
+    {
+        $products = Product::where('store_id', auth()->user()->store_id)->get();
 
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    // Add headers
-    $headers = [
-        'A3' => 'Nombre',
-        'B3' => 'Precio a publico',
-        'C3' => 'Precio de compra',
-        'D3' => 'Codigo',
-        'E3' => 'Stock minimo',
-        'F3' => 'Stock maximo',
-        'G3' => 'Stock actual',
-        'H3' => 'Categoria',
-        'I3' => 'Proveedor',
-        'J3' => 'Creado el'
-    ];
+        // Add headers
+        $headers = [
+            'A3' => 'Nombre',
+            'B3' => 'Precio a publico',
+            'C3' => 'Precio de compra',
+            'D3' => 'Codigo',
+            'E3' => 'Stock minimo',
+            'F3' => 'Stock maximo',
+            'G3' => 'Stock actual',
+            'H3' => 'Categoria',
+            'I3' => 'Proveedor',
+            'J3' => 'Creado el'
+        ];
 
-    foreach ($headers as $cell => $header) {
-        $sheet->setCellValue($cell, $header);
-        // Apply bold style to the header cells
-        $sheet->getStyle($cell)->getFont()->setBold(true);
+        foreach ($headers as $cell => $header) {
+            $sheet->setCellValue($cell, $header);
+            // Apply bold style to the header cells
+            $sheet->getStyle($cell)->getFont()->setBold(true);
+        }
+
+        // Add data rows
+        $row = 4;
+        foreach ($products as $product) {
+            $sheet->setCellValue('A' . $row, $product->name);
+            $sheet->setCellValue('B' . $row, $product->public_price);
+            $sheet->setCellValue('C' . $row, $product->cost);
+            $sheet->setCellValue('D' . $row, $product->code);
+            $sheet->setCellValue('E' . $row, $product->min_stock);
+            $sheet->setCellValue('F' . $row, $product->max_stock);
+            $sheet->setCellValue('G' . $row, $product->current_stock);
+            $sheet->setCellValue('H' . $row, $product->category->name);
+            $sheet->setCellValue('I' . $row, $product->brand->name);
+            $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY'));
+            $row++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        // Prepare the response as a streamed response
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, 'EZY_productos.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+            'Cache-Control' => 'max-age=1',
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'cache, must-revalidate',
+            'Pragma' => 'public',
+        ]);
     }
-
-    // Add data rows
-    $row = 4;
-    foreach ($products as $product) {
-        $sheet->setCellValue('A' . $row, $product->name);
-        $sheet->setCellValue('B' . $row, $product->public_price);
-        $sheet->setCellValue('C' . $row, $product->cost);
-        $sheet->setCellValue('D' . $row, $product->code);
-        $sheet->setCellValue('E' . $row, $product->min_stock);
-        $sheet->setCellValue('F' . $row, $product->max_stock);
-        $sheet->setCellValue('G' . $row, $product->current_stock);
-        $sheet->setCellValue('H' . $row, $product->category->name);
-        $sheet->setCellValue('I' . $row, $product->brand->name);
-        $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY'));
-        $row++;
-    }
-
-    $writer = new Xlsx($spreadsheet);
-
-    // Prepare the response as a streamed response
-    return response()->streamDownload(function () use ($writer) {
-        $writer->save('php://output');
-    }, 'EZY_productos.xlsx', [
-        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Cache-Control' => 'max-age=0',
-        'Cache-Control' => 'max-age=1',
-        'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-        'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
-        'Cache-Control' => 'cache, must-revalidate',
-        'Pragma' => 'public',
-    ]);
-}
 
     private function validateProductsFromFile($worksheet)
     {

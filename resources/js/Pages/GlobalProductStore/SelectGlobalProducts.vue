@@ -125,27 +125,24 @@
         </div>
         <!-- vista previa de producto -->
         <Loading v-if="loadingProduct" class="mt-28" />
-        <div v-else-if="productInfo" class="rounded-lg border border-[#D9D9D9] md:w-[500px] h-[400px] mx-auto">
+        <div v-else-if="productInfo" class="rounded-lg border border-[#D9D9D9] md:w-[500px] min-h-[400px] mx-auto">
           <p class="border-b border-[#D9D9D9] font-bold px-5 py-2">Vista previa del producto</p>
           <div class="py-3 px-7 h-full w-full">
-            <figure class="h-1/2">
-              <img class="h-full mx-auto rounded-md" :src="productInfo?.media[0]?.original_url" alt="">
+            <figure class="h-[200px]">
+              <img class="h-full mx-auto rounded-md" :src="productInfo?.media[0]?.original_url">
             </figure>
-            <div class="mt-7 text-sm flex">
-              <div class="space-y-1 w-32">
-                <p>Nombre:</p>
-                <p>Categoría:</p>
-                <p>Proveedor:</p>
-                <p>Precio sugerido:</p>
-                <p>Código:</p>
-              </div>
-              <div class="space-y-1 font-bold">
-                <p>{{ productInfo?.name ?? '-' }}</p>
-                <p>{{ productInfo?.category?.name ?? '-' }}</p>
-                <p>{{ productInfo?.brand?.name ?? '-' }}</p>
-                <p>${{ productInfo?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
-                <p>{{ productInfo?.code ?? 'N/A' }}</p>
-              </div>
+            <div class="mt-7 text-sm grid grid-cols-3 gap-x-3 gap-y-1">
+              <p >Nombre:</p>
+              <p class="font-bold col-span-2">{{ productInfo?.name ?? '-' }}</p>
+              <p >Categoría:</p>
+              <p class="font-bold col-span-2">{{ productInfo?.category?.name ?? '-' }}</p>
+              <p >Proveedor:</p>
+              <p class="font-bold col-span-2">{{ productInfo?.brand?.name ?? '-' }}</p>
+              <p >Precio sugerido:</p>
+              <p class="font-bold col-span-2">${{ productInfo?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-'
+                }}</p>
+              <p >Código:</p>
+              <p class="font-bold col-span-2">{{ productInfo?.code ?? 'N/A' }}</p>
             </div>
           </div>
         </div>
@@ -267,7 +264,7 @@ export default {
       this.globalProducts = this.global_products.map(product => ({
         key: product.id,
         label: product.name
-      }));
+      })).sort((a, b) => a.label.localeCompare(b.label));
     },
     handleLeftCheckChange(checkedProducts) {
       // Verificar si hay al menos un elemento seleccionado
@@ -280,7 +277,7 @@ export default {
     revertChanges() {
       // resetear variable de local storage a false
       localStorage.setItem('pendentProcess', false);
-      
+
       this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
       this.globalProductsFormater(); //formatea los productos globales para que el transfer los renderice
     },
