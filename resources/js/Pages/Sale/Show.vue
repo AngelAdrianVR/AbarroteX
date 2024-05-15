@@ -44,9 +44,10 @@
                         <table class="w-full">
                             <thead>
                                 <tr class="*:px-2">
-                                    <th class="w-[30%] text-start">Producto</th>
-                                    <th class="w-[30%] text-start">Precio</th>
-                                    <th class="w-[30%] text-start">Cantidad</th>
+                                    <th class="w-[20%] text-start">Producto</th>
+                                    <th class="w-[20%] text-start">Precio</th>
+                                    <th class="w-[20%] text-start">Cantidad</th>
+                                    <th class="w-[20%] text-start">Caja</th>
                                     <th class="w-[10%] text-end">Total</th>
                                 </tr>
                             </thead>
@@ -63,6 +64,7 @@
                                     </td>
                                     <td>${{ sale.current_price }}</td>
                                     <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                    <td>{{ sale.cash_register?.name }}</td>
                                     <td class="text-end">${{ (sale.current_price *
                                         sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 </tr>

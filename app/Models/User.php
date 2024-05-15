@@ -28,10 +28,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'type',
         'password',
         'employee_properties',
         'store_id',
-        'cash_register_id'
+        'cash_register_id',
     ];
 
     /**
@@ -85,5 +86,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Sale::class);
     }
-
 }

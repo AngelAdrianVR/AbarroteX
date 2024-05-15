@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Admin;
 use App\Models\CashRegister;
 use App\Models\Product;
 use App\Models\Sale;
@@ -26,10 +27,10 @@ class DatabaseSeeder extends Seeder
 
         // crear la primera tienda
         Store::create([
-            'name' => 'Tienda 1',
-            'contact_name' => 'Contacto 1',
-            'contact_phone' => '3312457896',
-            'address' => 'Direccion 1',
+            'name' => 'Admin',
+            'contact_name' => 'Administrador',
+            'contact_phone' => '3312155731',
+            'address' => '---',
             'next_payment' => now()->addDays(15),
             'default_card_id' => 1,
         ]);
@@ -50,10 +51,18 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('321321321'),
             'store_id' => 1,
         ]);
+        
+        // crear el primer vendedor
+        Admin::create([
+            'name' => 'Miguel Vazquez',
+            'email' => 'miguel@gmail.com',
+            'password' => bcrypt('321321321'),
+            'phone' => 3333034738,
+        ]);
 
         // agregar mas tiendas y usuarios desde el factory
-        Store::factory(10)->create();
-        User::factory(20)->create();
+        // Store::factory(10)->create();
+        // User::factory(20)->create();
 
         // agregar las configuraciones iniciales a las tiendas
         $stores = Store::all();

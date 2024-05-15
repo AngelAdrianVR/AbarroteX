@@ -50,7 +50,7 @@ class GlobalProductController extends Controller
 
     public function show($global_product_id)
     {
-        $global_product = GlobalProduct::with(['media', 'category', 'brand'])->find($global_product_id);
+        $global_product = GlobalProduct::with(['media', 'category', 'brand'])->findOrFail($global_product_id);
         $global_products = GlobalProduct::all(['id', 'name']);
 
         return inertia('GlobalProduct/Show', compact('global_product', 'global_products'));
@@ -59,7 +59,7 @@ class GlobalProductController extends Controller
 
     public function edit($global_product_id)
     {
-        $global_product = GlobalProduct::with('media')->find($global_product_id);
+        $global_product = GlobalProduct::with('media')->findOrFail($global_product_id);
         $categories = Category::all();
         $brands = Brand::all(['id', 'name']);
 

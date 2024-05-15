@@ -12,13 +12,22 @@ import TextInput from '@/Components/TextInput.vue';
 const form = useForm({
     store_name: '',
     name: '',
+    type: '',
     email: '',
+    address: '',
+    contact_phone: '',
     password: '',
     password_confirmation: '',
     terms: false,
 });
 
 const showPassword = ref(false);
+// const types = ['Abarrotes', 'Accesorios', 'Bsutería/Joyería', 'Boutique / Tienda de Ropa', 'cafetería', 'Carnicería',
+//     'Cremería', 'Dulcería', 'Farmacias / Boticas', 'Frutería / Verdulería', 'Ferreterías / Tlapalerías', 'Juguetería', 'Librería', 'Licorería / Cervecería',
+//     'Limpieza', 'Materiales Para Construcción', 'Supermercado', ' Mueblería', 'Taquería', 'Agroquímicos / Orgánicos', 'Panadería', 'Papelería',
+//     'Perfumería', 'Tienda de Pinturas', 'Tienda de plásticos', 'Refaccionaria', 'Kiosco', 'Tecnología', 'Veterinaria', 'Zapatería',
+//     'Óptica', 'Otro'
+// ]
 
 const submit = () => {
     form.post(route('register'), {
@@ -43,6 +52,7 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit">
+            <h1 class="font-bold ml-9 text-sm mb-2">Información de la tienda</h1>
             <div>
                 <div
                     class="flex items-center space-x-2 py-2 px-5 w-full h-10 border border-grayD9 rounded-full placeholder:text-sm placeholder:text-[#777777]">
@@ -57,6 +67,54 @@ const submit = () => {
                 </div>
                 <InputError :message="form.errors.store_name" />
             </div>
+            <div>
+                <div
+                    class="flex items-center space-x-2 py-2 mt-3 px-5 w-full h-10 border border-grayD9 rounded-full placeholder:text-sm placeholder:text-[#777777]">
+                    <svg class="size-5" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.1264 6.06317C11.1264 9.69714 7.37118 12.2875 6.32874 12.9367C6.1666 13.0394 5.9598 13.0394 5.79766 12.9367C4.75549 12.2875 1 9.69714 1 6.06317C1 3.26689 3.26692 1 6.0632 1C8.85948 1 11.1264 3.26689 11.1264 6.06317Z" stroke="#777777" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8.3131 6.06225C8.3131 7.79455 6.43784 8.87722 4.93765 8.01108C4.24139 7.60909 3.8125 6.8662 3.8125 6.06225C3.8125 4.32997 5.68776 3.24729 7.18795 4.11343C7.88421 4.5154 8.3131 5.25829 8.3131 6.06225Z" stroke="#777777" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+
+                    <input v-model="form.address" type="text"
+                        class="text-sm w-full placeholder:text-sm placeholder:text-[#777777] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full"
+                        placeholder="Dirección" required autofocus>
+                </div>
+                <InputError :message="form.errors.address" />
+            </div>
+            <div>
+                <div
+                    class="flex items-center space-x-2 py-2 mt-3 px-5 w-full h-10 border border-grayD9 rounded-full placeholder:text-sm placeholder:text-[#777777]">
+                    <svg class="size-5" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.48 3.73333C12.48 2.22371 11.2563 1 9.74667 1H9.59114C9.42727 1.00003 9.26717 1.04915 9.13148 1.14104C8.9958 1.23292 8.89076 1.36335 8.82991 1.51551L8.15587 3.20033C8.07638 3.39899 8.05694 3.6166 8.09993 3.8262C8.14293 4.0358 8.24649 4.22818 8.39777 4.37949L9.23881 5.22054C9.37357 5.35529 9.43015 5.55127 9.37493 5.73386C9.11283 6.59258 8.64371 7.37372 8.00885 8.00858C7.37399 8.64344 6.59285 9.11255 5.73413 9.37466C5.55155 9.43015 5.35557 9.37329 5.22081 9.23854L4.37977 8.39749C4.22845 8.24621 4.03607 8.14266 3.82647 8.09966C3.61687 8.05666 3.39926 8.07611 3.20061 8.15559L1.51551 8.82963C1.36335 8.89048 1.23292 8.99553 1.14104 9.13121C1.04915 9.26689 1.00003 9.427 1 9.59087V9.74667C1 11.2563 2.22371 12.48 3.73333 12.48H3.87C8.54673 12.48 12.3526 8.75119 12.477 4.10452L12.4784 4.10097L12.4795 4.09936L12.48 4.09741V3.73333Z" stroke="#777777" stroke-width="0.88" stroke-linejoin="round"/>
+                    </svg>
+                    <input v-model="form.contact_phone" type="text"
+                        class="text-sm w-full placeholder:text-sm placeholder:text-[#777777] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full"
+                        placeholder="Teléfono" required autofocus>
+                </div>
+                <InputError :message="form.errors.contact_phone" />
+            </div>
+            <div>
+                <div
+                    class="flex items-center space-x-2 py-2 mt-3 px-5 w-full h-10 border border-grayD9 rounded-full placeholder:text-sm placeholder:text-[#777777]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 !text-[#777777]">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+                    </svg>
+                    <input v-model="form.type" type="text"
+                        class="text-sm w-full placeholder:text-sm placeholder:text-[#777777] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full"
+                        placeholder="Giro. Ejeplo. Carnicería" required autofocus>
+                </div>
+                <InputError :message="form.errors.type" />
+            </div>
+            <!-- <div class="mt-3">
+                <el-select class="w-1/2 !rounded-full h-10" v-model="form.type" filterable clearable placeholder="Seleccione el giro de su tienda"
+                    no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                    <el-option v-for="type in types" :key="type" :label="type" :value="type" />
+                </el-select>
+            </div> -->
+
+            <h1 class="font-bold ml-9 text-sm mt-3">Contacto</h1>
+
             <div>
                 <div
                     class="flex items-center space-x-2 py-2 px-5 mt-3 w-full h-10 border border-grayD9 rounded-full placeholder:text-sm placeholder:text-[#777777]">
