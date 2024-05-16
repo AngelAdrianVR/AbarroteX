@@ -7,7 +7,7 @@
             </div>
 
             <!-- tabs options -->
-            <el-tabs v-model="activeTab">
+            <el-tabs v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane label="Punto de venta" name="1">
                     <Point />
                 </el-tab-pane>
@@ -50,9 +50,21 @@ props: {
 users: Array
 },
 methods: {
-
+    updateURL(tab) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('tab', tab.props.name );
+        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    },
+    setActiveTabFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab) {
+            this.activeTab = tab;
+        }
+    }
 },
 mounted() {
+    this.setActiveTabFromURL();
     // resetear variable de local storage a false
     localStorage.setItem('pendentProcess', false);
 }

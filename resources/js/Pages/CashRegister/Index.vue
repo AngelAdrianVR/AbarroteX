@@ -4,13 +4,13 @@
         <div class="text-right">
             <ThirthButton @click="$inertia.get(route('cash-registers.create'))">Crear caja</ThirthButton>
         </div>
-            <el-tabs class="mx-3" v-model="activeTab">
-                <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="index">
+            <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
+                <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="String(index + 1)">
                     <CashRegister :cash_register="item" />
                 </el-tab-pane>
 
                 <!-- Historial de cortes -->
-                <el-tab-pane label="Historial de cortes">
+                <el-tab-pane label="Historial de cortes" :name="String(cash_registers.length + 1)">
                     <section class="flex justify-between">
                         <div></div>
                         <div class="relative">
@@ -81,7 +81,7 @@ import CashRegister from '@/Pages/CashRegister/Tabs/CashRegister.vue';
 export default {
     data() {
         return {
-            activeTab: 0,
+            activeTab: '1',
             loading: false,
             localCashCuts: this.cash_cuts,
             showFilter: false, //filtro opciones
@@ -145,6 +145,21 @@ export default {
                 this.loadingItems = false;
             }
         },
+        updateURL(tab) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tab.props.name );
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        },
+        setActiveTabFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if (tab) {
+                this.activeTab = tab;
+            }
+        }
+    },
+    mounted() {
+        this.setActiveTabFromURL();
     }
 }
 </script>
