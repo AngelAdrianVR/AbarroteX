@@ -33,6 +33,7 @@ class CreateNewUser implements CreatesNewUsers
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
+        //crea la tienda relacionada a este nuevo usuario.
         $store = Store::create([
             'name' => $input['store_name'],
             'contact_name' => $input['name'],
@@ -48,6 +49,7 @@ class CreateNewUser implements CreatesNewUsers
                 $store->settings()->attach($setting->id, ['value' => null]);
             });
 
+        //Crea la caja registradora para esta nueva tienda
         CashRegister::create([
             'name' => 'Nueva caja',
             'started_cash' => 0,
@@ -56,9 +58,11 @@ class CreateNewUser implements CreatesNewUsers
             'store_id' => $store->id,
         ]);
 
+        //crea al usuario relacionado a esta tienda con el rol de administrador
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
+            'rol' => 'Administrador',
             'password' => Hash::make($input['password']),
             'store_id' => $store->id,
         ]);

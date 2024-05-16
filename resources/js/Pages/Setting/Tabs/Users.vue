@@ -22,7 +22,7 @@
                     </thead>
                     <tbody>
                         <tr 
-                            v-for="user in users" :key="user"
+                            v-for="(user, index) in users" :key="user"
                             class="*:text-xs *:px-3 *:py-2 hover:bg-primarylight">
                             <td class="rounded-s-full w-[20%]">{{ user.id }}</td>
                             <td class="w-[10%]">{{ user.name }}</td>
@@ -55,7 +55,8 @@
                                                 </svg>
                                                 <span class="text-xs">Ver</span>
                                             </el-dropdown-item> -->
-                                            <el-dropdown-item :command="'delete|' + user.id">
+                                            <!-- Solo se puede eliminar si no es el usuario administrador de la tienda -->
+                                            <el-dropdown-item v-if="index != 0" :command="'delete|' + user.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"
                                                     class="size-[14px] mr-2 text-red-600">

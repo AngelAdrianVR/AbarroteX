@@ -13,15 +13,24 @@
           <p v-if="!cash_register.is_active" class="text-red-500 px-2 bg-red-50 self-start">Caja deshabilitada</p>
           <p v-else class="text-green-500 px-2 bg-green-50 self-start">Caja Habilitada</p>
 
-          <el-dropdown :disabled="!cash_register.is_active" split-button type="primary" @click="handleCashCut">
-            Hacer cortre de caja
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo</el-dropdown-item>
-                <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <div class="flex space-x-3 items-center">
+            <el-popconfirm confirm-button-text="Si" cancel-button-text="No"
+              icon-color="#C30303" title="Se eliminará la caja registradora. ¿Deseas continuar?"
+              @confirm="deleteCashRegister()">
+              <template #reference>
+                <i class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-gray-200 rounded-full py-1 px-[7px] cursor-pointer"></i>
+              </template>
+            </el-popconfirm>
+            <el-dropdown :disabled="!cash_register.is_active" split-button type="primary" @click="handleCashCut">
+              Hacer cortre de caja
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                  <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </section>
 
         <!-- Información de caja -->
@@ -134,6 +143,12 @@
                         </el-tooltip>
                     </div>
                 </div>
+            </div>
+
+            <!-- Dinero actual en caja -->
+            <div class="mt-7 py-3 lg:mt-0 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
+                <h2 class="py-2 text-center text-sm font-bold">Dinero actual en caja</h2>
+                <p class="text-center mb-1">${{ cash_register.current_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
             </div>
           </div>
         </section>
@@ -356,6 +371,10 @@ methods: {
             this.fetchTotalCashMovements();
             },
         });
+    },
+    deleteCashRegister() {
+      this.$inertia.delete(route('cash-registers.destroy', this.cash_register.id));
+      location.reload();
     },
     editMaxCash() {
         this.edit_max_cash = true;

@@ -64,7 +64,10 @@ class CashRegisterController extends Controller
             'store_id' => auth()->user()->store_id,
         ]);
 
-        return to_route('cash-registers.index');
+        //recupera el total de cajas para pasarlo como parametro en url y seleccionar la pestaña correspondiente a historial de cortes
+        $total_cash_registers = CashRegister::where('store_id', auth()->user()->store_is)->get()->count();
+
+        return to_route('cash-registers.index', ['tab' => ($total_cash_registers + 1)]);
     }
 
     
@@ -94,7 +97,7 @@ class CashRegisterController extends Controller
     
     public function destroy(CashRegister $cash_register)
     {
-        //
+        $cash_register->delete();
     }
 
 
