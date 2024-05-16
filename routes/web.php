@@ -109,7 +109,7 @@ Route::resource('brands', BrandController::class)->middleware('auth');
 //-------------------------------------------------------------------------------------------------
 Route::resource('sales', SaleController::class)->middleware('auth')->middleware(['auth', 'activeSuscription']);
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription']);
-Route::get('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
+Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
 Route::get('sales-print-ticket/{created_at}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
 Route::get('sales-fetch-cash-register-sales/{cash_register_id}', [SaleController::class, 'fetchCashRegisterSales'])->middleware('auth')->name('sales.fetch-cash-register-sales');
@@ -138,9 +138,11 @@ Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController:
 
 // User routes-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
+Route::resource('users', UserController::class)->middleware('auth');
 Route::get('users-get-notifications', [UserController::class, 'getNotifications'])->middleware('auth')->name('users.get-notifications');
 Route::post('users-read-notifications', [UserController::class, 'readNotifications'])->middleware('auth')->name('users.read-user-notifications');
 Route::post('users-delete-notifications', [UserController::class, 'deleteNotifications'])->middleware('auth')->name('users.delete-user-notifications');
+Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword'])->middleware('auth')->name('users.reset-password');
 
 
 //settings routes-------------------------------------------------------------------------------------

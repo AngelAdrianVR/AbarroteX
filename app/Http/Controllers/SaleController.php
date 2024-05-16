@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class SaleController extends Controller
 {
@@ -42,33 +43,6 @@ class SaleController extends Controller
 
     public function index()
     {
-        // // Obtener todos las ventas registradas y contar el número de agrupaciones por día
-        // $total_sales = DB::table('sales')
-        //     ->select(DB::raw('DATE(created_at) as date'))
-        //     ->where('store_id', auth()->user()->store_id)
-        //     ->groupBy(DB::raw('DATE(created_at)'))
-        //     ->get()
-        //     ->count();
-
-        // $sales = Sale::where('store_id', auth()->user()->store_id)->latest()->get();
-
-        // // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        // $groupedSales = $sales->groupBy(function ($sale) {
-        //     return Carbon::parse($sale->created_at)->format('d-F-Y');
-        // })->map(function ($sales) {
-        //     $totalQuantity = $sales->sum('quantity');
-        //     $totalSale = $sales->sum(function ($sale) {
-        //         return $sale->quantity * $sale->current_price;
-        //     });
-
-        //     return [
-        //         'total_quantity' => $totalQuantity,
-        //         'total_sale' => $totalSale,
-        //         'sales' => $sales,
-        //     ];
-        // })->take(30);
-
-
         // obtiene las cajas registradoras de la tienda
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
         $groupedSales = null;
@@ -90,13 +64,16 @@ class SaleController extends Controller
     }
 
 
-    public function show($created_at)
+    public function show(Sale $sale)
     {
-        // Parsear la fecha recibida para obtener solo la parte de la fecha
-        $date = Carbon::parse($created_at)->toDateString();
+        // Parsear la fecha de la venta recibida para obtener solo la parte de la fecha
+        $date = Carbon::parse($sale->created_at)->toDateString();
 
         // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])->where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+        $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
+            ->where('store_id', auth()->user()->store_id)
+            ->where('cash_register_id', $sale->cash_register_id) //recuperar solo las  ventas de la caja involucrada.
+            ->whereDate('created_at', $date)->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $sales->groupBy(function ($sale) {
@@ -152,7 +129,12 @@ class SaleController extends Controller
         $endDate = Carbon::parse($queryDate[1])->endOfDay();
 
         // Obtener las ventas registradas en el rango de fechas requerido por el filtro
-        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
+        $sales = Sale::where('store_id', auth()->user()->store_id)
+            ->where('cash_register_id', $request->input('cashRegisterId'))
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate)
+            ->latest()
+            ->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $sales->groupBy(function ($sale) {
@@ -176,14 +158,17 @@ class SaleController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 30;
+        $offset = $currentPage * 15;
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         // $days_ago = Carbon::now()->subDays($offset);
         // ignorar esa cantidad de dias porque ya se cargaron.
         // $days_befor = Carbon::now()->subDays($skip_days);
         // Obtener las ventas registradas en los últimos 7 días
         // $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
-        $sales = Sale::where('store_id', auth()->user()->store_id)->latest()->get();
+        $sales = Sale::where('store_id', auth()->user()->store_id)
+            ->where('cash_register_id', request('cashRgisterId'))
+            ->latest()
+            ->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $sales->groupBy(function ($sale) {
@@ -200,7 +185,7 @@ class SaleController extends Controller
                 'sales' => $sales,
             ];
         })->skip($offset)
-            ->take(30);
+            ->take(15);
 
         return response()->json(['items' => $groupedSales]);
     }
@@ -337,7 +322,7 @@ class SaleController extends Controller
                 'total_sale' => $totalSale,
                 'sales' => $sales,
             ];
-        })->take(30);
+        })->take(5);
 
         // Retornar los datos agrupados
         return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);

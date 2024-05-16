@@ -37,7 +37,8 @@
             <section class="flex flex-col space-y-5 lg:mx-16 text-sm mt-10">
                 <article v-for="(group, index) in getGroupedSlaes" :key="index"
                     class="border border-grayD9 *:px-5 *:py-1">
-                    <div class="border-b border-grayD9 text-end">
+                    <div class="flex justify-between border-b border-grayD9 text-end">
+                        <p class="text-gray99">Vendedor: <span class="text-gray37">{{ group[0].user.name }}</span></p>
                         <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{ index }}</span></p>
                     </div>
                     <div class="border-b border-grayD9">
@@ -47,7 +48,6 @@
                                     <th class="w-[20%] text-start">Producto</th>
                                     <th class="w-[20%] text-start">Precio</th>
                                     <th class="w-[20%] text-start">Cantidad</th>
-                                    <th class="w-[20%] text-start">Caja</th>
                                     <th class="w-[10%] text-end">Total</th>
                                 </tr>
                             </thead>
@@ -64,7 +64,6 @@
                                     </td>
                                     <td>${{ sale.current_price }}</td>
                                     <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                                    <td>{{ sale.cash_register?.name }}</td>
                                     <td class="text-end">${{ (sale.current_price *
                                         sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 </tr>

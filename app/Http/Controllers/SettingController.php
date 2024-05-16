@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -10,7 +11,9 @@ class SettingController extends Controller
     
     public function index()
     {
-        return inertia('Setting/Index');
+        $users = User::with(['cashRegister:id,name'])->where('store_id', auth()->user()->store_id)->get();
+        
+        return inertia('Setting/Index', compact('users'));
     }
 
     
