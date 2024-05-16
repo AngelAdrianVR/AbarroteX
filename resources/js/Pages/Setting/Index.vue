@@ -11,16 +11,16 @@
                 <el-tab-pane label="Punto de venta" name="1">
                     <Point />
                 </el-tab-pane>
-                <!-- <el-tab-pane label="Cuentas" name="2">
-                    cuentas
+                <el-tab-pane label="Usuarios" name="2">
+                    <Users :users="users"/>
                 </el-tab-pane>
-                <el-tab-pane label="Ventas registradas" name="3">
+                <!-- <el-tab-pane label="Ventas registradas" name="3">
                     Ventas registradas
-                </el-tab-pane>
-                <el-tab-pane label="Productos" name="4">
+                </el-tab-pane> -->
+                <!-- <el-tab-pane label="Productos" name="4">
                     Productos
-                </el-tab-pane>
-                <el-tab-pane label="Notificaciones" name="5">
+                </el-tab-pane> -->
+                <!-- <el-tab-pane label="Notificaciones" name="5">
                     Notificaciones
                 </el-tab-pane> -->
             </el-tabs>
@@ -32,27 +32,29 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Point from '@/Pages/Setting/Tabs/Point.vue';
+import Users from '@/Pages/Setting/Tabs/Users.vue';
 
 export default {
-    data() {
-        return {
-            activeTab: '1',
-        }
-    },
-    components: {
-        AppLayout,
-        PrimaryButton,
-        Point
-    },
-    props: {
-
-    },
-    methods: {
-
-    },
-    mounted() {
-        // resetear variable de local storage a false
-        localStorage.setItem('pendentProcess', false);
+data() {
+    return {
+        activeTab: '1',
     }
+},
+components: {
+    AppLayout,
+    PrimaryButton,
+    Users,
+    Point
+},
+props: {
+users: Array
+},
+methods: {
+
+},
+mounted() {
+    // resetear variable de local storage a false
+    localStorage.setItem('pendentProcess', false);
+}
 }
 </script>

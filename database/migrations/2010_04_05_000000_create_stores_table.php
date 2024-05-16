@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('type'); // tipo de tienda ej. ropa, carniceria, abarrotes
             $table->string('contact_name');
             $table->string('contact_phone')->nullable();
             $table->string('address')->nullable();
