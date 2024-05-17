@@ -34,6 +34,26 @@ class UserController extends Controller
     }
 
 
+    public function edit(User $user)
+    {
+        return inertia('User/Edit', compact('user'));
+    }
+
+
+    public function update(Request $request, User $user)
+    {
+        $request-> validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'rol' => 'required|string|max:255',
+        ]);
+
+        $user->update($request->all());
+
+        return to_route('settings.index', ['tab' => 2]);
+    }
+
+
     public function show(User $user)
     {
         return inertia('User/Show');
