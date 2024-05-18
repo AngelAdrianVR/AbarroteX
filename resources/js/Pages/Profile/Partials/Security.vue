@@ -154,7 +154,6 @@ import DialogModal from "@/Components/DialogModal.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ActionMessage from '@/Components/ActionMessage.vue';
-import axios from 'axios';
 
 export default {
     data() {
