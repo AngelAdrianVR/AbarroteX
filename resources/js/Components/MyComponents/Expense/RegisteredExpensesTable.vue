@@ -42,7 +42,7 @@
                                         </svg>
                                         <span class="text-xs">Imprimir</span>
                                     </el-dropdown-item> -->
-                                    <el-dropdown-item :command="'delete|' + expense.expenses[0]?.id">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + expense.expenses[0]?.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -91,6 +91,8 @@ export default {
         return {
             showDeleteConfirm: false,
             itemIdToDelete: null,
+            // Permisos de rol actual
+            canDelete: this.$page.props.auth.user.rol == 'Administrador',
         };
     },
     components: {

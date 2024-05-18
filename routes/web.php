@@ -54,10 +54,10 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'activeSuscription']);
-    Route::get('/dashboard-get-day-data/{date}', [DashboardController::class, 'getDayData'])->name('dashboard.get-day-data');
-    Route::get('/dashboard-get-week-data/{date}', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
-    Route::get('/dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'activeSuscription', 'roles:Administrador']);
+    Route::get('dashboard-get-day-data/{date}', [DashboardController::class, 'getDayData'])->name('dashboard.get-day-data');
+    Route::get('dashboard-get-week-data/{date}', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
+    Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
 
@@ -107,7 +107,7 @@ Route::resource('brands', BrandController::class)->middleware('auth');
 
 //sales routes-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('sales', SaleController::class)->middleware('auth')->middleware(['auth', 'activeSuscription']);
+Route::resource('sales', SaleController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero']);
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription']);
 Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
@@ -118,7 +118,7 @@ Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage
 
 //expenses routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription']);
+Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador']);
 Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
 Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
 Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
@@ -147,7 +147,7 @@ Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword
 
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription']);
+Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador']);
 Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
 
 
@@ -181,7 +181,7 @@ Route::resource('payments', PaymentController::class)->middleware('auth');
 
 //Cash register routes--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
-Route::resource('cash-registers', CashRegisterController::class)->middleware('auth');
+Route::resource('cash-registers', CashRegisterController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero']);
 Route::get('cash-registers-fetch-cash-register/{cash_register_id}', [CashRegisterController::class, 'fetchCashRegister'])->middleware('auth')->name('cash-registers.fetch-cash-register');
 Route::put('cash-registers-asign/{user}/{cash_register_id}', [CashRegisterController::class, 'asignCashRegister'])->middleware('auth')->name('cash-registers.asign');
 

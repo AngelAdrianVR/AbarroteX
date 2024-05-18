@@ -2,7 +2,7 @@
     <AppLayout title="Productos">
         <div class="px-2 lg:px-10 py-7">
             <!-- tabs -->
-            <div class="flex items-center justify-center text-sm">
+            <div v-if="canTransfer" class="flex items-center justify-center text-sm">
                 <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -mr-5 cursor-default">Mis
                     productos</button>
                 <button @click="$inertia.get(route('global-product-store.select'))"
@@ -282,8 +282,6 @@ export default {
         });
 
         return {
-            // control de inventario activado
-            isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             form,
             importForm,
             loading: false,
@@ -304,6 +302,10 @@ export default {
             //exportacion
             showExportModal: false,
             isExporting: false,
+            // control de inventario activado
+            isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            // Permisos de rol
+            canTransfer: ['Administrador'].includes(this.$page.props.auth.user.rol),
         };
     },
     components: {
@@ -334,20 +336,6 @@ export default {
         exportProducts() {
             this.$inertia.visit(route('products.export'));
         },
-        // async exportProducts() {
-        //     try {
-        //         this.isExporting = true;
-        //         const response = await axios.get(route('products.export'));
-
-        //         if (response.status === 200) {
-        //             console.log(response.data.file);
-        //         }
-        //     } catch (error) {
-        //         console.log(error)
-        //     } finally {
-        //         this.isExporting = false;
-        //     }
-        // },
         async importProducts() {
             try {
                 this.isImporting = true;

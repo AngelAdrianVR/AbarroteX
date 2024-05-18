@@ -64,6 +64,8 @@ export default {
 
             // top products
             topProductsCurrentPeriod: [],
+            // Permisos de rol
+            canSeeDashboard: ['Administrador'].includes(this.$page.props.auth.user.rol),
 
             loading: false,
         }
@@ -386,6 +388,9 @@ export default {
         }
     },
     mounted() {
+        if (!this.canSeeDashboard) {
+            this.$inertia.visit(route('sales.point'));
+        }
         this.periodRange = this.getCurrentDate();
         this.fetchDailyData();
         // resetear variable de local storage a false

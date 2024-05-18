@@ -11,7 +11,7 @@
                             class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                     </template>
                 </el-popconfirm> -->
-                <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
+                <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
                     @confirm="deleteItem(expenses[0].id)">
                     <template #reference>
                         <i @click.stop
@@ -37,12 +37,14 @@
                     <thead>
                         <tr class="*:text-left *:py-1 *:px-4 *:text-sm text-gray37 bg-primarylight text-start">
                             <th class="rounded-s-full">Conceto</th>
+                            <th>Cantidad</th>
                             <th class="rounded-e-full">Costo</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="expense in expenses" :key="expense" class="*:text-left *:pb-px *:px-4 *:text-sm">
                             <td>{{ expense.concept }}</td>
+                            <td>{{ expense.quantity }}</td>
                             <td>${{ (expense.quantity *
                                 expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         </tr>
@@ -124,6 +126,8 @@ export default {
 
         return {
             form,
+            // Permisos de rol actual
+            canDelete: this.$page.props.auth.user.rol == 'Administrador',
         }
     },
     components: {

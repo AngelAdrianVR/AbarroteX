@@ -12,7 +12,7 @@
                                 class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                         </template>
                     </el-popconfirm> -->
-                    <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
+                    <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                         title="¿Continuar?" @confirm="deleteItem(Object.values(day_sales)[0].sales[0]?.id)">
                         <template #reference>
                             <i @click.stop
@@ -116,6 +116,8 @@ export default {
         return {
             form,
             paymentModal: false,
+            // Permisos de rol actual
+            canDelete: this.$page.props.auth.user.rol == 'Administrador',
         }
     },
     components: {
