@@ -65,7 +65,7 @@ class CashCutController extends Controller
         $date = Carbon::parse($created_at)->toDateString();
 
         // Obtener los cortes registrados en la fecha recibida
-        $cash_cuts = CashCut::with(['cashRegister:id,name', 'user:id,name'])->where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+        $cash_cuts = CashCut::with(['cashRegister:id,name', 'user:id,name'])->where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->latest()->get();
 
         // Agrupar los cortes por fecha con el nuevo formato de fecha y calcular el total de venta y la diferencia para cada fecha
         $groupedCashCuts = $cash_cuts->groupBy(function($date) {
@@ -74,18 +74,16 @@ class CashCutController extends Controller
         ->map(function($group) {
             $total_sales = $group->sum('sales_cash');
             $total_difference = $group->sum('difference');
+            $amount_sales_products = $group->count();
             
             return [
                 'cuts' => $group,
                 'total_sales' => $total_sales,
-                'total_difference' => $total_difference
+                'total_difference' => $total_difference,
+                'amount_sales_products' => $amount_sales_products
             ];
         });
         
-        // $cash_cuts_movements = CashRegisterMovement::whereHas('cashRegister', function($query) {
-        //     $query->where('store_id', auth()->user()->store_id);
-        // })->get();
-        // return $cash_cuts_movements;
         return inertia('CashRegister/Show', compact('groupedCashCuts'));
     }
 
@@ -185,39 +183,6 @@ class CashCutController extends Controller
     }
 
 
-    // public function getCashCutMovements(CashCut $cash_cut)
-    // {
-    //     // obtiene la caja registradora que hizo el corte
-    //     $cash_register = CashRegister::find($cash_cut->cash_register_id);
-
-    //     // Se obtiene el ultimo corte para guardar los movimientos de caja hechos desdes de este ultimo corte
-    //     $last_cash_cut = CashCut::where('cash_register_id', $cash_register->id)->where('created_at', '<', $cash_cut->created_at)->latest()->first();
-
-    //     if ( $last_cash_cut !== null) {
-    //         //Se obtienen los movimientos de caja hechos despues del ultimo corte y antes de los cortes mas recientes
-    //         $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-    //             ->where('created_at', '>', $last_cash_cut->created_at )
-    //             ->where('created_at', '<', $cash_cut->created_at)
-    //             ->get();
-    //     } else {
-    //         // Se obtiene el segundo corte para limitar los movimientos del primer corte
-    //         $second_cash_cut = CashCut::where('cash_register_id', $cash_register->id)
-    //         ->skip(1)
-    //         ->first();
-
-    //         //Si existe este segundo corte entonces delimita los movimientos a esa fecha
-    //         if ( $second_cash_cut !== null ) {
-    //             $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-    //                 ->where('created_at', '<', $second_cash_cut->created_at)
-    //                 ->get();
-    //         } else { //Si no existe el segundo corte obtiene todos los registrados
-    //             $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)->get();
-    //         }
-
-    //         return response()->json(['items' => $cash_cut_movements]);
-    //     }
-    // }
-
     public function getCashCutMovements(CashCut $cash_cut)
     {
         // Obtiene la caja registradora que realizó el corte
@@ -229,23 +194,39 @@ class CashCutController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Obtiene los cortes posteriores al corte actual en la misma caja (para definir el rango superior si existe)
+        $next_cuts = CashCut::where('cash_register_id', $cash_register->id)
+            ->where('created_at', '>', $cash_cut->created_at)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $startDate = null;
+        $endDate = $cash_cut->created_at;
+
         // Si hay cortes anteriores, el último se convierte en el punto de referencia
         if ($previous_cuts->isNotEmpty()) {
             $reference_cut = $previous_cuts->first();
-
-            // Obtiene los movimientos de caja entre el corte de referencia y el corte actual
-            $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-                ->where('created_at', '>', $reference_cut->created_at)
-                ->where('created_at', '<', $cash_cut->created_at)
-                ->get();
-        } else {
-            // Si no hay cortes anteriores, se toman todos los movimientos antes del corte actual
-            $cash_cut_movements = CashRegisterMovement::where('cash_register_id', $cash_register->id)
-                ->where('created_at', '<', $cash_cut->created_at)
-                ->get();
+            $startDate = $reference_cut->created_at;
         }
+
+        // Construye la consulta para los movimientos de caja
+        $query = CashRegisterMovement::where('cash_register_id', $cash_register->id);
+
+        if ($startDate) {
+            $query->where('created_at', '>', $startDate);
+        }
+
+        if ($endDate) {
+            $query->where('created_at', '<', $endDate);
+        } else {
+            $query->where('created_at', $cash_cut->created_at);
+        }
+
+        // Obtiene los movimientos de caja dentro del rango definido
+        $cash_cut_movements = $query->get();
 
         return response()->json(['items' => $cash_cut_movements]);
     }
+
         
 }
