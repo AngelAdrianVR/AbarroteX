@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('profile_photo_path', 2048)->nullable();
             $table->json('employee_properties')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('cash_register_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('cash_register_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

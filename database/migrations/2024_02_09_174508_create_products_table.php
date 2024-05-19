@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedFloat('public_price');
-            $table->unsignedFloat('cost')->nullable();
+            $table->unsignedFloat('cost')->nullable()->default(0);
             $table->string('code')->unique()->nullable();
             $table->unsignedSmallInteger('min_stock')->nullable();
             $table->unsignedSmallInteger('max_stock')->nullable();
-            $table->unsignedFloat('current_stock')->nullable();
+            $table->unsignedFloat('current_stock')->nullable()->default(1);
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
