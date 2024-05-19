@@ -104,6 +104,14 @@ class CashRegisterController extends Controller
     
     public function destroy(CashRegister $cash_register)
     {
+        //busca si hay ya otro usuario con la caja asignada
+        $cash_register_user_asigned = User::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cash_register->id)->first();
+
+        // si hay, le des asigna la caja para no eliminar tambien al usuario.
+        if ( $cash_register_user_asigned ) {
+            $cash_register_user_asigned->update(['cash_register_id' => null]);
+        }
+
         $cash_register->delete();
     }
 
