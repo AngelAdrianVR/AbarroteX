@@ -6,7 +6,7 @@
         </div>
             <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="String(index + 1)">
-                    <CashRegister :cash_register="item" />
+                    <CashRegister :cash_register="item" :total_cash_registers="cash_registers.length" />
                 </el-tab-pane>
 
                 <!-- Historial de cortes -->

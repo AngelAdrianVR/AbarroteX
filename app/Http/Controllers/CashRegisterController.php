@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CashCut;
 use App\Models\CashRegister;
+use App\Models\CashRegisterMovement;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class CashRegisterController extends Controller
                             'total_difference' => $total_difference
                         ];
                     })->take(7);
-        
+
         return inertia('CashRegister/Index', compact('cash_registers', 'cash_cuts', 'total_cash_cuts'));
     }
 
@@ -91,6 +92,12 @@ class CashRegisterController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        // Si se esta deshabilitando la caja buscar a los usuarios que tengan esa caja asignada y desasignarla
+        if ( !$request->is_active) {
+            $cash_register_user_asigned = User::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cash_register->id)->first();
+            $cash_register_user_asigned->update(['cash_register_id' => null]);
+        }
+
         $cash_register->update($validated);
     }
 
@@ -112,6 +119,15 @@ class CashRegisterController extends Controller
 
     public function asignCashRegister(User $user, $cash_register_id)
     {
+        //busca si hay ya otro usuario con la caja asignada
+        $cash_register_user_asigned = User::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cash_register_id)->first();
+
+        // si hay, le des asigna la caja y la asigna al usuario que ha hecho la petición.
+        if ( $cash_register_user_asigned ) {
+            $cash_register_user_asigned->update(['cash_register_id' => null]);
+        }
+
+        //asignación de caja
         $user->update([
             'cash_register_id' => $cash_register_id
         ]);

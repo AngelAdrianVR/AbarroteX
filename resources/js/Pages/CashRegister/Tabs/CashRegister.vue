@@ -3,7 +3,9 @@
   <div v-else class="min-h-32">
     <section class="flex justify-between space-x-3 mt-2">
       <!-- Boton para activar/desactivar caja registradora -->
-      <el-tooltip v-if="canDelete" :content="cash_register.is_active ? 'Deshabilitar caja' : 'Habilitar caja'"
+      <el-tooltip v-if="canDelete" :content="cash_register.is_active 
+        ? 'Desactivar caja. Si no planeas utilizar esta caja, puedes desactivarla para evitar que los usuarios accedan a ella.' 
+        : 'Habilitar caja para volver a ponerla en funcionamiento'"
         placement="right">
         <button class="flex justify-center items-center rounded-full size-8 bg-grayF2 active:scale-90">
           <i @click="form.is_active = false; update()" v-if="cash_register.is_active"
@@ -16,7 +18,8 @@
       <p v-else class="text-green-500 px-2 bg-green-50 self-start">Caja Habilitada</p>
 
       <div class="flex space-x-3 items-center">
-        <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
+        <!-- Eliminar caja -->
+        <el-popconfirm v-if="canDelete && total_cash_registers > 1" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
           title="Se eliminará la caja registradora. ¿Deseas continuar?" @confirm="deleteCashRegister()">
           <template #reference>
             <i
@@ -153,13 +156,6 @@
           </div>
         </div>
 
-        <!-- Dinero actual en caja -->
-        <div class="mt-7 py-3 lg:mt-0 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
-          <h2 class="py-2 text-center text-sm font-bold">Dinero actual en caja</h2>
-          <p class="text-center mb-1">${{ cash_register.current_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }}
-          </p>
-        </div>
       </div>
     </section>
   </div>
@@ -284,8 +280,9 @@
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
           <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
-          <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing">Hacer corte</PrimaryButton>
+          <PrimaryButton :disabled="(!cutForm.counted_cash || cutForm.processing) && (currentMovements.length || cutForm.totalSaleForCashCut == 0)">Hacer corte</PrimaryButton>
         </div>
+          <p v-if="!currentMovements.length && cutForm.totalSaleForCashCut == 0" class="text-xs text-red-600 text-right">*Para hacer corte es necesario que haya venta o movimiento de caja registrado</p>
       </form>
     </div>
   </Modal>
@@ -351,7 +348,8 @@ export default {
     Modal
   },
   props: {
-    cash_register: Object
+    cash_register: Object,
+    total_cash_registers: Number //numero de cajar registradoras para no poder eliminar si solo hay 1
   },
   methods: {
     update() {
