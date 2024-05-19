@@ -11,6 +11,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
+use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
@@ -202,10 +203,18 @@ Route::get('cash-cuts-get-by-page/{currentPage}', [CashCutController::class, 'ge
 Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'getCashCutMovements'])->name('cash-cuts.get-movements')->middleware('auth');
 
 
-
 //Tutorial routes----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('tutorials', TutorialController::class)->middleware('auth');
+
+
+//online sales routes----------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+Route::resource('online-sales', OnlineSaleController::class);
+Route::get('online-sales-client-index/{store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
+Route::get('online-sales/{offset}{limit}/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
+Route::get('online-sales-show-local-product/{product_id}', [OnlineSaleController::class, 'ShowLocalProduct'])->name('online-sales.show-local-product');
+Route::get('online-sales-show-global-product/{global_product_id}', [OnlineSaleController::class, 'ShowGlobalProduct'])->name('online-sales.show-global-product');
 
 
 // comandos Artisan
