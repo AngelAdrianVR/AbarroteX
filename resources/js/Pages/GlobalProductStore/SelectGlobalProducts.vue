@@ -4,7 +4,7 @@
       <!-- tabs -->
       <div class="flex justify-between mb-5 mx-2">
         <Back />
-        <div class="flex items-center justify-center text-sm">
+        <div v-if="canTransfer" class="flex items-center justify-center text-sm">
           <button @click="$inertia.get(route('products.index'))"
             class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Mis productos</button>
           <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -ml-5 cursor-default">Catálogo base</button>
@@ -196,6 +196,8 @@ export default {
       rightFilterCategory: null, //información para fltrar por categoría derecho
       rightFilterBrand: null, //información para fltrar por Proveedor derecho
       showConfirmModal: false,
+      // Permisos de rol
+      canTransfer: ['Administrador'].includes(this.$page.props.auth.user.rol),
     };
   },
   components: {

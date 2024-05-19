@@ -98,7 +98,7 @@
                             global_product_store.global_product?.name }}</h1>
 
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
-                            <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
+                            <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de compra:</p>
                                 <p class="text-right font-bold">{{ global_product_store.cost ?
                                     '$' + global_product_store.cost : '-' }}</p>
@@ -261,6 +261,8 @@ export default {
             searchLoading: false,
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            // Permisos de rol actual
+            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
             // validaciones
             cashAmountMessage: null,
         };

@@ -67,7 +67,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'delete|' + index">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + index">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -118,6 +118,8 @@ export default {
             itemToDelete: null,
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            // Permisos de rol actual
+            canDelete: ['Administrador'].includes(this.$page.props.auth.user.rol),
         };
     },
     components: {

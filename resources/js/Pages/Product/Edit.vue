@@ -11,7 +11,7 @@
                     <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
                     <InputError :message="form.errors.name" />
                 </div>
-                <div class="mt-3">
+                <div v-if="canSeeCost" class="mt-3">
                     <div class="flex items-center">
                         <InputLabel value="Precio de compra" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
@@ -205,6 +205,7 @@ export default {
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showBrandFormModal: false, //muestra formulario para agregar proveedor
+            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
         };
     },
     components: {

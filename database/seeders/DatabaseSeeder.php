@@ -48,6 +48,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Angel Vazquez',
             'email' => 'angel@gmail.com',
+            'rol' => 'Administrador',
             'password' => bcrypt('321321321'),
             'store_id' => 1,
         ]);

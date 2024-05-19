@@ -11,8 +11,11 @@ class SettingController extends Controller
     
     public function index()
     {
-        $users = User::with(['cashRegister:id,name'])->where('store_id', auth()->user()->store_id)->get();
-        
+        $users = User::with(['cashRegister:id,name'])
+            ->where('store_id', auth()->user()->store_id)
+            ->where('rol', '!=', 'Administrador')
+            ->get();
+            
         return inertia('Setting/Index', compact('users'));
     }
 

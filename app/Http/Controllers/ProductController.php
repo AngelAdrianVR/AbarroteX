@@ -378,6 +378,7 @@ class ProductController extends Controller
 
     public function export()
     {
+        $userCanSeeCost = in_array(auth()->user()->rol, ['Administrador', 'Almacenista']); 
         $products = Product::where('store_id', auth()->user()->store_id)->get();
 
         $spreadsheet = new Spreadsheet();
@@ -408,7 +409,7 @@ class ProductController extends Controller
         foreach ($products as $product) {
             $sheet->setCellValue('A' . $row, $product->name);
             $sheet->setCellValue('B' . $row, $product->public_price);
-            $sheet->setCellValue('C' . $row, $product->cost);
+            if ($userCanSeeCost) $sheet->setCellValue('C' . $row, $product->cost);
             $sheet->setCellValue('D' . $row, $product->code);
             $sheet->setCellValue('E' . $row, $product->min_stock);
             $sheet->setCellValue('F' . $row, $product->max_stock);

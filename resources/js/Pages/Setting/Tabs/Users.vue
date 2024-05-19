@@ -1,7 +1,7 @@
 <template>
     <section>
         <h1 class="rounded-full pl-10 bg-[#F2F2F2] py-1 text-sm">Usuarios</h1>
-        
+
         <!-- Botones -->
         <div class="text-right mt-3">
             <PrimaryButton @click="$inertia.get(route('users.create'))">Agregar usuario</PrimaryButton>
@@ -21,8 +21,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr 
-                            v-for="(user, index) in users" :key="user"
+                        <tr v-for="(user, index) in users" :key="user"
                             class="*:text-xs *:px-3 *:py-2 hover:bg-primarylight">
                             <td class="rounded-s-full w-[20%]">{{ user.id }}</td>
                             <td class="w-[10%]">{{ user.name }}</td>
@@ -38,8 +37,9 @@
                                     <template #dropdown>
                                         <el-dropdown-menu>
                                             <el-dropdown-item :command="'reset|' + user.id">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                                    stroke="currentColor" class="text-[#777777] size-[14px] mr-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor"
+                                                    class="text-[#777777] size-[14px] mr-2">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                                                 </svg>
@@ -56,8 +56,11 @@
                                                 <span class="text-xs">Ver</span>
                                             </el-dropdown-item> -->
                                             <el-dropdown-item :command="'edit|' + user.id">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-[#777777] size-[14px] mr-2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor"
+                                                    class="text-[#777777] size-[14px] mr-2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                                 </svg>
                                                 <span class="text-xs">Editar</span>
                                             </el-dropdown-item>
@@ -83,7 +86,8 @@
         </div>
     </section>
 
-    <ConfirmationModal :show="showDeleteConfirm || showResetConfirm" @close="showDeleteConfirm = false; showResetConfirm = false">
+    <ConfirmationModal :show="showDeleteConfirm || showResetConfirm"
+        @close="showDeleteConfirm = false; showResetConfirm = false">
         <template #title>
             <h1 v-if="showDeleteConfirm">Eliminar usuario</h1>
             <h1 v-else>Reetablecer contraseña</h1>
@@ -115,75 +119,75 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 export default {
-data(){
-    return {
-        showDeleteConfirm: false,
-        showResetConfirm: false,
-        itemIdToDelete: null,
-        itemIdToReset: null
-    }
-},
-components:{
-PrimaryButton,
-DangerButton,
-CancelButton,
-ConfirmationModal
-},
-props:{
-users: Array
-},
-methods:{
-    handleCommand(command) {
-        const commandName = command.split('|')[0];
-        const data = command.split('|')[1];
+    data() {
+        return {
+            showDeleteConfirm: false,
+            showResetConfirm: false,
+            itemIdToDelete: null,
+            itemIdToReset: null
+        }
+    },
+    components: {
+        PrimaryButton,
+        DangerButton,
+        CancelButton,
+        ConfirmationModal
+    },
+    props: {
+        users: Array
+    },
+    methods: {
+        handleCommand(command) {
+            const commandName = command.split('|')[0];
+            const data = command.split('|')[1];
 
-        if (commandName == 'see') {
-            this.$inertia.get(route('users.show', data));
-        } else if (commandName == 'edit') {
-            this.$inertia.get(route('users.edit', data));
-        } else if (commandName == 'reset') {
-            this.showResetConfirm = true;
-            this.itemIdToReset = data;
-        } else if (commandName == 'delete') {
-            this.showDeleteConfirm = true;
-            this.itemIdToDelete = data;
-        }
-    },
-    async deleteItem() {
-        try {
-            const response = await axios.delete(route('users.destroy', this.itemIdToDelete));
-            if (response.status == 200) {
-                this.$notify({
-                    title: 'Correcto',
-                    message: 'Se ha eliminado al usuario',
-                    type: 'success',
-                });
-                location.reload();
+            if (commandName == 'see') {
+                this.$inertia.get(route('users.show', data));
+            } else if (commandName == 'edit') {
+                this.$inertia.get(route('users.edit', data));
+            } else if (commandName == 'reset') {
+                this.showResetConfirm = true;
+                this.itemIdToReset = data;
+            } else if (commandName == 'delete') {
+                this.showDeleteConfirm = true;
+                this.itemIdToDelete = data;
             }
-        } catch (error) {
-            console.log(error);
-            this.$notify({
-                title: 'Error',
-                message: 'No se pudo eliminar al usuario. Intente más tarde',
-                type: 'error',
-            });
-        }
-    },
-    async resetPassword() {
-        try {
-            const response = await axios.put(route('users.reset-password', this.itemIdToReset));
-            if (response.status == 200) {
+        },
+        async deleteItem() {
+            try {
+                const response = await axios.delete(route('users.destroy', this.itemIdToDelete));
+                if (response.status == 200) {
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha eliminado al usuario',
+                        type: 'success',
+                    });
+                    location.reload();
+                }
+            } catch (error) {
+                console.log(error);
                 this.$notify({
-                    title: 'Correcto',
-                    message: 'Se ha reseteado el password a: ezyventas',
-                    type: 'success',
+                    title: 'Error',
+                    message: 'No se pudo eliminar al usuario. Intente más tarde',
+                    type: 'error',
                 });
-                this.showResetConfirm = false;
             }
-        } catch (error) {
-            console.log(error);
+        },
+        async resetPassword() {
+            try {
+                const response = await axios.put(route('users.reset-password', this.itemIdToReset));
+                if (response.status == 200) {
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha reseteado el password a: ezyventas',
+                        type: 'success',
+                    });
+                    this.showResetConfirm = false;
+                }
+            } catch (error) {
+                console.log(error);
+            }
         }
     }
-}
 }
 </script>

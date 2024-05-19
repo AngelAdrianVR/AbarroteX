@@ -6,7 +6,8 @@
                 <h1 class="font-bold text-lg">Gastos</h1>
                 <div class="flex space-x-2 items-center relative">
                     <!-- Boton para crear gasto -->
-                    <PrimaryButton @click="$inertia.get(route('expenses.create'))" class="!py-[6px]">Crear
+                    <PrimaryButton v-if="canCreate" @click="$inertia.get(route('expenses.create'))" class="!py-[6px]">
+                        Crear
                     </PrimaryButton>
                     <!-- filtro -->
                     <button @click.stop="showFilter = !showFilter"
@@ -81,6 +82,8 @@ export default {
             loadingItems: false, //para paginación
             currentPage: 1, //para paginación
             filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
+            // Permisos de rol actual
+            canCreate: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol),
         }
     },
     components: {

@@ -23,7 +23,8 @@
                     <InputLabel value="Rol" class="ml-3 mb-1" />
                     <el-radio-group v-model="form.rol" class="ml-4">
                         <el-radio value="Cajero" size="small">Cajero</el-radio>
-                        <el-radio value="Almacen" size="small">Almacén</el-radio>
+                        <el-radio value="Almacenista" size="small">Almacenista</el-radio>
+                        <!-- <el-radio value="Supervisor" size="small">Supervisor</el-radio> -->
                     </el-radio-group>
                     <InputError :message="form.errors.rol" />
                 </div>

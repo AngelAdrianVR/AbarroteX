@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Caja">
         <section class="mt-5 mx-2 lg:mx-8">
-        <div class="text-right">
+        <div v-if="canCreate" class="text-right">
             <ThirthButton @click="$inertia.get(route('cash-registers.create'))">Crear caja</ThirthButton>
         </div>
             <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
@@ -89,6 +89,8 @@ export default {
             loadingItems: false, //para paginación
             currentPage: 1, //para paginación
             filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
+            // Permisos de rol
+            canCreate: ['Administrador'].includes(this.$page.props.auth.user.rol),
         }
     },
     components: {

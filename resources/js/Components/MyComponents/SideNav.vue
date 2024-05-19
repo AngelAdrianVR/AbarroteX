@@ -107,7 +107,7 @@ export default {
                     active: route().current('sales.point'),
                     options: [],
                     dropdown: false,
-                    show: true
+                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Reportes',
@@ -116,7 +116,7 @@ export default {
                     active: route().current('dashboard'),
                     options: [],
                     dropdown: false,
-                    show: true
+                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Ventas registradas',
@@ -125,7 +125,7 @@ export default {
                     active: route().current('sales.index') || route().current('sales.show'),
                     options: [],
                     dropdown: false,
-                    show: true
+                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Gastos',
@@ -134,7 +134,7 @@ export default {
                     active: route().current('expenses.*'),
                     options: [],
                     dropdown: false,
-                    show: true
+                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Productos',
@@ -143,7 +143,7 @@ export default {
                     active: route().current('products.*') || route().current('global-product-store.*'),
                     options: [],
                     dropdown: false,
-                    show: true
+                    show: ['Administrador', 'Cajero', 'Almacenista'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Caja',
@@ -152,7 +152,7 @@ export default {
                     active: route().current('cash-registers.*'),
                     options: [],
                     dropdown: false,
-                    show: true
+                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Configuraciones',
@@ -161,7 +161,7 @@ export default {
                     active: route().current('settings.*'),
                     options: [],
                     dropdown: false,
-                    show: true
+                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
                 },
                 // {
                 //     label: 'Catálogo base',

@@ -52,7 +52,7 @@
           minimumFractionDigits: 2
         }) }}</div>
         <div class="w-[5%] text-right">
-          <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
+          <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
             @confirm="deleteItem(sale.product.id)">
             <template #reference>
               <i class="fa-regular fa-trash-can mr-2 text-primary cursor-pointer p-2 hover:bg-gray-100 rounded-full"></i>
@@ -144,6 +144,9 @@ export default {
       isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
       // descuentos activados
       isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
+      // Permisos de rol actual
+      canDelete: this.$page.props.auth.user.rol == 'Administrador',
+      // otros
       quantity: 1,
       editMode: null,
       editedPrice: null

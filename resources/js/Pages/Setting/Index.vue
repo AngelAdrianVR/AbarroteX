@@ -12,7 +12,7 @@
                     <Point />
                 </el-tab-pane>
                 <el-tab-pane label="Usuarios" name="2">
-                    <Users :users="users"/>
+                    <Users :users="users" />
                 </el-tab-pane>
                 <!-- <el-tab-pane label="Ventas registradas" name="3">
                     Ventas registradas
@@ -35,38 +35,38 @@ import Point from '@/Pages/Setting/Tabs/Point.vue';
 import Users from '@/Pages/Setting/Tabs/Users.vue';
 
 export default {
-data() {
-    return {
-        activeTab: '1',
-    }
-},
-components: {
-    AppLayout,
-    PrimaryButton,
-    Users,
-    Point
-},
-props: {
-users: Array
-},
-methods: {
-    updateURL(tab) {
-        const params = new URLSearchParams(window.location.search);
-        params.set('tab', tab.props.name );
-        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-    },
-    setActiveTabFromURL() {
-        const params = new URLSearchParams(window.location.search);
-        const tab = params.get('tab');
-        if (tab) {
-            this.activeTab = tab;
+    data() {
+        return {
+            activeTab: '1',
         }
+    },
+    components: {
+        AppLayout,
+        PrimaryButton,
+        Users,
+        Point
+    },
+    props: {
+        users: Array
+    },
+    methods: {
+        updateURL(tab) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tab.props.name);
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        },
+        setActiveTabFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if (tab) {
+                this.activeTab = tab;
+            }
+        }
+    },
+    mounted() {
+        this.setActiveTabFromURL();
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
-},
-mounted() {
-    this.setActiveTabFromURL();
-    // resetear variable de local storage a false
-    localStorage.setItem('pendentProcess', false);
-}
 }
 </script>
