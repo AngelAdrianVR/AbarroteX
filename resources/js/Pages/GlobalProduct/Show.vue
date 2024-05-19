@@ -19,7 +19,7 @@
             </div>
 
             <div class="mt-5">
-                <Back :route="'products.index'" />
+                <Back :to="route('products.index')" />
             </div>
 
             <!-- Info de producto -->

@@ -1,6 +1,6 @@
 <template>
-    <AppLayout title="Inicio">
-        <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
+    <AppLayout title="Reportes">
+        <h1 class="font-bold mx-4 lg:mx-32 mt-4">Reportes</h1>
         <section class="flex items-center justify-center">
             <el-radio-group v-model="period" @change="handleChangePeriod"
                 class="flex flex-col md:flex-row !items-start my-5 lg:mx-14">

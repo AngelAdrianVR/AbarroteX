@@ -27,7 +27,7 @@
                 </div>
             </div>
             <div class="mt-5">
-                <Back :route="'products.index'" />
+                <Back :to="route('products.index')" />
             </div>
 
             <!-- Info de producto -->
@@ -290,7 +290,7 @@ export default {
                     'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else if (this.form.cash_amount > total) {
                 this.cashAmountMessage =
-                    'El monto no debe superar el total del gato ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+                    'El monto no debe superar el total del gasto ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else {
                 this.cashAmountMessage = null;
             }

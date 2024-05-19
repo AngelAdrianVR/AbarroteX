@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Nuevo gasto">
         <div class="px-3 md:px-10 lg-px-1 py-7">
-            <Back />
+            <Back :to="route('expenses.index')" />
 
             <form @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[80%] mx-auto mt-7 lg:grid lg:grid-cols-2 gap-5">

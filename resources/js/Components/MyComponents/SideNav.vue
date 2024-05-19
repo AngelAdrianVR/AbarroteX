@@ -107,7 +107,7 @@ export default {
                     active: route().current('sales.point'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
+                    show: ['Administrador', 'Cajero', 'Almacenista'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Reportes',

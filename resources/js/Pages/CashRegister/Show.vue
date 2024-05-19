@@ -5,7 +5,7 @@
 
             <!-- back -->
             <div class="my-4">
-                <Back />
+                <Back :to="route('cash-registers.index', {tab: '2'})"/>
             </div>
 
             <div class="flex mt-8 mb-10">

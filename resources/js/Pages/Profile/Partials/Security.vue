@@ -17,20 +17,23 @@
                     <form @submit.prevent="updatePassword">
                         <div>
                             <InputLabel value="Contraseña actual" />
-                            <el-input ref="currentPasswordInput" type="password" v-model="formPassword.current_password" class="!w-1/3"
-                                autocomplete="current-password" :disabled="formPassword.processing" maxlength="255" />
+                            <el-input ref="currentPasswordInput" type="password" v-model="formPassword.current_password"
+                                class="!w-1/3" autocomplete="current-password" :disabled="formPassword.processing"
+                                maxlength="255" />
                             <InputError :message="formPassword.errors.current_password" />
                         </div>
                         <div class="mt-3">
                             <InputLabel value="Contraseña nueva" />
-                            <el-input ref="passwordInput" type="password" v-model="formPassword.password" autocomplete="new-password"
-                                class="!w-1/3" :disabled="formPassword.processing" maxlength="255" />
+                            <el-input ref="passwordInput" type="password" v-model="formPassword.password"
+                                autocomplete="new-password" class="!w-1/3" :disabled="formPassword.processing"
+                                maxlength="255" />
                             <InputError :message="formPassword.errors.password" />
                         </div>
                         <div class="mt-3">
                             <InputLabel value="Confirmar contraseña" />
-                            <el-input v-model="formPassword.password_confirmation" type="password" autocomplete="new-password"
-                                class="!w-1/3" :disabled="formPassword.processing" maxlength="255" />
+                            <el-input v-model="formPassword.password_confirmation" type="password"
+                                autocomplete="new-password" class="!w-1/3" :disabled="formPassword.processing"
+                                maxlength="255" />
                             <InputError :message="formPassword.errors.password_confirmation" />
                         </div>
                         <div class="flex items-center space-x-2 mt-5">
@@ -64,43 +67,52 @@
                     <button @click="editSessions = false" type="button" class="my-px text-[9px] self-start">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
-                    <div v-if="sessions.length > 0" class="mt-5 space-y-6">
-                        <div v-for="(session, i) in sessions" :key="i" class="flex items-center">
-                            <div>
-                                <svg v-if="session.agent.is_desktop" class="w-8 h-8 text-gray-500"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-                                </svg>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div v-if="sessions.length > 0" class="mt-5 space-y-6">
+                            <div v-for="(session, i) in sessions" :key="i" class="flex items-center">
+                                <div>
+                                    <svg v-if="session.agent.is_desktop" class="w-8 h-8 text-gray-500"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+                                    </svg>
 
-                                <svg v-else class="w-8 h-8 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                                </svg>
-                            </div>
-
-                            <div class="ms-3">
-                                <div class="text-sm text-gray-600">
-                                    {{ session.agent.platform ? session.agent.platform : 'desconocido' }} - {{
-                                        session.agent.browser ? session.agent.browser : 'desconocido' }}
+                                    <svg v-else class="w-8 h-8 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                                    </svg>
                                 </div>
 
-                                <div>
-                                    <div class="text-xs text-gray-500">
-                                        {{ session.ip_address }},
+                                <div class="ms-3">
+                                    <div class="text-sm text-gray-600">
+                                        {{ session.agent.platform ? session.agent.platform : 'desconocido' }} - {{
+                                            session.agent.browser ? session.agent.browser : 'desconocido' }}
+                                    </div>
 
-                                        <span v-if="session.is_current_device" class="text-green-500 font-semibold">Este
-                                            dispositivo</span>
-                                        <span v-else>Última vez activo {{ session.last_active }}</span>
+                                    <div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ session.ip_address }},
+
+                                            <span v-if="session.is_current_device"
+                                                class="text-green-500 font-semibold">Este
+                                                dispositivo</span>
+                                            <span v-else>Última vez activo {{ session.last_active }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <p class="text-gray99">
+                            Si es necesario, puede cerrar sesión en todos sus
+                            dispositivos. Algunas de sus sesiones recientes se enumeran a continuación. Si cree que su
+                            cuenta está comprometida o que alguien pueda ingresar sin su autorización,
+                            también debe actualizar su contraseña.
+                        </p>
                     </div>
                     <div class="flex items-center mt-5">
-                        <PrimaryButton @click="confirmLogout">
+                        <PrimaryButton v-if="sessions.length > 1" @click="confirmLogout">
                             Cerrar sesión en otros dispositivos
                         </PrimaryButton>
                         <ActionMessage :on="formLogout.recentlySuccessful" class="ms-3">

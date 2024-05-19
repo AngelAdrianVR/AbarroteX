@@ -3,7 +3,7 @@
         <main class="mx-2 lg:mx-56 my-10 text-sm">
             <BasicInfo />
             <Security :sessions="sessions" class="mt-7" />
-            <Suscription v-if="!canSeeSuscription" class="mt-7" />
+            <Suscription v-if="canSeeSuscription" class="mt-7" />
         </main>
     </AppLayout>
 </template>

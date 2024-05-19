@@ -27,10 +27,11 @@ class DatabaseSeeder extends Seeder
 
         // crear la primera tienda
         Store::create([
-            'name' => 'Admin',
+            'name' => 'Tienda de pruebas',
             'contact_name' => 'Administrador',
             'contact_phone' => '3312155731',
             'address' => '---',
+            'type' => 'Abarrotes',
             'next_payment' => now()->addDays(15),
             'default_card_id' => 1,
         ]);
@@ -51,6 +52,7 @@ class DatabaseSeeder extends Seeder
             'rol' => 'Administrador',
             'password' => bcrypt('321321321'),
             'store_id' => 1,
+            'rol' => 'Administrador',
         ]);
         
         // crear el primer vendedor

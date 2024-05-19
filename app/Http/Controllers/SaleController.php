@@ -282,7 +282,9 @@ class SaleController extends Controller
                 if ($current_product->current_stock <= $current_product->min_stock) {
                     $title = "Bajo stock";
                     $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
-                    $url = route('products.show', $current_product->id);
+                    $url =  $is_global_product 
+                        ? route('global-product-store.show', $current_product->id)
+                        : route('products.show', $current_product->id);
 
                     auth()->user()->notify(new BasicNotification($title, $description, $url));
                 }

@@ -3,7 +3,7 @@
     <div class="px-2 lg:px-20 py-7">
       <!-- tabs -->
       <div class="flex justify-between mb-5 mx-2">
-        <Back />
+        <Back :to="route('products.index')"/>
         <div v-if="canTransfer" class="flex items-center justify-center text-sm">
           <button @click="$inertia.get(route('products.index'))"
             class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Mis productos</button>
