@@ -23,7 +23,8 @@
                                 <div v-if="searchFocus && searchQuery"
                                 class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
                                 <ul v-if="productsFound?.length > 0 && !loading">
-                                    <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
+                                    <li @click="product.global_product_id ? $inertia.get(route('online-sales.show-global-product', product.global_product_id))
+                                        :$inertia.get(route('online-sales.show-local-product', product.id))" v-for="(product, index) in productsFound" :key="index"
                                     class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ?
                                         product.global_product?.name : product.name }}</li>
                                 </ul>
@@ -38,13 +39,14 @@
                             </div>
 
                             <!-- Carrito -->
-                            <div>
+                            <Link :href="route('online-sales.cart')" class="relative">
                                 <button class="bg-[#F2F2F2] rounded-full size-9 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-gray99">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                                     </svg>
+                                    <span v-if="cartCount > 0" class="absolute -top-2 -right-2 bg-primary text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">{{ cartCount }}</span>
                                 </button>
-                            </div>
+                            </Link>
                         </div>
                     </div>
                 </nav>
@@ -68,6 +70,7 @@ data() {
         searchFocus: false, //buscador. Bandera de enfoque para el buscador
         productsFound: null, //buscador. productos encontrados.
         loading: false, //cargando la busqueda de productos
+        cart: [] //productos guardados en el carrito (localStorage)
     }
 },
 components:{
@@ -97,6 +100,20 @@ methods:{
         console.log(error);
       }
     },
-}
+    loadCart() {
+        const cart = localStorage.getItem('Ezycart');
+        if (cart) {
+            this.cart = JSON.parse(cart);
+        }
+    }
+},
+created() {
+    this.loadCart();
+},
+computed: {
+    cartCount() {
+        return this.cart.length;
+    }
+},
 }
 </script>

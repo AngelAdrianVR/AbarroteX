@@ -17,7 +17,7 @@
             <section class="pb-16">
                 <h1 class="font-bold text-3xl text-center mb-12">Productos</h1>
                 
-                <div class="md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mx-7 md:mx-9 space-y-4 md:space-y-0">
+                <div class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-7 md:mx-9 space-y-4 md:space-y-0">
                     <OnlineProductCard v-for="product in visibleProducts" :key="product" :product="product" />
                 </div>
 

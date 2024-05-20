@@ -3,9 +3,9 @@
         <div class="p-4 md:p-9">
             <Back />
 
-            <section class="md:w-1/2 grid grid-cols-2 gap-x-10 border mx-auto mt-9 h-72">
+            <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
                 <!-- Imagen del producto -->
-                <figire class="border border-grayD9 rounded-md flex items-center justify-center">
+                <figire class="border border-grayD9 rounded-md flex items-center justify-center h-96">
                     <img v-if="product.media.length" :src="product.media[0]?.original_url" alt="producto" class="h-full mx-auto">
                     <div v-else>
                         <i class="fa-regular fa-image text-9xl text-gray-200"></i>
@@ -14,22 +14,31 @@
                 </figire>
 
                 <!-- Detalles del producto -->
-                <div class="">
+                <div>
                     <h1 class="font-bold text-2xl mt-4">{{ product.name }}</h1>
-                    <p class="text-xl text-primary font-bold mt-4">${{ product.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="text-2xl text-primary font-bold mt-4">${{ product.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     <div class="flex items-center space-x-3 mt-5">
                         <p class="text-gray99">Cantidad</p>
-                        <div class="relative">
-                            <el-input-number v-model="quantity" :disables=" product.current_stock < 1" :min="0" :max="product.current_stock" controls-position="right">
-                                <template #decrease-icon>
-                                <i class="fa-solid fa-angle-down"></i>
-                                </template>
-                                <template #increase-icon>
-                                <i class="fa-solid fa-angle-up"></i>
-                                </template>
-                            </el-input-number>
+                        <el-input-number v-model="quantity" :disabled=" product.current_stock < 1" :min="0" :max="product.current_stock" controls-position="right">
+                            <template #decrease-icon>
+                            <i class="fa-solid fa-angle-down"></i>
+                            </template>
+                            <template #increase-icon>
+                            <i class="fa-solid fa-angle-up"></i>
+                            </template>
+                        </el-input-number>
                         </div>
-                    </div>
+                        <!-- Boton -->
+                        <div class="text-center mt-7">
+                        <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
+                        </div>
+                        <!-- Características del producto -->
+                        <div class="mt-7">
+                            <h2 class="font-bold mb-3">Acerca del producto</h2>
+                            <p>• Característica 1</p>
+                            <p>• Característica 2</p>
+                            <p>• Característica 3</p>
+                        </div>
                     
                 </div>
             </section>
@@ -56,6 +65,37 @@ Back
 props:{
 product: Object
 },
-methods:{}
+methods:{
+    addToCart() {
+        // Obtener el carrito actual desde localStorage
+        let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
+
+        // Verificar si el producto ya está en el carrito
+        const productInCart = cart.find(item => item.id === this.product.id);
+
+        if (productInCart) {
+            // Si el producto ya está en el carrito, actualizar la cantidad
+            productInCart.quantity += this.quantity;
+        } else {
+            // Si el producto no está en el carrito, agregarlo
+            cart.push({
+                id: this.product.id,
+                name: this.product.name,
+                price: this.product.public_price,
+                quantity: this.quantity
+            });
+        }
+
+        // Guardar el carrito actualizado en localStorage
+        localStorage.setItem('Ezycart', JSON.stringify(cart));
+
+        // Mostrar un mensaje o notificación al usuario
+        this.$notify({
+            title: "Correcto",
+            message: "Se ha agregado correctamente al carrito",
+            type: "success",
+        });
+    }
+}
 }
 </script>

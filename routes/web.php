@@ -215,6 +215,7 @@ Route::get('online-sales-client-index/{store_id}', [OnlineSaleController::class,
 Route::get('online-sales/{offset}{limit}/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
 Route::get('online-sales-show-local-product/{product_id}', [OnlineSaleController::class, 'ShowLocalProduct'])->name('online-sales.show-local-product');
 Route::get('online-sales-show-global-product/{global_product_id}', [OnlineSaleController::class, 'ShowGlobalProduct'])->name('online-sales.show-global-product');
+Route::get('online-sales-cart', [OnlineSaleController::class, 'cartIndex'])->name('online-sales.cart');
 
 
 // comandos Artisan
