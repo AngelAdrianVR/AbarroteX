@@ -91,18 +91,22 @@ class DashboardController extends Controller
         $prev_month = Carbon::parse($date)->subMonth();
 
         $sales = Sale::whereYear('created_at', $current_month->year)
+            ->where('store_id', auth()->user()->store_id)
             ->whereMonth('created_at', $current_month->month)
             ->get();
 
         $last_period_sales = Sale::whereYear('created_at', $prev_month->year)
+            ->where('store_id', auth()->user()->store_id)
             ->whereMonth('created_at', $prev_month->month)
             ->get();
 
         $expenses = Expense::whereYear('created_at', $current_month->year)
+            ->where('store_id', auth()->user()->store_id)
             ->whereMonth('created_at', $current_month->month)
             ->get();
 
         $last_period_expenses = Expense::whereYear('created_at', $prev_month->year)
+            ->where('store_id', auth()->user()->store_id)
             ->whereMonth('created_at', $prev_month->month)
             ->get();
 

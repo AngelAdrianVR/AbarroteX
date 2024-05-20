@@ -491,10 +491,10 @@ import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
+import { tableExists } from '@/dbService.js';
 
 export default {
   data() {
-
     const form = useForm({
       cashRegisterMovementType: null, //que tipo de movimiento es
       registerAmount: null, //Dinero ingresado o sacado de caja
@@ -925,6 +925,7 @@ export default {
     },
   },
   mounted() {
+    console.log('existe productos?', tableExists('products'));
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;

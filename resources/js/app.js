@@ -11,6 +11,10 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import locale from 'element-plus/dist/locale/es.mjs';
 
+// iniciar IndexedDB
+import { openDatabase } from './dbService.js';
+openDatabase();
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
