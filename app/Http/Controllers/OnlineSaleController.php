@@ -30,6 +30,12 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products'));
     }
 
+
+    public function cartIndex()
+    {   
+        return inertia('OnlineSale/Cart');
+    }
+
     
     public function create()
     {
@@ -57,11 +63,10 @@ class OnlineSaleController extends Controller
     }
 
 
-    public function ShowGlobalProduct(GlobalProductStore $global_product_id)
+    public function ShowGlobalProduct($global_product_id)
     {   
-        $global_product = GlobalProductStore::with(['media', 'category:id,name', 'brand:id,name'])->find($global_product_id);
+        $global_product = GlobalProductStore::with(['globalProduct' => ['media', 'category:id,name', 'brand:id,name']])->find($global_product_id);
 
-        // return $global_product;
         return inertia('OnlineSale/ShowGlobalProduct', compact('global_product'));
     }
 
