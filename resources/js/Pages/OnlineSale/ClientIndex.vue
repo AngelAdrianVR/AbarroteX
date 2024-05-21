@@ -100,6 +100,7 @@ methods:{
 },
 mounted() {
     this.visibleProducts = this.products;
+    // localStorage.clear(); //borrar local storage
 }
 }
 </script>

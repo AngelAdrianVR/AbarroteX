@@ -80,7 +80,7 @@ methods:{
             // Si el producto no está en el carrito, agregarlo
             cart.push({
                 id: this.product.id,
-                name: this.product.name,
+                isLocal: true,
                 price: this.product.public_price,
                 quantity: this.quantity
             });

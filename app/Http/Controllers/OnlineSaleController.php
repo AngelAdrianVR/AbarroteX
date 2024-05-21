@@ -116,4 +116,16 @@ class OnlineSaleController extends Controller
 
         return response()->json(['products' => $moreProducts]);
     }
+
+
+    public function fetchProduct($product_id, $is_local)
+    {
+       if ( $is_local === 'true' ) {
+            $product = Product::with(['media'])->find($product_id);
+       } else {
+            $product = GlobalProductStore::with(['globalProduct.media'])->find($product_id);
+       }
+
+       return response()->json(['item' => $product]);
+    }
 }
