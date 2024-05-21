@@ -31,40 +31,7 @@
           <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
             :titles="['Catálogo base', 'Mi tienda']" :data="globalProducts" @left-check-change="handleLeftCheckChange"
             @right-check-change="handleLeftCheckChange">
-            <template #left-footer>
-              <!-- boton filtro izquierdo -->
-              <!-- <button @click.stop="showLeftFilter = !showLeftFilter"
-                class="rounded-full border border-[#c4c4c4] size-7 flex items-center justify-center mx-auto my-2">
-                <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_8826_331" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14"
-                    height="14">
-                    <rect width="14" height="14" fill="#D9D9D9" />
-                  </mask>
-                  <g mask="url(#mask0_8826_331)">
-                    <path
-                      d="M5.83333 10.5V9.33333H8.16667V10.5H5.83333ZM3.5 7.58333V6.41667H10.5V7.58333H3.5ZM1.75 4.66667V3.5H12.25V4.66667H1.75Z"
-                      fill="#999999" />
-                  </g>
-                </svg>
-              </button> -->
-            </template>
-            <template #right-footer>
-              <!-- boton filtro derecho -->
-              <!-- <button @click.stop="showRightFilter = !showRightFilter"
-                class="rounded-full border border-[#c4c4c4] size-7 flex items-center justify-center mx-auto my-2">
-                <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_8826_331" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14"
-                    height="14">
-                    <rect width="14" height="14" fill="#D9D9D9" />
-                  </mask>
-                  <g mask="url(#mask0_8826_331)">
-                    <path
-                      d="M5.83333 10.5V9.33333H8.16667V10.5H5.83333ZM3.5 7.58333V6.41667H10.5V7.58333H3.5ZM1.75 4.66667V3.5H12.25V4.66667H1.75Z"
-                      fill="#999999" />
-                  </g>
-                </svg>
-              </button> -->
-            </template>
+
           </el-transfer>
           <!-- ventana de filtro izquierdo -->
           <div v-if="showLeftFilter"
@@ -181,7 +148,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { tableExists, addOrUpdateItem, ensureObjectStore } from '@/dbService.js';
+import { addOrUpdateItem, clearObjectStore } from '@/dbService.js';
 
 export default {
   name: 'SelectGlobalProduct',
@@ -255,11 +222,11 @@ export default {
     localProductsFormater() {
       this.products = [];
       // Utiliza map en lugar de forEach para transformar los datos
-      this.global_products.map((globalProduct, index) => {
+      this.globalProducts.map((globalProduct, index) => {
         // Verifica si el nombre del producto global está presente en my_products
-        if (this.my_products.some(myProduct => myProduct.global_product.name === globalProduct.name)) {
+        if (this.my_products.some(myProduct => myProduct.global_product.name === globalProduct.label)) {
           // Si está presente, agrega el índice al arreglo foundIndexes
-          this.products.push(index + 1);
+          this.products.push(globalProduct.key);
         }
       });
       // inicializar numero de productos en la tienda para saber si se quitan o agregan
@@ -341,19 +308,24 @@ export default {
           this.showConfirmModal = false;
           this.initialProducts = this.products;
 
-          // eliminar tabla en IndexedDB de products si es que existe para volver a agregar la tabla con elemntos actualizados
-          if (await tableExists('products')) {
-            // limpiar tabla
-            await clearObjectStore('products');
-          } else {
-            console.log('no existe')
-            // crear de nuevo la tabla
-            await ensureObjectStore('products');
-          }
-          //  Agregar elementos
-          // const response = await axios.get(route('products.get-all-for-indexedDB'));
-          // const promises = response.data.products.map(product => addOrUpdateItem('products', product));
-          // await Promise.all(promises);
+          // Limpiar tabla
+          await clearObjectStore('products');
+
+          // Obtener productos
+          const response = await axios.get(route('products.get-all-for-indexedDB'));
+          const products = response.data.products;
+
+          // Descargar y almacenar imágenes
+          const promises = products.map(async (product) => {
+            if (product.image_url) {
+              const imageResponse = await axios.get(product.image_url, { responseType: 'blob' });
+              const imageBlob = imageResponse.data;
+              product.image = imageBlob;
+            }
+            addOrUpdateItem('products', product);
+          });
+
+          await Promise.all(promises);
 
           // resetear variable de local storage a false
           localStorage.setItem('pendentProcess', false);
@@ -374,8 +346,8 @@ export default {
     // resetear variable de local storage a false
     localStorage.setItem('pendentProcess', false);
 
-    this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
     this.globalProductsFormater(); //formatea los productos globales para que el transfer los renderice
+    this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
   }
 };
 </script>

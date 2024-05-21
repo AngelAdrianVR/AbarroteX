@@ -441,13 +441,22 @@ class ProductController extends Controller
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::where('store_id', auth()->user()->store_id)
             ->latest()
-            ->get(['id', 'name', 'code', 'public_price', 'current_stock',])
-            ->toArray();
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'code' => $product->code,
+                    'public_price' => $product->public_price,
+                    'current_stock' => $product->current_stock,
+                    'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
+                ];
+            })->toArray();
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])
+        $transfered_products = GlobalProductStore::query()
             ->where('store_id', auth()->user()->store_id)
-            ->get(['id', 'global_product_id', 'public_price', 'current_stock',])
+            ->get()
             ->map(function ($tp) {
                 return [
                     'id' => $tp->id,
@@ -455,6 +464,7 @@ class ProductController extends Controller
                     'code' => $tp->globalProduct->code,
                     'public_price' => $tp->public_price,
                     'current_stock' => $tp->current_stock,
+                    'image_url' => $tp->globalProduct->getFirstMediaUrl('imageCover'),
                 ];
             })->toArray();
 
@@ -462,7 +472,7 @@ class ProductController extends Controller
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = collect(array_merge($local_products, $transfered_products));
 
-        return response()->json(compact('products', 'transfered_products'));
+        return response()->json(compact('products', 'local_products'));
     }
 
     private function validateProductsFromFile($worksheet)

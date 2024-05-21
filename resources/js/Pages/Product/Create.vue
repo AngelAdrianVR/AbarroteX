@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Nuevo producto">
         <div class="px-3 md:px-10 py-7">
-            <Back :to="route('products.index')"/>
+            <Back :to="route('products.index')" />
 
             <form v-if="products_quantity < 650" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
@@ -32,8 +32,7 @@
                     <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')"
-                        class="!self-end !justify-self-end">
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -180,6 +179,8 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+import { addOrUpdateItem } from "@/dbService.js";
+import axios from 'axios';
 
 export default {
     data() {
@@ -232,12 +233,26 @@ export default {
         brands: Array
     },
     methods: {
-        store() {
+        async store() {
             this.form.post(route("products.store"), {
-                onSuccess: () => {
+                onSuccess: async () => {
+                    // guardar nuevo producto a IndexedDB
+                    // Obtener ultimo producto guardado
+                    const response = await axios.get(route('products.get-all-for-indexedDB'));
+                    const product = response.data.local_products[response.data.local_products.length - 1];
+
+                    // Descargar y almacenar imágenes
+                    if (product.image_url) {
+                        const imageResponse = await axios.get(product.image_url, { responseType: 'blob' });
+                        const imageBlob = imageResponse.data;
+                        product.image = imageBlob;
+                    }
+                    await addOrUpdateItem('products', product);
+
+                    // toast
                     this.$notify({
                         title: "Correcto",
-                        message: "Se ha agregado un nuevo producto",
+                        message: "",
                         type: "success",
                     });
                 },

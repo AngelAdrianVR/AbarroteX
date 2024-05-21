@@ -61,6 +61,9 @@ Route::middleware([
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
+// Route::get('test', function () {
+//     return inertia('GlobalProductStore/TestIndexedDB');
+// });
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
