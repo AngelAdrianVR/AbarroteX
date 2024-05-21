@@ -124,8 +124,8 @@ class GlobalProductStoreController extends Controller
             'store_id' => auth()->user()->store_id,
         ]);
 
-         // restar de caja en caso de que el usuario asi lo haya especificado
-         if ($request->is_paid_by_cash_register) {
+        // restar de caja en caso de que el usuario asi lo haya especificado
+        if ($request->is_paid_by_cash_register) {
             $unit = $request->quantity == 1 ? 'unidad' : 'unidades';
             $cash_register = auth()->user()->cashRegister;
             $cash_register->decrement('current_cash', $request->cash_amount);
@@ -207,14 +207,16 @@ class GlobalProductStoreController extends Controller
             // Se obtiene el producto global con el id recibido
             $product = GlobalProduct::with(['category', 'brand'])->find($productId);
 
-            GlobalProductStore::create([
-                'public_price' => $product->public_price,
-                'cost' => 0,
-                'current_stock' => 1,
-                'min_stock' => 1,
-                'global_product_id' => $productId,
-                'store_id' => auth()->user()->store_id,
-            ]);
+            if ($product) {
+                GlobalProductStore::create([
+                    'public_price' => $product->public_price,
+                    'cost' => 0,
+                    'current_stock' => 1,
+                    'min_stock' => 1,
+                    'global_product_id' => $productId,
+                    'store_id' => auth()->user()->store_id,
+                ]);
+            }
         }
     }
 }

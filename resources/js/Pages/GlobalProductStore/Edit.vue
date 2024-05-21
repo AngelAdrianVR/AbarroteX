@@ -1,6 +1,6 @@
 <template>
     <AppLayout title="Editar produco">
-        <div class="px-10 py-7">
+        <div class="px-4 md:px-10 py-7">
             <Back />
 
             <form @submit.prevent="update"
@@ -11,7 +11,7 @@
                     <el-input disabled v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
                     <InputError :message="form.errors.name" />
                 </div>
-                <div class="mt-3">
+                <div v-if="canSeeCost" class="mt-3">
                     <div class="flex items-center ml-3 mb-1">
                         <InputLabel value="Precio de compra" class="text-sm" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
@@ -206,6 +206,8 @@ export default {
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showBrandFormModal: false, //muestra formulario para agregar proveedor
+            // permisos de rol
+            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
         };
     },
     components: {

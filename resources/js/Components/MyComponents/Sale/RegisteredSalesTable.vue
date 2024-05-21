@@ -1,4 +1,40 @@
 <template>
+    <div class="flex justify-between items-center mx-3">
+        <h1 class="font-bold text-lg">Ventas registradas</h1>
+        <div class="relative">
+            <!-- filtro -->
+            <button @click.stop="showFilter = !showFilter"
+                class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="16" width="16"
+                    id="Filter-Sort-Lines-Descending--Streamline-Ultimate">
+                    <desc>Filter Sort Lines Descending Streamline Icon: https://streamlinehq.com</desc>
+                    <defs></defs>
+                    <title>filter</title>
+                    <path d="M0.73 4.2791H23.27" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="1"></path>
+                    <path d="M3.131 9.426H20.869" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="1"></path>
+                    <path d="M8.7141 19.7209H15.2859" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="1"></path>
+                    <path d="M5.531 14.573H18.469" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="1"></path>
+                </svg>
+                <p class="text-sm ml-2">Filtrar</p>
+            </button>
+            <div v-if="showFilter"
+                class="absolute top-9 right-0 lg:-left-64 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-10 w-80">
+                <div class="mb-3">
+                    <InputLabel value="Rango de fechas" class="ml-3 mb-1" />
+                    <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
+                        start-placeholder="Fecha de inicio" end-placeholder="Fecha de fin" class="!w-full" />
+                </div>
+                <div class="flex space-x-3">
+                    <PrimaryButton @click="searchSales" class="!py-1">Aplicar</PrimaryButton>
+                    <ThirthButton @click="cleanFilter" class="!py-1">Limpiar</ThirthButton>
+                </div>
+            </div>
+        </div>
+    </div>
     <Loading v-if="loading" class="mt-20" />
     <div class="mt-8" v-else>
         <p v-if="Object.keys(sales)?.length" class="text-gray66 text-[11px] mb-3">{{ Object.keys(sales)?.length }} de {{ totalSales }}
@@ -14,7 +50,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr @click="$inertia.visit(route('sales.show', formatBaseDate(index)))"
+                    <tr @click="$inertia.visit(route('sales.show', Object.values(sales)[0].sales[0].id))"
                         v-for="(sale, index) in sales" :key="index"
                         class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                         <td class="rounded-s-full">{{ formatDate(index) }}</td>
@@ -70,32 +106,35 @@
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <button v-else-if="Object.keys(sales)?.length && totalSales > 30 && Object.keys(sales)?.length < totalSales && !filtered"
+            <button v-else-if="Object.keys(sales)?.length && totalSales > 15 && Object.keys(sales)?.length < totalSales && !filtered"
                 @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
         </div>
     </div>
 
-        <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
-            <template #title>
-                <h1>Eliminar ventas</h1>
-            </template>
-            <template #content>
-                <p>
-                    Se eliminará las ventas del dia seleccionado, esto es un proceso irreversible. ¿Continuar
-                    de todas formas?
-                </p>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-1">
-                    <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
-                    <DangerButton @click="deleteItem">Eliminar</DangerButton>
-                </div>
-            </template>
-        </ConfirmationModal>
+    <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
+        <template #title>
+            <h1>Eliminar ventas</h1>
+        </template>
+        <template #content>
+            <p>
+                Se eliminará las ventas del dia seleccionado, esto es un proceso irreversible. ¿Continuar
+                de todas formas?
+            </p>
+        </template>
+        <template #footer>
+            <div class="flex items-center space-x-1">
+                <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
+                <DangerButton @click="deleteItem">Eliminar</DangerButton>
+            </div>
+        </template>
+    </ConfirmationModal>
 </template>
 
 <script>
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import InputLabel from "@/Components/InputLabel.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import DangerButton from "@/Components/DangerButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
@@ -108,13 +147,21 @@ export default {
             loading: false,
             itemIdToDelete: null,
             totalSales: null,
-            sales: {}
+            sales: {},
+            showFilter: false, //filtro opciones
+            searchDate: null, //filtro fechas
+            loadingItems: false, //para paginación
+            currentPage: 1, //para paginación
+            filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
         };
     },
     components: {
         ConfirmationModal,
+        PrimaryButton,
         DangerButton,
         CancelButton,
+        ThirthButton,
+        InputLabel,
         Loading
     },
     props: {
@@ -208,7 +255,51 @@ export default {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+        async searchSales() {
+            if ( this.searchDate != null) {
+                this.loading = true;
+                try {
+                    const response = await axios.get(route('sales.search'), { params: { queryDate: this.searchDate, cashRegisterId: this.cashRegister.id } });
+                    if (response.status == 200) {
+                        this.sales = response.data.items;
+                        this.filtered = true;
+                    }
+
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    this.loading = false;
+                    this.showFilter = false;
+                }
+            } else {
+                this.sales = this.groupedSales;
+                this.showFilter = false;
+                this.filtered = false;
+                this.currentPage = 1;
+            }
+        },
+        async fetchItemsByPage() {
+            try {
+                this.loadingItems = true;
+                const response = await axios.post(route('sales.get-by-page', this.currentPage), {cashRgisterId: this.cashRegister.id});
+
+                if (response.status === 200) {
+                    this.sales = {...this.sales, ...response.data.items};
+                    this.currentPage++;
+                }
+            } catch (error) {
+                console.log(error)
+            } finally {
+                this.loadingItems = false;
+            }
+        },
+        cleanFilter() {
+            this.fetchCashRegisterSales();
+            this.showFilter = false;
+            this.filtered = false;
+            this.currentPage = 1;
+        },
     },
     mounted() {
         this.fetchCashRegisterSales();

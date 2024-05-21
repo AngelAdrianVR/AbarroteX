@@ -2,10 +2,11 @@
     <AppLayout title="Detalles del corte">
         <div class="px-3 lg:px-14 py-5">
             <h1 class="lg:ml-10">Detalles de cortes</h1>
+            <h1 class="lg:ml-10 font-bold">{{ formatDate(Object.values(groupedCashCuts)[0].cuts[0].created_at) }}</h1>
 
             <!-- back -->
             <div class="my-4">
-                <Back />
+                <Back :to="route('cash-registers.index', {tab: '2'})"/>
             </div>
 
             <div class="flex mt-8 mb-10">
@@ -77,9 +78,9 @@
                     </footer>
                 </div>
 
+                <!-- resumen de corte en pequeño--------------------- -->
                 <div class="mt-7 lg:mt-0 mx-auto lg:mx-0 w-96 border border-grayD9 rounded-lg self-start">
-                    <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-t-lg">Corte {{
-                        formatDate(cash_cut.created_at) }}</h2>
+                    <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-t-lg">Resumen de corte</h2>
                     <div class="flex justify-between space-x-1 p-5">
                         <div class="font-semibold space-y-1">
                             <p>Efectivo al iniciar</p>

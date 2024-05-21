@@ -1,6 +1,6 @@
 <template>
-    <AppLayout title="Inicio">
-        <h1 class="font-bold mx-4 lg:mx-32 mt-4">Inicio</h1>
+    <AppLayout title="Reportes">
+        <h1 class="font-bold mx-4 lg:mx-32 mt-4">Reportes</h1>
         <section class="flex items-center justify-center">
             <el-radio-group v-model="period" @change="handleChangePeriod"
                 class="flex flex-col md:flex-row !items-start my-5 lg:mx-14">
@@ -64,6 +64,8 @@ export default {
 
             // top products
             topProductsCurrentPeriod: [],
+            // Permisos de rol
+            canSeeDashboard: ['Administrador'].includes(this.$page.props.auth.user.rol),
 
             loading: false,
         }
@@ -386,6 +388,9 @@ export default {
         }
     },
     mounted() {
+        if (!this.canSeeDashboard) {
+            this.$inertia.visit(route('sales.point'));
+        }
         this.periodRange = this.getCurrentDate();
         this.fetchDailyData();
         // resetear variable de local storage a false

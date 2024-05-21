@@ -3,8 +3,8 @@
     <div class="px-2 lg:px-20 py-7">
       <!-- tabs -->
       <div class="flex justify-between mb-5 mx-2">
-        <Back />
-        <div class="flex items-center justify-center text-sm">
+        <Back :to="route('products.index')" />
+        <div v-if="canTransfer" class="flex items-center justify-center text-sm">
           <button @click="$inertia.get(route('products.index'))"
             class="text-primary bg-primarylight rounded-full px-6 py-1 z-0">Mis productos</button>
           <button class="text-white bg-primary rounded-full px-5 py-1 z-10 -ml-5 cursor-default">Catálogo base</button>
@@ -132,16 +132,18 @@
               <img class="h-full mx-auto rounded-md" :src="productInfo?.media[0]?.original_url">
             </figure>
             <div class="mt-7 text-sm grid grid-cols-3 gap-x-3 gap-y-1">
-              <p >Nombre:</p>
+              <p>Nombre:</p>
               <p class="font-bold col-span-2">{{ productInfo?.name ?? '-' }}</p>
-              <p >Categoría:</p>
+              <p>Categoría:</p>
               <p class="font-bold col-span-2">{{ productInfo?.category?.name ?? '-' }}</p>
-              <p >Proveedor:</p>
+              <p>Proveedor:</p>
               <p class="font-bold col-span-2">{{ productInfo?.brand?.name ?? '-' }}</p>
-              <p >Precio sugerido:</p>
-              <p class="font-bold col-span-2">${{ productInfo?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-'
+              <p>Precio sugerido:</p>
+              <p class="font-bold col-span-2">${{ productInfo?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                ",") ??
+                '-'
                 }}</p>
-              <p >Código:</p>
+              <p>Código:</p>
               <p class="font-bold col-span-2">{{ productInfo?.code ?? 'N/A' }}</p>
             </div>
           </div>
@@ -179,8 +181,10 @@ import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { openDatabase, tableExists, deleteObjectStore, addOrUpdateItem, ensureObjectStore } from '@/dbService.js';
 
 export default {
+  name: 'SelectGlobalProduct',
   data() {
     return {
       products: [],
@@ -196,6 +200,8 @@ export default {
       rightFilterCategory: null, //información para fltrar por categoría derecho
       rightFilterBrand: null, //información para fltrar por Proveedor derecho
       showConfirmModal: false,
+      // Permisos de rol
+      canTransfer: ['Administrador'].includes(this.$page.props.auth.user.rol),
     };
   },
   components: {
@@ -322,7 +328,6 @@ export default {
     },
     async transferProducts() {
       try {
-        // Enviar la solicitud POST con los datos en el cuerpo
         this.processing = true;
         const response = await axios.post(route('global-product-store.transfer'), { products: this.products });
 
@@ -335,6 +340,21 @@ export default {
 
           this.showConfirmModal = false;
           this.initialProducts = this.products;
+
+          // eliminar tabla en IndexedDB de products si es que existe para volver a agregar la tabla con elemntos actualizados
+          if (await tableExists('products')) {
+            // eliminar tabla
+            await deleteObjectStore('products');
+          }
+          // crear de nuevo la tabla
+          await ensureObjectStore('products', 'id', [
+            { name: 'name', keyPath: 'name', unique: false },
+            { name: 'code', keyPath: 'code', unique: true }
+          ]);
+          //  Agregar elementos
+          const response = await axios.get(route('products.get-all-for-indexedDB'));
+          const promises = response.data.products.map(product => addOrUpdateItem('products', product));
+          await Promise.all(promises);
 
           // resetear variable de local storage a false
           localStorage.setItem('pendentProcess', false);

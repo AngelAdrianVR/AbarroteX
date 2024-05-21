@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('type')->nullable();
+            $table->string('rol')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('profile_photo_path', 2048)->nullable();
             $table->json('employee_properties')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('cash_register_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('cash_register_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

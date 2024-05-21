@@ -80,7 +80,7 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
           </svg>
-          <p class="text-sm flex items-center space-x-2">
+          <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
             Efectivo en "{{ asignedCashRegister?.name }}":
             <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
               class="ml-2">
@@ -97,6 +97,7 @@
               </svg>
             </el-tooltip>
           </p>
+          <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
         </div>
         <!-- Dropdown -->
         <div class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
@@ -250,8 +251,9 @@
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="receive()"
-                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
+                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !this.$page.props.auth?.user?.cash_register_id"
                   class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
+                  <p v-if="!this.$page.props.auth?.user?.cash_register_id" class="text-xs text-red-600 mt-1">Para cobrar asigna una caja registradora</p>
               </div>
             </div>
 
@@ -295,8 +297,10 @@
     </div>
 
     <!-- -------------- Modal selección de caja starts----------------------- -->
-    <Modal :show="showCashRegisterSelectionModal">
+    <Modal :show="showCashRegisterSelectionModal"  @close="showCashRegisterSelectionModal = false">
       <div class="py-4 px-7 relative">
+        <i @click="showCashRegisterSelectionModal = false"
+          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
 
         <h1 class="font-bold mt-2">Elegir caja</h1>
         <p class="text-gray99">Selecciona la caja de trabajo</p>
@@ -313,11 +317,12 @@
                 <path d="M67.8222 13.681L69.8833 27.0754L69.9784 27.6933M67.8222 13.681H71.6168M67.8222 13.681H62.1173M71.9444 40.4698H1M71.9444 40.4698L71.1465 35.2848M71.9444 40.4698L69.2213 49.3273M1 40.4698L2.9526 13.681H30.289H38.5333H58.1012M1 40.4698L4.25433 51.0556H6.42388M71.1465 35.2848L80.6226 35.6911M71.1465 35.2848L69.9784 27.6933M81.9243 35.7469L86.2634 35.9329L87 27.6933M81.9243 35.7469L79.5378 50.4075H68.8893M81.9243 35.7469L80.6226 35.6911M68.8893 50.4075L68.69 51.0556H67.1713M68.8893 50.4075L69.2213 49.3273M69.2213 49.3273H78.453L80.6226 35.6911M6.42388 51.0556L7.07475 53H66.3035L67.1713 51.0556M6.42388 51.0556H67.1713M71.6631 15.6253C71.7742 17.6943 72.0838 19.7969 72.5952 22.3225H81.2734C80.8859 19.771 80.6341 17.66 80.5452 15.6253M71.6631 15.6253H69.8833L71.5104 22.5385H72.5952M71.6631 15.6253C71.7276 17.7194 72.0007 19.2862 72.5952 22.5385M71.6631 15.6253L72.5952 22.5385M71.6631 15.6253C71.6283 14.9779 71.6129 14.3337 71.6168 13.681M72.5952 22.5385H82.3582L80.8395 15.6253H80.5452M80.5452 15.6253C80.416 12.6681 80.6308 9.87213 81.2734 6.11961L80.6226 6.76773L80.1887 6.11961L79.9717 6.55169L79.5378 6.11961L79.1039 6.55169L78.8869 6.11961L78.453 6.55169L78.1055 5.90357L77.5852 6.76773L77.1513 5.90357L76.7174 6.55169L76.5004 5.90357L76.0665 6.55169L75.6326 6.11961L75.1987 6.55169L74.7648 5.90357L74.3309 6.55169L74.1139 5.90357L73.68 6.55169L73.2461 5.90357L72.8122 6.55169L72.3783 5.90357C71.8862 8.95569 71.6307 11.3723 71.6168 13.681M87 27.6933H69.9784M87 27.6933L81.2734 13.681H80.5452M61.9312 10.5057H60.6907H58.1012M61.9312 10.5057H64.7043L64.9213 1L45.8292 1.43208L46.2632 10.5057H58.1012M61.9312 10.5057L62.1173 13.681M62.1173 13.681H58.1012M58.1012 10.5057V13.681M4.90519 14.7612H66.7374L70.4257 39.1735H2.9526L4.90519 14.7612ZM6.42388 16.0574H11.6308L11.1969 20.5942H5.98997L6.42388 16.0574ZM12.2817 16.0574H17.4886L17.2716 20.5942H11.8478L12.2817 16.0574ZM18.1395 16.0574H23.3464L23.1294 20.5942H17.9225L18.1395 16.0574ZM23.9973 16.0574H29.2042V20.5942H23.7803L23.9973 16.0574ZM29.855 16.0574H35.062V20.5942H29.855V16.0574ZM35.7128 16.0574H40.9198V20.5942H35.7128V16.0574ZM4.68824 32.2603H16.4038L16.1869 37.4452H4.25433L4.68824 32.2603ZM29.6381 32.2603H41.5706V37.4452H29.6381V32.2603ZM17.2716 32.2603H22.6955V37.4452H17.0547L17.2716 32.2603ZM23.5633 32.2603H28.9872V37.4452H23.5633V32.2603ZM48.2962 16.0574H53.7201L54.371 20.5942H48.9471L48.2962 16.0574ZM54.371 16.0574L55.0218 20.5942H60.2288L59.5779 16.0574H54.371ZM60.4457 16.0574L61.0966 20.5942H66.3035L65.6527 16.0574H60.4457ZM46.2632 1.86415L46.6971 10.0736H64.2704L64.4874 1.43208L46.2632 1.86415ZM47.3479 2.94435V9.20947H63.6196V2.94435H47.3479ZM5.98997 21.2423H11.1969L10.763 25.7791H5.55606L5.98997 21.2423ZM11.8478 21.2423H17.0547L16.8377 25.7791H11.4139L11.8478 21.2423ZM17.9225 21.2423H23.1294L22.9125 25.7791H17.7056L17.9225 21.2423ZM23.7803 21.2423H28.9872V25.7791H23.5633L23.7803 21.2423ZM29.855 21.2423H35.062V25.7791H29.855V21.2423ZM35.9298 21.2423H41.1367V25.7791H35.9298V21.2423ZM5.55606 26.6433H10.763L10.3291 31.1801H5.12215L5.55606 26.6433ZM11.6308 26.6433H16.8377L16.6208 31.1801H11.1969L11.6308 26.6433ZM17.7056 26.6433H22.9125L22.6955 31.1801H17.4886L17.7056 26.6433ZM23.7803 26.6433H28.9872V31.1801H23.5633L23.7803 26.6433ZM29.855 26.6433H35.062V31.1801H29.855V26.6433ZM36.3637 26.6433H41.5706V31.1801H36.3637V26.6433ZM48.9471 21.4584H54.371L54.8049 26.2112H49.381L48.9471 21.4584ZM55.0218 21.4584H60.2288L60.8796 26.2112H55.4558L55.0218 21.4584ZM61.0966 21.4584H66.3035L67.1713 26.2112H61.7475L61.0966 21.4584ZM49.381 26.8593H54.8049L55.2388 31.8282H49.8149L49.381 26.8593ZM55.6727 26.8593H60.8796L61.5305 31.8282H56.1066L55.6727 26.8593ZM61.7475 26.8593H67.1713L67.8222 31.8282H62.1814L61.7475 26.8593ZM49.8149 32.4763H61.7475L62.3983 37.4452H50.2488L49.8149 32.4763ZM62.3983 32.4763H67.8222L68.69 37.4452H63.0492L62.3983 32.4763Z" stroke="#373737" stroke-width="0.4"/>
               </svg>
             </label>
+            <p v-if="!item.is_active" class="text-sm text-red-400">Deshabilitada</p>
           </div>
         </section>
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
-          <PrimaryButton @click="asignCashRegister">Confirmar</PrimaryButton>
+          <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Confirmar</PrimaryButton>
         </div>
       </div>
     </Modal>
@@ -486,10 +491,10 @@ import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
+import { tableExists } from '@/dbService.js';
 
 export default {
   data() {
-
     const form = useForm({
       cashRegisterMovementType: null, //que tipo de movimiento es
       registerAmount: null, //Dinero ingresado o sacado de caja
@@ -645,9 +650,7 @@ export default {
             text: "Se te asignó una caja con éxito!",
             type: "success",
           });
-          this.asignedCashRegister = this.cash_registers.find(item => item.id == this.selectedCashRegisterId);
-          this.localCurrentCash = this.asignedCashRegister.current_cash;
-          this.showCashRegisterSelectionModal = false;
+          location.reload();
         }
       } catch (error) {
         console.log(error);
@@ -922,6 +925,7 @@ export default {
     },
   },
   mounted() {
+    console.log('existe productos?', tableExists('products'));
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;
