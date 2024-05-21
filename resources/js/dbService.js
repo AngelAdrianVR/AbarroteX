@@ -1,5 +1,5 @@
 const dbName = 'POSDatabase';
-const dbVersion = 1;
+const dbVersion = 2;
 let db;
 
 function openDatabase() {
@@ -17,6 +17,7 @@ function openDatabase() {
 
     request.onerror = event => {
       reject(event.target.errorCode);
+      console.error(event.target.error);
     };
   });
 }
@@ -26,7 +27,7 @@ function ensureObjectStore(storeName, keyPath = 'id', indexes = []) {
     if (db.objectStoreNames.contains(storeName)) {
       resolve();
     } else {
-      const version = db.version + 1;
+      const version = 2; //db.version + 0; //no incrementar la version por el momeno 20/05/2024
       db.close();
       const request = indexedDB.open(dbName, version);
 
@@ -81,7 +82,7 @@ function getItemByAttributes(storeName, attributes) {
         completed++;
         if (completed === indexKeys.length) {
           const uniqueResults = Array.from(new Set(results.map(item => item.id)))
-                                    .map(id => results.find(item => item.id === id));
+            .map(id => results.find(item => item.id === id));
           resolve(uniqueResults);
         }
       };
@@ -125,6 +126,33 @@ function deleteItem(storeName, id) {
   });
 }
 
+function deleteObjectStore(storeName) {
+  return new Promise((resolve, reject) => {
+    if (!db.objectStoreNames.contains(storeName)) {
+      resolve();
+      return;
+    }
+
+    const version = 2; //db.version + 1;
+    db.close();
+    const request = indexedDB.open(dbName, version);
+
+    request.onupgradeneeded = event => {
+      db = event.target.result;
+      db.deleteObjectStore(storeName);
+    };
+
+    request.onsuccess = event => {
+      db = event.target.result;
+      resolve();
+    };
+
+    request.onerror = event => {
+      reject(event.target.errorCode);
+    };
+  });
+}
+
 function tableExists(storeName) {
   return db.objectStoreNames.contains(storeName);
 }
@@ -136,5 +164,6 @@ export {
   getItemByAttributes,
   addOrUpdateItem,
   deleteItem,
+  deleteObjectStore,
   tableExists
 };

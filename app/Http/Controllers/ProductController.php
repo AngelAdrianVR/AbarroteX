@@ -378,7 +378,7 @@ class ProductController extends Controller
 
     public function export()
     {
-        $userCanSeeCost = in_array(auth()->user()->rol, ['Administrador', 'Almacenista']); 
+        $userCanSeeCost = in_array(auth()->user()->rol, ['Administrador', 'Almacenista']);
         $products = Product::where('store_id', auth()->user()->store_id)->get();
 
         $spreadsheet = new Spreadsheet();
@@ -434,6 +434,33 @@ class ProductController extends Controller
             'Cache-Control' => 'cache, must-revalidate',
             'Pragma' => 'public',
         ]);
+    }
+
+    public function getAllForIndexedDB()
+    {
+        // productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::where('store_id', auth()->user()->store_id)
+            ->latest()
+            ->get(['id', 'name', 'code'])
+            ->toArray();
+
+        // productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])
+            ->where('store_id', auth()->user()->store_id)
+            ->get(['id', 'global_product_id'])
+            ->map(function ($tp) {
+                return [
+                    'id' => $tp->id,
+                    'name' => $tp->globalProduct->name,
+                    'code' => $tp->globalProduct->code,
+                ];
+            })->toArray();
+
+
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $products = collect(array_merge($local_products, $transfered_products));
+
+        return response()->json(compact('products', 'transfered_products'));
     }
 
     private function validateProductsFromFile($worksheet)
