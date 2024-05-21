@@ -181,7 +181,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { openDatabase, tableExists, deleteObjectStore, addOrUpdateItem, ensureObjectStore } from '@/dbService.js';
+import { tableExists, addOrUpdateItem, ensureObjectStore } from '@/dbService.js';
 
 export default {
   name: 'SelectGlobalProduct',
@@ -343,18 +343,17 @@ export default {
 
           // eliminar tabla en IndexedDB de products si es que existe para volver a agregar la tabla con elemntos actualizados
           if (await tableExists('products')) {
-            // eliminar tabla
-            await deleteObjectStore('products');
+            // limpiar tabla
+            await clearObjectStore('products');
+          } else {
+            console.log('no existe')
+            // crear de nuevo la tabla
+            await ensureObjectStore('products');
           }
-          // crear de nuevo la tabla
-          await ensureObjectStore('products', 'id', [
-            { name: 'name', keyPath: 'name', unique: false },
-            { name: 'code', keyPath: 'code', unique: true }
-          ]);
           //  Agregar elementos
-          const response = await axios.get(route('products.get-all-for-indexedDB'));
-          const promises = response.data.products.map(product => addOrUpdateItem('products', product));
-          await Promise.all(promises);
+          // const response = await axios.get(route('products.get-all-for-indexedDB'));
+          // const promises = response.data.products.map(product => addOrUpdateItem('products', product));
+          // await Promise.all(promises);
 
           // resetear variable de local storage a false
           localStorage.setItem('pendentProcess', false);

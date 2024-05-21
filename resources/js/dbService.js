@@ -1,13 +1,31 @@
 const dbName = 'POSDatabase';
-const dbVersion = 2;
+let dbVersion;
 let db;
+
+const initialStores = [
+  {
+    name: 'products', keyPath: 'id', indexes: [
+      { name: 'name', keyPath: 'name', unique: false },
+      { name: 'code', keyPath: 'code', unique: false }
+    ]
+  },
+];
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(dbName, dbVersion);
+    const request = indexedDB.open(dbName);
 
     request.onupgradeneeded = event => {
       db = event.target.result;
+      dbVersion = db.version;
+      initialStores.forEach(store => {
+        if (!db.objectStoreNames.contains(store.name)) {
+          const objectStore = db.createObjectStore(store.name, { keyPath: store.keyPath });
+          store.indexes.forEach(index => {
+            objectStore.createIndex(index.name, index.keyPath, { unique: index.unique });
+          });
+        }
+      });
     };
 
     request.onsuccess = event => {
@@ -27,12 +45,13 @@ function ensureObjectStore(storeName, keyPath = 'id', indexes = []) {
     if (db.objectStoreNames.contains(storeName)) {
       resolve();
     } else {
-      const version = 2; //db.version + 0; //no incrementar la version por el momeno 20/05/2024
+      const newVersion = dbVersion + 1;
       db.close();
-      const request = indexedDB.open(dbName, version);
+      const request = indexedDB.open(dbName, newVersion);
 
       request.onupgradeneeded = event => {
         db = event.target.result;
+        dbVersion = newVersion;
         const store = db.createObjectStore(storeName, { keyPath: keyPath });
         indexes.forEach(index => store.createIndex(index.name, index.keyPath, { unique: index.unique || false }));
       };
@@ -133,13 +152,14 @@ function deleteObjectStore(storeName) {
       return;
     }
 
-    const version = 2; //db.version + 1;
+    const newVersion = dbVersion + 1;
     db.close();
-    const request = indexedDB.open(dbName, version);
+    const request = indexedDB.open(dbName, newVersion);
 
     request.onupgradeneeded = event => {
       db = event.target.result;
       db.deleteObjectStore(storeName);
+      dbVersion = newVersion;
     };
 
     request.onsuccess = event => {
@@ -149,6 +169,55 @@ function deleteObjectStore(storeName) {
 
     request.onerror = event => {
       reject(event.target.errorCode);
+    };
+  });
+}
+
+function closeDatabaseConnection() {
+  if (db) {
+    db.close();
+    db = null;
+  }
+}
+
+function deleteDatabase() {
+  return new Promise((resolve, reject) => {
+    closeDatabaseConnection();
+    const request = indexedDB.deleteDatabase(dbName);
+
+    request.onsuccess = () => {
+      console.log('Base de datos eliminada con éxito.');
+      resolve();
+    };
+
+    request.onerror = (event) => {
+      reject(event.target.error);
+    };
+
+    request.onblocked = () => {
+      console.warn('Eliminación de la base de datos bloqueada por otra pestaña.');
+      // Puedes notificar al usuario aquí o intentar de nuevo después de un tiempo.
+    };
+  });
+}
+
+function clearObjectStore(storeName) {
+  return new Promise((resolve, reject) => {
+    if (!db.objectStoreNames.contains(storeName)) {
+      resolve();
+      return;
+    }
+
+    const transaction = db.transaction(storeName, 'readwrite');
+    const store = transaction.objectStore(storeName);
+    const request = store.clear();
+
+    request.onsuccess = () => {
+      resolve();
+    };
+
+    request.onerror = () => {
+      reject(request.error);
     };
   });
 }
@@ -165,5 +234,7 @@ export {
   addOrUpdateItem,
   deleteItem,
   deleteObjectStore,
+  deleteDatabase,
+  clearObjectStore,
   tableExists
 };

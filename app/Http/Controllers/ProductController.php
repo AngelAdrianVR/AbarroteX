@@ -441,18 +441,20 @@ class ProductController extends Controller
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::where('store_id', auth()->user()->store_id)
             ->latest()
-            ->get(['id', 'name', 'code'])
+            ->get(['id', 'name', 'code', 'public_price', 'current_stock',])
             ->toArray();
 
         // productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])
             ->where('store_id', auth()->user()->store_id)
-            ->get(['id', 'global_product_id'])
+            ->get(['id', 'global_product_id', 'public_price', 'current_stock',])
             ->map(function ($tp) {
                 return [
                     'id' => $tp->id,
                     'name' => $tp->globalProduct->name,
                     'code' => $tp->globalProduct->code,
+                    'public_price' => $tp->public_price,
+                    'current_stock' => $tp->current_stock,
                 ];
             })->toArray();
 
