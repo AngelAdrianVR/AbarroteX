@@ -27,7 +27,7 @@ class OnlineSaleController extends Controller
         $products = $all_products->take(12);
 
         // return $products;
-        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products'));
+        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id'));
     }
 
 
@@ -39,13 +39,23 @@ class OnlineSaleController extends Controller
     
     public function create()
     {
-        //
+        return inertia('OnlineSale/Create');
     }
 
     
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'phone' => 'required|string|min:10|max:10',
+            'email' => 'nullable|email',
+            'suburb' => 'required|string|max:255',
+            'street' => 'required|string|max:255',
+            'ext_number' => 'required|string|min:1|max:50',
+            'int_number' => 'nullable|string|min:1|max:50',
+        ]);
+
+        OnlineSale::create($request->all());
     }
 
     
@@ -115,5 +125,48 @@ class OnlineSaleController extends Controller
         $moreProducts = $all_products->splice($offset)->take($limit);
 
         return response()->json(['products' => $moreProducts]);
+    }
+
+
+    public function fetchProduct($product_id, $is_local)
+    {
+       if ( $is_local === 'true' ) {
+            $product = Product::with(['media'])->find($product_id);
+       } else {
+            $product = GlobalProductStore::with(['globalProduct.media'])->find($product_id);
+       }
+
+       return response()->json(['item' => $product]);
+    }
+
+
+    public function searchProducts(Request $request, $store_id)
+    {
+        $query = $request->input('query');
+
+        // Realiza la búsqueda en la base de datos local
+        $local_products = Product::with(['category', 'brand', 'media'])
+            ->where('store_id', $store_id)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%$query%")
+                    ->orWhere('code', 'like', "%$query%");
+            })
+            ->get();
+
+        $global_products = GlobalProductStore::with(['globalProduct.media'])
+            ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
+                $queryBuilder->where('name', 'like', "%$query%")
+                    ->orWhere('code', $query);
+            })
+            ->where('store_id', $store_id)
+            ->get();
+
+        // Combinar los resultados en una colección
+        $combined_products = $local_products->merge($global_products);
+
+        // Tomar solo los primeros 20 elementos del arreglo combinado
+        $products = $combined_products;
+
+        return response()->json(['items' => $products]);
     }
 }

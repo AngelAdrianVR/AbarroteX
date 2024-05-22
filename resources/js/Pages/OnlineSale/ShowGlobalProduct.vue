@@ -6,7 +6,8 @@
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
                 <!-- Imagen del producto -->
                 <figire class="border border-grayD9 rounded-md flex items-center justify-center h-96">
-                    <img v-if="global_product.global_product?.media?.length" :src="global_product.global_product?.media[0]?.original_url" alt="producto" class="h-68 mx-auto">
+                    <img v-if="global_product.global_product?.media?.length" :src="global_product.global_product?.media[0]?.original_url" alt="producto" 
+                    class="h-full mx-auto">
                     <div v-else>
                         <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                         <p class="text-sm text-gray-300">Imagen no disponible</p>
@@ -79,8 +80,8 @@ methods:{
             // Si el producto no está en el carrito, agregarlo
             cart.push({
                 id: this.global_product.global_product_id,
-                name: this.global_product.global_product.name,
-                price: this.global_product.public_price,
+                isLocal: false,
+                price: this.product.public_price,
                 quantity: this.quantity
             });
         }
