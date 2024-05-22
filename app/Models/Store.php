@@ -91,4 +91,9 @@ class Store extends Model
     {
         return $this->hasOne(Payment::class)->latest();
     }
+
+    public function onlineSales() :HasMany
+    {
+        return $this->hasMany(OnlineSale::class);
+    }
 }

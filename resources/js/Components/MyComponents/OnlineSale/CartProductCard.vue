@@ -20,7 +20,7 @@
             <div class="mt-3 space-y-2 w-full">
                 <h1 class="font-bold">{{ product?.global_product_id ? product?.global_product.name : product?.name }}</h1>
                 <p class="font-bold">${{ product?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                <div class="flex justify-between">
+                <div v-if="actions" class="flex justify-between">
                     <el-input-number :disabled="product?.global_product?.current_stock < 1 || product?.current_stock < 1"
                         v-model="quantity" size="small" :min="0" :max="product?.current_stock" :precision="2" />
                     <!-- Eliminar producto de carrito -->
@@ -32,6 +32,7 @@
                     </template>
                     </el-popconfirm>
                 </div>
+                <p v-else>cantidad: {{ quantity }}</p>
             </div>
         </div>
 
@@ -52,7 +53,11 @@ data() {
     }
 },
 props:{
-    cartProduct: Object
+    cartProduct: Object,
+    actions: { //acciones de borrar y editar cantidad
+        type: Boolean,
+        default: true
+    }
 },
 watch: {
     quantity(newQuantity) {

@@ -21,8 +21,8 @@
                         </div>
 
                         <div class="text-center">
-                            <PrimaryButton class="!px-8">Finalizar pedido</PrimaryButton>
-                            <p class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
+                            <PrimaryButton @click="$inertia.get(route('online-sales.create'))" class="!px-8">Finalizar pedido</PrimaryButton>
+                            <p @click="$inertia.get(route('online-sales.client-index', storeId ?? 0))" class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
                         </div>
                             
                     </div>
@@ -31,7 +31,6 @@
             </section>
         </div>
     </OnlineStoreLayout>
-  
 </template>
 
 <script>
@@ -43,7 +42,8 @@ import Back from "@/Components/MyComponents/Back.vue";
 export default {
 data() {
     return {
-        cart: []
+        cart: [],
+        storeId: null //se recupera el id de la tienda desde el localstorage
     }
 },
 components:{
@@ -81,7 +81,10 @@ computed: {
 },
 mounted() {
     // Obtener el carrito actual desde localStorage
-        this.cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
+    this.cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
+
+    // recupera el store_id del localStorage
+    this.storeId = localStorage.getItem('storeId');
 }
 }
 </script>
