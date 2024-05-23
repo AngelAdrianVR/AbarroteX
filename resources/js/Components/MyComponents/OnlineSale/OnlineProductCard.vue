@@ -59,7 +59,7 @@ methods:{
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
                     id: this.product.global_product_id,
-                    name: this.product.global_product.name,
+                    isLocal: false,
                     price: this.product.public_price,
                     quantity: this.quantity
                 });
@@ -76,8 +76,8 @@ methods:{
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
                     id: this.product.id,
-                    name: this.product.name,
                     price: this.product.public_price,
+                    isLocal: true,
                     quantity: this.quantity
                 });
             }

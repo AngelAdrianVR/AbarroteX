@@ -53,7 +53,8 @@ PrimaryButton,
 props:{
 store: Object,
 products: Array,
-total_products: Number
+total_products: Number,
+store_id: Number //id de la tienda para guardarla en el localStorage
 },
 methods:{
     handleScroll() {
@@ -100,6 +101,10 @@ methods:{
 },
 mounted() {
     this.visibleProducts = this.products;
+    // localStorage.clear(); //borrar local storage
+
+    // Guardar store_id en el localStorage
+    localStorage.setItem('storeId', this.store_id);
 }
 }
 </script>

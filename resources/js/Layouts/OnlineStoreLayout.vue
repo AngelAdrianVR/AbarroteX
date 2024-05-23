@@ -9,9 +9,9 @@
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
-                            <figure>
+                            <Link :href="route('online-sales.client-index', storeId ?? 0)">
                                 <img class="h-12 md:h-20" src="@/../../public/images/black_logo.png" alt="logotipo de la tienda">
-                            </figure>
+                            </Link>
 
                             <!-- buscador de productos -->
                             <div class="relative w-44 md:w-80">
@@ -70,7 +70,8 @@ data() {
         searchFocus: false, //buscador. Bandera de enfoque para el buscador
         productsFound: null, //buscador. productos encontrados.
         loading: false, //cargando la busqueda de productos
-        cart: [] //productos guardados en el carrito (localStorage)
+        cart: [], //productos guardados en el carrito (localStorage)
+        storeId: null //se recupera el id de la tienda desde el localstorage
     }
 },
 components:{
@@ -91,7 +92,7 @@ methods:{
     async searchProducts() {
       try {
         this.loading = true;
-        const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
+        const response = await axios.get(route('online-sales.search-products', this.storeId), { params: { query: this.searchQuery } });
         if (response.status === 200) {
           this.productsFound = response.data.items;
           this.loading = false;
@@ -107,13 +108,18 @@ methods:{
         }
     }
 },
-created() {
-    this.loadCart();
-},
 computed: {
     cartCount() {
         return this.cart.length;
     }
 },
+created() {
+    this.loadCart();
+    
+},
+mounted() {
+    // recupera el store_id del localStorage
+    this.storeId = localStorage.getItem('storeId');
+}
 }
 </script>

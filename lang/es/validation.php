@@ -178,5 +178,9 @@ return [
         'type' => 'tipo',
         'registerAmount' => 'El monto es mayor que el dinero en caja,',
         'withdrawn_cash' => 'El monto a retirar es mayor que el dinero en caja,',
+        'suburb' => 'colonia',
+        'street' => 'calle',
+        'ext_number' => 'número exterior',
+        'int_number' => 'número interior',
     ],
 ];
