@@ -15,7 +15,7 @@
                     <Users :users="users" />
                 </el-tab-pane>
                 <el-tab-pane label="Tienda en línea" name="3">
-                    <OnlineStore :banners="banners" />
+                    <OnlineStore :banners="banners" :logo="logo" />
                 </el-tab-pane>
                 <!-- <el-tab-pane label="Productos" name="4">
                     Productos
@@ -50,7 +50,8 @@ export default {
     },
     props: {
         users: Array,
-        banners: Object //imagenes banners para tienda online
+        banners: Object, //imagenes banners para tienda online
+        logo: Object //imagenes logo para tienda online
     },
     methods: {
         updateURL(tab) {

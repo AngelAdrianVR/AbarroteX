@@ -59,10 +59,6 @@ class BannerController extends Controller
             $banner->clearMediaCollection('banner3');
         }
 
-        if ($request->clearedLogo) {
-            $banner->clearMediaCollection('logo');
-        }
-
         // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
         if ($request->hasFile('banner1')) {
             $banner->clearMediaCollection('banner1');
@@ -74,10 +70,6 @@ class BannerController extends Controller
 
         if ($request->hasFile('banner3')) {
             $banner->clearMediaCollection('banner3');
-        }
-
-        if ($request->hasFile('logo')) {
-            $banner->clearMediaCollection('logo');
         }
 
         // Guardar el archivo en la colección 'banner1'
@@ -93,11 +85,6 @@ class BannerController extends Controller
         // Guardar el archivo en la colección 'banner3'
         if ($request->hasFile('banner3')) {
             $banner->addMediaFromRequest('banner3')->toMediaCollection('banner3');
-        }
-
-        // Guardar el archivo en la colección 'logo'
-        if ($request->hasFile('logo')) {
-            $banner->addMediaFromRequest('logo')->toMediaCollection('logo');
         }
 
     }

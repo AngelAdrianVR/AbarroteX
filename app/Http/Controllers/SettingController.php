@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banner;
+use App\Models\Logo;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,8 +19,10 @@ class SettingController extends Controller
             ->get();
 
         $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
-            
-        return inertia('Setting/Index', compact('users', 'banners'));
+        $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
+        
+        // return $logo;
+        return inertia('Setting/Index', compact('users', 'banners', 'logo'));
     }
 
     

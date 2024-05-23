@@ -58,7 +58,7 @@ store: Object,
 products: Array,
 total_products: Number,
 store_id: Number, //id de la tienda para guardarla en el localStorage
-banners: Object //banners
+banners: Object, //banners
 },
 methods:{
     handleScroll() {
@@ -105,7 +105,7 @@ methods:{
     startTimer() {
         this.timer = setInterval(() => {
             this.currentBanner = (this.currentBanner + 1) % this.banners.media?.length;
-        }, 4000);
+        }, 5000);
     },
 },
 mounted() {

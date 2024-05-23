@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('type'); // tipo de tienda ej. ropa, carniceria, abarrotes
             $table->string('contact_name');
-            $table->string('contact_phone')->nullable();
+            $table->string('contact_phone')->nullable(); // telefono de contacto
+            $table->string('whatsapp')->nullable(); //wp para pedidos online
             $table->string('address')->nullable();
             $table->string('plan')->default('Plan Básico');
             $table->string('suscription_period')->default('Periodo de prueba');

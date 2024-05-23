@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Banner;
 use App\Models\GlobalProductStore;
+use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\Store;
@@ -171,5 +172,13 @@ class OnlineSaleController extends Controller
         $products = $combined_products;
 
         return response()->json(['items' => $products]);
+    }
+
+
+    public function getLogo($store_id)
+    {
+        $logo = Logo::with(['media'])->where('store_id', $store_id)->first();
+
+        return response()->json(['item' => $logo]);
     }
 }

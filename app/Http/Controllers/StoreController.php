@@ -57,4 +57,10 @@ class StoreController extends Controller
 
         return response()->json([]);
     }
+
+
+    public function updateWhatsapp(Request $request, Store $store)
+    {
+        
+    }
 }

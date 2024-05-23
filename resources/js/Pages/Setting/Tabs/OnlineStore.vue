@@ -32,49 +32,88 @@
       captar la atención de tus visitantes desde el primer momento.
     </p>
 
-    <div class="my-5 flex justify-center">
-      <!-- Banner 1  -->
-        <InputFilePreview
-            v-show="currentImage == 1"
-            @imagen="this.form.banner1 = $event; clearedBanner1 = false"
-            :imageUrl="getMediaUrl('banner1')"
-            @cleared="form.clearedBanner1 = true"
-        />
+    <div class="md:flex items-center justify-center md:space-x-9 my-5">
+      <div class="flex flex-col items-center justify-center">
+        <!-- Banner 1  -->
+          <InputFilePreview
+              v-show="currentImage == 1"
+              @imagen="this.bannerForm.banner1 = $event; clearedBanner1 = false"
+              :imageUrl="getMediaUrl('banner1')"
+              @cleared="bannerForm.clearedBanner1 = true"
+          />
 
-      <!-- Banner 2  -->
-        <InputFilePreview
-            v-show="currentImage == 2"
-            @imagen="this.form.banner2 = $event; clearedBanner2 = false"
-            :imageUrl="getMediaUrl('banner2')"
-            @cleared="form.clearedBanner2 = true"
-        />
+        <!-- Banner 2  -->
+          <InputFilePreview
+              v-show="currentImage == 2"
+              @imagen="this.bannerForm.banner2 = $event; clearedBanner2 = false"
+              :imageUrl="getMediaUrl('banner2')"
+              @cleared="bannerForm.clearedBanner2 = true"
+          />
 
-      <!-- Banner 3  -->
+        <!-- Banner 3  -->
+          <InputFilePreview
+              v-show="currentImage == 3"
+              @imagen="this.bannerForm.banner3 = $event; clearedBanner3 = false"
+              :imageUrl="getMediaUrl('banner3')"
+              @cleared="bannerForm.clearedBanner3 = true"
+          />
+
+        <p class="text-center mt-3">
+            <i
+                @click="currentImage = currentImage - 1"
+                v-if="currentImage > 1"
+                class="fa-solid fa-angle-left text-xs mr-2 cursor-pointer p-1"
+            ></i>
+            Imagen {{ currentImage }} de 3
+            <i
+                @click="currentImage = currentImage + 1"
+                v-if="currentImage < 3"
+                class="fa-solid fa-angle-right text-xs ml-2 cursor-pointer p-1"
+            ></i>
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center justify-center mt-7 md:mt-0">
+        <!-- Logo  -->
         <InputFilePreview
-            v-show="currentImage == 3"
-            @imagen="this.form.banner3 = $event; clearedBanner3 = false"
-            :imageUrl="getMediaUrl('banner3')"
-            @cleared="form.clearedBanner3 = true"
+            @imagen="this.logoForm.logoImage = $event; clearedLogo = false"
+            :imageUrl="logo?.media[0]?.original_url"
+            @cleared="logoForm.clearedLogo = true"
         />
+        <p class="mt-3">Logotipo de tu tienda (opcional)</p>
+      </div>
 
     </div>
-      <p class="text-center mt-2">
-          <i
-              @click="currentImage = currentImage - 1"
-              v-if="currentImage > 1"
-              class="fa-solid fa-angle-left text-xs mr-2 cursor-pointer p-1"
-          ></i>
-          Imagen {{ currentImage }} de 3
-          <i
-              @click="currentImage = currentImage + 1"
-              v-if="currentImage < 3"
-              class="fa-solid fa-angle-right text-xs ml-2 cursor-pointer p-1"
-          ></i>
-      </p>
-    <div class="text-right">
-        <PrimaryButton :disabled="form.processing" @click="update">Guardar</PrimaryButton>
-    </div>
 
+        <div class="text-right">
+            <PrimaryButton :disabled="logoForm.processing || bannerForm.processing" @click="update">Guardar</PrimaryButton>
+        </div>
+      
+  </section>
+
+  <!-- información de tienda -->
+  <section class="my-5">
+    <h2 class="font-bold mb-5">Contacto de WhatsApp <i class="fa-brands fa-whatsapp"></i></h2>
+    <div class="flex items-center">
+      <p class="ml-7">Número de teléfono:</p>
+      <div v-if="!editWhatsapp" class="flex space-x-5">
+        <p class="ml-7">{{ $page.props.auth.user.store.whatsapp ?? 'Sin registro' }}</p>
+        <i v-if="!editWhatsapp" @click="editWhatsapp = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
+      </div>
+      <div v-else class="flex items-center space-x-2 ml-7">
+        <el-input v-model="onlineStoreForm.whatsapp"
+        :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+        :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+        placeholder="Escribe el número de teléfono" />
+        <InputError :message="onlineStoreForm.errors.whatsapp" />
+        <button v-if="editWhatsapp">
+          <i @click="updateWhatsapp" class="fa-solid fa-check text-xs text-green-600 cursor-pointer bg-green-100 rounded-full py-1 px-[7px]"></i>
+        </button>
+        <button @click="editWhatsapp = false;">
+            <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
+          </button>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -86,7 +125,7 @@ import { Link, useForm } from "@inertiajs/vue3";
 
 export default {
   data() {
-    const form = useForm({
+    const bannerForm = useForm({
       banner1: null,
       banner2: null,
       banner3: null,
@@ -94,9 +133,23 @@ export default {
       clearedBanner2: false,
       clearedBanner3: false,
     });
+
+    const logoForm = useForm({
+      logoImage: null,
+      clearedLogo: false,
+    });
+
+    const onlineStoreForm = useForm({
+      whatsapp: this.$page.props.auth.user.store.whatsapp ?? null,
+    });
+
     return {
-      form,
-      currentImage: 1
+      onlineStoreForm,
+      bannerForm,
+      logoForm,
+      currentImage: 1,
+
+      editWhatsapp: false,
     };
   },
   components: {
@@ -106,21 +159,31 @@ export default {
     Link,
   },
   props: {
-    banners: Object
+    banners: Object,
+    logo: Object,
   },
   methods: {
     update() {
-        console.log('edit');
-        this.form.post(route("banners.update-with-media", this.banners.id), {
+      this.updateBanners();
+      this.updateLogo();
+      this.$notify({
+          title: "Correcto",
+          message: "Se han actualizado la media",
+          type: "success",
+      });
+      // window.location.reload();
+    },
+    updateWhatsapp() {
+      this.onlineStoreForm.put(route('store.update-whatsapp', $page.props.auth.user.store.id));
+    },
+    updateBanners() {
+        this.bannerForm.post(route("banners.update-with-media", this.banners.id), {
           method: '_put',
-          onSuccess: () => {
-            this.$notify({
-                title: "Correcto",
-                message: "Se han actualizado los banners",
-                type: "success",
-            });
-            window.location.reload();
-          },
+        });
+    },
+    updateLogo() {
+        this.logoForm.post(route("logos.update-with-media", 1), {
+          method: '_put',
         });
     },
     getMediaUrl(collectionName) {

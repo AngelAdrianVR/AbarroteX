@@ -12,6 +12,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
+use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -137,6 +138,7 @@ Route::resource('product-histories', ProductHistoryController::class)->middlewar
 Route::resource('stores', StoreController::class)->middleware('auth');
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
+Route::put('stores-update-whatsapp', [StoreController::class, 'updateWhatsapp'])->middleware('auth')->name('stores.update-whatsapp');
 
 
 // User routes-----------------------------------------------------------------------------------------
@@ -210,10 +212,16 @@ Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'get
 Route::resource('tutorials', TutorialController::class)->middleware('auth');
 
 
-//Banners routes------------------------------------------------------------------------------------------------------
+//Banners online store routes------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('banners', BannerController::class)->middleware('auth');
 Route::post('banners/update-with-media/{banner}', [BannerController::class, 'updateWithMedia'])->name('banners.update-with-media');
+
+
+//logos online store routes------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('logos', LogoController::class)->middleware('auth');
+Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWithMedia'])->name('logos.update-with-media');
 
 
 //online sales routes----------------------------------------------------------------------------------------------------
@@ -226,6 +234,7 @@ Route::get('online-sales-show-global-product/{global_product_id}', [OnlineSaleCo
 Route::get('online-sales-cart', [OnlineSaleController::class, 'cartIndex'])->name('online-sales.cart');
 Route::get('online-sales-fetch-product/{product_id}/{is_local}', [OnlineSaleController::class, 'fetchProduct'])->name('online-sales.fetch-product');
 Route::get('online-sales-search-products/{store_id}', [OnlineSaleController::class, 'searchProducts'])->name('online-sales.search-products');
+Route::get('online-sales-get-logo/{store_id}', [OnlineSaleController::class, 'getLogo'])->name('online-sales.get-logo');
 
 
 // comandos Artisan

@@ -16,6 +16,7 @@ class Store extends Model
         'type',
         'contact_name',
         'contact_phone',
+        'whatsapp',
         'address',
         'plan',
         'is_active',
