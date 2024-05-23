@@ -165,7 +165,7 @@ class ProductController extends Controller
             $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
-        return to_route('products.index');
+        return to_route('products.show', $product->id);
     }
 
 
@@ -472,7 +472,7 @@ class ProductController extends Controller
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = collect(array_merge($local_products, $transfered_products));
 
-        return response()->json(compact('products', 'local_products'));
+        return response()->json(compact('products', 'local_products', 'transfered_products'));
     }
 
     private function validateProductsFromFile($worksheet)

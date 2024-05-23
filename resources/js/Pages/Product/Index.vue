@@ -336,6 +336,59 @@ export default {
         exportProducts() {
             this.$inertia.visit(route('products.export'));
         },
+        openEntryModal() {
+            this.entryProductModal = true;
+            this.$nextTick(() => {
+                this.$refs.codeInput.focus(); // Enfocar el input de código cuando se abre el modal
+            });
+        },
+        entryProduct(product) {
+            console.log(product);
+            let routePage;
+            if (product.global_product_id) {
+                routePage = 'global-product-store.entry';
+            } else {
+                routePage = 'products.entry';
+            }
+
+            this.form.put(route(routePage, product.id), {
+                onSuccess: () => {
+                    if (product.global_product_id) {
+                        const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
+                        console.log(IndexProductEntry);
+                        if (IndexProductEntry !== -1) {
+                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                        }
+                        this.$notify({
+                            title: "Correcto",
+                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + product.global_product?.name,
+                            type: "success",
+                        });
+                    } else {
+                        const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
+                        if (IndexProductEntry !== -1) {
+                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                        }
+                        this.$notify({
+                            title: "Correcto",
+                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.localProducts[IndexProductEntry].name,
+                            type: "success",
+                        });
+                    }
+                    this.$nextTick(() => {
+                        this.$refs.codeInput.focus(); // Enfocar el input de código cuando se abre el modal
+                    });
+
+                    this.form.reset();
+                    this.productEntryFound = null;
+                },
+            });
+        },
+        closeEntryModal() {
+            this.form.reset();
+            this.productEntryFound = null;
+            this.entryProductModal = false;
+        },
         async importProducts() {
             try {
                 this.isImporting = true;
@@ -358,12 +411,6 @@ export default {
                 this.importWasWrong = true;
                 this.importErrors = error.response.data.errors;
             }
-        },
-        openEntryModal() {
-            this.entryProductModal = true;
-            this.$nextTick(() => {
-                this.$refs.codeInput.focus(); // Enfocar el input de código cuando se abre el modal
-            });
         },
         async fetchItemsByPage() {
             try {
@@ -421,53 +468,6 @@ export default {
             } finally {
                 this.loading = false;
             }
-        },
-        entryProduct(product) {
-            console.log(product);
-            let routePage;
-            if (product.global_product_id) {
-                routePage = 'global-product-store.entry';
-            } else {
-                routePage = 'products.entry';
-            }
-
-            this.form.put(route(routePage, product.id), {
-                onSuccess: () => {
-                    if (product.global_product_id) {
-                        const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
-                        console.log(IndexProductEntry);
-                        if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
-                        }
-                        this.$notify({
-                            title: "Correcto",
-                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + product.global_product?.name,
-                            type: "success",
-                        });
-                    } else {
-                        const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
-                        if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
-                        }
-                        this.$notify({
-                            title: "Correcto",
-                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.localProducts[IndexProductEntry].name,
-                            type: "success",
-                        });
-                    }
-                    this.$nextTick(() => {
-                        this.$refs.codeInput.focus(); // Enfocar el input de código cuando se abre el modal
-                    });
-
-                    this.form.reset();
-                    this.productEntryFound = null;
-                },
-            });
-        },
-        closeEntryModal() {
-            this.form.reset();
-            this.productEntryFound = null;
-            this.entryProductModal = false;
         },
         async fetchAllItemsForCurrentPage() {
             try {

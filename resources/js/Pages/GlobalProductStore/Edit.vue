@@ -8,7 +8,8 @@
                 <h1 class="font-bold ml-2 col-span-full">Editar producto transferido</h1>
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
-                    <el-input disabled v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
+                    <el-input disabled v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100"
+                        clearable />
                     <InputError :message="form.errors.name" />
                 </div>
                 <div v-if="canSeeCost" class="mt-3">
@@ -52,10 +53,10 @@
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button> -->
                     </div>
-                    <el-select disabled class="w-1/2" v-model="form.category_id" clearable
-                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                        no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="category in localCategories" :key="category" :label="category.name" :value="category.id" />
+                    <el-select disabled class="w-1/2" v-model="form.category_id" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="category in localCategories" :key="category" :label="category.name"
+                            :value="category.id" />
                     </el-select>
                     <InputError :message="form.errors.category_id" />
                 </div>
@@ -69,9 +70,8 @@
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button> -->
                     </div>
-                    <el-select disabled class="w-1/2" v-model="form.brand_id" clearable
-                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                        no-match-text="No se encontraron coincidencias">
+                    <el-select disabled class="w-1/2" v-model="form.brand_id" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
                     </el-select>
                     <InputError :message="form.errors.brand_id" />
@@ -101,13 +101,13 @@
                     <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
                     <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
                         @cleared="form.imageCover = null; form.imageCoverCleared = true"
-                        :imageUrl="global_product_store.global_product?.media[0]?.original_url"
-                        :disabled="true" />
+                        :imageUrl="global_product_store.global_product?.media[0]?.original_url" :disabled="true" />
                 </div>
 
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
-                    <el-input disabled v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
+                    <el-input disabled v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100"
+                        clearable>
                         <template #prefix>
                             <i class="fa-solid fa-barcode"></i>
                         </template>
@@ -173,6 +173,7 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+import { addOrUpdateItem } from "@/dbService.js";
 
 export default {
     data() {
@@ -226,16 +227,29 @@ export default {
         brands: Array
     },
     methods: {
-        update() {
-            this.form.put(route("global-product-store.update", this.global_product_store.id), {
-                onSuccess: () => {
-                    ElNotification({
-                        title: 'Correcto',
-                        message: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
-                        type: 'success',
-                    });
-                },
-            });
+        async update() {
+            try {
+                this.form.put(route("global-product-store.update", this.global_product_store.id), {
+                    onSuccess: async () => {
+                        // guardar nuevo producto a IndexedDB
+                        // Obtener producto que coincida con el id editado
+                        const response = await axios.get(route('products.get-all-for-indexedDB'));
+                        const product = response.data.transfered_products.find(item => item.id == this.global_product_store.id);
+
+                        if (product) {
+                            await addOrUpdateItem('products', product);
+                        }
+
+                        this.$notify({
+                            title: "Correcto",
+                            message: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
+                            type: "success",
+                        });
+                    },
+                });
+            } catch (error) {
+                console.error(error)
+            }
         },
         // async storeCategory() {
         //     try {
