@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
+use App\Models\Logo;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,8 +17,12 @@ class SettingController extends Controller
             ->where('store_id', auth()->user()->store_id)
             ->where('rol', '!=', 'Administrador')
             ->get();
-            
-        return inertia('Setting/Index', compact('users'));
+
+        $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
+        $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
+        
+        // return $logo;
+        return inertia('Setting/Index', compact('users', 'banners', 'logo'));
     }
 
     
