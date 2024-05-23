@@ -5,7 +5,7 @@
       :class="{
         'cursor-not-allowed': disabled,
         'cursor-pointer': !disabled,
-        'w-48 h-36': image,
+        'w-56 h-44': image,
         'size-14': !image
       }">
       <i v-if="image && canDelete && !disabled" @click.stop="clearImage"

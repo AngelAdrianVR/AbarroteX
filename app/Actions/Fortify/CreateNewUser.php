@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\Banner;
 use App\Models\CashRegister;
 use App\Models\Setting;
 use App\Models\Store;
@@ -41,6 +42,11 @@ class CreateNewUser implements CreatesNewUsers
             'type' => $input['type'],
             'contact_phone' => $input['contact_phone'],
             'next_payment' => now()->addDays(15),
+        ]);
+
+        //Se crea el registro para guardar los banners en él con el id de la tienda
+        Banner::create([
+            'store_id' => $store->id
         ]);
 
         // agregar las configuraciones iniciales a la tienda

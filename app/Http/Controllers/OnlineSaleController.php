@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
 use App\Models\GlobalProductStore;
 use App\Models\OnlineSale;
 use App\Models\Product;
@@ -26,8 +27,10 @@ class OnlineSaleController extends Controller
         //tomar solo primeros 12 productos
         $products = $all_products->take(12);
 
-        // return $products;
-        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id'));
+        $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
+
+        // return $banners;
+        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id', 'banners'));
     }
 
 
