@@ -314,7 +314,7 @@
                   :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !this.$page.props.auth?.user?.cash_register_id"
                   class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
                 <p v-if="!this.$page.props.auth?.user?.cash_register_id" class="text-xs text-red-600 mt-1">
-                  Para cobrar asigna una caja registradora
+                  Para cobrar asigna una caja registradora <span @click="cashRegisterModal = true" class="underline cursor-pointer text-primary">asignar una</span>
                 </p>
               </div>
             </div>

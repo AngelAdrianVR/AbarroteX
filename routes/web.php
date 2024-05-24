@@ -141,7 +141,7 @@ Route::resource('product-histories', ProductHistoryController::class)->middlewar
 Route::resource('stores', StoreController::class)->middleware('auth');
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
-Route::put('stores-update-whatsapp', [StoreController::class, 'updateWhatsapp'])->middleware('auth')->name('stores.update-whatsapp');
+Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
 
 
 // User routes-----------------------------------------------------------------------------------------

@@ -76,7 +76,7 @@
       <div class="flex flex-col items-center justify-center mt-7 md:mt-0">
         <!-- Logo  -->
         <InputFilePreview
-            @imagen="this.logoForm.logoImage = $event; clearedLogo = false"
+            @imagen="this.logoForm.logo = $event; clearedLogo = false"
             :imageUrl="logo?.media[0]?.original_url"
             @cleared="logoForm.clearedLogo = true"
         />
@@ -93,13 +93,18 @@
 
   <!-- información de tienda -->
   <section class="my-5">
+
+    <!-- Numero de whatsapp ----------------------------------------->
+    <!-- --------------------------------------------------------- -->
     <h2 class="font-bold mb-5">Contacto de WhatsApp <i class="fa-brands fa-whatsapp"></i></h2>
-    <div class="flex items-center">
+    <div class="flex items-center text-sm">
       <p class="ml-7">Número de teléfono:</p>
-      <div v-if="!editWhatsapp" class="flex space-x-5">
+
+      <div v-if="!editWhatsapp" class="flex items-center space-x-5">
         <p class="ml-7">{{ $page.props.auth.user.store.whatsapp ?? 'Sin registro' }}</p>
         <i v-if="!editWhatsapp" @click="editWhatsapp = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
+
       <div v-else class="flex items-center space-x-2 ml-7">
         <el-input v-model="onlineStoreForm.whatsapp"
         :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
@@ -107,13 +112,131 @@
         placeholder="Escribe el número de teléfono" />
         <InputError :message="onlineStoreForm.errors.whatsapp" />
         <button v-if="editWhatsapp">
-          <i @click="updateWhatsapp" class="fa-solid fa-check text-xs text-green-600 cursor-pointer bg-green-100 rounded-full py-1 px-[7px]"></i>
+          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
         </button>
         <button @click="editWhatsapp = false;">
             <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
           </button>
       </div>
     </div>
+
+    <!-- Gestion de pago ----------------------->
+    <!-- ------------------------------------ -->
+    <h2 class="font-bold mb-5 mt-8">Gestión de pago</h2>
+    
+    <div class="flex items-center text-sm">
+      <div class="w-36 ml-7 space-y-2">
+        <p>Efectivo</p>
+        <p>Tarjeta de crédito</p>
+        <p>Tarjeta de débito</p>
+        <p>Mercado pago</p>
+      </div>
+
+      <div class="flex flex-col w-36 ml-7 space-y-1">
+        <el-switch v-model="onlineStoreForm.cash_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch v-model="onlineStoreForm.credit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch v-model="onlineStoreForm.debit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch v-model="onlineStoreForm.mercado_pago" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+      </div>
+    </div>
+
+    <!-- Envío a domicilio ---------------------------------->
+    <!-- ------------------------------------------------- -->
+    <h2 class="font-bold mb-5 mt-8">Envío a domicilio</h2>
+
+    <!-- costo de envío -->
+    <div class="flex items-center text-sm">
+      <p class="ml-7">Costo de envío:</p>
+
+      <div v-if="!editDeliveryPrice" class="flex items-center space-x-5">
+        <p class="ml-7">${{ $page.props.auth.user.store.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? 'Sin registro' }}</p>
+        <i v-if="!editDeliveryPrice" @click="editDeliveryPrice = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
+      </div>
+
+      <div v-else class="flex items-center space-x-2 ml-7">
+        <el-input v-model="onlineStoreForm.delivery_price" type="text" placeholder="Ingresa el monto" class="px-10"
+          :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+          :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
+          <template #prefix>
+            <i class="fa-solid fa-dollar-sign"></i>
+          </template>
+        </el-input>
+        <InputError :message="onlineStoreForm.errors.delivery_price" />
+        <button v-if="editDeliveryPrice">
+          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+        </button>
+        <button @click="editDeliveryPrice = false;">
+            <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
+          </button>
+      </div>
+    </div>
+
+    <!-- condiciones de envío -->
+    <div class="flex items-center text-sm mt-3">
+      <p class="ml-7">Condiciones de envío:</p>
+
+      <div v-if="!editDeliveryConditions" class="flex items-center space-x-5">
+        <p class="ml-7">{{ $page.props.auth.user.store.delivery_conditions ?? 'Sin registro' }}</p>
+        <i v-if="!editDeliveryConditions" @click="editDeliveryConditions = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
+      </div>
+
+      <div v-else class="flex items-center space-x-2 ml-7">
+        <el-input v-model="onlineStoreForm.delivery_conditions" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+            placeholder="Escribe las condiciones de envío" :maxlength="500" show-word-limit
+            clearable />
+        <InputError :message="onlineStoreForm.errors.delivery_conditions" />
+        <button v-if="editDeliveryConditions">
+          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+        </button>
+        <button @click="editDeliveryConditions = false;">
+            <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
+          </button>
+      </div>
+    </div>
+
+
+    <!-- Mínimo de compra para envío gratis ---------------------------------->
+    <!-- ------------------------------------------------- -->
+    <h2 class="font-bold mb-5 mt-8">Mínimo de compra para envío gratis</h2>
+
+    <!-- Mínimo de compra para envío gratis -->
+    <div class="flex items-center text-sm mt-3">
+      <p class="ml-7">Compra mínima para envío gratis:</p>
+
+      <div v-if="!editMinFreeDelivery" class="flex items-center space-x-5">
+        <p class="ml-7">${{ $page.props.auth.user.store.min_free_delivery?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? 'Sin registro' }}</p>
+        <i v-if="!editMinFreeDelivery" @click="editMinFreeDelivery = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
+      </div>
+
+      <div v-else class="flex items-center space-x-2 ml-7">
+        <el-input v-model="onlineStoreForm.min_free_delivery" type="text" placeholder="Ingresa el monto" class="px-10"
+          :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+          :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
+          <template #prefix>
+            <i class="fa-solid fa-dollar-sign"></i>
+          </template>
+        </el-input>
+        <InputError :message="onlineStoreForm.errors.min_free_delivery" />
+        <button v-if="editMinFreeDelivery">
+          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+        </button>
+        <button @click="editMinFreeDelivery = false;">
+            <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
+          </button>
+      </div>
+      <el-switch v-model="onlineStoreForm.mercado_pago" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+    </div>
+
+    <!-- Gestión de cajas ---------------------------------->
+    <!-- ------------------------------------------------- -->
+    <!-- <h2 class="font-bold mb-5 mt-8">Gestión de cajas</h2>
+
+    <p class="ml-7 text-sm">Selecciona una caja específica para agregar todos los pedidos a domicilio.</p>
+    Gestión de cajas
+    <div class="flex items-center text-sm mt-3">
+      <p class="ml-7">Caja para pedidos a domicilio:</p>
+    </div> -->
+
   </section>
 </template>
 
@@ -135,12 +258,19 @@ export default {
     });
 
     const logoForm = useForm({
-      logoImage: null,
+      logo: null,
       clearedLogo: false,
     });
 
     const onlineStoreForm = useForm({
       whatsapp: this.$page.props.auth.user.store.whatsapp ?? null,
+      cash_payment: false,
+      credit_payment: false,
+      debit_payment: false,
+      mercado_pago: false,
+      delivery_price: this.$page.props.auth.user.store.delivery_price ?? null,
+      delivery_conditions: this.$page.props.auth.user.store.delivery_conditions ?? null,
+      min_free_delivery: this.$page.props.auth.user.store.min_free_delivery ?? null,
     });
 
     return {
@@ -149,7 +279,10 @@ export default {
       logoForm,
       currentImage: 1,
 
-      editWhatsapp: false,
+      editWhatsapp: false, //edita el numero de whatsapp
+      editDeliveryPrice: false, //edita el costo de envío
+      editDeliveryConditions: false, //edita condiciones de envío
+      editMinFreeDelivery: false, //edita el minimo para envío gratis
     };
   },
   components: {
@@ -173,8 +306,16 @@ export default {
       });
       // window.location.reload();
     },
-    updateWhatsapp() {
-      this.onlineStoreForm.put(route('store.update-whatsapp', $page.props.auth.user.store.id));
+    updateOnlineSalesInfo() {
+      this.onlineStoreForm.put(route('stores.update-online-sales-info', this.$page.props.auth.user.store.id), {
+          onSuccess: () => {
+            this.$notify({
+                title: "Correcto",
+                message: "Se ha creado tu pedido correctamente. Nos comunicaremos contigo",
+                type: "success",
+            });
+          },
+      });
     },
     updateBanners() {
         this.bannerForm.post(route("banners.update-with-media", this.banners.id), {
