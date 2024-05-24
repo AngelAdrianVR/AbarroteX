@@ -10,7 +10,8 @@
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
                             <Link :href="route('online-sales.client-index', storeId ?? 0)">
-                                <img class="h-12 md:h-16" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
+                                <img v-if="logo?.media?.length" class="h-12 md:h-16" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
+                                <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png" alt="">
                             </Link>
 
                             <!-- buscador de productos -->
@@ -111,7 +112,7 @@ methods:{
     },
     async getLogo() {
         try {
-            const response = await axios.get(route('online-sales.get-logo', this.storeId));
+            const response = await axios.get(route('online-sales.get-logo', this.storeId ?? 1));
             if ( response.status === 200 ) {
                 this.logo = response.data.item;
             }

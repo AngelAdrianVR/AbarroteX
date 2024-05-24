@@ -60,6 +60,8 @@ class OnlineSaleController extends Controller
         ]);
 
         OnlineSale::create($request->all());
+
+        return to_route('online-sales.client-index', ['store_id' => $request->store_id]);
     }
 
     
