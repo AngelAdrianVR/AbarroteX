@@ -97,8 +97,8 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">
-                    <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
-                    <PrimaryButton @click="deleteItem">Eliminar</PrimaryButton>
+                    <CancelButton @click="showDeleteConfirm = false" :disabled="deleting">Cancelar</CancelButton>
+                    <PrimaryButton @click="deleteItem" :disabled="deleting">Eliminar</PrimaryButton>
                 </div>
             </template>
         </ConfirmationModal>
@@ -110,10 +110,12 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
+import { deleteItem, getItemByAttributes } from "@/dbService.js";
 
 export default {
     data() {
         return {
+            deleting: false,
             showDeleteConfirm: false,
             itemToDelete: null,
             // control de inventario activado
@@ -161,22 +163,31 @@ export default {
         },
         async deleteItem() {
             let routePage;
-
             if (this.itemToDelete.global_product_id) {
                 routePage = 'global-product-store.show';
             } else {
                 routePage = 'products.show';
             }
             try {
+                this.deleting = true;
                 const response = await axios.delete(route(routePage, this.itemToDelete.id));
                 if (response.status === 200) {
+                    let productName;
                     if (this.itemToDelete.global_product_id) {
+                        productName = this.itemToDelete.global_product.name;
                         const indexToDelete = this.products.findIndex(item => item.global_product?.name == this.itemToDelete.global_product?.name);
                         this.products.splice(indexToDelete, 1);
                     } else {
+                        productName = this.itemToDelete.name;
                         const indexToDelete = this.products.findIndex(item => item.id == this.itemToDelete.id);
                         this.products.splice(indexToDelete, 1);
                     }
+
+                    // buscar producto en indexedDB
+                    const products = await getItemByAttributes('products', {name: productName});
+
+                    // eliminar de indexedDB
+                    await deleteItem('products', products[0].id);
 
                     this.showDeleteConfirm = false;
                     this.$notify({
@@ -192,6 +203,8 @@ export default {
                     message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
                     type: 'error',
                 });
+            } finally {
+                this.deleting = false;
             }
         }
     }

@@ -165,7 +165,7 @@ class ProductController extends Controller
             $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
-        return to_route('products.index');
+        return to_route('products.show', $product->id);
     }
 
 
@@ -208,6 +208,7 @@ class ProductController extends Controller
     }
 
 
+    // *******borrar
     public function getProductScaned($product_id)
     {
         $is_local_product = request()->boolean('is_local_product');
@@ -441,18 +442,30 @@ class ProductController extends Controller
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::where('store_id', auth()->user()->store_id)
             ->latest()
-            ->get(['id', 'name', 'code'])
-            ->toArray();
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => 'local_' . $product->id,
+                    'name' => $product->name,
+                    'code' => $product->code,
+                    'public_price' => $product->public_price,
+                    'current_stock' => $product->current_stock,
+                    'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
+                ];
+            })->toArray();
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])
+        $transfered_products = GlobalProductStore::query()
             ->where('store_id', auth()->user()->store_id)
-            ->get(['id', 'global_product_id'])
+            ->get()
             ->map(function ($tp) {
                 return [
-                    'id' => $tp->id,
+                    'id' => 'global_' . $tp->id,
                     'name' => $tp->globalProduct->name,
                     'code' => $tp->globalProduct->code,
+                    'public_price' => $tp->public_price,
+                    'current_stock' => $tp->current_stock,
+                    'image_url' => $tp->globalProduct->getFirstMediaUrl('imageCover'),
                 ];
             })->toArray();
 
@@ -460,7 +473,7 @@ class ProductController extends Controller
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = collect(array_merge($local_products, $transfered_products));
 
-        return response()->json(compact('products', 'transfered_products'));
+        return response()->json(compact('products', 'local_products', 'transfered_products'));
     }
 
     private function validateProductsFromFile($worksheet)

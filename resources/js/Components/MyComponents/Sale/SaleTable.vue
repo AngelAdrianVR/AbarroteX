@@ -12,8 +12,9 @@
       <div v-for="(sale, index) in saleProducts" :key="index"
         class="mb-2 flex items-center space-x-4 border rounded-full relative">
         <div class="grid grid-cols-2 items-center h-14 w-[45%]">
-          <img class="mx-auto h-14 object-contain" :src="sale.product.global_product_id ? sale.product.global_product.media[0]?.original_url : sale.product.media[0]?.original_url">
-          <p class="font-bold">{{ sale.product.global_product_id ? sale.product.global_product.name : sale.product.name }}</p>
+          <img class="mx-auto h-14 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
+            :alt="sale.product.name">
+          <p class="font-bold">{{ sale.product.name }}</p>
         </div>
         <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-base flex items-center">
           <template v-if="editMode !== index">
@@ -45,17 +46,20 @@
           </template>
         </div>
         <div class="w-[20%]">
-          <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small" :max="sale.product.current_stock" :precision="2" />
+          <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small"
+            :max="sale.product.current_stock" :precision="2" />
           <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
         </div>
-        <div class="text-[#5FCB1F] font-bold w-[15%]">${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
-          minimumFractionDigits: 2
-        }) }}</div>
+        <div class="text-[#5FCB1F] font-bold w-[15%]">${{ (sale.product.public_price *
+          sale.quantity).toLocaleString('en-US', {
+            minimumFractionDigits: 2
+          }) }}</div>
         <div class="w-[5%] text-right">
-          <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
-            @confirm="deleteItem(sale.product.id)">
+          <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
+            title="¿Continuar?" @confirm="deleteItem(sale.product.id)">
             <template #reference>
-              <i class="fa-regular fa-trash-can mr-2 text-primary cursor-pointer p-2 hover:bg-gray-100 rounded-full"></i>
+              <i
+                class="fa-regular fa-trash-can mr-2 text-primary cursor-pointer p-2 hover:bg-gray-100 rounded-full"></i>
             </template>
           </el-popconfirm>
         </div>
@@ -64,14 +68,16 @@
   </div>
 
   <!-- vista movil -->
-  <div :class="saleProducts?.length ? 'h-[230px]' : 'h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
+  <div :class="saleProducts.length ? 'h-[230px]' : 'h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-2 border rounded-md items-center relative">
       <figure>
-        <img class="mx-auto w-3/4 object-contain" :src="sale.product.global_product_id ? sale.product.global_product.media[0]?.original_url : sale.product.media[0]?.original_url" alt="">
+        <img class="mx-auto w-3/4 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
+          :alt="sale.product.name">
       </figure>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
-        <p class="font-bold">{{ sale.product.global_product_id ? sale.product.global_product.name : sale.product.name }}</p>
+        <p class="font-bold">{{ sale.product.name }}
+        </p>
         <div class="flex items-center space-x-2">
           <template v-if="editMode !== index">
             ${{ sale.product.public_price }}
@@ -103,8 +109,9 @@
             </div>
           </template>
         </div>
-          <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small" :max="sale.product.current_stock" :precision="2" />
-          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
+        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small"
+          :max="sale.product.current_stock" :precision="2" />
+        <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
         <div class="text-[#5FCB1F] font-bold">${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
           minimumFractionDigits: 2
         }) }}</div>
@@ -121,16 +128,16 @@
       </div>
     </div>
   </div>
-  <div class="text-center text-gray-500 text-sm mt-14" v-if="saleProducts?.length == 0">
+  <div class="text-center text-gray-500 text-sm mt-14" v-if="saleProducts.length == 0">
     <p v-if="isScanOn" class="flex items-center justify-center text-gray99 text-sm">
       Escanea un producto para comenzar la venta
       <i class="fa-regular fa-hand-point-up ml-3"></i>
-    </p>  
+    </p>
     <p v-else class="flex items-center justify-center text-gray99 text-sm">
       Busca un producto para comenzar la venta
       <i class="hidden lg:inline fa-regular fa-hand-point-right ml-3"></i>
       <i class="lg:hidden fa-regular fa-hand-point-down ml-3"></i>
-    </p>  
+    </p>
   </div>
 </template>
 

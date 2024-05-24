@@ -230,22 +230,21 @@ class SaleController extends Controller
 
     private function storeEachProductSold($sold_products, $created_at = null )
     {
-        // obtiene la primera caja registradora de la tienda
+        // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
         foreach ($sold_products as $product) {
-            $is_global_product = isset($product['product']['global_product_id']);
+            $is_global_product = explode('_', $product['product']['id'])[0] == 'global';
+            $product_id = explode('_', $product['product']['id'])[1];
 
-            $product_name = $is_global_product
-                ? GlobalProductStore::find($product['product']['id'])->globalProduct->name
-                : Product::find($product['product']['id'])->name;
+            $product_name = $product['product']['name'];
 
             //regiatra cada producto vendido
             Sale::create([
                 'current_price' => $product['product']['public_price'],
                 'quantity' => $product['quantity'],
                 'product_name' => $product_name,
-                'product_id' => $product['product']['id'],
+                'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
                 'store_id' => auth()->user()->store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
@@ -261,7 +260,7 @@ class SaleController extends Controller
             ProductHistory::create([
                 'description' => 'Registro de venta. ' . $product['quantity'] . ' piezas',
                 'type' => 'Venta',
-                'historicable_id' => $product['product']['id'],
+                'historicable_id' => $product_id,
                 'historicable_type' => $is_global_product
                     ? GlobalProductStore::class
                     : Product::class,
@@ -273,8 +272,8 @@ class SaleController extends Controller
             $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
             if ($is_inventory_on) {
                 $current_product = $is_global_product
-                    ? GlobalProductStore::find($product['product']['id'])
-                    : Product::find($product['product']['id']);
+                    ? GlobalProductStore::find($product_id)
+                    : Product::find($product_id);
                 
                 $current_product->decrement('current_stock', $product['quantity']);
 
@@ -291,6 +290,71 @@ class SaleController extends Controller
             }
         }
     }
+
+    // *****borrar
+    // private function storeEachProductSold($sold_products, $created_at = null )
+    // {
+    //     // obtiene la primera caja registradora de la tienda
+    //     $cash_register = CashRegister::find(auth()->user()->cash_register_id);
+
+    //     foreach ($sold_products as $product) {
+    //         $is_global_product = isset($product['product']['global_product_id']);
+
+    //         $product_name = $is_global_product
+    //             ? GlobalProductStore::find($product['product']['id'])->globalProduct->name
+    //             : Product::find($product['product']['id'])->name;
+
+    //         //regiatra cada producto vendido
+    //         Sale::create([
+    //             'current_price' => $product['product']['public_price'],
+    //             'quantity' => $product['quantity'],
+    //             'product_name' => $product_name,
+    //             'product_id' => $product['product']['id'],
+    //             'is_global_product' => $is_global_product,
+    //             'store_id' => auth()->user()->store_id,
+    //             'cash_register_id' => auth()->user()->cash_register_id,
+    //             'user_id' => auth()->id(),
+    //             'created_at' => $created_at ?? now(),
+    //         ]);
+
+    //         //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+    //         $cash_register->current_cash += $product['product']['public_price'] * $product['quantity'];
+    //         $cash_register->save();
+
+    //         //Registra el historial de venta de cada producto
+    //         ProductHistory::create([
+    //             'description' => 'Registro de venta. ' . $product['quantity'] . ' piezas',
+    //             'type' => 'Venta',
+    //             'historicable_id' => $product['product']['id'],
+    //             'historicable_type' => $is_global_product
+    //                 ? GlobalProductStore::class
+    //                 : Product::class,
+    //             'created_at' => $created_at ?? now(),
+    //         ]);
+
+    //         //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
+    //         // Verifica si 'global_product_id' existe en 'product'
+    //         $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+    //         if ($is_inventory_on) {
+    //             $current_product = $is_global_product
+    //                 ? GlobalProductStore::find($product['product']['id'])
+    //                 : Product::find($product['product']['id']);
+                
+    //             $current_product->decrement('current_stock', $product['quantity']);
+
+    //             // notificar si ha llegado al limite de existencias bajas
+    //             if ($current_product->current_stock <= $current_product->min_stock) {
+    //                 $title = "Bajo stock";
+    //                 $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
+    //                 $url =  $is_global_product 
+    //                     ? route('global-product-store.show', $current_product->id)
+    //                     : route('products.show', $current_product->id);
+
+    //                 auth()->user()->notify(new BasicNotification($title, $description, $url));
+    //             }
+    //         }
+    //     }
+    // }
 
 
     public function fetchCashRegisterSales($cash_register_id)
