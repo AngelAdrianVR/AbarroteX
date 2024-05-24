@@ -238,14 +238,8 @@ export default {
                             // Obtener producto mas reciente agregado
                             const response = await axios.get(route('products.get-all-for-indexedDB'));
                             const product = response.data.local_products.find(item => item.id == this.product.data.id);
-
-                            // Descargar y almacenar imágenes
-                            if (product.image_url) {
-                                const imageResponse = await axios.get(product.image_url, { responseType: 'blob' });
-                                const imageBlob = imageResponse.data;
-                                product.image = imageBlob;
-                            }
-
+                            console.log(product)
+                             // actualizar a indexedDB
                             if (product) {
                                 await addOrUpdateItem('products', product);
                             }
@@ -265,6 +259,7 @@ export default {
                             const response = await axios.get(route('products.get-all-for-indexedDB'));
                             const product = response.data.local_products.find(item => item.id == this.product.data.id);
 
+                            // actualizar a indexedDB
                             if (product) {
                                 await addOrUpdateItem('products', product);
                             }

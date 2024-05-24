@@ -242,12 +242,7 @@ export default {
                         const response = await axios.get(route('products.get-all-for-indexedDB'));
                         const product = response.data.local_products[0];
 
-                        // Descargar y almacenar imágenes
-                        if (product.image_url) {
-                            const imageResponse = await axios.get(product.image_url, { responseType: 'blob' });
-                            const imageBlob = imageResponse.data;
-                            product.image = imageBlob;
-                        }
+                        // agregar a indexedDB
                         await addOrUpdateItem('products', product);
 
                         // toast
