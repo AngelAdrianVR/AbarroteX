@@ -2,14 +2,16 @@
     <OnlineStoreLayout :title="store.name">
         <div ref="scrollContainer" style="height: 91vh; overflow-y: scroll;" @scroll="handleScroll">
             <!-- Banners -->
-            <section class="my-4 mx-3">
-                <figure class="md:w-1/2 mx-auto">
-                    <img class="rounded-lg" src="@/../../public/images/black_logo.png" alt="">
-                    <div class="flex items-center justify-center space-x-3">
-                        <i class="fa-solid fa-circle text-xs text-grayD9"></i>
+            <section v-if="banners.media?.length" class="my-4 mx-3">
+                <figure class="md:w-1/2 h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
+                    <img class="!rounded-md h-full object-contain" :src="banners.media[currentBanner].original_url" alt="">
+                    <div class="flex items-center justify-center space-x-3 mt-4">
+                        <i @click="currentBanner = index" v-for="(dot, index) in banners.media?.length" :key="dot" :class="index == currentBanner ? 'text-primary' : 'cursor-pointer text-xs' "
+                            class="fa-solid fa-circle text-grayD9 transition-all duration-300"></i>
                     </div>
                 </figure>
             </section>
+
             <!-- Separador de banner y productos -->
             <div class="border-b border-grayD9 my-10"></div>
 
@@ -42,7 +44,8 @@ export default {
 data() {
     return {
         loading: false, // bandera de carga para recuperar mas items con scroll.
-        visibleProducts: this.products //variable local de productos visibles
+        visibleProducts: this.products, //variable local de productos visibles
+        currentBanner: 0 //index de banners
     }
 },
 components:{
@@ -54,7 +57,8 @@ props:{
 store: Object,
 products: Array,
 total_products: Number,
-store_id: Number //id de la tienda para guardarla en el localStorage
+store_id: Number, //id de la tienda para guardarla en el localStorage
+banners: Object, //banners
 },
 methods:{
     handleScroll() {
@@ -98,6 +102,11 @@ methods:{
                 return ;
             }
     },
+    startTimer() {
+        this.timer = setInterval(() => {
+            this.currentBanner = (this.currentBanner + 1) % this.banners.media?.length;
+        }, 5000);
+    },
 },
 mounted() {
     this.visibleProducts = this.products;
@@ -105,6 +114,9 @@ mounted() {
 
     // Guardar store_id en el localStorage
     localStorage.setItem('storeId', this.store_id);
+
+    //iniciar contador para cambiar banners automaticamente.
+    this.startTimer()
 }
 }
 </script>
