@@ -208,6 +208,7 @@ class ProductController extends Controller
     }
 
 
+    // *******borrar
     public function getProductScaned($product_id)
     {
         $is_local_product = request()->boolean('is_local_product');
@@ -444,7 +445,7 @@ class ProductController extends Controller
             ->get()
             ->map(function ($product) {
                 return [
-                    'id' => $product->id,
+                    'id' => 'local_' . $product->id,
                     'name' => $product->name,
                     'code' => $product->code,
                     'public_price' => $product->public_price,
@@ -459,7 +460,7 @@ class ProductController extends Controller
             ->get()
             ->map(function ($tp) {
                 return [
-                    'id' => $tp->id,
+                    'id' => 'global_' . $tp->id,
                     'name' => $tp->globalProduct->name,
                     'code' => $tp->globalProduct->code,
                     'public_price' => $tp->public_price,

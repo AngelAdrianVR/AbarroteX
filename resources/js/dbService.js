@@ -113,6 +113,38 @@ function getItemByAttributes(storeName, attributes) {
   });
 }
 
+function getItemByPartialAttributes(storeName, attributes) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+    const indexKeys = Object.keys(attributes);
+    const results = [];
+
+    let completed = 0;
+
+    indexKeys.forEach(key => {
+      const index = store.index(key);
+      const request = index.getAll();
+
+      request.onsuccess = () => {
+        const regex = new RegExp(attributes[key], 'i');
+        const matchingItems = request.result.filter(item => regex.test(item[key]));
+        results.push(...matchingItems);
+        completed++;
+        if (completed === indexKeys.length) {
+          const uniqueResults = Array.from(new Set(results.map(item => item.id)))
+            .map(id => results.find(item => item.id === id));
+          resolve(uniqueResults);
+        }
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  });
+}
+
 function addOrUpdateItem(storeName, item) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite');
@@ -231,6 +263,7 @@ export {
   ensureObjectStore,
   getAll,
   getItemByAttributes,
+  getItemByPartialAttributes,
   addOrUpdateItem,
   deleteItem,
   deleteObjectStore,
