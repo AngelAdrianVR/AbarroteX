@@ -5,7 +5,7 @@
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
-                    <ThirthButton @click="openEntryModal">Entrada de producto</ThirthButton>
+                    <ThirthButton v-if="isInventoryOn" @click="openEntryModal">Entrada de producto</ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('global-product-store.edit', global_product_store.id))"
                         class="!rounded-full">Editar</PrimaryButton>
                 </div>
@@ -237,6 +237,7 @@ import axios from 'axios';
 import { useForm } from "@inertiajs/vue3";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import { addOrUpdateItem } from '@/dbService.js';
 
 export default {
     data() {
@@ -358,6 +359,18 @@ export default {
                         });
                         this.fetchHistory();
                         this.entryLoading = false;
+
+                        // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
+                        if (this.isInventoryOn) {
+                            const product = {
+                                id: 'global_' + this.global_product_store.id,
+                                name: this.global_product_store.global_product.name,
+                                code: this.global_product_store.global_product.code,
+                                public_price: this.global_product_store.public_price,
+                                current_stock: this.global_product_store.current_stock + this.form.quantity,
+                            };
+                            addOrUpdateItem('products', product);
+                        }
                     },
                 });
             }

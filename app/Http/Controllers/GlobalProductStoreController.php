@@ -119,7 +119,7 @@ class GlobalProductStoreController extends Controller
         // Crear gasto
         Expense::create([
             'concept' => 'Compra de producto: ' . $global_product_store->globalProduct->name,
-            'current_price' => $global_product_store->cost,
+            'current_price' => $global_product_store->cost ?? 0,
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
         ]);

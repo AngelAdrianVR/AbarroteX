@@ -232,6 +232,7 @@ import Modal from "@/Components/Modal.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
 import { useForm } from "@inertiajs/vue3";
+import { addOrUpdateItem } from "@/dbService.js";
 
 export default {
     data() {
@@ -281,11 +282,11 @@ export default {
         handleChangeCashAmount() {
             const total = this.product.data.cost * this.form.quantity;
             if (this.form.cash_amount > this.cash_register.current_cash) {
-                this.cashAmountMessage = 
-                'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+                this.cashAmountMessage =
+                    'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else if (this.form.cash_amount > total) {
-                this.cashAmountMessage = 
-                'El monto no debe superar el total del gasto ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+                this.cashAmountMessage =
+                    'El monto no debe superar el total del gasto ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else {
                 this.cashAmountMessage = null;
             }
@@ -331,7 +332,7 @@ export default {
                 this.form.put(route('products.entry', this.product.data?.id), {
                     onSuccess: () => {
                         this.form.reset();
-                        this, this.entryProductModal = false;
+                        this.entryProductModal = false;
                         this.$notify({
                             title: 'Correcto',
                             text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
@@ -339,6 +340,18 @@ export default {
                         });
                         this.fetchHistory();
                         this.entryLoading = false;
+
+                        // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
+                        if (this.isInventoryOn) {
+                            const product = {
+                                id: 'local_' + this.product.data.id,
+                                name: this.product.data.name,
+                                code: this.product.data.code,
+                                public_price: this.product.data.public_price,
+                                current_stock: this.product.data.current_stock + this.form.quantity,
+                            };
+                            addOrUpdateItem('products', product);
+                        }
                     },
                 });
             }

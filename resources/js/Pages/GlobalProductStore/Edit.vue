@@ -234,7 +234,7 @@ export default {
                         // guardar nuevo producto a IndexedDB
                         // Obtener producto que coincida con el id editado
                         const response = await axios.get(route('products.get-all-for-indexedDB'));
-                        const product = response.data.transfered_products.find(item => item.id == this.global_product_store.id);
+                        const product = response.data.transfered_products.find(item => item.id.split('_')[1] == this.global_product_store.id);
 
                         // actualizar a indexedDB
                         if (product) {

@@ -44,7 +44,7 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $vailidated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . auth()->user()->store_id,
             'code' => 'nullable|unique:products,code,NULL,id,store_id,' . auth()->user()->store_id . '|string|max:100',
             'public_price' => 'required|numeric|min:0|max:9999',
@@ -55,8 +55,10 @@ class ProductController extends Controller
             'category_id' => 'required',
             'brand_id' => 'required',
         ]);
-
-        $product = Product::create($request->except('imageCover') + ['store_id' => auth()->user()->store_id]);
+        
+        // forzar default de 1 en stock
+        $vailidated['current_stock'] = $vailidated['current_stock'] ?? 1;
+        $product = Product::create($vailidated + ['store_id' => auth()->user()->store_id]);
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
@@ -65,7 +67,6 @@ class ProductController extends Controller
 
         return to_route('products.show', $product->id);
     }
-
 
     public function show($product_id)
     {
@@ -247,7 +248,7 @@ class ProductController extends Controller
         // Crear gasto
         Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
-            'current_price' => $product->cost,
+            'current_price' => $product->cost ?? 0,
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
         ]);
