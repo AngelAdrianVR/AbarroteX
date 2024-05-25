@@ -267,12 +267,12 @@ async function initializeProducts() {
   if (indexedDBProducts.length < serverProducts.length) {
     console.log('Sincronizando indexedDB');
     // actualizar BDD local
-    addOrupdateBatchOfItems('products', serverProducts);
+    addOrUpdateBatchOfItems('products', serverProducts);
     console.log('indexedDB sincronizada!!');
   }
 }
 
-async function addOrupdateBatchOfItems(storeName, items) {
+async function addOrUpdateBatchOfItems(storeName, items) {
   const promises = items.map((item) => addOrUpdateItem(storeName, item));
   await Promise.all(promises);
 }
@@ -306,6 +306,6 @@ export {
   clearObjectStore,
   tableExists,
   initializeProducts,
-  addOrupdateBatchOfItems,
+  addOrUpdateBatchOfItems,
   prepareImageToStore
 };

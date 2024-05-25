@@ -368,6 +368,7 @@ export default {
                                 code: this.global_product_store.global_product.code,
                                 public_price: this.global_product_store.public_price,
                                 current_stock: this.global_product_store.current_stock + this.form.quantity,
+                                image_url: this.global_product_store.global_product.media[0]?.original_url,
                             };
                             addOrUpdateItem('products', product);
                         }

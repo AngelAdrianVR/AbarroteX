@@ -349,6 +349,7 @@ export default {
                                 code: this.product.data.code,
                                 public_price: this.product.data.public_price,
                                 current_stock: this.product.data.current_stock + this.form.quantity,
+                                image_url: this.product.data.imageCover[0]?.original_url,
                             };
                             addOrUpdateItem('products', product);
                         }

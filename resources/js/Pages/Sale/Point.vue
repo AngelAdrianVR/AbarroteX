@@ -33,7 +33,7 @@
       </p>
       <p class="text-xs">
         Las ventas que realices se guardan en el dispositivo que estas utilizando y
-        luego se transfieren automáticamente a la nube cuando tengas internet. 
+        luego se transfieren automáticamente a la nube cuando tengas internet.
         ¡Así nunca perderán información!. <br>
         <b>Es importante que no recargues la página para poder registrar ventas</b>
       </p>
@@ -192,28 +192,6 @@
               </div>
             </div>
           </div>
-          <!-- ***BUSCADOR ANTIGUO *** -->
-          <!-- <div class="relative">
-            <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
-              ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
-              type="search">
-            <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
-            <div v-if="searchFocus && searchQuery"
-              class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
-              <ul v-if="productsFound?.length > 0 && !loading">
-                <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
-                  class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ?
-                    product.global_product?.name : product.name }}</li>
-              </ul>
-              <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron
-                coincidencias
-              </p>
-              <div v-if="loading" class="flex justify-center items-center py-10">
-                <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-              </div>
-            </div>
-          </div> -->
-
           <!-- Detalle de producto encontrado -->
           <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
             <div class="relative" v-if="productFoundSelected">
@@ -247,40 +225,6 @@
               <i class="fa-regular fa-hand-point-up ml-3"></i>
             </p>
           </div>
-          <!-- *** Detalle de producto encontrado ANTIGUO *** -->
-          <!-- <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-            <div class="relative" v-if="productFoundSelected">
-              <i @click="productFoundSelected = null"
-                class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
-              <figure class="h-36">
-                <img class="object-contain h-36 mx-auto"
-                  :src="productFoundSelected?.global_product_id ? productFoundSelected?.global_product?.media[0]?.original_url : productFoundSelected?.media[0]?.original_url">
-              </figure>
-              <div class="flex justify-between items-center mt-2 mb-4">
-                <p class="font-bold">{{ productFoundSelected?.global_product_id ?
-                  productFoundSelected?.global_product?.name :
-                  productFoundSelected?.name }}</p>
-                <p class="text-[#5FCB1F]">${{ productFoundSelected?.public_price }}</p>
-              </div>
-              <div class="flex justify-between items-center">
-                <p class="text-gray99">Cantidad</p>
-                <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0"
-                  :max="productFoundSelected.current_stock" :precision="2" />
-                <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
-              </div>
-              <div class="text-center mt-7">
-                <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
-                  class="!rounded-full !px-24" :disabled="quantity == 0">
-                  Agregar
-                </PrimaryButton>
-              </div>
-            </div>
-            <p v-else class="text-center text-gray99 text-sm">
-              Busca el producto
-              <i class="fa-regular fa-hand-point-up ml-3"></i>
-            </p>
-          </div> -->
-
           <!-- Total por cobrar -->
           <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
             class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
@@ -314,11 +258,11 @@
                   :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !this.$page.props.auth?.user?.cash_register_id"
                   class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
                 <p v-if="!this.$page.props.auth?.user?.cash_register_id" class="text-xs text-red-600 mt-1">
-                  Para cobrar asigna una caja registradora <span @click="cashRegisterModal = true" class="underline cursor-pointer text-primary">asignar una</span>
+                  Para cobrar asigna una caja registradora <span @click="cashRegisterModal = true"
+                    class="underline cursor-pointer text-primary">asignar una</span>
                 </p>
               </div>
             </div>
-
             <!-- cobrando -->
             <div v-else>
               <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() -
@@ -557,7 +501,7 @@ import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
-import { getItemByPartialAttributes, getItemByAttributes } from '@/dbService.js';
+import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
   data() {
@@ -662,6 +606,11 @@ export default {
     cash_registers: Array
   },
   methods: {
+    sumCashForSale() {
+      this.localCurrentCash += this.editableTabs[this.editableTabsValue - 1]?.saleProducts.reduce((accum, item) => {
+        return accum += item.product.public_price * item.quantity;
+      }, 0);
+    },
     selectProductFromList(product) {
       // crear link virtual de imagen blob si es que tiene imagen el producto
       if (product.image && !product.imageUrl) {
@@ -678,6 +627,21 @@ export default {
       } else {
         this.quantity = 0;
       }
+    },
+    updateCurrentStockInIndexedDB() {
+      const products = this.editableTabs[this.editableTabsValue - 1]?.saleProducts.map(item => {
+        const product = {
+          id: item.product.id,
+          name: item.product.name,
+          code: item.product.code,
+          public_price: item.product.public_price,
+          current_stock: item.product.current_stock <= item.quantity ? 0 : item.product.current_stock -= item.quantity,
+          image_url: item.product.image_url,
+        };
+        return product;
+      });
+
+      addOrUpdateBatchOfItems('products', products);
     },
     async store() {
       if (!this.storeProcessing) {
@@ -708,9 +672,10 @@ export default {
           }
         } else {
           this.saveToLocalStorage();
+          this.updateCurrentStockInIndexedDB();
           this.storeProcessing = false;
+          this.sumCashForSale(); //sumar lo vendido a la caja
           this.clearTab();
-          this.fetchCashRegister();
         }
       }
     },
@@ -785,18 +750,6 @@ export default {
         console.log(error);
       }
     },
-    // async searchProducts() {
-    //   try {
-    //     this.loading = true;
-    //     const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
-    //     if (response.status === 200) {
-    //       this.productsFound = response.data.items;
-    //       this.loading = false;
-    //     }
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // },
     async fetchTotalSaleForCashCut() {
       try {
         const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
@@ -855,56 +808,6 @@ export default {
         this.scanning = false;
       }
     },
-    // async getProductByCode() {
-    //   this.scanning = true;
-    //   //buscar primero en productos transferidos del catalogo con el codigo escaneado
-    //   let productScaned = this.products.find(item => item.global_product?.code === this.scannerQuery);
-    //   let is_local_product = false;
-
-    //   //si no se encontró en productos transferidos se busca en productos locales
-    //   if (productScaned == null) {
-    //     productScaned = this.products.find(item => item.code === this.scannerQuery);
-    //     is_local_product = true;
-    //   }
-
-    //   // si no se encontró el producto escaneado aparece un mensaje y no busca en la bd para no tardar más
-    //   if (productScaned != null) {
-    //     try {
-    //       if (is_local_product) {
-    //         const response = await axios.get(route('products.get-product-scaned', [productScaned.id, { is_local_product: is_local_product }]));
-
-    //         if (response.status === 200 && response.data && response.data.item) {
-    //           this.productSelected = response.data.item;
-    //           this.addSaleProduct(this.productSelected);
-    //         } else {
-    //           console.error('La respuesta no tiene el formato esperado.');
-    //         }
-    //       } else {
-    //         const response = await axios.get(route('products.get-product-scaned', [productScaned.global_product.id, { is_local_product: is_local_product }]));
-
-    //         if (response.status === 200 && response.data && response.data.item) {
-    //           this.productSelected = response.data.item;
-    //           this.addSaleProduct(this.productSelected);
-    //         } else {
-    //           console.error('La respuesta no tiene el formato esperado.');
-    //         }
-    //       }
-    //     } catch (error) {
-    //       console.error('Error al realizar la solicitud:', error);
-    //     } finally {
-    //       this.scanning = false;
-    //     }
-    //   } else {
-    //     this.$notify({
-    //       title: "Poducto no encontrado",
-    //       message: "El producto escaneado no esta registrado en la base de datos",
-    //       type: "warning"
-    //     });
-    //     console.error('El producto escaneado no tiene la propiedad "id".');
-    //     this.scannerQuery = null;
-    //     this.scanning = false;
-    //   }
-    // },
     addSaleProduct(product) {
       //revisa si el producto a agregar ya esta dentro del arreglo
       const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
@@ -934,39 +837,6 @@ export default {
         localStorage.setItem('pendentProcess', true);
       }
     },
-    // addSaleProduct(product) {
-    //   //revisa si el producto escaneado ya esta dentro del arreglo
-    //   const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
-    //     if (product.global_product_id) {
-    //       return sale.product.global_product_id == product.global_product_id;
-    //     } else {
-    //       return sale.product.name == product.id && !sale.product.global_product_id;
-    //     }
-    //   });
-    //   if (existingIndex !== -1) {
-    //     this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
-    //       ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-    //       quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
-    //     };
-    //   } else {
-    //     // Si el producto no existe, agrégalo al array
-    //     this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
-    //       product: product,
-    //       quantity: this.quantity
-    //     });
-    //   }
-    //   this.scannerQuery = null;
-    //   this.quantity = 1;
-    //   this.scanning = false;
-    //   this.inputFocus();
-
-    //   // indicar al navegador mediante el local storage que hay proceso pendiente
-    //   const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
-    //   if (!pendentProcess) {
-    //     // guardar el valor en el localStorage
-    //     localStorage.setItem('pendentProcess', true);
-    //   }
-    // },
     clearTab() {
       this.searchQuery = null;
       this.scannerQuery = null;
