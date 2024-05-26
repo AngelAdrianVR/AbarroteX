@@ -466,15 +466,15 @@ class ProductController extends Controller
         $columnNames = [];
         // Obtener datos y guardar en la base de datos
         foreach ($worksheet->getRowIterator() as $row) {
-            if ($row->getRowIndex() < 3) {
-                continue; // Saltar las primeras 2 filas
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
             }
 
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
 
-            if ($row->getRowIndex() == 3) {
-                // Obtener los nombres de columna de la tercera fila del archivo Excel
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la fila 4 del archivo Excel
                 foreach ($cellIterator as $cell) {
                     $columnNames[] = $cell->getValue();
                 }
@@ -493,7 +493,9 @@ class ProductController extends Controller
                 $columnNames[0] => 'required|string|max:120|unique:products,name',
                 $columnNames[1] => 'required|numeric|min:0|max:999999',
                 $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[3] => $data[$columnNames[3]] ? 'unique:products,code' : '',
+                $columnNames[3] => $data[$columnNames[3]] 
+                    ?  ['max:100', new \App\Rules\UniqueProductCode()]
+                    : '',
                 $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999' : '',
                 $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999' : '',
                 $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '',
@@ -514,15 +516,15 @@ class ProductController extends Controller
     private function storeProductsFromFile($worksheet)
     {
         foreach ($worksheet->getRowIterator() as $row) {
-            if ($row->getRowIndex() < 3) {
-                continue; // Saltar las primeras 2 filas
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
             }
 
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
 
-            if ($row->getRowIndex() == 3) {
-                // Obtener los nombres de columna de la tercera fila del archivo Excel
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la cuarta fila del archivo Excel
                 foreach ($cellIterator as $cell) {
                     $columnNames[] = $cell->getValue();
                 }

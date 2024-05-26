@@ -148,7 +148,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { addOrUpdateItem, clearObjectStore, addOrUpdateBatchOfItems } from '@/dbService.js';
+import { addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
   name: 'SelectGlobalProduct',

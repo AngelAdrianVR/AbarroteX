@@ -269,6 +269,7 @@ import Modal from "@/Components/Modal.vue";
 import DialogModal from "@/Components/DialogModal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
+import { addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
     data() {
@@ -401,6 +402,11 @@ export default {
                 });
 
                 if (response.status === 200) {
+                    // Obtener productos
+                    const response = await axios.get(route('products.get-all-for-indexedDB'));
+                    const products = response.data.products;
+                    // actualizar indexedDB
+                    await addOrUpdateBatchOfItems('products', products);
                     this.isImporting = false;
                     this.importWasSuccessful = true;
                     this.importWasWrong = false;
