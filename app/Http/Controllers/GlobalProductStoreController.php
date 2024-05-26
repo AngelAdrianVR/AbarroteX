@@ -50,8 +50,9 @@ class GlobalProductStoreController extends Controller
         $global_product_store = GlobalProductStore::with('globalProduct.media')
             ->where('store_id', auth()->user()->store_id)
             ->findOrFail($global_product_store_id);
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProductStore/Edit', compact('global_product_store', 'categories', 'brands'));
     }
@@ -173,8 +174,9 @@ class GlobalProductStoreController extends Controller
     {
         $global_products = GlobalProduct::all(['id', 'name']);
         $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
-        $categories = Category::all(['id', 'name']);
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }

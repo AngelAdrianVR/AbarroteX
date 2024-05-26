@@ -14,9 +14,9 @@
                 <el-tab-pane label="Usuarios" name="2">
                     <Users :users="users" />
                 </el-tab-pane>
-                <el-tab-pane label="Tienda en línea" name="3">
+                <!-- <el-tab-pane label="Tienda en línea" name="3">
                     <OnlineStore :banners="banners" :logo="logo" />
-                </el-tab-pane>
+                </el-tab-pane> -->
                 <!-- <el-tab-pane label="Productos" name="4">
                     Productos
                 </el-tab-pane> -->

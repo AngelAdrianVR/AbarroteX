@@ -22,12 +22,12 @@ const form = useForm({
 });
 
 const showPassword = ref(false);
-// const types = ['Abarrotes', 'Accesorios', 'Bsutería/Joyería', 'Boutique / Tienda de Ropa', 'cafetería', 'Carnicería',
-//     'Cremería', 'Dulcería', 'Farmacias / Boticas', 'Frutería / Verdulería', 'Ferreterías / Tlapalerías', 'Juguetería', 'Librería', 'Licorería / Cervecería',
-//     'Limpieza', 'Materiales Para Construcción', 'Supermercado', ' Mueblería', 'Taquería', 'Agroquímicos / Orgánicos', 'Panadería', 'Papelería',
-//     'Perfumería', 'Tienda de Pinturas', 'Tienda de plásticos', 'Refaccionaria', 'Kiosco', 'Tecnología', 'Veterinaria', 'Zapatería',
-//     'Óptica', 'Otro'
-// ]
+const types = ['Abarrotes', 'Accesorios', 'Bisutería/Joyería', 'Boutique / Tienda de Ropa', 'Cafetería', 'Carnicería',
+    'Cremería', 'Dulcería', 'Farmacia', 'Frutería / Verdulería', 'Ferreterías / Tlapalerías', 'Juguetería', 'Librería', 'Licorería / Cervecería',
+    'Limpieza', 'Materiales Para Construcción', 'Supermercado', ' Mueblería', 'Taquería', 'Agroquímicos / Orgánicos', 'Panadería', 'Papelería',
+    'Perfumería', 'Tienda de Pinturas', 'Tienda de plásticos', 'Refaccionaria', 'Kiosco', 'Tecnología', 'Veterinaria', 'Zapatería',
+    'Óptica', 'Otro'
+]
 
 const submit = () => {
     form.post(route('register'), {
@@ -94,7 +94,7 @@ const submit = () => {
                 <InputError :message="form.errors.contact_phone" />
             </div>
             <div>
-                <div
+                <!-- <div
                     class="flex items-center space-x-2 py-2 mt-3 px-5 w-full h-10 border border-grayD9 rounded-full placeholder:text-sm placeholder:text-[#777777]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 !text-[#777777]">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
@@ -103,15 +103,15 @@ const submit = () => {
                     <input v-model="form.type" type="text"
                         class="text-sm w-full placeholder:text-sm placeholder:text-[#777777] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full"
                         placeholder="Giro. Ejemplo. Carnicería" required autofocus>
+                </div> -->
+                <div class="mt-3">
+                    <el-select class="w-1/2 !rounded-full h-10" v-model="form.type" filterable clearable placeholder="Seleccione el giro de su tienda"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="item in types" :key="item" :label="item" :value="item" />
+                    </el-select>
                 </div>
                 <InputError :message="form.errors.type" />
             </div>
-            <!-- <div class="mt-3">
-                <el-select class="w-1/2 !rounded-full h-10" v-model="form.type" filterable clearable placeholder="Seleccione el giro de su tienda"
-                    no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                    <el-option v-for="type in types" :key="type" :label="type" :value="type" />
-                </el-select>
-            </div> -->
 
             <h1 class="font-bold ml-9 text-sm mt-3">Contacto</h1>
 
