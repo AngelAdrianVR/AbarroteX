@@ -240,7 +240,7 @@ export default {
                             const product = response.data.local_products.find(item => item.id.split('_')[1] == this.product.data.id);
                              // actualizar a indexedDB
                             if (product) {
-                                await addOrUpdateItem('products', product);
+                                addOrUpdateItem('products', product);
                             }
 
                             this.$notify({
@@ -260,7 +260,7 @@ export default {
 
                             // actualizar a indexedDB
                             if (product) {
-                                await addOrUpdateItem('products', product);
+                                addOrUpdateItem('products', product);
                             }
 
                             this.$notify({

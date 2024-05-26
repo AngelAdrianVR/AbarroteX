@@ -238,7 +238,7 @@ export default {
 
                         // actualizar a indexedDB
                         if (product) {
-                            await addOrUpdateItem('products', product);
+                            addOrUpdateItem('products', product);
                         }
 
                         this.$notify({

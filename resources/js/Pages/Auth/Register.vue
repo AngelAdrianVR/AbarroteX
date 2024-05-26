@@ -38,7 +38,7 @@ const submit = () => {
 
 <template>
 
-    <Head title="Register" />
+    <Head title="Registro" />
 
     <AuthenticationCard>
         <template #logo>

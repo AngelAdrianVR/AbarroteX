@@ -46,7 +46,7 @@ class ProductController extends Controller
     {
         $vailidated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . auth()->user()->store_id,
-            'code' => 'nullable|unique:products,code,NULL,id,store_id,' . auth()->user()->store_id . '|string|max:100',
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode()],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
@@ -95,7 +95,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
-            'code' => 'nullable|string|max:100|unique:products,code,' . $product->id,
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
@@ -132,7 +132,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
-            'code' => 'nullable|string|max:100|unique:products,code,' . $product->id,
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
@@ -207,25 +207,6 @@ class ProductController extends Controller
 
         return response()->json(['items' => $products]);
     }
-
-
-    // *******borrar
-    // public function getProductScaned($product_id)
-    // {
-    //     $is_local_product = request()->boolean('is_local_product');
-
-    //     // si es producto local busca en la tabla de productos locales, si no, en la tabla de productos transferidos del catálogo
-    //     if ($is_local_product == '1') {
-    //         $product = Product::with(['category', 'brand', 'media'])->find($product_id);
-    //     } else {
-    //         $product = GlobalProductStore::whereHas('globalProduct', function ($query) use ($product_id) {
-    //             $query->where('id', $product_id);
-    //         })->with(['globalProduct.category', 'globalProduct.brand', 'globalProduct.media'])->first();
-    //     }
-
-    //     return response()->json(['item' => $product]);
-    // }
-
 
     public function entryStock(Request $request, $product_id)
     {
