@@ -95,7 +95,10 @@ class CashRegisterController extends Controller
         // Si se esta deshabilitando la caja buscar a los usuarios que tengan esa caja asignada y desasignarla
         if ( !$request->is_active) {
             $cash_register_user_asigned = User::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cash_register->id)->first();
-            $cash_register_user_asigned->update(['cash_register_id' => null]);
+
+            if ( $cash_register_user_asigned ) {
+                $cash_register_user_asigned->update(['cash_register_id' => null]);
+            }
         }
 
         $cash_register->update($validated);
