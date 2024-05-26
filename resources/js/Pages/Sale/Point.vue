@@ -640,7 +640,6 @@ export default {
         };
         return product;
       });
-
       addOrUpdateBatchOfItems('products', products);
     },
     async store() {
@@ -654,13 +653,15 @@ export default {
               }
             });
             if (response.status === 200) {
+              this.updateCurrentStockInIndexedDB();
+              this.clearTab();
+              this.fetchCashRegister();
+              
               this.$notify({
                 title: "Correcto",
                 text: "Se ha registrado la venta con éxito!",
                 type: "success",
               });
-              this.clearTab();
-              this.fetchCashRegister();
 
               // resetear variable de local storage a false
               localStorage.setItem('pendentProcess', false);
