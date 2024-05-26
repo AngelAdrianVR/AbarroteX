@@ -18,7 +18,9 @@ return new class extends Migration
             $table->unsignedMediumInteger('product_id')->nullable();
             $table->boolean('is_global_product');
             $table->unsignedFloat('quantity');
+            $table->foreignId('cash_register_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

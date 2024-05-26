@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Nuevo producto">
         <div class="px-3 md:px-10 py-7">
-            <Back />
+            <Back :to="route('products.index')" />
 
             <form v-if="products_quantity < 650" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
@@ -12,7 +12,7 @@
                         clearable />
                     <InputError :message="form.errors.name" />
                 </div>
-                <div class="mt-3">
+                <div v-if="canSeeCost" class="mt-3">
                     <div class="flex items-center">
                         <InputLabel value="Precio de compra" class="ml-3 mb-1" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
@@ -32,8 +32,7 @@
                     <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')"
-                        class="!self-end !justify-self-end">
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -180,6 +179,8 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+import { addOrUpdateItem } from "@/dbService.js";
+import axios from 'axios';
 
 export default {
     data() {
@@ -212,6 +213,8 @@ export default {
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showBrandFormModal: false, //muestra formulario para agregar proveedor
+            // Permisos de rol actual
+            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
         };
     },
     components: {
@@ -230,16 +233,29 @@ export default {
         brands: Array
     },
     methods: {
-        store() {
-            this.form.post(route("products.store"), {
-                onSuccess: () => {
-                    this.$notify({
-                        title: "Correcto",
-                        message: "Se ha agregado un nuevo producto",
-                        type: "success",
-                    });
-                },
-            });
+        async store() {
+            try {
+                this.form.post(route("products.store"), {
+                    onSuccess: async () => {
+                        // guardar nuevo producto a IndexedDB
+                        // Obtener producto mas reciente agregado
+                        const response = await axios.get(route('products.get-all-for-indexedDB'));
+                        const product = response.data.local_products[0];
+
+                        // agregar a indexedDB
+                        await addOrUpdateItem('products', product);
+
+                        // toast
+                        this.$notify({
+                            title: "Correcto",
+                            message: "",
+                            type: "success",
+                        });
+                    },
+                });
+            } catch (error) {
+                console.error(error);
+            }
         },
         async storeCategory() {
             try {

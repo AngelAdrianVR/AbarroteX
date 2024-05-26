@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Models\Product;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -27,7 +26,11 @@ class BasicNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        if (app()->environment() == 'production') {
+            return ['database', 'mail'];
+        } else {
+            return ['database'];
+        }
     }
 
     /**
@@ -36,9 +39,13 @@ class BasicNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject($this->title)
+            ->markdown('emails.basic-email-template', [
+                'greeting' => '¡Hola!',
+                'description' => $this->description,
+                'url' => $this->url,
+                'salutation' => 'Saludos',
+            ]);
     }
 
     /**

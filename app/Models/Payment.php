@@ -5,25 +5,36 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Payment extends Model
+class Payment extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'payment_method',
         'amount',
-        'next_payment',
-        'suscription_id'
-    ];  
-
-    protected $casts = [
-        'next_payment' => 'date'
+        'suscription_period',
+        'store_id',
+        'status',
+        'rejected_reason',
+        'notes',
+        'days_gifted',
+        'validated_at',
+        'validated_by_id',
     ];
 
+    protected $casts = ['validated_at' => 'datetime'];
+
     //relationships
-    public function suscription() :BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Suscription::class);
+        return $this->belongsTo(Store::class);
+    }
+
+    public function validatedBy(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class);
     }
 }

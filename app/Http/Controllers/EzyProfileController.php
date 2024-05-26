@@ -27,7 +27,6 @@ class EzyProfileController extends Controller
             'contact_phone' => $request->input('contact_phone'),
             'contact_name' => $request->input('name'),
         ]);
-
     }
     
     public function updateSuscription(Request $request)

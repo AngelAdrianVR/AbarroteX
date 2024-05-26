@@ -1,40 +1,106 @@
 <template>
   <AppLayout title="Registrar venta">
+    <div v-if="!isOnline" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-[#232323] text-white text-xs">
+      <p class="text-sm flex items-center space-x-3 font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24"
+          id="Wifi-Disabled--Streamline-Core" height="16" width="16">
+          <desc>Wifi Disabled Streamline Icon: https://streamlinehq.com</desc>
+          <g id="wifi-disabled--wireless-wifi-internet-server-network-disabled-off-offline-connection">
+            <path id="Vector 2432" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="m0.7960714285714285 0.7960714285714285 20.697857142857142 20.697857142857142" stroke-width="2.1">
+            </path>
+            <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M11.145 21.09573364285714c1.151915357142857 0 2.0857071428571428 -0.9337917857142857 2.0857071428571428 -2.0857071428571428s-0.9337917857142857 -2.0857071428571428 -2.0857071428571428 -2.0857071428571428c-1.1518994357142855 0 -2.0857071428571428 0.9337917857142857 -2.0857071428571428 2.0857071428571428s0.9338077071428571 2.0857071428571428 2.0857071428571428 2.0857071428571428Z"
+              stroke-width="2.1"></path>
+            <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M7.212454907142857 14.32936532142857c0.5177170928571428 -0.53150505 1.1366626285714285 -0.9539483142857142 1.820281007142857 -1.2423809142857143"
+              stroke-width="2.1"></path>
+            <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M3.757441221428571 11.6385006c0.9691532785714285 -0.9748053857142858 2.0014509428571428 -1.5694389 2.0014509428571428 -1.5694389"
+              stroke-width="2.1"></path>
+            <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M8.83744367142857 8.825040878571428s0.9409086642857143 -0.26260804285714284 2.3155170428571425 -0.26260804285714284c1.3745924571428572 0 2.7356357785714285 0.2717628642857143 4.004828378571428 0.7996378285714286 1.2691448357142856 0.5278749642857142 2.4215378357142856 1.3014812571428571 3.390675192857143 2.276286642857143"
+              stroke-width="2.1"></path>
+            <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M5.543936957142857 5.503400999999999c1.775701007142857 -0.7357929 3.678980421428571 -1.1145159214285714 5.601094885714286 -1.1145159214285714 1.9221144642857142 0 3.8253938785714285 0.3787230214285714 5.601126728571429 1.1145159214285714 1.7757169285714285 0.7357929 3.389035285714286 1.8142308642857141 4.74777 3.1737298071428572"
+              stroke-width="2.1"></path>
+            <path id="Vector_6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              d="M0.7960714285714285 8.677305942857142c0.57410124 -0.5744133 1.1653052785714284 -1.0461015428571427 1.87291725 -1.5767946"
+              stroke-width="2.1"></path>
+          </g>
+        </svg>
+        <span>Sin conexión a Internet</span>
+      </p>
+      <p class="text-xs">
+        Las ventas que realices se guardan en el dispositivo que estas utilizando y
+        luego se transfieren automáticamente a la nube cuando tengas internet.
+        ¡Así nunca perderán información!. <br>
+        <b>Es importante que no recargues la página para poder registrar ventas</b>
+      </p>
+    </div>
+    <div v-if="syncingData" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
+      <p class="text-sm flex items-center space-x-3 font-semibold">
+        <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          id="Rotate-Right--Streamline-Sharp" height="16" width="16">
+          <desc>Rotate Right Streamline Icon: https://streamlinehq.com</desc>
+          <g id="rotate-right">
+            <path id="Vector 2754" stroke="currentColor" d="M20.2047 0.5135V4.8893H15.8289" stroke-width="2"></path>
+            <path id="Ellipse 1206" stroke="currentColor"
+              d="M20.2047 4.764C18.2001 2.4929 15.2674 1.0605 12.0001 1.0605C5.9583 1.0605 1.0605 5.9583 1.0605 12C1.0605 16.194 3.4207 19.8367 6.8853 21.6726"
+              stroke-width="2"></path>
+            <path id="Ellipse 1207" stroke="currentColor"
+              d="M9.1081 22.5533C10.0293 22.8051 10.999 22.9395 11.9999 22.9395C13.4231 22.9395 14.7826 22.6678 16.0297 22.1734"
+              stroke-width="2"></path>
+            <path id="Ellipse 1208" stroke="currentColor"
+              d="M17.7655 21.2986C19.2694 20.3641 20.5299 19.0749 21.4301 17.548" stroke-width="2"></path>
+            <path id="Ellipse 1209" stroke="currentColor" d="M22.9395 12C22.9395 13.2879 22.717 14.5237 22.3083 15.6713"
+              stroke-width="2"></path>
+          </g>
+        </svg>
+        <span>Sincronizando datos</span>
+      </p>
+      <p class="text-xs">
+        Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
+      </p>
+    </div>
     <div class="px-2 lg:px-6 py-7">
       <!-- header botones -->
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <!-- Dinero en caja -->
-        <div v-if="isShowCahsOn" class="mt-4 lg:mt-0 flex items-center justify-center  space-x-3 text-gray99">
+        <div v-if="isShowCahsOn" class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
-            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
             class="size-4 cursor-pointer">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
           </svg>
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
-            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 cursor-pointer">
+            fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
           </svg>
-          <p class="text-sm flex items-center space-x-2">
-            Efectivo en caja:
-            <b :class="(localCurrentCash >= cash_register.max_cash) && isMaxCashOn ? 'text-red-600' : ''" class="ml-2">
+          <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
+            Efectivo en "{{ asignedCashRegister?.name }}":
+            <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
+              class="ml-2">
               {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
                 '*****' }}
             </b>
-            <el-tooltip v-if="(localCurrentCash >= cash_register.max_cash) && isMaxCashOn && showCashRegisterMoney"
+            <el-tooltip
+              v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
               content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="size-4 text-red-600">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
               </svg>
             </el-tooltip>
           </p>
+          <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
         </div>
-        <!-- Dropdon -->
+        <!-- Dropdown -->
         <div class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
           <el-col :span="3">
             <el-dropdown trigger="click">
@@ -56,11 +122,13 @@
               </p>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
+                  <el-dropdown-item @click="showCashRegisterSelectionModal = true"><i
+                      class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
+                  <el-dropdown-item :disabled="!asignedCashRegister" @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
                       class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
-                  <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
+                  <el-dropdown-item :disabled="!asignedCashRegister" @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
                       class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
-                  <el-dropdown-item @click="handleCashCut"><i class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
+                  <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
                     corte</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -68,7 +136,6 @@
           </el-col>
         </div>
       </div>
-
       <!-- cuerpo de la pagina -->
       <div class="lg:flex space-x-5 my-5">
         <!-- scaner de código  -->
@@ -108,13 +175,16 @@
             <div v-if="searchFocus && searchQuery"
               class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
               <ul v-if="productsFound?.length > 0 && !loading">
-                <li @click="productFoundSelected = product; searchQuery = null"
-                  v-for="(product, index) in productsFound" :key="index"
-                  class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ?
-                    product.global_product?.name : product.name }}</li>
+                <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
+                  class="hover:bg-gray-200 cursor-pointer text-xs px-3 py-2 flex space-x-2">
+                  <span class="w-4/5">{{ product.name }}</span>
+                  <span v-if="product.code" class="w-1/5 text-[10px] text-gray99">
+                    {{ product.code }}
+                  </span>
+                </li>
               </ul>
-              <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron
-                coincidencias
+              <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">
+                No se encontraron coincidencias
               </p>
               <!-- estado de carga -->
               <div v-if="loading" class="flex justify-center items-center py-10">
@@ -122,21 +192,20 @@
               </div>
             </div>
           </div>
-
           <!-- Detalle de producto encontrado -->
           <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
             <div class="relative" v-if="productFoundSelected">
               <i @click="productFoundSelected = null"
                 class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
               <figure class="h-36">
-                <img class="object-contain h-36 mx-auto"
-                  :src="productFoundSelected?.global_product_id ? productFoundSelected?.global_product?.media[0]?.original_url : productFoundSelected?.media[0]?.original_url">
+                <img v-if="productFoundSelected.imageUrl" :src="productFoundSelected.imageUrl"
+                  :alt="productFoundSelected.name" class="object-contain h-36 mx-auto">
+                <p v-else class="text-center text-xs text-gray99 pt-10 px-8">Este producto no tiene imagen registrada
+                </p>
               </figure>
               <div class="flex justify-between items-center mt-2 mb-4">
-                <p class="font-bold">{{ productFoundSelected?.global_product_id ?
-                  productFoundSelected?.global_product?.name :
-                  productFoundSelected?.name }}</p>
-                <p class="text-[#5FCB1F]">${{ productFoundSelected?.public_price }}</p>
+                <p class="font-bold">{{ productFoundSelected.name }}</p>
+                <p class="text-[#5FCB1F]">${{ productFoundSelected.public_price }}</p>
               </div>
               <div class="flex justify-between items-center">
                 <p class="text-gray99">Cantidad</p>
@@ -145,8 +214,9 @@
                 <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
-                <PrimaryButton @click="addSaleProduct(this.productFoundSelected); productFoundSelected = null"
-                  class="!rounded-full !px-24">Agregar
+                <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
+                  class="!rounded-full !px-24" :disabled="quantity == 0">
+                  Agregar
                 </PrimaryButton>
               </div>
             </div>
@@ -155,11 +225,10 @@
               <i class="fa-regular fa-hand-point-up ml-3"></i>
             </p>
           </div>
-
           <!-- Total por cobrar -->
           <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
             class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-            <div v-if="!editableTabs[this.editableTabsValue - 1]?.paying">
+            <div v-if="!editableTabs[editableTabsValue - 1]?.paying">
               <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
                 <p class="text-gray-99">$ <strong class="ml-3">{{
@@ -186,11 +255,14 @@
               </div>
               <div class="text-center mt-7">
                 <PrimaryButton @click="receive()"
-                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
+                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !this.$page.props.auth?.user?.cash_register_id"
                   class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
+                <p v-if="!this.$page.props.auth?.user?.cash_register_id" class="text-xs text-red-600 mt-1">
+                  Para cobrar asigna una caja registradora <span @click="cashRegisterModal = true"
+                    class="underline cursor-pointer text-primary">asignar una</span>
+                </p>
               </div>
             </div>
-
             <!-- cobrando -->
             <div v-else>
               <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() -
@@ -214,9 +286,9 @@
                       }) }}</p>
               </div>
               <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
-                class="text-xs text-primary text-center mb-3">La cantidad es insuficiente. Por favor, ingrese una
-                cantidad
-                igual o mayor al total de compra.</p>
+                class="text-xs text-primary text-center mb-3">
+                La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
+              </p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
                 <PrimaryButton @click="store" class="!rounded-full">Aceptar</PrimaryButton>
@@ -229,6 +301,43 @@
         </section>
       </div>
     </div>
+
+    <!-- -------------- Modal selección de caja starts----------------------- -->
+    <Modal :show="showCashRegisterSelectionModal" @close="showCashRegisterSelectionModal = false">
+      <div class="py-4 px-7 relative">
+        <i @click="showCashRegisterSelectionModal = false"
+          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+
+        <h1 class="font-bold mt-2">Elegir caja</h1>
+        <p class="text-gray99">Selecciona la caja de trabajo</p>
+
+        <section class="flex justify-between space-x-7 w-2/3 mx-auto text-sm mt-5">
+          <div class="flex flex-col items-center" v-for="(item, index) in cash_registers" :key="item">
+            <input :disabled="!item.is_active" v-model="selectedCashRegisterId" :id="'suscription-' + index"
+              :aria-describedby="'suscription-text-' + index" type="radio" :value="item.id"
+              class="size-3 text-primary focus:ring-0 disabled:cursor-not-allowed">
+            <label :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-[#373737]'"
+              :for="'suscription-' + index">{{ item.name }}</label>
+            <label :class="!item.is_active ? 'text-grayD9 cursor-not-allowed' : 'text-[#373737]'"
+              :for="'suscription-' + index" class="mt-4">
+              <svg width="100" height="66" viewBox="0 0 88 54" fill="none" xmlns="http://www.w3.org/2000/svg"
+                stroke="currentColor">
+                <path
+                  d="M67.8222 13.681L69.8833 27.0754L69.9784 27.6933M67.8222 13.681H71.6168M67.8222 13.681H62.1173M71.9444 40.4698H1M71.9444 40.4698L71.1465 35.2848M71.9444 40.4698L69.2213 49.3273M1 40.4698L2.9526 13.681H30.289H38.5333H58.1012M1 40.4698L4.25433 51.0556H6.42388M71.1465 35.2848L80.6226 35.6911M71.1465 35.2848L69.9784 27.6933M81.9243 35.7469L86.2634 35.9329L87 27.6933M81.9243 35.7469L79.5378 50.4075H68.8893M81.9243 35.7469L80.6226 35.6911M68.8893 50.4075L68.69 51.0556H67.1713M68.8893 50.4075L69.2213 49.3273M69.2213 49.3273H78.453L80.6226 35.6911M6.42388 51.0556L7.07475 53H66.3035L67.1713 51.0556M6.42388 51.0556H67.1713M71.6631 15.6253C71.7742 17.6943 72.0838 19.7969 72.5952 22.3225H81.2734C80.8859 19.771 80.6341 17.66 80.5452 15.6253M71.6631 15.6253H69.8833L71.5104 22.5385H72.5952M71.6631 15.6253C71.7276 17.7194 72.0007 19.2862 72.5952 22.5385M71.6631 15.6253L72.5952 22.5385M71.6631 15.6253C71.6283 14.9779 71.6129 14.3337 71.6168 13.681M72.5952 22.5385H82.3582L80.8395 15.6253H80.5452M80.5452 15.6253C80.416 12.6681 80.6308 9.87213 81.2734 6.11961L80.6226 6.76773L80.1887 6.11961L79.9717 6.55169L79.5378 6.11961L79.1039 6.55169L78.8869 6.11961L78.453 6.55169L78.1055 5.90357L77.5852 6.76773L77.1513 5.90357L76.7174 6.55169L76.5004 5.90357L76.0665 6.55169L75.6326 6.11961L75.1987 6.55169L74.7648 5.90357L74.3309 6.55169L74.1139 5.90357L73.68 6.55169L73.2461 5.90357L72.8122 6.55169L72.3783 5.90357C71.8862 8.95569 71.6307 11.3723 71.6168 13.681M87 27.6933H69.9784M87 27.6933L81.2734 13.681H80.5452M61.9312 10.5057H60.6907H58.1012M61.9312 10.5057H64.7043L64.9213 1L45.8292 1.43208L46.2632 10.5057H58.1012M61.9312 10.5057L62.1173 13.681M62.1173 13.681H58.1012M58.1012 10.5057V13.681M4.90519 14.7612H66.7374L70.4257 39.1735H2.9526L4.90519 14.7612ZM6.42388 16.0574H11.6308L11.1969 20.5942H5.98997L6.42388 16.0574ZM12.2817 16.0574H17.4886L17.2716 20.5942H11.8478L12.2817 16.0574ZM18.1395 16.0574H23.3464L23.1294 20.5942H17.9225L18.1395 16.0574ZM23.9973 16.0574H29.2042V20.5942H23.7803L23.9973 16.0574ZM29.855 16.0574H35.062V20.5942H29.855V16.0574ZM35.7128 16.0574H40.9198V20.5942H35.7128V16.0574ZM4.68824 32.2603H16.4038L16.1869 37.4452H4.25433L4.68824 32.2603ZM29.6381 32.2603H41.5706V37.4452H29.6381V32.2603ZM17.2716 32.2603H22.6955V37.4452H17.0547L17.2716 32.2603ZM23.5633 32.2603H28.9872V37.4452H23.5633V32.2603ZM48.2962 16.0574H53.7201L54.371 20.5942H48.9471L48.2962 16.0574ZM54.371 16.0574L55.0218 20.5942H60.2288L59.5779 16.0574H54.371ZM60.4457 16.0574L61.0966 20.5942H66.3035L65.6527 16.0574H60.4457ZM46.2632 1.86415L46.6971 10.0736H64.2704L64.4874 1.43208L46.2632 1.86415ZM47.3479 2.94435V9.20947H63.6196V2.94435H47.3479ZM5.98997 21.2423H11.1969L10.763 25.7791H5.55606L5.98997 21.2423ZM11.8478 21.2423H17.0547L16.8377 25.7791H11.4139L11.8478 21.2423ZM17.9225 21.2423H23.1294L22.9125 25.7791H17.7056L17.9225 21.2423ZM23.7803 21.2423H28.9872V25.7791H23.5633L23.7803 21.2423ZM29.855 21.2423H35.062V25.7791H29.855V21.2423ZM35.9298 21.2423H41.1367V25.7791H35.9298V21.2423ZM5.55606 26.6433H10.763L10.3291 31.1801H5.12215L5.55606 26.6433ZM11.6308 26.6433H16.8377L16.6208 31.1801H11.1969L11.6308 26.6433ZM17.7056 26.6433H22.9125L22.6955 31.1801H17.4886L17.7056 26.6433ZM23.7803 26.6433H28.9872V31.1801H23.5633L23.7803 26.6433ZM29.855 26.6433H35.062V31.1801H29.855V26.6433ZM36.3637 26.6433H41.5706V31.1801H36.3637V26.6433ZM48.9471 21.4584H54.371L54.8049 26.2112H49.381L48.9471 21.4584ZM55.0218 21.4584H60.2288L60.8796 26.2112H55.4558L55.0218 21.4584ZM61.0966 21.4584H66.3035L67.1713 26.2112H61.7475L61.0966 21.4584ZM49.381 26.8593H54.8049L55.2388 31.8282H49.8149L49.381 26.8593ZM55.6727 26.8593H60.8796L61.5305 31.8282H56.1066L55.6727 26.8593ZM61.7475 26.8593H67.1713L67.8222 31.8282H62.1814L61.7475 26.8593ZM49.8149 32.4763H61.7475L62.3983 37.4452H50.2488L49.8149 32.4763ZM62.3983 32.4763H67.8222L68.69 37.4452H63.0492L62.3983 32.4763Z"
+                  stroke="#373737" stroke-width="0.4" />
+              </svg>
+            </label>
+            <p v-if="!item.is_active" class="text-sm text-red-400">Deshabilitada</p>
+          </div>
+        </section>
+
+        <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
+          <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Confirmar</PrimaryButton>
+        </div>
+      </div>
+    </Modal>
+    <!-- --------------------------- Modal selección de caja ends ------------------------------------ -->
+
 
     <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
     <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
@@ -294,7 +403,7 @@
               <div v-if="cutLoading">
                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
               </div>
-              <p v-else>${{ (cash_register.started_cash + cutForm.totalSaleForCashCut +
+              <p v-else>${{ (asignedCashRegister?.started_cash + cutForm.totalSaleForCashCut +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               <el-input @input="difference()" v-model="cutForm.counted_cash" type="text" placeholder="0.00"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
@@ -345,7 +454,7 @@
           <div class="col-span-full mt-2">
             <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
             <el-input v-model="cutForm.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-              placeholder="Escribe auí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit
+              placeholder="Escribe aquí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit
               clearable />
           </div>
 
@@ -391,10 +500,11 @@ import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
+import { format } from 'date-fns';
+import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
   data() {
-
     const form = useForm({
       cashRegisterMovementType: null, //que tipo de movimiento es
       registerAmount: null, //Dinero ingresado o sacado de caja
@@ -414,9 +524,17 @@ export default {
       form,
       cutForm,
 
+      selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
+      asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
+      showCashRegisterSelectionModal: false, //muestra u oculta el modal de selección de caja
+
+      // conexion a internet
+      isOnline: navigator.onLine, // Verificar el estado de conexión al cargar el componente
+      syncingData: false,
+
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
-      localCurrentCash: this.cash_register.current_cash, //dinero de caja local
+      localCurrentCash: 0, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
       cashCutModal: false, //muestra el modal para el corte de caja
       // inventario de codigos activado
@@ -435,9 +553,10 @@ export default {
       loading: false, //cargando la busqueda de productos
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
-      searchQuery: null, //buscador
-      searchFocus: false, //buscador
-      productsFound: null, //buscador
+      //buscador
+      searchQuery: null,
+      searchFocus: false,
+      productsFound: null,
       productSelected: null, //producto escaneado agergado a la lista de compras
       productFoundSelected: null, //producto seleccionado desde barra de busqueda
       quantity: 1, //cantidad para agregar del producto escaneado o buscado
@@ -484,36 +603,100 @@ export default {
   },
   props: {
     products: Array,
-    cash_register: Object
+    cash_registers: Array
   },
   methods: {
+    sumCashForSale() {
+      this.localCurrentCash += this.editableTabs[this.editableTabsValue - 1]?.saleProducts.reduce((accum, item) => {
+        return accum += item.product.public_price * item.quantity;
+      }, 0);
+    },
+    selectProductFromList(product) {
+      // crear link virtual de imagen blob si es que tiene imagen el producto
+      if (product.image && !product.imageUrl) {
+        const imageUrl = URL.createObjectURL(product.image);
+        product = { ...product, imageUrl };
+      }
+
+      this.productFoundSelected = product;
+      this.searchQuery = null;
+
+      // revisar si hay stock del producto para dejar 1 como default a vender
+      if (product.current_stock) {
+        this.quantity = 1;
+      } else {
+        this.quantity = 0;
+      }
+    },
+    updateCurrentStockInIndexedDB() {
+      const products = this.editableTabs[this.editableTabsValue - 1]?.saleProducts.map(item => {
+        const product = {
+          id: item.product.id,
+          name: item.product.name,
+          code: item.product.code,
+          public_price: item.product.public_price,
+          current_stock: item.product.current_stock <= item.quantity ? 0 : item.product.current_stock -= item.quantity,
+          image_url: item.product.image_url,
+        };
+        return product;
+      });
+      addOrUpdateBatchOfItems('products', products);
+    },
     async store() {
-      try {
+      if (!this.storeProcessing) {
         this.storeProcessing = true;
-        const response = await axios.post(route('sales.store'), {
-          data: {
-            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+        if (this.isOnline) {
+          try {
+            const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
+              data: {
+                saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+              }
+            });
+            if (response.status === 200) {
+              this.updateCurrentStockInIndexedDB();
+              this.clearTab();
+              this.fetchCashRegister();
+              
+              this.$notify({
+                title: "Correcto",
+                text: "Se ha registrado la venta con éxito!",
+                type: "success",
+              });
+
+              // resetear variable de local storage a false
+              localStorage.setItem('pendentProcess', false);
+            }
+          } catch (error) {
+            console.log(error);
+          } finally {
+            this.storeProcessing = false;
           }
-        });
+        } else {
+          this.saveToLocalStorage();
+          this.updateCurrentStockInIndexedDB();
+          this.storeProcessing = false;
+          this.sumCashForSale(); //sumar lo vendido a la caja
+          this.clearTab();
+        }
+      }
+    },
+    async asignCashRegister() {
+      try {
+        const response = await axios.put(route('cash-registers.asign', [this.$page.props.auth?.user.id, this.selectedCashRegisterId]));
         if (response.status === 200) {
           this.$notify({
             title: "Correcto",
-            text: "Se ha registrado la venta con éxito!",
+            text: "Se te asignó una caja con éxito!",
             type: "success",
           });
-          this.storeProcessing = false;
-          this.clearTab();
-          this.fetchCashRegister();
-
-          // resetear variable de local storage a false
-          localStorage.setItem('pendentProcess', false);
+          location.reload();
         }
       } catch (error) {
         console.log(error);
       }
     },
     storeCashRegisterMovement() {
-      this.form.post(route('cash-register-movements.store'), {
+      this.form.post(route('cash-register-movements.store', { cash_register_id: this.asignedCashRegister?.id }), {
         onSuccess: () => {
           this.$notify({
             title: "Correcto",
@@ -527,7 +710,7 @@ export default {
       });
     },
     storeCashCut() {
-      this.cutForm.post(route('cash-cuts.store'), {
+      this.cutForm.post(route('cash-cuts.store', { cash_register_id: this.asignedCashRegister?.id }), {
         onSuccess: () => {
           this.$notify({
             title: "Correcto",
@@ -542,7 +725,7 @@ export default {
     },
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
-      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.cash_register.started_cash) - this.cutForm.counted_cash
+      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
     },
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
@@ -550,10 +733,10 @@ export default {
     },
     async fetchCashRegister() {
       try {
-        const response = await axios.get(route('cash-registers.fetch-cash-register'));
+        const response = await axios.get(route('cash-registers.fetch-cash-register', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.localCurrentCash = response.data.item.current_cash;
-          if ((this.localCurrentCash >= this.cash_register.max_cash) && this.isMaxCashOn) {
+          if ((this.localCurrentCash >= this.asignedCashRegister?.max_cash) && this.isMaxCashOn && this.isOnline) {
             this.showLimitCashModal = true;
           }
         }
@@ -563,19 +746,14 @@ export default {
     },
     async searchProducts() {
       try {
-        this.loading = true;
-        const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
-        if (response.status === 200) {
-          this.productsFound = response.data.items;
-          this.loading = false;
-        }
+        this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
       } catch (error) {
         console.log(error);
       }
     },
     async fetchTotalSaleForCashCut() {
       try {
-        const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut'));
+        const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.cutForm.totalSaleForCashCut = response.data;
         }
@@ -586,7 +764,7 @@ export default {
     async fetchTotalCashMovements() {
       try {
         this.cutLoading = true;
-        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements'));
+        const response = await axios.get(route('cash-register-movements.fetch-total-cash-movements', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.cutForm.totalCashMovements = response.data;
           this.cutLoading = false;
@@ -604,66 +782,37 @@ export default {
       // Introducir un retraso para dar tiempo al evento click de ejecutarse antes del blur
       setTimeout(() => {
         this.searchFocus = false;
-      }, 80);
+      }, 100);
     },
     async getProductByCode() {
       this.scanning = true;
-      //buscar primero en productos transferidos del catalogo con el codigo escaneado
-      let productScaned = this.products.find(item => item.global_product?.code === this.scannerQuery);
-      let is_local_product = false;
 
-      //si no se encontró en productos transferidos se busca en productos locales
-      if (productScaned == null) {
-        productScaned = this.products.find(item => item.code === this.scannerQuery);
-        is_local_product = true;
-      }
+      let foundProducts = await getItemByAttributes('products', { code: this.scannerQuery });
+      let productScaned = foundProducts[0];
 
       // si no se encontró el producto escaneado aparece un mensaje y no busca en la bd para no tardar más
       if (productScaned != null) {
-        try {
-          if (is_local_product) {
-            const response = await axios.get(route('products.get-product-scaned', [productScaned.id, { is_local_product: is_local_product }]));
-
-            if (response.status === 200 && response.data && response.data.item) {
-              this.productSelected = response.data.item;
-              this.addSaleProduct(this.productSelected);
-            } else {
-              console.error('La respuesta no tiene el formato esperado.');
-            }
-          } else {
-            const response = await axios.get(route('products.get-product-scaned', [productScaned.global_product.id, { is_local_product: is_local_product }]));
-
-            if (response.status === 200 && response.data && response.data.item) {
-              this.productSelected = response.data.item;
-              this.addSaleProduct(this.productSelected);
-            } else {
-              console.error('La respuesta no tiene el formato esperado.');
-            }
-          }
-        } catch (error) {
-          console.error('Error al realizar la solicitud:', error);
-        } finally {
-          this.scanning = false;
+        // agregar la imagen al producto si es que no la tiene
+        if (productScaned.image && !productScaned.imageUrl) {
+          const imageUrl = URL.createObjectURL(productScaned.image);
+          productScaned = { ...productScaned, imageUrl };
         }
+
+        this.addSaleProduct(productScaned);
       } else {
         this.$notify({
           title: "Poducto no encontrado",
           message: "El producto escaneado no esta registrado en la base de datos",
           type: "warning"
         });
-        console.error('El producto escaneado no tiene la propiedad "id".');
         this.scannerQuery = null;
         this.scanning = false;
       }
     },
     addSaleProduct(product) {
-      //revisa si el producto escaneado ya esta dentro del arreglo
+      //revisa si el producto a agregar ya esta dentro del arreglo
       const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
-        if (product.global_product_id) {
-          return sale.product.global_product_id == product.global_product_id;
-        } else {
-          return sale.product.id == product.id && !sale.product.global_product_id;
-        }
+        return sale.product.id == product.id;
       });
       if (existingIndex !== -1) {
         this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
@@ -729,8 +878,65 @@ export default {
         this.$refs.receivedInput.focus(); // Enfocar el input de código cuando se abre el modal
       });
     },
+    handleOnline() {
+      const storedData = JSON.parse(localStorage.getItem('sales')) || [];
+      this.isOnline = true;
+      if (storedData.length) {
+        this.syncData();
+      }
+    },
+    handleOffline() {
+      this.isOnline = false;
+    },
+    saveToLocalStorage() {
+      // Obtén los datos actuales almacenados en el Local Storage
+      let storedData = JSON.parse(localStorage.getItem('sales')) || [];
+
+      const dataToStore = {
+        created_at: format(new Date(), 'yyyy-MM-dd HH:mm'),
+        saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+      };
+
+      // Agrega el nuevo objeto al arreglo
+      storedData.push(dataToStore);
+
+      // Vuelve a guardar el arreglo en el Local Storage
+      localStorage.setItem('sales', JSON.stringify(storedData));
+      this.form.reset();
+
+      this.$notify({
+        title: 'Correcto',
+        message: 'Se registró la venta en almacenamiento local. Cuando tengas conexión a internet se guardarán en la nube',
+        type: 'success'
+      });
+    },
+    async syncData() {
+      this.syncingData = true;
+      try {
+        const localStorageItems = JSON.parse(localStorage.getItem('sales'));
+        const response = await axios.post(route('sales.sync-localstorage'), {
+          sales: localStorageItems,
+        });
+
+        if (response.status === 200) {
+          // eliminar datos en almacenamiento local
+          localStorage.removeItem('sales');
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.syncingData = false;
+      }
+    },
   },
   mounted() {
+    //verificar si el usuario tiene una caja asignada
+    if (!this.$page.props.auth?.user?.cash_register_id) {
+      this.showCashRegisterSelectionModal = true;
+    } else {
+      this.asignedCashRegister = this.cash_registers.find(item => item.id == this.$page.props.auth?.user?.cash_register_id);
+      this.localCurrentCash = this.asignedCashRegister?.current_cash;
+    }
     if (this.isScanOn) {
       this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
     } else {
@@ -739,6 +945,15 @@ export default {
 
     // resetear variable de local storage a false
     localStorage.setItem('pendentProcess', false);
-  }
+
+    // Agregar escuchadores de eventos online/offline
+    window.addEventListener('online', this.handleOnline);
+    window.addEventListener('offline', this.handleOffline);
+  },
+  beforeUnmount() {
+    // Eliminar los escuchadores de eventos al desmontar el componente
+    window.removeEventListener('online', this.handleOnline);
+    window.removeEventListener('offline', this.handleOffline);
+  },
 }
 </script>

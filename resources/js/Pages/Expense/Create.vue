@@ -1,11 +1,24 @@
 <template>
-    <AppLayout title="Nuevo egreso">
+    <AppLayout title="Nuevo gasto">
         <div class="px-3 md:px-10 lg-px-1 py-7">
-            <Back />
+            <Back :to="route('expenses.index')" />
 
             <form @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[80%] mx-auto mt-7 lg:grid lg:grid-cols-2 gap-5">
-                <h1 class="font-bold ml-2 col-span-full">Agregar egreso</h1>
+                <section class="ml-2 col-span-full flex justify-between items-center">
+                    <h1 class="font-bold">Agregar gasto</h1>
+                    <el-tooltip v-if="isShowCahsOn && cash_register"
+                        content="Para cambiar de caja, ve al punto de venta, click al botón movimientos de caja > cambiar de caja"
+                        placement="top">
+                        <p class="text-gray99 text-xs">
+                            Efectivo en "{{ cash_register?.name }}":
+                            <b class="ml-2">
+                                ${{ cash_register?.current_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </b>
+                        </p>
+                    </el-tooltip>
+                    <p v-else class="text-xs text-gray99">No tienes caja asignada.</p>
+                </section>
                 <p class="text-xs col-span-full">
                     Aqui no se registran las compras de tus productos para la venta. Esta sección es para registrar
                     gastos adicionales
@@ -19,7 +32,7 @@
                                 class="fa-solid fa-x"></i></button>
                     </div>
                     <div class="mt-3">
-                        <InputLabel :value="'Concepto del egreso ' + (index + 1) + '*'" class="ml-3 mb-1" />
+                        <InputLabel :value="'Concepto del gasto ' + (index + 1) + '*'" class="ml-3 mb-1" />
                         <el-input v-model="expense.concept" required :placeholder="placeholders[index]?.concept"
                             :maxlength="100" clearable />
                         <InputError :message="expense.errors.concept" />
@@ -36,7 +49,7 @@
                             :parser="(value) => value.replace(/\D/g, '')" placeholder="Ej. 1" />
                     </div> -->
                     <div class="mt-3">
-                        <InputLabel :value="'Costo total de egreso ' + (index + 1) + '*'" class="ml-3 mb-1 text-sm" />
+                        <InputLabel :value="'Costo total de gasto ' + (index + 1) + '*'" class="ml-3 mb-1 text-sm" />
                         <el-input v-model="expense.current_price" required type="text"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                             :parser="(value) => value.replace(/[^\d.]/g, '')"
@@ -54,7 +67,7 @@
                 </div>
                 <div @click="addExpense"
                     class="flex justify-center items-center cursor-pointer rounded-md border border-dashed border-primary">
-                    <p class="text-primary text-sm my-3">+ Agregar otro egreso</p>
+                    <p class="text-primary text-sm my-3">+ Agregar otro gasto</p>
                 </div>
 
                 <div class="col-span-full text-right mt-3">
@@ -63,7 +76,7 @@
                     <p v-else class="text-xs">
                         Has excedido el monto disponible en caja.
                         <button @click="uncheckAll()" type="button" class="underline text-primary">
-                            Click aqui para volver a indicar los egresos que se pagarán con el dinero de caja disponible
+                            Click aqui para volver a indicar los gastos que se pagarán con el dinero de caja disponible
                         </button>
                     </p>
                 </div>
@@ -142,6 +155,8 @@ export default {
                     amount: 'Ej. 335',
                 },
             ],
+            // mostrar dinero en caja activado
+            isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
         };
     },
     components: {
@@ -159,7 +174,7 @@ export default {
             this.form.expenses.forEach(item => item.from_cash_register = false);
         },
         exceededCashAmount() {
-            return this.getTotalFromCashRegister() > this.cash_register.current_cash;
+            return this.getTotalFromCashRegister() > this.cash_register?.current_cash;
         },
         getCheckboxLabel(index) {
             let label = 'Dinero tomado de caja para el pago';
@@ -174,7 +189,7 @@ export default {
                 ? parseFloat(this.form.expenses[index].current_price)
                 : 0;
             const newTotal = this.getTotalFromCashRegister(index) + newAmount;
-            return (this.cash_register.current_cash - newTotal) >= 0;
+            return (this.cash_register?.current_cash - newTotal) >= 0;
         },
         getTotalFromCashRegister(index = null) { //si index es nulo,
             const total = this.form.expenses.reduce((acc, expense, currentIndex) => {
@@ -220,7 +235,7 @@ export default {
                 onSuccess: () => {
                     this.$notify({
                         title: "Correcto",
-                        message: "Se ha registrado el egreso",
+                        message: "Se ha registrado el gasto",
                         type: "success",
                     });
                     this.form.reset();

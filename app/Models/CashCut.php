@@ -20,6 +20,8 @@ class CashCut extends Model
         'difference',
         'notes',
         'cash_register_id',
+        'store_id',
+        'user_id',
     ];
 
     //relationships
@@ -27,4 +29,15 @@ class CashCut extends Model
     {
         return $this->belongsTo(CashRegister::class);
     }
+
+    public Function store() :BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public Function user() :BelongsTo
+    {
+        return $this->belongsTo(user::class);
+    }
+    
 }

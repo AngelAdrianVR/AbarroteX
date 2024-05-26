@@ -11,7 +11,8 @@ class Brand extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'business_line_name'
     ];
 
     //relationships

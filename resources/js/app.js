@@ -11,6 +11,10 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import locale from 'element-plus/dist/locale/es.mjs';
 
+// iniciar IndexedDB
+import { initializeProducts } from './dbService.js';
+initializeProducts(); //abre conexion a indexedDB y revisa si hay mas productos en server que en local. De ser asi, actualiza la BDD local
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({

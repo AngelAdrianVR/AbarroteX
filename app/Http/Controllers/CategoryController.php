@@ -26,7 +26,8 @@ class CategoryController extends Controller
             'name' =>'required|string|max:100|unique:categories,name',
         ]);
 
-        $category = Category::create($request->all());
+        // guardar business_line_name con el id de la tienda para que solo ella pueda verlo
+        $category = Category::create($request->all() + ['business_line_name' => auth()->user()->store->id]);
 
         return response()->json(['item' => $category]);
     }

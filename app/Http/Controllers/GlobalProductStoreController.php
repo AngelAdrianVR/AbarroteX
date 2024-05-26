@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductHistoryResource;
 use App\Models\Brand;
+use App\Models\CashRegisterMovement;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\GlobalProduct;
@@ -35,17 +36,23 @@ class GlobalProductStoreController extends Controller
 
     public function show($global_product_store_id)
     {
-        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])->find($global_product_store_id);
+        $cash_register = auth()->user()->cashRegister;
+        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($global_product_store_id);
 
-        return inertia('GlobalProductStore/Show', compact('global_product_store'));
+        return inertia('GlobalProductStore/Show', compact('global_product_store', 'cash_register'));
     }
 
 
     public function edit($global_product_store_id)
     {
-        $global_product_store = GlobalProductStore::with('globalProduct.media')->find($global_product_store_id);
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $global_product_store = GlobalProductStore::with('globalProduct.media')
+            ->where('store_id', auth()->user()->store_id)
+            ->findOrFail($global_product_store_id);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProductStore/Edit', compact('global_product_store', 'categories', 'brands'));
     }
@@ -110,13 +117,28 @@ class GlobalProductStoreController extends Controller
             'historicable_type' => GlobalProductStore::class
         ]);
 
-        // Crear egreso
+        // Crear gasto
         Expense::create([
             'concept' => 'Compra de producto: ' . $global_product_store->globalProduct->name,
-            'current_price' => $global_product_store->cost,
+            'current_price' => $global_product_store->cost ?? 0,
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
         ]);
+
+        // restar de caja en caso de que el usuario asi lo haya especificado
+        if ($request->is_paid_by_cash_register) {
+            $unit = $request->quantity == 1 ? 'unidad' : 'unidades';
+            $cash_register = auth()->user()->cashRegister;
+            $cash_register->decrement('current_cash', $request->cash_amount);
+
+            // crear movimiento de caja
+            CashRegisterMovement::create([
+                'amount' => $request->cash_amount,
+                'type' => 'Retiro',
+                'notes' => "Compra de {$global_product_store->globalProduct->name} ($request->quantity $unit)",
+                'cash_register_id' => $cash_register->id,
+            ]);
+        }
     }
 
     public function fetchHistory($global_product_store_id, $month = null, $year = null)
@@ -152,8 +174,9 @@ class GlobalProductStoreController extends Controller
     {
         $global_products = GlobalProduct::all(['id', 'name']);
         $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
-        $categories = Category::all(['id', 'name']);
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }
@@ -169,7 +192,8 @@ class GlobalProductStoreController extends Controller
 
         // eliminar productos de la tienda que se regresaron a catalogo base
         // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
-        GlobalProductStore::whereNotIn('global_product_id', $product_ids)
+        GlobalProductStore::where('store_id', auth()->user()->store_id)
+            ->whereNotIn('global_product_id', $product_ids)
             ->get()
             ->each(fn ($prd) => $prd->delete());
 
@@ -185,14 +209,16 @@ class GlobalProductStoreController extends Controller
             // Se obtiene el producto global con el id recibido
             $product = GlobalProduct::with(['category', 'brand'])->find($productId);
 
-            GlobalProductStore::create([
-                'public_price' => $product->public_price,
-                'cost' => 0,
-                'current_stock' => 1,
-                'min_stock' => 1,
-                'global_product_id' => $productId,
-                'store_id' => auth()->user()->store_id,
-            ]);
+            if ($product) {
+                GlobalProductStore::create([
+                    'public_price' => $product->public_price,
+                    'cost' => 0,
+                    'current_stock' => 1,
+                    'min_stock' => 1,
+                    'global_product_id' => $productId,
+                    'store_id' => auth()->user()->store_id,
+                ]);
+            }
         }
     }
 }

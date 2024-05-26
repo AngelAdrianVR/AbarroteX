@@ -47,6 +47,7 @@ export default {
             if (format === 'video') return 'video/*';
             else if (format === 'pdf') return 'application/pdf';
             else if (format === 'imagen') return 'image/*';
+            else if (format === 'excel') return '.xlsx, .xls';
             else '*/*';
         },
         openFileBrowser() {

@@ -22,7 +22,7 @@ const submit = () => {
 
 <template>
 
-    <Head title="Forgot Password" />
+    <Head title="Olvidé contraseña" />
 
     <AuthenticationCard>
         <template #logo>

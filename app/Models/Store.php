@@ -13,8 +13,13 @@ class Store extends Model
 
     protected $fillable = [
         'name',
+        'type',
         'contact_name',
         'contact_phone',
+        'whatsapp',
+        'delivery_price',
+        'delivery_conditions',
+        'min_free_delivery',
         'address',
         'plan',
         'is_active',
@@ -33,6 +38,11 @@ class Store extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function cashCuts(): HasMany
+    {
+        return $this->hasMany(CashCut::class);
     }
 
     public function products(): HasMany
@@ -79,5 +89,15 @@ class Store extends Model
                 'max_stock',
                 'current_stock',
             ])->withTimestamps();
+    }
+
+    public function lastPayment()
+    {
+        return $this->hasOne(Payment::class)->latest();
+    }
+
+    public function onlineSales() :HasMany
+    {
+        return $this->hasMany(OnlineSale::class);
     }
 }

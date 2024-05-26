@@ -34,7 +34,7 @@ const submit = () => {
 
 <template>
 
-    <Head title="Log in" />
+    <Head title="Inicio de sesión" />
 
     <AuthenticationCard>
         <template #logo>
@@ -96,8 +96,7 @@ const submit = () => {
             </div>
 
             <div class="block mt-4 ml-6">
-                <el-checkbox v-model="form.remember" name="remember" label="Mantener sesión abierta"
-                    size="small" />
+                <el-checkbox v-model="form.remember" name="remember" label="Mantener sesión abierta" size="small" />
             </div>
 
             <Link v-if="canResetPassword" :href="route('password.request')"

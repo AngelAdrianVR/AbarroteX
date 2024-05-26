@@ -33,7 +33,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <!-- ** descomentar cuando se haga una plantilla para imprimir todos los egresos del día **  -->
+                                    <!-- ** descomentar cuando se haga una plantilla para imprimir todos los gastos del día **  -->
                                     <!-- <el-dropdown-item :command="'print|' + expense.expenses[0]?.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -42,7 +42,7 @@
                                         </svg>
                                         <span class="text-xs">Imprimir</span>
                                     </el-dropdown-item> -->
-                                    <el-dropdown-item :command="'delete|' + expense.expenses[0]?.id">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + expense.expenses[0]?.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -58,15 +58,15 @@
                 </tr>
             </tbody>
         </table>
-        <el-empty v-else description="No hay egresos registrados" />
+        <el-empty v-else description="No hay gastos registrados" />
 
         <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
             <template #title>
-                <h1>Eliminar egresos</h1>
+                <h1>Eliminar gastos</h1>
             </template>
             <template #content>
                 <p>
-                    Se eliminarán los egresos del dia seleccionado, esto es un proceso irreversible. ¿Continuar
+                    Se eliminarán los gastos del dia seleccionado, esto es un proceso irreversible. ¿Continuar
                     de todas formas?
                 </p>
             </template>
@@ -91,6 +91,8 @@ export default {
         return {
             showDeleteConfirm: false,
             itemIdToDelete: null,
+            // Permisos de rol actual
+            canDelete: this.$page.props.auth.user.rol == 'Administrador',
         };
     },
     components: {
@@ -121,7 +123,7 @@ export default {
                 if (response.status == 200) {
                     this.$notify({
                         title: 'Correcto',
-                        message: 'Se han eliminado los egresos del día',
+                        message: 'Se han eliminado los gastos del día',
                         type: 'success',
                     });
                     location.reload();

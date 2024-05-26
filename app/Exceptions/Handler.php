@@ -27,4 +27,16 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    // public function render($request, Throwable $e)
+    // {
+    //     $response = parent::render($request, $e);
+    //     $status = $response->status();
+
+    //     return match ($status) {
+    //         404 => inertia('Error/404', ['user' => auth()->user()])->toResponse($request)->setStatusCode($status),
+    //         419 => inertia('Error/419')->toResponse($request)->setStatusCode($status),
+    //         default => $response
+    //     };
+    // }
 }

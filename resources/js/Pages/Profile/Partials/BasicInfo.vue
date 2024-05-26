@@ -3,20 +3,20 @@
         <h1 class="ml-3">Información básica</h1>
         <div class="rounded-[5px] border border-grayD9 px-4 py-4 mt-3">
             <article>
-                <h2>Información de la Tienda</h2>
+                <h2 v-if="canSeeStoreInfo">Información de la Tienda</h2>
                 <div class="flex items-start space-x-3 justify-between">
                     <div class="grid grid-cols-2 gap-2 mt-2 w-5/6">
-                        <p class="flex flex-col">
+                        <p v-if="canSeeStoreInfo" class="flex flex-col">
                             <b>Nombre de la Tienda </b>
                             <el-input v-if="edit" v-model="form.store_name" placeholder="Nombre de tienda *"
                                 :disabled="form.processing" maxlength="255" />
                             <span v-else>{{ form.store_name }}</span>
                             <InputError :message="form.errors.store_name" />
                         </p>
-                        <p class="flex flex-col">
+                        <p v-if="canSeeStoreInfo" class="flex flex-col">
                             <b>Dirección</b>
                             <el-input v-if="edit" v-model="form.store_address" placeholder="Dirección de tienda"
-                            :disabled="form.processing" maxlength="255" />
+                                :disabled="form.processing" maxlength="255" />
                             <span v-else>{{ form.store_address ?? '-' }}</span>
                             <InputError :message="form.errors.store_address" />
                         </p>
@@ -24,23 +24,23 @@
                         <p class="flex flex-col">
                             <b> Nombre</b>
                             <el-input v-if="edit" v-model="form.name" placeholder="Nombre *" :disabled="form.processing"
-                            maxlength="255" />
+                                maxlength="255" />
                             <span v-else>{{ form.name }}</span>
                             <InputError :message="form.errors.name" />
                         </p>
                         <p class="flex flex-col">
                             <b>Teléfono</b>
                             <el-input v-if="edit" v-model="form.contact_phone" placeholder="Teléfono"
-                            :disabled="form.processing"
-                            :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
-                            :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable />
+                                :disabled="form.processing"
+                                :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                                :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable />
                             <span v-else>{{ form.contact_phone ?? '-' }}</span>
                             <InputError :message="form.errors.contact_phone" />
                         </p>
                         <p class="flex flex-col">
                             <b>Correo electrónico</b>
-                            <el-input v-if="edit" v-model="form.email" placeholder="Correo *" :disabled="form.processing"
-                            maxlength="255" />
+                            <el-input v-if="edit" v-model="form.email" placeholder="Correo *"
+                                :disabled="form.processing" maxlength="255" />
                             <span v-else>{{ form.email }}</span>
                             <InputError :message="form.errors.email" />
                         </p>
@@ -73,7 +73,6 @@
 <script>
 import { useForm } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
-import axios from 'axios';
 
 export default {
     data() {
@@ -88,6 +87,8 @@ export default {
         return {
             form,
             edit: false,
+            // Permisos de rol actual
+            canSeeStoreInfo: ['Administrador'].includes(this.$page.props.auth.user.rol),
         };
     },
     components: {

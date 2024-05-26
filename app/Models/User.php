@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +12,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
     use HasFactory;
@@ -28,9 +28,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'rol',
         'password',
         'employee_properties',
         'store_id',
+        'cash_register_id',
     ];
 
     /**
@@ -70,4 +72,18 @@ class User extends Authenticatable
         return $this->belongsTo(Store::class);
     }
 
+    public function cashRegister() :BelongsTo
+    {
+        return $this->belongsTo(CashRegister::class);
+    }
+
+    public function cashCuts() :BelongsTo
+    {
+        return $this->belongsTo(CashCut::class);
+    }
+
+    public function sales() :HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
 }

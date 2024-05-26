@@ -12,9 +12,11 @@ class CashRegister extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'started_cash',
         'current_cash',
         'max_cash',
+        'is_active',
         'store_id',
     ];
 
@@ -32,5 +34,10 @@ class CashRegister extends Model
     public function cashCuts() :HasMany
     {
         return $this->hasMany(CashCut::class);
+    }
+
+    public function sales() :HasMany
+    {
+        return $this->hasMany(Sale::class);
     }
 }

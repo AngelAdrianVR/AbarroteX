@@ -3,7 +3,7 @@
         <section class="mx-2 lg:mx-10 mt-7">
             <Back />
             <div class="flex items-center justify-end space-x-1">
-                <!-- ** descomentar cuando se haga una plantilla para imprimir todos los egresos del día **  -->
+                <!-- ** descomentar cuando se haga una plantilla para imprimir todos los gastos del día **  -->
                 <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
                     @confirm="print(expenses[0].id)">
                     <template #reference>
@@ -11,7 +11,7 @@
                             class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                     </template>
                 </el-popconfirm> -->
-                <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
+                <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
                     @confirm="deleteItem(expenses[0].id)">
                     <template #reference>
                         <i @click.stop
@@ -21,7 +21,7 @@
             </div>
         </section>
         <header class="flex items-center justify-between font-bold mx-2 lg:mx-36 text-sm mt-4">
-            <h1>Detalle de egresos </h1>
+            <h1>Detalle de gastos </h1>
             <h2>
                 <span class="text-gray77">Fecha: </span>
                 {{ formatDate(expenses[0]?.created_at) }}
@@ -37,12 +37,14 @@
                     <thead>
                         <tr class="*:text-left *:py-1 *:px-4 *:text-sm text-gray37 bg-primarylight text-start">
                             <th class="rounded-s-full">Conceto</th>
+                            <th>Cantidad</th>
                             <th class="rounded-e-full">Costo</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="expense in expenses" :key="expense" class="*:text-left *:pb-px *:px-4 *:text-sm">
                             <td>{{ expense.concept }}</td>
+                            <td>{{ expense.quantity }}</td>
                             <td>${{ (expense.quantity *
                                 expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         </tr>
@@ -72,7 +74,7 @@
             }}</span></p>
     <p class="font-bold px-2">Total de movimientos: <span class="font-thin ml-2 text-gray-600">{{ expenses.length
             }}</span></p>
-    <p class="font-bold px-2">Egreso total: <span class="!font-thin ml-2 text-gray-600">${{
+    <p class="font-bold px-2">Gasto total: <span class="!font-thin ml-2 text-gray-600">${{
             totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
 </div>
 <div class="grid grid-cols-5 lg:ml-16 mr-3 self-start mt-9">
@@ -124,6 +126,8 @@ export default {
 
         return {
             form,
+            // Permisos de rol actual
+            canDelete: this.$page.props.auth.user.rol == 'Administrador',
         }
     },
     components: {
@@ -145,7 +149,7 @@ export default {
 
                     this.$notify({
                         title: 'Correcto',
-                        message: 'Se han eliminado los egresos del día',
+                        message: 'Se han eliminado los gastos del día',
                         type: 'success',
                         position: 'top-right',
                     });
@@ -156,7 +160,7 @@ export default {
                 console.log(error);
                 this.$notify({
                     title: 'Error',
-                    message: 'No se pudo eliminar el registro de egresos. Inténte más tarde',
+                    message: 'No se pudo eliminar el registro de gastos. Inténte más tarde',
                     type: 'error',
                     position: 'top-right',
                 });

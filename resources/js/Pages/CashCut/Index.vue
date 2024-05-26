@@ -3,10 +3,10 @@
         <section class="mt-5 mx-2 lg:mx-8">
             <el-tabs class="mx-3" v-model="activeTab">
                 <el-tab-pane label="Caja" name="1">
-                    <CashRegister />
+                    <!-- <CashRegister :cash_register="cash_register" :currentMovements="current_movements" /> -->
                 </el-tab-pane>
                 <el-tab-pane label="Historial de cortes" name="2">
-                    <CashCutsTable :items="cash_cuts" />
+                    <!-- <CashCutsTable :items="cash_cuts" /> -->
                 </el-tab-pane>
             </el-tabs>
         </section>
@@ -16,8 +16,8 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import CashCutsTable from '@/Pages/CashCut/Tabs/CashCutsTable.vue';
-import CashRegister from '@/Pages/CashCut/Tabs/CashRegister.vue';
+// import CashCutsTable from '@/Pages/CashCut/Tabs/CashCutsTable.vue';
+// import CashRegister from '@/Pages/CashCut/Tabs/CashRegister.vue';
 
 export default {
     data() {
@@ -27,15 +27,21 @@ export default {
     },
     components: {
         AppLayout,
-        CashCutsTable,
-        CashRegister,
+        // CashCutsTable,
+        // CashRegister,
         PrimaryButton,
     },
     props: {
-        cash_cuts: Array
+        cash_cuts: Array,
+        cash_register: Object,
+        current_movements: Array
     },
     methods: {
 
+    },
+    mounted() {
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
 }
 </script>

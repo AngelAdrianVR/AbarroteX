@@ -8,10 +8,11 @@
                 <h1 class="font-bold ml-2 col-span-full">Editar producto</h1>
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Nombre del producto*" />
-                    <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100" clearable />
+                    <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100"
+                        clearable />
                     <InputError :message="form.errors.name" />
                 </div>
-                <div class="mt-3">
+                <div v-if="canSeeCost" class="mt-3">
                     <div class="flex items-center">
                         <InputLabel value="Precio de compra" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
@@ -46,16 +47,15 @@
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Categoría*" />
-                        <button
-                            @click="showCategoryFormModal = true" type="button"
+                        <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" v-model="form.category_id" clearable
-                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                        no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="category in localCategories" :key="category" :label="category.name" :value="category.id" />
+                    <el-select class="w-1/2" v-model="form.category_id" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="category in localCategories" :key="category" :label="category.name"
+                            :value="category.id" />
                     </el-select>
                     <InputError :message="form.errors.category_id" />
                 </div>
@@ -63,15 +63,13 @@
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Proveedor *" />
-                        <button
-                            @click="showBrandFormModal = true" type="button"
+                        <button @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" v-model="form.brand_id" clearable
-                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                        no-match-text="No se encontraron coincidencias">
+                    <el-select class="w-1/2" v-model="form.brand_id" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
                     </el-select>
                     <InputError :message="form.errors.brand_id" />
@@ -106,7 +104,8 @@
 
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Código del producto (en caso de tener)" />
-                    <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
+                    <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100"
+                        clearable>
                         <template #prefix>
                             <i class="fa-solid fa-barcode"></i>
                         </template>
@@ -124,17 +123,19 @@
         <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
             <template #title> Agregar categoría </template>
             <template #content>
-            <form @submit.prevent="storeCategory" ref="categoryForm">
-                <div>
-                <label class="text-sm ml-3">Nombre de la categoría *</label>
-                <el-input v-model="categoryForm.name" placeholder="Escribe el nombre de la categoría" :maxlength="100" required clearable />
-                <InputError :message="categoryForm.errors.name" />
-                </div>
-            </form>
+                <form @submit.prevent="storeCategory" ref="categoryForm">
+                    <div>
+                        <label class="text-sm ml-3">Nombre de la categoría *</label>
+                        <el-input v-model="categoryForm.name" placeholder="Escribe el nombre de la categoría"
+                            :maxlength="100" required clearable />
+                        <InputError :message="categoryForm.errors.name" />
+                    </div>
+                </form>
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="showCategoryFormModal = false" :disabled="categoryForm.processing">Cancelar</CancelButton>
+                    <CancelButton @click="showCategoryFormModal = false" :disabled="categoryForm.processing">Cancelar
+                    </CancelButton>
                     <PrimaryButton @click="storeCategory()" :disabled="categoryForm.processing">Crear</PrimaryButton>
                 </div>
             </template>
@@ -144,17 +145,19 @@
         <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
             <template #title> Agregar proveedor </template>
             <template #content>
-            <form @submit.prevent="storeBrand">
-                <div>
-                <label class="text-sm ml-3">Nombre del proveedor*</label>
-                <el-input v-model="brandForm.name" placeholder="Escribe el nombre del proveedor" :maxlength="100" required clearable />
-                <InputError :message="brandForm.errors.name" />
-                </div>
-            </form>
+                <form @submit.prevent="storeBrand">
+                    <div>
+                        <label class="text-sm ml-3">Nombre del proveedor*</label>
+                        <el-input v-model="brandForm.name" placeholder="Escribe el nombre del proveedor"
+                            :maxlength="100" required clearable />
+                        <InputError :message="brandForm.errors.name" />
+                    </div>
+                </form>
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="showBrandFormModal = false" :disabled="brandForm.processing">Cancelar</CancelButton>
+                    <CancelButton @click="showBrandFormModal = false" :disabled="brandForm.processing">Cancelar
+                    </CancelButton>
                     <PrimaryButton @click="storeBrand()" :disabled="brandForm.processing">Crear</PrimaryButton>
                 </div>
             </template>
@@ -172,6 +175,7 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+import { addOrUpdateItem } from "@/dbService.js";
 
 export default {
     data() {
@@ -205,6 +209,7 @@ export default {
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showBrandFormModal: false, //muestra formulario para agregar proveedor
+            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
         };
     },
     components: {
@@ -223,28 +228,51 @@ export default {
         brands: Array
     },
     methods: {
-        update() {
-            if (this.form.imageCover) {
-                this.form.post(route("products.update-with-media", this.product.data.id), {
-                    method: '_put',
-                    onSuccess: () => {
-                        this.$notify({
-                            title: "Correcto",
-                            message: 'Se ha editado el producto ' + this.product.data.name,
-                            type: "success",
-                        });
-                    },
-                });
-            } else {
-                this.form.put(route("products.update", this.product.data.id), {
-                    onSuccess: () => {
-                        ElNotification({
-                            title: 'Correcto',
-                            message: 'Se ha editado el producto ' + this.product.data.name,
-                            type: 'success',
-                        });
-                    },
-                });
+        async update() {
+            try {
+                if (this.form.imageCover) {
+                    this.form.post(route("products.update-with-media", this.product.data.id), {
+                        method: '_put',
+                        onSuccess: async () => {
+                            // guardar nuevo producto a IndexedDB
+                            // Obtener producto mas reciente agregado
+                            const response = await axios.get(route('products.get-all-for-indexedDB'));
+                            const product = response.data.local_products.find(item => item.id.split('_')[1] == this.product.data.id);
+                             // actualizar a indexedDB
+                            if (product) {
+                                addOrUpdateItem('products', product);
+                            }
+
+                            this.$notify({
+                                title: "Correcto",
+                                message: 'Se ha editado el producto ' + this.product.data.name,
+                                type: "success",
+                            });
+                        },
+                    });
+                } else {
+                    this.form.put(route("products.update", this.product.data.id), {
+                        onSuccess: async () => {
+                            // guardar nuevo producto a IndexedDB
+                            // Obtener producto que coincida con el id editado
+                            const response = await axios.get(route('products.get-all-for-indexedDB'));
+                            const product = response.data.local_products.find(item => item.id.split('_')[1] == this.product.data.id);
+
+                            // actualizar a indexedDB
+                            if (product) {
+                                addOrUpdateItem('products', product);
+                            }
+
+                            this.$notify({
+                                title: "Correcto",
+                                message: 'Se ha editado el producto ' + this.product.data.name,
+                                type: "success",
+                            });
+                        },
+                    });
+                }
+            } catch (error) {
+                console.error(error);
             }
         },
         async storeCategory() {

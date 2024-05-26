@@ -58,12 +58,12 @@ const logout = () => {
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-12">
                             <!-- Dias de prueba -->
-                            <section
+                            <section v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
                                 class="hidden md:flex space-x-4 bg-primarylight font-bold px-6 py-2 rounded-[5px] text-xs">
                                 <p v-if="calculateRemainigFreeDays($page.props.auth.user.store.created_at) > 0">
                                     Te quedan {{ calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
                                     días de tu prueba gratuita <br>
-                                    ¡Suscribete en cualquier momento! Tu pago comenzarsá a contar al finalizar el
+                                    ¡Paga tu suscripción en cualquier momento! Tu pago comenzarsá a contar al finalizar el
                                     periodo de
                                     prueba.
                                 </p>
@@ -72,7 +72,7 @@ const logout = () => {
                                     Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
                                     tu suscripción.
                                 </p>
-                                <PrimaryButton class="!py-1 self-end">
+                                <PrimaryButton @click="$inertia.visit(route('profile.show'))" class="!py-1 self-end">
                                     Pagar suscripción
                                     <i class="fa-solid fa-arrow-right-long"></i>
                                 </PrimaryButton>
@@ -188,8 +188,8 @@ const logout = () => {
                                 :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('cash-cuts.index')"
-                                :active="route().current('cash-cuts.*')">
+                            <ResponsiveNavLink :href="route('cash-registers.index')"
+                                :active="route().current('cash-registers.*')">
                                 Caja
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">
