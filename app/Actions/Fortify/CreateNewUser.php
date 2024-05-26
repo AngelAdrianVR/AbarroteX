@@ -58,7 +58,7 @@ class CreateNewUser implements CreatesNewUsers
         // agregar las configuraciones iniciales a la tienda
         $settings = Setting::all();
             $settings->each(function($setting) use ($store){
-                $store->settings()->attach($setting->id, ['value' => null]);
+                $store->settings()->attach($setting->id, ['value' => 1]);
             });
 
         //Crea la caja registradora para esta nueva tienda

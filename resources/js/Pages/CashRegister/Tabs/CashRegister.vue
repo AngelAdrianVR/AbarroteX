@@ -274,7 +274,7 @@
         <div class="col-span-full mt-2">
           <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
           <el-input v-model="cutForm.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-            placeholder="Escribe auí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit
+            placeholder="Escribe aquí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit
             clearable />
         </div>
 

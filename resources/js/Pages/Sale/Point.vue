@@ -124,11 +124,11 @@
                 <el-dropdown-menu>
                   <el-dropdown-item @click="showCashRegisterSelectionModal = true"><i
                       class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
-                  <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
+                  <el-dropdown-item :disabled="!asignedCashRegister" @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
                       class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
-                  <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
+                  <el-dropdown-item :disabled="!asignedCashRegister" @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
                       class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
-                  <el-dropdown-item @click="handleCashCut"><i class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
+                  <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
                     corte</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -454,7 +454,7 @@
           <div class="col-span-full mt-2">
             <InputLabel value="Comentarios (opcional)" class="text-sm ml-2" />
             <el-input v-model="cutForm.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-              placeholder="Escribe auí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit
+              placeholder="Escribe aquí cualquier comentario relacionado al corte" :maxlength="255" show-word-limit
               clearable />
           </div>
 
