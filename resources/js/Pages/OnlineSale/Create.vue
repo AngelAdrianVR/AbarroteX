@@ -32,15 +32,15 @@
                     <h1 class="font-bold my-3 ml-3 col-span-full">Dirección</h1>
 
                     <div>
-                        <InputLabel value="Calle*" class="ml-3 mb-1" />
-                        <el-input v-model="form.street" placeholder="Escribe tu calle" :maxlength="255" clearable />
-                        <InputError :message="form.errors.street" />
-                    </div>
-
-                    <div class="mt-3">
                         <InputLabel value="Colonia*" class="ml-3 mb-1" />
                         <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
                         <InputError :message="form.errors.suburb" />
+                    </div>
+
+                    <div class="mt-3">
+                        <InputLabel value="Calle*" class="ml-3 mb-1" />
+                        <el-input v-model="form.street" placeholder="Escribe tu calle" :maxlength="255" clearable />
+                        <InputError :message="form.errors.street" />
                     </div>
 
                     <div class="grid grid-cols-2 gap-x-7 mt-3">
@@ -78,14 +78,15 @@
                         <CartProductCard :cartProduct="product" v-for="product in cart" :key="product" :actions="false" />
                     </div>
 
-                    <el-checkbox class="mt-5 ml-3" v-model="confirmSale">Confirmo que mi pedido es correcto y deseo continuar</el-checkbox>
+                    <p class="text-primary text-center">Total a pagar: ${{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+
+                    <el-checkbox class="mt-4 ml-3" v-model="confirmSale">Confirmo que mi pedido es correcto y deseo continuar</el-checkbox>
 
                     <div class="col-span-2 text-center py-3">
                         <PrimaryButton @click="store" class="!px-16" :disabled="form.processing || !confirmSale">Relizar pedido</PrimaryButton>
                     </div>
                 </div>
             </section>
-
         </div>
     </OnlineStoreLayout>
 </template>
@@ -109,7 +110,11 @@ data() {
         street: null, //Dirección / calle
         ext_number: null, //Dirección
         int_number: null, //Dirección
+        products: null, //productos
+        total: null, //cantidad total de venta $
+        store_id: null
     });
+
     return {
         form,
         confirmSale: false,
@@ -135,6 +140,7 @@ methods:{
                     message: "Se ha creado tu pedido correctamente. Nos comunicaremos contigo",
                     type: "success",
                 });
+                localStorage.removeItem('Ezycart');
             },
         });
     },
@@ -142,6 +148,17 @@ methods:{
 mounted() {
     // Obtener el carrito actual desde localStorage
     this.cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
+
+    // recupera el store_id del localStorage
+    this.form.store_id = localStorage.getItem('storeId');
+
+    //guarda el carrito en variable products del formulario para guardarlo en la base de datos
+    this.form.products = this.cart;
+
+    //calcula el total de la venta en el carrito
+    this.form.total = this.cart.reduce((sum, item) => {
+        return sum + (item.price * item.quantity);
+    }, 0);
 }
 }
 </script>

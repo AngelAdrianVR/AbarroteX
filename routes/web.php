@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BannerController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CashCutController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
+use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -61,13 +63,10 @@ Route::middleware([
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
-// Route::get('test', function () {
-//     return inertia('GlobalProductStore/TestIndexedDB');
-// });
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-Route::resource('global-products', GlobalProductController::class)->middleware('auth');
+Route::resource('global-products', GlobalProductController::class)->middleware(['auth']);
 Route::get('global-products-search', [GlobalProductController::class, 'searchProduct'])->name('global-products.search')->middleware('auth');
 Route::post('global-products/update-with-media/{global_product}', [GlobalProductController::class, 'updateWithMedia'])->name('global-products.update-with-media')->middleware('auth');
 // Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('global-products.select')->middleware('auth');
@@ -78,7 +77,7 @@ Route::get('global-products-filter', [GlobalProductController::class, 'filter'])
 
 //products routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('products', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription']);
+Route::resource('products', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('products/update-with-media/{product}', [ProductController::class, 'updateWithMedia'])->name('products.update-with-media')->middleware('auth');
 Route::put('products-entry/{product_id}', [ProductController::class, 'entryStock'])->name('products.entry')->middleware('auth');
 Route::get('products-search', [ProductController::class, 'searchProduct'])->name('products.search')->middleware('auth');
@@ -93,7 +92,7 @@ Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllF
 
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-Route::resource('global-product-store', GlobalProductStoreController::class)->middleware(['auth', 'activeSuscription']);
+Route::resource('global-product-store', GlobalProductStoreController::class)->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('global-product-select', [GlobalProductStoreController::class, 'selectGlobalProducts'])->name('global-product-store.select')->middleware('auth');
 Route::post('global-product-store/transfer', [GlobalProductStoreController::class, 'transfer'])->name('global-product-store.transfer')->middleware('auth');
 Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
@@ -112,8 +111,8 @@ Route::resource('brands', BrandController::class)->middleware('auth');
 
 //sales routes-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('sales', SaleController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero']);
-Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription']);
+Route::resource('sales', SaleController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero', 'verified']);
+Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
 Route::get('sales-print-ticket/{created_at}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
@@ -123,7 +122,7 @@ Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage
 
 //expenses routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador']);
+Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
 Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
 Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
 Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
@@ -136,9 +135,10 @@ Route::resource('product-histories', ProductHistoryController::class)->middlewar
 
 //store routes-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
-Route::resource('stores', StoreController::class)->middleware('auth');
+Route::resource('stores', StoreController::class)->middleware(['auth']);
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
+Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
 
 
 // User routes-----------------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword
 
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador']);
+Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
 Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
 
 
@@ -186,7 +186,7 @@ Route::resource('payments', PaymentController::class)->middleware('auth');
 
 //Cash register routes--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
-Route::resource('cash-registers', CashRegisterController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero']);
+Route::resource('cash-registers', CashRegisterController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero', 'verified']);
 Route::get('cash-registers-fetch-cash-register/{cash_register_id}', [CashRegisterController::class, 'fetchCashRegister'])->middleware('auth')->name('cash-registers.fetch-cash-register');
 Route::put('cash-registers-asign/{user}/{cash_register_id}', [CashRegisterController::class, 'asignCashRegister'])->middleware('auth')->name('cash-registers.asign');
 
@@ -207,13 +207,25 @@ Route::get('cash-cuts-get-by-page/{currentPage}', [CashCutController::class, 'ge
 Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'getCashCutMovements'])->name('cash-cuts.get-movements')->middleware('auth');
 
 
-//Tutorial routes----------------------------------------------------------------------------------------------------
+//Tutorial routes-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('tutorials', TutorialController::class)->middleware('auth');
 
 
+//Banners online store routes------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('banners', BannerController::class)->middleware('auth');
+Route::post('banners/update-with-media/{banner}', [BannerController::class, 'updateWithMedia'])->name('banners.update-with-media');
+
+
+//logos online store routes------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('logos', LogoController::class)->middleware('auth');
+Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWithMedia'])->name('logos.update-with-media');
+
+
 //online sales routes----------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
 Route::resource('online-sales', OnlineSaleController::class);
 Route::get('online-sales-client-index/{store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
 Route::get('online-sales/{offset}{limit}/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
@@ -222,6 +234,7 @@ Route::get('online-sales-show-global-product/{global_product_id}', [OnlineSaleCo
 Route::get('online-sales-cart', [OnlineSaleController::class, 'cartIndex'])->name('online-sales.cart');
 Route::get('online-sales-fetch-product/{product_id}/{is_local}', [OnlineSaleController::class, 'fetchProduct'])->name('online-sales.fetch-product');
 Route::get('online-sales-search-products/{store_id}', [OnlineSaleController::class, 'searchProducts'])->name('online-sales.search-products');
+Route::get('online-sales-get-logo/{store_id}', [OnlineSaleController::class, 'getLogo'])->name('online-sales.get-logo');
 
 
 // comandos Artisan

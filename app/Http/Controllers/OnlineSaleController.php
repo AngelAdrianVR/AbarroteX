@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
 use App\Models\GlobalProductStore;
+use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\Store;
@@ -26,8 +28,10 @@ class OnlineSaleController extends Controller
         //tomar solo primeros 12 productos
         $products = $all_products->take(12);
 
-        // return $products;
-        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id'));
+        $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
+
+        // return $banners;
+        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id', 'banners'));
     }
 
 
@@ -56,6 +60,8 @@ class OnlineSaleController extends Controller
         ]);
 
         OnlineSale::create($request->all());
+
+        return to_route('online-sales.client-index', ['store_id' => $request->store_id]);
     }
 
     
@@ -168,5 +174,13 @@ class OnlineSaleController extends Controller
         $products = $combined_products;
 
         return response()->json(['items' => $products]);
+    }
+
+
+    public function getLogo($store_id)
+    {
+        $logo = Logo::with(['media'])->where('store_id', $store_id)->first();
+
+        return response()->json(['item' => $logo]);
     }
 }

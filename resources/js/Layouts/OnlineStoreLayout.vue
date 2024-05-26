@@ -10,7 +10,8 @@
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
                             <Link :href="route('online-sales.client-index', storeId ?? 0)">
-                                <img class="h-12 md:h-20" src="@/../../public/images/black_logo.png" alt="logotipo de la tienda">
+                                <img v-if="logo?.media?.length" class="h-12 md:h-16" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
+                                <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png" alt="">
                             </Link>
 
                             <!-- buscador de productos -->
@@ -62,6 +63,7 @@
 <script>
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import axios from 'axios';
 
 export default {
 data() {
@@ -71,7 +73,8 @@ data() {
         productsFound: null, //buscador. productos encontrados.
         loading: false, //cargando la busqueda de productos
         cart: [], //productos guardados en el carrito (localStorage)
-        storeId: null //se recupera el id de la tienda desde el localstorage
+        storeId: null, //se recupera el id de la tienda desde el localstorage
+        logo: null //se recupera el logotipo de la tienda con el storeId obtenido del localstorage
     }
 },
 components:{
@@ -106,6 +109,16 @@ methods:{
         if (cart) {
             this.cart = JSON.parse(cart);
         }
+    },
+    async getLogo() {
+        try {
+            const response = await axios.get(route('online-sales.get-logo', this.storeId ?? 1));
+            if ( response.status === 200 ) {
+                this.logo = response.data.item;
+            }
+        } catch (error) {
+         console.log(error);   
+        }
     }
 },
 computed: {
@@ -120,6 +133,7 @@ created() {
 mounted() {
     // recupera el store_id del localStorage
     this.storeId = localStorage.getItem('storeId');
+    this.getLogo();
 }
 }
 </script>

@@ -44,9 +44,9 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $vailidated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . auth()->user()->store_id,
-            'code' => 'nullable|unique:products,code,NULL,id,store_id,' . auth()->user()->store_id . '|string|max:100',
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode()],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
@@ -55,8 +55,10 @@ class ProductController extends Controller
             'category_id' => 'required',
             'brand_id' => 'required',
         ]);
-
-        $product = Product::create($request->except('imageCover') + ['store_id' => auth()->user()->store_id]);
+        
+        // forzar default de 1 en stock
+        $vailidated['current_stock'] = $vailidated['current_stock'] ?? 1;
+        $product = Product::create($vailidated + ['store_id' => auth()->user()->store_id]);
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
@@ -65,7 +67,6 @@ class ProductController extends Controller
 
         return to_route('products.show', $product->id);
     }
-
 
     public function show($product_id)
     {
@@ -94,7 +95,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
-            'code' => 'nullable|string|max:100|unique:products,code,' . $product->id,
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
@@ -131,7 +132,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
-            'code' => 'nullable|string|max:100|unique:products,code,' . $product->id,
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
@@ -207,25 +208,6 @@ class ProductController extends Controller
         return response()->json(['items' => $products]);
     }
 
-
-    // *******borrar
-    public function getProductScaned($product_id)
-    {
-        $is_local_product = request()->boolean('is_local_product');
-
-        // si es producto local busca en la tabla de productos locales, si no, en la tabla de productos transferidos del catálogo
-        if ($is_local_product == '1') {
-            $product = Product::with(['category', 'brand', 'media'])->find($product_id);
-        } else {
-            $product = GlobalProductStore::whereHas('globalProduct', function ($query) use ($product_id) {
-                $query->where('id', $product_id);
-            })->with(['globalProduct.category', 'globalProduct.brand', 'globalProduct.media'])->first();
-        }
-
-        return response()->json(['item' => $product]);
-    }
-
-
     public function entryStock(Request $request, $product_id)
     {
         $product = Product::find($product_id);
@@ -247,7 +229,7 @@ class ProductController extends Controller
         // Crear gasto
         Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
-            'current_price' => $product->cost,
+            'current_price' => $product->cost ?? 0,
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
         ]);
@@ -484,15 +466,15 @@ class ProductController extends Controller
         $columnNames = [];
         // Obtener datos y guardar en la base de datos
         foreach ($worksheet->getRowIterator() as $row) {
-            if ($row->getRowIndex() < 3) {
-                continue; // Saltar las primeras 2 filas
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
             }
 
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
 
-            if ($row->getRowIndex() == 3) {
-                // Obtener los nombres de columna de la tercera fila del archivo Excel
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la fila 4 del archivo Excel
                 foreach ($cellIterator as $cell) {
                     $columnNames[] = $cell->getValue();
                 }
@@ -511,7 +493,9 @@ class ProductController extends Controller
                 $columnNames[0] => 'required|string|max:120|unique:products,name',
                 $columnNames[1] => 'required|numeric|min:0|max:999999',
                 $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[3] => $data[$columnNames[3]] ? 'unique:products,code' : '',
+                $columnNames[3] => $data[$columnNames[3]] 
+                    ?  ['max:100', new \App\Rules\UniqueProductCode()]
+                    : '',
                 $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999' : '',
                 $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999' : '',
                 $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '',
@@ -532,15 +516,15 @@ class ProductController extends Controller
     private function storeProductsFromFile($worksheet)
     {
         foreach ($worksheet->getRowIterator() as $row) {
-            if ($row->getRowIndex() < 3) {
-                continue; // Saltar las primeras 2 filas
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
             }
 
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
 
-            if ($row->getRowIndex() == 3) {
-                // Obtener los nombres de columna de la tercera fila del archivo Excel
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la cuarta fila del archivo Excel
                 foreach ($cellIterator as $cell) {
                     $columnNames[] = $cell->getValue();
                 }

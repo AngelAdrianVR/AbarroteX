@@ -145,10 +145,14 @@ function getItemByPartialAttributes(storeName, attributes) {
   });
 }
 
-function addOrUpdateItem(storeName, item) {
+async function addOrUpdateItem(storeName, item) {
+  // revisar si el elemento tiene imagen para guardarla tambien
+  await prepareImageToStore(item);
+  
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite');
     const store = transaction.objectStore(storeName);
+
     const request = store.put(item);
 
     request.onsuccess = () => {
@@ -205,13 +209,6 @@ function deleteObjectStore(storeName) {
   });
 }
 
-function closeDatabaseConnection() {
-  if (db) {
-    db.close();
-    db = null;
-  }
-}
-
 function deleteDatabase() {
   return new Promise((resolve, reject) => {
     closeDatabaseConnection();
@@ -258,6 +255,45 @@ function tableExists(storeName) {
   return db.objectStoreNames.contains(storeName);
 }
 
+async function initializeProducts() {
+  await openDatabase();
+
+  // Descarga inicial de productos en servidor
+  const response = await axios.get(route('products.get-all-for-indexedDB'));
+  const serverProducts = response.data.products;
+
+  const indexedDBProducts = await getAll('products');
+  // revisar si hay mas productos en la base de datos del servidor que en indexedDB
+  if (indexedDBProducts.length != serverProducts.length) {
+    console.log('Sincronizando indexedDB');
+    clearObjectStore('products');
+    // actualizar BDD local
+    addOrUpdateBatchOfItems('products', serverProducts);
+    console.log('indexedDB sincronizada!!');
+  }
+}
+
+async function addOrUpdateBatchOfItems(storeName, items) {
+  const promises = items.map((item) => addOrUpdateItem(storeName, item));
+  await Promise.all(promises);
+}
+
+//**  Funciones privadas  **//
+function closeDatabaseConnection() {
+  if (db) {
+    db.close();
+    db = null;
+  }
+}
+
+async function prepareImageToStore(item) {
+  if (item.image_url) {
+    const imageResponse = await axios.get(item.image_url, { responseType: 'blob' });
+    const imageBlob = imageResponse.data;
+    item.image = imageBlob;
+  }
+}
+
 export {
   openDatabase,
   ensureObjectStore,
@@ -269,5 +305,8 @@ export {
   deleteObjectStore,
   deleteDatabase,
   clearObjectStore,
-  tableExists
+  tableExists,
+  initializeProducts,
+  addOrUpdateBatchOfItems,
+  prepareImageToStore
 };

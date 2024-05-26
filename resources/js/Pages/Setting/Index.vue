@@ -14,9 +14,9 @@
                 <el-tab-pane label="Usuarios" name="2">
                     <Users :users="users" />
                 </el-tab-pane>
-                <!-- <el-tab-pane label="Ventas registradas" name="3">
-                    Ventas registradas
-                </el-tab-pane> -->
+                <el-tab-pane label="Tienda en línea" name="3">
+                    <OnlineStore :banners="banners" :logo="logo" />
+                </el-tab-pane>
                 <!-- <el-tab-pane label="Productos" name="4">
                     Productos
                 </el-tab-pane> -->
@@ -33,6 +33,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Point from '@/Pages/Setting/Tabs/Point.vue';
 import Users from '@/Pages/Setting/Tabs/Users.vue';
+import OnlineStore from '@/Pages/Setting/Tabs/OnlineStore.vue';
 
 export default {
     data() {
@@ -43,11 +44,14 @@ export default {
     components: {
         AppLayout,
         PrimaryButton,
+        OnlineStore,
         Users,
         Point
     },
     props: {
-        users: Array
+        users: Array,
+        banners: Object, //imagenes banners para tienda online
+        logo: Object //imagenes logo para tienda online
     },
     methods: {
         updateURL(tab) {

@@ -43,7 +43,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                                                 </svg>
-                                                <span class="text-xs">Reestablecer contraseña</span>
+                                                <span class="text-xs">Restablecer contraseña</span>
                                             </el-dropdown-item>
                                             <!-- <el-dropdown-item :command="'see|' + user.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -98,7 +98,7 @@
                 de todas formas?
             </p>
             <p v-else>
-                Se reestablecerá la contraseña al usuario seleccionado, esto es un proceso irreversible. ¿Continuar
+                Se restablecerá la contraseña al usuario seleccionado, esto es un proceso irreversible. ¿Continuar
                 de todas formas?
             </p>
         </template>
@@ -106,7 +106,7 @@
             <div class="flex items-center space-x-1">
                 <CancelButton @click="showDeleteConfirm = false; showResetConfirm = false">Cancelar</CancelButton>
                 <DangerButton v-if="showDeleteConfirm" @click="deleteItem">Eliminar</DangerButton>
-                <DangerButton v-else @click="resetPassword" class="!bg-green-500">Reestablecer</DangerButton>
+                <DangerButton v-else @click="resetPassword" class="!bg-green-500">Restablecer</DangerButton>
             </div>
         </template>
     </ConfirmationModal>
