@@ -35,8 +35,9 @@ class ProductController extends Controller
     public function create()
     {
         $products_quantity = Product::all()->count();
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
     }
@@ -55,7 +56,7 @@ class ProductController extends Controller
             'category_id' => 'required',
             'brand_id' => 'required',
         ]);
-        
+
         // forzar default de 1 en stock
         $vailidated['current_stock'] = $vailidated['current_stock'] ?? 1;
         $product = Product::create($vailidated + ['store_id' => auth()->user()->store_id]);
@@ -84,12 +85,12 @@ class ProductController extends Controller
         $product = ProductResource::make(Product::with('category', 'brand')
             ->where('store_id', auth()->user()->store_id)
             ->findOrFail($product_id));
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('Product/Edit', compact('product', 'categories', 'brands'));
     }
-
 
     public function update(Request $request, Product $product)
     {
@@ -493,7 +494,7 @@ class ProductController extends Controller
                 $columnNames[0] => 'required|string|max:120|unique:products,name',
                 $columnNames[1] => 'required|numeric|min:0|max:999999',
                 $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[3] => $data[$columnNames[3]] 
+                $columnNames[3] => $data[$columnNames[3]]
                     ?  ['max:100', new \App\Rules\UniqueProductCode()]
                     : '',
                 $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999' : '',

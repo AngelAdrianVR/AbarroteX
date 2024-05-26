@@ -22,8 +22,9 @@ class GlobalProductController extends Controller
 
     public function create()
     {
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProduct/Create', compact('categories', 'brands'));
     }
@@ -60,8 +61,9 @@ class GlobalProductController extends Controller
     public function edit($global_product_id)
     {
         $global_product = GlobalProduct::with('media')->findOrFail($global_product_id);
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProduct/Edit', compact('global_product', 'categories', 'brands'));
     }
