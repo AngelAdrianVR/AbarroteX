@@ -56,15 +56,7 @@ class StoreController extends Controller
     {
         $new_value = $request->value ? 1 : null;
         $store->settings()->updateExistingPivot($setting_id, ['value' => $new_value]);
-        $setting_name = Setting::find($setting_id)->key;
-        $action = $new_value ? 'activó' : 'desactivó';
-
-        // Guardar el movimiento en historial
-        SettingHistory::create([
-            'description' => $action . " la configuración \"$setting_name\"",
-            'user_name' => auth()->user()->name,
-        ]);
-
+       
         return response()->json([]);
     }
 

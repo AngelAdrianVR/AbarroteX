@@ -12,5 +12,6 @@ class SettingHistory extends Model
     protected $fillable = [
         'description',
         'user_name',
+        'store_id',
     ];
 }
