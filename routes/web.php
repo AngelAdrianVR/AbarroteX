@@ -19,6 +19,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SettingHistoryController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
@@ -131,6 +132,11 @@ Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'p
 //history routes---------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::resource('product-histories', ProductHistoryController::class)->middleware('auth');
+
+
+//setting history routes---------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
+Route::resource('setting-histories', SettingHistoryController::class)->middleware('auth');
 
 
 //store routes-----------------------------------------------------------------------------------------

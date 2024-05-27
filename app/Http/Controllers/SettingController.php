@@ -21,7 +21,6 @@ class SettingController extends Controller
         $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
         $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
         
-        // return $logo;
         return inertia('Setting/Index', compact('users', 'banners', 'logo'));
     }
 
