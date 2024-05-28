@@ -63,7 +63,7 @@ class CreateNewUser implements CreatesNewUsers
 
         //Crea la caja registradora para esta nueva tienda
         CashRegister::create([
-            'name' => 'Nueva caja',
+            'name' => 'Caja principal',
             'started_cash' => 0,
             'current_cash' => 0,
             'max_cash' => 5000,
