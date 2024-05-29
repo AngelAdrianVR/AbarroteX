@@ -57,10 +57,10 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 border border-grayD9 rounded-lg p-4">
+                    <div class="mt-5 border border-green-400 rounded-lg p-4">
                         <p class="font-bold mb-3">Importante</p>
                         <p class="text-sm">
-                            Una vez que confirmes tu pedido, nos pondremos en contacto contigo a través de WhatsApp al número proporcionado para coordinar
+                            Una vez que confirmes tu pedido, nos pondremos en contacto contigo a través de WhatsApp <i class="fa-brands fa-whatsapp text-sm text-green-500"></i> al número proporcionado para coordinar
                             todos los detalles de la entrega y el pago.
                         </p>
                     </div>

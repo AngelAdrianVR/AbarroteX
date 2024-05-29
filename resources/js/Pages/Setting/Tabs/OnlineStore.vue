@@ -101,18 +101,18 @@
       <p class="ml-7">Número de teléfono:</p>
 
       <div v-if="!editWhatsapp" class="flex items-center space-x-5">
-        <p class="ml-7">{{ $page.props.auth.user.store.whatsapp ?? 'Sin registro' }}</p>
+        <p class="ml-7">{{ onlineStoreForm.online_store_properties?.whatsapp ?? 'Sin registro' }}</p>
         <i v-if="!editWhatsapp" @click="editWhatsapp = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
       <div v-else class="flex items-center space-x-2 ml-7">
-        <el-input v-model="onlineStoreForm.whatsapp"
+        <el-input v-model="onlineStoreForm.online_store_properties.whatsapp"
         :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
         :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
         placeholder="Escribe el número de teléfono" />
         <InputError :message="onlineStoreForm.errors.whatsapp" />
         <button v-if="editWhatsapp">
-          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+          <i @click="editWhatsapp = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
         </button>
         <button @click="editWhatsapp = false;">
             <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
@@ -133,10 +133,10 @@
       </div>
 
       <div class="flex flex-col w-36 ml-7 space-y-1">
-        <el-switch v-model="onlineStoreForm.cash_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
-        <el-switch v-model="onlineStoreForm.credit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
-        <el-switch v-model="onlineStoreForm.debit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
-        <el-switch v-model="onlineStoreForm.mercado_pago" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch v-model="onlineStoreForm.online_store_properties.cash_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch v-model="onlineStoreForm.online_store_properties.credit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch v-model="onlineStoreForm.online_store_properties.debit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch v-model="onlineStoreForm.online_store_properties.mercado_pago" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
       </div>
     </div>
 
@@ -149,21 +149,20 @@
       <p class="ml-7">Costo de envío:</p>
 
       <div v-if="!editDeliveryPrice" class="flex items-center space-x-5">
-        <p class="ml-7">${{ $page.props.auth.user.store.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? 'Sin registro' }}</p>
+        <p class="ml-7">${{ onlineStoreForm.online_store_properties?.delivery_price ?? 'Sin registro' }}</p>
         <i v-if="!editDeliveryPrice" @click="editDeliveryPrice = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
       <div v-else class="flex items-center space-x-2 ml-7">
-        <el-input v-model="onlineStoreForm.delivery_price" type="text" placeholder="Ingresa el monto" class="px-10"
+        <el-input v-model="onlineStoreForm.online_store_properties.delivery_price" type="text" placeholder="Ingresa el monto" class="px-10"
           :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
           :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
           <template #prefix>
             <i class="fa-solid fa-dollar-sign"></i>
           </template>
         </el-input>
-        <InputError :message="onlineStoreForm.errors.delivery_price" />
         <button v-if="editDeliveryPrice">
-          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+          <i @click="editDeliveryPrice = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
         </button>
         <button @click="editDeliveryPrice = false;">
             <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
@@ -176,17 +175,16 @@
       <p class="ml-7">Condiciones de envío:</p>
 
       <div v-if="!editDeliveryConditions" class="flex items-center space-x-5">
-        <p class="ml-7">{{ $page.props.auth.user.store.delivery_conditions ?? 'Sin registro' }}</p>
+        <p class="ml-7">{{ onlineStoreForm.online_store_properties?.delivery_conditions ?? 'Sin registro' }}</p>
         <i v-if="!editDeliveryConditions" @click="editDeliveryConditions = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
       <div v-else class="flex items-center space-x-2 ml-7">
-        <el-input v-model="onlineStoreForm.delivery_conditions" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+        <el-input v-model="onlineStoreForm.online_store_properties.delivery_conditions" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
             placeholder="Escribe las condiciones de envío" :maxlength="500" show-word-limit
             clearable />
-        <InputError :message="onlineStoreForm.errors.delivery_conditions" />
         <button v-if="editDeliveryConditions">
-          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+          <i @click="editDeliveryConditions = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
         </button>
         <button @click="editDeliveryConditions = false;">
             <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
@@ -204,27 +202,26 @@
       <p class="ml-7">Compra mínima para envío gratis:</p>
 
       <div v-if="!editMinFreeDelivery" class="flex items-center space-x-5">
-        <p class="ml-7">${{ $page.props.auth.user.store.min_free_delivery?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? 'Sin registro' }}</p>
+        <p class="ml-7">${{ onlineStoreForm.online_store_properties?.min_free_delivery ?? 'Sin registro' }}</p>
         <i v-if="!editMinFreeDelivery" @click="editMinFreeDelivery = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
       <div v-else class="flex items-center space-x-2 ml-7">
-        <el-input v-model="onlineStoreForm.min_free_delivery" type="text" placeholder="Ingresa el monto" class="px-10"
+        <el-input v-model="onlineStoreForm.online_store_properties.min_free_delivery" type="text" placeholder="Ingresa el monto" class="px-10"
           :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
           :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
           <template #prefix>
             <i class="fa-solid fa-dollar-sign"></i>
           </template>
         </el-input>
-        <InputError :message="onlineStoreForm.errors.min_free_delivery" />
         <button v-if="editMinFreeDelivery">
-          <i @click="updateOnlineSalesInfo" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+          <i @click="editMinFreeDelivery = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
         </button>
         <button @click="editMinFreeDelivery = false;">
             <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
           </button>
       </div>
-      <el-switch v-model="onlineStoreForm.mercado_pago" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+      <el-switch v-model="onlineStoreForm.online_store_properties.enabled_free_delivery" class="ml-4" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
     </div>
 
     <!-- Gestión de cajas ---------------------------------->
@@ -236,6 +233,10 @@
     <div class="flex items-center text-sm mt-3">
       <p class="ml-7">Caja para pedidos a domicilio:</p>
     </div> -->
+
+    <div class="text-right mt-4">
+      <PrimaryButton @click="updateOnlineSalesInfo">Guadar cambios</PrimaryButton>
+    </div>
 
   </section>
 </template>
@@ -263,14 +264,17 @@ export default {
     });
 
     const onlineStoreForm = useForm({
-      whatsapp: this.$page.props.auth.user.store.whatsapp ?? null,
-      cash_payment: false,
-      credit_payment: false,
-      debit_payment: false,
-      mercado_pago: false,
-      delivery_price: this.$page.props.auth.user.store.delivery_price ?? null,
-      delivery_conditions: this.$page.props.auth.user.store.delivery_conditions ?? null,
-      min_free_delivery: this.$page.props.auth.user.store.min_free_delivery ?? null,
+      online_store_properties: {
+          whatsapp : this.$page.props.auth.user.store.online_store_properties?.whatsapp ?? null,
+          cash_payment: !! this.$page.props.auth.user.store.online_store_properties?.cash_payment,
+          credit_payment: !! this.$page.props.auth.user.store.online_store_properties?.credit_payment,
+          debit_payment: !! this.$page.props.auth.user.store.online_store_properties?.debit_payment,
+          mercado_pago: !! this.$page.props.auth.user.store.online_store_properties?.mercado_pago,
+          delivery_price: this.$page.props.auth.user.store.online_store_properties?.delivery_price ?? null,
+          delivery_conditions: this.$page.props.auth.user.store.online_store_properties?.delivery_conditions ?? null,
+          min_free_delivery: this.$page.props.auth.user.store.online_store_properties?.min_free_delivery ?? null,
+          enabled_free_delivery: this.$page.props.auth.user.store.online_store_properties?.enabled_free_delivery ?? null,
+      }
     });
 
     return {
@@ -314,6 +318,10 @@ export default {
                 message: "Se ha creado tu pedido correctamente. Nos comunicaremos contigo",
                 type: "success",
             });
+            this.editWhatsapp = false;
+            this.editDeliveryPrice = false;
+            this.editDeliveryConditions = false;
+            this.editMinFreeDelivery = false;
           },
       });
     },

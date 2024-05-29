@@ -1,5 +1,5 @@
 <template>
-    <div class="py-3 px-5 rounded-lg border border-gayD9 flex flex-col h-96">
+    <div class="py-3 px-5 rounded-lg border border-gayD9 flex flex-col h-96 hover:border-primary">
             <!-- Imagen -->
         <figure class="h-1/2 text-center">
             <Link :href="product.global_product_id ? route('online-sales.show-global-product', product.global_product_id) : route('online-sales.show-local-product', product.id)">
