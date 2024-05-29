@@ -18,6 +18,7 @@ class OnlineSale extends Model
         'street',
         'ext_number',
         'int_number',
+        'address_references',
         'payment_method',
         'status',
         'products',

@@ -1,9 +1,9 @@
 <template>
     <OnlineStoreLayout title="Mi carrito">
-        <div class="p-2 md:p-9">
+        <div class="md:p-2 lg:p-9">
             <Back />
 
-            <section class="xl:w-[60%] mx-auto mt-9 border border-grayD9 rounded-lg">
+            <section class="xl:w-[60%] mx-auto mt-9 border border-grayD9 rounded-lg mb-9">
                 <p class="py-2 px-9 border-b border-grayD9">Mi carrito</p>
 
                 <!-- body -->
@@ -14,20 +14,38 @@
                     </div>
 
                     <!-- Parte derecha -->
-                    <div class="md:w-[30%] md:py-4 md:px-9">
-                        <div class="border border-grayD9 rounded-lg py-7 px-5 flex justify-between font-bold mb-5">
-                            <p>Total:</p>
-                            <p>${{ cartTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <div class="md:w-[30%] md:py-4 md:px-5 text-sm">
+                        <div class="border border-grayD9 grid grid-cols-3 gap-x-1 rounded-lg p-3 mb-5 *:mb-1">
+                                <p class="col-span-2">Subtotal:</p>
+                                <p><span class="mr-2">$</span>{{ cartTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                <p class="col-span-2">Costo de envío:</p>
+                                <!-- Costo de envio si esta activado el minimo para envio gratis -->
+                                <div v-if="store?.online_store_properties?.enabled_free_delivery">
+                                    <p v-if="(cartTotal < store?.online_store_properties?.min_free_delivery)"><span class="mr-2">$</span>{{ parseFloat(store?.online_store_properties?.delivery_price || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                    <p class="text-green-500" v-else><span class="mr-2">$</span>0</p>
+                                </div>
+                                <!-- Costo de envío si esta desactivado el envio gratis -->
+                                <p v-else><span class="mr-2">$</span>{{ parseFloat(store?.online_store_properties?.delivery_price || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                <p class="font-bold col-span-2">Total:</p>
+                                <p v-if="cartTotal < store?.online_store_properties?.min_free_delivery" class="font-bold"><span class="mr-2">$</span>{{ (cartTotal + parseFloat(store?.online_store_properties?.delivery_price || 0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                <p v-else class="font-bold"><span class="mr-2">$</span>{{ cartTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                         </div>
 
-                        <div class="text-center">
+                        <p v-if="(cartTotal < store?.online_store_properties?.min_free_delivery) && store?.online_store_properties?.enabled_free_delivery" 
+                            class="text-xs text-center text-gray99 mb-5">
+                            Agregar 
+                            <span>
+                                ${{ (parseFloat(store?.online_store_properties?.min_free_delivery || 0) - cartTotal)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                            más para conseguir envió gratis
+                        </p>
+
+                        <div class="text-center pb-5">
                             <PrimaryButton @click="$inertia.get(route('online-sales.create'))" class="!px-8">Finalizar pedido</PrimaryButton>
                             <p @click="$inertia.get(route('online-sales.client-index', storeId ?? 0))" class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
                         </div>
-                            
                     </div>
                 </div>
-
             </section>
         </div>
     </OnlineStoreLayout>
@@ -38,12 +56,15 @@ import OnlineStoreLayout from '@/Layouts/OnlineStoreLayout.vue';
 import CartProductCard from '@/Components/MyComponents/OnlineSale/CartProductCard.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Back from "@/Components/MyComponents/Back.vue";
+import axios from 'axios';
 
 export default {
 data() {
     return {
         cart: [],
-        storeId: null //se recupera el id de la tienda desde el localstorage
+        storeId: null, //se recupera el id de la tienda desde el localstorage
+        store: {}, //se recupera la información de la tienda para utilizar el costo de envío.
+
     }
 },
 components:{
@@ -70,6 +91,16 @@ methods:{
             this.cart.splice(productIndex, 1);
          }
     },
+    async fetchStoreInfo() {
+        try {
+            const response = await axios.get(route('stores.fetch-store-info', this.storeId));
+            if ( response.status === 200 ) {
+                this.store = response.data.store;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
       
 },
 computed: {
@@ -85,6 +116,9 @@ mounted() {
 
     // recupera el store_id del localStorage
     this.storeId = localStorage.getItem('storeId');
+
+    // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
+    this.fetchStoreInfo();
 }
 }
 </script>

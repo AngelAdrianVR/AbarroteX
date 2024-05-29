@@ -315,7 +315,7 @@ export default {
           onSuccess: () => {
             this.$notify({
                 title: "Correcto",
-                message: "Se ha creado tu pedido correctamente. Nos comunicaremos contigo",
+                message: "¡Configuraciones actualizadas!",
                 type: "success",
             });
             this.editWhatsapp = false;

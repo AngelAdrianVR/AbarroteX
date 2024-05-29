@@ -2,7 +2,7 @@
     <OnlineStoreLayout :title="store.name">
         <div ref="scrollContainer" style="height: 91vh; overflow-y: scroll;" @scroll="handleScroll">
             <!-- Banners -->
-            <section v-if="banners.media?.length" class="my-4 mx-3">
+            <section v-if="banners.media?.length" class="my-4">
                 <figure class="md:w-1/2 h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
                     <img class="!rounded-md h-full object-contain" :src="banners.media[currentBanner].original_url" alt="">
                     <div class="flex items-center justify-center space-x-3 mt-4">

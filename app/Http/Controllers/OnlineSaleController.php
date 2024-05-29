@@ -57,6 +57,7 @@ class OnlineSaleController extends Controller
             'street' => 'required|string|max:255',
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
+            'address_references' => 'nullable|string|min:1|max:255',
         ]);
 
         OnlineSale::create($request->all());

@@ -74,4 +74,10 @@ class StoreController extends Controller
 
         $store->update($request->all());
     }
+
+
+    public function fetchStoreInfo(Store $store)
+    {
+        return response()->json(compact('store'));
+    }
 }
