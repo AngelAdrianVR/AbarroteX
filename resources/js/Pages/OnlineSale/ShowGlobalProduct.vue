@@ -17,7 +17,10 @@
                 <!-- Detalles del producto -->
                 <div class="h-96">
                     <h1 class="font-bold text-2xl mt-4">{{ global_product.global_product.name }}</h1>
-                    <p class="text-2xl text-primary font-bold mt-4">${{ global_product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="text-2xl text-primary font-bold mt-4">
+                        ${{ integerPart }}
+                        <span class="decimal-part">{{ decimalPart }}</span>
+                    </p>
                     <div class="flex items-center space-x-3 mt-5">
                         <p class="text-gray99">Cantidad</p>
                         <el-input-number v-model="quantity" :disabled=" global_product.current_stock < 1" :min="0" :max="global_product.current_stock" controls-position="right">
@@ -34,12 +37,12 @@
                         <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
                         </div>
                         <!-- Características del producto -->
-                        <div class="mt-7">
+                        <!-- <div class="mt-7">
                             <h2 class="font-bold mb-3">Acerca del producto</h2>
                             <p>• Característica 1</p>
                             <p>• Característica 2</p>
                             <p>• Característica 3</p>
-                        </div>
+                        </div> -->
                 </div>
             </section>
         </div>
@@ -81,7 +84,7 @@ methods:{
             cart.push({
                 id: this.global_product.global_product_id,
                 isLocal: false,
-                price: this.product.public_price,
+                price: this.global_product.public_price,
                 quantity: this.quantity
             });
         }
@@ -96,6 +99,25 @@ methods:{
             type: "success",
         });
     }
+},
+computed: {
+    integerPart() {
+      // Obtener la parte entera del precio y formatearla con comas
+      return Math.floor(this.global_product.public_price).toLocaleString();
+    },
+    decimalPart() {
+      // Obtener los decimales del precio sin el punto decimal
+      const decimalStr = this.global_product.public_price.toFixed(2).split('.')[1];
+      return decimalStr;
+    }
 }
 }
 </script>
+
+<style scoped>
+.decimal-part {
+  font-size: 0.65em;
+  vertical-align: super;
+}
+</style>
+

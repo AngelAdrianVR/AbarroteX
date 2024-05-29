@@ -2,14 +2,14 @@
     <div>
         <Head :title="title" />
 
-        <div class="overflow-hidden h-screen md:flex bg-white">
+        <div class="overflow-hidden h-screen bg-white">
             <!-- resto de pagina -->
             <main class="w-full">
                 <nav class="bg-white border-b border-gray-100">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
-                            <Link :href="route('online-sales.client-index', storeId ?? 0)">
+                            <Link v-if="!loadigLogo" :href="route('online-sales.client-index', storeId ?? 0)">
                                 <img v-if="logo?.media?.length" class="h-12 md:h-16" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
                                 <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png" alt="">
                             </Link>
@@ -52,8 +52,18 @@
                     </div>
                 </nav>
 
-                <div class="overflow-y-auto h-[calc(100vh-3rem)] bg-white">
+                <div class="overflow-y-auto h-[calc(100vh-5rem)] flex flex-col justify-between bg-white">
                     <slot />
+                    <footer class="flex justify-between items-center bg-gray-100 p-3 h-24">
+                        <figure>
+                            <img v-if="logo?.media?.length" class="h-12" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
+                        </figure>
+                        <figure class="text-center text-xs">
+                            <img class="h-12 mx-auto" src="@/../../public/images/black_logo.png" alt="">
+                            <p class="text-gray99">Potencia tu negocio, prueba </p>
+                            <a :href="'/'" target="_blank" class="text-primary">Punto de venta</a>
+                        </figure>
+                    </footer>
                 </div>
             </main>
         </div>
@@ -74,6 +84,7 @@ data() {
         loading: false, //cargando la busqueda de productos
         cart: [], //productos guardados en el carrito (localStorage)
         storeId: null, //se recupera el id de la tienda desde el localstorage
+        loadigLogo: false, //cargando logo
         logo: null //se recupera el logotipo de la tienda con el storeId obtenido del localstorage
     }
 },
@@ -111,6 +122,7 @@ methods:{
         }
     },
     async getLogo() {
+        this.loadigLogo = true;
         try {
             const response = await axios.get(route('online-sales.get-logo', this.storeId ?? 1));
             if ( response.status === 200 ) {
@@ -118,6 +130,8 @@ methods:{
             }
         } catch (error) {
          console.log(error);   
+        } finally {
+            this.loadigLogo = false;
         }
     }
 },

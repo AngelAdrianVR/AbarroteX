@@ -16,30 +16,32 @@
                 <!-- Detalles del producto -->
                 <div>
                     <h1 class="font-bold text-2xl mt-4">{{ product.name }}</h1>
-                    <p class="text-2xl text-primary font-bold mt-4">${{ product.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="text-2xl text-primary font-bold mt-4">
+                        ${{ integerPart }}
+                        <span class="decimal-part">{{ decimalPart }}</span>
+                    </p>
                     <div class="flex items-center space-x-3 mt-5">
-                        <p class="text-gray99">Cantidad</p>
-                        <el-input-number v-model="quantity" :disabled=" product.current_stock < 1" :min="0" :max="product.current_stock" controls-position="right">
-                            <template #decrease-icon>
-                            <i class="fa-solid fa-angle-down"></i>
-                            </template>
-                            <template #increase-icon>
-                            <i class="fa-solid fa-angle-up"></i>
-                            </template>
-                        </el-input-number>
-                        </div>
-                        <!-- Boton -->
-                        <div class="text-center mt-7">
-                        <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
-                        </div>
-                        <!-- Características del producto -->
-                        <div class="mt-7">
-                            <h2 class="font-bold mb-3">Acerca del producto</h2>
-                            <p>• Característica 1</p>
-                            <p>• Característica 2</p>
-                            <p>• Característica 3</p>
-                        </div>
-                    
+                    <p class="text-gray99">Cantidad</p>
+                    <el-input-number v-model="quantity" :disabled=" product.current_stock < 1" :min="0" :max="product.current_stock" controls-position="right">
+                        <template #decrease-icon>
+                        <i class="fa-solid fa-angle-down"></i>
+                        </template>
+                        <template #increase-icon>
+                        <i class="fa-solid fa-angle-up"></i>
+                        </template>
+                    </el-input-number>
+                    </div>
+                    <!-- Boton -->
+                    <div class="text-center mt-7">
+                    <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
+                    </div>
+                    <!-- Características del producto -->
+                    <!-- <div class="mt-7">
+                        <h2 class="font-bold mb-3">Acerca del producto</h2>
+                        <p>• Característica 1</p>
+                        <p>• Característica 2</p>
+                        <p>• Característica 3</p>
+                    </div> -->
                 </div>
             </section>
         </div>
@@ -96,6 +98,24 @@ methods:{
             type: "success",
         });
     }
-}
+},
+computed: {
+    integerPart() {
+      // Obtener la parte entera del precio y formatearla con comas
+      return Math.floor(this.product.public_price).toLocaleString();
+    },
+    decimalPart() {
+      // Obtener los decimales del precio sin el punto decimal
+      const decimalStr = this.product.public_price.toFixed(2).split('.')[1];
+      return decimalStr;
+    }
+  }
 }
 </script>
+
+<style scoped>
+.decimal-part {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+</style>
