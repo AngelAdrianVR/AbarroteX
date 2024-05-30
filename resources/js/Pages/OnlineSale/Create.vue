@@ -150,6 +150,7 @@ data() {
         ext_number: null, //Dirección
         int_number: null, //Dirección
         products: null, //productos
+        delivery_price: 0, //precio de envío
         total: null, //cantidad total de venta $
         address_references: null, //referencias para dar con el lugar
         store_id: null
@@ -174,10 +175,12 @@ props:{
 },
 methods:{
     storeOrder() {
-        // si no se alcanza el monto mínimo.
-        if ( this.form.total < this.store?.online_store_properties?.min_free_delivery ) {
-           this.form.total += parseFloat(this.store?.online_store_properties?.delivery_price);
-        }
+        // si no se alcanza el monto mínimo calcula el envio.
+        const storeProperties = this.store?.online_store_properties;
+        this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery 
+        ? 0 
+        : parseFloat(storeProperties?.delivery_price);
+
         this.form.post(route("online-sales.store"), {
             onSuccess: () => {
                 this.$notify({
@@ -212,6 +215,7 @@ mounted() {
     this.form.total = this.cart.reduce((sum, item) => {
         return sum + (item.price * item.quantity);
     }, 0);
+
 },
 created() {
     // recupera el store_id del localStorage

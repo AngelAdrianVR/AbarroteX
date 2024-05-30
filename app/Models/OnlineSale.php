@@ -22,6 +22,7 @@ class OnlineSale extends Model
         'payment_method',
         'status',
         'products',
+        'delivery_price',
         'total',
         'delivered_at',
         'store_id'
