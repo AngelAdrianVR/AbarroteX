@@ -108,7 +108,7 @@ class OnlineSaleController extends Controller
     
     public function destroy(OnlineSale $online_sale)
     {
-        //
+        $online_sale->delete();
     }
 
 

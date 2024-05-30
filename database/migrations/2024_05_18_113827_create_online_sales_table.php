@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('payment_method')->default('Efectivo');
             $table->string('status')->default('Pendiente'); // estatus del pedido 
             $table->json('products')->nullable(); // se guarda el arreglo del carrito recuperado del localStorage
+            $table->unsignedFloat('delivery_price'); // costo de envío
             $table->unsignedFloat('total'); // total de venta $
             $table->timestamp('delivered_at')->nullable();
             $table->foreignId('store_id');

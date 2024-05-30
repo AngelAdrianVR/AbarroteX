@@ -17,8 +17,7 @@
                         Editar
                         <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item @click="cashRegisterModal = true"><i
-                                class="fa-solid fa-arrow-down mr-3"></i>Eliminar</el-dropdown-item>
+                            <el-dropdown-item @click="showDeleteConfirm = true">Eliminar</el-dropdown-item>
                         </el-dropdown-menu>
                         </template>
                     </el-dropdown>
@@ -39,8 +38,12 @@
                     <p>{{ online_sale.payment_method }}</p>
                     <p>Referencias</p>
                     <p>{{ online_sale.address_references ?? '--' }}</p>
+                    <p class="font-bold mt-3">Subtotal:</p>
+                    <p class="font-bold mt-3">${{ online_sale.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="font-bold">Costo de envío:</p>
+                    <p class="font-bold">${{ online_sale.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     <p class="font-bold">Total:</p>
-                    <p class="font-bold">${{ online_sale.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="font-bold">${{ (online_sale.total + online_sale.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 </div>
             </article>
 
@@ -83,30 +86,53 @@
                     </table>
                 </div>
             </article>
-
-
         </section>
+
+        <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
+        <template #title>
+            <h1>Eliminar pedido</h1>
+        </template>
+        <template #content>
+            <p>
+                Se eliminará el pedido seleccionado, esto es un proceso irreversible. ¿Continuar
+                de todas formas?
+            </p>
+        </template>
+        <template #footer>
+            <div class="flex items-center space-x-1">
+                <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
+                <DangerButton @click="deleteOnlineOrder">Eliminar</DangerButton>
+            </div>
+        </template>
+    </ConfirmationModal>
     </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import Back from "@/Components/MyComponents/Back.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DangerButton from "@/Components/DangerButton.vue";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
+import Back from "@/Components/MyComponents/Back.vue";
 
 export default {
 data() {
     return {
         status: this.online_sale.status,
         statuses: ['Pendiente', 'Procesando', 'Entregado', 'Cancelado'],
+        showDeleteConfirm: false //modal de confirmación de eliminación
     }
 },
 components:{
 AppLayout,
 PrimaryButton,
+CancelButton,
+ConfirmationModal,
+DangerButton,
 Back
 },
 props:{
@@ -176,6 +202,27 @@ methods:{
         } catch (error) {
             console.error('Error formatting date:', error);
             return '--';  // Retorna '--' si ocurre un error al formatear la fecha
+        }
+    },
+    async deleteOnlineOrder() {
+        try {
+            const response = await axios.delete(route('online-sales.destroy', this.online_sale.id));
+            if (response.status == 200) {
+                this.$notify({
+                    title: 'Correcto',
+                    message: 'Se ha eliminado la orden',
+                    type: 'success',
+                });
+                this.showDeleteConfirm = false;
+                this.$inertia.get(route('online-sales.index'));
+            }
+        } catch (error) {
+            console.log(error);
+            this.$notify({
+                title: 'Error',
+                message: 'No se pudo eliminar la orden. Intente más tarde',
+                type: 'error',
+            });
         }
     },
 }

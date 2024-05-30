@@ -204,12 +204,32 @@
         </div>
     </Modal>
   <!-- --------------------------- Modal creación de orden ends ------------------------------------ -->
+
+  <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
+        <template #title>
+            <h1>Eliminar pedido</h1>
+        </template>
+        <template #content>
+            <p>
+                Se eliminará el pedido seleccionado, esto es un proceso irreversible. ¿Continuar
+                de todas formas?
+            </p>
+        </template>
+        <template #footer>
+            <div class="flex items-center space-x-1">
+                <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
+                <DangerButton @click="deleteOnlineOrder">Eliminar</DangerButton>
+            </div>
+        </template>
+    </ConfirmationModal>
 </template>
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DangerButton from "@/Components/DangerButton.vue";
 import ProductInput from "@/Components/MyComponents/ProductInput.vue";
 import InputError from "@/Components/InputError.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
@@ -247,6 +267,7 @@ data() {
         filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
         currentPage: 1, //para paginación
         products: null, //se obtienne todos los productos de la tienda
+        showDeleteConfirm: false, //modal de eliminación
 
         payment_methods: [
             'Efectivo',
@@ -258,10 +279,12 @@ data() {
     }
 },
 components:{
+ConfirmationModal,
 PrimaryButton,
 ThirthButton,
 CancelButton,
 ProductInput,
+DangerButton,
 InputError,
 InputLabel,
 Loading,
@@ -287,7 +310,7 @@ methods:{
         const data = command.split('|')[1];
 
         if (commandName == 'see') {
-            this.$inertia.get(route('sales.show', data));
+            this.$inertia.get(route('online-sales.show', data));
         } else if (commandName == 'processing' || commandName == 'delivered' || commandName == 'cancel') {
             this.updateStatus(commandName, data);
         } else if (commandName == 'delete') {
@@ -316,6 +339,33 @@ methods:{
             }
         } catch (error) {
             console.log(error);
+        }
+    },
+    async deleteOnlineOrder() {
+        try {
+            const response = await axios.delete(route('online-sales.destroy', this.itemIdToDelete));
+            if (response.status == 200) {
+                this.$notify({
+                    title: 'Correcto',
+                    message: 'Se ha eliminado la orden',
+                    type: 'success',
+                });
+                
+                const onlineSaleIndex = this.localOrders.findIndex(item => item.id == this.itemIdToDelete);
+
+                if ( onlineSaleIndex != -1 ) {
+                    this.localOrders.splice(onlineSaleIndex, 1);
+                }
+
+                this.showDeleteConfirm = false;
+            }
+        } catch (error) {
+            console.log(error);
+            this.$notify({
+                title: 'Error',
+                message: 'No se pudo eliminar la orden. Intente más tarde',
+                type: 'error',
+            });
         }
     },
     async filterOnlineSales() {
