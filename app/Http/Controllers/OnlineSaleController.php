@@ -8,6 +8,7 @@ use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\Store;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OnlineSaleController extends Controller
@@ -15,7 +16,12 @@ class OnlineSaleController extends Controller
     
     public function index()
     {   
-        //
+        $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
+        $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get();
+
+        // return $online_orders;
+        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders'));
     }
 
 
@@ -57,6 +63,7 @@ class OnlineSaleController extends Controller
             'street' => 'required|string|max:255',
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
+            'address_references' => 'nullable|string|min:1|max:255',
         ]);
 
         OnlineSale::create($request->all());
@@ -67,7 +74,7 @@ class OnlineSaleController extends Controller
     
     public function show(OnlineSale $online_sale)
     {
-        //
+        return inertia('OnlineSale/Show', compact('online_sale'));
     }
 
 
@@ -183,4 +190,75 @@ class OnlineSaleController extends Controller
 
         return response()->json(['item' => $logo]);
     }
+
+
+    public function filterOnlineSales(Request $request)
+    {
+        $queryDate = $request->input('queryDate');
+        $startDate = Carbon::parse($queryDate[0])->startOfDay();
+        $endDate = Carbon::parse($queryDate[1])->endOfDay();
+
+        // Obtener los gastos registrados en el rango de fechas requerido por el filtro
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
+
+        return response()->json(['items' => $online_orders]);
+    }
+
+
+    public function updateOnlineSaleStatus(Request $request, OnlineSale $online_sale)
+    {   
+        if ( $request->status == 'pendent' ) {
+            $status = 'Pendiente';
+            $delivered_at = null;
+        } else if ( $request->status == 'processing' ) {
+            $status = 'Procesando';
+            $delivered_at = now();
+        } else if ( $request->status == 'delivered' ) {
+            $status = 'Entregado';
+            $delivered_at = now();
+        } else if ( $request->status == 'cancel' ) {
+            $status = 'Cancelado';
+            $delivered_at = null;
+        }
+
+        $online_sale->update([
+            'status' => $status,
+            'delivered_at' => $delivered_at,
+        ]);
+
+        return response()->json(compact('status', 'delivered_at'));
+    }
+
+
+    public function fetchAllProducts()
+    {
+        // Productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::where('store_id', auth()->user()->store_id)
+            ->latest('id')
+            ->get(['id', 'name', 'public_price', 'current_stock']);
+
+        // Productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with('globalProduct:id,name,public_price')
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
+        
+        // Construimos un nuevo arreglo con el formato especificado
+        $products = array_map(function($product) {
+            // Si el producto tiene 'global_product_id', se considera transferido
+            $isLocal = isset($product['global_product_id']);
+            return [
+                'id' => $isLocal ? $product['global_product_id'] : $product['id'],
+                'price' => $isLocal ? $product['global_product']['public_price'] : $product['public_price'],
+                'isLocal' => !$isLocal,
+                'current_stock' => $product['current_stock'],
+                'name' => $isLocal ? $product['global_product']['name'] : $product['name'],
+            ];
+        }, $merged);
+
+        return response()->json(compact('products'));
+    }
+
 }

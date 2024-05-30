@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('street'); //calle
             $table->string('ext_number');
             $table->string('int_number')->nullable();
+            $table->string('address_references')->nullable();
             $table->string('payment_method')->default('Efectivo');
             $table->string('status')->default('Pendiente'); // estatus del pedido 
             $table->json('products')->nullable(); // se guarda el arreglo del carrito recuperado del localStorage

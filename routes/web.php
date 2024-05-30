@@ -139,6 +139,7 @@ Route::resource('stores', StoreController::class)->middleware(['auth']);
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
 Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
+Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->middleware('auth')->name('stores.fetch-store-info');
 
 
 // User routes-----------------------------------------------------------------------------------------
@@ -235,6 +236,9 @@ Route::get('online-sales-cart', [OnlineSaleController::class, 'cartIndex'])->nam
 Route::get('online-sales-fetch-product/{product_id}/{is_local}', [OnlineSaleController::class, 'fetchProduct'])->name('online-sales.fetch-product');
 Route::get('online-sales-search-products/{store_id}', [OnlineSaleController::class, 'searchProducts'])->name('online-sales.search-products');
 Route::get('online-sales-get-logo/{store_id}', [OnlineSaleController::class, 'getLogo'])->name('online-sales.get-logo');
+Route::get('online-sales-filter', [OnlineSaleController::class, 'filterOnlineSales'])->name('online-sales.filter')->middleware('auth');
+Route::put('online-sales-update-status/{online_sale}', [OnlineSaleController::class, 'updateOnlineSaleStatus'])->name('online-sales.update-status')->middleware('auth');
+Route::get('online-sales-fetch-all-products', [OnlineSaleController::class, 'fetchAllProducts'])->name('online-sales.fetch-all-products');
 
 
 // comandos Artisan

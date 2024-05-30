@@ -1,25 +1,6 @@
 <template>
   <div class="flex justify-between">
     <h1 class="font-bold">Configuraciones de tienda en línea</h1>
-    <Link :href="route('online-sales.client-index', $page.props.auth.user.store_id)">
-      <ThirthButton>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="size-4 mr-1"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"
-          />
-        </svg>
-        Ver tienda en línea
-      </ThirthButton>
-    </Link>
   </div>
 
   <!-- Portada -->
@@ -85,10 +66,21 @@
 
     </div>
 
-        <div class="text-right">
-            <PrimaryButton :disabled="logoForm.processing || bannerForm.processing" @click="update">Guardar</PrimaryButton>
-        </div>
-      
+    <div class="text-right">
+        <PrimaryButton :disabled="logoForm.processing || bannerForm.processing" @click="update">Guardar</PrimaryButton>
+    </div>
+  </section>
+
+  <!-- Productos -->
+  <!-- -------------------------------------------------->
+  <section class="my-7">
+    <h2 class="my-2 font-bold">Productos</h2>
+    <p class="text-sm mx-7">
+      Todos los productos disponibles en tu inventario serán reflejados en la tienda en línea. 
+      Si no deseas que algún producto aparezca en la tienda en línea, deberás eliminarlo directamente desde tu inventario. 
+      Esto asegura que todos los productos que tienes disponibles se muestren automáticamente en la tienda en línea sin necesidad de configuración adicional.
+      <span @click="$inertia.get(route('products.index'))" class="text-primary ml-1 cursor-pointer">Ir a mis productos</span>
+    </p>
   </section>
 
   <!-- información de tienda -->
@@ -98,14 +90,14 @@
     <!-- --------------------------------------------------------- -->
     <h2 class="font-bold mb-5">Contacto de WhatsApp <i class="fa-brands fa-whatsapp"></i></h2>
     <div class="flex items-center text-sm">
-      <p class="ml-7">Número de teléfono:</p>
+      <p class="mx-7">Número de teléfono:</p>
 
       <div v-if="!editWhatsapp" class="flex items-center space-x-5">
-        <p class="ml-7">{{ onlineStoreForm.online_store_properties?.whatsapp ?? 'Sin registro' }}</p>
+        <p class="mx-7">{{ onlineStoreForm.online_store_properties?.whatsapp ?? 'Sin registro' }}</p>
         <i v-if="!editWhatsapp" @click="editWhatsapp = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
-      <div v-else class="flex items-center space-x-2 ml-7">
+      <div v-else class="flex items-center space-x-2 mx-7">
         <el-input v-model="onlineStoreForm.online_store_properties.whatsapp"
         :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
         :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
@@ -125,14 +117,14 @@
     <h2 class="font-bold mb-5 mt-8">Gestión de pago</h2>
     
     <div class="flex items-center text-sm">
-      <div class="w-36 ml-7 space-y-2">
+      <div class="w-36 mx-7 space-y-2">
         <p>Efectivo</p>
         <p>Tarjeta de crédito</p>
         <p>Tarjeta de débito</p>
         <p>Mercado pago</p>
       </div>
 
-      <div class="flex flex-col w-36 ml-7 space-y-1">
+      <div class="flex flex-col w-36 mx-7 space-y-1">
         <el-switch v-model="onlineStoreForm.online_store_properties.cash_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
         <el-switch v-model="onlineStoreForm.online_store_properties.credit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
         <el-switch v-model="onlineStoreForm.online_store_properties.debit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
@@ -146,14 +138,14 @@
 
     <!-- costo de envío -->
     <div class="flex items-center text-sm">
-      <p class="ml-7">Costo de envío:</p>
+      <p class="mx-7">Costo de envío:</p>
 
       <div v-if="!editDeliveryPrice" class="flex items-center space-x-5">
-        <p class="ml-7">${{ onlineStoreForm.online_store_properties?.delivery_price ?? 'Sin registro' }}</p>
+        <p class="mx-7">${{ onlineStoreForm.online_store_properties?.delivery_price ?? 'Sin registro' }}</p>
         <i v-if="!editDeliveryPrice" @click="editDeliveryPrice = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
-      <div v-else class="flex items-center space-x-2 ml-7">
+      <div v-else class="flex items-center space-x-2 mx-7">
         <el-input v-model="onlineStoreForm.online_store_properties.delivery_price" type="text" placeholder="Ingresa el monto" class="px-10"
           :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
           :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
@@ -172,14 +164,14 @@
 
     <!-- condiciones de envío -->
     <div class="flex items-center text-sm mt-3">
-      <p class="ml-7">Condiciones de envío:</p>
+      <p class="mx-7">Condiciones de envío:</p>
 
       <div v-if="!editDeliveryConditions" class="flex items-center space-x-5">
-        <p class="ml-7">{{ onlineStoreForm.online_store_properties?.delivery_conditions ?? 'Sin registro' }}</p>
+        <p class="mx-7">{{ onlineStoreForm.online_store_properties?.delivery_conditions ?? 'Sin registro' }}</p>
         <i v-if="!editDeliveryConditions" @click="editDeliveryConditions = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
-      <div v-else class="flex items-center space-x-2 ml-7">
+      <div v-else class="flex items-center space-x-2 mx-7">
         <el-input v-model="onlineStoreForm.online_store_properties.delivery_conditions" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
             placeholder="Escribe las condiciones de envío" :maxlength="500" show-word-limit
             clearable />
@@ -199,14 +191,14 @@
 
     <!-- Mínimo de compra para envío gratis -->
     <div class="flex items-center text-sm mt-3">
-      <p class="ml-7">Compra mínima para envío gratis:</p>
+      <p class="mx-7">Compra mínima para envío gratis:</p>
 
       <div v-if="!editMinFreeDelivery" class="flex items-center space-x-5">
-        <p class="ml-7">${{ onlineStoreForm.online_store_properties?.min_free_delivery ?? 'Sin registro' }}</p>
+        <p class="mx-7">${{ onlineStoreForm.online_store_properties?.min_free_delivery ?? 'Sin registro' }}</p>
         <i v-if="!editMinFreeDelivery" @click="editMinFreeDelivery = true" class="fa-solid fa-pen text-xs text-primary cursor-pointer bg-gray-100  rounded-full py-1 px-[5px]"></i>
       </div>
 
-      <div v-else class="flex items-center space-x-2 ml-7">
+      <div v-else class="flex items-center space-x-2 mx-7">
         <el-input v-model="onlineStoreForm.online_store_properties.min_free_delivery" type="text" placeholder="Ingresa el monto" class="px-10"
           :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
           :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
@@ -228,10 +220,10 @@
     <!-- ------------------------------------------------- -->
     <!-- <h2 class="font-bold mb-5 mt-8">Gestión de cajas</h2>
 
-    <p class="ml-7 text-sm">Selecciona una caja específica para agregar todos los pedidos a domicilio.</p>
+    <p class="mx-7 text-sm">Selecciona una caja específica para agregar todos los pedidos a domicilio.</p>
     Gestión de cajas
     <div class="flex items-center text-sm mt-3">
-      <p class="ml-7">Caja para pedidos a domicilio:</p>
+      <p class="mx-7">Caja para pedidos a domicilio:</p>
     </div> -->
 
     <div class="text-right mt-4">
@@ -244,8 +236,7 @@
 <script>
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import ThirthButton from "@/Components/MyComponents/ThirthButton.vue";
-import { Link, useForm } from "@inertiajs/vue3";
+import { useForm } from "@inertiajs/vue3";
 
 export default {
   data() {
@@ -291,9 +282,7 @@ export default {
   },
   components: {
     InputFilePreview,
-    PrimaryButton,
-    ThirthButton,
-    Link,
+    PrimaryButton
   },
   props: {
     banners: Object,
@@ -315,7 +304,7 @@ export default {
           onSuccess: () => {
             this.$notify({
                 title: "Correcto",
-                message: "Se ha creado tu pedido correctamente. Nos comunicaremos contigo",
+                message: "¡Configuraciones actualizadas!",
                 type: "success",
             });
             this.editWhatsapp = false;
