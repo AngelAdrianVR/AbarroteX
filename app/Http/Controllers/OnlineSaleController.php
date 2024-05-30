@@ -8,6 +8,7 @@ use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\Store;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OnlineSaleController extends Controller
@@ -15,7 +16,12 @@ class OnlineSaleController extends Controller
     
     public function index()
     {   
-        //
+        $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
+        $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get();
+
+        // return $online_orders;
+        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders'));
     }
 
 
@@ -183,5 +189,18 @@ class OnlineSaleController extends Controller
         $logo = Logo::with(['media'])->where('store_id', $store_id)->first();
 
         return response()->json(['item' => $logo]);
+    }
+
+
+    public function filterOnlineSales(Request $request)
+    {
+        $queryDate = $request->input('queryDate');
+        $startDate = Carbon::parse($queryDate[0])->startOfDay();
+        $endDate = Carbon::parse($queryDate[1])->endOfDay();
+
+        // Obtener los gastos registrados en el rango de fechas requerido por el filtro
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
+
+        return response()->json(['items' => $online_orders]);
     }
 }
