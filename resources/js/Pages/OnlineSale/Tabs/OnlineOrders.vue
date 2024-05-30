@@ -35,11 +35,11 @@
                     </div>
                 </div>
             </div>
-            <PrimaryButton class="!py-1">Registrar pedido</PrimaryButton>
+            <PrimaryButton @click="createOnlineOrderModal = true" class="!py-1">Registrar pedido</PrimaryButton>
         </div>
     </div>
     <p class="my-4 mx-3 text-gray99 text-sm">En esta sección solo se muestran los pedidos que se encuentran pendientes, procesando y pedidos cancelados. 
-        Los pedidos entregados, puedes revisarlos en el módulo de <span @click="$inertia.get(route('sales.index'))" class="text-primary cursor-pointer ml-1">ventas registradas</span>
+        Los pedidos entregados, puedes revisarlos en el módulo de <span @click="$inertia.get(route('sales.index'))" class="text-primary cursor-pointer underline ml-1">ventas registradas</span>
     </p>
 
     <Loading v-if="loading" class="mt-20" />
@@ -53,6 +53,7 @@
                     <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">
                         <th># Pedido</th>
                         <th>Fecha de pedido</th>
+                        <th>Entregado</th>
                         <th>Cliente</th>
                         <th>Total</th>
                         <th>Estatus</th>
@@ -65,6 +66,7 @@
                         class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                         <td class="rounded-s-full">{{ online_order.id }}</td>
                         <td>{{ formatDate(online_order.created_at) }}</td>
+                        <td>{{ formatDate(online_order.delivered_at) ?? '--' }}</td>
                         <td>{{ online_order.name }}</td>
                         <td>${{ online_order.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         <td class="flex items-center space-x-2">
@@ -142,20 +144,100 @@
                 @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
         </div>
     </div>
+
+    <!-- -------------- Modal creación de orden starts----------------------- -->
+    <Modal :show="createOnlineOrderModal" @close="createOnlineOrderModal = false; form.reset">
+        <div class="py-4 px-7 relative text-sm">
+        <i @click="createOnlineOrderModal = false"
+            class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+
+        <form class="mt-5 mb-2" @submit.prevent="storeOnlineSale">
+            <h2 class="font-bold mb-4">Registrar pedido</h2>
+            <p>Datos del cliente</p>
+
+            <div class="mt-3">
+                <InputLabel value="Nombre del cliente*" class="ml-3 mb-1" />
+                <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
+                <InputError :message="form.errors.name" />
+            </div>
+
+            <div class="mt-3">
+                <InputLabel class="mb-1 ml-2" value="Teléfono*" />
+                <el-input v-model="form.phone"
+                :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+                placeholder="Escribe el número de teléfono del cliente" />
+                <InputError :message="form.errors.phone" />
+            </div>
+
+            <p class="font-bold my-5">Detalles del pedido</p>
+
+            <section class="max-h-72 overflow-auto">
+                <div class="space-y-3">
+                    <ProductInput :products="products" v-for="(item, index) in form.items" :key="item.id" :id="item.id"
+                    @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
+                </div>
+                <p v-if="!form.items?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
+                productos </p>
+                <div class="mt-4 mb-6 text-left">
+                    <button class="text-primary text-sm" type="button" @click="addNewItem">
+                        <i class="fa-solid fa-plus"></i>
+                        Agregar producto
+                    </button>
+                </div>
+            </section>
+
+            <div class="mt-3">
+                <InputLabel value="Método de pago" class="ml-3 mb-1" />
+                <el-select v-model="form.payment_method" class="!w-full" filterable required clearable placeholder="Seleccione"
+                    no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                    <el-option v-for="payment_method in payment_methods" :key="payment_method" :value="payment_method" 
+                    :label="payment_method" />
+                </el-select>
+            </div>
+
+            <div class="flex justify-end space-x-1 pt-5 pb-1 py-3">
+            <CancelButton @click="createOnlineOrderModal = false">Cancelar</CancelButton>
+            <PrimaryButton :disabled="form.processing">Confirmar</PrimaryButton>
+            </div>
+        </form>
+        </div>
+    </Modal>
+  <!-- --------------------------- Modal creación de orden ends ------------------------------------ -->
 </template>
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import ProductInput from "@/Components/MyComponents/ProductInput.vue";
+import InputError from "@/Components/InputError.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import InputLabel from "@/Components/InputLabel.vue";
+import { useForm } from "@inertiajs/vue3";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
+import Modal from "@/Components/Modal.vue";
 
 export default {
 data() {
+    const form = useForm({
+      name: null,
+      phone: null,
+      payment_method: null,
+      items: [
+        {
+            id: 1,
+            price: null,
+            is_local: null,
+            quantity: null
+        }
+      ],
+    });
     return {
+        form, //formulario para crear orden en linea
+        createOnlineOrderModal: false, //modal para crear orden en linea.
         localOrders: this.orders, //ordenes locales 
         loading: false,
         totalOnlineOrders: null, //items totales para paginación
@@ -164,18 +246,42 @@ data() {
         loadingItems: false, //para paginación
         filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
         currentPage: 1, //para paginación
+        products: null, //se obtienne todos los productos de la tienda
+
+        payment_methods: [
+            'Efectivo',
+            'Tarjeta de crédito',
+            'Tarjeta de débito',
+            'Trandferencia o depósito',
+            'Mercado pago',
+        ]
     }
 },
 components:{
 PrimaryButton,
 ThirthButton,
+CancelButton,
+ProductInput,
+InputError,
 InputLabel,
-Loading
+Loading,
+Modal
 },
 props:{
 orders: Array
 },
 methods:{
+    addNewItem() {
+      this.form.items.push({ id: this.next_item_id++, product_id: null, quantity: null });
+    },
+    deleteItem(index) {
+      if (this.form.items.length > 1) {
+        this.form.items.splice(index, 1);
+      }
+    },
+    syncItems(index, product_obj) {
+      this.form.items[index] = product_obj;
+    },
     handleCommand(command) {
         const commandName = command.split('|')[0];
         const data = command.split('|')[1];
@@ -183,7 +289,7 @@ methods:{
         if (commandName == 'see') {
             this.$inertia.get(route('sales.show', data));
         } else if (commandName == 'processing' || commandName == 'delivered' || commandName == 'cancel') {
-            updateStatus(commandName, data);
+            this.updateStatus(commandName, data);
         } else if (commandName == 'delete') {
             this.showDeleteConfirm = true;
             this.itemIdToDelete = data;
@@ -193,7 +299,20 @@ methods:{
         try {
             const response = await axios.put(route('online-sales.update-status', orderId), { status: status });
             if ( response.status === 200 ) {
+                //buscar la orden seleccionada para actualizar estatus
+                const orderIndex = this.localOrders.findIndex(item => item.id == orderId);
 
+                //si existe, actualizar el estatus
+                if ( orderIndex != -1 ) {
+                     this.localOrders[orderIndex].status = response.data.status;
+                     this.localOrders[orderIndex].delivered_at = response.data.delivered_at;
+
+                     this.$notify({
+                        title: "Correcto",
+                        message: "Se ha actualizado el estatus",
+                        type: "success",
+                    });                
+                }
             }
         } catch (error) {
             console.log(error);
@@ -244,7 +363,15 @@ methods:{
         this.currentPage = 1;
     },
     formatDate(dateString) {
-      return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
+        if (!dateString) {
+            return '--';  // Retorna '--' si dateString es null o undefined
+        }
+        try {
+            return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return '--';  // Retorna '--' si ocurre un error al formatear la fecha
+        }
     },
     getStatusIcon(status) {
       switch (status) {
@@ -272,7 +399,20 @@ methods:{
         default:
           return '';
       }
+    },
+    async fetchAllProducts() {
+        try {
+          const response = await axios.get(route('online-sales.fetch-all-products'));
+          if ( response.status === 200 ) {
+            this.products = response.data.products;
+          }  
+        } catch (error) {
+            console.log(error);
+        }
     }
 },
+mounted() {
+    this.fetchAllProducts();
+}
 }
 </script>

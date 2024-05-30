@@ -10,10 +10,10 @@
                 <img v-if="product?.global_product_id ? product?.global_product.media?.length : product?.media?.length" 
                         :src="product?.global_product_id ? product?.global_product.media[0]?.original_url : product?.media[0]?.original_url" 
                         alt="producto" class="h-full mx-auto">
-                    <div class="flex flex-col items-center justify-center" v-else>
-                        <i class="fa-regular fa-image text-3xl text-gray-200"></i>
-                        <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>
-                    </div>
+                <div class="flex flex-col items-center justify-center" v-else>
+                    <i class="fa-regular fa-image text-3xl text-gray-200"></i>
+                    <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>
+                </div>
             </figure>
 
             <!-- Detalles del producto -->

@@ -82,9 +82,11 @@ methods:{
             // Si el producto no está en el carrito, agregarlo
             cart.push({
                 id: this.product.id,
+                name: this.product.name,
                 isLocal: true,
                 price: this.product.public_price,
-                quantity: this.quantity
+                quantity: this.quantity,
+                image_url: this.product.media[0]?.original_url
             });
         }
 

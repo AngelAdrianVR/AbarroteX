@@ -74,7 +74,7 @@ class OnlineSaleController extends Controller
     
     public function show(OnlineSale $online_sale)
     {
-        //
+        return inertia('OnlineSale/Show', compact('online_sale'));
     }
 
 
@@ -203,4 +203,62 @@ class OnlineSaleController extends Controller
 
         return response()->json(['items' => $online_orders]);
     }
+
+
+    public function updateOnlineSaleStatus(Request $request, OnlineSale $online_sale)
+    {   
+        if ( $request->status == 'pendent' ) {
+            $status = 'Pendiente';
+            $delivered_at = null;
+        } else if ( $request->status == 'processing' ) {
+            $status = 'Procesando';
+            $delivered_at = now();
+        } else if ( $request->status == 'delivered' ) {
+            $status = 'Entregado';
+            $delivered_at = now();
+        } else if ( $request->status == 'cancel' ) {
+            $status = 'Cancelado';
+            $delivered_at = null;
+        }
+
+        $online_sale->update([
+            'status' => $status,
+            'delivered_at' => $delivered_at,
+        ]);
+
+        return response()->json(compact('status', 'delivered_at'));
+    }
+
+
+    public function fetchAllProducts()
+    {
+        // Productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::where('store_id', auth()->user()->store_id)
+            ->latest('id')
+            ->get(['id', 'name', 'public_price', 'current_stock']);
+
+        // Productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with('globalProduct:id,name,public_price')
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
+        
+        // Construimos un nuevo arreglo con el formato especificado
+        $products = array_map(function($product) {
+            // Si el producto tiene 'global_product_id', se considera transferido
+            $isLocal = isset($product['global_product_id']);
+            return [
+                'id' => $isLocal ? $product['global_product_id'] : $product['id'],
+                'price' => $isLocal ? $product['global_product']['public_price'] : $product['public_price'],
+                'isLocal' => !$isLocal,
+                'current_stock' => $product['current_stock'],
+                'name' => $isLocal ? $product['global_product']['name'] : $product['name'],
+            ];
+        }, $merged);
+
+        return response()->json(compact('products'));
+    }
+
 }

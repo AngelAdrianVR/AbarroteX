@@ -28,7 +28,8 @@ class OnlineSale extends Model
     ];
 
     protected $casts = [
-        'products' => 'array'
+        'products' => 'array',
+        'delivered_at' => 'datetime',
     ];
 
     //relationships

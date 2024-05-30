@@ -174,6 +174,10 @@ props:{
 },
 methods:{
     storeOrder() {
+        // si no se alcanza el monto mínimo.
+        if ( this.form.total < this.store?.online_store_properties?.min_free_delivery ) {
+           this.form.total += parseFloat(this.store?.online_store_properties?.delivery_price);
+        }
         this.form.post(route("online-sales.store"), {
             onSuccess: () => {
                 this.$notify({
