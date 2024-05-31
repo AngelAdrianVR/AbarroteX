@@ -64,7 +64,7 @@
                                 </button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
-                                        <el-dropdown-item :command="'see|' + formatBaseDate(index)">
+                                        <el-dropdown-item :command="'see|' + sale.sales[0]?.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"

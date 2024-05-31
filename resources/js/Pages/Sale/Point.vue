@@ -801,7 +801,7 @@ export default {
         this.addSaleProduct(productScaned);
       } else {
         this.$notify({
-          title: "Poducto no encontrado",
+          title: "Producto no encontrado",
           message: "El producto escaneado no esta registrado en la base de datos",
           type: "warning"
         });

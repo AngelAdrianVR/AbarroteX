@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="'Venta del día'">
-        <div class="md:px-10 px-2 py-7 text-sm md:text-base">
+        <div class="md:px-10 px-2 py-7 text-xs md:text-sm">
             <div class="flex justify-between items-center">
                 <Back />
                 <div class="flex items-center space-x-2">
@@ -23,7 +23,7 @@
             </div>
 
             <!-- Información de la venta -->
-            <div class="mt-7 lg:mx-16 text-gray99 text-sm">
+            <div class="mt-7 lg:mx-16 text-gray99">
                 <p>Total de productos vendidos: <span class="font-thin ml-2 text-gray37">{{
                     Object.values(day_sales)[0].total_quantity }}</span></p>
                 <p>Fecha de venta: <span class="font-thin ml-2 text-gray37">{{
@@ -34,9 +34,9 @@
             </div>
 
             <!-- Productos -->
-            <section class="flex flex-col space-y-5 lg:mx-16 text-sm mt-10">
+            <section class="flex flex-col space-y-5 lg:mx-16 mt-10">
                 <article v-for="(group, index) in getGroupedSlaes" :key="index"
-                    class="border border-grayD9 *:px-5 *:py-1">
+                    class="border border-grayD9 *:px-1 *:md:px-5 *:py-1">
                     <div class="flex justify-between border-b border-grayD9 text-end">
                         <p class="text-gray99">Vendedor: <span class="text-gray37">{{ group[0].user.name }}</span></p>
                         <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{ index }}</span></p>
@@ -45,18 +45,18 @@
                         <table class="w-full">
                             <thead>
                                 <tr class="*:px-2">
-                                    <th class="w-[20%] text-start">Producto</th>
-                                    <th class="w-[20%] text-start">Precio</th>
-                                    <th class="w-[20%] text-start">Cantidad</th>
-                                    <th class="w-[10%] text-end">Total</th>
+                                    <th class="w-[55%] text-start">Producto</th>
+                                    <th class="w-[15%] text-start">Precio</th>
+                                    <th class="w-[15%] text-start">Cantidad</th>
+                                    <th class="w-[15%] text-end">Total</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr v-for="(sale, index2) in group" :key="index2" class="*:px-2">
+                            <tbody class="divide-y-[1px]">
+                                <tr v-for="(sale, index2) in group" :key="index2" class="*:px-2 *:py-[6px] *:align-top border-grayD9">
                                     <td>
                                         <button v-if="sale.product_id" @click="viewProduct(sale)"
-                                            class="text-primary underline">
-                                            {{ sale.product_name }}
+                                            class="text-start text-primary underline">
+                                            {{ sale.product_name }} otro texto un poco mas grande
                                         </button>
                                         <el-tooltip v-else content="El producto fue eliminado" placement="right">
                                             <span class="text-red-700">{{ sale.product_name }}</span>
@@ -64,7 +64,7 @@
                                     </td>
                                     <td>${{ sale.current_price }}</td>
                                     <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                                    <td class="text-end">${{ (sale.current_price *
+                                    <td class="text-end pb-1">${{ (sale.current_price *
                                         sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 </tr>
                             </tbody>

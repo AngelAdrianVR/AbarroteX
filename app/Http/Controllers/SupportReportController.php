@@ -26,7 +26,7 @@ class SupportReportController extends Controller
             'first_report' => 'boolean',
         ]);
 
-        $report = SupportReport::create($valiidated + ['user_id' => auth()->id()]);
+        $report = SupportReport::create($valiidated + ['user_id' => auth()->id(), 'store_id' => auth()->user()->store_id]);
 
         // archivos adjuntos
         $report->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
