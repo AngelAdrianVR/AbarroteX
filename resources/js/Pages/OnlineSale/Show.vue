@@ -13,7 +13,7 @@
                         <el-option v-for="status in statuses" :key="status" :value="status" 
                         :label="status" />
                     </el-select>
-                    <el-dropdown split-button type="primary" @click="editOnlineOrderModal = true">
+                    <el-dropdown :disabled="loadingProducts" split-button type="primary" @click="editOnlineOrderModal = true">
                         Editar
                         <template #dropdown>
                         <el-dropdown-menu>
@@ -161,7 +161,7 @@
 
             <p class="font-bold my-5">Detalles del pedido</p>
 
-            <section class="max-h-72 overflow-auto">
+            <section class="max-h-56 overflow-auto">
                 <div class="space-y-3">
                     <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id" :init_state="item"
                     @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
@@ -234,6 +234,7 @@ data() {
     });
     return {
         form,
+        loadingProducts: false,
         status: this.online_sale.status,
         statuses: ['Pendiente', 'Procesando', 'Entregado', 'Cancelado'],
         showDeleteConfirm: false, //modal de confirmación de eliminación
@@ -378,6 +379,7 @@ methods:{
         }
     },
     async fetchAllProducts() {
+        this.loadingProducts = true;
         try {
           const response = await axios.get(route('online-sales.fetch-all-products'));
           if ( response.status === 200 ) {
@@ -385,6 +387,8 @@ methods:{
           }  
         } catch (error) {
             console.log(error);
+        } finally {
+            this.loadingProducts = false;
         }
     },
     totalMoneyOrder() {
