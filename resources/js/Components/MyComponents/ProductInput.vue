@@ -46,7 +46,7 @@ export default {
             is_local: false, //propiedad requeridas para una venta en linea.
             quantity: 1, //propiedad requeridas para una venta en linea.
             error_validation: false,
-            last_product_selected: null //guarda el producto seleccionado para habilitarlo de nuevo si se cambia
+            last_product_index_selected: null //guarda el producto seleccionado para habilitarlo de nuevo si se cambia
         };
     },
     components:{
@@ -86,26 +86,39 @@ export default {
     computed: {
         syncItem() {
             if (this.selection != null && this.quantity) {
-                //se le agregó un id relativo porque productos locales y globales algunos repetian el id. el relativo es consecutivo sin repetición
+                // Encuentra el índice del producto seleccionado en la lista de productos
                 const productSelectedIndex = this.products.findIndex(item => item.relative_id === this.selection);
-                if ( productSelectedIndex != -1 ) {
-                    this.products[productSelectedIndex].disabled = true;
-                    this.price = this.products[productSelectedIndex].price,
-                        this.$emit('syncItem', {
-                            id: this.id,
-                            name: this.products[productSelectedIndex].name,
-                            product_id: this.products[productSelectedIndex].id,
-                            price: this.products[productSelectedIndex].price,
-                            is_local: this.products[productSelectedIndex].isLocal,
-                            quantity: this.quantity,
-                            image_url: this.products[productSelectedIndex].image_url,
-                        });
-                        this.error_validation = false;
+
+                if (productSelectedIndex != -1) {
+                    // Si hay un producto seleccionado anteriormente, habilítalo
+                    if (this.last_product_index_selected != null) {
+                        this.products[this.last_product_index_selected].disabled = false;
                     }
+
+                    // Guarda el índice del producto seleccionado actualmente
+                    this.last_product_index_selected = productSelectedIndex;
+
+                    // Deshabilita el producto seleccionado actualmente para evitar múltiples selecciones
+                    this.products[productSelectedIndex].disabled = true;
+
+                    // Emite el evento con la información del producto seleccionado
+                    this.price = this.products[productSelectedIndex].price;
+                    this.$emit('syncItem', {
+                        id: this.id,
+                        name: this.products[productSelectedIndex].name,
+                        product_id: this.products[productSelectedIndex].id,
+                        price: this.products[productSelectedIndex].price,
+                        is_local: this.products[productSelectedIndex].isLocal,
+                        quantity: this.quantity,
+                        image_url: this.products[productSelectedIndex].image_url,
+                    });
+                    this.error_validation = false;
+                }
             } else {
                 this.error_validation = true;
             }
-        },
+        }
+
     },
 };
 </script>
