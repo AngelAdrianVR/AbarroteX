@@ -218,13 +218,18 @@
 
     <!-- Gestión de cajas ---------------------------------->
     <!-- ------------------------------------------------- -->
-    <!-- <h2 class="font-bold mb-5 mt-8">Gestión de cajas</h2>
+    <h2 class="font-bold mb-5 mt-8">Gestión de cajas</h2>
 
     <p class="mx-7 text-sm">Selecciona una caja específica para agregar todos los pedidos a domicilio.</p>
-    Gestión de cajas
+    <!-- Gestión de cajas -->
     <div class="flex items-center text-sm mt-3">
       <p class="mx-7">Caja para pedidos a domicilio:</p>
-    </div> -->
+      <el-select v-model="onlineStoreForm.online_store_properties.online_sales_cash_register" class="!w-40" filterable required clearable placeholder="Seleccione"
+          no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+          <el-option v-for="item in cash_registers" :key="item" :value="item.id" 
+          :label="item.name" />
+      </el-select>
+    </div>
 
     <div class="text-right mt-4">
       <PrimaryButton @click="updateOnlineSalesInfo">Guadar cambios</PrimaryButton>
@@ -265,6 +270,7 @@ export default {
           delivery_conditions: this.$page.props.auth.user.store.online_store_properties?.delivery_conditions ?? null,
           min_free_delivery: this.$page.props.auth.user.store.online_store_properties?.min_free_delivery ?? null,
           enabled_free_delivery: this.$page.props.auth.user.store.online_store_properties?.enabled_free_delivery ?? null,
+          online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties?.online_sales_cash_register ?? null,
       }
     });
 
@@ -285,6 +291,7 @@ export default {
     PrimaryButton
   },
   props: {
+    cash_registers: Array,
     banners: Object,
     logo: Object,
   },

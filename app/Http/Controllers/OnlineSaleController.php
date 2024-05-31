@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banner;
+use App\Models\CashRegister;
 use App\Models\GlobalProductStore;
 use App\Models\Logo;
 use App\Models\OnlineSale;
@@ -18,10 +19,12 @@ class OnlineSaleController extends Controller
     {   
         $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
         $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
-        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get();
+        $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->take(15);
+        $total_online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->get()->count();
 
-        // return $online_orders;
-        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders'));
+        // return $cash_registers;
+        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders', 'cash_registers', 'total_online_orders'));
     }
 
 
@@ -64,16 +67,21 @@ class OnlineSaleController extends Controller
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
             'address_references' => 'nullable|string|min:1|max:255',
+            'products' => 'required|array|min:1',
         ]);
 
-        OnlineSale::create($request->all());
+        $new_online_sale = OnlineSale::create($request->all());
 
-        return to_route('online-sales.client-index', ['store_id' => $request->store_id]);
+        if ( $request->created_from_app === true ) {
+            return to_route('online-sales.show', $new_online_sale->id );
+        } else {
+            return to_route('online-sales.client-index', ['store_id' => $request->store_id]);
+        }
     }
 
     
     public function show(OnlineSale $online_sale)
-    {
+    {   
         return inertia('OnlineSale/Show', compact('online_sale'));
     }
 
@@ -102,7 +110,21 @@ class OnlineSaleController extends Controller
     
     public function update(Request $request, OnlineSale $online_sale)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'phone' => 'required|string|min:10|max:10',
+            'email' => 'nullable|email',
+            'suburb' => 'required|string|max:255',
+            'street' => 'required|string|max:255',
+            'ext_number' => 'required|string|min:1|max:50',
+            'int_number' => 'nullable|string|min:1|max:50',
+            'address_references' => 'nullable|string|min:1|max:255',
+            'products' => 'required|array|min:1',
+        ]);
+
+        $online_sale->update($request->all());
+
+        return to_route('online-sales.show', $online_sale->id );
     }
 
     
@@ -233,32 +255,51 @@ class OnlineSaleController extends Controller
     public function fetchAllProducts()
     {
         // Productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::where('store_id', auth()->user()->store_id)
+        $local_products = Product::with('media')->where('store_id', auth()->user()->store_id)
             ->latest('id')
             ->get(['id', 'name', 'public_price', 'current_stock']);
 
         // Productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with('globalProduct:id,name,public_price')
+        $transfered_products = GlobalProductStore::with('globalProduct.media', 'globalProduct:id,name,public_price')
             ->where('store_id', auth()->user()->store_id)
             ->get();
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
         
+        // Inicializamos el contador para relative_id
+        $relative_id = 1;
+
         // Construimos un nuevo arreglo con el formato especificado
-        $products = array_map(function($product) {
+        $products = array_map(function($product) use (&$relative_id) {
             // Si el producto tiene 'global_product_id', se considera transferido
             $isLocal = isset($product['global_product_id']);
-            return [
+            $formatted_product = [
                 'id' => $isLocal ? $product['global_product_id'] : $product['id'],
                 'price' => $isLocal ? $product['global_product']['public_price'] : $product['public_price'],
                 'isLocal' => !$isLocal,
                 'current_stock' => $product['current_stock'],
                 'name' => $isLocal ? $product['global_product']['name'] : $product['name'],
+                'image_url' => $isLocal ? $product['global_product']['media'][0]['original_url'] : $product['media'][0]['original_url'],
+                'disabled' => false, //propiedad de deshabilitado para no mostrarlo en la creación de orden cuando ya se seleccionó
+                'relative_id' => $relative_id // Asignamos el relative_id actual
             ];
+            $relative_id++; // Incrementamos el contador
+            return $formatted_product;
         }, $merged);
 
         return response()->json(compact('products'));
     }
+
+
+    public function getItemsByPage($currentPage)
+    {
+        $offset = $currentPage * 15;
+
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->skip($offset)->take(15);
+
+        return response()->json(['items' => $online_orders]);
+    }
+
 
 }

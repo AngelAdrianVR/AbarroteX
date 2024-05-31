@@ -1,5 +1,5 @@
 <template>
-    <div class="flex space-x-2 space-y-0 flex-row justify-between items-center common-container">
+    <div class="flex space-x-2 flex-row justify-between items-center common-container">
         <div class="w-72">
             <div class="flex items-center space-x-2">
                 <InputLabel value="Producto*" class="mb-1" />
@@ -7,13 +7,12 @@
             </div>
             <el-select @change="syncItem" v-model="selection" class="!w-full" filterable required clearable placeholder="Seleccione"
                 no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                <el-option v-for="product in products" :key="product.id" :value="product.id" 
-                :label="product.name" />
+                <el-option :disabled="product.disabled" v-for="product in products" :key="product" :value="product.relative_id" :label="product.name" />
             </el-select>
         </div>
         <div class="w-24">
             <InputLabel value="Precio unitario" class="mb-1 text-sm" />
-            <el-input v-model="price" required type="number"
+            <el-input disabled v-model="price" min="1" required type="number"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                 :parser="(value) => value.replace(/[^\d.]/g, '')"
                 placeholder="0.00">
@@ -24,19 +23,14 @@
         </div>
         <div class="w-24">
             <InputLabel value="Cantidad" class="mb-1 text-sm" />
-            <el-input @change="syncItem" v-model.number="quantity" type="number" placeholder="Ingresa la cantidad" />
+            <el-input @change="syncItem" min="1" v-model.number="quantity" type="number" placeholder="Ingresa la cantidad" />
         </div>
         <div>
             <InputLabel value="Total" class="mb-1 text-sm" />
             <p><span class="mr-2">$</span>{{ (quantity * price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
         </div>
-        <button type="button" @click="$emit('deleteItem')">
-            <i class="
-          fa-regular fa-trash-can
-          text-sm
-          text-primary
-          cursor-pointer
-        "></i>
+        <button type="button" @click="handleDelete">
+            <i class="fa-regular fa-trash-can text-sm text-primary cursor-pointer pt-2"></i>
         </button>
     </div>
 </template>
@@ -48,10 +42,11 @@ export default {
     data() {
         return {
             selection: null, //propiedad requeridas para una venta en linea. (id)
-            price: 1, //propiedad requeridas para una venta en linea.
+            price: 0, //propiedad requeridas para una venta en linea.
             is_local: false, //propiedad requeridas para una venta en linea.
             quantity: 1, //propiedad requeridas para una venta en linea.
             error_validation: false,
+            last_product_selected: null //guarda el producto seleccionado para habilitarlo de nuevo si se cambia
         };
     },
     components:{
@@ -68,34 +63,45 @@ export default {
     },
     mounted() {
         if (this.init_state != null) {
-            this.selection = this.init_state.product_id;
+            if ( this.init_state.name ) {
+                const productSelectedIndex = this.products.findIndex(item => item.name === this.init_state.name);
+                this.selection = this.products[productSelectedIndex].relative_id;
+            } else {
+                this.selection = null;
+            }
+            this.price = this.init_state.price;
+            this.is_local = this.init_state.isLocal;
             this.quantity = this.init_state.quantity;
         }
     },
+    methods:{
+        handleDelete() {
+            const productSelectedIndex = this.products.findIndex(item => item.relative_id === this.selection);
+            if ( productSelectedIndex != -1 ) {
+                this.products[productSelectedIndex].disabled = false;
+            }
+            this.$emit('deleteItem');
+        }
+    },
     computed: {
-        getTotal() {
-            return this.selection != null
-                ? (this.quantity * this.products.find(product => { return product.id === this.selection }).price)?.toFixed(2) +
-                " " +
-                this.products.find(product => { return product.id === this.selection }).currency
-                : 0;
-        },
-        getPrice() {
-            return this.selection != null
-                ? this.products.find(product => { return product.id === this.selection }).price + ' ' +
-                this.products.find(product => { return product.id === this.selection }).currency +
-                " / Unidad"
-                : 0;
-        },
         syncItem() {
             if (this.selection != null && this.quantity) {
-                this.$emit('syncItem', {
-                    id: this.selection,
-                    price: this.id,
-                    is_local: this.selection,
-                    quantity: this.quantity,
-                });
-                this.error_validation = false;
+                //se le agregó un id relativo porque productos locales y globales algunos repetian el id. el relativo es consecutivo sin repetición
+                const productSelectedIndex = this.products.findIndex(item => item.relative_id === this.selection);
+                if ( productSelectedIndex != -1 ) {
+                    this.products[productSelectedIndex].disabled = true;
+                    this.price = this.products[productSelectedIndex].price,
+                        this.$emit('syncItem', {
+                            id: this.id,
+                            name: this.products[productSelectedIndex].name,
+                            product_id: this.products[productSelectedIndex].id,
+                            price: this.products[productSelectedIndex].price,
+                            is_local: this.products[productSelectedIndex].isLocal,
+                            quantity: this.quantity,
+                            image_url: this.products[productSelectedIndex].image_url,
+                        });
+                        this.error_validation = false;
+                    }
             } else {
                 this.error_validation = true;
             }
