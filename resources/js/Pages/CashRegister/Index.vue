@@ -49,7 +49,7 @@
                     </section>
 
                     <Loading v-if="loading" class="mt-20" />
-                    <div v-else class="mt-8">
+                    <div v-else>
                         <p v-if="Object.keys(localCashCuts)?.length" class="text-gray66 text-[11px] mb-3">{{ Object.keys(localCashCuts)?.length }} de {{ total_cash_cuts }}
                             elementos
                         </p>

@@ -1,7 +1,7 @@
 <template>
     <AppLayout :title="'Gastos del día'">
         <section class="mx-2 lg:mx-10 mt-7">
-            <Back />
+            <Back :to="route('expenses.index')" />
             <div class="flex items-center justify-end space-x-1">
                 <!-- ** descomentar cuando se haga una plantilla para imprimir todos los gastos del día **  -->
                 <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
@@ -12,7 +12,7 @@
                     </template>
 </el-popconfirm> -->
                 <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
-                    title="¿Continuar?" @confirm="deleteItem(expenses[0].id)">
+                    title="¿Continuar?" @confirm="deleteDayExpenses(expenses[0].id)">
                     <template #reference>
                         <i @click.stop
                             class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
@@ -108,7 +108,7 @@
                         <InputError :message="form.errors.quantity" />
                     </div>
                     <div class="mt-2">
-                        <InputLabel value="Costo" />
+                        <InputLabel value="Costo por unidad" />
                         <el-input v-model="form.current_price" placeholder="No olvides llenar este campo"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                             :parser="(value) => value.replace(/\D/g, '')">
@@ -120,7 +120,7 @@
             <template #footer>
                 <div class="flex items-center space-x-1">
                     <CancelButton @click="showEditModal = false" :disabled="form.processing">Cancelar</CancelButton>
-                    <PrimaryButton @click="deleteExpense" :disabled="form.processing">Guardar cambios
+                    <PrimaryButton @click="update" :disabled="form.processing">Guardar cambios
                     </PrimaryButton>
                 </div>
             </template>
@@ -137,8 +137,8 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">
-                    <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
-                    <PrimaryButton @click="deleteExpense">Eliminar</PrimaryButton>
+                    <CancelButton @click="showDeleteConfirm = false" :disabled="deleting">Cancelar</CancelButton>
+                    <PrimaryButton @click="deleteItem" :disabled="deleting">Eliminar</PrimaryButton>
                 </div>
             </template>
         </ConfirmationModal>
@@ -172,8 +172,11 @@ export default {
             showEditModal: false,
             showDeleteConfirm: false,
             itemIdToDelete: null,
+            itemIdToEdit: null,
             // Permisos de rol actual
             canDelete: this.$page.props.auth.user.rol == 'Administrador',
+            // cargas
+            deleting: false,
         }
     },
     components: {
@@ -200,28 +203,62 @@ export default {
                 this.form.concept = expense.concept;
                 this.form.quantity = expense.quantity;
                 this.form.current_price = expense.current_price;
+                this.itemIdToEdit = itemId;
                 this.showEditModal = true;
             } else if (commandName == 'delete') {
                 this.showDeleteConfirm = true;
                 this.itemIdToDelete = itemId;
             }
         },
-        deleteExpense() {
-
-        },
-        update() {
-
-        },
-        async deleteItem(expenseId) {
+        async deleteItem() {
+            this.deleting = true;
             try {
-                const response = await axios.delete(route('expenses.destroy', expenseId));
+                const response = await axios.delete(route('expenses.destroy', this.itemIdToDelete));
                 if (response.status == 200) {
+                    this.showDeleteConfirm = false;
+                    
+                    // eliminar el gasto de la lista
+                    const index = this.expenses.findIndex(item => item.id == this.itemIdToDelete);
+                    this.expenses.splice(index, 1);
 
                     this.$notify({
-                        title: 'Correcto',
-                        message: 'Se han eliminado los gastos del día',
+                        title: 'Gasto eliminado',
+                        message: '',
                         type: 'success',
-                        position: 'top-right',
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'No se pudo procesar la petición',
+                    message: 'No se pudo eliminar el gasto. Inténte más tarde',
+                    type: 'error',
+                });
+            } finally {
+                this.deleting = false;
+            }
+        },
+        update() {
+            this.form.put(route('expenses.update', this.itemIdToEdit), {
+                onSuccess: () => {
+                    this.itemIdToEdit = null;
+                    this.showEditModal = false;
+                    this.$notify({
+                        title: 'Gasto actualizado',
+                        message: '',
+                        type: 'success',
+                    });
+                }
+            });
+        },
+        async deleteDayExpenses(expenseId) {
+            try {
+                const response = await axios.delete(route('expenses.delete-day', expenseId));
+                if (response.status == 200) {
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se han eliminado todos los gastos del día',
+                        type: 'success',
                     });
 
                     this.$inertia.get(route('expenses.index'));
@@ -229,10 +266,9 @@ export default {
             } catch (error) {
                 console.log(error);
                 this.$notify({
-                    title: 'Error',
+                    title: 'No se pudo procesar la petición',
                     message: 'No se pudo eliminar el registro de gastos. Inténte más tarde',
                     type: 'error',
-                    position: 'top-right',
                 });
             }
         },

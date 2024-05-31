@@ -1,7 +1,7 @@
 <template>
   <Loading v-if="loading" />
   <div v-else class="min-h-32">
-    <section class="flex justify-between space-x-3 mt-2">
+    <section class="flex flex-col md:flex-row justify-between space-y-2 md:space-x-3 mt-2">
       <!-- Boton para activar/desactivar caja registradora -->
       <el-tooltip v-if="canDelete" :content="cash_register.is_active 
         ? 'Desactivar caja. Si no planeas utilizar esta caja, puedes desactivarla para evitar que los usuarios accedan a ella.' 
