@@ -239,6 +239,7 @@ Route::get('online-sales-get-logo/{store_id}', [OnlineSaleController::class, 'ge
 Route::get('online-sales-filter', [OnlineSaleController::class, 'filterOnlineSales'])->name('online-sales.filter')->middleware('auth');
 Route::put('online-sales-update-status/{online_sale}', [OnlineSaleController::class, 'updateOnlineSaleStatus'])->name('online-sales.update-status')->middleware('auth');
 Route::get('online-sales-fetch-all-products', [OnlineSaleController::class, 'fetchAllProducts'])->name('online-sales.fetch-all-products');
+Route::post('online-sales-get-by-page/{currentPage}', [OnlineSaleController::class, 'getItemsByPage'])->name('online-sales.get-by-page')->middleware('auth');
 
 
 // comandos Artisan

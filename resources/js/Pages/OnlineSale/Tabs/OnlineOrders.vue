@@ -109,14 +109,14 @@
                                             </svg>
                                             <span class="text-xs">Ver</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'edit|' + online_order.id">
+                                        <!-- <el-dropdown-item :command="'edit|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                             </svg>
                                             <span class="text-xs">Editar</span>
-                                        </el-dropdown-item>
+                                        </el-dropdown-item> -->
                                         <el-dropdown-item :command="'delete|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
@@ -143,6 +143,7 @@
             <button v-else-if="localOrders?.length && totalOnlineOrders > 15 && localOrders?.length < totalOnlineOrders && !filtered"
                 @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
         </div>
+        {{localOrders}}
     </div>
 
     <!-- -------------- Modal creación de orden starts----------------------- -->
@@ -155,37 +156,70 @@
             <h2 class="font-bold mb-4">Registrar pedido</h2>
             <p>Datos del cliente</p>
 
-            <div class="mt-3">
-                <InputLabel value="Nombre del cliente*" class="ml-3 mb-1" />
-                <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
-                <InputError :message="form.errors.name" />
-            </div>
+            <div class="md:grid grid-cols-2 gap-y-2 gap-x-7 space-y-2 md:space-y-0 mt-3">
+                <div>
+                    <InputLabel value="Nombre del cliente*" class="ml-3 mb-1" />
+                    <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
+                    <InputError :message="form.errors.name" />
+                </div>
 
-            <div class="mt-3">
-                <InputLabel class="mb-1 ml-2" value="Teléfono*" />
-                <el-input v-model="form.phone"
-                :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
-                :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
-                placeholder="Escribe el número de teléfono del cliente" />
-                <InputError :message="form.errors.phone" />
+                <div>
+                    <InputLabel class="mb-1 ml-2" value="Teléfono*" />
+                    <el-input v-model="form.phone"
+                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                    :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+                    placeholder="Escribe el número de teléfono del cliente" />
+                    <InputError :message="form.errors.phone" />
+                </div>
+
+                <h1 class="font-bold my-1 ml-3 col-span-full">Dirección</h1>
+
+                <div>
+                    <InputLabel value="Calle*" class="ml-3 mb-1" />
+                    <el-input v-model="form.street" placeholder="Escribe tu calle" :maxlength="255" clearable />
+                    <InputError :message="form.errors.street" />
+                </div>
+
+                <div>
+                    <InputLabel value="Colonia*" class="ml-3 mb-1" />
+                    <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
+                    <InputError :message="form.errors.suburb" />
+                </div>
+
+                <div>
+                    <InputLabel value="Número exterior*" class="ml-3 mb-1" />
+                    <el-input v-model="form.ext_number" placeholder="Número de tu casa" :maxlength="255" clearable />
+                    <InputError :message="form.errors.ext_number" />
+                </div>
+
+                <div>
+                    <InputLabel value="Número Interior" class="ml-3 mb-1" />
+                    <el-input v-model="form.int_number" placeholder="Número de edificio, coto, fraccionamiento" :maxlength="255" clearable />
+                    <InputError :message="form.errors.int_number" />
+                </div>
             </div>
 
             <p class="font-bold my-5">Detalles del pedido</p>
 
             <section class="max-h-72 overflow-auto">
                 <div class="space-y-3">
-                    <ProductInput :products="products" v-for="(item, index) in form.items" :key="item.id" :id="item.id"
+                    <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id"
                     @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
                 </div>
-                <p v-if="!form.items?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
+                <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
                 productos </p>
-                <div class="mt-4 mb-6 text-left">
-                    <button class="text-primary text-sm" type="button" @click="addNewItem">
-                        <i class="fa-solid fa-plus"></i>
-                        Agregar producto
-                    </button>
-                </div>
             </section>
+            <div class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm">
+                <button class="text-primary text-sm self-start" type="button" @click="addNewItem">
+                    <i class="fa-solid fa-plus"></i>
+                    Agregar producto
+                </button>
+                <div class="flex flex-col mr-7 items-end">
+                    <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total + form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                </div>
+            </div>
 
             <div class="mt-3">
                 <InputLabel value="Método de pago" class="ml-3 mb-1" />
@@ -243,16 +277,27 @@ import Modal from "@/Components/Modal.vue";
 export default {
 data() {
     const form = useForm({
-      name: null,
-      phone: null,
-      payment_method: null,
-      items: [
-        {
-            id: 1,
-            price: null,
-            is_local: null,
-            quantity: null
-        }
+        name: null,
+        phone: null,
+        payment_method: 'Efectivo',
+        suburb: null,
+        street: null,
+        ext_number: null,
+        int_number: null,
+        delivery_price: null, //precio de envío
+        total: 0,
+        store_id: this.$page.props.auth.user.store_id,
+        created_from_app: true,
+        products: [
+            {
+                id: 1,
+                name: null,
+                product_id: null,
+                price: 1,
+                is_local: null,
+                quantity: 1,
+                image_url: null,
+            }
       ],
     });
     return {
@@ -260,7 +305,6 @@ data() {
         createOnlineOrderModal: false, //modal para crear orden en linea.
         localOrders: this.orders, //ordenes locales 
         loading: false,
-        totalOnlineOrders: null, //items totales para paginación
         showFilter: false, //filtro opciones
         searchDate: null, //filtro fechas
         loadingItems: false, //para paginación
@@ -268,7 +312,7 @@ data() {
         currentPage: 1, //para paginación
         products: null, //se obtienne todos los productos de la tienda
         showDeleteConfirm: false, //modal de eliminación
-
+        next_item_id: 2, //para el index de productos creados como venta en linea
         payment_methods: [
             'Efectivo',
             'Tarjeta de crédito',
@@ -291,19 +335,35 @@ Loading,
 Modal
 },
 props:{
-orders: Array
+orders: Array,
+totalOnlineOrders: Number
 },
 methods:{
     addNewItem() {
-      this.form.items.push({ id: this.next_item_id++, product_id: null, quantity: null });
+      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, is_local:null, quantity: null });
     },
     deleteItem(index) {
-      if (this.form.items.length > 1) {
-        this.form.items.splice(index, 1);
+      if (this.form.products.length > 1) {
+        this.form.products.splice(index, 1);
+        //actualiza el total y precio de envío cuando se elimina algun producto
+        this.syncItems();
+        this.totalMoneyOrder();
+        this.calculateDeliveryPrice();
       }
     },
     syncItems(index, product_obj) {
-      this.form.items[index] = product_obj;
+        this.form.products[index] = product_obj;
+    },
+    storeOnlineSale() {
+        this.form.post(route("online-sales.store"), {
+            onSuccess: () => {
+                this.$notify({
+                    title: "Correcto",
+                    message: "¡Se ha creado el pedido correctamente!",
+                    type: "success",
+                });
+            },
+        });
     },
     handleCommand(command) {
         const commandName = command.split('|')[0];
@@ -339,6 +399,22 @@ methods:{
             }
         } catch (error) {
             console.log(error);
+        }
+    },
+    async fetchItemsByPage() {
+        try {
+            this.loadingItems = true;
+            const response = await axios.post(route('online-sales.get-by-page', this.currentPage));
+
+            if (response.status === 200) {
+                // this.localOrders.push(response.data.items);
+                this.localOrders = [response.data.items];
+                this.currentPage++;
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            this.loadingItems = false;
         }
     },
     async deleteOnlineOrder() {
@@ -389,21 +465,6 @@ methods:{
             this.showFilter = false;
             this.filtered = false;
             this.currentPage = 1;
-        }
-    },
-    async fetchItemsByPage() {
-        try {
-            this.loadingItems = true;
-            const response = await axios.post(route('sales.get-by-page', this.currentPage), {cashRgisterId: this.cashRegister.id});
-
-            if (response.status === 200) {
-                this.sales = {...this.sales, ...response.data.items};
-                this.currentPage++;
-            }
-        } catch (error) {
-            console.log(error)
-        } finally {
-            this.loadingItems = false;
         }
     },
     cleanFilter() {
@@ -459,7 +520,28 @@ methods:{
         } catch (error) {
             console.log(error);
         }
+    },
+    totalMoneyOrder() {
+        //calcula el total de la venta de la orden
+        this.form.total = this.form.products.reduce((sum, item) => {
+            return sum + (item.price * item.quantity);
+        }, 0);
+    },
+    calculateDeliveryPrice() {
+        const storeProperties = this.$page.props.auth.user.store.online_store_properties;
+        this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery 
+        ? 0 
+        : parseFloat(storeProperties?.delivery_price);
     }
+},
+watch: {
+        'form.products': {
+            handler() {
+                this.totalMoneyOrder();
+                this.calculateDeliveryPrice();
+            },
+            deep: true
+        }
 },
 mounted() {
     this.fetchAllProducts();
