@@ -20,7 +20,7 @@ class OnlineSaleController extends Controller
         $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
         $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
-        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->take(15);
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
         $total_online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->get()->count();
 
         // return $cash_registers;
@@ -228,19 +228,38 @@ class OnlineSaleController extends Controller
 
 
     public function updateOnlineSaleStatus(Request $request, OnlineSale $online_sale)
-    {   
-        if ( $request->status == 'pendent' ) {
-            $status = 'Pendiente';
-            $delivered_at = null;
-        } else if ( $request->status == 'processing' ) {
-            $status = 'Procesando';
+    {
+        // Diccionario de estados válidos y sus traducciones
+        $status_map = [
+            'pendent' => 'Pendiente',
+            'processing' => 'Procesando',
+            'delivered' => 'Entregado',
+            'cancel' => 'Cancelado'
+        ];
+
+        // Verifica si el estado solicitado es válido
+        if (!isset($status_map[$request->status])) {
+            return response()->json(['error' => 'Estado inválido'], 400);
+        }
+
+        $status = $status_map[$request->status];
+        $delivered_at = null;
+
+        // Si se cambia desde 'delivered' a otro estado y existe una caja configurada
+        if ($online_sale->delivered_at && $request->online_sales_cash_register) {
+            $total_sale = $online_sale->total + $online_sale->delivery_price;
+            $cash_register = CashRegister::find($request->online_sales_cash_register);
+            $cash_register->current_cash -= $total_sale;
+            $cash_register->save();
+        }
+
+        // Si se cambia el estado a 'delivered' y existe una caja configurada
+        if ($request->status == 'delivered' && $request->online_sales_cash_register) {
+            $total_sale = $online_sale->total + $online_sale->delivery_price;
+            $cash_register = CashRegister::find($request->online_sales_cash_register);
+            $cash_register->current_cash += $total_sale;
+            $cash_register->save();
             $delivered_at = now();
-        } else if ( $request->status == 'delivered' ) {
-            $status = 'Entregado';
-            $delivered_at = now();
-        } else if ( $request->status == 'cancel' ) {
-            $status = 'Cancelado';
-            $delivered_at = null;
         }
 
         $online_sale->update([
@@ -250,6 +269,7 @@ class OnlineSaleController extends Controller
 
         return response()->json(compact('status', 'delivered_at'));
     }
+
 
 
     public function fetchAllProducts()
@@ -294,9 +314,9 @@ class OnlineSaleController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 15;
+        $offset = $currentPage * 20;
 
-        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->skip($offset)->take(15);
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->skip($offset)->take(20);
 
         return response()->json(['items' => $online_orders]);
     }
