@@ -22,13 +22,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $all_products = $this->getAllProducts();
-        $total_products = $all_products->count();
-
-        //tomar solo primeros 30 productos
-        $products = $all_products->take(30);
-
-        return inertia('Product/Index', compact('products', 'total_products'));
+        return inertia('Product/Index');
     }
 
 
@@ -457,6 +451,17 @@ class ProductController extends Controller
         $products = collect(array_merge($local_products, $transfered_products));
 
         return response()->json(compact('products', 'local_products', 'transfered_products'));
+    }
+
+    public function getDataForProductsView()
+    {
+        $all_products = $this->getAllProducts();
+        $total_products = $all_products->count();
+
+        //tomar solo primeros 30 productos
+        $products = $all_products->take(30);
+
+        return response()->json(compact('products', 'total_products'));
     }
 
     private function validateProductsFromFile($worksheet)

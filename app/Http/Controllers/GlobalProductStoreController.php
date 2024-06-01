@@ -171,7 +171,7 @@ class GlobalProductStoreController extends Controller
         return response()->json(['items' => $groupedHistoryArray]);
     }
 
-    public function selectGlobalProducts()
+    public function getDataForBaseCatalogView()
     {
         $global_products = GlobalProduct::all(['id', 'name']);
         $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
@@ -179,7 +179,8 @@ class GlobalProductStoreController extends Controller
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
-        return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
+        return response()->json(compact('global_products', 'my_products', 'categories', 'brands'));
+        // return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }
 
     public function transfer(Request $request)
