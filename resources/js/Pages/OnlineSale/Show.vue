@@ -333,7 +333,7 @@ methods:{
                 status = 'cancel';
             }
 
-            const response = await axios.put(route('online-sales.update-status', this.online_sale.id), { status: status });
+            const response = await axios.put(route('online-sales.update-status', this.online_sale.id), { status: status, online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties.online_sales_cash_register});
             if ( response.status === 200 ) {
                 this.$notify({
                     title: "Correcto",

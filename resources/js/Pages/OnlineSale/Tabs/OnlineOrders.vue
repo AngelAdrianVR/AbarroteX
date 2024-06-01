@@ -47,7 +47,7 @@
         <p v-if="localOrders?.length" class="text-gray66 text-[11px] mb-3">{{ localOrders?.length }} de {{ totalOnlineOrders }}
             elementos
         </p>
-        <div class="overflow-auto">
+        <div class="overflow-auto h-[465px] border-b py-3">
             <table v-if="localOrders?.length" class="w-full">
                 <thead>
                     <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">
@@ -140,10 +140,9 @@
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <button v-else-if="localOrders?.length && totalOnlineOrders > 15 && localOrders?.length < totalOnlineOrders && !filtered"
-                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
+            <!-- <button v-else-if="localOrders?.length && totalOnlineOrders > 20 && localOrders?.length < totalOnlineOrders && !filtered"
+                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button> -->
         </div>
-        {{localOrders}}
     </div>
 
     <!-- -------------- Modal creación de orden starts----------------------- -->
@@ -380,7 +379,7 @@ methods:{
     },
     async updateStatus(status, orderId) {
         try {
-            const response = await axios.put(route('online-sales.update-status', orderId), { status: status });
+            const response = await axios.put(route('online-sales.update-status', orderId), { status: status, online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties.online_sales_cash_register});
             if ( response.status === 200 ) {
                 //buscar la orden seleccionada para actualizar estatus
                 const orderIndex = this.localOrders.findIndex(item => item.id == orderId);
@@ -407,8 +406,7 @@ methods:{
             const response = await axios.post(route('online-sales.get-by-page', this.currentPage));
 
             if (response.status === 200) {
-                // this.localOrders.push(response.data.items);
-                this.localOrders = [response.data.items];
+                this.localOrders.push(response.data.items);
                 this.currentPage++;
             }
         } catch (error) {
@@ -535,13 +533,13 @@ methods:{
     }
 },
 watch: {
-        'form.products': {
-            handler() {
-                this.totalMoneyOrder();
-                this.calculateDeliveryPrice();
-            },
-            deep: true
-        }
+    'form.products': {
+        handler() {
+            this.totalMoneyOrder();
+            this.calculateDeliveryPrice();
+        },
+        deep: true
+    }
 },
 mounted() {
     this.fetchAllProducts();
