@@ -17,7 +17,7 @@ class SettingController extends Controller
             ->where('store_id', auth()->user()->store_id)
             ->where('rol', '!=', 'Administrador')
             ->get();
-
+      
         return inertia('Setting/Index', compact('users'));
     }
 

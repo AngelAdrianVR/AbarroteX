@@ -296,20 +296,28 @@ export default {
     async transferProducts() {
       try {
         this.processing = true;
-        const response = await axios.post(route('global-product-store.transfer'), { products: this.products });
+        let response = await axios.post(route('global-product-store.transfer'), { products: this.products });
 
         if (response.status === 200) {
-          this.$notify({
-            title: "Éxito",
-            message: "¡Se han transferido los productos a tu tienda!",
-            type: "success",
-          });
+          if (response.data.rejected_products.length) {
+            this.$notify({
+              title: "Límite de productos alcanzado",
+              message: "Los siguientes productos no se puedieron transferir a tu tienda debido a que llegaste al limite para tu paquete actual: " + response.data.rejected_products.join(', '),
+              type: "warning",
+            });
+          } else {
+            this.$notify({
+              title: "Éxito",
+              message: "¡Se han transferido los productos a tu tienda!",
+              type: "success",
+            });
+          }
 
           this.showConfirmModal = false;
           this.initialProducts = this.products;
 
           // Obtener productos
-          const response = await axios.get(route('products.get-all-for-indexedDB'));
+          response = await axios.get(route('products.get-all-for-indexedDB'));
           const products = response.data.products;
 
           // Descargar y almacenar imágenes

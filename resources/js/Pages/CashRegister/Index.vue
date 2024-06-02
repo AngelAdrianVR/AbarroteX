@@ -2,7 +2,7 @@
     <AppLayout title="Caja">
         <section class="mt-5 mx-2 lg:mx-8">
         <div v-if="canCreate" class="text-right">
-            <ThirthButton @click="$inertia.get(route('cash-registers.create'))">Crear caja</ThirthButton>
+            <ThirthButton v-if="cash_registers.length < 1" @click="$inertia.get(route('cash-registers.create'))">Crear caja</ThirthButton>
         </div>
             <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="String(index + 1)">
@@ -49,7 +49,7 @@
                     </section>
 
                     <Loading v-if="loading" class="mt-20" />
-                    <div v-else class="mt-8">
+                    <div v-else>
                         <p v-if="Object.keys(localCashCuts)?.length" class="text-gray66 text-[11px] mb-3">{{ Object.keys(localCashCuts)?.length }} de {{ total_cash_cuts }}
                             elementos
                         </p>

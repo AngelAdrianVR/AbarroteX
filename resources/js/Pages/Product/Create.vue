@@ -3,7 +3,7 @@
         <div class="px-3 md:px-10 py-7">
             <Back :to="route('products.index')" />
 
-            <form v-if="products_quantity < 650" @submit.prevent="store"
+            <form v-if="products_quantity < 800" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3 col-span-2">
@@ -116,10 +116,17 @@
                     <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar producto</PrimaryButton>
                 </div>
             </form>
-            <div v-else class="text-center text-gray-500">
-                <p class="text-3xl mb-3">¡Lo sentimos!</p>
-                <p class="">Has llegado al límite de productos disponibles (650). Para poder aumentar el límite ponte en
-                    contacto con el equipo de DTW</p>
+            <div v-else class="text-center text-gray37">
+                <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
+                <p class="text-xl text-center">Has llegado al límite de productos (800) de tu plan contratado.</p>
+                <p class="text-xl text-center">
+                    Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
+                </p>
+                <div class="flex justify-center mt-5">
+                    <PrimaryButton @click="$inertia.get(route('profile.show'))" :disabled="form.processing">
+                        Explorar planes
+                    </PrimaryButton>
+                </div>
             </div>
         </div>
 

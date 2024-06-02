@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Expense;
 use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
+use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
 use Illuminate\Http\Request;
@@ -101,6 +102,18 @@ class GlobalProductStoreController extends Controller
 
     public function entryStock(Request $request, $global_product_store_id)
     {
+        $messages = [
+            'cash_amount.required_if' => 'El monto a retirar es obligatorio cuando el pago se realiza mediante la caja registradora.',
+            'cash_amount.numeric' => 'El monto a retirar debe ser un número.',
+            'cash_amount.min' => 'El monto a retirar debe ser al menos 1.',
+        ];
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+            'is_paid_by_cash_register' => 'boolean',
+            'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
+        ], $messages);
+
         $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
@@ -170,7 +183,7 @@ class GlobalProductStoreController extends Controller
         return response()->json(['items' => $groupedHistoryArray]);
     }
 
-    public function selectGlobalProducts()
+    public function getDataForBaseCatalogView()
     {
         $global_products = GlobalProduct::all(['id', 'name']);
         $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
@@ -178,13 +191,15 @@ class GlobalProductStoreController extends Controller
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
-        return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
+        return response()->json(compact('global_products', 'my_products', 'categories', 'brands'));
+        // return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }
 
     public function transfer(Request $request)
     {
+        $store = auth()->user()->store;
         // Mis productos ya registrados
-        $my_products = GlobalProductStore::where('store_id', auth()->user()->store_id)
+        $my_products = GlobalProductStore::where('store_id', $store->id)
             ->pluck('global_product_id'); // Obtenemos solo los ids de los productos registrados
 
         // Obtener el arreglo de productos del cuerpo de la solicitud
@@ -192,7 +207,7 @@ class GlobalProductStoreController extends Controller
 
         // eliminar productos de la tienda que se regresaron a catalogo base
         // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
-        GlobalProductStore::where('store_id', auth()->user()->store_id)
+        GlobalProductStore::where('store_id', $store->id)
             ->whereNotIn('global_product_id', $product_ids)
             ->get()
             ->each(fn ($prd) => $prd->delete());
@@ -204,21 +219,36 @@ class GlobalProductStoreController extends Controller
             });
         });
 
+        // obtener prouductos totales en la tienda para establecer limite de 800 (paquete basico)
+        $total_local_products = Product::where('store_id', $store->id)->get(['id'])->count();
+        $total_global_products = GlobalProductStore::where('store_id', $store->id)->get(['id'])->count();
+        $total_products = $total_local_products + $total_global_products;
+        $rejected_products = [];
         // agregar nuevos productos
         foreach ($new_product_ids as $productId) {
-            // Se obtiene el producto global con el id recibido
             $product = GlobalProduct::with(['category', 'brand'])->find($productId);
+            // fijar un limite para paquete basico
+            if ($total_products < 800) {
+                // Se obtiene el producto global con el id recibido
 
-            if ($product) {
-                GlobalProductStore::create([
-                    'public_price' => $product->public_price,
-                    'cost' => 0,
-                    'current_stock' => 1,
-                    'min_stock' => 1,
-                    'global_product_id' => $productId,
-                    'store_id' => auth()->user()->store_id,
-                ]);
+                if ($product) {
+                    GlobalProductStore::create([
+                        'public_price' => $product->public_price,
+                        'cost' => 0,
+                        'current_stock' => 1,
+                        'min_stock' => 1,
+                        'global_product_id' => $productId,
+                        'store_id' => auth()->user()->store_id,
+                    ]);
+                }
+
+                // agregar el producto recien creado
+                $total_products++;
+            } else {
+                $rejected_products[] = $product->name;
             }
         }
+
+        return response()->json(compact('rejected_products', 'total_products'));
     }
 }
