@@ -64,16 +64,22 @@ class StoreController extends Controller
     public function updateOnlineSalesInfo(Request $request, Store $store)
     {
         $request->validate([
-            'whatsapp' => 'nullable|string|min:10|max:10',
-            'cash_payment' => 'nullable|boolean',
-            'credit_payment' => 'nullable|boolean',
-            'debit_payment' => 'nullable|boolean',
-            'mercado_pago' => 'nullable|boolean',
-            'delivery_price' => 'nullable|numeric|min:0|max:9999',
-            'delivery_conditions' => 'nullable|string|max:500',
-            'min_free_delivery' => 'nullable|numeric|min:0|max:9999',
+            'online_store_properties.whatsapp' => 'nullable|string|min:10|max:10',
+            'online_store_properties.cash_payment' => 'nullable|boolean',
+            'online_store_properties.credit_payment' => 'nullable|boolean',
+            'online_store_properties.debit_payment' => 'nullable|boolean',
+            'online_store_properties.mercado_pago' => 'nullable|boolean',
+            'online_store_properties.delivery_price' => 'nullable|numeric|min:0|max:9999',
+            'online_store_properties.delivery_conditions' => 'nullable|string|max:500',
+            'online_store_properties.min_free_delivery' => 'nullable|numeric|min:0|max:9999',
         ]);
 
         $store->update($request->all());
+    }
+
+
+    public function fetchStoreInfo(Store $store)
+    {
+        return response()->json(compact('store'));
     }
 }

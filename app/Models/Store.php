@@ -16,10 +16,7 @@ class Store extends Model
         'type',
         'contact_name',
         'contact_phone',
-        'whatsapp',
-        'delivery_price',
-        'delivery_conditions',
-        'min_free_delivery',
+        'online_store_properties', //json
         'address',
         'plan',
         'is_active',
@@ -32,6 +29,7 @@ class Store extends Model
 
     protected $casts = [
         'next_payment' => 'date',
+        'online_store_properties' => 'array',
     ];
 
     //relationships

@@ -1,5 +1,5 @@
 <template>
-    <div class="py-3 px-5 rounded-lg border border-gayD9 flex flex-col h-96">
+    <div class="py-3 px-5 rounded-lg border border-gayD9 flex flex-col h-96 hover:border-primary">
             <!-- Imagen -->
         <figure class="h-1/2 text-center">
             <Link :href="product.global_product_id ? route('online-sales.show-global-product', product.global_product_id) : route('online-sales.show-local-product', product.id)">
@@ -59,9 +59,11 @@ methods:{
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
                     id: this.product.global_product_id,
+                    name: this.product.global_product.name,
                     isLocal: false,
                     price: this.product.public_price,
-                    quantity: this.quantity
+                    quantity: this.quantity,
+                    image_url: this.product.global_product.media[0]?.original_url
                 });
             }
         } else {
@@ -76,9 +78,11 @@ methods:{
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
                     id: this.product.id,
+                    name: this.product.name,
                     price: this.product.public_price,
                     isLocal: true,
-                    quantity: this.quantity
+                    quantity: this.quantity,
+                    image_url: this.product.media[0]?.original_url
                 });
             }
         }

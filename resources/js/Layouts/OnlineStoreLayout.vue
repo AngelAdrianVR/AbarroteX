@@ -2,14 +2,14 @@
     <div>
         <Head :title="title" />
 
-        <div class="overflow-hidden h-screen md:flex bg-white">
+        <div class="overflow-hidden h-screen bg-white">
             <!-- resto de pagina -->
             <main class="w-full">
                 <nav class="bg-white border-b border-gray-100">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
-                            <Link :href="route('online-sales.client-index', storeId ?? 0)">
+                            <Link v-if="!loadigLogo" :href="route('online-sales.client-index', storeId ?? 0)">
                                 <img v-if="logo?.media?.length" class="h-12 md:h-16" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
                                 <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png" alt="">
                             </Link>
@@ -52,8 +52,36 @@
                     </div>
                 </nav>
 
-                <div class="overflow-y-auto h-[calc(100vh-3rem)] bg-white">
+                <div class="overflow-y-auto h-[calc(100vh-5rem)] flex flex-col justify-between bg-white">
                     <slot />
+                    <footer class="flex justify-between items-center bg-gray-100 p-3 h-[72px] md:h-24">
+                        <!-- Logo de la tienda -->
+                        <figure class="flex items-center space-x-2">
+                            <img v-if="logo?.media?.length" class="h-10 md:h-12" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
+                            <p class="tex-sm text-gray99">{{ store?.name }}</p>
+                        </figure>
+                        <!-- whatsapp button computed -->
+                        <div v-if="store?.online_store_properties?.whatsapp" class="hidden md:flex flex-col items-center">
+                            <a class="size-10 rounded-full flex items-center justify-center"
+                                :href="whatsappLink"
+                                target="_blank" rel="noopener noreferrer">
+                                <i class="fa-brands fa-whatsapp text-2xl lg:text-4xl text-gray99"></i>
+                            </a>
+                            <p class="text-sm text-gray99">Comunicate vía WhatsApp</p>
+                        </div>
+                        <!-- whatsapp button movil -->
+                        <a v-if="store?.online_store_properties?.whatsapp" class="md:hidden z-50 size-10 lg:w-20 lg:h-20 rounded-full bg-green-500 shadow-md flex items-center justify-center fixed bottom-3 right-3 hover:scale-105"
+                            :href="whatsappLink"
+                            target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-beat fa-whatsapp text-xl text-gray-100"></i>
+                        </a>
+                        <!-- Logo de ezy -->
+                        <figure class="text-center text-xs">
+                            <img class="h-10 md:h-12 mx-auto" src="@/../../public/images/black_logo.png" alt="">
+                            <p class="text-gray99">Potencia tu negocio, prueba </p>
+                            <a :href="'/'" target="_blank" class="text-primary">Punto de venta</a>
+                        </figure>
+                    </footer>
                 </div>
             </main>
         </div>
@@ -74,6 +102,8 @@ data() {
         loading: false, //cargando la busqueda de productos
         cart: [], //productos guardados en el carrito (localStorage)
         storeId: null, //se recupera el id de la tienda desde el localstorage
+        store: {}, //se recupera la informacion de la tienda
+        loadigLogo: false, //cargando logo
         logo: null //se recupera el logotipo de la tienda con el storeId obtenido del localstorage
     }
 },
@@ -111,6 +141,7 @@ methods:{
         }
     },
     async getLogo() {
+        this.loadigLogo = true;
         try {
             const response = await axios.get(route('online-sales.get-logo', this.storeId ?? 1));
             if ( response.status === 200 ) {
@@ -118,12 +149,28 @@ methods:{
             }
         } catch (error) {
          console.log(error);   
+        } finally {
+            this.loadigLogo = false;
+        }
+    },
+    async fetchStoreInfo() {
+        try {
+            const response = await axios.get(route('stores.fetch-store-info', this.storeId));
+            if ( response.status === 200 ) {
+                this.store = response.data.store;
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
 },
 computed: {
     cartCount() {
         return this.cart.length;
+    },
+    whatsappLink() {
+      const text = encodeURIComponent('Hola! vi tu página, me interesa su servicio!');
+      return `https://api.whatsapp.com/send?phone=${this.store?.online_store_properties?.whatsapp}&text=${text}`;
     }
 },
 created() {
@@ -134,6 +181,9 @@ mounted() {
     // recupera el store_id del localStorage
     this.storeId = localStorage.getItem('storeId');
     this.getLogo();
+
+    // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
+    this.fetchStoreInfo();
 }
 }
 </script>
