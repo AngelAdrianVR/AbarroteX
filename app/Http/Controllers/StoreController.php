@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
+use App\Models\SettingHistory;
 use App\Models\Store;
 use Illuminate\Http\Request;
 
@@ -54,7 +56,7 @@ class StoreController extends Controller
     {
         $new_value = $request->value ? 1 : null;
         $store->settings()->updateExistingPivot($setting_id, ['value' => $new_value]);
-
+       
         return response()->json([]);
     }
 

@@ -61,8 +61,10 @@
                         <InputError :message="expense.errors.current_price" />
                     </div>
                     <div class="mt-3">
-                        <el-checkbox v-model="expense.from_cash_register" :label="getCheckboxLabel(index)" size="small"
-                            :disabled="!hasEnoughCash(index)" />
+                        <el-checkbox v-model="expense.from_cash_register" size="small"
+                            :disabled="!hasEnoughCash(index)">
+                            <span v-html="getCheckboxLabel(index)"></span>
+                        </el-checkbox>
                     </div>
                 </div>
                 <div @click="addExpense"
@@ -178,7 +180,7 @@ export default {
         getCheckboxLabel(index) {
             let label = 'Dinero tomado de caja para el pago';
             if (!this.hasEnoughCash(index)) {
-                label += ' (No hay suficiente dinero en caja)';
+                label += '<br> (No hay suficiente dinero en caja)';
             }
 
             return label;

@@ -1,11 +1,11 @@
 <template>
     <AppLayout title="Ventas">
         <div class="px-2 lg:px-10 py-7">
-            <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
-                <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="String(index + 1)">
-                        <RegisteredSalesTable :cashRegister="item" />
-                </el-tab-pane>
-            </el-tabs>
+            <!-- <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
+                <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="String(index + 1)"> -->
+                        <RegisteredSalesTable :cashRegister="cash_registers[0]" />
+                <!-- </el-tab-pane>
+            </el-tabs> -->
         </div>
     </AppLayout>
 </template>

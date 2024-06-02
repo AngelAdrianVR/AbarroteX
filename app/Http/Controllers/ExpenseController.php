@@ -111,10 +111,22 @@ class ExpenseController extends Controller
 
     public function update(Request $request, Expense $expense)
     {
-        //
+        $validated = $request->validate([
+            'concept' => 'required|string|max:255',
+            'quantity' => 'required|numeric|min:1',
+            'current_price' => 'required|numeric|min:0',
+        ]);
+
+        $expense->update($validated);
     }
 
     public function destroy(Expense $expense)
+    {
+        // Eliminar el registro de gasto enviado como referencia
+        $expense->delete();
+    }
+    
+    public function destroyDayExpenses(Expense $expense)
     {
         // Obtener la fecha de creación del registro de gasto
         $expenseDate = $expense->created_at->toDateString();

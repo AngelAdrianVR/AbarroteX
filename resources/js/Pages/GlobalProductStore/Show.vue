@@ -285,10 +285,11 @@ export default {
     },
     methods: {
         handleChangeCashAmount() {
-            const total = this.global_product_store.cost * this.form.quantity;
+            // total redondeado a 2 decimales
+            const total = Math.round((this.global_product_store.cost * this.form.quantity + Number.EPSILON) * 100) / 100;
             if (this.form.cash_amount > this.cash_register.current_cash) {
                 this.cashAmountMessage =
-                    'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+                    'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else if (this.form.cash_amount > total) {
                 this.cashAmountMessage =
                     'El monto no debe superar el total del gasto ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
@@ -358,7 +359,6 @@ export default {
                             type: 'success',
                         });
                         this.fetchHistory();
-                        this.entryLoading = false;
 
                         // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
                         if (this.isInventoryOn) {
@@ -373,6 +373,7 @@ export default {
                             addOrUpdateItem('products', product);
                         }
                     },
+                    onFinish: () => this.entryLoading = false,
                 });
             }
         },

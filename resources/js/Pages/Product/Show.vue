@@ -280,7 +280,8 @@ export default {
     },
     methods: {
         handleChangeCashAmount() {
-            const total = this.product.data.cost * this.form.quantity;
+            // total redondeado a 2 decimales
+            const total = Math.round((this.product.data.cost * this.form.quantity + Number.EPSILON) * 100) / 100;
             if (this.form.cash_amount > this.cash_register.current_cash) {
                 this.cashAmountMessage =
                     'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
@@ -327,35 +328,35 @@ export default {
             });
         },
         entryProduct() {
-            if (!this.entryLoading) {
-                this.entryLoading = true;
-                this.form.put(route('products.entry', this.product.data?.id), {
-                    onSuccess: () => {
-                        this.form.reset();
-                        this.entryProductModal = false;
-                        this.$notify({
-                            title: 'Correcto',
-                            text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
-                            type: 'success',
-                        });
-                        this.fetchHistory();
-                        this.entryLoading = false;
+            if (this.entryLoading) return;
 
-                        // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
-                        if (this.isInventoryOn) {
-                            const product = {
-                                id: 'local_' + this.product.data.id,
-                                name: this.product.data.name,
-                                code: this.product.data.code,
-                                public_price: this.product.data.public_price,
-                                current_stock: this.product.data.current_stock + this.form.quantity,
-                                image_url: this.product.data.imageCover[0]?.original_url,
-                            };
-                            addOrUpdateItem('products', product);
-                        }
-                    },
-                });
-            }
+            this.entryLoading = true;
+            this.form.put(route('products.entry', this.product.data?.id), {
+                onSuccess: () => {
+                    this.form.reset();
+                    this.entryProductModal = false;
+                    this.$notify({
+                        title: 'Correcto',
+                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
+                        type: 'success',
+                    });
+                    this.fetchHistory();
+
+                    // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
+                    if (this.isInventoryOn) {
+                        const product = {
+                            id: 'local_' + this.product.data.id,
+                            name: this.product.data.name,
+                            code: this.product.data.code,
+                            public_price: this.product.data.public_price,
+                            current_stock: this.product.data.current_stock + this.form.quantity,
+                            image_url: this.product.data.imageCover[0]?.original_url,
+                        };
+                        addOrUpdateItem('products', product);
+                    }
+                },
+                onFinish: () => this.entryLoading = false,
+            });
         },
         getIcon(type) {
             if (type === 'Precio') {
