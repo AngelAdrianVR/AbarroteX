@@ -98,9 +98,10 @@ export default {
             }, 0);
         },
         calculateTotalProductsExpense() {
-            return this.expensesCurrentPeriod?.reduce((acumulador, current) => {
-                return acumulador + current.quantity;
-            }, 0);
+            return this.expensesCurrentPeriod?.length;
+            // return this.expensesCurrentPeriod?.reduce((acumulador, current) => {
+            //     return acumulador + current.quantity;
+            // }, 0);
         },
         getSimpleKpisOptions() {
             return [
@@ -120,7 +121,7 @@ export default {
                     value: "$" + this.calculateTotalExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
                 {
-                    title: "Productos comprados",
+                    title: "Gastos registrados",
                     icon: "fa-solid fa-clipboard-list",
                     value: this.calculateTotalProductsExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },

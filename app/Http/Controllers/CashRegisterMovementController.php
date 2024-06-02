@@ -31,7 +31,7 @@ class CashRegisterMovementController extends Controller
             'cashRegisterMovementType' => 'required|string',
             //En caso de retirar dinero de la caja el monto máximo es lo que se tenga registrado en current_cash, es decir lo que hay en caja
             'registerAmount' => $request->cashRegisterMovementType == 'Ingreso'
-                ? 'required|numeric|min:0|max:10000'
+                ? 'required|numeric|min:0|max:500000'
                 : 'required|numeric|min:0|max:' . $cash_register->current_cash,
             'registerNotes' => 'nullable|string|max:255',
         ]);

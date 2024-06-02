@@ -102,6 +102,18 @@ class GlobalProductStoreController extends Controller
 
     public function entryStock(Request $request, $global_product_store_id)
     {
+        $messages = [
+            'cash_amount.required_if' => 'El monto a retirar es obligatorio cuando el pago se realiza mediante la caja registradora.',
+            'cash_amount.numeric' => 'El monto a retirar debe ser un número.',
+            'cash_amount.min' => 'El monto a retirar debe ser al menos 1.',
+        ];
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+            'is_paid_by_cash_register' => 'boolean',
+            'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
+        ], $messages);
+
         $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
@@ -218,7 +230,7 @@ class GlobalProductStoreController extends Controller
             // fijar un limite para paquete basico
             if ($total_products < 800) {
                 // Se obtiene el producto global con el id recibido
-    
+
                 if ($product) {
                     GlobalProductStore::create([
                         'public_price' => $product->public_price,
@@ -231,7 +243,7 @@ class GlobalProductStoreController extends Controller
                 }
 
                 // agregar el producto recien creado
-                $total_products ++;
+                $total_products++;
             } else {
                 $rejected_products[] = $product->name;
             }

@@ -205,6 +205,18 @@ class ProductController extends Controller
 
     public function entryStock(Request $request, $product_id)
     {
+        $messages = [
+            'cash_amount.required_if' => 'El monto a retirar es obligatorio cuando el pago se realiza mediante la caja registradora.',
+            'cash_amount.numeric' => 'El monto a retirar debe ser un número.',
+            'cash_amount.min' => 'El monto a retirar debe ser al menos 1.',
+        ];
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+            'is_paid_by_cash_register' => 'boolean',
+            'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
+        ], $messages);
+        
         $product = Product::find($product_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar

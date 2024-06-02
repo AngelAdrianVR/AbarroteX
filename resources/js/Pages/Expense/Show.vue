@@ -11,13 +11,13 @@
                             class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                     </template>
 </el-popconfirm> -->
-                <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
+                <!-- <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                     title="¿Continuar?" @confirm="deleteDayExpenses(expenses[0].id)">
                     <template #reference>
                         <i @click.stop
                             class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
                     </template>
-                </el-popconfirm>
+                </el-popconfirm> -->
             </div>
         </section>
         <header class="flex items-center justify-between font-bold mx-2 lg:mx-36 text-sm mt-4">
@@ -61,7 +61,7 @@
                                     </button>
                                     <template #dropdown>
                                         <el-dropdown-menu>
-                                            <el-dropdown-item :command="'edit|' + expense.id">
+                                            <el-dropdown-item v-if="canEdit" :command="'edit|' + expense.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -175,6 +175,7 @@ export default {
             itemIdToEdit: null,
             // Permisos de rol actual
             canDelete: this.$page.props.auth.user.rol == 'Administrador',
+            canEdit: this.$page.props.auth.user.rol == 'Administrador',
             // cargas
             deleting: false,
         }

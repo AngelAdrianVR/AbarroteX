@@ -12,13 +12,13 @@
                                 class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
                         </template>
                     </el-popconfirm> -->
-                    <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
+                    <!-- <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                         title="¿Continuar?" @confirm="deleteItem(Object.values(day_sales)[0].sales[0]?.id)">
                         <template #reference>
                             <i @click.stop
                                 class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
                         </template>
-                    </el-popconfirm>
+                    </el-popconfirm> -->
                 </div>
             </div>
 
@@ -56,7 +56,7 @@
                                     <td>
                                         <button v-if="sale.product_id" @click="viewProduct(sale)"
                                             class="text-start text-primary underline">
-                                            {{ sale.product_name }} otro texto un poco mas grande
+                                            {{ sale.product_name }}
                                         </button>
                                         <el-tooltip v-else content="El producto fue eliminado" placement="right">
                                             <span class="text-red-700">{{ sale.product_name }}</span>
