@@ -18,9 +18,15 @@ class CheckSuscriptionsStatus extends Command
         foreach ($stores as $store) {
             $daysUntilPayment = now()->diffInDays($store->next_payment, false);
 
-            if ($daysUntilPayment >= 1 && $daysUntilPayment <= 3 && $store->status !== 'Próximo a vencer') {
-                $store->update(['status' => 'Próximo a vencer']);
-            } elseif ($daysUntilPayment <= 0 && $store->status !== 'Vencido') {
+            // if ($daysUntilPayment >= 1 && $daysUntilPayment <= 3 && $store->status !== 'Próximo a vencer') {
+            //     $store->update(['status' => 'Próximo a vencer']);
+            // } elseif ($daysUntilPayment <= 0 && $store->status !== 'Vencido') {
+            //     $store->update([
+            //         'status' => 'Vencido',
+            //         'is_active' => false,
+            //     ]);
+            // }
+            if ($daysUntilPayment <= 0 && $store->status !== 'Vencido') {
                 $store->update([
                     'status' => 'Vencido',
                     'is_active' => false,

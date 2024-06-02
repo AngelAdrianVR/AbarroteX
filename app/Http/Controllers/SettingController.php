@@ -19,6 +19,7 @@ class SettingController extends Controller
             ->get();
 
         return inertia('Setting/Index', compact('users'));
+
     }
 
     

@@ -22,13 +22,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $all_products = $this->getAllProducts();
-        $total_products = $all_products->count();
-
-        //tomar solo primeros 30 productos
-        $products = $all_products->take(30);
-
-        return inertia('Product/Index', compact('products', 'total_products'));
+        return inertia('Product/Index');
     }
 
 
@@ -211,6 +205,18 @@ class ProductController extends Controller
 
     public function entryStock(Request $request, $product_id)
     {
+        $messages = [
+            'cash_amount.required_if' => 'El monto a retirar es obligatorio cuando el pago se realiza mediante la caja registradora.',
+            'cash_amount.numeric' => 'El monto a retirar debe ser un número.',
+            'cash_amount.min' => 'El monto a retirar debe ser al menos 1.',
+        ];
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+            'is_paid_by_cash_register' => 'boolean',
+            'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
+        ], $messages);
+        
         $product = Product::find($product_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
@@ -457,6 +463,17 @@ class ProductController extends Controller
         $products = collect(array_merge($local_products, $transfered_products));
 
         return response()->json(compact('products', 'local_products', 'transfered_products'));
+    }
+
+    public function getDataForProductsView()
+    {
+        $all_products = $this->getAllProducts();
+        $total_products = $all_products->count();
+
+        //tomar solo primeros 30 productos
+        $products = $all_products->take(30);
+
+        return response()->json(compact('products', 'total_products'));
     }
 
     private function validateProductsFromFile($worksheet)

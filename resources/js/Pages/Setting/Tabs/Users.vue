@@ -4,7 +4,7 @@
 
         <!-- Botones -->
         <div class="text-right mt-3">
-            <PrimaryButton @click="$inertia.get(route('users.create'))">Agregar usuario</PrimaryButton>
+            <PrimaryButton v-if="users.length < 1" @click="$inertia.get(route('users.create'))">Agregar usuario</PrimaryButton>
         </div>
 
         <div class="mt-3 mx-3">

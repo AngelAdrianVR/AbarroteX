@@ -124,11 +124,14 @@
                 <el-dropdown-menu>
                   <el-dropdown-item @click="showCashRegisterSelectionModal = true"><i
                       class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
-                  <el-dropdown-item :disabled="!asignedCashRegister" @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
+                  <el-dropdown-item :disabled="!asignedCashRegister"
+                    @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
                       class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
-                  <el-dropdown-item :disabled="!asignedCashRegister" @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
+                  <el-dropdown-item :disabled="!asignedCashRegister"
+                    @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
                       class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
-                  <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
+                  <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i
+                      class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
                     corte</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -331,7 +334,9 @@
           </div>
         </section>
 
-        <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
+        <div class="flex justify-between space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
+          <p v-if="cash_registers.length == 1" class="text-gray99">Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))" class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
+          <span v-else></span>
           <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Confirmar</PrimaryButton>
         </div>
       </div>
@@ -643,42 +648,51 @@ export default {
       addOrUpdateBatchOfItems('products', products);
     },
     async store() {
-      if (!this.storeProcessing) {
-        this.storeProcessing = true;
-        if (this.isOnline) {
-          try {
-            const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
-              data: {
-                saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
-              }
-            });
-            if (response.status === 200) {
-              this.updateCurrentStockInIndexedDB();
-              this.clearTab();
-              this.fetchCashRegister();
-              
-              this.$notify({
-                title: "Correcto",
-                text: "Se ha registrado la venta con éxito!",
-                type: "success",
-              });
+      if (this.storeProcessing) return;
 
-              // resetear variable de local storage a false
-              localStorage.setItem('pendentProcess', false);
-            }
-          } catch (error) {
-            console.log(error);
-          } finally {
-            this.storeProcessing = false;
-          }
-        } else {
-          this.saveToLocalStorage();
-          this.updateCurrentStockInIndexedDB();
-          this.storeProcessing = false;
-          this.sumCashForSale(); //sumar lo vendido a la caja
-          this.clearTab();
-        }
+      this.storeProcessing = true;
+
+      if (this.isOnline) {
+        await this.processOnlineSale();
+      } else {
+        this.processOfflineSale();
       }
+
+      this.storeProcessing = false;
+    },
+    async processOnlineSale() {
+      try {
+        const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
+          data: {
+            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+          }
+        });
+        if (response.status === 200) {
+          if (this.isInventoryOn) {
+            this.updateCurrentStockInIndexedDB();
+          }
+          this.clearTab();
+          this.fetchCashRegister();
+
+          this.$notify({
+            title: "Correcto",
+            message: "Se ha registrado la venta",
+            type: "success",
+          });
+
+          localStorage.setItem('pendentProcess', false);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    processOfflineSale() {
+      this.saveToLocalStorage();
+      if (this.isInventoryOn) {
+        this.updateCurrentStockInIndexedDB();
+      }
+      this.sumCashForSale();
+      this.clearTab();
     },
     async asignCashRegister() {
       try {
@@ -801,7 +815,7 @@ export default {
         this.addSaleProduct(productScaned);
       } else {
         this.$notify({
-          title: "Poducto no encontrado",
+          title: "Producto no encontrado",
           message: "El producto escaneado no esta registrado en la base de datos",
           type: "warning"
         });

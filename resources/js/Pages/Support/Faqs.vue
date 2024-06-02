@@ -10,7 +10,7 @@
                 <p class="mt-3">Puedes registrar tus productos manualmente ingresando la información correspondiente,
                     como nombre,
                     precio, y cantidad en stock (opcional). También ofrecemos la opción de buscar tus productos en
-                    nuestro <a :href="route('global-product-store.select')" target="_blank" class="text-primary">“Catalogo
+                    nuestro <a :href="route('products.index')" target="_blank" class="text-primary">“Catalogo
                         base”</a> y agregarlos a tus productos. </p>
             </div>
             <div class="mt-8">

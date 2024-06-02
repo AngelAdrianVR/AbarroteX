@@ -10,7 +10,9 @@ class UserController extends Controller
 {
     public function create()
     {
-        return inertia('User/Create');
+        $total_users = User::where('store_id', auth()->user()->store_id)->get(['id'])->count();
+
+        return inertia('User/Create', compact('total_users'));
     }
 
 

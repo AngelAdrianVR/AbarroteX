@@ -72,7 +72,7 @@
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-2 border rounded-md items-center relative">
       <figure>
-        <img class="mx-auto w-3/4 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
+        <img class="mx-auto w-3/4 h-24 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
           :alt="sale.product.name">
       </figure>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
