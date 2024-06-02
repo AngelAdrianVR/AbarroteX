@@ -10,40 +10,50 @@
                 <div class="md:flex">
                     <!-- parte izquierda -->
                     <div class="border-r border-grayD9 p-2 md:py-4 md:px-9 md:w-[70%] h-96 space-y-4 overflow-auto">
-                        <CartProductCard @productRemoved="removeCartProduct($event)" @updateCart="updateCart($event)" :cartProduct="product" v-for="product in cart" :key="product" />
+                        <div v-if="cart.length">
+                            <CartProductCard @productRemoved="removeCartProduct($event)" @updateCart="updateCart($event)"
+                            :cartProduct="product" v-for="product in cart" :key="product" />
+                        </div>
+                        
+                        <div v-else>
+                            <el-empty description="No hay productos en tu carrito" />
+                            <p @click="$inertia.get(route('online-sales.client-index', storeId ?? 0))" class="text-primary text-center cursor-pointer">Seguir comprando</p>
+                        </div>
                     </div>
 
                     <!-- Parte derecha -->
                     <div class="md:w-[30%] md:py-4 md:px-5 text-sm">
-                        <div class="border border-grayD9 grid grid-cols-3 gap-x-1 rounded-lg p-3 mb-5 *:mb-1">
-                                <p class="col-span-2">Subtotal:</p>
-                                <p><span class="mr-2">$</span>{{ cartTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                                <p class="col-span-2">Costo de envío:</p>
-                                <!-- Costo de envio si esta activado el minimo para envio gratis -->
-                                <div v-if="store?.online_store_properties?.enabled_free_delivery">
-                                    <p v-if="(cartTotal < store?.online_store_properties?.min_free_delivery)"><span class="mr-2">$</span>{{ parseFloat(store?.online_store_properties?.delivery_price || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                                    <p class="text-green-500" v-else><span class="mr-2">$</span>0</p>
-                                </div>
-                                <!-- Costo de envío si esta desactivado el envio gratis -->
-                                <p v-else><span class="mr-2">$</span>{{ parseFloat(store?.online_store_properties?.delivery_price || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                                <p class="font-bold col-span-2">Total:</p>
-                                <p v-if="cartTotal < store?.online_store_properties?.min_free_delivery" class="font-bold"><span class="mr-2">$</span>{{ (cartTotal + parseFloat(store?.online_store_properties?.delivery_price || 0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                                <p v-else class="font-bold"><span class="mr-2">$</span>{{ cartTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                        </div>
+                        <section v-if="cart.length">
+                            <div class="border border-grayD9 grid grid-cols-3 gap-x-1 rounded-lg p-3 mb-5 *:mb-1">
+                                    <p class="col-span-2">Subtotal:</p>
+                                    <p><span class="mr-2">$</span>{{ cartTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                    <p class="col-span-2">Costo de envío:</p>
+                                    <!-- Costo de envio si esta activado el minimo para envio gratis -->
+                                    <div v-if="store?.online_store_properties?.enabled_free_delivery">
+                                        <p v-if="(cartTotal < store?.online_store_properties?.min_free_delivery)"><span class="mr-2">$</span>{{ parseFloat(store?.online_store_properties?.delivery_price || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                        <p class="text-green-500" v-else><span class="mr-2">$</span>0</p>
+                                    </div>
+                                    <!-- Costo de envío si esta desactivado el envio gratis -->
+                                    <p v-else><span class="mr-2">$</span>{{ parseFloat(store?.online_store_properties?.delivery_price || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                    <p class="font-bold col-span-2">Total:</p>
+                                    <p v-if="cartTotal < store?.online_store_properties?.min_free_delivery" class="font-bold"><span class="mr-2">$</span>{{ (cartTotal + parseFloat(store?.online_store_properties?.delivery_price || 0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                    <p v-else class="font-bold"><span class="mr-2">$</span>{{ cartTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            </div>
 
-                        <p v-if="(cartTotal < store?.online_store_properties?.min_free_delivery) && store?.online_store_properties?.enabled_free_delivery" 
-                            class="text-xs text-center text-gray99 mb-5">
-                            Agregar 
-                            <span>
-                                ${{ (parseFloat(store?.online_store_properties?.min_free_delivery || 0) - cartTotal)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                            </span>
-                            más para conseguir envió gratis
-                        </p>
+                            <p v-if="(cartTotal < store?.online_store_properties?.min_free_delivery) && store?.online_store_properties?.enabled_free_delivery" 
+                                class="text-xs text-center text-gray99 mb-5">
+                                Agregar 
+                                <span>
+                                    ${{ (parseFloat(store?.online_store_properties?.min_free_delivery || 0) - cartTotal)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                </span>
+                                más para conseguir envió gratis
+                            </p>
 
-                        <div class="text-center pb-5">
-                            <PrimaryButton @click="$inertia.get(route('online-sales.create'))" class="!px-8">Finalizar pedido</PrimaryButton>
-                            <p @click="$inertia.get(route('online-sales.client-index', storeId ?? 0))" class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
-                        </div>
+                            <div class="text-center pb-5">
+                                <PrimaryButton @click="$inertia.get(route('online-sales.create'))" class="!px-8">Finalizar pedido</PrimaryButton>
+                                <p @click="$inertia.get(route('online-sales.client-index', storeId ?? 0))" class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </section>

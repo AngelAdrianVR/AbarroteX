@@ -4,7 +4,7 @@
         <i class="fa-sharp fa-solid fa-circle-notch text-4xl fa-spin ml-2 text-primary"></i>
     </div>
     <section class="text-sm" v-else>
-        <div v-if="cartProduct" class="flex space-x-4">
+        <div class="flex space-x-4">
             <!-- Imagen del producto -->
             <figure class="border border-grayD9 rounded-md p-3 w-28">
                 <img v-if="product?.global_product_id ? product?.global_product.media?.length : product?.media?.length" 
@@ -34,10 +34,6 @@
                 </div>
                 <p v-else>cantidad: {{ quantity }}</p>
             </div>
-        </div>
-
-        <div v-else>
-            <p class="text-center text-sm text-gray-400">No hay productos en tu carrito</p>
         </div>
     </section>
 </template>

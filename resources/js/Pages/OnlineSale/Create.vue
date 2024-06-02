@@ -117,8 +117,11 @@
                         más para conseguir envió gratis. 
                         <span @click="$inertia.get(route('online-sales.client-index', form.store_id ?? 0))" class="text-primary cursor-pointer ml-1">Seguir comprando</span>
                     </p>
-
-                    <el-checkbox class="mt-4 ml-3" v-model="confirmSale">Confirmo que mi pedido es correcto y deseo continuar</el-checkbox>
+                    
+                    <label for="confirm" class="text-xs items-center flex">
+                        <el-checkbox id="confirm" class="px-2" name="confirm" v-model="confirmSale"></el-checkbox>
+                        Confirmo que mi pedido es correcto y deseo continuar
+                    </label>
 
                     <div class="col-span-2 text-center py-3">
                         <PrimaryButton @click="storeOrder" class="!px-16" :disabled="form.processing || !confirmSale">Relizar pedido</PrimaryButton>

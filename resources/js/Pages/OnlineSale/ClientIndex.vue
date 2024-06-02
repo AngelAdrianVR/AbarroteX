@@ -2,11 +2,11 @@
     <OnlineStoreLayout :title="store.name">
         <div ref="scrollContainer" style="height: 91vh; overflow-y: scroll;" @scroll="handleScroll">
             <!-- Banners -->
-            <section v-if="banners.media?.length" class="my-4">
+            <section v-if="banners?.media?.length" class="my-4">
                 <figure class="md:w-1/2 h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
-                    <img class="!rounded-md h-full object-contain" :src="banners.media[currentBanner].original_url" alt="">
+                    <img class="!rounded-md h-full object-contain" :src="banners?.media[currentBanner].original_url" alt="">
                     <div class="flex items-center justify-center space-x-3 mt-4">
-                        <i @click="currentBanner = index" v-for="(dot, index) in banners.media?.length" :key="dot" :class="index == currentBanner ? 'text-primary' : 'cursor-pointer text-xs' "
+                        <i @click="currentBanner = index" v-for="(dot, index) in banners?.media?.length" :key="dot" :class="index == currentBanner ? 'text-primary' : 'cursor-pointer text-xs' "
                             class="fa-solid fa-circle text-grayD9 transition-all duration-300"></i>
                     </div>
                 </figure>
@@ -104,7 +104,7 @@ methods:{
     },
     startTimer() {
         this.timer = setInterval(() => {
-            this.currentBanner = (this.currentBanner + 1) % this.banners.media?.length;
+            this.currentBanner = (this.currentBanner + 1) % this.banners?.media?.length;
         }, 5000);
     },
 },
