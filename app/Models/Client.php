@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Client extends Model
 {
@@ -12,14 +12,21 @@ class Client extends Model
 
     protected $fillable = [
         'name',
-        // 'rfc',
+        'last_name',
         'phone',
-        'address',
+        'email',
+        'debt',
+        'notes',
+        'razon_social',
+        'postal_code',
+        'rfc',
+        'tax_regime',
+        'store_id',
     ];
 
     //relationships
-    public function sales() :HasMany
+    public function store() :BelongsTo
     {
-        return $this->hasMany(Sale::class);
+        return $this->belongsTo(Store::class);
     }
 }

@@ -1,15 +1,17 @@
 <template>
     <OnlineStoreLayout title="Mi carrito">
         <div class="md:p-2 lg:p-9">
-            <Back />
+            <div class="pl-4 mt-3">
+                <Back />
+            </div>
 
-            <section class="xl:w-[60%] mx-auto mt-9 border border-grayD9 rounded-lg mb-9">
+            <section class="xl:w-[60%] mx-auto mt-5 border border-grayD9 rounded-lg mb-9">
                 <p class="py-2 px-9 border-b border-grayD9">Mi carrito</p>
 
                 <!-- body -->
                 <div class="md:flex">
                     <!-- parte izquierda -->
-                    <div class="border-r border-grayD9 p-2 md:py-4 md:px-9 md:w-[70%] h-96 space-y-4 overflow-auto">
+                    <div class="border-r border-grayD9 p-2 md:py-4 md:px-9 md:w-[70%] h-96 xl:h-[440px] space-y-4 overflow-auto">
                         <div v-if="cart.length">
                             <CartProductCard @productRemoved="removeCartProduct($event)" @updateCart="updateCart($event)"
                             :cartProduct="product" v-for="product in cart" :key="product" />

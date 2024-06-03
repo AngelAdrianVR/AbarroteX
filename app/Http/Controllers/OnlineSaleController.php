@@ -70,6 +70,10 @@ class OnlineSaleController extends Controller
             'products' => 'required|array|min:1',
         ]);
 
+        //descontar de inventario la cantidad solicitada si la configuración de inventario está activa
+        // Pendiente el codigo
+
+
         $new_online_sale = OnlineSale::create($request->all());
 
         if ( $request->created_from_app === true ) {

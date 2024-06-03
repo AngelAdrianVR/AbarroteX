@@ -1,5 +1,9 @@
 <template>
-    <div class="py-3 px-5 rounded-lg border border-gayD9 flex flex-col h-96 hover:border-primary">
+    <div class="py-3 px-5 rounded-lg border border-gayD9 flex flex-col h-96 hover:border-primary relative group">
+        <!-- Deatalle de cantidad disponible  -->
+        <div class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg hidden group-hover:block h-10">
+            <p class="text-white text-center">{{  product.current_stock ?? '0' }} Unidades disponibles</p>
+        </div>
             <!-- Imagen -->
         <figure class="h-1/2 text-center">
             <Link :href="product.global_product_id ? route('online-sales.show-global-product', product.global_product_id) : route('online-sales.show-local-product', product.id)">
@@ -17,10 +21,10 @@
         <div class="text-center mt-5 flex flex-col justify-center items-center">
             <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
             <p class="text-3xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price : product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-            <el-input-number :disabled="product.global_product?.current_stock < 1 || product.current_stock < 1"
+            <el-input-number :disabled="product.current_stock < 1"
                 v-model="quantity" class="mb-5" size="small" :min="0" 
                 :max="product.current_stock" :precision="2" />
-            <PrimaryButton @click="addToCart" class="!px-9 !py-1">Agregar al carrito</PrimaryButton>
+            <PrimaryButton :disabled="product.current_stock < 1" @click="addToCart" class="!px-9 !py-1">Agregar al carrito</PrimaryButton>
         </div>
     </div>
 </template>

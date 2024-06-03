@@ -98,4 +98,9 @@ class Store extends Model
     {
         return $this->hasMany(OnlineSale::class);
     }
+
+    public function clients() :HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
 }
