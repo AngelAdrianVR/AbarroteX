@@ -1,29 +1,36 @@
 <template>
   <Loading v-if="loading" />
   <div v-else class="min-h-32">
+    <div class="text-center">
+      <p v-if="!cash_register.is_active" class="text-red-500 px-2 bg-red-50 self-start">Caja deshabilitada</p>
+      <p v-else class="text-green-500 px-2 bg-green-50 self-start">Caja Habilitada</p>
+    </div>
     <section class="flex flex-col md:flex-row justify-between space-y-2 md:space-x-3 mt-2">
       <!-- Boton para activar/desactivar caja registradora -->
       <el-tooltip v-if="canDelete" :content="cash_register.is_active 
         ? 'Desactivar caja. Si no planeas utilizar esta caja, puedes desactivarla para evitar que los usuarios accedan a ella.' 
         : 'Habilitar caja para volver a ponerla en funcionamiento'"
         placement="right">
-        <button class="flex justify-center items-center rounded-full size-8 bg-grayF2 active:scale-90">
-          <i @click="form.is_active = false; update()" v-if="cash_register.is_active"
-            class="fa-solid fa-ban text-primary"></i>
-          <i v-else @click="form.is_active = true; update()" class="fa-solid fa-check text-primary"></i>
-        </button>
+        <div class="flex items-center space-x-4 text-sm">
+          <button class="flex justify-center items-center rounded-full size-8 bg-grayF2 active:scale-90 self-start">
+            <i @click="form.is_active = false; update()" v-if="cash_register.is_active"
+              class="fa-solid fa-ban text-primary"></i>
+            <i v-else @click="form.is_active = true; update()" class="fa-solid fa-check text-primary"></i>
+          </button>
+          <p class="text-gray99 w-60">
+            <i v-if="!cash_register.is_active" class="fa-solid fa-arrow-left-long mr-3"></i>Esta caja está deshabilitada, por lo que los usuarios no pueden utilizarla.
+            Para habilitarla, haz clic en el botón
+          </p>
+        </div>
       </el-tooltip>
 
-      <p v-if="!cash_register.is_active" class="text-red-500 px-2 bg-red-50 self-start">Caja deshabilitada</p>
-      <p v-else class="text-green-500 px-2 bg-green-50 self-start">Caja Habilitada</p>
-
-      <div class="flex space-x-3 items-center">
+      <div class="flex space-x-3 items-center self-start">
         <!-- Eliminar caja -->
         <el-popconfirm v-if="canDelete && total_cash_registers > 1" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
           title="Se eliminará la caja registradora. ¿Deseas continuar?" @confirm="deleteCashRegister()">
           <template #reference>
             <i
-              class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-gray-200 rounded-full py-1 px-[7px] cursor-pointer"></i>
+              class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-[#F2F2F2] rounded-full py-1 px-[7px] cursor-pointer"></i>
           </template>
         </el-popconfirm>
         <el-dropdown :disabled="!cash_register.is_active" split-button type="primary" @click="handleCashCut">
@@ -94,9 +101,12 @@
         </footer>
       </div>
 
-      <div v-if="isMaxCashOn" class="w-96 space-y-3">
+      <!-- Lado derecho -->
+      <div class="w-96 lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 mt-4 lg:mt-0"
+          :class="isMaxCashOn ? 'h-[270px]' : 'h-[150px]'">
+        <p class="font-bold text-center">Ajustes generales</p>
         <!-- Editar cantidad maxima permitida en caja -->
-        <div class="mt-7 py-3 lg:mt-0 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
+        <div v-if="isMaxCashOn" class="py-3 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
           <h2 class="py-2 text-center text-sm font-bold">Efectivo máximo en caja</h2>
           <i v-if="!edit_max_cash" @click="editMaxCash"
             class="fa-solid fa-pen text-xs text-primary cursor-pointer hover:bg-gray-200 rounded-full py-1 px-[5px] absolute top-2 right-2"></i>
