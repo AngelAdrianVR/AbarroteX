@@ -2,7 +2,7 @@
     <div class="overflow-auto">
         <table v-if="Object.keys(expenses)?.length" class="w-full">
             <thead>
-                <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">
+                <tr class="*:text-left *:pb-2 *:px-4 *:text-sm  border-b border-primary">
                     <th>Fecha</th>
                     <th>Conceptos</th>
                     <th>Total</th>

@@ -70,7 +70,7 @@
                             <p class="text-sm text-gray99">Comunicate vía WhatsApp</p>
                         </div>
                         <!-- whatsapp button movil -->
-                        <a v-if="store?.online_store_properties?.whatsapp" class="md:hidden z-50 size-10 lg:w-20 lg:h-20 rounded-full bg-green-500 shadow-md flex items-center justify-center fixed bottom-3 right-3 hover:scale-105"
+                        <a v-if="store?.online_store_properties?.whatsapp" class="md:hidden z-50 size-10 lg:w-20 lg:h-20 rounded-full bg-green-500 shadow-md flex items-center justify-center fixed bottom-8 right-3 hover:scale-105"
                             :href="whatsappLink"
                             target="_blank" rel="noopener noreferrer">
                             <i class="fa-brands fa-beat fa-whatsapp text-xl text-gray-100"></i>

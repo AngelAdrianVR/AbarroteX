@@ -3,7 +3,7 @@
     <div v-if="loading" class="flex justify-center items-center py-10">
         <i class="fa-sharp fa-solid fa-circle-notch text-4xl fa-spin ml-2 text-primary"></i>
     </div>
-    <section class="text-sm" v-else>
+    <section class="text-sm mt-2" v-else>
         <div class="flex space-x-4">
             <!-- Imagen del producto -->
             <figure class="border border-grayD9 rounded-md p-3 w-28">
@@ -22,7 +22,7 @@
                 <p class="font-bold">${{ product?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 <div v-if="actions" class="flex justify-between">
                     <el-input-number :disabled="product?.global_product?.current_stock < 1 || product?.current_stock < 1"
-                        v-model="quantity" size="small" :min="0" :max="product?.current_stock" :precision="2" />
+                        v-model="quantity" size="small" :min="1" :max="product?.current_stock" :precision="2" />
                     <!-- Eliminar producto de carrito -->
                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                     title="¿Deseas continuar?" @confirm="deleteCartProduct()">

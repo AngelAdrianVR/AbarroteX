@@ -17,8 +17,8 @@
               class="fa-solid fa-ban text-primary"></i>
             <i v-else @click="form.is_active = true; update()" class="fa-solid fa-check text-primary"></i>
           </button>
-          <p class="text-gray99 w-60">
-            <i v-if="!cash_register.is_active" class="fa-solid fa-arrow-left-long mr-3"></i>Esta caja está deshabilitada, por lo que los usuarios no pueden utilizarla.
+          <p v-if="!cash_register.is_active" class="text-gray99 w-60">
+            <i class="fa-solid fa-arrow-left-long mr-3"></i>Esta caja está deshabilitada, por lo que los usuarios no pueden utilizarla.
             Para habilitarla, haz clic en el botón
           </p>
         </div>
