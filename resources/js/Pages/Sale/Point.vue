@@ -627,7 +627,7 @@ export default {
       this.searchQuery = null;
 
       // revisar si hay stock del producto para dejar 1 como default a vender
-      if (product.current_stock) {
+      if ((product.current_stock && this.isInventoryOn) || !this.isInventoryOn) {
         this.quantity = 1;
       } else {
         this.quantity = 0;

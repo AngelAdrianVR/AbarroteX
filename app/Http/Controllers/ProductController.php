@@ -469,11 +469,12 @@ class ProductController extends Controller
     {
         $all_products = $this->getAllProducts();
         $total_products = $all_products->count();
+        $total_local_products = $all_products->whereNull('global_product_id')->count();
 
         //tomar solo primeros 30 productos
         $products = $all_products->take(30);
 
-        return response()->json(compact('products', 'total_products'));
+        return response()->json(compact('products', 'total_products', 'total_local_products'));
     }
 
     private function validateProductsFromFile($worksheet)

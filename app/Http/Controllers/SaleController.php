@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
 
 class SaleController extends Controller
 {
@@ -73,7 +73,8 @@ class SaleController extends Controller
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
             ->where('store_id', auth()->user()->store_id)
             ->where('cash_register_id', $sale->cash_register_id) //recuperar solo las  ventas de la caja involucrada.
-            ->whereDate('created_at', $date)->get();
+            ->whereDate('created_at', $date)
+            ->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $sales->groupBy(function ($sale) {
@@ -230,6 +231,9 @@ class SaleController extends Controller
 
     private function storeEachProductSold($sold_products, $created_at = null )
     {
+        // Generar un id unico para productos vendidos a este cliente
+        $last_sale = Sale::where('store_id', auth()->user()->store_id)->latest('id')->first();
+        $group_id = $last_sale ? $last_sale->group_id + 1  : 1;
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
@@ -243,6 +247,7 @@ class SaleController extends Controller
             Sale::create([
                 'current_price' => $product['product']['public_price'],
                 'quantity' => $product['quantity'],
+                'group_id' => $group_id,
                 'product_name' => $product_name,
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
@@ -326,5 +331,10 @@ class SaleController extends Controller
 
         // Retornar los datos agrupados
         return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);
+    }
+
+    public function refund()
+    {
+        return 0;
     }
 }
