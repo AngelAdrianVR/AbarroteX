@@ -121,7 +121,7 @@ Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sale
 Route::get('sales-print-ticket/{created_at}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
 Route::get('sales-fetch-cash-register-sales/{cash_register_id}', [SaleController::class, 'fetchCashRegisterSales'])->middleware('auth')->name('sales.fetch-cash-register-sales');
 Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage'])->middleware('auth')->name('sales.sync-localstorage');
-Route::post('sales/refund', [SaleController::class, 'refund'])->middleware('auth')->name('sales.refund');
+Route::post('sales/refund/{saleFolio}', [SaleController::class, 'refund'])->middleware('auth')->name('sales.refund');
 
 
 //expenses routes-------------------------------------------------------------------------------------

@@ -330,7 +330,7 @@ export default {
                     response = await axios.get(route('products.get-all-for-indexedDB'));
                     const products = response.data.products;
 
-                    // Descargar y almacenar imágenes
+                    // actualizar lista de productos en indexedDB
                     addOrUpdateBatchOfItems('products', products);
 
                     // resetear variable de local storage a false

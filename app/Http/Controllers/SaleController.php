@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CashRegister;
+use App\Models\CashRegisterMovement;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -229,11 +230,11 @@ class SaleController extends Controller
         }
     }
 
-    private function storeEachProductSold($sold_products, $created_at = null )
+    private function storeEachProductSold($sold_products, $created_at = null)
     {
         // Generar un id unico para productos vendidos a este cliente
         $last_sale = Sale::where('store_id', auth()->user()->store_id)->latest('id')->first();
-        $group_id = $last_sale ? $last_sale->group_id + 1  : 1;
+        $group_id = $last_sale ? intval($last_sale->group_id) + 1 : 1;
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
@@ -273,20 +274,19 @@ class SaleController extends Controller
             ]);
 
             //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
-            // Verifica si 'global_product_id' existe en 'product'
             $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
             if ($is_inventory_on) {
                 $current_product = $is_global_product
                     ? GlobalProductStore::find($product_id)
                     : Product::find($product_id);
-                
+
                 $current_product->decrement('current_stock', $product['quantity']);
 
                 // notificar si ha llegado al limite de existencias bajas
                 if ($current_product->current_stock <= $current_product->min_stock) {
                     $title = "Bajo stock";
                     $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
-                    $url =  $is_global_product 
+                    $url =  $is_global_product
                         ? route('global-product-store.show', $current_product->id)
                         : route('products.show', $current_product->id);
 
@@ -333,8 +333,42 @@ class SaleController extends Controller
         return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);
     }
 
-    public function refund()
+    public function refund($saleFolio)
     {
-        return 0;
+        // obtiene la caja registradora asignada al cajero
+        $cash_register = CashRegister::find(auth()->user()->cash_register_id);
+        $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+        $saleProducts = Sale::where([
+            'store_id' => auth()->user()->store_id,
+            'group_id' => $saleFolio,
+        ])->get();
+        $total_amount = $saleProducts->sum(fn ($sale) => $sale->current_price * $sale->quantity);
+
+        // Crear movimiento de retiro de caja con el monto de la venta a cancelar
+        CashRegisterMovement::create([
+            'amount' => $total_amount,
+            'type' => 'Retiro',
+            'notes' => "Venta con folio $saleFolio fue reembolsada / cancelada",
+            'cash_register_id' => $cash_register->id,
+        ]);
+        // Restar dinero de caja
+        if ($cash_register->current_cash < $total_amount) {
+            $cash_register->update(['current_cash' => 0]);
+        } else {
+            $cash_register->decrement('current_cash', $total_amount);
+        }
+
+        // si el control de inventario esta activado, devolver mercancia disponible para la venta
+        if ($is_inventory_on) {
+            $saleProducts->each(function ($sale) {
+                $current_product = $sale->is_global_product
+                    ? GlobalProductStore::find($sale->product_id)
+                    : Product::find($sale->product_id);
+                $current_product->increment('current_stock', $sale->quantity);
+            });
+        }
+        
+        // marcar productos de venta como reembolsados / cancelados
+        $saleProducts->each(fn ($sale) => $sale->update(['was_refunded' => true]));
     }
 }
