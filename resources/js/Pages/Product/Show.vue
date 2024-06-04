@@ -143,10 +143,11 @@
                         </div>
                         <div v-else>
                             <div class="flex items-center justify-center space-x-3">
-                                <PrimaryButton @click="loadPreviousMonth"><i
-                                        class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
-                                <PrimaryButton @click="loadNextMonth"><i
-                                        class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
+                                <button @click="loadPreviousMonth" class="bg-grayD9 size-7 rounded-full"><i
+                                        class="fa-solid fa-chevron-left text-[9px] text-black pb-3"></i></button>
+                                <p class="w-32 text-center text-sm">{{ castDate(currentMonth, currentYear) }}</p>
+                                <button @click="loadNextMonth" class="bg-grayD9 size-7 rounded-full"><i
+                                        class="fa-solid fa-chevron-right text-[9px] text-black pb-3"></i></button>
                             </div>
                             <div v-if="Object?.keys(productHistory)?.length">
                                 <div v-for="(history, index) in productHistory" :key="history">
@@ -386,6 +387,26 @@ export default {
             };
 
             const translatedMonth = monthsTranslation[month] || month;
+
+            return `${translatedMonth} ${year}`;
+        },
+        castDate(month, year) {
+            const monthsCast = {
+                1: 'Enero',
+                2: 'Febrero',
+                3: 'Marzo',
+                4: 'Abril',
+                5: 'Mayo',
+                6: 'Junio',
+                7: 'Julio',
+                8: 'Agosto',
+                9: 'Septiembre',
+                10: 'Octubre',
+                11: 'Noviembre',
+                12: 'Diciembre',
+            };
+
+            const translatedMonth = monthsCast[month] || month;
 
             return `${translatedMonth} ${year}`;
         },
