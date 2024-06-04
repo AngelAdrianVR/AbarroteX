@@ -126,10 +126,10 @@
                       class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
                   <el-dropdown-item :disabled="!asignedCashRegister"
                     @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
-                      class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                      class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
                   <el-dropdown-item :disabled="!asignedCashRegister"
                     @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
-                      class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
+                      class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
                   <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i
                       class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
                     corte</el-dropdown-item>
@@ -369,6 +369,9 @@
                 <i class="fa-solid fa-dollar-sign"></i>
               </template>
             </el-input>
+            <p class="text-red-500 text-xs" v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash">
+              *El monto no debe exceder el dinero actual de tu caja (${{ asignedCashRegister?.current_cash }})
+            </p>
             <InputError :message="form.errors.registerAmount" />
           </div>
 
@@ -380,7 +383,7 @@
 
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
-            <PrimaryButton :disabled="!form.registerAmount || form.processing">Confirmar</PrimaryButton>
+            <PrimaryButton :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash)">Confirmar</PrimaryButton>
           </div>
         </form>
       </div>

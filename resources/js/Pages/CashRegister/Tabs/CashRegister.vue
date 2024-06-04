@@ -38,9 +38,9 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
-                  class="fa-solid fa-arrow-down mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                  class="fa-solid fa-arrow-up mr-3"></i>Ingresar efectivo</el-dropdown-item>
               <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
-                  class="fa-solid fa-arrow-up mr-3"></i>Retirar efectivo</el-dropdown-item>
+                  class="fa-solid fa-arrow-down mr-3"></i>Retirar efectivo</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -55,13 +55,20 @@
             <p class="font-bold mb-3">Efectivo esperado</p>
             <p class="text-gray99">Efectivo inicial</p>
             <p class="text-gray99">Ventas</p>
-            <p v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement"
-              :title="cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
-              class="text-gray99 truncate">
-              {{ cashRegisterMovement.type + ' de efectivo. Motivo: ' + (cashRegisterMovement.notes ??
+
+            <p v-if="currentMovements?.length" @click="showcashRegisterMovements = !showcashRegisterMovements"
+                class="text-primary flex items-center cursor-pointer">Movimientos de caja 
+                <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i>
+            </p>
+
+            <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement"
+              :title="cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
+              class="text-gray99 truncate w-60 md:w-auto">
+              {{ cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ??
                 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
             </p>
           </div>
+
           <div class="w-1/4 space-y-1">
             <div v-if="cutLoading">
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
@@ -75,10 +82,12 @@
             <div v-if="cutLoading">
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </div>
-            <p v-else class="text-gray99"><span class="text-gray99 mr-3"><i
+
+            <p v-else class="text-gray99 pb-5"><span class="text-gray99 mr-3"><i
                   class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
                     cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-            <p v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
+
+            <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
               <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
                 class="fa-solid text-xs px-1"></i>
               <span class="text-gray99 mr-3">$</span>{{
@@ -183,7 +192,7 @@
         <h2 v-if="form.cashRegisterMovementType === 'Retiro'" class="font-bold col-span-full">Retirar efectivo a caja
         </h2>
 
-        <div class="mt-2">
+        <div class="mt-2 col-span-full">
           <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar*"
             class="ml-3 mb-1 text-sm" />
           <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar*"
@@ -195,6 +204,9 @@
               <i class="fa-solid fa-dollar-sign"></i>
             </template>
           </el-input>
+          <p class="text-red-500 text-xs" v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > cash_register.current_cash">
+            *El monto no debe exceder el dinero actual de tu caja (${{ cash_register.current_cash }})
+          </p>
           <InputError :message="form.errors.registerAmount" />
         </div>
 
@@ -206,7 +218,7 @@
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
           <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
-          <PrimaryButton :disabled="!form.registerAmount || form.processing">Confirmar</PrimaryButton>
+          <PrimaryButton :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > cash_register.current_cash)">Confirmar</PrimaryButton>
         </div>
       </form>
     </div>
@@ -290,9 +302,10 @@
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
           <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
-          <PrimaryButton :disabled="(!cutForm.counted_cash || cutForm.processing) && (currentMovements.length || cutForm.totalSaleForCashCut == 0)">Hacer corte</PrimaryButton>
+          <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing || (!currentMovements.length && cutForm.totalSaleForCashCut == 0)">Hacer corte</PrimaryButton>
         </div>
-          <p v-if="!currentMovements.length && cutForm.totalSaleForCashCut == 0" class="text-xs text-red-600 text-right">*Para hacer corte es necesario que haya venta o movimiento de caja registrado</p>
+          <p v-if="!currentMovements.length && cutForm.totalSaleForCashCut == 0" 
+            class="text-xs text-red-600 text-right">*Para hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
       </form>
     </div>
   </Modal>
@@ -342,6 +355,8 @@ export default {
       cutLoading: false,
       cashRegisterModal: false,
       cashCutModal: false,
+      showcashRegisterMovements: true,
+
       // monto maximo en caja activado
       isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
       // Permisos de rol
