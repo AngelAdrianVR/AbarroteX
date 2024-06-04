@@ -8,7 +8,7 @@
                 <div class="flex items-center space-x-2">
                     <p>Estatus:</p>
                     <span v-html="getStatusIcon(online_sale.status)"></span>
-                    <el-select @change="updateStatus" v-model="status" class="!w-40 md:!w-48" filterable required clearable placeholder="Seleccione"
+                    <el-select @change="updateStatus" v-model="status" class="!w-40 md:!w-48" filterable required placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="status in statuses" :key="status" :value="status" 
                         :label="status" />

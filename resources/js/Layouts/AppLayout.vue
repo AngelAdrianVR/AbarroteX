@@ -186,6 +186,9 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
                                 Gastos
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('quotes.index')" :active="route().current('quotes.*')">
+                                Cotizaciones
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('products.index')"
                                 :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
@@ -193,6 +196,10 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('cash-registers.index')"
                                 :active="route().current('cash-registers.*')">
                                 Caja
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('online-sales.index')"
+                                :active="route().current('online-sales.*')">
+                                Tienda en línea
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('settings.index')" :active="route().current('settings.*')">
                                 Configuraciones

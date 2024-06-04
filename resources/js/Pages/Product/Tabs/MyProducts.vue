@@ -158,10 +158,10 @@
                     <span class="text-gray99">Nota: Los productos que Ezy ventas te facilita como catálogo base, no
                         serán exportados.</span>
                 </p>
-                <p v-if="products.filter(item => !item.global_product_id).length" class="mt-2">
+                <p v-if="totalLocalProducts" class="mt-2">
                     Hay
                     <b class="text-primary">
-                        {{ products.filter(item => !item.global_product_id).length }}
+                        {{ totalLocalProducts }}
                     </b>
                     producto(s) disponible(s) para exportar
                 </p>
@@ -172,7 +172,7 @@
                     <CancelButton @click="showExportModal = false">
                         Cancelar
                     </CancelButton>
-                    <a v-if="products.filter(item => !item.global_product_id).length" :href="route('products.export')"
+                    <a v-if="totalLocalProducts" :href="route('products.export')"
                         class="cursor-pointer text-center px-4 py-2 bg-primary border border-transparent rounded-full text-xs text-white tracking-widest active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:text-white disabled:bg-[#999999] focus:outline-none focus:ring-0 transition ease-in-out duration-100">
                         Exportar
                     </a>
@@ -300,6 +300,7 @@ export default {
             products: [],
             localProducts: [],
             totalProducts: null,
+            totalLocalProducts: null,
             // carga
             loading: false,
         };
@@ -401,6 +402,7 @@ export default {
                 if (response.status === 200) {
                     this.products = response.data.products;
                     this.totalProducts = response.data.total_products;
+                    this.totalLocalProducts = response.data.total_local_products;
                     this.localProducts = this.products;
                 }
             } catch (error) {
