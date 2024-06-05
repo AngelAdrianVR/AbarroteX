@@ -17,6 +17,7 @@ use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
+use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
@@ -67,7 +68,7 @@ Route::middleware([
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-Route::resource('global-products', GlobalProductController::class)->middleware(['auth']);
+// Route::resource('global-products', GlobalProductController::class)->middleware(['auth']);
 Route::get('global-products-search', [GlobalProductController::class, 'searchProduct'])->name('global-products.search')->middleware('auth');
 Route::post('global-products/update-with-media/{global_product}', [GlobalProductController::class, 'updateWithMedia'])->name('global-products.update-with-media')->middleware('auth');
 // Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('global-products.select')->middleware('auth');
@@ -120,6 +121,8 @@ Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sale
 Route::get('sales-print-ticket/{created_at}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
 Route::get('sales-fetch-cash-register-sales/{cash_register_id}', [SaleController::class, 'fetchCashRegisterSales'])->middleware('auth')->name('sales.fetch-cash-register-sales');
 Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage'])->middleware('auth')->name('sales.sync-localstorage');
+Route::post('sales/refund/{saleFolio}', [SaleController::class, 'refund'])->middleware('auth')->name('sales.refund');
+Route::post('sales/update-group-sale', [SaleController::class, 'updateGroupSale'])->middleware('auth')->name('sales.update-group-sale');
 
 
 //expenses routes-------------------------------------------------------------------------------------
@@ -129,6 +132,11 @@ Route::delete('expenses/delete-day/{expense}', [ExpenseController::class, 'delet
 Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
 Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
 Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
+
+
+//quotes routes-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
 
 
 //history routes---------------------------------------------------------------------------------------

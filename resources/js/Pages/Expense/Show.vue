@@ -54,7 +54,7 @@
                                         ",") }}
                             </td>
                             <td class="text-end">
-                                <el-dropdown trigger="click" @command="handleCommand">
+                                <el-dropdown v-if="canEdit && canDelete" trigger="click" @command="handleCommand">
                                     <button @click.stop
                                         class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
                                         <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -211,13 +211,39 @@ export default {
                 this.itemIdToDelete = itemId;
             }
         },
+        update() {
+            this.form.put(route('expenses.update', this.itemIdToEdit), {
+                onSuccess: () => {
+                    this.itemIdToEdit = null;
+                    this.showEditModal = false;
+                    this.$notify({
+                        title: 'Gasto actualizado',
+                        message: '',
+                        type: 'success',
+                    });
+                }
+            });
+        },
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+        },
+        print(expenseId) {
+            window.open(route('expenses.print-expenses', expenseId), '_blank');
+        },
+        totalExpenses() {
+            let total = 0;
+            this.expenses.forEach(expense => {
+                total += expense.quantity * expense.current_price;
+            });
+            return total;
+        },
         async deleteItem() {
             this.deleting = true;
             try {
                 const response = await axios.delete(route('expenses.destroy', this.itemIdToDelete));
                 if (response.status == 200) {
                     this.showDeleteConfirm = false;
-                    
+
                     // eliminar el gasto de la lista
                     const index = this.expenses.findIndex(item => item.id == this.itemIdToDelete);
                     this.expenses.splice(index, 1);
@@ -238,19 +264,6 @@ export default {
             } finally {
                 this.deleting = false;
             }
-        },
-        update() {
-            this.form.put(route('expenses.update', this.itemIdToEdit), {
-                onSuccess: () => {
-                    this.itemIdToEdit = null;
-                    this.showEditModal = false;
-                    this.$notify({
-                        title: 'Gasto actualizado',
-                        message: '',
-                        type: 'success',
-                    });
-                }
-            });
         },
         async deleteDayExpenses(expenseId) {
             try {
@@ -273,19 +286,6 @@ export default {
                 });
             }
         },
-        formatDate(dateString) {
-            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
-        },
-        print(expenseId) {
-            window.open(route('expenses.print-expenses', expenseId), '_blank');
-        },
-        totalExpenses() {
-            let total = 0;
-            this.expenses.forEach(expense => {
-                total += expense.quantity * expense.current_price;
-            });
-            return total;
-        }
     },
 }
 </script>

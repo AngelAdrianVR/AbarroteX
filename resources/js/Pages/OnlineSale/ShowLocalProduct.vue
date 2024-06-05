@@ -31,6 +31,7 @@
                         </template>
                     </el-input-number>
                     </div>
+                    <p class="mt-2 text-sm">Unidades disponibles: <span> {{ product.current_stock }} </span></p>
                     <!-- Boton -->
                     <div class="text-center mt-7">
                     <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
