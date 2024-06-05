@@ -37,12 +37,12 @@
                     <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
                     </div>
                     <!-- Características del producto -->
-                    <!-- <div class="mt-7">
+                    <div v-if="product.description" class="mt-7">
                         <h2 class="font-bold mb-3">Acerca del producto</h2>
-                        <p>• Característica 1</p>
-                        <p>• Característica 2</p>
-                        <p>• Característica 3</p>
-                    </div> -->
+                        <div>
+                            <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -57,7 +57,8 @@ import Back from "@/Components/MyComponents/Back.vue";
 export default {
 data() {
     return {
-        quantity: 1
+        quantity: 1,
+        formattedDescription: null, //descripción del producto formateado con viñetas
     }
 },
 components:{
@@ -74,7 +75,7 @@ methods:{
         let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
 
         // Verificar si el producto ya está en el carrito
-        const productInCart = cart.find(item => item.id === this.product.id);
+        const productInCart = cart.find(item => item.id === this.product.id && item.isLocal == true);
 
         if (productInCart) {
             // Si el producto ya está en el carrito, actualizar la cantidad
@@ -100,7 +101,18 @@ methods:{
             message: "Se ha agregado correctamente al carrito",
             type: "success",
         });
+    },
+    formatDescription() {
+        if ( this.product.description != null ) {
+            const text = this.product.description;
+            const lines = text.split('\n');
+            const formattedLines = lines.map(line => `• ${line.trim()}`);
+            this.formattedDescription = formattedLines.join('\n');
+        }
     }
+},
+mounted() {
+    this.formatDescription();
 },
 computed: {
     integerPart() {
@@ -120,5 +132,8 @@ computed: {
 .decimal-part {
   font-size: 0.75em;
   vertical-align: super;
+}
+.whitespace-break-spaces {
+    white-space: pre-wrap; /* Respect line breaks */
 }
 </style>

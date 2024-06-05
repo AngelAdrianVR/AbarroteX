@@ -148,7 +148,7 @@
       <div v-else class="flex items-center space-x-2 mx-7">
         <el-input v-model="onlineStoreForm.online_store_properties.delivery_price" type="text" placeholder="Ingresa el monto" class="px-10"
           :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-          :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
+          :parser="(value) => value.replace(/\D/g, '')">
           <template #prefix>
             <i class="fa-solid fa-dollar-sign"></i>
           </template>
@@ -201,7 +201,7 @@
       <div v-else class="flex items-center space-x-2 mx-7">
         <el-input v-model="onlineStoreForm.online_store_properties.min_free_delivery" type="text" placeholder="Ingresa el monto" class="px-10"
           :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-          :parser="(value) => value.replace(/\D/g, '')" @keydown.enter="update">
+          :parser="(value) => value.replace(/\D/g, '')">
           <template #prefix>
             <i class="fa-solid fa-dollar-sign"></i>
           </template>
@@ -327,7 +327,7 @@ export default {
         });
     },
     updateLogo() {
-        this.logoForm.post(route("logos.update-with-media", 1), {
+        this.logoForm.post(route("logos.update-with-media", this.logo.id), {
           method: '_put',
         });
     },

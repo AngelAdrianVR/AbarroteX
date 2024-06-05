@@ -88,7 +88,7 @@ methods:{
             if ( ( this.total_products - this.visibleProducts.length ) !== 0 ) {
                 this.loading = true;
                 try {
-                    const response = await axios.get(route('online-sales.load-more-products', [offset, limit]), { storeId: this.store.id});
+                    const response = await axios.post(route('online-sales.load-more-products', [offset, limit]), { storeId: this.store_id});
                     if (response.status === 200 ) {
                         this.visibleProducts = [...this.visibleProducts, ...response.data.products]; //agrega los products obtenidos al array de products que se muestran 
                     }
@@ -111,6 +111,7 @@ methods:{
 mounted() {
     this.visibleProducts = this.products;
     // localStorage.clear(); //borrar local storage
+    // localStorage.removeItem('Ezycart'); //borrar una variable del local storage
 
     // Guardar store_id en el localStorage
     localStorage.setItem('storeId', this.store_id);

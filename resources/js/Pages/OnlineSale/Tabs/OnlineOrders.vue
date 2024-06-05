@@ -50,7 +50,7 @@
         <div class="overflow-auto h-[465px] border-b py-3">
             <table v-if="localOrders?.length" class="w-full">
                 <thead>
-                    <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">
+                    <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                         <th># Pedido</th>
                         <th>Fecha de pedido</th>
                         <th>Entregado</th>

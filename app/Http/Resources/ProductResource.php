@@ -23,6 +23,7 @@ class ProductResource extends JsonResource
             'min_stock' => $this->min_stock,
             'max_stock' => $this->max_stock,
             'current_stock' => $this->current_stock,
+            'description' => $this->description,
             'store_id' => $this->store_id,
             'imageCover' => $this->getMedia('imageCover')->all(),
             'category' => $this->whenLoaded('category'),
