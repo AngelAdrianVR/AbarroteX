@@ -130,6 +130,16 @@
                                 <p class="text-gray37">Cantidad máxima:</p>
                                 <p class="text-right font-bold">{{ product.data.max_stock ?? '-' }}</p>
                             </div>
+                            <!-- Descripción del producto -->
+                            <div v-if="product.data.description">
+                                <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
+                                <div class="grid grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
+                                    <p class="text-gray37">Descripción: </p>
+                                    <div>
+                                        <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <!-- ---------------------------------- -->
@@ -250,6 +260,7 @@ export default {
             productsFound: [this.product.data],
             entryProductModal: false,
             productHistory: null,
+            formattedDescription: null, //descripción del producto formateado con viñetas
             currentMonth: new Date().getMonth() + 1, // El mes actual
             currentYear: new Date().getFullYear(), // El año actual
             // loading
@@ -466,9 +477,24 @@ export default {
                 this.searchLoading = false;
             }
         },
+        formatDescription() {
+            if ( this.product.data.description != null ) {
+                const text = this.product.data.description;
+                const lines = text.split('\n');
+                const formattedLines = lines.map(line => `• ${line.trim()}`);
+                this.formattedDescription = formattedLines.join('\n');
+            }
+        }
     },
     mounted() {
         this.fetchHistory();
+        this.formatDescription();
     }
 }
 </script>
+
+<style scoped>
+.whitespace-break-spaces {
+    white-space: pre-wrap; /* Respect line breaks */
+}
+</style>
