@@ -122,7 +122,8 @@
               </p>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="showCashRegisterSelectionModal = true"><i
+                  <el-dropdown-item v-if="$page.props.auth.user.store.plan != 'Plan Básico'"
+                    @click="showCashRegisterSelectionModal = true"><i
                       class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
                   <el-dropdown-item :disabled="!asignedCashRegister"
                     @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
@@ -335,7 +336,9 @@
         </section>
 
         <div class="flex justify-between space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
-          <p v-if="cash_registers.length == 1" class="text-gray99">Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))" class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
+          <p v-if="cash_registers.length == 1" class="text-gray99">Por ahora solo tienes una caja. <span
+              @click="$inertia.get(route('cash-registers.create'))"
+              class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
           <span v-else></span>
           <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Confirmar</PrimaryButton>
         </div>
@@ -369,7 +372,8 @@
                 <i class="fa-solid fa-dollar-sign"></i>
               </template>
             </el-input>
-            <p class="text-red-500 text-xs" v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash">
+            <p class="text-red-500 text-xs"
+              v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash">
               *El monto no debe exceder el dinero actual de tu caja (${{ asignedCashRegister?.current_cash }})
             </p>
             <InputError :message="form.errors.registerAmount" />
@@ -383,7 +387,9 @@
 
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
-            <PrimaryButton :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash)">Confirmar</PrimaryButton>
+            <PrimaryButton
+              :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash)">
+              Confirmar</PrimaryButton>
           </div>
         </form>
       </div>
