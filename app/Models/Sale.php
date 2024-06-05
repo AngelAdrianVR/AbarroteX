@@ -14,7 +14,7 @@ class Sale extends Model
         'current_price',
         'product_name',
         'quantity',
-        'was_refunded',
+        'refunded_at',
         'group_id',
         'product_id',
         'is_global_product',
