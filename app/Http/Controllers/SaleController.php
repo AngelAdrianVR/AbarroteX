@@ -94,7 +94,6 @@ class SaleController extends Controller
             ];
         });
 
-        // return $day_sales;
         return inertia('Sale/Show', compact('day_sales'));
     }
 
@@ -367,8 +366,149 @@ class SaleController extends Controller
                 $current_product->increment('current_stock', $sale->quantity);
             });
         }
-        
+
         // marcar productos de venta como reembolsados / cancelados
-        $saleProducts->each(fn ($sale) => $sale->update(['was_refunded' => true]));
+        $saleProducts->each(fn ($sale) => $sale->update(['refunded_at' => now()]));
     }
+
+    public function updateGroupSale(Request $request)
+    {
+        // Validar los datos del request
+        $request->validate([
+            'folio' => 'required|string',
+            'sales' => 'required|array',
+            'sales.*.id' => 'required|integer|exists:sales,id',
+            'sales.*.product_id' => 'required|string',
+            'sales.*.quantity' => 'required|numeric|min:1',
+            'sales.*.current_price' => 'required|numeric|min:0',
+        ], [
+            'required' => 'llenar campo'
+        ]);
+
+        // Obtener las ventas actuales
+        $sales = Sale::where([
+            'store_id' => auth()->user()->store_id,
+            'group_id' => $request->folio,
+        ])->get();
+
+        $sales_in_request = collect($request->sales);
+
+        // Obtener información de la caja registradora y control de inventario
+        $cash_register = CashRegister::find(auth()->user()->cash_register_id);
+        $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+
+        // Variables para calcular las diferencias de monto
+        $total_diff_amount = 0;
+
+        // Procesar cada venta y actualizar los productos e inventario
+        $sales->each(function ($sale) use ($sales_in_request, $is_inventory_on, &$total_diff_amount) {
+            $sale_updated = $sales_in_request->firstWhere('id', $sale->id);
+
+            if ($sale_updated) {
+                $old_quantity = $sale->quantity;
+                $old_price = $sale->current_price;
+                $new_quantity = $sale_updated['quantity'];
+                $new_price = $sale_updated['current_price'];
+
+                $product_type = explode('_', $sale_updated['product_id'])[0];
+                $product_id = explode('_', $sale_updated['product_id'])[1];
+                $product_name = $product_type == 'global'
+                    ? GlobalProductStore::find($product_id)->globalProduct->name
+                    : Product::find($product_id)->name;
+
+                // Calcular diferencia en inventario
+                if ($is_inventory_on) {
+                    $current_product = $sale->is_global_product
+                        ? GlobalProductStore::find($sale->product_id)
+                        : Product::find($sale->product_id);
+
+                    if ($old_quantity != $new_quantity || $sale->product_id != $product_id) {
+                        if ($sale->product_id != $product_id) {
+                            $current_product->increment('current_stock', $old_quantity);
+                            $new_product = $sale->is_global_product
+                                ? GlobalProductStore::find($product_id)
+                                : Product::find($product_id);
+                            $new_product->decrement('current_stock', $new_quantity);
+                        } else {
+                            $current_product->increment('current_stock', $old_quantity);
+                            $current_product->decrement('current_stock', $new_quantity);
+                        }
+                    }
+                }
+
+                // Calcular la diferencia en montos para movimientos de caja
+                $old_total = $old_quantity * $old_price;
+                $new_total = $new_quantity * $new_price;
+                $total_diff_amount += $new_total - $old_total;
+
+                // Actualizar la venta
+                $sale->update([
+                    'product_id' => $product_id,
+                    'product_name' => $product_name,
+                    'quantity' => $new_quantity,
+                    'current_price' => $new_price,
+                ]);
+            }
+        });
+
+        // Crear movimiento de caja según la diferencia calculada
+        if ($total_diff_amount != 0) {
+            $movement_type = $total_diff_amount > 0 ? 'Ingreso' : 'Retiro';
+            CashRegisterMovement::create([
+                'amount' => abs($total_diff_amount),
+                'type' => $movement_type,
+                'notes' => "Actualización de venta con folio {$request->folio}",
+                'cash_register_id' => $cash_register->id,
+            ]);
+
+            if ($movement_type == 'Ingreso') {
+                $cash_register->increment('current_cash', abs($total_diff_amount));
+            } else {
+                $cash_register->decrement('current_cash', abs($total_diff_amount));
+            }
+        }
+    }
+
+    // public function updateGroupSale(Request $request)
+    // {
+    //     $messages = [
+    //         'sales.*.product_id.required' => 'llenar campo',
+    //         'sales.*.quantity.required' => 'Indicar cantidad',
+    //         'sales.*.current_price.required' => 'Indicar precio',
+    //     ];
+
+    //     $request->validate([
+    //         'sales.*.product_id' => 'required|string',
+    //         'sales.*.quantity' => 'required|numeric|min:1',
+    //         'sales.*.current_price' => 'required|numeric|min:0',
+    //     ], $messages);
+
+    //     $sales = Sale::where([
+    //         'store_id' => auth()->user()->store_id,
+    //         'group_id' => $request->folio,
+    //     ])->get();
+
+    //     $sales_in_request = collect($request->sales);
+
+    //     $sales->each(function ($sale) use ($sales_in_request) {
+    //         // buscar venta que corresponda
+    //         $sale_updated = $sales_in_request->firstWhere('id', $sale->id);
+
+    //         // actualizar venta
+    //         if ($sale_updated) {
+    //             $current_product_type = explode('_', $sale_updated['product_id'])[0];
+    //             $current_product_id = explode('_', $sale_updated['product_id'])[1];
+    //             $current_product_name = $current_product_type == 'global'
+    //                 ? GlobalProductStore::find($current_product_id)->globalProduct->name
+    //                 : Product::find($current_product_id)->name;
+
+    //             $sale->update([
+    //                 'product_id' => $current_product_id, // quitar el prefijo al id del producto
+    //                 'product_name' => $current_product_name,
+    //                 'quantity' => $sale_updated['quantity'],
+    //                 'current_price' => $sale_updated['current_price'],
+    //             ]);
+    //         }
+    //     });
+    // }
 }

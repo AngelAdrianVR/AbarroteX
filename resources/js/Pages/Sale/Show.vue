@@ -37,15 +37,19 @@
             <section class="flex flex-col space-y-5 lg:mx-16 mt-10">
                 <article v-for="(group, index) in getGroupedSales" :key="index"
                     class="border border-grayD9 *:px-1 *:md:px-5 *:py-1">
-                    <div class="flex justify-between border-b border-grayD9 text-end">
-                        <p class="text-gray99">Vendedor: <span class="text-gray37">{{ group[0].user.name }}</span></p>
-                        <p class="text-gray99">reembolsado: <span class="text-gray37">{{ group[0].was_refunded }}</span>
-                        </p>
-                        <p class="text-gray99">Folio: <span class="text-gray37">{{ index }}</span></p>
-                        <div class="flex items-center space-x-2">
+                    <div class="flex items-center justify-between border-b border-grayD9 text-end">
+                        <div class="flex items-center space-x-3">
+                            <p class="text-gray99">Folio: <span class="text-gray37">{{ index }}</span></p>
+                            <span class="text-gray99">•</span>
                             <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{
                                 formatDateHour(group[0].created_at) }}</span></p>
-                            <el-dropdown v-if="canEdit && canRefund" trigger="click" @command="handleCommand">
+                            <span class="text-gray99">•</span>
+                            <p class="text-gray99">Vendedor: <span class="text-gray37">{{ group[0].user.name }}</span>
+                            </p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <el-dropdown v-if="canEdit && canRefund && group.some(item => !item?.refunded_at)"
+                                trigger="click" @command="handleCommand">
                                 <button @click.stop
                                     class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
                                     <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -60,8 +64,7 @@
                                             </svg>
                                             <span class="text-xs">Editar</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item v-if="canRefund && group.some(item => !item.was_refunded)"
-                                            :command="'refund|' + index">
+                                        <el-dropdown-item v-if="canRefund" :command="'refund|' + index">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -116,56 +119,64 @@
                             <span class="text-gray37">$</span>
                             <span class="text-gray37">21.50</span>
                         </div> -->
-                        <div class="text-gray37 font-black flex items-center justify-end space-x-2 *:w-12 px-2">
-                            <span class="text-start">Total:</span>
-                            <span>$</span>
-                            <span>{{ calcTotal(group).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        <div :class="group.some(item => item?.refunded_at) ? 'text-[#8C3DE4]' : 'text-gray37'"
+                            class="font-black flex items-center justify-end space-x-2 px-2">
+                            <el-tooltip v-if="group.some(item => item?.refunded_at)" placement="top">
+                                <template #content>
+                                    <p>El reembolso de realizó a las {{ formatDateHour(group[0].refunded_at) }}</p>
+                                </template>
+                                <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2">
+                                    Reembolsado</p>
+                            </el-tooltip>
+                            <span class="text-start w-12">Total:</span>
+                            <span class="w-12">$</span>
+                            <span class="w-12">{{ calcTotal(group).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}</span>
                         </div>
                     </div>
                 </article>
             </section>
         </div>
-        <DialogModal :show="showEditModal" @close="showEditModal = false">
+        <DialogModal :show="showEditModal" @close="closeEditModal()">
             <template #title>
                 <h1>Editar venta</h1>
             </template>
             <template #content>
                 <form @submit.prevent="update">
-                    <section v-for="(sale, index) in getGroupedSales[saleFolioToEdit]" :key="index"
-                        class="flex items-center space-x-2 mb-1">
+                    <section v-for="(sale, index) in form.sales" :key="index" class="flex items-center space-x-2 mb-1">
                         <div class="w-1/2">
                             <InputLabel value="Producto" />
-                            <el-select class="" v-model="sale.product_id" filterable
-                                placeholder="Selecciona el producto" no-data-text="No hay opciones registradas"
+                            <el-select v-model="sale.product_id" filterable placeholder="Selecciona el producto"
+                                no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
-                                <el-option v-for="item in products" :key="item.id" :label="item.name" :value="item.id" />
+                                <el-option v-for="item in products" :key="item.id" :label="item.name"
+                                    :value="item.id" />
                             </el-select>
-                            <!-- <el-input v-model="sale.product_id" placeholder="No olvides llenar este campo"> 
-                            </el-input>-->
-                            <!-- <InputError :message="errors.concept" /> -->
+                            <InputError :message="form.errors[`sales.${index}.product_id`]" />
                         </div>
                         <div class="w-1/4">
-                            <InputLabel value="Costo por unidad" />
+                            <InputLabel value="Precio por unidad" />
                             <el-input v-model.number="sale.current_price" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/\D/g, '')" required>
+                                :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
                             </el-input>
-                            <!-- <InputError :message="errors.sale.current_price" /> -->
+                            <InputError :message="form.errors[`sales.${index}.current_price`]" />
                         </div>
                         <div class="w-1/4">
                             <InputLabel value="Cantidad" />
                             <el-input v-model.number="sale.quantity" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/\D/g, '')" required>
+                                :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
                             </el-input>
-                            <!-- <InputError :message="errors.quantity" /> -->
+                            <InputError :message="form.errors[`sales.${index}.quantity`]" />
                         </div>
                     </section>
                 </form>
+
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">
-                    <CancelButton @click="showEditModal = false" :disabled="editing">Cancelar</CancelButton>
+                    <CancelButton @click="closeEditModal()" :disabled="editing">Cancelar</CancelButton>
                     <PrimaryButton @click="update" :disabled="editing">Guardar cambios</PrimaryButton>
                 </div>
             </template>
@@ -204,15 +215,23 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DialogModal from '@/Components/DialogModal.vue';
 import InputLabel from "@/Components/InputLabel.vue";
+import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { addOrUpdateBatchOfItems, getAll } from '@/dbService.js';
+import axios from 'axios';
 
 export default {
     data() {
+        const form = useForm({
+            folio: null,
+            sales: []
+        });
+
         return {
+            form,
             products: [],
             // modales
             showEditModal: false,
@@ -237,6 +256,7 @@ export default {
         ThirthButton,
         CancelButton,
         InputLabel,
+        InputError,
         Back,
         ConfirmationModal,
         DialogModal,
@@ -273,39 +293,67 @@ export default {
         formatSalesProductId() {
             // Obtener las ventas del primer día (si hay múltiples días, se debe ajustar esta parte)
             const sales = Object.values(this.day_sales)[0].sales;
-            
+
             // cambiar el id de cada venta para que coincida con id de productos en indexedDB
             sales.forEach(sale => {
-                sale.product_id = sale.is_global_product
-                ? 'global_' + sale.product_id
-                : 'local_'  + sale.product_id;
+                // revisar si el id es un numero
+                if (Number.isFinite(sale.product_id)) {
+                    sale.product_id = sale.is_global_product
+                        ? 'global_' + sale.product_id
+                        : 'local_' + sale.product_id;
+                }
             });
         },
         formatDateHour(dateString) {
             return format(parseISO(dateString), 'h:mm a', { locale: es });
+        },
+        closeEditModal() {
+            this.showEditModal = false;
+        },
+        openEditModal(saleFolio) {
+            this.saleFolioToEdit = saleFolio;
+
+            // Preparar form con una copia profunda de las ventas seleccionadas
+            this.form.folio = saleFolio;
+            this.form.sales = JSON.parse(JSON.stringify(this.getGroupedSales[saleFolio]));
+
+            // Abrir modal
+            this.showEditModal = true;
         },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const saleFolio = command.split('|')[1];
 
             if (commandName == 'edit') {
-                this.saleFolioToEdit = saleFolio;
-                this.showEditModal = true;
+                this.openEditModal(saleFolio);
             } else if (commandName == 'refund') {
                 this.showRefundConfirm = true;
                 this.saleFolioToRefund = saleFolio;
             }
         },
         update() {
-            this.form.put(route('sales.update', this.saleFolioToEdit), {
-                onSuccess: () => {
-                    this.saleFolioToEdit = null;
+            this.editing = true;
+            this.form.post(route('sales.update-group-sale'), {
+                onSuccess: async () => {
+                    // Obtener productos de servidor
+                    const response = await axios.get(route('products.get-all-for-indexedDB'));
+                    const products = response.data.products;
+                    // actualizar lista de productos en indexedDB
+                    addOrUpdateBatchOfItems('products', products);
+
                     this.showEditModal = false;
+                    
                     this.$notify({
                         title: 'Venta actualizada',
                         message: '',
                         type: 'success',
                     });
+                    
+                    // volver a formatear id de productos para que no de error al querer editar de nuevo la venta
+                    this.formatSalesProductId();
+                },
+                onFinish: () => {
+                    this.editing = false;
                 }
             });
         },
@@ -335,10 +383,12 @@ export default {
             return `${day} ${months[month]}, ${year}`;
         },
         viewProduct(product) {
+            const productId = product.product_id.split('_')[1];
+
             if (product.is_global_product) {
-                window.open(route('global-product-store.show', product.product_id), '_blank');
+                window.open(route('global-product-store.show', productId), '_blank');
             } else {
-                window.open(route('products.show', product.product_id), '_blank');
+                window.open(route('products.show', productId), '_blank');
             }
         },
         print(daySales) {
@@ -359,7 +409,7 @@ export default {
 
                     // actualizar elementos de la vista (reactividad)
                     this.getGroupedSales[this.saleFolioToRefund].forEach(element => {
-                        element.was_refunded = 1;
+                        element.refunded_at = 1;
                     });
 
                     this.$notify({
