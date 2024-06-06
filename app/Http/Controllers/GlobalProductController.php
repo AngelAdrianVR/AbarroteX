@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\GlobalProduct;
-use App\Models\GlobalProductStore;
-use App\Models\Product;
 use Illuminate\Http\Request;
 
 class GlobalProductController extends Controller
@@ -35,6 +33,7 @@ class GlobalProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:global_products,name',
             'code' => 'nullable|string|max:100|unique:global_products,code',
+            'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|string|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
@@ -74,6 +73,7 @@ class GlobalProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:global_products,name,' . $global_product->id,
             'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
+            'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',
@@ -96,6 +96,7 @@ class GlobalProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:global_products,name,' . $global_product->id,
             'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
+            'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|max:200',
             'category_id' => 'required',
             'brand_id' => 'required',

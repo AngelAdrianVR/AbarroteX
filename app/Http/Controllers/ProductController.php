@@ -45,6 +45,7 @@ class ProductController extends Controller
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
+            'description' => 'nullable|string|max:255',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'required',
@@ -70,7 +71,7 @@ class ProductController extends Controller
             ->where('store_id', auth()->user()->store_id)
             ->findOrFail($product_id));
 
-        return inertia('Product/Show', compact('product', 'cash_register'));
+            return inertia('Product/Show', compact('product', 'cash_register'));
     }
 
 
@@ -93,6 +94,7 @@ class ProductController extends Controller
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
+            'description' => 'nullable|string|max:255',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
@@ -130,6 +132,7 @@ class ProductController extends Controller
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
+            'description' => 'nullable|string|max:255',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',

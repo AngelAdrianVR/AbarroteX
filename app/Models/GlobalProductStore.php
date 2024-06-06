@@ -17,6 +17,7 @@ class GlobalProductStore extends Model
         'min_stock',
         'max_stock',
         'current_stock',
+        'description',
         'global_product_id',
         'store_id',
     ];

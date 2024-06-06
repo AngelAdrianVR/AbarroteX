@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedFloat('public_price');
             $table->string('code')->nullable();
+            $table->string('description')->nullable();
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

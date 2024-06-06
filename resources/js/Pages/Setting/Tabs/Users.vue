@@ -11,7 +11,7 @@
             <div class="overflow-auto mt-9">
                 <table v-if="users?.length" class="w-full">
                     <thead>
-                        <tr class="*:text-left *:px-3 *:pb-2 *:text-sm">
+                        <tr class="*:text-left *:px-3 *:pb-2 *:text-sm border-b border-primary">
                             <th class="w-[10%]">ID</th>
                             <th class="w-[20%]">Nombre</th>
                             <th class="w-[20%]">Correo electrónico</th>

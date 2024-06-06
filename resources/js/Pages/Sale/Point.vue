@@ -336,8 +336,8 @@
         </section>
 
         <div class="flex justify-between space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
-          <p v-if="cash_registers.length == 1" class="text-gray99">Por ahora solo tienes una caja. <span
-              @click="$inertia.get(route('cash-registers.create'))"
+          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan != 'Plan básico'" class="text-gray99">
+            Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))"
               class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
           <span v-else></span>
           <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Confirmar</PrimaryButton>
@@ -345,7 +345,6 @@
       </div>
     </Modal>
     <!-- --------------------------- Modal selección de caja ends ------------------------------------ -->
-
 
     <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
     <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
@@ -515,7 +514,7 @@ import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
-import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems } from '@/dbService.js';
+import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems, initializeProducts } from '@/dbService.js';
 
 export default {
   data() {
@@ -953,6 +952,8 @@ export default {
     },
   },
   mounted() {
+    initializeProducts();
+    
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;

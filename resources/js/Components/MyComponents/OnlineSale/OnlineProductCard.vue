@@ -1,12 +1,12 @@
 <template>
-    <div class="py-3 px-5 rounded-lg border border-gayD9 flex flex-col h-96 hover:border-primary relative group">
+    <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col h-96 hover:border-primary relative group">
         <!-- Deatalle de cantidad disponible  -->
-        <div class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg hidden group-hover:block h-10">
-            <p class="text-white text-center">{{  product.current_stock ?? '0' }} Unidades disponibles</p>
+        <div class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg hidden group-hover:block">
+            <p class="text-white text-center py-2">{{  product.current_stock ?? '0' }} Unidades disponibles</p>
         </div>
             <!-- Imagen -->
         <figure class="h-1/2 text-center">
-            <Link :href="product.global_product_id ? route('online-sales.show-global-product', product.global_product_id) : route('online-sales.show-local-product', product.id)">
+            <Link :href="product.global_product_id ? route('online-sales.show-global-product', product.id) : route('online-sales.show-local-product', product.id)">
                 <img v-if="product.global_product_id ? product.global_product.media?.length : product.media?.length" 
                     :src="product.global_product_id ? product.global_product.media[0]?.original_url : product.media[0]?.original_url" 
                     alt="producto" class="h-full mx-auto">
@@ -53,8 +53,8 @@ methods:{
 
         if ( this.product.global_product_id ) {
 
-            // Verificar si el producto ya está en el carrito
-            const productInCart = cart.find(item => item.id === this.product.global_product_id);
+            // Verificar si el producto ya está en el carrito comparando id y si es local o no
+            const productInCart = cart.find(item => item.id === this.product.global_product_id && item.isLocal == false);
 
             if (productInCart) {
                 // Si el producto ya está en el carrito, actualizar la cantidad
@@ -62,7 +62,7 @@ methods:{
             } else {
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
-                    id: this.product.global_product_id,
+                    id: this.product.id,
                     name: this.product.global_product.name,
                     isLocal: false,
                     price: this.product.public_price,
@@ -73,7 +73,7 @@ methods:{
         } else {
 
              // Verificar si el producto ya está en el carrito
-            const productInCart = cart.find(item => item.id === this.product.id);
+            const productInCart = cart.find(item => item.id === this.product.id && item.isLocal == true);
 
             if (productInCart) {
                 // Si el producto ya está en el carrito, actualizar la cantidad

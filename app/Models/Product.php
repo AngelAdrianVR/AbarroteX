@@ -21,6 +21,7 @@ class Product extends Model implements HasMedia
         'min_stock',
         'max_stock',
         'current_stock',
+        'description',
         'store_id',
         'category_id',
         'brand_id',

@@ -1,7 +1,7 @@
 <template>
     <section v-if="Object.keys(items)?.length" class="mt-4 text-sm w-full overflow-auto">
         <table class="w-full">
-            <tr class="font-bold *:pb-3 *:px-4">
+            <tr class="font-bold *:pb-3 *:px-4 border-b border-primary">
                 <td>Fecha</td>
                 <td>Total de cortes</td>
                 <td>Total de ventas</td>

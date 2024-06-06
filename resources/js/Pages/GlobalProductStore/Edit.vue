@@ -95,9 +95,15 @@
                     <InputError :message="form.errors.max_stock" />
                 </div>
 
-                <h2 class="font-bold col-span-full text-sm my-5">Cantidades de stock permitidas</h2>
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
+                    <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255" show-word-limit
+                        clearable />
+                    <InputError :message="form.errors.description" />
+                </div>
 
-                <div>
+                <div class="mt-3">
                     <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
                     <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
                         @cleared="form.imageCover = null; form.imageCoverCleared = true"
@@ -182,6 +188,7 @@ export default {
             code: this.global_product_store.global_product?.code,
             public_price: this.global_product_store.public_price,
             cost: this.global_product_store.cost,
+            description: this.global_product_store.description,
             current_stock: this.global_product_store.current_stock,
             category_id: this.global_product_store.global_product?.category_id,
             brand_id: this.global_product_store.global_product?.brand_id,

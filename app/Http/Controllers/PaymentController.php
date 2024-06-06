@@ -55,10 +55,10 @@ class PaymentController extends Controller
         $admins = Admin::where('employee_properties->department', 'Dirección')->get();
         $title = "Nuevo pago registrado";
         $description = "La tienda '$store->name' ha pagado una suscripción {$validated['suscription_period']} ($ {$validated['amount']}).";
-        if (app()->environment() === 'local'){
-            $url = 'http://localhost:8000/stores';
-        } else {
+        if (app()->environment() === 'production'){
             $url = 'https://admin.ezyventas.com/stores';
+        } else {
+            $url = 'http://localhost:8000/stores';
         }
         $admins->each(fn ($admin) => $admin->notify(new AdminBasicNotification($title, $description, $url)));
     }
