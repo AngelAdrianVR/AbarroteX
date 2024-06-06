@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\GlobalProduct;
-use App\Models\GlobalProductStore;
-use App\Models\Product;
 use Illuminate\Http\Request;
 
 class GlobalProductController extends Controller
