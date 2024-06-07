@@ -1,0 +1,92 @@
+<template>
+    <AppLayout :title="'Detalles del cliente'">
+        <section class="mx-2 lg:mx-10 mt-7">
+            <h1 class="font-bold">Detalles del cliente</h1>
+
+            <article class="flex items-center space-x-3 justify-between mt-5">
+                <el-select @change="$inertia.get(route('clients.show', clientId))" class="!w-40 md:!w-60" filterable v-model="clientId" clearable placeholder="Buscar cliente"
+                    no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                    <el-option v-for="item in clients" :key="item" :label="item.name"
+                        :value="item.id" />
+                </el-select>
+                <div class="flex items-center space-x-3">
+                    <ThirthButton>Registrar abono</ThirthButton>
+                    <PrimaryButton @click="$inertia.get(route('clients.edit', client.id))">Editar</PrimaryButton>
+                </div>
+            </article>
+
+            <!-- Información del cliente -->
+            <header class="mt-7 lg:mx-16 text-sm lg:text-base space-y-1">
+                <p class="font-bold">Nombre: <span class="font-thin ml-5">{{
+                   client.name }}</span></p>
+                <p class="font-bold">Teléfono: <span class="font-thin ml-5">{{
+                    client.phone }}</span></p>
+                <p class="font-bold">Dirección: <span class="font-thin ml-5">
+                    {{ client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state }}
+                </span></p>
+            </header>
+
+            <div class="text-center text-sm lg:text-base my-5">
+                <h2>Saldo total pendiente de pago</h2>
+                <h3 class="font-bold">${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</h3>
+            </div>
+
+            <!-- Pestañas -->
+            <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
+                <el-tab-pane label="Ventas a crédito" name="1">
+                    <CreditSales :clientId="client.id" />
+                </el-tab-pane>
+                <el-tab-pane label="Ventas al contado" name="2">
+                    <CashSales :clientId="client.id" />
+                </el-tab-pane>
+            </el-tabs>
+        </section>
+    </AppLayout>
+</template>
+
+<script>
+import AppLayout from '@/Layouts/AppLayout.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import CreditSales from '@/Pages/Client/Tabs/CreditSales.vue';
+import CashSales from '@/Pages/Client/Tabs/CashSales.vue';
+import Back from "@/Components/MyComponents/Back.vue";
+
+export default {
+data() {
+    return {
+        clientId: null, //guarda el id del cliente seleccionado para ingresar a sus detalles
+        activeTab: '1',
+    }
+},
+components:{
+AppLayout,
+PrimaryButton,
+ThirthButton,
+CreditSales,
+CashSales,
+Back
+},
+props:{
+client: Object,
+clients: Array
+},
+methods:{
+    updateURL(tab) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('tab', tab.props.name );
+        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    },
+    setActiveTabFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab) {
+            this.activeTab = tab;
+        }
+    }
+},
+mounted() {
+    this.setActiveTabFromURL();
+}
+};
+</script>
