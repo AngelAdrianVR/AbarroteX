@@ -181,7 +181,7 @@ const logout = () => {
                                 Reportes
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('sales.index')"
-                                :active="route().current('sales.index') || route().current('sales.show')">
+                                :active="route().current('sales.*')">
                                 Ventas registradas
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
