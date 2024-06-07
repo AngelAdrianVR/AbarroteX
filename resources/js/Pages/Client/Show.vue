@@ -51,8 +51,6 @@ import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CreditSales from '@/Pages/Client/Tabs/CreditSales.vue';
 import CashSales from '@/Pages/Client/Tabs/CashSales.vue';
 import Back from "@/Components/MyComponents/Back.vue";
-import { format, parseISO } from 'date-fns';
-import es from 'date-fns/locale/es';
 
 export default {
 data() {
