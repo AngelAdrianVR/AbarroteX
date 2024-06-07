@@ -37,11 +37,11 @@
                             :maxlength="100" clearable />
                         <InputError :message="expense.errors.concept" />
                     </div>
-                    <div class="mt-3">
+                    <!-- <div class="mt-3">
                         <InputLabel :value="'Fecha ' + (index + 1) + '*'" class="ml-3 mb-1" />
                         <el-date-picker v-model="expense.date" type="date" placeholder="Selecciona una fecha"
                             :disabled-date="disabledDate" />
-                    </div>
+                    </div> -->
                     <!-- <div class="mt-3">
                         <InputLabel :value="'Cantidad ' + (index + 1) + '*'" class="ml-3 mb-1" />
                         <el-input v-model="expense.quantity" required type="text"
