@@ -18,7 +18,8 @@
 
             <!-- Productos -->
             <main class="flex flex-col space-y-5 lg:mx-16 mt-10">
-                <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item" @show-modal="handleShowModal" :folio="index" />
+                <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item"
+                    @show-modal="handleShowModal" :folio="index" />
             </main>
         </div>
 

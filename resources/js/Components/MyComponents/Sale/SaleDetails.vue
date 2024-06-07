@@ -41,34 +41,43 @@
             </div>
         </div>
         <div class="border-b border-grayD9">
-            <table class="w-full">
-                <thead>
-                    <tr class="*:px-2">
-                        <th class="w-[55%] text-start">Producto</th>
-                        <th class="w-[15%] text-start">Precio</th>
-                        <th class="w-[15%] text-start">Cantidad</th>
-                        <th class="w-[15%] text-end">Total</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y-[1px]">
-                    <tr v-for="(sale, index) in groupedSales" :key="index"
-                        class="*:px-2 *:py-[6px] *:align-top border-grayD9">
-                        <td>
-                            <button v-if="sale.product_id" @click="viewProduct(sale)"
-                                class="text-start text-primary underline">
-                                {{ sale.product_name }}
-                            </button>
-                            <el-tooltip v-else content="El producto fue eliminado" placement="right">
-                                <span class="text-red-700">{{ sale.product_name }}</span>
-                            </el-tooltip>
-                        </td>
-                        <td>${{ sale.current_price }}</td>
-                        <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                        <td class="text-end pb-1">${{ (sale.current_price *
-                            sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <Accordion :active="false" :id="parseInt(folio)" position="center" title="Ver detalles">
+                <template #trigger>
+                    <button class="text-primary">
+                        Ver detalles
+                    </button>
+                </template>
+                <template #content>
+                    <table class="w-full">
+                        <thead>
+                            <tr class="*:px-2">
+                                <th class="w-[55%] text-start">Producto</th>
+                                <th class="w-[15%] text-start">Precio</th>
+                                <th class="w-[15%] text-start">Cantidad</th>
+                                <th class="w-[15%] text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-[1px]">
+                            <tr v-for="(sale, index) in groupedSales" :key="index"
+                                class="*:px-2 *:py-[6px] *:align-top border-grayD9">
+                                <td>
+                                    <button v-if="sale.product_id" @click="viewProduct(sale)"
+                                        class="text-start text-primary underline">
+                                        {{ sale.product_name }}
+                                    </button>
+                                    <el-tooltip v-else content="El producto fue eliminado" placement="right">
+                                        <span class="text-red-700">{{ sale.product_name }}</span>
+                                    </el-tooltip>
+                                </td>
+                                <td>${{ sale.current_price }}</td>
+                                <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                <td class="text-end pb-1">${{ (sale.current_price *
+                                    sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+            </Accordion>
         </div>
         <div class="text-end">
             <!--*** descomentar cuado se guarden los descuentos sobre la venta total ***-->
@@ -101,6 +110,7 @@
 </template>
 
 <script>
+import Accordion from '@/Components/MyComponents/Accordion.vue';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 
@@ -112,6 +122,9 @@ export default {
             canRefund: this.$page.props.auth.user.rol == 'Administrador',
             canEdit: this.$page.props.auth.user.rol == 'Administrador',
         };
+    },
+    components: {
+        Accordion,
     },
     props: {
         folio: String,
