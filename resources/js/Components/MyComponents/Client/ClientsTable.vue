@@ -18,7 +18,7 @@
                     <td class="rounded-s-full">{{ client.name }}</td>
                     <td>{{ client.phone }}</td>
                     <td>{{ client.rfc ?? '-' }}</td>
-                    <td>{{ client.street + ' ' + client.ext_number + ', Col.' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state }}</td>
+                    <td>{{ client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state }}</td>
                     <td>${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">

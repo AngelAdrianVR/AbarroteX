@@ -49,7 +49,9 @@ class ClientController extends Controller
     
     public function show(Client $client)
     {
-        //
+        $clients = Client::where('store_id', auth()->user()->store_id)->latest()->get(['id', 'name']);
+
+        return inertia('Client/Show', compact('client', 'clients'));
     }
 
     
@@ -113,5 +115,11 @@ class ClientController extends Controller
             ->get();
 
         return response()->json(['items' => $clients]);
+    }
+
+
+    public function printHistorial(Client $client)
+    {
+        return inertia('Client/PrintHistorial');
     }
 }

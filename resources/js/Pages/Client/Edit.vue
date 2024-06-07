@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Editar cliente">
         <div class="px-3 md:px-10 py-7">
-            <Back :to="route('clients.index')"/>
+            <Back />
 
             <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 w-full lg:w-2/3 xl:w-1/2 mx-auto mt-7 md:grid md:grid-cols-2 gap-x-3">
