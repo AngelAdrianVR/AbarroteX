@@ -320,7 +320,7 @@ class OnlineSaleController extends Controller
     {
         $offset = $currentPage * 20;
 
-        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->skip($offset)->take(20);
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->skip($offset)->take(20)->get();
 
         return response()->json(['items' => $online_orders]);
     }
