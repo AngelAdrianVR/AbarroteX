@@ -66,6 +66,7 @@ class GlobalProductStoreController extends Controller
             'code' => 'nullable|string|max:100',
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
+            'description' => 'nullable|string|max:255',
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',

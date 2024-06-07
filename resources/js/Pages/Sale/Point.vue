@@ -641,19 +641,36 @@ export default {
         this.quantity = 0;
       }
     },
-    updateCurrentStockInIndexedDB() {
-      const products = this.editableTabs[this.editableTabsValue - 1]?.saleProducts.map(item => {
-        const product = {
-          id: item.product.id,
-          name: item.product.name,
-          code: item.product.code,
-          public_price: item.product.public_price,
-          current_stock: item.product.current_stock <= item.quantity ? 0 : item.product.current_stock -= item.quantity,
-          image_url: item.product.image_url,
-        };
-        return product;
-      });
-      addOrUpdateBatchOfItems('products', products);
+    async updateCurrentStockInIndexedDB() {
+      // Obtener la pestaña actual y sus productos
+      const saleProducts = this.editableTabs[this.editableTabsValue - 1]?.saleProducts;
+
+      // Asegurarse de que existan productos en la pestaña
+      if (!saleProducts) {
+        return;
+      }
+
+      // Mapear los productos para actualizar su stock
+      const products = await Promise.all(saleProducts.map(async (item) => {
+        // Obtener productos por código
+        let foundProducts = await getItemByAttributes('products', { code: item.product.code });
+
+        // Verificar si se encontró el producto
+        if (foundProducts.length > 0) {
+          // Actualizar el stock
+          foundProducts[0].current_stock = item.product.current_stock <= item.quantity ? 0 : item.product.current_stock - item.quantity;
+          return foundProducts[0];
+        }
+
+        // Manejar el caso donde no se encuentre el producto
+        return null;
+      }));
+
+      // Filtrar productos que no fueron encontrados
+      const validProducts = products.filter(product => product !== null);
+
+      // Actualizar los productos en IndexedDB
+      await addOrUpdateBatchOfItems('products', validProducts);
     },
     async store() {
       if (this.storeProcessing) return;
@@ -953,7 +970,7 @@ export default {
   },
   mounted() {
     initializeProducts();
-    
+
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;

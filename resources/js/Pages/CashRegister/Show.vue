@@ -38,7 +38,7 @@
                                 <p class="text-gray99">Efectivo inicial</p>
                                 <p class="text-gray99">Ventas</p>
 
-                                <p  v-if="cashCutMovements[index].length"
+                                <p  v-if="cashCutMovements[index]?.length"
                                     class="text-primary flex items-center">Movimientos de caja 
                                     <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i>
                                 </p>

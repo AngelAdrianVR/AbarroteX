@@ -39,7 +39,7 @@ class OnlineSaleController extends Controller
 
         $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
 
-        // return $banners;
+        // return $products;
         return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id', 'banners'));
     }
 
@@ -101,7 +101,6 @@ class OnlineSaleController extends Controller
     public function ShowGlobalProduct($global_product_id)
     {   
         $global_product = GlobalProductStore::with(['globalProduct' => ['media', 'category:id,name', 'brand:id,name']])->find($global_product_id);
-
         return inertia('OnlineSale/ShowGlobalProduct', compact('global_product'));
     }
 
@@ -156,7 +155,7 @@ class OnlineSaleController extends Controller
         return $products;
     }
 
-
+    // para index de tienda en linea para clientes. (carga por scroll)
     public function loadMoreProducts($offset, $limit)
     {
         // Cargar más productos desde la base de datos tomando sólo los requeridos y saltando los ya cargados
@@ -316,6 +315,7 @@ class OnlineSaleController extends Controller
     }
 
 
+    //para index en app
     public function getItemsByPage($currentPage)
     {
         $offset = $currentPage * 20;

@@ -57,6 +57,14 @@
                     <InputError :message="form.errors.public_price" />
                 </div>
 
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
+                    <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255" show-word-limit
+                        clearable />
+                    <InputError :message="form.errors.description" />
+                </div>
+
                 <div class="col-span-full mt-3">
                     <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
                     <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
@@ -141,6 +149,7 @@ export default {
             category_id: this.global_product.category_id,
             brand_id: this.global_product.brand_id,
             code: this.global_product.code,
+            description: this.global_product.description,
             public_price: this.global_product.public_price,
             imageCover: null,
             imageCoverCleared: false
