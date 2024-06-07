@@ -277,7 +277,6 @@ export default {
             importForm,
             loading: false,
             searchQuery: null,
-            searchFocus: false,
             entryProductModal: false,
             productEntryFound: null,
             // tabs
