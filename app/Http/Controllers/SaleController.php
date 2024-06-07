@@ -65,15 +65,15 @@ class SaleController extends Controller
     }
 
 
-    public function show(Sale $sale)
+    public function show($date, $cashRegisterId)
     {
         // Parsear la fecha de la venta recibida para obtener solo la parte de la fecha
-        $date = Carbon::parse($sale->created_at)->toDateString();
+        // $date = Carbon::parse($sale->created_at)->toDateString();
 
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
             ->where('store_id', auth()->user()->store_id)
-            ->where('cash_register_id', $sale->cash_register_id) //recuperar solo las  ventas de la caja involucrada.
+            ->where('cash_register_id', $cashRegisterId) //recuperar solo las  ventas de la caja involucrada.
             ->whereDate('created_at', $date)
             ->get();
 
@@ -159,7 +159,7 @@ class SaleController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 15;
+        $offset = $currentPage * 30;
         // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
         // $days_ago = Carbon::now()->subDays($offset);
         // ignorar esa cantidad de dias porque ya se cargaron.
@@ -186,7 +186,7 @@ class SaleController extends Controller
                 'sales' => $sales,
             ];
         })->skip($offset)
-            ->take(15);
+            ->take(30);
 
         return response()->json(['items' => $groupedSales]);
     }
@@ -327,19 +327,20 @@ class SaleController extends Controller
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $sales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->format('d-F-Y');
+            return Carbon::parse($sale->created_at)->toDateString();
         })->map(function ($sales) {
             $totalQuantity = $sales->sum('quantity');
             $totalSale = $sales->sum(function ($sale) {
                 return $sale->quantity * $sale->current_price;
             });
+            $uniqueFolios = $sales->unique('group_id')->count();
 
             return [
                 'total_quantity' => $totalQuantity,
                 'total_sale' => $totalSale,
-                'sales' => $sales,
+                'unique_folios' => $uniqueFolios,
             ];
-        })->take(5);
+        })->take(30);
 
         // Retornar los datos agrupados
         return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);

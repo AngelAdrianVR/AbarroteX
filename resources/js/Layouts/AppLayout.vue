@@ -181,7 +181,7 @@ const logout = () => {
                                 Reportes
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('sales.index')"
-                                :active="route().current('sales.index') || route().current('sales.show')">
+                                :active="route().current('sales.*')">
                                 Ventas registradas
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('expenses.index')" :active="route().current('expenses.*')">
@@ -193,6 +193,10 @@ const logout = () => {
                             <ResponsiveNavLink :href="route('products.index')"
                                 :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('clients.index')"
+                                :active="route().current('clients.*')">
+                                Clientes
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('cash-registers.index')"
                                 :active="route().current('cash-registers.*')">

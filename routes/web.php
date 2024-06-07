@@ -7,6 +7,7 @@ use App\Http\Controllers\CashCutController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\CashRegisterMovementController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
@@ -114,7 +115,8 @@ Route::resource('brands', BrandController::class)->middleware('auth');
 
 //sales routes-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('sales', SaleController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero', 'verified']);
+Route::resource('sales', SaleController::class)->except('show')->middleware('auth')->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero', 'verified']);
+Route::get('sales/{date}{cashRegisterId}', [SaleController::class, 'show'])->name('sales.show')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
@@ -176,6 +178,11 @@ Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByM
 //cards routes----------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('cards', CardController::class)->middleware('auth');
+
+
+//clients routes----------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::resource('clients', ClientController::class)->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------

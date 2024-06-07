@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('phone')->nullable();
             $table->string('email')->nullable()->unique();
-            $table->unsignedDouble('debt')->nullable();
+            $table->unsignedDouble('debt')->nullable(); //Deuda acumulada del cliente
             $table->string('notes')->nullable();
             $table->string('razon_social')->nullable(); //facturación
             $table->string('postal_code')->nullable(); //facturación

@@ -48,9 +48,8 @@
     </div>
     <Loading v-if="loading" class="mt-20" />
     <div class="mt-8" v-else>
-        <p v-if="Object.keys(sales)?.length" class="text-gray66 text-[11px] mb-3">{{ Object.keys(sales)?.length }} de {{
-            totalSales }}
-            elementos
+        <p v-if="Object.keys(sales)?.length" class="text-gray66 text-[11px] mb-3">
+            {{ Object.keys(sales)?.length }} de {{ totalSales }} elementos
         </p>
         <div class="overflow-auto">
             <table v-if="Object.keys(sales)?.length" class="w-full">
@@ -62,11 +61,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr @click="$inertia.visit(route('sales.show', Object.values(sales)[0].sales[0].id))"
-                        v-for="(sale, index) in sales" :key="index"
+                    <tr @click="$inertia.visit(route('sales.show', {date: index, cashRegisterId: this.cashRegister.id}))" v-for="(sale, index) in sales" :key="index"
                         class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                         <td class="rounded-s-full">{{ formatDate(index) }}</td>
-                        <td>{{ sale.total_quantity }}</td>
+                        <td> 
+                            {{ sale.unique_folios > 1 ? sale.unique_folios + ' ventas' : sale.unique_folios + ' venta' }}
+                            ({{ sale.total_quantity }} productos en total)
+                        </td>
                         <td>${{ sale.total_sale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         <td class="rounded-e-full text-end">
                             <el-dropdown trigger="click" @command="handleCommand">
@@ -76,7 +77,7 @@
                                 </button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
-                                        <el-dropdown-item :command="'see|' + sale.sales[0]?.id">
+                                        <el-dropdown-item :command="'see|' + index">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -87,7 +88,7 @@
                                             <span class="text-xs">Ver</span>
                                         </el-dropdown-item>
                                         <!-- ** descomentar cuando se haga una plantilla para imprimir todas las ventas del día **  -->
-                                        <!-- <el-dropdown-item :command="'print|' + sale.sales[0]?.created_at">
+                                        <!-- <el-dropdown-item :command="'print|' + index">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -95,7 +96,7 @@
                                             </svg>
                                             <span class="text-xs">Imprimir</span>
                                         </el-dropdown-item> -->
-                                        <!-- <el-dropdown-item :command="'delete|' + sale.sales[0]?.id">
+                                        <!-- <el-dropdown-item :command="'delete|' + index">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
                                                 class="size-[14px] mr-2 text-red-600">
@@ -112,18 +113,17 @@
                 </tbody>
             </table>
             <el-empty v-else description="No hay ventas registradas" />
-            <p v-if="Object.keys(sales)?.length" class="text-gray66 text-[11px] mt-1">{{ Object.keys(sales)?.length }}
-                de {{
-                    totalSales }}
-                elementos
+            <p v-if="Object.keys(sales)?.length" class="text-gray66 text-[11px] mt-1">
+                {{ Object.keys(sales)?.length }} de {{ totalSales }} elementos
             </p>
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
             <button
-                v-else-if="Object.keys(sales)?.length && totalSales > 15 && Object.keys(sales)?.length < totalSales && !filtered"
-                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
-                elementos</button>
+                v-else-if="Object.keys(sales)?.length && totalSales > 30 && Object.keys(sales)?.length < totalSales && !filtered"
+                @click="fetchItemsByPage" class="text-primary w-full my-4 text-xs underline">
+                Cargar más elementos
+            </button>
         </div>
     </div>
 
@@ -155,6 +155,8 @@ import Loading from '@/Components/MyComponents/Loading.vue';
 import DangerButton from "@/Components/DangerButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
     data() {
@@ -224,7 +226,7 @@ export default {
             const data = command.split('|')[1];
 
             if (commandName == 'see') {
-                this.$inertia.get(route('sales.show', data));
+                this.$inertia.get(route('sales.show', {date: data, cashRegisterId: this.cashRegister.id}));
             } else if (commandName == 'print') {
                 this.print(data);
             } else if (commandName == 'delete') {
@@ -233,23 +235,7 @@ export default {
             }
         },
         formatDate(dateString) {
-            const months = {
-                'January': 'Enero',
-                'February': 'Febrero',
-                'March': 'Marzo',
-                'April': 'Abril',
-                'May': 'Mayo',
-                'June': 'Junio',
-                'July': 'Julio',
-                'August': 'Agosto',
-                'September': 'Septiembre',
-                'October': 'Octubre',
-                'November': 'Noviembre',
-                'December': 'Diciembre'
-            };
-
-            const [day, month, year] = dateString.split('-');
-            return `${day} ${months[month]}, ${year}`;
+            return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },
         formatBaseDate(dateString) {
             const months = {

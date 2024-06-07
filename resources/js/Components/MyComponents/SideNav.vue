@@ -122,7 +122,7 @@ export default {
                     label: 'Ventas registradas',
                     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="22" width="22" id="Task-List--Streamline-Core"><desc>Task List Streamline Icon: https://streamlinehq.com</desc><g id="task-list--task-list-work"><path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M19.72665 19.72665C19.72665 20.14044792857143 19.56218164285714 20.53736914285714 19.269705 20.830005C18.976909928571427 21.122481642857142 18.580147928571428 21.286949999999997 18.166349999999998 21.286949999999997H4.12365C3.709852071428571 21.286949999999997 3.312930857142857 21.122481642857142 3.020295 20.830005C2.727659142857143 20.53736914285714 2.5633500000000002 20.14044792857143 2.5633500000000002 19.72665V2.5633500000000002C2.5633500000000002 2.1495520714285714 2.727659142857143 1.752630857142857 3.020295 1.459995C3.312930857142857 1.1675183571428571 3.709852071428571 1.00305 4.12365 1.00305H12.839199214285713C13.252997142857142 1.00305 13.649759142857143 1.1675183571428571 13.942395 1.459995L19.269705 6.787305C19.56218164285714 7.079940857142856 19.72665 7.476702857142857 19.72665 7.890500785714285V19.72665Z" stroke-width="1.71"></path><path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M12.016539 10.169812499999999H15.917289" stroke-width="1.71"></path><path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M12.016539 15.582142928571427H15.917289" stroke-width="1.71"></path><path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.982636 15.493779L7.289944500000001 16.8010875L9.468791999999999 13.750541785714285" stroke-width="1.71"></path><path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.982636 9.983850214285713L7.289944500000001 11.291317928571427L9.468791999999999 8.240772214285714" stroke-width="1.71"></path></g></svg>',
                     route: route('sales.index'),
-                    active: route().current('sales.index') || route().current('sales.show'),
+                    active: route().current('sales.*'),
                     options: [],
                     dropdown: false,
                     show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
@@ -153,6 +153,15 @@ export default {
                     options: [],
                     dropdown: false,
                     show: ['Administrador', 'Cajero', 'Almacenista'].includes(this.$page.props.auth.user.rol)
+                },
+                {
+                    label: 'Clientes',
+                    icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>',
+                    route: route('clients.index'),
+                    active: route().current('clients.*'),
+                    options: [],
+                    dropdown: false,
+                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
                 },
                 {
                     label: 'Caja',
