@@ -182,6 +182,8 @@ Route::resource('cards', CardController::class)->middleware('auth');
 //clients routes----------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('clients', ClientController::class)->middleware('auth');
+Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
+Route::get('clients-search', [ClientController::class, 'searchClient'])->name('clients.search')->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------

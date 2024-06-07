@@ -13,16 +13,24 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
+            //informacion personal -----------------------------------------------
             $table->string('name');
-            $table->string('last_name');
             $table->string('phone')->nullable();
             $table->string('email')->nullable()->unique();
-            $table->unsignedDouble('debt')->nullable(); //Deuda acumulada del cliente
             $table->string('notes')->nullable();
-            $table->string('razon_social')->nullable(); //facturación
-            $table->string('postal_code')->nullable(); //facturación
-            $table->string('rfc')->nullable(); //facturación
-            $table->string('tax_regime')->nullable(); //facturación
+            $table->unsignedDouble('debt')->nullable(); //Deuda acumulada del cliente
+            //Domicilio ----------------------------------------------------------
+            $table->string('street')->nullable(); //calle
+            $table->string('suburb')->nullable(); //colonia
+            $table->string('ext_number')->nullable(); // numero de vivienda
+            $table->string('int_number')->nullable(); // numero de coto, frac, etc
+            $table->string('town')->nullable(); //Municipio
+            $table->string('polity_state')->nullable(); //Estado
+            $table->string('postal_code')->nullable(); //codigo postal
+            //Información fiscal-------------------------------------------------
+            $table->string('razon_social')->nullable();
+            $table->string('rfc')->nullable();
+            $table->string('tax_regime')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

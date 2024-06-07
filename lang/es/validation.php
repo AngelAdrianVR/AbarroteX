@@ -182,5 +182,9 @@ return [
         'street' => 'calle',
         'ext_number' => 'número exterior',
         'int_number' => 'número interior',
+        'postal_code' => 'código postal',
+        'town' => 'municipio',
+        'polity_state' => 'estado',
+        'polity_state' => 'estado',
     ],
 ];
