@@ -17,8 +17,7 @@
             </section>
             <section :class="options.currentVal - options.refVal < 0 ? 'text-red-600' : 'text-green-600'"
                 class="w-1/3 flex flex-col items-center text-xl">
-                <span>{{
-                    calcPercentage() }}%</span>
+                <span>{{ calcPercentage() }}%</span>
                 <svg v-if="options.currentVal - options.refVal >= 0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round"
