@@ -3,7 +3,7 @@
         <div class="px-3 md:px-10 py-7">
             <Back />
 
-                <form v-if="total_cash_registers < 2" @submit.prevent="store"
+                <form v-if="total_cash_registers < 1" @submit.prevent="store"
                     class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                     <h1 class="font-bold ml-2 col-span-full">Crear caja</h1>
                     <p class="ml-2 col-span-full text-gray99 text-xs">Puedes crear hasta 4 cajas. Si requieres más puedes adquirirlo por un costo extra. 
@@ -43,7 +43,7 @@
 
                 <section class="mt-10" v-else>
                     <h1 class="font-bold text-5xl text-center mb-5">Lo sentimos :(</h1>
-                    <p class="text-xl text-center">Has alcanzado el límite de cajas (2) de tu plan contratado.</p>
+                    <p class="text-xl text-center">Has alcanzado el límite de cajas (1) de tu plan contratado.</p>
                     <p class="text-xl text-center">Para incrementar el límite de cajas es necesario cambiar tu plan. Para cambiarlo da clic en el siguiente botón.</p>
                     <div class="flex justify-center mt-5">
                         <PrimaryButton @click="$inertia.get(route('profile.show'))" :disabled="form.processing">Cambiar de plan</PrimaryButton>

@@ -7,6 +7,7 @@ use App\Http\Controllers\CashCutController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\CashRegisterMovementController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
@@ -176,6 +177,11 @@ Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByM
 //cards routes----------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('cards', CardController::class)->middleware('auth');
+
+
+//clients routes----------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+Route::resource('clients', ClientController::class)->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------
