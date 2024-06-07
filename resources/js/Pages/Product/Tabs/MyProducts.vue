@@ -317,8 +317,6 @@ export default {
         FileUploader,
     },
     props: {
-        // products: Object,
-        // totalProducts: Number,
     },
     methods: {
         handleCommand(command) {

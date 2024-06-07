@@ -122,7 +122,8 @@
               </p>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="showCashRegisterSelectionModal = true"><i
+                  <el-dropdown-item v-if="$page.props.auth.user.store.plan != 'Plan Básico'"
+                    @click="showCashRegisterSelectionModal = true"><i
                       class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
                   <el-dropdown-item :disabled="!asignedCashRegister"
                     @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
@@ -335,14 +336,17 @@
         </section>
 
         <div class="flex justify-between space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
-          <p v-if="cash_registers.length == 1" class="text-gray99 text-sm">Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))" class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
+
+          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan != 'Plan básico'" class="text-gray99">
+            Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))"
+              class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
+              
           <span v-else></span>
           <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Confirmar</PrimaryButton>
         </div>
       </div>
     </Modal>
     <!-- --------------------------- Modal selección de caja ends ------------------------------------ -->
-
 
     <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
     <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
@@ -369,7 +373,8 @@
                 <i class="fa-solid fa-dollar-sign"></i>
               </template>
             </el-input>
-            <p class="text-red-500 text-xs" v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash">
+            <p class="text-red-500 text-xs"
+              v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash">
               *El monto no debe exceder el dinero actual de tu caja (${{ asignedCashRegister?.current_cash }})
             </p>
             <InputError :message="form.errors.registerAmount" />
@@ -383,7 +388,9 @@
 
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
-            <PrimaryButton :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash)">Confirmar</PrimaryButton>
+            <PrimaryButton
+              :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash)">
+              Confirmar</PrimaryButton>
           </div>
         </form>
       </div>
@@ -509,7 +516,7 @@ import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
-import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems } from '@/dbService.js';
+import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems, initializeProducts } from '@/dbService.js';
 
 export default {
   data() {
@@ -636,19 +643,36 @@ export default {
         this.quantity = 0;
       }
     },
-    updateCurrentStockInIndexedDB() {
-      const products = this.editableTabs[this.editableTabsValue - 1]?.saleProducts.map(item => {
-        const product = {
-          id: item.product.id,
-          name: item.product.name,
-          code: item.product.code,
-          public_price: item.product.public_price,
-          current_stock: item.product.current_stock <= item.quantity ? 0 : item.product.current_stock -= item.quantity,
-          image_url: item.product.image_url,
-        };
-        return product;
-      });
-      addOrUpdateBatchOfItems('products', products);
+    async updateCurrentStockInIndexedDB() {
+      // Obtener la pestaña actual y sus productos
+      const saleProducts = this.editableTabs[this.editableTabsValue - 1]?.saleProducts;
+
+      // Asegurarse de que existan productos en la pestaña
+      if (!saleProducts) {
+        return;
+      }
+
+      // Mapear los productos para actualizar su stock
+      const products = await Promise.all(saleProducts.map(async (item) => {
+        // Obtener productos por código
+        let foundProducts = await getItemByAttributes('products', { code: item.product.code });
+
+        // Verificar si se encontró el producto
+        if (foundProducts.length > 0) {
+          // Actualizar el stock
+          foundProducts[0].current_stock = item.product.current_stock <= item.quantity ? 0 : item.product.current_stock - item.quantity;
+          return foundProducts[0];
+        }
+
+        // Manejar el caso donde no se encuentre el producto
+        return null;
+      }));
+
+      // Filtrar productos que no fueron encontrados
+      const validProducts = products.filter(product => product !== null);
+
+      // Actualizar los productos en IndexedDB
+      await addOrUpdateBatchOfItems('products', validProducts);
     },
     async store() {
       if (this.storeProcessing) return;
@@ -947,6 +971,8 @@ export default {
     },
   },
   mounted() {
+    initializeProducts();
+
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;

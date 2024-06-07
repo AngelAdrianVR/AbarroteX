@@ -144,7 +144,7 @@
             <template #content>
                 <form @submit.prevent="update">
                     <section v-for="(sale, index) in form.sales" :key="index" class="flex items-center space-x-2 mb-1">
-                        <div class="w-1/2">
+                        <div class="w-1/3 md:w-1/2">
                             <InputLabel value="Producto" />
                             <el-select v-model="sale.product_id" filterable placeholder="Selecciona el producto"
                                 no-data-text="No hay opciones registradas"
@@ -154,7 +154,7 @@
                             </el-select>
                             <InputError :message="form.errors[`sales.${index}.product_id`]" />
                         </div>
-                        <div class="w-1/4">
+                        <div class="w-1/3 md:w-1/4">
                             <InputLabel value="Precio por unidad" />
                             <el-input v-model.number="sale.current_price" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
@@ -162,7 +162,7 @@
                             </el-input>
                             <InputError :message="form.errors[`sales.${index}.current_price`]" />
                         </div>
-                        <div class="w-1/4">
+                        <div class="w-1/3 md:w-1/4">
                             <InputLabel value="Cantidad" />
                             <el-input v-model.number="sale.quantity" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"

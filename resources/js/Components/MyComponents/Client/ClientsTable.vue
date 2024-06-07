@@ -97,7 +97,39 @@ props:{
 clients: Array
 },
 methods:{
+    handleCommand(command) {
+        const commandName = command.split('|')[0];
+        const data = command.split('|')[1];
 
+        if (commandName == 'see') {
+            this.$inertia.get(route('expenses.show', data));
+        } else if (commandName == 'print') {
+            this.print(data);
+        } else if (commandName == 'delete') {
+            this.showDeleteConfirm = true;
+            this.itemIdToDelete = data;
+        }
+    },
+    async deleteItem() {
+        try {
+            const response = await axios.delete(route('expenses.destroy', this.itemIdToDelete));
+            if (response.status == 200) {
+                this.$notify({
+                    title: 'Correcto',
+                    message: 'Se han eliminado los gastos del día',
+                    type: 'success',
+                });
+                location.reload();
+            }
+        } catch (error) {
+            console.log(error);
+            this.$notify({
+                title: 'El servidor no pudo procesar la petición',
+                message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
+                type: 'error',
+            });
+        }
+    },
 }
 }
 </script>

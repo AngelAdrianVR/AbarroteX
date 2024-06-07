@@ -279,17 +279,30 @@ class SaleController extends Controller
                     ? GlobalProductStore::find($product_id)
                     : Product::find($product_id);
 
-                $current_product->decrement('current_stock', $product['quantity']);
+                if ($current_product->current_stock <= $product['quantity']) {
+                    $current_product->update(['current_stock' => 0]);
 
-                // notificar si ha llegado al limite de existencias bajas
-                if ($current_product->current_stock <= $current_product->min_stock) {
-                    $title = "Bajo stock";
-                    $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
+                    // notificar si no hay existencias
+                    $title = "Sin stock!";
+                    $description = "Te has quedado sin existencias del producto <span class='text-primary'>$product_name</span>";
                     $url =  $is_global_product
                         ? route('global-product-store.show', $current_product->id)
                         : route('products.show', $current_product->id);
 
                     auth()->user()->notify(new BasicNotification($title, $description, $url));
+                } else {
+                    $current_product->decrement('current_stock', $product['quantity']);
+
+                    // notificar si ha llegado al limite de existencias bajas
+                    if ($current_product->current_stock <= $current_product->min_stock) {
+                        $title = "Bajo stock!";
+                        $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
+                        $url =  $is_global_product
+                            ? route('global-product-store.show', $current_product->id)
+                            : route('products.show', $current_product->id);
+
+                        auth()->user()->notify(new BasicNotification($title, $description, $url));
+                    }
                 }
             }
         }
@@ -468,47 +481,4 @@ class SaleController extends Controller
             }
         }
     }
-
-    // public function updateGroupSale(Request $request)
-    // {
-    //     $messages = [
-    //         'sales.*.product_id.required' => 'llenar campo',
-    //         'sales.*.quantity.required' => 'Indicar cantidad',
-    //         'sales.*.current_price.required' => 'Indicar precio',
-    //     ];
-
-    //     $request->validate([
-    //         'sales.*.product_id' => 'required|string',
-    //         'sales.*.quantity' => 'required|numeric|min:1',
-    //         'sales.*.current_price' => 'required|numeric|min:0',
-    //     ], $messages);
-
-    //     $sales = Sale::where([
-    //         'store_id' => auth()->user()->store_id,
-    //         'group_id' => $request->folio,
-    //     ])->get();
-
-    //     $sales_in_request = collect($request->sales);
-
-    //     $sales->each(function ($sale) use ($sales_in_request) {
-    //         // buscar venta que corresponda
-    //         $sale_updated = $sales_in_request->firstWhere('id', $sale->id);
-
-    //         // actualizar venta
-    //         if ($sale_updated) {
-    //             $current_product_type = explode('_', $sale_updated['product_id'])[0];
-    //             $current_product_id = explode('_', $sale_updated['product_id'])[1];
-    //             $current_product_name = $current_product_type == 'global'
-    //                 ? GlobalProductStore::find($current_product_id)->globalProduct->name
-    //                 : Product::find($current_product_id)->name;
-
-    //             $sale->update([
-    //                 'product_id' => $current_product_id, // quitar el prefijo al id del producto
-    //                 'product_name' => $current_product_name,
-    //                 'quantity' => $sale_updated['quantity'],
-    //                 'current_price' => $sale_updated['current_price'],
-    //             ]);
-    //         }
-    //     });
-    // }
 }

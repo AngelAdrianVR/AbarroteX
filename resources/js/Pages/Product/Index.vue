@@ -2,8 +2,8 @@
     <AppLayout title="Productos">
         <div class="px-2 lg:px-10 py-7">
             <!-- tabs -->
-            <div  v-if="canTransfer" class="flex justify-center">
-                <ToggleButton @update="handleToggle" :labels="['Mis productos', 'Catálogo base']"
+            <div v-show="canTransfer" class="flex justify-center">
+                <ToggleButton ref="togglebutton" @update="handleToggle" :labels="['Mis productos', 'Catálogo base']"
                     class="w-3/4 md:w-[45%] lg:w-[35%] xl:w-[20%]" />
             </div>
             <!-- <div v-if="canTransfer" class="flex items-center justify-center text-sm">
@@ -14,7 +14,7 @@
             </div> -->
 
             <section v-if="activeTab === 'Mis productos'">
-                <MyProducts :products="products" :totalProducts="total_products" />
+                <MyProducts />
             </section>
             <section v-else>
                 <BaseCatalog />
@@ -45,27 +45,35 @@ export default {
         BaseCatalog,
     },
     props: {
-        products: Object,
-        total_products: Number,
     },
     methods: {
         handleToggle(active) {
             this.activeTab = active;
+
+            const tab = active == 'Mis productos' ? 'myproducts' : 'basecatalog';
+            this.updateURL(tab);
+        },
+        updateURL(tab) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tab);
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
         },
     },
     mounted() {
-        // // Obtener la URL actual
-        // const currentURL = new URL(window.location.href);
-        // // Extraer el valor de 'currentTab' de los parámetros de búsqueda
-        // const currentTabFromURL = currentURL.searchParams.get('page');
+        // Obtener la URL actual
+        const currentURL = new URL(window.location.href);
+        // Extraer el valor de 'activeTab' de los parámetros de búsqueda
+        const activeTabFromURL = currentURL.searchParams.get('tab');
+        if (activeTabFromURL) {
+            if (activeTabFromURL == 'basecatalog') {
+                const tab = 'Catálogo base';
+                this.$refs.togglebutton.toggle();
+                // this.activeTab = tab;
+            }
+        }
 
-        // if (currentTabFromURL) {
-        //     this.currentPage = currentTabFromURL;
-        //     this.fetchAllItemsForCurrentPage();
-        // }
-
-        // // resetear variable de local storage a false
-        // localStorage.setItem('pendentProcess', false);
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
 }
 </script>
