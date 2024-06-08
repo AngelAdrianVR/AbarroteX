@@ -58,7 +58,7 @@
                         <!-- Logo de la tienda -->
                         <figure class="flex items-center space-x-2">
                             <img v-if="logo?.media?.length" class="h-10 md:h-12" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
-                            <p class="tex-sm text-gray99">{{ store?.name }}</p>
+                            <p v-else class="tex-sm text-gray99">{{ store?.name }}</p>
                         </figure>
                         <!-- whatsapp button computed -->
                         <div v-if="store?.online_store_properties?.whatsapp" class="hidden md:flex flex-col items-center">

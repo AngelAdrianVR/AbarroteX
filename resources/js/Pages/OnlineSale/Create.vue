@@ -6,7 +6,7 @@
             <section class="md:grid grid-cols-2 gap-x-9 my-8 lg:mx-16">
                 <!-- Formulario -->
                 <form @submit.prevent="store">
-                    <h1 class="font-bold ml-2 col-span-full">Contacto</h1>
+                    <h1 class="font-bold ml-2">Contacto</h1>
 
                     <div class="mt-3">
                         <InputLabel value="Nombre*" class="ml-3 mb-1" />
@@ -23,13 +23,13 @@
                         <InputError :message="form.errors.phone" />
                     </div>
 
-                    <div class="mt-3">
+                    <!-- <div class="mt-3">
                         <InputLabel value="Correo electrónico (opcional)" class="ml-3 mb-1" />
                         <el-input v-model="form.email" placeholder="Escribe tu correo electrónico" :maxlength="255" clearable />
                         <InputError :message="form.errors.email" />
-                    </div>
+                    </div> -->
 
-                    <h1 class="font-bold my-3 ml-3 col-span-full">Dirección</h1>
+                    <h1 class="font-bold my-3 ml-3">Dirección</h1>
 
                     <div class="mt-3">
                         <InputLabel value="Calle*" class="ml-3 mb-1" />
@@ -41,6 +41,23 @@
                         <InputLabel value="Colonia*" class="ml-3 mb-1" />
                         <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
                         <InputError :message="form.errors.suburb" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-7 mt-3">
+                        <div>
+                            <InputLabel class="mb-1 ml-2" value="Código postal" />
+                            <el-input v-model="form.postal_code"
+                            :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                            :parser="(value) => value.replace(/\D/g, '')" maxlength="6" clearable
+                            placeholder="Escribe el código postal" />
+                            <InputError :message="form.errors.postal_code" />
+                        </div>
+
+                        <div>
+                            <InputLabel value="Estado*" class="ml-3 mb-1" />
+                            <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan" :maxlength="255" clearable />
+                            <InputError :message="form.errors.polity_state" />
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-x-7 mt-3">
@@ -69,7 +86,7 @@
                             Una vez que confirmes tu pedido, nos pondremos en contacto contigo a través de WhatsApp <i class="fa-brands fa-whatsapp text-sm text-green-500"></i> al número proporcionado para coordinar
                             todos los detalles de la entrega y el pago.
                         </p>
-                        <p class="mt-4 text-gray99 text-sm">Condiciones de envío: {{ store?.online_store_properties?.delivery_conditions }}</p>
+                        <p v-if="store?.online_store_properties?.delivery_conditions" class="mt-4 text-primary text-sm">Condiciones de envío: <strong>{{ store?.online_store_properties?.delivery_conditions }}</strong></p>
                     </div>
                 </form>
 
@@ -145,13 +162,18 @@ import axios from 'axios';
 export default {
 data() {
     const form = useForm({
-        name: null, //contacto
-        phone: null, //contacto
-        email: null, //contacto
-        suburb: null, //Dirección / colonia
-        street: null, //Dirección / calle
-        ext_number: null, //Dirección
-        int_number: null, //Dirección
+        // Contacto -------------
+        name: null,
+        phone: null,
+        email: null,
+        // Domicilio --------------
+        suburb: null,
+        street: null,
+        ext_number: null,
+        int_number: null,
+        postal_code: null,
+        polity_state: null,
+        // Envío -----------------------
         products: null, //productos
         delivery_price: 0, //precio de envío
         total: null, //cantidad total de venta $

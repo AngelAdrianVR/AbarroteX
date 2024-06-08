@@ -24,7 +24,8 @@ return new class extends Migration
             $table->string('int_number')->nullable();
             $table->string('town')->nullable(); //Municipio
             $table->string('polity_state')->nullable(); //Estado
-            $table->string('address_references')->nullable();
+            $table->string('postal_code')->nullable(); //codigo postal
+            $table->string('address_references')->nullable(); //referencias de la vivienda
             //Información extra -------------------
             $table->string('payment_method')->default('Efectivo');
             $table->string('status')->default('Pendiente'); // estatus del pedido 

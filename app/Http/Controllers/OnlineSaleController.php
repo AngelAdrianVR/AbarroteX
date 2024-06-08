@@ -27,19 +27,48 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders', 'cash_registers', 'total_online_orders'));
     }
 
+    // public function clientIndex($store_id)
+    // {   
+    //     $store = Store::find($store_id);
+    //     $all_products = $this->getAllProducts($store_id); //locales y transferidos 
+    //     $total_products = $all_products->count(); //Número de productos locales y transferidos 
 
-    public function clientIndex($store_id)
-    {   
+    //     //tomar solo primeros 12 productos
+    //     $products = $all_products->take(12);
+
+    //     $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
+
+    //     // return $products;
+    //     return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id', 'banners'));
+    // }
+
+    public function clientIndex($encoded_store_id)
+    {
+        // Decodificar el ID de la tienda
+        $store_id = base64_decode($encoded_store_id);
+
+        $store_id = intval($store_id);
+
+        // Buscar la tienda
         $store = Store::find($store_id);
-        $all_products = $this->getAllProducts($store_id); //locales y transferidos 
-        $total_products = $all_products->count(); //Número de productos locales y transferidos 
 
-        //tomar solo primeros 12 productos
+        if (!$store) {
+            return inertia('Error/404'); // Manejar caso de tienda no encontrada
+        }
+
+        // Obtener todos los productos (locales y transferidos)
+        $all_products = $this->getAllProducts($store_id);
+
+        // Contar el total de productos
+        $total_products = $all_products->count();
+
+        // Tomar solo los primeros 12 productos
         $products = $all_products->take(12);
 
+        // Obtener los banners
         $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
 
-        // return $products;
+        // Retornar la vista con los datos
         return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id', 'banners'));
     }
 
@@ -66,6 +95,8 @@ class OnlineSaleController extends Controller
             'street' => 'required|string|max:255',
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
+            'postal_code' => 'nullable|string|max:6',
+            'polity_state' => 'required|string|max:100',
             'address_references' => 'nullable|string|min:1|max:255',
             'products' => 'required|array|min:1',
         ]);
@@ -121,6 +152,8 @@ class OnlineSaleController extends Controller
             'street' => 'required|string|max:255',
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
+            'postal_code' => 'nullable|string|max:6',
+            'polity_state' => 'required|string|max:100',
             'address_references' => 'nullable|string|min:1|max:255',
             'products' => 'required|array|min:1',
         ]);
