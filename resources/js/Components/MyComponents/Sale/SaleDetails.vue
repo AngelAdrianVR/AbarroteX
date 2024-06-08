@@ -1,6 +1,6 @@
 <template>
-    <article class="border border-grayD9 *:px-1 *:md:px-5 *:py-1">
-        <div class="flex items-center justify-between border-b border-grayD9 text-end">
+    <article class="border border-grayD9">
+        <header class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1">
             <div class="flex items-center space-x-3">
                 <p class="text-gray99">Folio: <span class="text-gray37">{{ folio }}</span></p>
                 <span class="text-gray99">•</span>
@@ -35,12 +35,20 @@
                                 </svg>
                                 <span class="text-xs">Reembolso/Cancelar</span>
                             </el-dropdown-item>
+                            <el-dropdown-item v-if="canInstallment" :command="'installment|' + folio">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                                </svg>
+                                <span class="text-xs">Ver abonos</span>
+                            </el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
             </div>
-        </div>
-        <div class="border-b border-grayD9">
+        </header>
+        <main class="border-b border-grayD9 px-1 md:px-5 py-1">
             <Accordion :active="false" :id="parseInt(folio)" position="center" title="Ver detalles">
                 <template #trigger>
                     <button class="text-primary">
@@ -78,21 +86,15 @@
                     </table>
                 </template>
             </Accordion>
-        </div>
-        <div class="text-end">
-            <!--*** descomentar cuado se guarden los descuentos sobre la venta total ***-->
-            <!-- <div class="text-gray99 flex items-center justify-end space-x-2 *:w-12 px-3">
-                            <span>Subtotal:</span>
-                            <span class="text-gray37">$</span>
-                            <span class="text-gray37">{{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span>
-                        </div>
-                        <div class="text-gray99 flex items-center justify-end space-x-2 *:w-12 px-3">
-                            <span>Descuento:</span>
-                            <span class="text-gray37">$</span>
-                            <span class="text-gray37">21.50</span>
-                        </div> -->
+        </main>
+        <footer class="text-end md:flex justify-between">
+            <div
+                class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
+                <span class="text-gray99">Fecha de vencimiento:</span>
+                <span class="text-gray37">08 jun 24</span>
+            </div>
             <div :class="groupedSales.some(item => item?.refunded_at) ? 'text-[#8C3DE4]' : 'text-gray37'"
-                class="font-black flex items-center justify-end space-x-2 px-2">
+                class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
                 <el-tooltip v-if="groupedSales.some(item => item?.refunded_at)" placement="top">
                     <template #content>
                         <p>El reembolso de realizó a las {{ formatDateHour(groupedSales[0].refunded_at) }}</p>
@@ -100,12 +102,30 @@
                     <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2">
                         Reembolsado</p>
                 </el-tooltip>
-                <span class="text-start w-12">Total:</span>
-                <span class="w-12">$</span>
-                <span class="w-12">{{ calcTotal(groupedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }}</span>
+                <div class="flex justify-end">
+                    <span class="text-start w-32">Total de la venta:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ calcTotal(groupedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div class="flex justify-end">
+                    <span class="text-start w-32">Total abonado:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ calcTotal(groupedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div class="flex bg-[#F2FEA8] rounded-[5px] py-1">
+                    <span class="w-24 text-start text-[#794A04]">Pendiente</span>
+                    <span class="text-start w-32">Deuda restante:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ calcTotal(groupedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
             </div>
-        </div>
+        </footer>
     </article>
 </template>
 
@@ -119,6 +139,7 @@ export default {
     data() {
         return {
             // Permisos de rol actual
+            canInstallment: this.$page.props.auth.user.rol == 'Administrador',
             canRefund: this.$page.props.auth.user.rol == 'Administrador',
             canEdit: this.$page.props.auth.user.rol == 'Administrador',
         };

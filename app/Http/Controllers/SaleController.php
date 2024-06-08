@@ -13,7 +13,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class SaleController extends Controller
 {
@@ -71,21 +70,7 @@ class SaleController extends Controller
             ->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $sales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) {
-            // Calcular totales
-            $totalQuantity = $sales->sum('quantity');
-            $totalSale = $sales->sum(function ($productSale) {
-                return $productSale['quantity'] * $productSale['current_price'];
-            });
-
-            return [
-                'total_quantity' => $totalQuantity,
-                'total_sale' => $totalSale,
-                'sales' => $sales->values(), // Convertir el mapa en un arreglo indexado
-            ];
-        });
+        $day_sales = $this->getGroupedSales($sales, true);
 
         return inertia('Sale/Show', compact('day_sales'));
     }
@@ -161,21 +146,7 @@ class SaleController extends Controller
         $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $sales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) {
-            // Calcular totales
-            $totalQuantity = $sales->sum('quantity');
-            $totalSale = $sales->sum(function ($productSale) {
-                return $productSale['quantity'] * $productSale['current_price'];
-            });
-
-            return [
-                'total_quantity' => $totalQuantity,
-                'total_sale' => $totalSale,
-                'sales' => $sales->values(), // Convertir el mapa en un arreglo indexado
-            ];
-        });
+        $day_sales = $this->getGroupedSales($sales, true);
 
         // return $day_sales;
         return inertia('Sale/PrintTicket', compact('day_sales'));
@@ -431,11 +402,11 @@ class SaleController extends Controller
     }
 
     // private
-    private function getGroupedSales($sales)
+    private function getGroupedSales($sales, $returnSales = false)
     {
         return $sales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) {
+        })->map(function ($sales) use ($returnSales) {
             $totalQuantity = $sales->sum('quantity');
             $totalSale = $sales->sum(function ($sale) {
                 return $sale->quantity * $sale->current_price;
@@ -446,6 +417,7 @@ class SaleController extends Controller
                 'total_quantity' => $totalQuantity,
                 'total_sale' => $totalSale,
                 'unique_folios' => $uniqueFolios,
+                'sales' => $returnSales ? $sales->values() : [],
             ];
         });
     }

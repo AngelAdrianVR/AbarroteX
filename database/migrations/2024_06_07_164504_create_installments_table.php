@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('credit_sale_payments', function (Blueprint $table) {
+        Schema::create('installments', function (Blueprint $table) {
             $table->id();
             $table->unsignedFloat('amount')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('sale_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('group_id');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('credit_sale_payments');
+        Schema::dropIfExists('installments');
     }
 };
