@@ -148,17 +148,19 @@ export default {
             }
         },
         handleEdit(product) {
+            const encodedId = btoa(product.id.toString());
             if (product.global_product_id) {
-                this.$inertia.get(route('global-product-store.edit', product.id));
+                this.$inertia.get(route('global-product-store.edit', encodedId));
             } else {
-                this.$inertia.get(route('products.edit', product.id))
+                this.$inertia.get(route('products.edit', encodedId))
             }
         },
         handleShow(product) {
+            const encodedId = btoa(product.id.toString());
             if (product.global_product_id) {
-                this.$inertia.get(route('global-product-store.show', product.id));
+                this.$inertia.get(route('global-product-store.show', encodedId));
             } else {
-                this.$inertia.get(route('products.show', product.id))
+                this.$inertia.get(route('products.show', encodedId))
             }
         },
         async deleteItem() {

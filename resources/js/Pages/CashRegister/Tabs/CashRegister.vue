@@ -132,13 +132,13 @@
             <div class="flex justify-center space-x-4 my-2">
               <el-tooltip content="Cancelar" placement="left">
                 <button @click="edit_max_cash = false;"
-                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
+                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150 border border-grayD9">
                   <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
                 </button>
               </el-tooltip>
               <el-tooltip content="Guardar" placement="right">
                 <button @click="update"
-                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
+                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150 border border-grayD9"><i
                     class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
               </el-tooltip>
             </div>
@@ -161,13 +161,13 @@
             <div class="flex justify-center space-x-4 my-2">
               <el-tooltip content="Cancelar" placement="left">
                 <button @click="edit_cash_register_name = false;"
-                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
+                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150 border border-grayD9">
                   <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
                 </button>
               </el-tooltip>
               <el-tooltip content="Guardar" placement="right">
                 <button @click="update"
-                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
+                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150 border border-grayD9"><i
                     class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
               </el-tooltip>
             </div>

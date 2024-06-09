@@ -19,7 +19,7 @@
                         
                         <div v-else>
                             <el-empty description="No hay productos en tu carrito" />
-                            <p @click="$inertia.get(route('online-sales.client-index', storeId ?? 0))" class="text-primary text-center cursor-pointer">Seguir comprando</p>
+                            <p @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))" class="text-primary text-center cursor-pointer">Seguir comprando</p>
                         </div>
                     </div>
 
@@ -53,7 +53,7 @@
 
                             <div class="text-center pb-5">
                                 <PrimaryButton @click="$inertia.get(route('online-sales.create'))" class="!px-8">Finalizar pedido</PrimaryButton>
-                                <p @click="$inertia.get(route('online-sales.client-index', storeId ?? 0))" class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
+                                <p @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))" class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
                             </div>
                         </section>
                     </div>
@@ -76,6 +76,7 @@ data() {
         cart: [],
         storeId: null, //se recupera el id de la tienda desde el localstorage
         store: {}, //se recupera la información de la tienda para utilizar el costo de envío.
+        encodedIdStore: null, //id codificado de la tienda
 
     }
 },
@@ -108,6 +109,10 @@ methods:{
             const response = await axios.get(route('stores.fetch-store-info', this.storeId));
             if ( response.status === 200 ) {
                 this.store = response.data.store;
+
+                //decodifica el id de la tienda
+                const encodedId = btoa(this.storeId.toString());
+                this.encodedIdStore = encodedId;
             }
         } catch (error) {
             console.log(error);

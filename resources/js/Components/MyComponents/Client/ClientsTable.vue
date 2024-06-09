@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('clients.show', client.id))"
+                <tr @click="$inertia.visit(route('clients.show', encodeId(client.id)))"
                     v-for="(client, index) in clients" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ client.name }}</td>
@@ -28,7 +28,7 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item :command="'see|' + client.id">
+                                    <el-dropdown-item :command="'see|' + encodeId(client.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -38,7 +38,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'edit|' + client.id">
+                                    <el-dropdown-item :command="'edit|' + encodeId(client.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -144,6 +144,13 @@ methods:{
             });
         }
     },
+    encodeId(id) {
+        const encodedId = btoa(id.toString());
+        return encodedId;
+    },
+},
+mounted() {
+    
 }
 }
 </script>

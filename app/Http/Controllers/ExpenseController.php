@@ -90,9 +90,12 @@ class ExpenseController extends Controller
         return to_route('expenses.index');
     }
 
-    public function show($expense_id)
+    public function show($encoded_expense_id)
     {
-        $expense = Expense::find($expense_id);
+        // Decodificar el ID
+        $decoded_expense_id = base64_decode($encoded_expense_id);
+
+        $expense = Expense::find($decoded_expense_id);
 
         // Parsear la fecha recibida para obtener solo la parte de la fecha
         $date = Carbon::parse($expense->created_at)->toDateString();

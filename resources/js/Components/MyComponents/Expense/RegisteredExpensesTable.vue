@@ -9,7 +9,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('expenses.show', expense.expenses[0]?.id))"
+                <tr @click="handleShow(expense.expenses[0].id)"
                     v-for="(expense, index) in expenses" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ formatDate(index) }}</td>
@@ -23,7 +23,7 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item :command="'see|' + expense.expenses[0]?.id">
+                                    <el-dropdown-item :command="'see|' + expense.expenses[0].id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -109,7 +109,7 @@ export default {
             const data = command.split('|')[1];
 
             if (commandName == 'see') {
-                this.$inertia.get(route('expenses.show', data));
+                this.handleShow(data);
             } else if (commandName == 'print') {
                 this.print(data);
             } else if (commandName == 'delete') {
@@ -156,9 +156,13 @@ export default {
             const [day, month, year] = dateString.split('-');
             return `${day}-${months[month]}-${year}`;
         },
+        handleShow(expenseId) {
+            const encodedId = btoa(expenseId.toString());
+            this.$inertia.visit(route('expenses.show', encodedId))
+        },
         print(expenseId) {
             window.open(route('expenses.print-expenses', expenseId), '_blank');
         }
-    }
+    },
 }
 </script>
