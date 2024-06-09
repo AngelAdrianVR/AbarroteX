@@ -57,11 +57,9 @@
                             <div class="w-1/4 space-y-1">
                                 <!-- <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
                                     cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
-                                <p class="text-gray99"><span class="text-gray99 mr-3"><i
-                                    class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                                <p class="text-gray99 pb-5"><span class="text-gray99 mr-3"><i
-                                    class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                <p class="text-gray99  ml-[18px] pb-5"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                                 <div v-if="loadingMovements">
                                     <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
@@ -70,7 +68,7 @@
                                 <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in cashCutMovements[index]"
 
                                     :key="cashRegisterMovement" class="text-gray99">
-                                    <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
+                                    <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus'"
                                         class="fa-solid text-xs px-1"></i>
                                     <span class="text-gray99 mr-3">$</span>{{
                                         cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}

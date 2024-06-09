@@ -76,19 +76,17 @@
             <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
               (cash_register.started_cash + cutForm.totalSaleForCashCut +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-            <p class="text-gray99"><span class="text-gray99 mr-3"><i
-                  class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+            <p class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                     cash_register.started_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
             <div v-if="cutLoading">
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </div>
 
-            <p v-else class="text-gray99 pb-5"><span class="text-gray99 mr-3"><i
-                  class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+            <p v-else class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                     cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
 
             <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
-              <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
+              <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus'"
                 class="fa-solid text-xs px-1"></i>
               <span class="text-gray99 mr-3">$</span>{{
                 cashRegisterMovement.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
