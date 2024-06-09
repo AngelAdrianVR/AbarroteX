@@ -8,12 +8,13 @@
                 <div class="flex items-center space-x-2">
                     <p>Estatus:</p>
                     <span v-html="getStatusIcon(online_sale.status)"></span>
-                    <el-select @change="updateStatus" v-model="status" class="!w-40 md:!w-48" filterable required placeholder="Seleccione"
+                    <el-select :disabled="status == 'Entregado' || status == 'Cancelado'" @change="handleUpdateStatus" v-model="status" class="!w-40 md:!w-48" filterable required placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="status in statuses" :key="status" :value="status" 
                         :label="status" />
                     </el-select>
-                    <el-dropdown :disabled="loadingProducts" split-button type="primary" @click="editOnlineOrderModal = true">
+                    <el-dropdown :disabled="loadingProducts || status == 'Entregado' || status == 'Cancelado'" split-button type="primary"
+                        @click="editOnlineOrderModal = true">
                         Editar
                         <template #dropdown>
                         <el-dropdown-menu>
@@ -89,131 +90,153 @@
             </article>
         </section>
 
+        <!-- Confirmación de eliminación -->
         <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
-        <template #title>
-            <h1>Eliminar pedido</h1>
-        </template>
-        <template #content>
-            <p>
-                Se eliminará el pedido seleccionado, esto es un proceso irreversible. ¿Continuar
-                de todas formas?
-            </p>
-        </template>
-        <template #footer>
-            <div class="flex items-center space-x-1">
-                <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
-                <DangerButton @click="deleteOnlineOrder">Eliminar</DangerButton>
+            <template #title>
+                <h1>Eliminar pedido</h1>
+            </template>
+            <template #content>
+                <p>
+                    Se eliminará el pedido seleccionado, esto es un proceso irreversible. ¿Continuar
+                    de todas formas?
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="showDeleteConfirm = false">Cancelar</CancelButton>
+                    <DangerButton @click="deleteOnlineOrder">Eliminar</DangerButton>
+                </div>
+            </template>
+        </ConfirmationModal>
+        <!-- Confirmación de eliminación -->
+
+        <!-- Confirmación de Actualización de estatus -->
+        <ConfirmationModal :show="showUpdateStatusConfirm" @close="showUpdateStatusConfirm = false">
+            <template #title>
+                <h1>Cambiar estatus de pedido</h1>
+            </template>
+            <template #content>
+                <p>
+                    Se cambiará el estatus del pedido seleccionado, esto es un proceso irreversible. ¿Continuar
+                    de todas formas?
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="showUpdateStatusConfirm = false; status = online_sale.status">Cancelar</CancelButton>
+                    <DangerButton @click="updateStatus">Confirmar</DangerButton>
+                </div>
+            </template>
+        </ConfirmationModal>
+        <!-- Confirmación de Actualización de estatus -->
+
+        <!-- -------------- Modal edición de orden starts----------------------- -->
+        <Modal :show="editOnlineOrderModal" @close="editOnlineOrderModal = false; form.reset">
+            <div class="py-4 px-7 relative text-sm">
+            <i @click="editOnlineOrderModal = false"
+                class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+
+            <form class="mt-5 mb-2" @submit.prevent="updateOnlineSale">
+                <h2 class="font-bold mb-4">Editar pedido</h2>
+                <p>Datos del cliente</p>
+
+                <div class="md:grid grid-cols-2 gap-y-2 gap-x-7 space-y-2 md:space-y-0 mt-3">
+                    <div>
+                        <InputLabel value="Nombre del cliente*" class="ml-3 mb-1" />
+                        <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
+                        <InputError :message="form.errors.name" />
+                    </div>
+
+                    <div>
+                        <InputLabel class="mb-1 ml-2" value="Teléfono*" />
+                        <el-input v-model="form.phone"
+                        :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                        :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+                        placeholder="Escribe el número de teléfono del cliente" />
+                        <InputError :message="form.errors.phone" />
+                    </div>
+
+                    <h1 class="font-bold my-1 ml-3 col-span-full">Dirección</h1>
+
+                    <div>
+                        <InputLabel value="Calle*" class="ml-3 mb-1" />
+                        <el-input v-model="form.street" placeholder="Escribe tu calle" :maxlength="255" clearable />
+                        <InputError :message="form.errors.street" />
+                    </div>
+
+                    <div>
+                        <InputLabel value="Colonia*" class="ml-3 mb-1" />
+                        <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
+                        <InputError :message="form.errors.suburb" />
+                    </div>
+
+                    <div>
+                        <InputLabel class="mb-1 ml-2" value="Código postal" />
+                        <el-input v-model="form.postal_code"
+                        :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                        :parser="(value) => value.replace(/\D/g, '')" maxlength="6" clearable
+                        placeholder="Escribe el código postal" />
+                        <InputError :message="form.errors.postal_code" />
+                    </div>
+
+                    <div>
+                        <InputLabel value="Estado*" class="ml-3 mb-1" />
+                        <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan" :maxlength="255" clearable />
+                        <InputError :message="form.errors.polity_state" />
+                    </div>
+
+                    <div>
+                        <InputLabel value="Número exterior*" class="ml-3 mb-1" />
+                        <el-input v-model="form.ext_number" placeholder="Número de tu casa" :maxlength="255" clearable />
+                        <InputError :message="form.errors.ext_number" />
+                    </div>
+
+                    <div>
+                        <InputLabel value="Número Interior" class="ml-3 mb-1" />
+                        <el-input v-model="form.int_number" placeholder="Número de edificio, coto, fraccionamiento" :maxlength="255" clearable />
+                        <InputError :message="form.errors.int_number" />
+                    </div>
+                </div>
+
+                <p class="font-bold my-5">Detalles del pedido</p>
+
+                <section class="max-h-56 overflow-auto">
+                    <div class="space-y-3">
+                        <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id" :init_state="item"
+                        @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
+                    </div>
+                    <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
+                    productos </p>
+                </section>
+                <div class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm">
+                    <button class="text-primary text-sm self-start" type="button" @click="addNewItem">
+                        <i class="fa-solid fa-plus"></i>
+                        Agregar producto
+                    </button>
+                    <div class="flex flex-col mr-7 items-end">
+                        <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                        <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                        <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total + form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <InputLabel value="Método de pago" class="ml-3 mb-1" />
+                    <el-select v-model="form.payment_method" class="!w-full" filterable required clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="payment_method in payment_methods" :key="payment_method" :value="payment_method" 
+                        :label="payment_method" />
+                    </el-select>
+                </div>
+
+                <div class="flex justify-end space-x-1 pt-5 pb-1 py-3">
+                <CancelButton @click="editOnlineOrderModal = false">Cancelar</CancelButton>
+                <PrimaryButton :disabled="form.processing">Guardar cambios</PrimaryButton>
+                </div>
+            </form>
             </div>
-        </template>
-    </ConfirmationModal>
-
-    <!-- -------------- Modal edición de orden starts----------------------- -->
-    <Modal :show="editOnlineOrderModal" @close="editOnlineOrderModal = false; form.reset">
-        <div class="py-4 px-7 relative text-sm">
-        <i @click="editOnlineOrderModal = false"
-            class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
-
-        <form class="mt-5 mb-2" @submit.prevent="updateOnlineSale">
-            <h2 class="font-bold mb-4">Editar pedido</h2>
-            <p>Datos del cliente</p>
-
-            <div class="md:grid grid-cols-2 gap-y-2 gap-x-7 space-y-2 md:space-y-0 mt-3">
-                <div>
-                    <InputLabel value="Nombre del cliente*" class="ml-3 mb-1" />
-                    <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
-                    <InputError :message="form.errors.name" />
-                </div>
-
-                <div>
-                    <InputLabel class="mb-1 ml-2" value="Teléfono*" />
-                    <el-input v-model="form.phone"
-                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
-                    :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
-                    placeholder="Escribe el número de teléfono del cliente" />
-                    <InputError :message="form.errors.phone" />
-                </div>
-
-                <h1 class="font-bold my-1 ml-3 col-span-full">Dirección</h1>
-
-                <div>
-                    <InputLabel value="Calle*" class="ml-3 mb-1" />
-                    <el-input v-model="form.street" placeholder="Escribe tu calle" :maxlength="255" clearable />
-                    <InputError :message="form.errors.street" />
-                </div>
-
-                <div>
-                    <InputLabel value="Colonia*" class="ml-3 mb-1" />
-                    <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
-                    <InputError :message="form.errors.suburb" />
-                </div>
-
-                <div>
-                    <InputLabel class="mb-1 ml-2" value="Código postal" />
-                    <el-input v-model="form.postal_code"
-                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
-                    :parser="(value) => value.replace(/\D/g, '')" maxlength="6" clearable
-                    placeholder="Escribe el código postal" />
-                    <InputError :message="form.errors.postal_code" />
-                </div>
-
-                <div>
-                    <InputLabel value="Estado*" class="ml-3 mb-1" />
-                    <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan" :maxlength="255" clearable />
-                    <InputError :message="form.errors.polity_state" />
-                </div>
-
-                <div>
-                    <InputLabel value="Número exterior*" class="ml-3 mb-1" />
-                    <el-input v-model="form.ext_number" placeholder="Número de tu casa" :maxlength="255" clearable />
-                    <InputError :message="form.errors.ext_number" />
-                </div>
-
-                <div>
-                    <InputLabel value="Número Interior" class="ml-3 mb-1" />
-                    <el-input v-model="form.int_number" placeholder="Número de edificio, coto, fraccionamiento" :maxlength="255" clearable />
-                    <InputError :message="form.errors.int_number" />
-                </div>
-            </div>
-
-            <p class="font-bold my-5">Detalles del pedido</p>
-
-            <section class="max-h-56 overflow-auto">
-                <div class="space-y-3">
-                    <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id" :init_state="item"
-                    @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
-                </div>
-                <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
-                productos </p>
-            </section>
-            <div class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm">
-                <button class="text-primary text-sm self-start" type="button" @click="addNewItem">
-                    <i class="fa-solid fa-plus"></i>
-                    Agregar producto
-                </button>
-                <div class="flex flex-col mr-7 items-end">
-                    <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total + form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                </div>
-            </div>
-
-            <div class="mt-3">
-                <InputLabel value="Método de pago" class="ml-3 mb-1" />
-                <el-select v-model="form.payment_method" class="!w-full" filterable required clearable placeholder="Seleccione"
-                    no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                    <el-option v-for="payment_method in payment_methods" :key="payment_method" :value="payment_method" 
-                    :label="payment_method" />
-                </el-select>
-            </div>
-
-            <div class="flex justify-end space-x-1 pt-5 pb-1 py-3">
-            <CancelButton @click="editOnlineOrderModal = false">Cancelar</CancelButton>
-            <PrimaryButton :disabled="form.processing">Guardar cambios</PrimaryButton>
-            </div>
-        </form>
-        </div>
-    </Modal>
-    <!-- --------------------------- Modal edición de orden ends ------------------------------------ -->
+        </Modal>
+        <!-- --------------------------- Modal edición de orden ends ------------------------------------ -->
     </AppLayout>
 </template>
 
@@ -254,7 +277,8 @@ data() {
         form,
         loadingProducts: false,
         status: this.online_sale.status,
-        statuses: ['Pendiente', 'Procesando', 'Entregado', 'Cancelado'],
+        statuses: ['Procesando', 'Entregado', 'Cancelado'],
+        showUpdateStatusConfirm: false, //modal de confirmación de cambio de estatus (Entregado y cancelado)
         showDeleteConfirm: false, //modal de confirmación de eliminación
         editOnlineOrderModal: false, //modal de ediciónde orden
         products: null, //se obtienne todos los productos de la tienda
@@ -294,6 +318,13 @@ methods:{
                 this.editOnlineOrderModal = false;
             },
         });
+    },
+    handleUpdateStatus() {
+        if ( this.status == 'Entregado' || this.status == 'Cancelado' ) {
+            this.showUpdateStatusConfirm = true;
+        } else {
+            this.updateStatus();
+        }
     },
     addNewItem() {
       this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, is_local:null, quantity: null });

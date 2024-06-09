@@ -47,7 +47,7 @@
         <p v-if="localOrders?.length" class="text-gray66 text-[11px] mb-3">{{ localOrders?.length }} de {{ totalOnlineOrders }}
             elementos
         </p>
-        <div class="overflow-auto h-[465px] border-b py-3">
+        <div class="overflow-auto h-[465px] py-3">
             <table v-if="localOrders?.length" class="w-full">
                 <thead>
                     <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
@@ -81,19 +81,19 @@
                                 </button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
-                                        <el-dropdown-item :command="'processing|' + online_order.id">
+                                        <el-dropdown-item v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado' && online_order.status != 'Procesando'" :command="'processing|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2 text-blue-500">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                             </svg>
                                             <span class="text-xs">Procesando</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'delivered|' + online_order.id">
+                                        <el-dropdown-item v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado'" :command="'delivered|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2 text-green-500">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                             </svg>
                                             <span class="text-xs">Entregado</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'cancel|' + online_order.id">
+                                        <el-dropdown-item v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado'" :command="'cancel|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2 text-red-500">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                                             </svg>
@@ -113,14 +113,6 @@
                                             <i class="fa-brands fa-whatsapp text-green-500"></i>
                                             <span class="text-xs">Mandar whatapp</span>
                                         </el-dropdown-item>
-                                        <!-- <el-dropdown-item :command="'edit|' + online_order.id">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                            </svg>
-                                            <span class="text-xs">Editar</span>
-                                        </el-dropdown-item> -->
                                         <el-dropdown-item :command="'delete|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
@@ -150,7 +142,7 @@
     </div>
 
     <!-- -------------- Modal creación de orden starts----------------------- -->
-    <Modal :show="createOnlineOrderModal" @close="createOnlineOrderModal = false; form.reset">
+    <Modal :show="createOnlineOrderModal" @close="createOnlineOrderModal = false">
         <div class="py-4 px-7 relative text-sm">
         <i @click="createOnlineOrderModal = false"
             class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
@@ -250,7 +242,7 @@
 
             <div class="flex justify-end space-x-1 pt-5 pb-1 py-3">
             <CancelButton @click="createOnlineOrderModal = false">Cancelar</CancelButton>
-            <PrimaryButton :disabled="form.processing">Confirmar</PrimaryButton>
+            <PrimaryButton :disabled="form.processing || !form.products[0].name">Confirmar</PrimaryButton>
             </div>
         </form>
         </div>
@@ -274,6 +266,26 @@
             </div>
         </template>
     </ConfirmationModal>
+
+    <!-- Confirmación de Actualización de estatus -->
+        <ConfirmationModal :show="showUpdateStatusConfirm" @close="showUpdateStatusConfirm = false">
+            <template #title>
+                <h1>Cambiar estatus de pedido</h1>
+            </template>
+            <template #content>
+                <p>
+                    Se cambiará el estatus del pedido seleccionado, esto es un proceso irreversible. ¿Continuar
+                    de todas formas?
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="showUpdateStatusConfirm = false">Cancelar</CancelButton>
+                    <DangerButton @click="updateStatus(tempStatus, orderId);">Confirmar</DangerButton>
+                </div>
+            </template>
+        </ConfirmationModal>
+        <!-- Confirmación de Actualización de estatus -->
 </template>
 
 <script>
@@ -308,13 +320,14 @@ data() {
         total: 0,
         store_id: this.$page.props.auth.user.store_id,
         created_from_app: true,
+        store_inventory: this.$page.props.auth.user.store.online_store_properties.inventory,
         products: [
             {
                 id: 1,
                 name: null,
                 product_id: null,
                 price: 1,
-                is_local: null,
+                isLocal: null,
                 quantity: 1,
                 image_url: null,
             }
@@ -332,6 +345,7 @@ data() {
         currentPage: 1, //para paginación
         products: null, //se obtienne todos los productos de la tienda
         showDeleteConfirm: false, //modal de eliminación
+        showUpdateStatusConfirm: false, //modal de actualizacion de estatus
         next_item_id: 2, //para el index de productos creados como venta en linea
         payment_methods: [
             'Efectivo',
@@ -339,7 +353,9 @@ data() {
             'Tarjeta de débito',
             'Trandferencia o depósito',
             'Mercado pago',
-        ]
+        ],
+        tempStatus: null, //estatus temporal para usar en modal de confirmacion 
+        orderId: null, //id de la orden para usar en modal de confirmacion 
     }
 },
 components:{
@@ -360,7 +376,7 @@ totalOnlineOrders: Number
 },
 methods:{
     addNewItem() {
-      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, is_local:null, quantity: null });
+      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, isLocal: null, quantity: null });
     },
     deleteItem(index) {
       if (this.form.products.length > 1) {
@@ -391,8 +407,12 @@ methods:{
 
         if (commandName == 'see') {
             this.$inertia.get(route('online-sales.show', data));
-        } else if (commandName == 'processing' || commandName == 'delivered' || commandName == 'cancel') {
+        } else if (commandName == 'processing') {
             this.updateStatus(commandName, data);
+        } else if (commandName == 'delivered' || commandName == 'cancel') {
+            this.tempStatus = commandName;
+            this.orderId = data;
+            this.showUpdateStatusConfirm = true;
         } else if (commandName == 'delete') {
             this.showDeleteConfirm = true;
             this.itemIdToDelete = data;
@@ -402,7 +422,11 @@ methods:{
     },
     async updateStatus(status, orderId) {
         try {
-            const response = await axios.put(route('online-sales.update-status', orderId), { status: status, online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties.online_sales_cash_register});
+            const response = await axios.put(route('online-sales.update-status', orderId), { 
+                status: status,
+                online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties.online_sales_cash_register,
+                store_inventory: this.$page.props.auth.user.store.online_store_properties.inventory
+            });
             if ( response.status === 200 ) {
                 //buscar la orden seleccionada para actualizar estatus
                 const orderIndex = this.localOrders.findIndex(item => item.id == orderId);
@@ -421,6 +445,8 @@ methods:{
             }
         } catch (error) {
             console.log(error);
+        } finally {
+            this.showUpdateStatusConfirm = false;
         }
     },
     async fetchItemsByPage() {

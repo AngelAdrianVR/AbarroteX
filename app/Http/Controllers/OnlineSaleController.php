@@ -92,11 +92,22 @@ class OnlineSaleController extends Controller
                 if ( $product['isLocal'] === true ) {
                     $temp_product = Product::find($product['id']);
                     $temp_product->current_stock -= $product['quantity'];
-                    $temp_product->save();
+
+                    //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
+                    // if ( $temp_product->current_stock < 0 ) {
+                        // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    // } else {
+                        $temp_product->save();
+                    // }
                 } else {
                     $temp_product = GlobalProductStore::find($product['id']);
                     $temp_product->current_stock -= $product['quantity'];
-                    $temp_product->save();
+                    //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
+                    // if ( $temp_product->current_stock < 0 ) {
+                        // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    // } else {
+                        $temp_product->save();
+                    // }
                 }
             }
         }
@@ -294,6 +305,21 @@ class OnlineSaleController extends Controller
             $cash_register->current_cash += $total_sale;
             $cash_register->save();
             $delivered_at = now();
+        }
+
+        // Si se cambia el estado a 'cancel' y la configuración de inventario está activa
+        if ($request->status == 'cancel' && $request->store_inventory === true) {
+            foreach ($online_sale->products as $product) {
+                if ($product['isLocal'] === true) {
+                    $temp_product = Product::find($product['id']);
+                    $temp_product->current_stock += $product['quantity']; // Aumentar el stock
+                    $temp_product->save();
+                } else {
+                    $temp_product = GlobalProductStore::find($product['id']);
+                    $temp_product->current_stock += $product['quantity']; // Aumentar el stock
+                    $temp_product->save();
+                }
+            }
         }
 
         $online_sale->update([
