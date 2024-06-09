@@ -141,7 +141,10 @@
                     </label>
 
                     <div class="col-span-2 text-center py-3">
-                        <PrimaryButton @click="storeOrder" class="!px-16" :disabled="form.processing || !confirmSale">Relizar pedido</PrimaryButton>
+                        <PrimaryButton @click="storeOrder" class="!px-16" :disabled="form.processing || !confirmSale">
+                            <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                            Relizar pedido
+                        </PrimaryButton>
                     </div>
                 </article>
             </section>
@@ -178,7 +181,8 @@ data() {
         delivery_price: 0, //precio de envío
         total: null, //cantidad total de venta $
         address_references: null, //referencias para dar con el lugar
-        store_id: null
+        store_id: null,
+        store_inventory: null //bandera para saber si la configuración de inventario está activa y descontar productos
     });
 
     return {
@@ -223,6 +227,7 @@ methods:{
             const response = await axios.get(route('stores.fetch-store-info', this.form.store_id));
             if ( response.status === 200 ) {
                 this.store = response.data.store;
+                this.form.store_inventory = this.store.online_store_properties?.inventory;
             }
         } catch (error) {
             console.log(error);

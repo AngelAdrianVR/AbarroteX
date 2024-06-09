@@ -14,7 +14,7 @@
                     <div class="border-r border-grayD9 p-2 md:py-4 md:px-9 md:w-[70%] h-96 xl:h-[440px] space-y-4 overflow-auto">
                         <div v-if="cart.length">
                             <CartProductCard @productRemoved="removeCartProduct($event)" @updateCart="updateCart($event)"
-                            :cartProduct="product" v-for="product in cart" :key="product" />
+                            :cartProduct="product" v-for="product in cart" :key="product" :store="store" />
                         </div>
                         
                         <div v-else>

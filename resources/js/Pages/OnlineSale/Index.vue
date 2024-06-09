@@ -117,7 +117,7 @@ methods:{
 },
 mounted() {
     this.setActiveTabFromURL();
-    this.encodeUrlStore();
+    this.encodeUrlStore(); //codifica el id de la tienda por seguridad
 }
 }
 </script>
