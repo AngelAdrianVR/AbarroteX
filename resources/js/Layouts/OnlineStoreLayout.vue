@@ -9,7 +9,7 @@
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
-                            <Link v-if="!loadigLogo" :href="route('online-sales.client-index', storeId ?? 0)">
+                            <Link v-if="!loadigLogo" :href="route('online-sales.client-index', encodedIdStore ?? 0)">
                                 <img v-if="logo?.media?.length" class="h-12 md:h-16" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
                                 <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png" alt="">
                             </Link>
@@ -54,11 +54,11 @@
 
                 <div class="overflow-y-auto h-[calc(100vh-5rem)] flex flex-col justify-between bg-white">
                     <slot />
-                    <footer class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-24 md:px-7">
+                    <footer v-if="!loadigLogo && !loadigStore" class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-24 md:px-7">
                         <!-- Logo de la tienda -->
                         <figure class="flex items-center space-x-2">
                             <img v-if="logo?.media?.length" class="h-10 md:h-12" :src="logo?.media[0]?.original_url" alt="logotipo de la tienda">
-                            <p class="tex-sm text-gray99">{{ store?.name }}</p>
+                            <p v-else class="tex-sm text-gray99">{{ store?.name }}</p>
                         </figure>
                         <!-- whatsapp button computed -->
                         <div v-if="store?.online_store_properties?.whatsapp" class="hidden md:flex flex-col items-center">
@@ -106,12 +106,14 @@ data() {
         searchQuery: null, //buscador. Palabras escritas en el buscador
         searchFocus: false, //buscador. Bandera de enfoque para el buscador
         productsFound: null, //buscador. productos encontrados.
-        loading: false, //cargando la busqueda de productos
         cart: [], //productos guardados en el carrito (localStorage)
         storeId: null, //se recupera el id de la tienda desde el localstorage
         store: {}, //se recupera la informacion de la tienda
+        loading: false, //cargando la busqueda de productos
         loadigLogo: false, //cargando logo
-        logo: null //se recupera el logotipo de la tienda con el storeId obtenido del localstorage
+        loadigStore: false, //cargando tienda
+        logo: null, //se recupera el logotipo de la tienda con el storeId obtenido del localstorage
+        encodedIdStore: null, //url codificada de mi tienda
     }
 },
 components:{
@@ -160,7 +162,12 @@ methods:{
             this.loadigLogo = false;
         }
     },
+    encodeStoreId() {
+      const encodedId = btoa(this.storeId.toString());
+      this.encodedIdStore = encodedId;
+    },
     async fetchStoreInfo() {
+        this.loadigStore = true;
         try {
             const response = await axios.get(route('stores.fetch-store-info', this.storeId));
             if ( response.status === 200 ) {
@@ -168,6 +175,8 @@ methods:{
             }
         } catch (error) {
             console.log(error);
+        } finally {
+            this.loadigStore = false;
         }
     }
 },
@@ -183,14 +192,17 @@ computed: {
 created() {
     this.loadCart();
     
-},
-mounted() {
     // recupera el store_id del localStorage
     this.storeId = localStorage.getItem('storeId');
     this.getLogo();
 
     // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
     this.fetchStoreInfo();
+
+},
+mounted() {
+    //codifica el id de la tienda
+    this.encodeStoreId();
 }
 }
 </script>

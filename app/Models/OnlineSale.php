@@ -20,6 +20,7 @@ class OnlineSale extends Model
         'int_number',
         'town',
         'polity_state',
+        'postal_code',
         'address_references',
         'payment_method',
         'status',

@@ -38,6 +38,7 @@
                     <p>{{ online_sale.payment_method }}</p>
                     <p>Referencias</p>
                     <p>{{ online_sale.address_references ?? '--' }}</p>
+                    <div class="col-span-full border-t mt-3"></div>
                     <p class="font-bold mt-3">Subtotal:</p>
                     <p class="font-bold mt-3">${{ online_sale.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     <p class="font-bold">Costo de envío:</p>
@@ -106,7 +107,7 @@
         </template>
     </ConfirmationModal>
 
-    <!-- -------------- Modal creación de orden starts----------------------- -->
+    <!-- -------------- Modal edición de orden starts----------------------- -->
     <Modal :show="editOnlineOrderModal" @close="editOnlineOrderModal = false; form.reset">
         <div class="py-4 px-7 relative text-sm">
         <i @click="editOnlineOrderModal = false"
@@ -144,6 +145,21 @@
                     <InputLabel value="Colonia*" class="ml-3 mb-1" />
                     <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
                     <InputError :message="form.errors.suburb" />
+                </div>
+
+                <div>
+                    <InputLabel class="mb-1 ml-2" value="Código postal" />
+                    <el-input v-model="form.postal_code"
+                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                    :parser="(value) => value.replace(/\D/g, '')" maxlength="6" clearable
+                    placeholder="Escribe el código postal" />
+                    <InputError :message="form.errors.postal_code" />
+                </div>
+
+                <div>
+                    <InputLabel value="Estado*" class="ml-3 mb-1" />
+                    <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan" :maxlength="255" clearable />
+                    <InputError :message="form.errors.polity_state" />
                 </div>
 
                 <div>
@@ -197,7 +213,7 @@
         </form>
         </div>
     </Modal>
-    <!-- --------------------------- Modal creación de orden ends ------------------------------------ -->
+    <!-- --------------------------- Modal edición de orden ends ------------------------------------ -->
     </AppLayout>
 </template>
 
@@ -224,6 +240,8 @@ data() {
         payment_method: this.online_sale.payment_method,
         suburb: this.online_sale.suburb,
         street: this.online_sale.street,
+        postal_code: this.online_sale.postal_code, 
+        polity_state: this.online_sale.polity_state,
         ext_number: this.online_sale.ext_number,
         int_number: this.online_sale.int_number,
         delivery_price: this.online_sale.delivery_price,

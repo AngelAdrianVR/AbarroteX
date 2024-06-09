@@ -1,7 +1,7 @@
 <template>
     <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col h-96 hover:border-primary relative group">
         <!-- Deatalle de cantidad disponible  -->
-        <div class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg hidden group-hover:block">
+        <div v-if="store?.online_store_properties?.inventory" class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg hidden group-hover:block">
             <p class="text-white text-center py-2">{{  product.current_stock ?? '0' }} Unidades disponibles</p>
         </div>
             <!-- Imagen -->
@@ -21,10 +21,14 @@
         <div class="text-center mt-5 flex flex-col justify-center items-center">
             <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
             <p class="text-3xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price : product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-            <el-input-number :disabled="product.current_stock < 1"
+            <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
+            <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product.current_stock < 1"
                 v-model="quantity" class="mb-5" size="small" :min="0" 
                 :max="product.current_stock" :precision="2" />
-            <PrimaryButton :disabled="product.current_stock < 1" @click="addToCart" class="!px-9 !py-1">Agregar al carrito</PrimaryButton>
+
+            <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
+            <el-input-number v-else v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
+            <PrimaryButton :disabled="store?.online_store_properties?.inventory && product.current_stock < 1" @click="addToCart" class="!px-9 !py-1">Agregar al carrito</PrimaryButton>
         </div>
     </div>
 </template>
@@ -37,6 +41,8 @@ export default {
 data() {
     return {
         quantity: 1, //cantidad seleccionada para guardar al carrito
+        storeId: null, //recupera el id de la tienda almacenada en el local storage
+        store: null, //recupera toda la informacióon de la tienda.
     }
 },
 components:{
@@ -100,7 +106,24 @@ methods:{
             message: "Se ha agregado correctamente al carrito",
             type: "success",
         });
+    },
+    async fetchStoreInfo() {
+        try {
+            const response = await axios.get(route('stores.fetch-store-info', this.storeId));
+            if ( response.status === 200 ) {
+                this.store = response.data.store;
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 },
+mounted() {
+    // recupera el store_id del localStorage
+    this.storeId = localStorage.getItem('storeId');
+
+    // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
+    this.fetchStoreInfo();
+}
 }
 </script>
