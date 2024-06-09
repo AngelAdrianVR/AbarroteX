@@ -2,16 +2,16 @@
     <article class="border border-grayD9">
         <header class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1">
             <div class="flex items-center space-x-3">
-                <p class="text-gray99">Folio: <span class="text-gray37">{{ folio }}</span></p>
+                <p class="text-gray99">Folio: <span class="text-gray37">{{ groupedSales.folio }}</span></p>
                 <span class="text-gray99">•</span>
                 <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{
-                    formatDateHour(groupedSales[0].created_at) }}</span></p>
+                    formatDateHour(groupedSales.products[0].created_at) }}</span></p>
                 <span class="text-gray99">•</span>
-                <p class="text-gray99">Vendedor: <span class="text-gray37">{{ groupedSales[0].user.name }}</span>
+                <p class="text-gray99">Vendedor: <span class="text-gray37">{{ groupedSales.user_name }}</span>
                 </p>
             </div>
             <div class="flex items-center space-x-2">
-                <el-dropdown v-if="canEdit && canRefund && groupedSales.some(item => !item?.refunded_at)"
+                <el-dropdown v-if="canEdit && canRefund && groupedSales.products.some(item => !item?.refunded_at)"
                     trigger="click" @command="handleCommand">
                     <button @click.stop
                         class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
@@ -19,7 +19,7 @@
                     </button>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item :command="'edit|' + folio">
+                            <el-dropdown-item :command="'edit|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -27,7 +27,7 @@
                                 </svg>
                                 <span class="text-xs">Editar</span>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="canRefund" :command="'refund|' + folio">
+                            <el-dropdown-item v-if="canRefund" :command="'refund|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -35,7 +35,8 @@
                                 </svg>
                                 <span class="text-xs">Reembolso/Cancelar</span>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="canInstallment" :command="'installment|' + folio">
+                            <el-dropdown-item v-if="canInstallment && groupedSales.credit_data"
+                                :command="'installment|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -49,7 +50,7 @@
             </div>
         </header>
         <main class="border-b border-grayD9 px-1 md:px-5 py-1">
-            <Accordion :active="false" :id="parseInt(folio)" position="center" title="Ver detalles">
+            <Accordion :active="false" :id="parseInt(groupedSales.folio)" position="center" title="Ver detalles">
                 <template #trigger>
                     <button class="text-primary">
                         Ver detalles
@@ -66,7 +67,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y-[1px]">
-                            <tr v-for="(sale, index) in groupedSales" :key="index"
+                            <tr v-for="(sale, index) in groupedSales.products" :key="index"
                                 class="*:px-2 *:py-[6px] *:align-top border-grayD9">
                                 <td>
                                     <button v-if="sale.product_id" @click="viewProduct(sale)"
@@ -87,41 +88,65 @@
                 </template>
             </Accordion>
         </main>
-        <footer class="text-end md:flex justify-between">
-            <div
+        <footer class="text-end md:flex" :class="groupedSales.credit_data ? 'justify-between' : 'justify-end'">
+            <div v-if="groupedSales.credit_data"
                 class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
                 <span class="text-gray99">Fecha de vencimiento:</span>
-                <span class="text-gray37">08 jun 24</span>
+                <p :class="expiredDateClass" class="flex items-center space-x-2">
+                    <span v-if="wasRefunded" class="text-gray99">
+                        <i class="fa-solid fa-minus"></i>
+                    </span>
+                    <span v-else>
+                        {{ groupedSales.credit_data.expired_date ? formatDate(groupedSales.credit_data.expired_date)
+                            : 'No especificada' }}
+                    </span>
+                    <svg v-if="isExpired" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" class="size-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                </p>
             </div>
-            <div :class="groupedSales.some(item => item?.refunded_at) ? 'text-[#8C3DE4]' : 'text-gray37'"
-                class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
-                <el-tooltip v-if="groupedSales.some(item => item?.refunded_at)" placement="top">
-                    <template #content>
-                        <p>El reembolso de realizó a las {{ formatDateHour(groupedSales[0].refunded_at) }}</p>
-                    </template>
-                    <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2">
-                        Reembolsado</p>
-                </el-tooltip>
-                <div class="flex justify-end">
+            <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
+                <div class="flex items-center justify-end"
+                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
+                        <template #content>
+                            <p>El reembolso de realizó a las {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            </p>
+                        </template>
+                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
+                            Reembolsado</p>
+                    </el-tooltip>
                     <span class="text-start w-32">Total de la venta:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ calcTotal(groupedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ calcTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
-                <div class="flex justify-end">
+                <div v-if="groupedSales.credit_data" class="flex items-center justify-end"
+                    :class="wasRefunded ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <el-tooltip v-if="wasRefunded" placement="top">
+                        <template #content>
+                            <p>El reembolso de realizó a las {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            </p>
+                        </template>
+                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
+                            Reembolsado</p>
+                    </el-tooltip>
                     <span class="text-start w-32">Total abonado:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ calcTotal(groupedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ calcTotalInstallments.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
-                <div class="flex bg-[#F2FEA8] rounded-[5px] py-1">
-                    <span class="w-24 text-start text-[#794A04]">Pendiente</span>
+                <div v-if="groupedSales.credit_data && !wasRefunded" class="flex rounded-[5px] py-1" :class="statusStyles.bg">
+                    <span class="w-24 text-start" :class="statusStyles.text">
+                        {{ groupedSales.credit_data.status }}</span>
                     <span class="text-start w-32">Deuda restante:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ calcTotal(groupedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ (calcTotal - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
             </div>
@@ -131,7 +156,7 @@
 
 <script>
 import Accordion from '@/Components/MyComponents/Accordion.vue';
-import { format, parseISO } from 'date-fns';
+import { parseISO, isBefore, format } from 'date-fns';
 import es from 'date-fns/locale/es';
 
 export default {
@@ -148,23 +173,57 @@ export default {
         Accordion,
     },
     props: {
-        folio: String,
-        groupedSales: Array,
-        installments: {
-            default: [],
-            type: Array
-        }
+        groupedSales: Object,
     },
     emits: ['show-modal'],
-    methods: {
-        formatDateHour(dateString) {
-            return format(parseISO(dateString), 'h:mm a', { locale: es });
+    computed: {
+        wasRefunded() {
+            return this.groupedSales.products.some(item => item?.refunded_at);
         },
-        calcTotal(sales) {
-            return sales.reduce((accumulator, currentValue) => {
+        isExpired() {
+            if (!this.groupedSales.credit_data.expired_date) {
+                return false;
+            }
+            const expiredDate = parseISO(this.groupedSales.credit_data.expired_date);
+            const today = new Date();
+            return isBefore(expiredDate, today) && this.groupedSales.credit_data.status !== 'Pagado' && !this.wasRefunded;
+        },
+        expiredDateClass() {
+            if (!this.groupedSales.credit_data.expired_date) {
+                return 'text-gray37';
+            }
+
+            return this.isExpired ? 'text-[#DD0808]' : 'text-gray37';
+        },
+        statusStyles() {
+            const status = this.groupedSales.credit_data?.status;
+            if (status === 'Pendiente') {
+                return { bg: 'bg-[#F2FEA8]', text: 'text-[#794A04]' };
+            } else if (status === 'Parcial') {
+                return { bg: 'bg-[#DADEFD]', text: 'text-[#080592]' };
+            } else if (status === 'Pagado') {
+                return { bg: 'bg-[#C4FBAA]', text: 'text-[#0AA91A]' };
+            }
+            return { bg: 'bg-[#C4FBAA]', text: 'text-[#0AA91A]' };
+        },
+        calcTotal() {
+            return this.groupedSales.products.reduce((accumulator, currentValue) => {
                 const subtotal = currentValue.quantity * currentValue.current_price;
                 return accumulator + subtotal;
             }, 0);
+        },
+        calcTotalInstallments() {
+            return this.groupedSales.credit_data.installments.reduce((accumulator, currentValue) => {
+                return accumulator + currentValue.amount;
+            }, 0);
+        },
+    },
+    methods: {
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
+        },
+        formatDateHour(dateString) {
+            return format(parseISO(dateString), 'h:mm a', { locale: es });
         },
         viewProduct(product) {
             const productId = product.product_id.split('_')[1];

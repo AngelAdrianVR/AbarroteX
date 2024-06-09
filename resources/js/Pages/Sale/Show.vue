@@ -19,7 +19,7 @@
             <!-- Productos -->
             <main class="flex flex-col space-y-5 lg:mx-16 mt-10">
                 <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item"
-                    @show-modal="handleShowModal" :folio="index" />
+                    @show-modal="handleShowModal" />
             </main>
         </div>
 
@@ -106,6 +106,8 @@ import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
 import { addOrUpdateBatchOfItems, getAll } from '@/dbService.js';
 import axios from 'axios';
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
     data() {
@@ -148,24 +150,7 @@ export default {
             // Obtener las ventas del primer día (si hay múltiples días, se debe ajustar esta parte)
             const sales = Object.values(this.day_sales)[0].sales;
 
-            // Agrupar las ventas por group_id
-            const salesGroupedByGroupId = sales.reduce((groupedSales, sale) => {
-                // Obtener el group_id de la venta
-                const groupId = sale.group_id;
-
-                // Verificar si ya existe un array para este group_id, de lo contrario, crear uno nuevo
-                if (!groupedSales[groupId]) {
-                    groupedSales[groupId] = [];
-                }
-
-                // Agregar la venta al array correspondiente al group_id
-                groupedSales[groupId].push(sale);
-
-                return groupedSales;
-            }, {});
-
-            // Resultado: objeto donde las claves son los group_id y los valores son arrays de ventas
-            return salesGroupedByGroupId;
+            return  Object.values(sales);
         }
     },
     methods: {
@@ -174,13 +159,15 @@ export default {
             const sales = Object.values(this.day_sales)[0].sales;
 
             // cambiar el id de cada venta para que coincida con id de productos en indexedDB
-            sales.forEach(sale => {
-                // revisar si el id es un numero
-                if (Number.isFinite(sale.product_id)) {
-                    sale.product_id = sale.is_global_product
-                        ? 'global_' + sale.product_id
-                        : 'local_' + sale.product_id;
-                }
+            Object.values(sales).forEach(sale => {
+                sale.products.forEach(product => {
+                    // revisar si el id es un numero
+                    if (Number.isFinite(product.product_id)) {
+                        product.product_id = product.is_global_product
+                            ? 'global_' + product.product_id
+                            : 'local_' + product.product_id;
+                    }
+                })
             });
         },
         closeEditModal() {
@@ -236,23 +223,7 @@ export default {
             });
         },
         formatDate(dateString) {
-            const months = {
-                'January': 'Enero',
-                'February': 'Febrero',
-                'March': 'Marzo',
-                'April': 'Abril',
-                'May': 'Mayo',
-                'June': 'Junio',
-                'July': 'Julio',
-                'August': 'Agosto',
-                'September': 'Septiembre',
-                'October': 'Octubre',
-                'November': 'Noviembre',
-                'December': 'Diciembre'
-            };
-
-            const [day, month, year] = dateString.split('-');
-            return `${day} ${months[month]}, ${year}`;
+            return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },
         async refundSale() {
             this.refunding = true;
