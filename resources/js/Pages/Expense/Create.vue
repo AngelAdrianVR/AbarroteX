@@ -73,7 +73,9 @@
                 </div>
 
                 <div class="col-span-full text-right mt-3">
-                    <PrimaryButton v-if="!exceededCashAmount()" class="!rounded-full" :disabled="form.processing">Crear
+                    <PrimaryButton v-if="!exceededCashAmount()" class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Crear
                     </PrimaryButton>
                     <p v-else class="text-xs">
                         Has excedido el monto disponible en caja.

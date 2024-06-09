@@ -8,7 +8,7 @@
                     <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton>
-                    <PrimaryButton @click="$inertia.get(route('products.edit', product.data.id))" class="!rounded-full">
+                    <PrimaryButton @click="$inertia.get(route('products.edit', encodedId))" class="!rounded-full">
                         Editar</PrimaryButton>
                 </div>
             </div>
@@ -254,6 +254,7 @@ export default {
         });
         return {
             form,
+            encodedId: null, //id codificado
             currentTab: 1,
             searchQuery: this.product.data.name,
             searchFocus: false,
@@ -484,11 +485,16 @@ export default {
                 const formattedLines = lines.map(line => `• ${line.trim()}`);
                 this.formattedDescription = formattedLines.join('\n');
             }
-        }
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            this.encodedId = encodedId;
+        },
     },
     mounted() {
         this.fetchHistory();
         this.formatDescription();
+        this.encodeId(this.product.data.id);
     }
 }
 </script>

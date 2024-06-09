@@ -135,6 +135,7 @@
                         Cancelar
                     </CancelButton>
                     <PrimaryButton @click="importProducts()" :disabled="!importForm.file.length">
+                        <i v-if="isImporting" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Importar
                     </PrimaryButton>
                 </div>
