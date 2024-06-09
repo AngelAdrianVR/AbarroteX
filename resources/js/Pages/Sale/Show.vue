@@ -65,18 +65,42 @@
                                 </td>
                             </tr>
                             <tr v-if="addInstallment">
-                                <td colspan="4">
-                                    <button type="button" class="text-primary mt-2">+ Agregar abono</button>
-                                </td>
-                            </tr>
-                            <tr v-else>
                                 <td>-</td>
                                 <td>{{ formatDateTime(new Date().toISOString()) }}</td>
                                 <td>
-                                    <!-- poner input con icono de $ -->
-                                    ${{ installment.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                    <el-input v-model="installmentForm.amount" required type="text" class="!w-11/12"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" placeholder="0.00">
+                                        <template #prefix>
+                                            <i class="fa-solid fa-dollar-sign"></i>
+                                        </template>
+                                    </el-input>
                                 </td>
-                                <td>${{ calcRemainingDebt(index).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                <td>
+                                    ${{
+                                        calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                            ",") }}
+                                </td>
+                                <td>
+                                    <div
+                                        class="flex items-center space-x-1 *:size-5 *:flex *:items-center *:justify-center *:rounded-full *:text-[10px]">
+                                        <button @click="storeInstallment" type="button"
+                                            class="bg-primary text-white disabled:cursor-not-allowed disabled:bg-gray99"
+                                            :disabled="addingInstallment || !installmentForm.isDirty">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                        <button @click="addInstallment = false" type="button"
+                                            class="bg-grayF2 text-gray37" :disabled="addingInstallment">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-else-if="saleToSeeInstallments.credit_data.status !== 'Pagado'">
+                                <td colspan="4">
+                                    <button @click="addInstallment = true" type="button" class="text-primary mt-2">
+                                        + Agregar abono
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -85,7 +109,7 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">
-                    <CancelButton @click="closeInstallmentModal()" :disabled="editing">Cancelar</CancelButton>
+                    <CancelButton @click="closeInstallmentModal()" :disabled="addingInstallment">Cancelar</CancelButton>
                 </div>
             </template>
         </DialogModal>
@@ -183,8 +207,14 @@ export default {
             products: []
         });
 
+        const installmentForm = useForm({
+            credit_sale_data_id: null,
+            amount: '',
+        });
+
         return {
             form,
+            installmentForm,
             products: [],
             // modales
             showEditModal: false,
@@ -192,7 +222,9 @@ export default {
             showRefundConfirm: false,
             saleToSeeInstallments: null,
             saleFolioToRefund: null,
+            addInstallment: false,
             // cargas
+            addingInstallment: false,
             refunding: false,
             editing: false,
             // inventario de codigos activado
@@ -233,6 +265,18 @@ export default {
         },
     },
     methods: {
+        calcRemainingDebtWithNewInstallment() {
+            const totalSale = this.saleToSeeInstallments.total_sale;
+            const installments = this.saleToSeeInstallments.credit_data.installments;
+
+            let totalPaid = 0;
+            installments.forEach(installment => {
+                totalPaid += installment.amount;
+            });
+
+            const newInstallmentAmount = this.installmentForm.amount ? parseFloat(this.installmentForm.amount) : 0;
+            return totalSale - totalPaid - newInstallmentAmount;
+        },
         calcRemainingDebt(index) {
             const totalSale = this.saleToSeeInstallments.total_sale;
             const installments = this.saleToSeeInstallments.credit_data.installments;
@@ -321,6 +365,23 @@ export default {
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },
+        storeInstallment() {
+            this.addingInstallment = true;
+            this.installmentForm.transform((data) => ({
+                ...data,
+                credit_sale_data_id: this.saleToSeeInstallments.credit_data.id,
+            })).post(route('installments.store'), {
+                onSuccess: () => {
+                    this.addInstallment = false;
+                    this.installmentForm.reset();
+                    this.saleToSeeInstallments = this.getGroupedSales.find(item => item.folio == this.saleToSeeInstallments.folio);
+                },
+                onFinish: () => {
+                    this.addingInstallment = false;
+                    this.installmentForm.reset();
+                }
+            });
+        },
         async refundSale() {
             this.refunding = true;
             try {
@@ -357,6 +418,11 @@ export default {
                 this.refunding = false;
             }
         },
+    },
+    watch: {
+        'installmentForm.amount': function () {
+            this.calcRemainingDebtWithNewInstallment();
+        }
     },
     async mounted() {
         this.products = await getAll('products');

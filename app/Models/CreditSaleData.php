@@ -24,5 +24,15 @@ class CreditSaleData extends Model
     {
         return $this->hasMany(Installment::class);
     }
+
+    // public function sales()
+    // {
+    //     return Sale::where('folio', $this->folio)->get();
+    // }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'folio', 'folio');
+    }
     
 }

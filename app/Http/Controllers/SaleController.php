@@ -475,6 +475,7 @@ class SaleController extends Controller
                 // Agregar credit_data a las ventas del mismo folio
                 $sales->where('folio', $folio)->each(function ($sale) use ($creditData, $installments) {
                     $sale->credit_data = [
+                        'id' => $creditData->id,
                         'expired_date' => $creditData->expired_date,
                         'status' => $creditData->status,
                         'installments' => $installments,
