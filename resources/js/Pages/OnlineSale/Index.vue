@@ -12,7 +12,7 @@
                         </button>
                         <p class="px-2 text-gray77">{{ encodedUrlStore }}</p>
                     </div>
-                    <Link :href="route('online-sales.client-index', $page.props.auth.user.store_id)">
+                    <Link :href="route('online-sales.client-index', encodedStoreId ?? 0)">
                         <ThirthButton>
                             <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -69,6 +69,7 @@ data() {
     return {
         activeTab: '1',
         encodedUrlStore: null, //url codificada de mi tienda
+        encodedStoreId: null, //id de tienda codificada
     }
 },
 components:{
@@ -113,6 +114,7 @@ methods:{
       const baseUrl = 'https://ezyventas.com/online-sales-client-index/';
       const encodedId = btoa(this.$page.props.auth.user.store_id.toString());
       this.encodedUrlStore = baseUrl + encodedId;
+      this.encodedStoreId = encodedId;
     },
 },
 mounted() {
