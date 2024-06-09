@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('credit_sale_payments', function (Blueprint $table) {
+        Schema::create('credit_sale_data', function (Blueprint $table) {
             $table->id();
-            $table->unsignedFloat('amount')->nullable();
-            $table->text('notes')->nullable();
-            $table->foreignId('sale_id')->constrained()->cascadeOnDelete();
+            $table->string('folio');
+            $table->date('expired_date')->nullable();
+            $table->string('status');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('credit_sale_payments');
+        Schema::dropIfExists('credit_sale_data');
     }
 };

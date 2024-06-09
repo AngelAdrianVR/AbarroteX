@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\CreditSaleData;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -13,7 +14,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class SaleController extends Controller
 {
@@ -70,32 +70,18 @@ class SaleController extends Controller
             ->whereDate('created_at', $date)
             ->get();
 
-        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $sales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) {
-            // Calcular totales
-            $totalQuantity = $sales->sum('quantity');
-            $totalSale = $sales->sum(function ($productSale) {
-                return $productSale['quantity'] * $productSale['current_price'];
-            });
+        $this->addCreditDataToSales($sales);
 
-            return [
-                'total_quantity' => $totalQuantity,
-                'total_sale' => $totalSale,
-                'sales' => $sales->values(), // Convertir el mapa en un arreglo indexado
-            ];
-        });
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        $day_sales = $this->getGroupedSalesByDate($sales, true);
 
         return inertia('Sale/Show', compact('day_sales'));
     }
-
 
     public function edit(Sale $sale)
     {
         //
     }
-
 
     public function update(Request $request, Sale $sale)
     {
@@ -131,7 +117,7 @@ class SaleController extends Controller
             ->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSales($sales);
+        $groupedSales = $this->getGroupedSalesByDate($sales);
 
         return response()->json(['items' => $groupedSales]);
     }
@@ -146,7 +132,7 @@ class SaleController extends Controller
             ->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSales($sales)->skip($offset)
+        $groupedSales = $this->getGroupedSalesByDate($sales)->skip($offset)
             ->take(30);
 
         return response()->json(['items' => $groupedSales]);
@@ -161,21 +147,7 @@ class SaleController extends Controller
         $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $sales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) {
-            // Calcular totales
-            $totalQuantity = $sales->sum('quantity');
-            $totalSale = $sales->sum(function ($productSale) {
-                return $productSale['quantity'] * $productSale['current_price'];
-            });
-
-            return [
-                'total_quantity' => $totalQuantity,
-                'total_sale' => $totalSale,
-                'sales' => $sales->values(), // Convertir el mapa en un arreglo indexado
-            ];
-        });
+        $day_sales = $this->getGroupedSalesByDate($sales, true);
 
         // return $day_sales;
         return inertia('Sale/PrintTicket', compact('day_sales'));
@@ -194,7 +166,7 @@ class SaleController extends Controller
     {
         // Generar un id unico para productos vendidos a este cliente
         $last_sale = Sale::where('store_id', auth()->user()->store_id)->latest('id')->first();
-        $group_id = $last_sale ? intval($last_sale->group_id) + 1 : 1;
+        $folio = $last_sale ? intval($last_sale->folio) + 1 : 1;
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
@@ -208,7 +180,7 @@ class SaleController extends Controller
             Sale::create([
                 'current_price' => $product['product']['public_price'],
                 'quantity' => $product['quantity'],
-                'group_id' => $group_id,
+                'folio' => $folio,
                 'product_name' => $product_name,
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
@@ -287,7 +259,7 @@ class SaleController extends Controller
             ->get();
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSales($sales)->take(30);
+        $groupedSales = $this->getGroupedSalesByDate($sales)->take(30);
 
         // Retornar los datos agrupados
         return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);
@@ -300,7 +272,7 @@ class SaleController extends Controller
         $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
         $saleProducts = Sale::where([
             'store_id' => auth()->user()->store_id,
-            'group_id' => $saleFolio,
+            'folio' => $saleFolio,
         ])->get();
         $total_amount = $saleProducts->sum(fn ($sale) => $sale->current_price * $sale->quantity);
 
@@ -349,7 +321,7 @@ class SaleController extends Controller
         // Obtener las ventas actuales
         $sales = Sale::where([
             'store_id' => auth()->user()->store_id,
-            'group_id' => $request->folio,
+            'folio' => $request->folio,
         ])->get();
 
         $sales_in_request = collect($request->sales);
@@ -431,22 +403,76 @@ class SaleController extends Controller
     }
 
     // private
-    private function getGroupedSales($sales)
+    private function getGroupedSalesByDate($sales, $returnSales = false)
     {
         return $sales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) {
+        })->map(function ($sales) use ($returnSales) {
             $totalQuantity = $sales->sum('quantity');
             $totalSale = $sales->sum(function ($sale) {
                 return $sale->quantity * $sale->current_price;
             });
-            $uniqueFolios = $sales->unique('group_id')->count();
+            $uniqueFolios = $sales->unique('folio')->count();
+
+            $salesByFolio = $sales->groupBy('folio')->map(function ($folioSales) {
+                $firstSale = $folioSales->first();
+                return [
+                    'products' => $folioSales->map(function ($sale) {
+                        return [
+                            'id' => $sale->id,
+                            'current_price' => $sale->current_price,
+                            'product_name' => $sale->product_name,
+                            'product_id' => $sale->product_id,
+                            'is_global_product' => $sale->is_global_product,
+                            'quantity' => $sale->quantity,
+                            'refunded_at' => $sale->refunded_at,
+                            'cash_register_id' => $sale->cash_register_id,
+                            'store_id' => $sale->store_id,
+                            'created_at' => $sale->created_at,
+                            'updated_at' => $sale->updated_at,
+                        ];
+                    })->values(),
+                    'credit_data' => $firstSale->credit_data,
+                    'folio' => $firstSale->folio,
+                    'user_name' => $firstSale->user->name,
+                ];
+            });
 
             return [
                 'total_quantity' => $totalQuantity,
                 'total_sale' => $totalSale,
                 'unique_folios' => $uniqueFolios,
+                'sales' => $returnSales ? $salesByFolio : [],
             ];
+        });
+    }
+
+    private function addCreditDataToSales($sales)
+    {
+        $folios = $sales->unique('folio')->pluck('folio');
+
+        $folios->each(function ($folio) use ($sales) {
+            // Buscar CreditSaleData relacionado usando el folio
+            $creditData = CreditSaleData::where('folio', $folio)->first();
+
+            if ($creditData) {
+                // Obtener los installments relacionados
+                $installments = $creditData->installments;
+
+                // Agregar credit_data a las ventas del mismo folio
+                $sales->where('folio', $folio)->each(function ($sale) use ($creditData, $installments) {
+                    $sale->credit_data = [
+                        'expired_date' => $creditData->expired_date,
+                        'status' => $creditData->status,
+                        'installments' => $installments,
+                    ];
+                });
+            } else {
+                // Si no hay credit_data, agregar un array vacío a las ventas del mismo folio
+                $sales->where('folio', $folio)->each(function ($sale) {
+                    $sale->credit_data = null;
+                });
+            }
         });
     }
 }
