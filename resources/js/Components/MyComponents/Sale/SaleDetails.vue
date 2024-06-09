@@ -121,7 +121,7 @@
                     <span class="text-start w-32">Total de la venta:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ calcTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ groupedSales.total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
                 <div v-if="groupedSales.credit_data" class="flex items-center justify-end"
@@ -146,7 +146,7 @@
                     <span class="text-start w-32">Deuda restante:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ (calcTotal - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ (groupedSales.total_sale - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
             </div>
@@ -205,12 +205,6 @@ export default {
                 return { bg: 'bg-[#C4FBAA]', text: 'text-[#0AA91A]' };
             }
             return { bg: 'bg-[#C4FBAA]', text: 'text-[#0AA91A]' };
-        },
-        calcTotal() {
-            return this.groupedSales.products.reduce((accumulator, currentValue) => {
-                const subtotal = currentValue.quantity * currentValue.current_price;
-                return accumulator + subtotal;
-            }, 0);
         },
         calcTotalInstallments() {
             return this.groupedSales.credit_data.installments.reduce((accumulator, currentValue) => {

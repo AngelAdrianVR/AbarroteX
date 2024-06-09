@@ -23,38 +23,105 @@
             </main>
         </div>
 
+        <DialogModal :show="showInstallmentModal" @close="closeInstallmentModal()">
+            <template #title>
+                <h1>Abonos</h1>
+            </template>
+            <template #content>
+                <section class="border-t pt-1 border-grayD9">
+                    <div class="flex items-center justify-between">
+                        <span>Resumen de venta</span>
+                        <span :class="statusStyles" class="rounded-full px-4 py-[2px]">{{
+                            saleToSeeInstallments.credit_data.status }}</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-2 pb-2 border-b border-grayD9">
+                        <p class="text-gray99">Folio de venta: <span class="text-gray37">{{ saleToSeeInstallments.folio
+                                }}</span></p>
+                        <span class="text-grayD9">|</span>
+                        <p class="text-gray99">Total de venta: <span class="text-gray37">
+                                ${{ saleToSeeInstallments.total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span></p>
+                        <span class="text-grayD9">|</span>
+                        <p class="text-gray99">Fecha de vencimiento: <span class="text-gray37">
+                                {{ formatDate(saleToSeeInstallments.credit_data.expired_date) }}
+                            </span></p>
+                    </div>
+                    <table class="w-full mt-4 *:text-sm">
+                        <thead>
+                            <tr class="*:text-start">
+                                <th class="w-[13%]">Folio</th>
+                                <th class="w-[29%]">Fecha</th>
+                                <th class="w-[29%]">Monto abonado</th>
+                                <th class="w-[29%]">Deuda restante</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-[1px]">
+                            <tr v-for="(installment, index) in saleToSeeInstallments.credit_data.installments"
+                                :key="index" class="*:py-[6px] *:align-top border-grayD9">
+                                <td>{{ 'A' + String(installment.id).padStart(3, '0') }}</td>
+                                <td>{{ formatDateTime(installment.created_at) }}</td>
+                                <td>${{ installment.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                <td>${{ calcRemainingDebt(index).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                </td>
+                            </tr>
+                            <tr v-if="addInstallment">
+                                <td colspan="4">
+                                    <button type="button" class="text-primary mt-2">+ Agregar abono</button>
+                                </td>
+                            </tr>
+                            <tr v-else>
+                                <td>-</td>
+                                <td>{{ formatDateTime(new Date().toISOString()) }}</td>
+                                <td>
+                                    <!-- poner input con icono de $ -->
+                                    ${{ installment.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                </td>
+                                <td>${{ calcRemainingDebt(index).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="closeInstallmentModal()" :disabled="editing">Cancelar</CancelButton>
+                </div>
+            </template>
+        </DialogModal>
         <DialogModal :show="showEditModal" @close="closeEditModal()">
             <template #title>
                 <h1>Editar venta</h1>
             </template>
             <template #content>
                 <form @submit.prevent="update">
-                    <section v-for="(sale, index) in form.sales" :key="index" class="flex items-center space-x-2 mb-1">
+                    <section v-for="(product, index) in form.products" :key="index"
+                        class="flex items-center space-x-2 mb-1">
                         <div class="w-1/3 md:w-1/2">
                             <InputLabel value="Producto" />
-                            <el-select v-model="sale.product_id" filterable placeholder="Selecciona el producto"
+                            <el-select v-model="product.product_id" filterable placeholder="Selecciona el producto"
                                 no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="item in products" :key="item.id" :label="item.name"
                                     :value="item.id" />
                             </el-select>
-                            <InputError :message="form.errors[`sales.${index}.product_id`]" />
+                            <InputError :message="form.errors[`products.${index}.product_id`]" />
                         </div>
                         <div class="w-1/3 md:w-1/4">
                             <InputLabel value="Precio por unidad" />
-                            <el-input v-model.number="sale.current_price" placeholder="No olvides llenar este campo"
+                            <el-input v-model.number="product.current_price" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
                             </el-input>
-                            <InputError :message="form.errors[`sales.${index}.current_price`]" />
+                            <InputError :message="form.errors[`products.${index}.current_price`]" />
                         </div>
                         <div class="w-1/3 md:w-1/4">
                             <InputLabel value="Cantidad" />
-                            <el-input v-model.number="sale.quantity" placeholder="No olvides llenar este campo"
+                            <el-input v-model.number="product.quantity" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
                             </el-input>
-                            <InputError :message="form.errors[`sales.${index}.quantity`]" />
+                            <InputError :message="form.errors[`products.${index}.quantity`]" />
                         </div>
                     </section>
                 </form>
@@ -113,7 +180,7 @@ export default {
     data() {
         const form = useForm({
             folio: null,
-            sales: []
+            products: []
         });
 
         return {
@@ -121,9 +188,10 @@ export default {
             products: [],
             // modales
             showEditModal: false,
+            showInstallmentModal: false,
             showRefundConfirm: false,
+            saleToSeeInstallments: null,
             saleFolioToRefund: null,
-            saleFolioToEdit: null,
             // cargas
             refunding: false,
             editing: false,
@@ -150,10 +218,32 @@ export default {
             // Obtener las ventas del primer día (si hay múltiples días, se debe ajustar esta parte)
             const sales = Object.values(this.day_sales)[0].sales;
 
-            return  Object.values(sales);
-        }
+            return Object.values(sales);
+        },
+        statusStyles() {
+            const status = this.saleToSeeInstallments.credit_data.status;
+            if (status === 'Pendiente') {
+                return 'bg-[#F2FEA8] text-[#794A04]';
+            } else if (status === 'Parcial') {
+                return 'bg-[#DADEFD] text-[#080592]';
+            } else if (status === 'Pagado') {
+                return 'bg-[#C4FBAA] text-[#0AA91A]';
+            }
+            return 'bg-[#C4FBAA] text-[#0AA91A]';
+        },
     },
     methods: {
+        calcRemainingDebt(index) {
+            const totalSale = this.saleToSeeInstallments.total_sale;
+            const installments = this.saleToSeeInstallments.credit_data.installments;
+
+            let totalPaid = 0;
+            for (let i = 0; i <= index; i++) {
+                totalPaid += installments[i].amount;
+            }
+
+            return totalSale - totalPaid;
+        },
         formatSalesProductId() {
             // Obtener las ventas del primer día (si hay múltiples días, se debe ajustar esta parte)
             const sales = Object.values(this.day_sales)[0].sales;
@@ -170,15 +260,17 @@ export default {
                 })
             });
         },
+        closeInstallmentModal() {
+            this.showInstallmentModal = false;
+        },
         closeEditModal() {
             this.showEditModal = false;
         },
         openEditModal(saleFolio) {
-            this.saleFolioToEdit = saleFolio;
-
             // Preparar form con una copia profunda de las ventas seleccionadas
-            this.form.folio = saleFolio;
-            this.form.sales = JSON.parse(JSON.stringify(this.getGroupedSales[saleFolio]));
+            let sale = this.getGroupedSales.find(item => item.folio == saleFolio);
+            this.form.folio = sale.folio;
+            this.form.products = JSON.parse(JSON.stringify(sale.products));
 
             // Abrir modal
             this.showEditModal = true;
@@ -188,13 +280,14 @@ export default {
             this.saleFolioToRefund = saleFolio;
         },
         openInstallmentModal(saleFolio) {
-            this.showRefundConfirm = true;
-            this.saleFolioToRefund = saleFolio;
+            this.showInstallmentModal = true;
+            let sale = this.getGroupedSales.find(item => item.folio == saleFolio);
+            this.saleToSeeInstallments = sale;
         },
         handleShowModal(modal, saleFolio) {
             if (modal == 'edit') this.openEditModal(saleFolio);
             else if (modal == 'refund') this.openRefundModal(saleFolio);
-            else if (modal == 'installments') this.openInstallmentModal(saleFolio);
+            else if (modal == 'installment') this.openInstallmentModal(saleFolio);
         },
         update() {
             this.editing = true;
@@ -222,6 +315,9 @@ export default {
                 }
             });
         },
+        formatDateTime(dateTimeString) {
+            return format(parseISO(dateTimeString), 'dd MMM yy, hh:mm a', { locale: es });
+        },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },
@@ -239,8 +335,9 @@ export default {
                     this.showRefundConfirm = false;
 
                     // actualizar elementos de la vista (reactividad)
-                    this.getGroupedSales[this.saleFolioToRefund].forEach(element => {
-                        element.refunded_at = 1;
+                    let sale = this.getGroupedSales.find(item => item.folio == this.saleFolioToRefund);
+                    sale.products.forEach(element => {
+                        element.refunded_at = new Date().toISOString();
                     });
 
                     this.$notify({
