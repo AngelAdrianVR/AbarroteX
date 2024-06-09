@@ -43,7 +43,7 @@ export default {
         return {
             selection: null, //propiedad requeridas para una venta en linea. (id)
             price: 0, //propiedad requeridas para una venta en linea.
-            is_local: false, //propiedad requeridas para una venta en linea.
+            isLocal: false, //propiedad requeridas para una venta en linea.
             quantity: 1, //propiedad requeridas para una venta en linea.
             error_validation: false,
             last_product_index_selected: null //guarda el producto seleccionado para habilitarlo de nuevo si se cambia
@@ -70,7 +70,7 @@ export default {
                 this.selection = null;
             }
             this.price = this.init_state.price;
-            this.is_local = this.init_state.isLocal;
+            this.isLocal = this.init_state.isLocal;
             this.quantity = this.init_state.quantity;
         }
     },
@@ -108,7 +108,7 @@ export default {
                         name: this.products[productSelectedIndex].name,
                         product_id: this.products[productSelectedIndex].id,
                         price: this.products[productSelectedIndex].price,
-                        is_local: this.products[productSelectedIndex].isLocal,
+                        isLocal: this.products[productSelectedIndex].isLocal,
                         quantity: this.quantity,
                         image_url: this.products[productSelectedIndex].image_url,
                     });
