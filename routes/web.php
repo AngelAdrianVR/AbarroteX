@@ -13,6 +13,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
+use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
@@ -237,6 +238,11 @@ Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'get
 //Tutorial routes-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('tutorials', TutorialController::class)->middleware('auth');
+
+
+//Abonos routes-----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('installments', InstallmentController::class)->middleware('auth');
 
 
 //Banners online store routes------------------------------------------------------------------------------------------------------

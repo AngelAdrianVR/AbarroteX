@@ -309,11 +309,11 @@ class SaleController extends Controller
         // Validar los datos del request
         $request->validate([
             'folio' => 'required|string',
-            'sales' => 'required|array',
-            'sales.*.id' => 'required|integer|exists:sales,id',
-            'sales.*.product_id' => 'required|string',
-            'sales.*.quantity' => 'required|numeric|min:1',
-            'sales.*.current_price' => 'required|numeric|min:0',
+            'products' => 'required|array',
+            'products.*.id' => 'required|integer|exists:sales,id',
+            'products.*.product_id' => 'required|string',
+            'products.*.quantity' => 'required|numeric|min:1',
+            'products.*.current_price' => 'required|numeric|min:0',
         ], [
             'required' => 'llenar campo'
         ]);
@@ -324,7 +324,7 @@ class SaleController extends Controller
             'folio' => $request->folio,
         ])->get();
 
-        $sales_in_request = collect($request->sales);
+        $products_in_request = collect($request->products);
 
         // Obtener información de la caja registradora y control de inventario
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
@@ -334,8 +334,8 @@ class SaleController extends Controller
         $total_diff_amount = 0;
 
         // Procesar cada venta y actualizar los productos e inventario
-        $sales->each(function ($sale) use ($sales_in_request, $is_inventory_on, &$total_diff_amount) {
-            $sale_updated = $sales_in_request->firstWhere('id', $sale->id);
+        $sales->each(function ($sale) use ($products_in_request, $is_inventory_on, &$total_diff_amount) {
+            $sale_updated = $products_in_request->firstWhere('id', $sale->id);
 
             if ($sale_updated) {
                 $old_quantity = $sale->quantity;
@@ -361,10 +361,16 @@ class SaleController extends Controller
                             $new_product = $sale->is_global_product
                                 ? GlobalProductStore::find($product_id)
                                 : Product::find($product_id);
-                            $new_product->decrement('current_stock', $new_quantity);
+
+                            $new_stock = $new_product->current_stock - $new_quantity;
+                            $new_product->current_stock = max($new_stock, 0);
+                            $new_product->save();
                         } else {
                             $current_product->increment('current_stock', $old_quantity);
-                            $current_product->decrement('current_stock', $new_quantity);
+
+                            $new_stock = $current_product->current_stock - $new_quantity;
+                            $current_product->current_stock = max($new_stock, 0);
+                            $current_product->save();
                         }
                     }
                 }
@@ -416,6 +422,12 @@ class SaleController extends Controller
 
             $salesByFolio = $sales->groupBy('folio')->map(function ($folioSales) {
                 $firstSale = $folioSales->first();
+
+                // Calcular el total de todos los productos en la venta
+                $totalSale = $folioSales->sum(function ($sale) {
+                    return $sale->quantity * $sale->current_price;
+                });
+
                 return [
                     'products' => $folioSales->map(function ($sale) {
                         return [
@@ -435,6 +447,7 @@ class SaleController extends Controller
                     'credit_data' => $firstSale->credit_data,
                     'folio' => $firstSale->folio,
                     'user_name' => $firstSale->user->name,
+                    'total_sale' => $totalSale,
                 ];
             });
 
@@ -462,6 +475,7 @@ class SaleController extends Controller
                 // Agregar credit_data a las ventas del mismo folio
                 $sales->where('folio', $folio)->each(function ($sale) use ($creditData, $installments) {
                     $sale->credit_data = [
+                        'id' => $creditData->id,
                         'expired_date' => $creditData->expired_date,
                         'status' => $creditData->status,
                         'installments' => $installments,

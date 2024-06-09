@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Editar produco">
         <div class="px-3 md:px-10 py-7">
-            <Back />
+            <Back :to="route('products.show', product.data)" />
 
             <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid grid-cols-2 gap-x-3">
