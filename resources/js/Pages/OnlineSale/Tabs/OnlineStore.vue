@@ -67,7 +67,10 @@
     </div>
 
     <div class="text-right">
-        <PrimaryButton :disabled="logoForm.processing || bannerForm.processing" @click="update">Guardar</PrimaryButton>
+        <PrimaryButton :disabled="logoForm.processing || bannerForm.processing" @click="update">
+          <i v-if="logoForm.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+          Guardar
+        </PrimaryButton>
     </div>
   </section>
 
@@ -231,8 +234,20 @@
       </el-select>
     </div>
 
-    <div class="text-right mt-4">
-      <PrimaryButton @click="updateOnlineSalesInfo">Guadar cambios</PrimaryButton>
+    <!-- Inventario ---------------------------------->
+    <!-- ------------------------------------------------- -->
+    <h2 class="font-bold mb-5 mt-8">Inventario</h2>
+    
+    <div class="flex items-center space-x-2">
+      <p class="mx-7 text-sm">Actualiza el inventario automáticamente al hacer una venta y toma en cuenta el inventario</p>
+      <el-switch v-model="onlineStoreForm.online_store_properties.inventory" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+    </div>
+
+    <div class="text-right mt-7 md:mx-7">
+      <PrimaryButton :disabled="onlineStoreForm.processing" @click="updateOnlineSalesInfo">
+        <i v-if="onlineStoreForm.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+        Guadar cambios
+      </PrimaryButton>
     </div>
 
   </section>
@@ -271,6 +286,7 @@ export default {
           min_free_delivery: this.$page.props.auth.user.store.online_store_properties?.min_free_delivery ?? null,
           enabled_free_delivery: this.$page.props.auth.user.store.online_store_properties?.enabled_free_delivery ?? null,
           online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties?.online_sales_cash_register ?? null,
+          inventory: !! this.$page.props.auth.user.store.online_store_properties?.inventory,
       }
     });
 
@@ -299,12 +315,6 @@ export default {
     update() {
       this.updateBanners();
       this.updateLogo();
-      this.$notify({
-          title: "Correcto",
-          message: "Se han actualizado la media",
-          type: "success",
-      });
-      // window.location.reload();
     },
     updateOnlineSalesInfo() {
       this.onlineStoreForm.put(route('stores.update-online-sales-info', this.$page.props.auth.user.store.id), {
@@ -329,6 +339,13 @@ export default {
     updateLogo() {
         this.logoForm.post(route("logos.update-with-media", this.logo.id), {
           method: '_put',
+          onSuccess: () => {
+            this.$notify({
+                title: "Correcto",
+                message: "¡Banners y Logo actualizados!",
+                type: "success",
+            });
+          }
         });
     },
     getMediaUrl(collectionName) {

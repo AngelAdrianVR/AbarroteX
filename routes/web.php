@@ -254,7 +254,7 @@ Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWit
 //online sales routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
 Route::resource('online-sales', OnlineSaleController::class);
-Route::get('online-sales-client-index/{store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
+Route::get('online-sales-client-index/{encoded_store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
 Route::post('online-sales/{offset}{limit}/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
 Route::get('online-sales-show-local-product/{product_id}', [OnlineSaleController::class, 'ShowLocalProduct'])->name('online-sales.show-local-product');
 Route::get('online-sales-show-global-product/{global_product_id}', [OnlineSaleController::class, 'ShowGlobalProduct'])->name('online-sales.show-global-product');

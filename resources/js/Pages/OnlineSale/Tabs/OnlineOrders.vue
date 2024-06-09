@@ -109,6 +109,10 @@
                                             </svg>
                                             <span class="text-xs">Ver</span>
                                         </el-dropdown-item>
+                                        <el-dropdown-item v-if="online_order.phone" :command="'whatsapp|' + online_order.phone">
+                                            <i class="fa-brands fa-whatsapp text-green-500"></i>
+                                            <span class="text-xs">Mandar whatapp</span>
+                                        </el-dropdown-item>
                                         <!-- <el-dropdown-item :command="'edit|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -140,8 +144,8 @@
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <!-- <button v-else-if="localOrders?.length && totalOnlineOrders > 20 && localOrders?.length < totalOnlineOrders && !filtered"
-                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button> -->
+            <button v-else-if="localOrders?.length && totalOnlineOrders > 5 && localOrders?.length < totalOnlineOrders && !filtered"
+                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
         </div>
     </div>
 
@@ -183,6 +187,21 @@
                     <InputLabel value="Colonia*" class="ml-3 mb-1" />
                     <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
                     <InputError :message="form.errors.suburb" />
+                </div>
+
+                <div>
+                    <InputLabel class="mb-1 ml-2" value="Código postal" />
+                    <el-input v-model="form.postal_code"
+                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                    :parser="(value) => value.replace(/\D/g, '')" maxlength="6" clearable
+                    placeholder="Escribe el código postal" />
+                    <InputError :message="form.errors.postal_code" />
+                </div>
+
+                <div>
+                    <InputLabel value="Estado*" class="ml-3 mb-1" />
+                    <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan" :maxlength="255" clearable />
+                    <InputError :message="form.errors.polity_state" />
                 </div>
 
                 <div>
@@ -283,6 +302,8 @@ data() {
         street: null,
         ext_number: null,
         int_number: null,
+        postal_code: null, 
+        polity_state: null,
         delivery_price: null, //precio de envío
         total: 0,
         store_id: this.$page.props.auth.user.store_id,
@@ -375,6 +396,8 @@ methods:{
         } else if (commandName == 'delete') {
             this.showDeleteConfirm = true;
             this.itemIdToDelete = data;
+        } else if (commandName == 'whatsapp') {
+            this.whatsappMessage(data);
         }
     },
     async updateStatus(status, orderId) {
@@ -406,7 +429,7 @@ methods:{
             const response = await axios.post(route('online-sales.get-by-page', this.currentPage));
 
             if (response.status === 200) {
-                this.localOrders.push(response.data.items);
+                this.localOrders = [...this.localOrders, ...response.data.items];
                 this.currentPage++;
             }
         } catch (error) {
@@ -530,6 +553,11 @@ methods:{
         this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery 
         ? 0 
         : parseFloat(storeProperties?.delivery_price);
+    },
+    whatsappMessage(phone) {
+        const text = encodeURIComponent('Hola! hemos recibido tu pedido en línea');
+        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
+        window.open(url, '_blank');    
     }
 },
 watch: {
