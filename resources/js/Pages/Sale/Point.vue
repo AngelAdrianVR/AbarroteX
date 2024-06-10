@@ -295,7 +295,10 @@
               </p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
-                <PrimaryButton @click="store" class="!rounded-full">Aceptar</PrimaryButton>
+                <PrimaryButton :disabled="storeProcessing" @click="store" class="!rounded-full">
+                  <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                  Aceptar
+                </PrimaryButton>
                 <!-- <PrimaryButton
                   :disabled="storeProcessing || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived"
                   @click="store" class="!rounded-full">Aceptar</PrimaryButton> boton con validaciones de deshabilitar-->

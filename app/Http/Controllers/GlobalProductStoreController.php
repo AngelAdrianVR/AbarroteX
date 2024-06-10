@@ -35,22 +35,28 @@ class GlobalProductStoreController extends Controller
     }
 
 
-    public function show($global_product_store_id)
+    public function show($encoded_global_product_store_id)
     {
+        // Decodificar el ID
+        $decoded_global_product_id = base64_decode($encoded_global_product_store_id);
+
         $cash_register = auth()->user()->cashRegister;
         $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($global_product_store_id);
+            ->findOrFail($decoded_global_product_id);
 
         return inertia('GlobalProductStore/Show', compact('global_product_store', 'cash_register'));
     }
 
 
-    public function edit($global_product_store_id)
+    public function edit($encoded_global_product_store_id)
     {
+        // Decodificar el ID
+        $decoded_global_product_id = base64_decode($encoded_global_product_store_id);
+
         $global_product_store = GlobalProductStore::with('globalProduct.media')
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($global_product_store_id);
+            ->findOrFail($decoded_global_product_id);
         $store = auth()->user()->store;
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
@@ -88,7 +94,6 @@ class GlobalProductStoreController extends Controller
 
         $global_product_store->update($request->except('imageCover'));
 
-        // return to_route('global-product-store.show', $global_product_store->id); descomentar cuando este listo el show de global product store
         return to_route('products.index');
     }
 

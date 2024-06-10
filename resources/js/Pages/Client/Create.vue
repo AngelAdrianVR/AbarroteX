@@ -112,7 +112,10 @@
                 </div>
 
                 <div class="col-span-full text-right mt-3">
-                    <PrimaryButton :disabled="form.processing">Guardar</PrimaryButton>
+                    <PrimaryButton :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Guardar
+                    </PrimaryButton>
                 </div>
             </form>
         </div>

@@ -76,19 +76,17 @@
             <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
               (cash_register.started_cash + cutForm.totalSaleForCashCut +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-            <p class="text-gray99"><span class="text-gray99 mr-3"><i
-                  class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+            <p class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                     cash_register.started_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
             <div v-if="cutLoading">
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </div>
 
-            <p v-else class="text-gray99 pb-5"><span class="text-gray99 mr-3"><i
-                  class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+            <p v-else class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                     cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
 
             <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
-              <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
+              <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus'"
                 class="fa-solid text-xs px-1"></i>
               <span class="text-gray99 mr-3">$</span>{{
                 cashRegisterMovement.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
@@ -132,13 +130,13 @@
             <div class="flex justify-center space-x-4 my-2">
               <el-tooltip content="Cancelar" placement="left">
                 <button @click="edit_max_cash = false;"
-                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
+                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150 border border-grayD9">
                   <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
                 </button>
               </el-tooltip>
               <el-tooltip content="Guardar" placement="right">
                 <button @click="update"
-                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
+                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150 border border-grayD9"><i
                     class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
               </el-tooltip>
             </div>
@@ -161,13 +159,13 @@
             <div class="flex justify-center space-x-4 my-2">
               <el-tooltip content="Cancelar" placement="left">
                 <button @click="edit_cash_register_name = false;"
-                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150">
+                  class="text-gray-600 text-[11px] bg-gray-100 transition-all rounded-full size-7 duration-150 border border-grayD9">
                   <i class="fa-solid fa-x pr-[1px] pt-[5px]"></i>
                 </button>
               </el-tooltip>
               <el-tooltip content="Guardar" placement="right">
                 <button @click="update"
-                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150"><i
+                  class="text-green-600 text-[11px] bg-green-100 transition-all size-7 rounded-full duration-150 border border-grayD9"><i
                     class="fa-solid fa-check pr-[1px] pt-[5px]"></i></button>
               </el-tooltip>
             </div>

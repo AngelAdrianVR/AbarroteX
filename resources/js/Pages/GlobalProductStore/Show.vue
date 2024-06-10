@@ -6,7 +6,7 @@
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
                     <ThirthButton v-if="isInventoryOn" @click="openEntryModal">Entrada de producto</ThirthButton>
-                    <PrimaryButton @click="$inertia.get(route('global-product-store.edit', global_product_store.id))"
+                    <PrimaryButton @click="$inertia.get(route('global-product-store.edit', encodedId))"
                         class="!rounded-full">Editar</PrimaryButton>
                 </div>
             </div>
@@ -259,6 +259,7 @@ export default {
         });
         return {
             form,
+            encodedId: null, //id codificado
             currentTab: 1,
             searchQuery: this.global_product_store.global_product.name,
             searchFocus: false,
@@ -492,11 +493,16 @@ export default {
                 const formattedLines = lines.map(line => `• ${line.trim()}`);
                 this.formattedDescription = formattedLines.join('\n');
             }
-        }
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            this.encodedId = encodedId;
+        },
     },
     mounted() {
         this.fetchHistory();
         this.formatDescription();
+        this.encodeId(this.global_product_store.id);
     }
 }
 </script>

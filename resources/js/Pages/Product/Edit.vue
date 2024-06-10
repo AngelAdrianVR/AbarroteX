@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Editar produco">
         <div class="px-3 md:px-10 py-7">
-            <Back :to="route('products.show', product.data)" />
+            <Back />
 
             <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid grid-cols-2 gap-x-3">
@@ -120,7 +120,10 @@
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar cambios</PrimaryButton>
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Guardar cambios
+                    </PrimaryButton>
                 </div>
             </form>
         </div>

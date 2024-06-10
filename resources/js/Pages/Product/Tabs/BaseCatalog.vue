@@ -76,7 +76,9 @@
                                     class="rounded-full size-9 border border-[#c4c4c4] flex items-center justify-center"><i
                                         class="fa-solid fa-rotate-left"></i></button>
                             </el-tooltip>
-                            <PrimaryButton :disabled="processing" @click="showConfirmModal = true">Guardar cambios
+                            <PrimaryButton :disabled="processing" @click="showConfirmModal = true">
+                                <i v-if="processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                                Guardar cambios
                             </PrimaryButton>
                         </div>
                     </transition>
@@ -125,7 +127,10 @@
             <template #footer>
                 <div class="flex items-center space-x-1">
                     <CancelButton @click="showConfirmModal = false" :disabled="processing">Cancelar</CancelButton>
-                    <PrimaryButton @click="transferProducts" :disabled="processing">Si, continuar</PrimaryButton>
+                    <PrimaryButton @click="transferProducts" :disabled="processing">
+                        <i v-if="processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Si, continuar
+                    </PrimaryButton>
                 </div>
             </template>
         </ConfirmationModal>

@@ -19,7 +19,7 @@
             <!-- Productos -->
             <main class="flex flex-col space-y-5 lg:mx-16 mt-10">
                 <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item"
-                    @show-modal="handleShowModal" />
+                    @show-modal="handleShowModal" :isOutOfCashCut="is_out_of_cash_cut" />
             </main>
         </div>
 
@@ -244,6 +244,7 @@ export default {
     },
     props: {
         day_sales: Object,
+        is_out_of_cash_cut: Boolean //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
     },
     computed: {
         getGroupedSales() {

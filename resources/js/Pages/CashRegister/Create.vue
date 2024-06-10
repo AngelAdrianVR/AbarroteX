@@ -37,7 +37,10 @@
                     </div>
 
                     <div class="col-span-2 text-right mt-5">
-                        <PrimaryButton :disabled="form.processing">Crear caja</PrimaryButton>
+                        <PrimaryButton :disabled="form.processing">
+                            <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                            Crear caja
+                        </PrimaryButton>
                     </div>
                 </form>
 

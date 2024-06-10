@@ -47,16 +47,25 @@ class ClientController extends Controller
     }
 
     
-    public function show(Client $client)
+    public function show($encoded_client_id)
     {
+        // Decodificar el ID
+        $decoded_client_id = base64_decode($encoded_client_id);
+
+        $client = Client::find($decoded_client_id);
         $clients = Client::where('store_id', auth()->user()->store_id)->latest()->get(['id', 'name']);
 
         return inertia('Client/Show', compact('client', 'clients'));
     }
 
     
-    public function edit(Client $client)
+    public function edit($encoded_client_id)
     {
+        // Decodificar el ID
+        $decoded_client_id = base64_decode($encoded_client_id);
+
+        $client = Client::find($decoded_client_id);
+        
         return inertia('Client/Edit', compact('client'));
     }
 

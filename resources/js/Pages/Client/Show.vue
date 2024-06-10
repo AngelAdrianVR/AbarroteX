@@ -1,7 +1,9 @@
 <template>
     <AppLayout :title="'Detalles del cliente'">
         <section class="mx-2 lg:mx-10 mt-7">
-            <h1 class="font-bold">Detalles del cliente</h1>
+            <Back :to="route('clients.index')" />
+
+            <h1 class="font-bold mt-4">Detalles del cliente</h1>
 
             <article class="flex items-center space-x-3 justify-between mt-5">
                 <el-select @change="$inertia.get(route('clients.show', clientId))" class="!w-40 md:!w-60" filterable v-model="clientId" clearable placeholder="Buscar cliente"
@@ -11,7 +13,7 @@
                 </el-select>
                 <div class="flex items-center space-x-3">
                     <ThirthButton>Registrar abono</ThirthButton>
-                    <PrimaryButton @click="$inertia.get(route('clients.edit', client.id))">Editar</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('clients.edit', encodedId))">Editar</PrimaryButton>
                 </div>
             </article>
 
@@ -57,6 +59,7 @@ data() {
     return {
         clientId: null, //guarda el id del cliente seleccionado para ingresar a sus detalles
         activeTab: '1',
+        encodedId: null //id codificado
     }
 },
 components:{
@@ -83,10 +86,15 @@ methods:{
         if (tab) {
             this.activeTab = tab;
         }
-    }
+    },
+    encodeId(id) {
+        const encodedId = btoa(id.toString());
+        this.encodedId = encodedId;
+    },
 },
 mounted() {
     this.setActiveTabFromURL();
+    this.encodeId(this.client.id);
 }
 };
 </script>
