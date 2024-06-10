@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\CreditSaleData;
@@ -75,7 +76,18 @@ class SaleController extends Controller
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $this->getGroupedSalesByDate($sales, true);
 
-        return inertia('Sale/Show', compact('day_sales'));
+        //evalúa si la venta está dentro del corte---------------
+        $last_cash_cut = CashCut::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cashRegisterId)->latest()->first();
+
+        // si el corte tiene una fecha posterior a la venta entonces esta fuera de corte
+        // y no se muestran las opciones de editar y reembolso.
+        if ( $last_cash_cut->created_at > $sales[0]->created_at ) { 
+            $is_out_of_cash_cut = true;
+        } else {
+            $is_out_of_cash_cut = false;
+        }
+
+        return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut'));
     }
 
     public function edit(Sale $sale)

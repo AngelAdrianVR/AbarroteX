@@ -50,11 +50,35 @@
                 </div>
             </section>
         </div>
+
+        <!-- Confirmación de contraseña de usuario -->
+        <ConfirmationModal :show="showPasswordConfirm" @close="showPasswordConfirm = false">
+            <template #title>
+                <h1 class="text-center">¡Se ha creado un nuevo usuario!</h1>
+            </template>
+            <template #content>
+                <h2 class="text-center">IMPORTANTE</h2>
+                <p class="text-center my-5">
+                    El nuevo usuario puede iniciar sesión ingresando el correo registrado y la siguiente
+                    contraseña que podrá cambiar una vez logueado.
+                </p>
+                <p class="text-center font-bold">Contraseña: ezyventas</p>
+                <div class="border-t border-grayD9 w-40 mx-auto"></div>
+                <div class="border-t border-grayD9 w-32 mx-auto mt-1"></div>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <PrimaryButton @click="$inertia.get(route('settings.index', {tab: 2}))">De acuerdo</PrimaryButton>
+                </div>
+            </template>
+        </ConfirmationModal>
+        <!-- Confirmación de contraseña de usuario -->
     </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -71,10 +95,12 @@ export default {
 
         return {
             form,
+            showPasswordConfirm: true,
         }
     },
     components: {
         AppLayout,
+        ConfirmationModal,
         PrimaryButton,
         InputLabel,
         InputError,
@@ -92,6 +118,7 @@ export default {
                         message: "Se ha creado un nuevo usuario. Su contraseña es: ezyventas",
                         type: "success",
                     });
+                    this.showPasswordConfirm = true;
                 },
             });
         },

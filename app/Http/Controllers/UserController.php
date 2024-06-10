@@ -31,8 +31,8 @@ class UserController extends Controller
             'store_id' => auth()->user()->store_id, 
             'password' => bcrypt('ezyventas'), 
         ]);
-
-        return to_route('settings.index', ['tab' => 2]);
+        
+        // return to_route('settings.index', ['tab' => 2]);
     }
 
 
