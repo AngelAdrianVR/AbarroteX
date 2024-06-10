@@ -132,7 +132,7 @@
                             <InputError :message="form.errors[`products.${index}.product_id`]" />
                         </div>
                         <div class="w-1/3 md:w-1/4">
-                            <InputLabel value="Precio por unidad" />
+                            <InputLabel value="$ por unidad" />
                             <el-input v-model.number="product.current_price" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>

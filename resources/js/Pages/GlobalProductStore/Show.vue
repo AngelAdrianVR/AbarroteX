@@ -31,12 +31,12 @@
             </div>
 
             <!-- Info de producto -->
-            <div class="lg:grid grid-cols-3 gap-x-12 mx-10">
+            <div class="lg:grid grid-cols-3 gap-x-12 mx-2 md:mx-10">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
-                    <figure class="size-96 border border-grayD9 rounded-lg flex justify-center items-center">
+                    <figure class="h-72 md:h-96 border border-grayD9 rounded-lg flex justify-center items-center">
                         <img v-if="global_product_store.global_product.media?.length"
-                            class="h-[380px] mx-auto object-contain"
+                            class="h-64 md:h-80 mx-auto object-contain"
                             :src="global_product_store.global_product.media[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
@@ -67,7 +67,7 @@
                     <!-- pestaña 1 Informacion de producto -->
                     <div v-if="currentTab == 1" class="mt-7 md:mx-16 text-sm lg:text-base">
                         <div class="lg:flex justify-between items-center">
-                            <div class="flex space-x-4 items-center">
+                            <div class="md:flex space-y-1 md:space-x-4 items-center">
                                 <p class="text-gray37 flex items-center">
                                     <span class="mr-2">Código</span>
                                     <span class="font-bold">{{ global_product_store.global_product?.code ?? 'N/A'
@@ -84,10 +84,10 @@
                                         </button>
                                     </el-tooltip>
                                 </p>
-                                <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
+                                <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
                                 <p class="text-gray37">Categoría: <span class="font-bold">{{
                                     global_product_store.global_product?.category?.name }}</span></p>
-                                <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
+                                <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
                                 <p class="text-gray37">Proveedor: <span class="font-bold">{{
                                     global_product_store.global_product?.brand?.name }}</span></p>
                             </div>
