@@ -395,7 +395,7 @@ export default {
         async fetchDataForProductsView() {
             try {
                 this.loading = true;
-                const response = await axios.get(route('products.get-data-for-products-view'));
+                const response = await axios.post(route('products.get-data-for-products-view'), {page: this.currentPage});
 
                 if (response.status === 200) {
                     this.products = response.data.products;
@@ -514,8 +514,16 @@ export default {
                 this.loading = false;
             }
         },
+        getPageFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const page = params.get('page');
+            if (page) {
+                this.currentPage = parseInt(page);
+            }
+        }
     },
     mounted() {
+        this.getPageFromUrl(); //obtiene la variable page de la url.
         this.fetchDataForProductsView();
     }
 }

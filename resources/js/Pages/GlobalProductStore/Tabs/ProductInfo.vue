@@ -17,10 +17,10 @@
                     </el-tooltip>
                 </p>
                 <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
-                <p class="text-gray37">Categoría: <span class="font-bold">{{ product.global_product.category?.name
+                <p class="text-gray37">Categoría: <span class="font-bold">{{ product.global_product.category?.name ?? 'N/A'
                         }}</span></p>
                 <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
-                <p class="text-gray37">Proveedor: <span class="font-bold">{{ product.global_product.brand?.name
+                <p class="text-gray37">Proveedor: <span class="font-bold">{{ product.global_product.brand?.name ?? 'N/A'
                         }}</span></p>
             </div>
         </div>
@@ -33,18 +33,18 @@
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de compra:</p>
-                <p class="text-right font-bold">{{ product.global_product.cost ? '$' + product.global_product.cost : '-'
+                <p class="text-right font-bold">{{ product.global_product.cost ? '$' + product.global_product.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '-'
                     }}
                 </p>
             </div>
             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de venta: </p>
-                <p class="text-right font-bold">${{ product.global_product.public_price }}</p>
+                <p class="text-right font-bold">${{ product.global_product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
             </div>
             <div v-if="product.current_stock >= product.min_stock || !isInventoryOn"
                 class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Existencias: </p>
-                <p class="text-right font-bold text-[#5FCB1F]">{{ product.current_stock ?? '-' }}
+                <p class="text-right font-bold text-[#5FCB1F]">{{ product.current_stock?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}
                 </p>
             </div>
             <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">
@@ -67,9 +67,9 @@
                 <p class="text-right font-bold">{{ product.max_stock ?? '-' }}</p>
             </div>
             <!-- Descripción del producto -->
-            <div v-if="product.description">
+            <div v-if="product.description" class="md:!w-[600px]">
                 <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
-                <div class="grid grid-cols-3 md:grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
+                <div class="grid grid-cols-3 md:grid-cols-2 items-center rounded-md px-5 py-1">
                     <p class="text-gray37">Descripción: </p>
                     <div>
                         <p class="whitespace-break-spaces col-span-2 md:col-span-1">{{ formattedDescription }}</p>

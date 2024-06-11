@@ -92,7 +92,7 @@ Route::get('products-get-all-until-page/{currentPage}', [ProductController::clas
 Route::post('products/import', [ProductController::class, 'import'])->name('products.import')->middleware('auth');
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
-Route::get('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
+Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 
 
 //global-product-store routes----------------------------------------------------------------------------------

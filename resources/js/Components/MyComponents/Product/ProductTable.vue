@@ -27,7 +27,7 @@
                         {{ product.global_product_id ? product.global_product?.name : product.name }}
                     </td>
                     <td>
-                        ${{ product.public_price }}
+                        ${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </td>
                     <td>
                         <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
