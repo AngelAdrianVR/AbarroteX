@@ -240,11 +240,13 @@ export default {
             });
         },
         handleProductSelected(product) {
+            //si hay error al mostrar producto de catalogo, comentar linea de abajo y descomentar las de if y else.
+            const encodedId = btoa(product.id.toString());
             if (product.global_product_id) {
-                let encodedId = btoa(product.global_product_id.toString());
+                // let encodedId = btoa(product.global_product_id.toString());
                 this.$inertia.get(route('global-product-store.show', encodedId))
             } else {
-                let encodedId = btoa(product.id.toString());
+                // let encodedId = btoa(product.id.toString());
                 this.$inertia.get(route('products.show', encodedId))
             }
         },

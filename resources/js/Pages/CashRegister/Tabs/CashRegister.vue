@@ -1,13 +1,13 @@
 <template>
   <Loading v-if="loading" />
   <div v-else class="min-h-32">
-    <div class="text-center">
+    <div v-if="total_cash_registers > 1" class="text-center">
       <p v-if="!cash_register.is_active" class="text-red-500 px-2 bg-red-50 self-start">Caja deshabilitada</p>
       <p v-else class="text-green-500 px-2 bg-green-50 self-start">Caja Habilitada</p>
     </div>
     <section class="flex flex-col md:flex-row justify-between space-y-2 md:space-x-3 mt-2">
       <!-- Boton para activar/desactivar caja registradora -->
-      <el-tooltip v-if="canDelete" :content="cash_register.is_active 
+      <el-tooltip v-if="canDelete && total_cash_registers > 1" :content="cash_register.is_active 
         ? 'Desactivar caja. Si no planeas utilizar esta caja, puedes desactivarla para evitar que los usuarios accedan a ella.' 
         : 'Habilitar caja para volver a ponerla en funcionamiento'"
         placement="right">
@@ -23,6 +23,8 @@
           </p>
         </div>
       </el-tooltip>
+      <!-- span vacio para acomodar los botones del lado derecho cuando no hay opcion de habilitar y deshabilitar caja (mala praxis?) -->
+      <span v-else></span>
 
       <div class="flex space-x-3 items-center self-start">
         <!-- Eliminar caja -->
@@ -48,7 +50,7 @@
     </section>
 
     <!-- Información de caja -->
-    <section class="lg:flex lg:space-x-7 md:w-[90%] mx-auto text-sm mt-7">
+    <section class="lg:flex lg:space-x-7 md:w-full xl:w-[90%] mx-auto text-sm mt-7">
       <div class="w-full border border-grayD9 rounded-lg self-start">
         <div class="p-4 flex items-center space-x-2">
           <div class="w-3/4 space-y-1">
@@ -109,7 +111,7 @@
       </div>
 
       <!-- Lado derecho -->
-      <div class="w-96 lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 mt-4 lg:mt-0">
+      <div class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 my-4 lg:mt-0">
         <p class="font-bold text-center">Ajustes generales</p>
         <!-- Editar cantidad maxima permitida en caja -->
         <div v-if="isMaxCashOn" class="py-3 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
