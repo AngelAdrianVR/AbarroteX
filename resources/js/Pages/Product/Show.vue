@@ -31,24 +31,22 @@
             <div class="mt-5">
                 <Back :to="route('products.index')" />
             </div>
-
             <!-- Info de producto -->
-            <div class="lg:grid grid-cols-3 gap-x-12 mx-2 md:mx-10">
+            <div class="md:grid grid-cols-2 xl:grid-cols-3 gap-x-10 mx-2 md:mx-6">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
                     <figure class="border h-72 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
-                        <img v-if="product.data.imageCover?.length" class="h-64 md:h-80  mx-auto object-contain"
+                        <img v-if="product.data.imageCover?.length" class="h-64 md:h-80 mx-auto object-contain"
                             :src="product.data.imageCover[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                             <p class="text-sm text-gray-300">Imagen no disponible</p>
                         </div>
                     </figure>
-
                 </section>
 
                 <!-- informacion de producto -->
-                <section class="col-span-2 my-3 lg:my-0">
+                <section class="xl:col-span-2 my-3 lg:my-0">
                     <!-- Pestañas -->
                     <el-tabs class="" v-model="activeTab" @tab-click="updateURL">
                         <el-tab-pane label="Información del producto" name="1">
@@ -147,7 +145,7 @@ export default {
             // loading
             entryLoading: false,
             searchLoading: false,
-            // // control de inventario activado
+            // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // validaciones
             cashAmountMessage: null,
@@ -243,17 +241,11 @@ export default {
         },
         handleProductSelected(product) {
             if (product.global_product_id) {
-                this.$inertia.get(route('global-product-store.show', product.id))
+                let encodedId = btoa(product.global_product_id.toString());
+                this.$inertia.get(route('global-product-store.show', encodedId))
             } else {
-                this.$inertia.get(route('products.show', product.id))
-            }
-        },
-        formatDescription() {
-            if (this.product.data.description != null) {
-                const text = this.product.data.description;
-                const lines = text.split('\n');
-                const formattedLines = lines.map(line => `• ${line.trim()}`);
-                this.formattedDescription = formattedLines.join('\n');
+                let encodedId = btoa(product.id.toString());
+                this.$inertia.get(route('products.show', encodedId))
             }
         },
         encodeId(id) {
@@ -276,9 +268,7 @@ export default {
         },
     },
     mounted() {
-        // this.setActiveTabFromURL();
-        // this.fetchHistory();
-        // this.formatDescription();
+        this.setActiveTabFromURL();
         this.encodeId(this.product.data.id);
     },
 }

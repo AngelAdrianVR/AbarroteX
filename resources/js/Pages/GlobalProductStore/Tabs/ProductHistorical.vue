@@ -123,8 +123,8 @@ export default {
         async fetchHistory() {
             this.loading = true;
             try {
-                const response = await axios.get(route("products.fetch-history", {
-                    product_id: this.product.id,
+                const response = await axios.get(route("global-product-store.fetch-history", {
+                    global_product_store_id: this.product.id,
                     month: this.currentMonth,
                     year: this.currentYear,
                 }));

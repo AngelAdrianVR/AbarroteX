@@ -31,10 +31,10 @@
             </div>
 
             <!-- Info de producto -->
-            <div class="lg:grid grid-cols-3 gap-x-12 mx-2 md:mx-10">
+            <div class="md:grid grid-cols-2 xl:grid-cols-3 gap-x-10 mx-2 md:mx-6">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
-                    <figure class="h-72 md:h-96 border border-grayD9 rounded-lg flex justify-center items-center">
+                    <figure class="border h-72 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
                         <img v-if="global_product_store.global_product.media?.length"
                             class="h-64 md:h-80 mx-auto object-contain"
                             :src="global_product_store.global_product.media[0]?.original_url" alt="">
@@ -46,26 +46,19 @@
                 </section>
 
                 <!-- informacion de producto -->
-                <section class="col-span-2 my-3 lg:my-0">
+                <section class="xl:col-span-2 my-3 lg:my-0">
                     <!-- Pestañas -->
-                    <div
-                        class="lg:w-3/4 w-full flex items-center space-x-7 text-sm border-b border-gray4 lg:mx-16 mx-2 mb-5 contenedor transition-colors ease-linear duration-200">
-                        <div @click="currentTab = 1"
-                            :class="currentTab == 1 ? 'text-primary border-b-2 border-primary pb-1 px-3 font-bold' : 'px-3 pb-1 text-gray66 font-semibold'"
-                            class="flex items-center space-x-2 cursor-pointer text-base">
-                            <i class="fa-regular fa-file-lines"></i>
-                            <p>Información del producto</p>
-                        </div>
-                        <div @click="currentTab = 2"
-                            :class="currentTab == 2 ? 'text-primary border-b-2 border-primary pb-1 px-3 font-bold' : 'px-3 pb-1 text-gray66 font-semibold'"
-                            class="flex items-center space-x-2 cursor-pointer text-base">
-                            <i class="fa-regular fa-calendar-check"></i>
-                            <p>Historial de movimientos</p>
-                        </div>
-                    </div>
+                    <el-tabs class="" v-model="activeTab" @tab-click="updateURL">
+                        <el-tab-pane label="Información del producto" name="1">
+                            <ProductInfo :product="global_product_store" />
+                        </el-tab-pane>
+                        <el-tab-pane label="Historial de movimientos" name="2">
+                            <ProductHistorical :product="global_product_store" />
+                        </el-tab-pane>
+                    </el-tabs>
 
                     <!-- pestaña 1 Informacion de producto -->
-                    <div v-if="currentTab == 1" class="mt-7 md:mx-16 text-sm lg:text-base">
+                    <!-- <div v-if="currentTab == 1" class="mt-7 md:mx-16 text-sm lg:text-base">
                         <div class="lg:flex justify-between items-center">
                             <div class="md:flex space-y-1 md:space-x-4 items-center">
                                 <p class="text-gray37 flex items-center">
@@ -132,7 +125,6 @@
                                 <p class="text-gray37">Cantidad máxima:</p>
                                 <p class="text-right font-bold">{{ global_product_store.max_stock ?? '-' }}</p>
                             </div>
-                            <!-- Descripción del producto -->
                             <div v-if="global_product_store.description">
                                 <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
                                 <div class="grid grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
@@ -143,13 +135,12 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <!-- ---------------------------------- -->
 
 
                     <!-- pestaña 2 historial de producto -->
-                    <div v-if="currentTab == 2" class="mt-7 mx-16">
-                        <!-- estado de carga -->
+                    <!-- <div v-if="currentTab == 2" class="mt-7 mx-16">
                         <div v-if="loading" class="flex justify-center items-center py-10">
                             <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
                         </div>
@@ -175,7 +166,7 @@
                             </div>
                             <p v-else class="text-xs text-gray-500 mt-5 text-center">No hay actividad en esta fecha</p>
                         </div>
-                    </div>
+                    </div> -->
                     <!-- ---------------------------------- -->
                 </section>
             </div>
@@ -236,6 +227,8 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import ProductInfo from './Tabs/ProductInfo.vue';
+import ProductHistorical from './Tabs/ProductHistorical.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import Loading2 from '@/Components/MyComponents/Loading2.vue';
@@ -260,7 +253,7 @@ export default {
         return {
             form,
             encodedId: null, //id codificado
-            currentTab: 1,
+            // currentTab: 1,
             searchQuery: this.global_product_store.global_product.name,
             searchFocus: false,
             productsFound: [this.global_product_store],
@@ -279,6 +272,8 @@ export default {
             canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
             // validaciones
             cashAmountMessage: null,
+            // tabs
+            activeTab: '1',
         };
     },
     components: {
@@ -290,13 +285,20 @@ export default {
         InputError,
         Loading2,
         Modal,
-        Back
+        Back,
+        ProductInfo,
+        ProductHistorical,
     },
     props: {
         global_product_store: Object,
         cash_register: Object,
     },
     methods: {
+        updateURL(tab) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tab.props.name);
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        },
         handleChangeCashAmount() {
             // total redondeado a 2 decimales
             const total = Math.round((this.global_product_store.cost * this.form.quantity + Number.EPSILON) * 100) / 100;
@@ -388,6 +390,13 @@ export default {
                     },
                     onFinish: () => this.entryLoading = false,
                 });
+            }
+        },
+        setActiveTabFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if (tab) {
+                this.activeTab = tab;
             }
         },
         async fetchHistory() {
@@ -487,7 +496,7 @@ export default {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
         formatDescription() {
-            if ( this.global_product_store.description != null ) {
+            if (this.global_product_store.description != null) {
                 const text = this.global_product_store.description;
                 const lines = text.split('\n');
                 const formattedLines = lines.map(line => `• ${line.trim()}`);
@@ -500,8 +509,9 @@ export default {
         },
     },
     mounted() {
-        this.fetchHistory();
-        this.formatDescription();
+        // this.fetchHistory();
+        // this.formatDescription();
+        this.setActiveTabFromURL();
         this.encodeId(this.global_product_store.id);
     }
 }
@@ -509,6 +519,7 @@ export default {
 
 <style scoped>
 .whitespace-break-spaces {
-    white-space: pre-wrap; /* Respect line breaks */
+    white-space: pre-wrap;
+    /* Respect line breaks */
 }
 </style>
