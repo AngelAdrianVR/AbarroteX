@@ -1,14 +1,15 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="Object.keys(products)?.length" class="w-full">
+        <table v-if="Object.keys(products)?.length" class="w-full table-fixed">
             <thead>
-                <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th></th>
-                    <th>Código</th>
-                    <th>Nombre de producto</th>
-                    <th>Precio</th>
-                    <th>Existencias</th>
-                    <th>Existencias mínimas</th>
+                <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
+                    <th class="w-20 md:w-[10%]"></th>
+                    <th class="w-36 md:w-[15%]">Código</th>
+                    <th class="w-44 md:w-[20%]">Nombre de producto</th>
+                    <th class="w-20 md:w-[15%]">Precio</th>
+                    <th class="w-32 md:w-[15%]">Existencias</th>
+                    <th class="w-32 md:w-[15%]">Existencias mínimas</th>
+                    <th class="w-16 md:w-[10%]"></th>
                 </tr>
             </thead>
             <tbody>
