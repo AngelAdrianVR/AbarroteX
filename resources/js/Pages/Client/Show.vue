@@ -6,7 +6,7 @@
             <h1 class="font-bold mt-4">Detalles del cliente</h1>
 
             <article class="flex items-center space-x-3 justify-between mt-5">
-                <el-select @change="$inertia.get(route('clients.show', clientId))" class="!w-40 md:!w-60" filterable v-model="clientId" clearable placeholder="Buscar cliente"
+                <el-select @change="$inertia.get(route('clients.show', clientId))" class="!w-40 md:!w-80" filterable v-model="clientId" clearable placeholder="Buscar cliente"
                     no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                     <el-option v-for="item in clients" :key="item" :label="item.name"
                         :value="item.id" />
@@ -24,7 +24,7 @@
                 <p class="font-bold">Teléfono: <span class="font-thin ml-5">{{
                     client.phone }}</span></p>
                 <p class="font-bold">Dirección: <span class="font-thin ml-5">
-                    {{ client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state }}
+                    {{ client.street ? client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state : '-' }}
                 </span></p>
             </header>
 

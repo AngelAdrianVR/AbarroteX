@@ -3,6 +3,7 @@
         <table v-if="clients?.length" class="w-full">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
+                    <th>N°</th>
                     <th>Cliente</th>
                     <th>Teléfono</th>
                     <th>RFC</th>
@@ -15,10 +16,11 @@
                 <tr @click="$inertia.visit(route('clients.show', encodeId(client.id)))"
                     v-for="(client, index) in clients" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td class="rounded-s-full">{{ client.name }}</td>
+                    <td class="rounded-s-full">{{ index + 1 }}</td>
+                    <td>{{ client.name }}</td>
                     <td>{{ client.phone }}</td>
                     <td>{{ client.rfc ?? '-' }}</td>
-                    <td>{{ client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state }}</td>
+                    <td>{{ client.street ? client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state : '-' }}</td>
                     <td>${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">

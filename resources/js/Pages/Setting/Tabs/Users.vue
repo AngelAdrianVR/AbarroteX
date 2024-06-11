@@ -24,7 +24,7 @@
                     <tbody>
                         <tr v-for="(user, index) in users" :key="user"
                             class="*:text-xs *:px-3 *:py-2 hover:bg-primarylight">
-                            <td class="rounded-s-full w-[20%]">{{ user.id }}</td>
+                            <td class="rounded-s-full w-[20%]">{{ index + 1 }}</td>
                             <td class="w-[10%]">{{ user.name }}</td>
                             <td class="w-[20%]">{{ user.email }}</td>
                             <td class="w-[20%]">{{ user.rol ?? '--' }}</td>

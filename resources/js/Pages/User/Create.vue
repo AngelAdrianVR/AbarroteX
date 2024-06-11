@@ -95,7 +95,7 @@ export default {
 
         return {
             form,
-            showPasswordConfirm: true,
+            showPasswordConfirm: false,
         }
     },
     components: {
