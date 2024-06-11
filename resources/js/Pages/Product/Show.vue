@@ -35,8 +35,8 @@
             <div class="md:grid grid-cols-2 xl:grid-cols-3 gap-x-10 mx-2 md:mx-6">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
-                    <figure class="border h-72 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
-                        <img v-if="product.data.imageCover?.length" class="h-64 md:h-80 mx-auto object-contain"
+                    <figure class="border h-64 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
+                        <img v-if="product.data.imageCover?.length" class="h-52 md:h-80 mx-auto object-contain"
                             :src="product.data.imageCover[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>

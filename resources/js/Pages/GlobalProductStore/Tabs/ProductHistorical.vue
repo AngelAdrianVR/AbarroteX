@@ -31,7 +31,7 @@
 import Loading2 from '@/Components/MyComponents/Loading2.vue';
 
 export default {
-    name: 'ProductHistorical',
+    name: 'GlobalProductHistorical',
     data() {
         return {
             productHistory: [],

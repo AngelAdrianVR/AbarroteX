@@ -34,9 +34,9 @@
             <div class="md:grid grid-cols-2 xl:grid-cols-3 gap-x-10 mx-2 md:mx-6">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
-                    <figure class="border h-72 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
+                    <figure class="border h-64 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
                         <img v-if="global_product_store.global_product.media?.length"
-                            class="h-64 md:h-80 mx-auto object-contain"
+                            class="h-52 md:h-80 mx-auto object-contain"
                             :src="global_product_store.global_product.media[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
@@ -56,118 +56,6 @@
                             <ProductHistorical :product="global_product_store" />
                         </el-tab-pane>
                     </el-tabs>
-
-                    <!-- pestaña 1 Informacion de producto -->
-                    <!-- <div v-if="currentTab == 1" class="mt-7 md:mx-16 text-sm lg:text-base">
-                        <div class="lg:flex justify-between items-center">
-                            <div class="md:flex space-y-1 md:space-x-4 items-center">
-                                <p class="text-gray37 flex items-center">
-                                    <span class="mr-2">Código</span>
-                                    <span class="font-bold">{{ global_product_store.global_product?.code ?? 'N/A'
-                                        }}</span>
-                                    <el-tooltip v-if="global_product_store.global_product?.code" content="Copiar código"
-                                        placement="right">
-                                        <button @click="copyToClipboard"
-                                            class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-                                            </svg>
-                                        </button>
-                                    </el-tooltip>
-                                </p>
-                                <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
-                                <p class="text-gray37">Categoría: <span class="font-bold">{{
-                                    global_product_store.global_product?.category?.name }}</span></p>
-                                <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
-                                <p class="text-gray37">Proveedor: <span class="font-bold">{{
-                                    global_product_store.global_product?.brand?.name }}</span></p>
-                            </div>
-                        </div>
-                        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{
-                            formatDate(global_product_store.created_at) }}</strong></p>
-                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{
-                            global_product_store.global_product?.name }}</h1>
-
-                        <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
-                            <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Precio de compra:</p>
-                                <p class="text-right font-bold">{{ global_product_store.cost ?
-                                    '$' + global_product_store.cost : '-' }}</p>
-                            </div>
-                            <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Precio de venta: </p>
-                                <p class="text-right font-bold">${{ global_product_store.public_price }}</p>
-                            </div>
-                            <div v-if="global_product_store.current_stock >= global_product_store.min_stock || !isInventoryOn"
-                                class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-[#5FCB1F]">{{ global_product_store.current_stock ??
-                                    '-' }}
-                                </p>
-                            </div>
-                            <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">
-                                <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-redDanger">
-                                    <span>{{ global_product_store.current_stock ?? '-' }}</span>
-                                    <i class="fa-solid fa-arrow-down text-xs ml-2"></i>
-                                </p>
-                                <p class="absolute top-2 -right-16 text-xs font-bold text-redDanger">Bajo stock</p>
-                            </div>
-                            <h2 class="pt-5 ml-5 font-bold text-lg">Cantidades de stock permitidas</h2>
-
-                            <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Cantidad mínima:</p>
-                                <p class="text-right font-bold">{{ global_product_store.min_stock ?? '-' }}</p>
-                            </div>
-                            <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Cantidad máxima:</p>
-                                <p class="text-right font-bold">{{ global_product_store.max_stock ?? '-' }}</p>
-                            </div>
-                            <div v-if="global_product_store.description">
-                                <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
-                                <div class="grid grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
-                                    <p class="text-gray37">Descripción: </p>
-                                    <div>
-                                        <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-                    <!-- ---------------------------------- -->
-
-
-                    <!-- pestaña 2 historial de producto -->
-                    <!-- <div v-if="currentTab == 2" class="mt-7 mx-16">
-                        <div v-if="loading" class="flex justify-center items-center py-10">
-                            <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-                        </div>
-                        <div v-else>
-                            <div class="flex items-center justify-center space-x-3">
-                                <button @click="loadPreviousMonth" class="bg-grayD9 size-7 rounded-full"><i
-                                        class="fa-solid fa-chevron-left text-[9px] text-black pb-3"></i></button>
-                                <p class="w-32 text-center text-sm">{{ castDate(currentMonth, currentYear) }}</p>
-                                <button @click="loadNextMonth" class="bg-grayD9 size-7 rounded-full"><i
-                                        class="fa-solid fa-chevron-right text-[9px] text-black pb-3"></i></button>
-                            </div>
-                            <div v-if="Object?.keys(productHistory)?.length">
-                                <div v-for="(history, index) in productHistory" :key="history">
-
-                                    <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
-                                        translateMonth(index) }}</h2>
-                                    <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span
-                                            class="mr-2" v-html="getIcon(activity.type)"></span>{{ activity.description
-                                                + ' ' +
-                                                activity.created_at }}
-                                    </p>
-                                </div>
-                            </div>
-                            <p v-else class="text-xs text-gray-500 mt-5 text-center">No hay actividad en esta fecha</p>
-                        </div>
-                    </div> -->
-                    <!-- ---------------------------------- -->
                 </section>
             </div>
         </div>
@@ -239,8 +127,6 @@ import Modal from "@/Components/Modal.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
 import { useForm } from "@inertiajs/vue3";
-import { format, parseISO } from 'date-fns';
-import es from 'date-fns/locale/es';
 import { addOrUpdateItem } from '@/dbService.js';
 
 export default {
@@ -253,23 +139,15 @@ export default {
         return {
             form,
             encodedId: null, //id codificado
-            // currentTab: 1,
             searchQuery: this.global_product_store.global_product.name,
             searchFocus: false,
             productsFound: [this.global_product_store],
             entryProductModal: false,
-            productHistory: null,
-            formattedDescription: null, //descripción del producto formateado con viñetas
-            currentMonth: new Date().getMonth() + 1, // El mes actual
-            currentYear: new Date().getFullYear(), // El año actual
             // loading
-            loading: false,
             entryLoading: false,
             searchLoading: false,
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
-            // Permisos de rol actual
-            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
             // validaciones
             cashAmountMessage: null,
             // tabs
@@ -310,43 +188,6 @@ export default {
                     'El monto no debe superar el total del gasto ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else {
                 this.cashAmountMessage = null;
-            }
-        },
-        copyToClipboard() {
-            const textToCopy = this.global_product_store.global_product?.code;
-
-            // Create a temporary input element
-            const input = document.createElement("input");
-            input.value = textToCopy;
-            document.body.appendChild(input);
-
-            // Select the content of the input element
-            input.select();
-
-            // Try to copy the text to the clipboard
-            document.execCommand("copy");
-
-            // Remove the temporary input element
-            document.body.removeChild(input);
-
-            this.$notify({
-                title: "Éxito",
-                message: this.global_product_store.global_product?.code + " copiado",
-                type: "success",
-            });
-        },
-        async searchProducts() {
-            this.searchLoading = true;
-            try {
-                const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
-                if (response.status == 200) {
-                    this.productsFound = response.data.items;
-                }
-
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.searchLoading = false;
             }
         },
         handleBlur() {
@@ -399,92 +240,6 @@ export default {
                 this.activeTab = tab;
             }
         },
-        async fetchHistory() {
-            this.loading = true;
-            try {
-                const response = await axios.get(route("global-product-store.fetch-history", {
-                    global_product_store_id: this.global_product_store.id,
-                    month: this.currentMonth,
-                    year: this.currentYear,
-                }));
-                if (response.status === 200) {
-                    this.productHistory = response.data.items;
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        async loadPreviousMonth() {
-            if (this.currentMonth === 1) {
-                this.currentMonth = 12;
-                this.currentYear -= 1;
-            } else {
-                this.currentMonth -= 1;
-            }
-            await this.fetchHistory();
-        },
-        async loadNextMonth() {
-            if (this.currentMonth === 12) {
-                this.currentMonth = 1;
-                this.currentYear += 1;
-            } else {
-                this.currentMonth += 1;
-            }
-            await this.fetchHistory();
-        },
-        getIcon(type) {
-            if (type === 'Precio') {
-                return '<i class="fa-solid fa-dollar-sign"></i>';
-            } else if (type === 'Entrada') {
-                return '<i class="fa-regular fa-square-plus"></i>';
-            } else if (type === 'Venta') {
-                return '<i class="fa-solid fa-hand-holding-dollar"></i>';
-            }
-        },
-        translateMonth(dateString) {
-            const [month, year] = dateString.split(' ');
-
-            const monthsTranslation = {
-                'January': 'Enero',
-                'February': 'Febrero',
-                'March': 'Marzo',
-                'April': 'Abril',
-                'May': 'Mayo',
-                'June': 'Junio',
-                'July': 'Julio',
-                'August': 'Agosto',
-                'September': 'Septiembre',
-                'October': 'Octubre',
-                'November': 'Noviembre',
-                'December': 'Diciembre',
-            };
-
-            const translatedMonth = monthsTranslation[month] || month;
-
-            return `${translatedMonth} ${year}`;
-        },
-        castDate(month, year) {
-            const monthsCast = {
-                1: 'Enero',
-                2: 'Febrero',
-                3: 'Marzo',
-                4: 'Abril',
-                5: 'Mayo',
-                6: 'Junio',
-                7: 'Julio',
-                8: 'Agosto',
-                9: 'Septiembre',
-                10: 'Octubre',
-                11: 'Noviembre',
-                12: 'Diciembre',
-            };
-
-            const translatedMonth = monthsCast[month] || month;
-
-            return `${translatedMonth} ${year}`;
-        },
         handleProductSelected(product) {
             if (product.global_product_id) {
                 this.$inertia.get(route('global-product-store.show', product.id))
@@ -492,34 +247,28 @@ export default {
                 this.$inertia.get(route('products.show', product.id))
             }
         },
-        formatDate(dateString) {
-            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
-        },
-        formatDescription() {
-            if (this.global_product_store.description != null) {
-                const text = this.global_product_store.description;
-                const lines = text.split('\n');
-                const formattedLines = lines.map(line => `• ${line.trim()}`);
-                this.formattedDescription = formattedLines.join('\n');
-            }
-        },
         encodeId(id) {
             const encodedId = btoa(id.toString());
             this.encodedId = encodedId;
         },
+        async searchProducts() {
+            this.searchLoading = true;
+            try {
+                const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
+                if (response.status == 200) {
+                    this.productsFound = response.data.items;
+                }
+
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.searchLoading = false;
+            }
+        },
     },
     mounted() {
-        // this.fetchHistory();
-        // this.formatDescription();
         this.setActiveTabFromURL();
         this.encodeId(this.global_product_store.id);
     }
 }
 </script>
-
-<style scoped>
-.whitespace-break-spaces {
-    white-space: pre-wrap;
-    /* Respect line breaks */
-}
-</style>

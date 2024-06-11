@@ -65,10 +65,10 @@
             <!-- Descripción del producto -->
             <div v-if="product.description">
                 <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
-                <div class="grid grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
+                <div class="grid grid-cols-3 md:grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
                     <p class="text-gray37">Descripción: </p>
                     <div>
-                        <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
+                        <p class="whitespace-break-spaces col-span-2 md:col-span-1">{{ formattedDescription }}</p>
                     </div>
                 </div>
             </div>

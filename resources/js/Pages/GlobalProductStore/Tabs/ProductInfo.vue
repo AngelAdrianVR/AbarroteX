@@ -24,13 +24,17 @@
                         }}</span></p>
             </div>
         </div>
-        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.global_product.created_at
-                }}</strong></p>
+        <!-- <p class="text-gray37 mt-3">Fecha de alta:
+            <strong class="ml-5">
+                {{ formatDate(product.global_product.created_at) }}
+            </strong>
+        </p> -->
         <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ product.global_product.name }}</h1>
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de compra:</p>
-                <p class="text-right font-bold">{{ product.global_product.cost ? '$' + product.global_product.cost : '-' }}
+                <p class="text-right font-bold">{{ product.global_product.cost ? '$' + product.global_product.cost : '-'
+                    }}
                 </p>
             </div>
             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
@@ -65,10 +69,10 @@
             <!-- Descripción del producto -->
             <div v-if="product.description">
                 <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
-                <div class="grid grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
+                <div class="grid grid-cols-3 md:grid-cols-2 items-center border border-grayD9 rounded-md px-5 py-1">
                     <p class="text-gray37">Descripción: </p>
                     <div>
-                        <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
+                        <p class="whitespace-break-spaces col-span-2 md:col-span-1">{{ formattedDescription }}</p>
                     </div>
                 </div>
             </div>
@@ -77,9 +81,11 @@
 </template>
 
 <script>
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
-    name: 'ProductInfo',
+    name: 'GlobalProductInfo',
     data() {
         return {
             // control de inventario activado
@@ -100,7 +106,7 @@ export default {
     },
     methods: {
         copyToClipboard() {
-            const textToCopy = this.product.code;
+            const textToCopy = this.product.global_product.code;
 
             // Create a temporary input element
             const input = document.createElement("input");
@@ -118,7 +124,7 @@ export default {
 
             this.$notify({
                 title: "Éxito",
-                message: this.product.code + " copiado",
+                message: this.product.global_product.code + " copiado",
                 type: "success",
             });
         },
@@ -129,7 +135,10 @@ export default {
                 const formattedLines = lines.map(line => `• ${line.trim()}`);
                 this.formattedDescription = formattedLines.join('\n');
             }
-        }
+        },
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+        },
     },
     mounted() {
         this.formatDescription();
