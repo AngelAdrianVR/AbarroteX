@@ -45,6 +45,7 @@ class CashCutController extends Controller
             'sales_cash' => $request->totalSaleForCashCut,
             'counted_cash' => $request->counted_cash,
             'difference' => $request->difference * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
+            'withdrawn_cash' => $request->withdrawn_cash,
             'notes' => $request->notes,
             'cash_register_id' => $cash_register->id,
             'store_id' => auth()->user()->store_id,
