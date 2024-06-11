@@ -40,7 +40,7 @@
 
                                 <p  v-if="cashCutMovements[index]?.length"
                                     class="text-primary flex items-center">Movimientos de caja 
-                                    <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i>
+                                    <!-- <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i> -->
                                 </p>
 
                                 <div v-if="loadingMovements">
@@ -87,7 +87,7 @@
                     </div>
 
                     <!-- resumen de corte en pequeño--------------------- -->
-                    <div class="mt-7 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 rounded-lg self-start">
+                    <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 rounded-lg self-start">
                         <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-t-lg">Resumen de corte</h2>
                         <div class="flex justify-between space-x-1 p-5">
                             <div class="font-semibold space-y-1">
@@ -130,7 +130,7 @@
                                 : 'Faltante de efectivo' ) }} </p>
                     </div>
                 </article>
-                <div class="border-b my-7"></div>
+                <div class="border-b my-12"></div>
             </section>
         </div>
     </AppLayout>

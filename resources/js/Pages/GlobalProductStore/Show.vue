@@ -241,10 +241,11 @@ export default {
             }
         },
         handleProductSelected(product) {
+            const encodedId = btoa(product.id.toString());
             if (product.global_product_id) {
-                this.$inertia.get(route('global-product-store.show', product.id))
+                this.$inertia.get(route('global-product-store.show', encodedId))
             } else {
-                this.$inertia.get(route('products.show', product.id))
+                this.$inertia.get(route('products.show', encodedId))
             }
         },
         encodeId(id) {
