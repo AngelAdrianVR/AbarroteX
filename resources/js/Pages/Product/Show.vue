@@ -69,9 +69,7 @@
                     <div class="mt-3">
                         <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
                         <el-input v-model="form.quantity" ref="quantityInput" @keydown.enter="entryProduct"
-                            placeholder="Cantidad que entra a almacén"
-                            :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                            :parser="(value) => value.replace(/\D/g, '')">
+                            placeholder="Cantidad que entra a almacén">
                         </el-input>
                         <InputError :message="form.errors.quantity" />
                     </div>

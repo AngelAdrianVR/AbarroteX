@@ -1,6 +1,6 @@
 <template>
     <AppLayout title="Productos">
-        <div class="px-2 lg:px-10 py-7">
+        <div ref="scrollContainer" style="height: 93vh; overflow-y: scroll;" @scroll="handleScroll" class="px-2 lg:px-10 py-7">
             <!-- tabs -->
             <div v-show="canTransfer" class="flex justify-center">
                 <ToggleButton ref="togglebutton" @update="handleToggle" :labels="['Mis productos', 'Catálogo base']"
@@ -14,6 +14,7 @@
             </div> -->
 
             <section v-if="activeTab === 'Mis productos'">
+                <i v-show="showScrollButton" @click="scrollToTop" class="fa-solid animate-bounce fa-arrow-up rounded-full bg-[#F2F2F2] text-gray9A py-3 px-[14px] fixed bottom-8 right-8 cursor-pointer transition-opacity duration-300"></i>
                 <MyProducts />
             </section>
             <section v-else>
@@ -36,6 +37,7 @@ export default {
             activeTab: 'Mis productos',
             // Permisos de rol
             canTransfer: ['Administrador'].includes(this.$page.props.auth.user.rol),
+            showScrollButton: false,
         };
     },
     components: {
@@ -58,6 +60,29 @@ export default {
             params.set('tab', tab);
             window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
         },
+        handleScroll() {
+            // console.log(this.$refs.scrollContainer);
+            const container = this.$refs.scrollContainer;
+            const scrollHeight = container.scrollHeight;
+            const scrollTop = container.scrollTop;
+            const clientHeight = container.clientHeight;
+            // console.log('scrollHeight',scrollHeight);
+            // console.log('scrollTop',scrollTop);
+            // console.log('clientHeight',clientHeight);
+
+            // Determinar si has llegado al final de la vista
+            if (scrollTop > 400) {
+                this.showScrollButton = true;
+            } else {
+                this.showScrollButton = false;
+            }
+        },
+        scrollToTop() {
+            console.log('entró');
+            document.documentElement.scrollTop = 0; // Para navegadores modernos
+            document.body.scrollTop = 0; // Para navegadores más antiguos
+            // window.scrollTo({ top: 0, behavior: 'smooth' });
+        },  
     },
     mounted() {
         // Obtener la URL actual
@@ -74,6 +99,7 @@ export default {
 
         // resetear variable de local storage a false
         localStorage.setItem('pendentProcess', false);
-    }
+    },
 }
 </script>
+

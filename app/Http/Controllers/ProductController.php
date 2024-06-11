@@ -48,8 +48,8 @@ class ProductController extends Controller
             'description' => 'nullable|string|max:255',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         // forzar default de 1 en stock
@@ -107,8 +107,8 @@ class ProductController extends Controller
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -148,8 +148,8 @@ class ProductController extends Controller
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -235,7 +235,7 @@ class ProductController extends Controller
         $product = Product::find($product_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
-        $product->current_stock += intval($request->quantity);
+        $product->current_stock += floatval($request->quantity);
 
         // Guarda el producto
         $product->save();
@@ -482,12 +482,13 @@ class ProductController extends Controller
 
     public function getDataForProductsView()
     {
+        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
         $all_products = $this->getAllProducts();
         $total_products = $all_products->count();
         $total_local_products = $all_products->whereNull('global_product_id')->count();
 
         //tomar solo primeros 30 productos
-        $products = $all_products->take(30);
+        $products = $all_products->take($page);
 
         return response()->json(compact('products', 'total_products', 'total_local_products'));
     }

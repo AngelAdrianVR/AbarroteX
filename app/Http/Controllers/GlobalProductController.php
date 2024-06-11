@@ -35,8 +35,8 @@ class GlobalProductController extends Controller
             'code' => 'nullable|string|max:100|unique:global_products,code',
             'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|string|max:200',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         $global_product = GlobalProduct::create($request->except('imageCover'));
@@ -75,8 +75,8 @@ class GlobalProductController extends Controller
             'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
             'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|max:200',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         $global_product->update($request->except('imageCover'));
@@ -98,8 +98,8 @@ class GlobalProductController extends Controller
             'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
             'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|max:200',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         $global_product->update($request->except('imageCover'));
