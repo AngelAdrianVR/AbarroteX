@@ -320,7 +320,7 @@ data() {
         total: 0,
         store_id: this.$page.props.auth.user.store_id,
         created_from_app: true,
-        store_inventory: this.$page.props.auth.user.store.online_store_properties.inventory,
+        store_inventory: this.$page.props.auth.user.store?.online_store_properties?.inventory,
         products: [
             {
                 id: 1,
@@ -425,7 +425,7 @@ methods:{
             const response = await axios.put(route('online-sales.update-status', orderId), { 
                 status: status,
                 online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties.online_sales_cash_register,
-                store_inventory: this.$page.props.auth.user.store.online_store_properties.inventory
+                store_inventory: this.$page.props.auth.user.store?.online_store_properties?.inventory
             });
             if ( response.status === 200 ) {
                 //buscar la orden seleccionada para actualizar estatus
