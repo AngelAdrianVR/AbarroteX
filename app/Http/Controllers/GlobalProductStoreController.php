@@ -94,7 +94,10 @@ class GlobalProductStoreController extends Controller
 
         $global_product_store->update($request->except('imageCover'));
 
-        return to_route('products.index');
+        //codifica el id del producto
+        $encoded_global_product_id = base64_encode($global_product_store->id);
+
+        return to_route('global-product-store.show', $encoded_global_product_id);
     }
 
 

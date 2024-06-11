@@ -11,7 +11,7 @@
                 </p>
             </div>
             <div class="flex items-center space-x-2">
-                <el-dropdown v-if="canEdit && canRefund && groupedSales.products.some(item => !item?.refunded_at) && !isOutOfCashCut"
+                <el-dropdown v-if="(canEdit || canRefund || canInstallment) && (!isOutOfCashCut || groupedSales.credit_data)"
                     trigger="click" @command="handleCommand">
                     <button @click.stop
                         class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
@@ -19,7 +19,7 @@
                     </button>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item v-if="!isOutOfCashCut" :command="'edit|' + groupedSales.folio">
+                            <el-dropdown-item v-if="canEdit  && !isOutOfCashCut" :command="'edit|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"

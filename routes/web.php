@@ -100,8 +100,8 @@ Route::get('products-get-data-for-products-view', [ProductController::class, 'ge
 Route::resource('global-product-store', GlobalProductStoreController::class)->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('global-product-store-get-data-for-base-catalog-view', [GlobalProductStoreController::class, 'getDataForBaseCatalogView'])->name('global-product-store.get-data-for-base-catalog-view')->middleware('auth');
 Route::post('global-product-store/transfer', [GlobalProductStoreController::class, 'transfer'])->name('global-product-store.transfer')->middleware('auth');
-Route::put('global-product-store-entry/{encoded_global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
-Route::get('global-product-store-fetch-history/{encoded_global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
+Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
+Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
 
 
 //categories routes----------------------------------------------------------------------------------
