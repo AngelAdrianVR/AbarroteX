@@ -187,6 +187,7 @@ Route::resource('clients', ClientController::class)->middleware('auth');
 Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
 Route::get('clients-search', [ClientController::class, 'searchClient'])->name('clients.search')->middleware('auth');
 Route::get('clients-print-historial/{client}', [ClientController::class, 'printHistorial'])->name('clients.print-historial')->middleware('auth');
+Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getClientSales'])->name('clients.get-client-sales')->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------

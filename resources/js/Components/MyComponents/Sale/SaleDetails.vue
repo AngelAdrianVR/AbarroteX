@@ -11,15 +11,15 @@
                 </p>
             </div>
             <div class="flex items-center space-x-2">
-                <el-dropdown v-if="(canEdit || canRefund || canInstallment) && (!isOutOfCashCut || groupedSales.credit_data)"
-                    trigger="click" @command="handleCommand">
+                <el-dropdown v-if="hasOptions" trigger="click" @command="handleCommand">
                     <button @click.stop
                         class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item v-if="canEdit  && !isOutOfCashCut" :command="'edit|' + groupedSales.folio">
+                            <el-dropdown-item v-if="canEdit && !isOutOfCashCut && !wasRefunded"
+                                :command="'edit|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -27,7 +27,8 @@
                                 </svg>
                                 <span class="text-xs">Editar</span>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="canRefund && !isOutOfCashCut" :command="'refund|' + groupedSales.folio">
+                            <el-dropdown-item v-if="canRefund && !isOutOfCashCut && !wasRefunded"
+                                :command="'refund|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -140,13 +141,15 @@
                         {{ calcTotalInstallments.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
-                <div v-if="groupedSales.credit_data && !wasRefunded" class="flex rounded-[5px] py-1" :class="statusStyles.bg">
+                <div v-if="groupedSales.credit_data && !wasRefunded" class="flex rounded-[5px] py-1"
+                    :class="statusStyles.bg">
                     <span class="w-24 text-start" :class="statusStyles.text">
                         {{ groupedSales.credit_data.status }}</span>
                     <span class="text-start w-32">Deuda restante:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ (groupedSales.total_sale - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ (groupedSales.total_sale - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                            ",") }}
                     </span>
                 </div>
             </div>
@@ -178,6 +181,13 @@ export default {
     },
     emits: ['show-modal'],
     computed: {
+        hasOptions() {
+            return (
+                (this.canEdit && !this.isOutOfCashCut && !this.wasRefunded) ||
+                (this.canRefund && !this.isOutOfCashCut && !this.wasRefunded) ||
+                (this.canInstallment && this.groupedSales.credit_data)
+            );
+        },
         wasRefunded() {
             return this.groupedSales.products.some(item => item?.refunded_at);
         },
@@ -199,11 +209,11 @@ export default {
         statusStyles() {
             const status = this.groupedSales.credit_data?.status;
             if (status === 'Pendiente') {
-                return { bg: 'bg-[#F2FEA8]', text: 'text-[#794A04]' };
+                return { bg: 'bg-[#FAFFDD]', text: 'text-[#EFCE21]' };
             } else if (status === 'Parcial') {
-                return { bg: 'bg-[#DADEFD]', text: 'text-[#080592]' };
+                return { bg: 'bg-[#F1F2FE]', text: 'text-[#2D29FF]' };
             } else if (status === 'Pagado') {
-                return { bg: 'bg-[#C4FBAA]', text: 'text-[#0AA91A]' };
+                return { bg: 'bg-[#E6FDDB]', text: 'text-[#08B91A]' };
             }
             return { bg: 'bg-[#C4FBAA]', text: 'text-[#0AA91A]' };
         },

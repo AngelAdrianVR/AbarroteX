@@ -17,6 +17,7 @@ class Sale extends Model
         'refunded_at',
         'folio',
         'product_id',
+        'client_id',
         'is_global_product',
         'cash_register_id',
         'store_id',
@@ -38,5 +39,10 @@ class Sale extends Model
     public function user() :BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function client() :BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 }

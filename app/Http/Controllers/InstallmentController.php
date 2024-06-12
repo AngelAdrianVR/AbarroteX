@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CreditSaleData;
 use App\Models\Installment;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 
 class InstallmentController extends Controller
@@ -42,6 +43,10 @@ class InstallmentController extends Controller
         // Calcular el monto total de todos los abonos realizados
         $totalInstallmentsAmount = $credit_sale_data->installments->sum('amount');
 
+        // obtener cualquier producto para actualizar a cliente
+        $first_sale = Sale::firstWhere('folio', $credit_sale_data->folio);
+        $first_sale->client->update(['debt' => $totalSaleAmount - $totalInstallmentsAmount]);
+        
         // Actualizar el estado de la venta a crédito
         if ($totalInstallmentsAmount >= $totalSaleAmount) {
             $credit_sale_data->status = 'Pagado';

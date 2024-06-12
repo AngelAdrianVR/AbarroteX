@@ -187,8 +187,8 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import SaleDetails from "@/Components/MyComponents/Sale/SaleDetails.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DialogModal from '@/Components/DialogModal.vue';
 import InputLabel from "@/Components/InputLabel.vue";
@@ -256,11 +256,11 @@ export default {
         statusStyles() {
             const status = this.saleToSeeInstallments.credit_data.status;
             if (status === 'Pendiente') {
-                return 'bg-[#F2FEA8] text-[#794A04]';
+                return 'bg-[#FAFFDD] text-[#EFCE21]';
             } else if (status === 'Parcial') {
-                return 'bg-[#DADEFD] text-[#080592]';
+                return 'bg-[#F1F2FE] text-[#2D29FF]';
             } else if (status === 'Pagado') {
-                return 'bg-[#C4FBAA] text-[#0AA91A]';
+                return 'bg-[#E6FDDB] text-[#08B91A]';
             }
             return 'bg-[#C4FBAA] text-[#0AA91A]';
         },
