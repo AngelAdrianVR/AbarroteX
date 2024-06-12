@@ -76,8 +76,8 @@ class GlobalProductStoreController extends Controller
             'current_stock' => 'required|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -126,7 +126,7 @@ class GlobalProductStoreController extends Controller
         $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
-        $global_product_store->current_stock += intval($request->quantity);
+        $global_product_store->current_stock += floatval($request->quantity);
 
         // Guarda el producto
         $global_product_store->save();
