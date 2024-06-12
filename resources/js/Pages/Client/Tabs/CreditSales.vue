@@ -1,7 +1,7 @@
 <template>
     <Loading v-if="loading" class="mt-10" />
     <section v-else-if="getCreditSales.length">
-        <header class="relative flex items-center justify-between space-x-3">
+        <header class="flex items-center justify-between space-x-3">
             <!-- Imprimir historial -->
             <button @click.stop="print" class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -13,45 +13,47 @@
             </button>
 
             <!-- filtro -->
-            <button @click.stop="showFilter = !showFilter"
-                class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="16" width="16"
-                    id="Filter-Sort-Lines-Descending--Streamline-Ultimate">
-                    <desc>Filter Sort Lines Descending Streamline Icon: https://streamlinehq.com</desc>
-                    <defs></defs>
-                    <title>filter</title>
-                    <path d="M0.73 4.2791H23.27" fill="none" stroke="currentColor" stroke-linecap="round"
-                        stroke-linejoin="round" stroke-width="1"></path>
-                    <path d="M3.131 9.426H20.869" fill="none" stroke="currentColor" stroke-linecap="round"
-                        stroke-linejoin="round" stroke-width="1"></path>
-                    <path d="M8.7141 19.7209H15.2859" fill="none" stroke="currentColor" stroke-linecap="round"
-                        stroke-linejoin="round" stroke-width="1"></path>
-                    <path d="M5.531 14.573H18.469" fill="none" stroke="currentColor" stroke-linecap="round"
-                        stroke-linejoin="round" stroke-width="1"></path>
-                </svg>
-                <p class="text-sm ml-2">Filtrar</p>
-            </button>
-            <div v-if="showFilter"
-                class="absolute top-9 right-0 lg:-left-64 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-10 w-80">
-                <div class="mb-3">
-                    <InputLabel value="Rango de fechas" class="ml-3 mb-1" />
-                    <div v-if="isMobile" class="flex items-center space-x-2">
-                        <el-date-picker @change="handleStartDateChange" :disabled-date="disabledPrevDays"
-                            v-model="startDate" type="date" class="!w-1/2" placeholder="Inicio" size="small" />
-                        <el-date-picker @change="handleFinishDateChange" :disabled-date="disabledNextDays"
-                            v-model="finishDate" type="date" class="!w-1/2" placeholder="Final" size="small" />
+            <div class="relative">
+                <button @click.stop="showFilter = !showFilter"
+                    class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="16" width="16"
+                        id="Filter-Sort-Lines-Descending--Streamline-Ultimate">
+                        <desc>Filter Sort Lines Descending Streamline Icon: https://streamlinehq.com</desc>
+                        <defs></defs>
+                        <title>filter</title>
+                        <path d="M0.73 4.2791H23.27" fill="none" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="1"></path>
+                        <path d="M3.131 9.426H20.869" fill="none" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="1"></path>
+                        <path d="M8.7141 19.7209H15.2859" fill="none" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="1"></path>
+                        <path d="M5.531 14.573H18.469" fill="none" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="1"></path>
+                    </svg>
+                    <p class="text-sm ml-2">Filtrar</p>
+                </button>
+                <div v-if="showFilter"
+                    class="absolute top-9 right-0 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-10 w-80">
+                    <div class="mb-3">
+                        <InputLabel value="Rango de fechas" class="ml-3 mb-1" />
+                        <div v-if="isMobile" class="flex items-center space-x-2">
+                            <el-date-picker @change="handleStartDateChange" :disabled-date="disabledPrevDays"
+                                v-model="startDate" type="date" class="!w-1/2" placeholder="Inicio" size="small" />
+                            <el-date-picker @change="handleFinishDateChange" :disabled-date="disabledNextDays"
+                                v-model="finishDate" type="date" class="!w-1/2" placeholder="Final" size="small" />
+                        </div>
+                        <div v-else>
+                            <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
+                                start-placeholder="Fecha de inicio" end-placeholder="Fecha de fin" class="!w-full" />
+                        </div>
                     </div>
-                    <div v-else>
-                        <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
-                            start-placeholder="Fecha de inicio" end-placeholder="Fecha de fin" class="!w-full" />
+                    <div class="flex space-x-2">
+                        <PrimaryButton @click="searchSales" class="!py-1"
+                            :disabled="isMobile ? !(startDate && finishDate) : !searchDate">
+                            Aplicar
+                        </PrimaryButton>
+                        <ThirthButton @click="cleanFilter" class="!py-1">Limpiar</ThirthButton>
                     </div>
-                </div>
-                <div class="flex space-x-2">
-                    <PrimaryButton @click="searchSales" class="!py-1"
-                        :disabled="isMobile ? !(startDate && finishDate) : !searchDate">
-                        Aplicar
-                    </PrimaryButton>
-                    <ThirthButton @click="cleanFilter" class="!py-1">Limpiar</ThirthButton>
                 </div>
             </div>
         </header>
@@ -290,6 +292,9 @@ export default {
         clientId: Number
     },
     computed: {
+        isMobile() {
+            return window.innerWidth < 768;
+        },
         getCreditSales() {
             // Inicializar un arreglo para almacenar todas las ventas filtradas
             let filteredSales = [];
@@ -318,11 +323,11 @@ export default {
         statusStyles() {
             const status = this.saleToSeeInstallments.credit_data.status;
             if (status === 'Pendiente') {
-                return 'bg-[#F2FEA8] text-[#794A04]';
+                return 'bg-[#FAFFDD] text-[#EFCE21]';
             } else if (status === 'Parcial') {
-                return 'bg-[#DADEFD] text-[#080592]';
+                return 'bg-[#F1F2FE] text-[#2D29FF]';
             } else if (status === 'Pagado') {
-                return 'bg-[#C4FBAA] text-[#0AA91A]';
+                return 'bg-[#E6FDDB] text-[#08B91A]';
             }
             return 'bg-[#C4FBAA] text-[#0AA91A]';
         },
@@ -402,8 +407,8 @@ export default {
             this.editing = true;
             this.form.post(route('sales.update-group-sale'), {
                 onSuccess: async () => {
-                    // Obtener productos de servidor
                     await this.fetchSales(false);
+                    // Obtener productos de servidor
                     const response = await axios.get(route('products.get-all-for-indexedDB'));
                     const products = response.data.products;
                     // actualizar lista de productos en indexedDB
@@ -437,7 +442,8 @@ export default {
                 ...data,
                 credit_sale_data_id: this.saleToSeeInstallments.credit_data.id,
             })).post(route('installments.store'), {
-                onSuccess: () => {
+                onSuccess: async () => {
+                    await this.fetchSales(false);
                     this.addInstallment = false;
                     this.installmentForm.reset();
                     this.saleToSeeInstallments = this.getCreditSales.find(item => item.folio == this.saleToSeeInstallments.folio);
@@ -453,6 +459,7 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
+                    await this.fetchSales(false);
                     // Obtener productos de servidor
                     response = await axios.get(route('products.get-all-for-indexedDB'));
                     const products = response.data.products;
