@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\CreditSaleData;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-    
+
     public function index()
     {
         $clients = Client::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
@@ -16,13 +18,13 @@ class ClientController extends Controller
         return inertia('Client/Index', compact('clients', 'total_clients'));
     }
 
-    
+
     public function create()
     {
         return inertia('Client/Create');
     }
 
-    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -46,7 +48,7 @@ class ClientController extends Controller
         return to_route('clients.index');
     }
 
-    
+
     public function show($encoded_client_id)
     {
         // Decodificar el ID
@@ -58,18 +60,18 @@ class ClientController extends Controller
         return inertia('Client/Show', compact('client', 'clients'));
     }
 
-    
+
     public function edit($encoded_client_id)
     {
         // Decodificar el ID
         $decoded_client_id = base64_decode($encoded_client_id);
 
         $client = Client::find($decoded_client_id);
-        
+
         return inertia('Client/Edit', compact('client'));
     }
 
-    
+
     public function update(Request $request, Client $client)
     {
         $request->validate([
@@ -93,7 +95,7 @@ class ClientController extends Controller
         return to_route('clients.index');
     }
 
-    
+
     public function destroy(Client $client)
     {
         $client->delete();
@@ -130,5 +132,102 @@ class ClientController extends Controller
     public function printHistorial(Client $client)
     {
         return inertia('Client/PrintHistorial');
+    }
+
+    // API
+    public function getClientSales(Client $client)
+    {
+        $sales = $client->sales()
+            ->with(['cashRegister:id,name', 'user:id,name'])
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        $this->addCreditDataToSales($sales);
+
+        $items = $this->getGroupedSalesByDate($sales, true);
+
+        return response()->json(['items' => $items]);
+    }
+
+    // private
+    private function getGroupedSalesByDate($sales, $returnSales = false)
+    {
+        return $sales->groupBy(function ($sale) {
+            return Carbon::parse($sale->created_at)->toDateString();
+        })->map(function ($sales) use ($returnSales) {
+            $totalQuantity = $sales->sum('quantity');
+            $totalSale = $sales->sum(function ($sale) {
+                return $sale->quantity * $sale->current_price;
+            });
+            $uniqueFolios = $sales->unique('folio')->count();
+
+            $salesByFolio = $sales->groupBy('folio')->map(function ($folioSales) {
+                $firstSale = $folioSales->first();
+
+                // Calcular el total de todos los productos en la venta
+                $totalSale = $folioSales->sum(function ($sale) {
+                    return $sale->quantity * $sale->current_price;
+                });
+
+                return [
+                    'products' => $folioSales->map(function ($sale) {
+                        return [
+                            'id' => $sale->id,
+                            'current_price' => $sale->current_price,
+                            'product_name' => $sale->product_name,
+                            'product_id' => $sale->product_id,
+                            'is_global_product' => $sale->is_global_product,
+                            'quantity' => $sale->quantity,
+                            'refunded_at' => $sale->refunded_at,
+                            'cash_register_id' => $sale->cash_register_id,
+                            'store_id' => $sale->store_id,
+                            'created_at' => $sale->created_at,
+                            'updated_at' => $sale->updated_at,
+                        ];
+                    })->values(),
+                    'credit_data' => $firstSale->credit_data,
+                    'folio' => $firstSale->folio,
+                    'user_name' => $firstSale->user->name,
+                    'total_sale' => $totalSale,
+                ];
+            });
+
+            return [
+                'total_quantity' => $totalQuantity,
+                'total_sale' => $totalSale,
+                'unique_folios' => $uniqueFolios,
+                'sales' => $returnSales ? $salesByFolio : [],
+            ];
+        });
+    }
+
+    private function addCreditDataToSales($sales)
+    {
+        $folios = $sales->unique('folio')->pluck('folio');
+
+        $folios->each(function ($folio) use ($sales) {
+            // Buscar CreditSaleData relacionado usando el folio
+            $creditData = CreditSaleData::where('folio', $folio)->first();
+
+            if ($creditData) {
+                // Obtener los installments relacionados
+                $installments = $creditData->installments;
+
+                // Agregar credit_data a las ventas del mismo folio
+                $sales->where('folio', $folio)->each(function ($sale) use ($creditData, $installments) {
+                    $sale->credit_data = [
+                        'id' => $creditData->id,
+                        'expired_date' => $creditData->expired_date,
+                        'status' => $creditData->status,
+                        'installments' => $installments,
+                    ];
+                });
+            } else {
+                // Si no hay credit_data, agregar un array vacío a las ventas del mismo folio
+                $sales->where('folio', $folio)->each(function ($sale) {
+                    $sale->credit_data = null;
+                });
+            }
+        });
     }
 }

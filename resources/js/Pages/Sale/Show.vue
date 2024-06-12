@@ -187,8 +187,8 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import SaleDetails from "@/Components/MyComponents/Sale/SaleDetails.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DialogModal from '@/Components/DialogModal.vue';
 import InputLabel from "@/Components/InputLabel.vue";
