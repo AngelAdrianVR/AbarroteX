@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\Client;
 use App\Models\CreditSaleData;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
@@ -39,7 +40,9 @@ class SaleController extends Controller
         //recupera todas las cajas registradoras de la tienda
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
 
-        return inertia('Sale/Point', compact('products', 'cash_registers'));
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+
+        return inertia('Sale/Point', compact('products', 'cash_registers', 'clients'));
     }
 
     public function index()
@@ -48,7 +51,7 @@ class SaleController extends Controller
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
         $groupedSales = null;
         $total_sales = 1;
-
+        
         return inertia('Sale/Index', compact('groupedSales', 'total_sales', 'cash_registers'));
     }
 
@@ -81,7 +84,7 @@ class SaleController extends Controller
 
         // si el corte tiene una fecha posterior a la venta entonces esta fuera de corte
         // y no se muestran las opciones de editar y reembolso.
-        if ( $last_cash_cut->created_at > $sales[0]->created_at ) { 
+        if ( $last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at ) { 
             $is_out_of_cash_cut = true;
         } else {
             $is_out_of_cash_cut = false;
