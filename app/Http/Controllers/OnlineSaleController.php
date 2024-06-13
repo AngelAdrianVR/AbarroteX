@@ -341,9 +341,9 @@ class OnlineSaleController extends Controller
 
         // Productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with('globalProduct.media', 'globalProduct:id,name,public_price')
-            ->where('store_id', auth()->user()->store_id)
-            ->get();
-
+        ->where('store_id', auth()->user()->store_id)
+        ->get();
+            
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
         
@@ -360,7 +360,9 @@ class OnlineSaleController extends Controller
                 'isLocal' => !$isLocal,
                 'current_stock' => $product['current_stock'],
                 'name' => $isLocal ? $product['global_product']['name'] : $product['name'],
-                'image_url' => $isLocal ? $product['global_product']['media'][0]['original_url'] : $product['media'][0]['original_url'],
+                'image_url' => $isLocal 
+                    ? ($product['global_product']['media'][0]['original_url'] ?? null) 
+                    : ($product['media'][0]['original_url'] ?? null),
                 'disabled' => false, //propiedad de deshabilitado para no mostrarlo en la creación de orden cuando ya se seleccionó
                 'relative_id' => $relative_id // Asignamos el relative_id actual
             ];

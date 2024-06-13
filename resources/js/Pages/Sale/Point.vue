@@ -405,7 +405,6 @@
       <div class="p-4 relative">
         <i @click="cashCutModal = false; cutForm.reset()"
           class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
-
         <form class="mt-5 mb-2" @submit.prevent="storeCashCut">
           <h2 class="font-bold col-span-full">Hacer corte de caja</h2>
           <p class="col-span-full">Por favor, cuenta el dinero en caja e ingrésalo para proceder con el corte.</p>
@@ -421,7 +420,7 @@
               <div v-if="cutLoading">
                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
               </div>
-              <p v-else>${{ (asignedCashRegister?.started_cash + cutForm.totalSaleForCashCut +
+              <p v-else>${{ (asignedCashRegister?.started_cash + cutForm.totalStoreSale + cutForm.totalOnlineSale +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               <el-input @input="difference()" v-model="cutForm.counted_cash" type="text" placeholder="0.00"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
@@ -478,8 +477,10 @@
 
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
-            <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing">Hacer corte</PrimaryButton>
+            <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing || (cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0)">Hacer corte</PrimaryButton>
           </div>
+          <p v-if="cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0" 
+            class="text-xs text-red-600 text-right">*Para hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
         </form>
       </div>
     </Modal>
@@ -533,7 +534,8 @@ export default {
       counted_cash: null,
       difference: null,
       notes: null,
-      totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
+      totalStoreSale: null, //dinero esperado de ventas hechas para hacer corte
+      totalOnlineSale: null, //dinero esperado de ventas en linea para hacer corte
       totalCashMovements: null, //dinero de movimientos de caja para hacer corte
       withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
     });
@@ -769,7 +771,7 @@ export default {
     },
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
-      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
+      this.cutForm.difference = (this.cutForm.totalStoreSale + this.cutForm.totalOnlineSale + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
     },
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
@@ -799,7 +801,8 @@ export default {
       try {
         const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
         if (response.status === 200) {
-          this.cutForm.totalSaleForCashCut = response.data;
+          this.cutForm.totalStoreSale = response.data.store_sales; //ventas en tienda
+          this.cutForm.totalOnlineSale = response.data.online_sales; // ventas en linea
         }
       } catch (error) {
         console.log(error);

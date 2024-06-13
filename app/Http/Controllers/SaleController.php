@@ -81,7 +81,7 @@ class SaleController extends Controller
 
         // si el corte tiene una fecha posterior a la venta entonces esta fuera de corte
         // y no se muestran las opciones de editar y reembolso.
-        if ( $last_cash_cut->created_at > $sales[0]->created_at ) { 
+        if ( $last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at ) { 
             $is_out_of_cash_cut = true;
         } else {
             $is_out_of_cash_cut = false;

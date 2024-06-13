@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedFloat('started_cash');
             $table->unsignedFloat('expected_cash'); //suma algebraica de ingresos y retiros de caja
-            $table->unsignedFloat('sales_cash'); //suma suma de todas las ventas
+            $table->unsignedFloat('store_sales_cash')->nullable(); //suma suma de todas las ventas hechoas en tienda
+            $table->unsignedFloat('online_sales_cash')->nullable(); //suma suma de todas las ventas hechas en línea
             $table->unsignedFloat('counted_cash'); //dinero contado manualmente de la caja
-            $table->unsignedFloat('withdrawn_cash')->default(0); //dinero retirado de caja despues de hacer el corte
+            $table->unsignedFloat('withdrawn_cash')->nullable(); //dinero retirado de caja despues de hacer el corte
             $table->float('difference'); //diferencia entre el dinero esperado y el contado manualmente
             $table->string('notes')->nullable();
             $table->foreignId('cash_register_id')->constrained()->cascadeOnDelete();
