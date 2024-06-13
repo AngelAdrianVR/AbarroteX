@@ -12,7 +12,7 @@
                     <el-option v-for="item in clients" :key="item" :label="item.name" :value="item.id" />
                 </el-select>
                 <div class="flex items-center space-x-3">
-                    <ThirthButton>Registrar abono</ThirthButton>
+                    <!-- <ThirthButton>Registrar abono</ThirthButton> -->
                     <PrimaryButton @click="$inertia.get(route('clients.edit', encodedId))">Editar</PrimaryButton>
                 </div>
             </article>
@@ -59,7 +59,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 export default {
     data() {
         return {
-            clientId: null, //guarda el id del cliente seleccionado para ingresar a sus detalles
+            clientId: this.client.id, //guarda el id del cliente seleccionado para ingresar a sus detalles
             activeTab: '1',
             encodedId: null //id codificado
         }

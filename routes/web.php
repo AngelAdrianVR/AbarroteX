@@ -67,6 +67,47 @@ Route::middleware([
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
+// Route::get('update-from-json', function () {
+//     // Ruta al archivo JSON
+//     $filePath = public_path('files/product_histories.json');
+
+//     // Verificar si el archivo existe
+//     if (!Illuminate\Support\Facades\File::exists($filePath)) {
+//         return 'Archivo JSON no encontrado. ' . $filePath;
+//     }
+
+//     // Leer el contenido del archivo JSON
+//     $jsonData =  Illuminate\Support\Facades\File::get($filePath);
+//     $items = json_decode($jsonData, true);
+
+//     // Verificar si la decodificación fue exitosa
+//     if (json_last_error() !== JSON_ERROR_NONE) {
+//         return 'Error al decodificar el archivo JSON.';
+//     }
+
+//     foreach ($items as $itemData) {
+//         $prd = App\Models\GlobalProductStore::where('store_id', 5)
+//             ->whereHas('globalProduct', function ($q) use ($itemData) {
+//                 $q->where('code', $itemData['code']);
+//             })->first();
+
+//         if (!$prd) {
+//             // Manejar el caso cuando el producto no se encuentra, si es necesario
+//             continue;
+//         }
+
+//         App\Models\ProductHistory::create([
+//             'historicable_id' => $prd->id,
+//             'historicable_type' => App\Models\GlobalProductStore::class,
+//             'description' => $itemData['description'],
+//             'type' => $itemData['type'],
+//             'created_at' => $itemData['created_at'],
+//         ]);
+//     }
+
+//     return 'items migrados correctamente!.';
+// });
+
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
@@ -186,7 +227,8 @@ Route::resource('cards', CardController::class)->middleware('auth');
 Route::resource('clients', ClientController::class)->middleware('auth');
 Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
 Route::get('clients-search', [ClientController::class, 'searchClient'])->name('clients.search')->middleware('auth');
-Route::get('clients-print-historial/{client}', [ClientController::class, 'printHistorial'])->name('clients.print-historial')->middleware('auth');
+Route::get('clients-print-credit-historial/{client}', [ClientController::class, 'PrintCreditHistorical'])->name('clients.print-credit-historial')->middleware('auth');
+Route::get('clients-print-cash-historial/{client}', [ClientController::class, 'PrintCashHistorical'])->name('clients.print-cash-historial')->middleware('auth');
 Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getClientSales'])->name('clients.get-client-sales')->middleware('auth');
 
 

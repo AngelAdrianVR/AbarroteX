@@ -314,6 +314,11 @@ class SaleController extends Controller
 
         // marcar productos de venta como reembolsados / cancelados
         $saleProducts->each(fn ($sale) => $sale->update(['refunded_at' => now()]));
+        // marcar status de informacion de credoto a reembolsado (si es que es a credito)
+        $credit_sale_data = CreditSaleData::firstWhere('folio', $saleFolio);
+        if ($credit_sale_data) {
+            $credit_sale_data->update(['status' => 'Reembolsado']);
+        }
     }
 
     public function updateGroupSale(Request $request)
