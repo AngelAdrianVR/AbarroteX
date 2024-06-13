@@ -129,9 +129,14 @@ class ClientController extends Controller
     }
 
 
-    public function printHistorial(Client $client)
+    public function PrintCreditHistorical(Client $client)
     {
-        return inertia('Client/PrintHistorial');
+        return inertia('Client/PrintCreditHistorical', compact('client'));
+    }
+    
+    public function PrintCashHistorical(Client $client)
+    {
+        return inertia('Client/PrintCashHistorical', compact('client'));
     }
 
     // API

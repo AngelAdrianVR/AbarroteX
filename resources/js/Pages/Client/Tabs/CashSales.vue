@@ -13,7 +13,7 @@
             </button>
 
             <!-- filtro -->
-            <div class="relative">
+            <!-- <div class="relative">
                 <button @click.stop="showFilter = !showFilter"
                     class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="16" width="16"
@@ -55,7 +55,7 @@
                         <ThirthButton @click="cleanFilter" class="!py-1">Limpiar</ThirthButton>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </header>
 
         <!-- Ventas -->
@@ -256,7 +256,7 @@ export default {
             else if (modal == 'refund') this.openRefundModal(saleFolio);
         },
         print() {
-            window.open(route('clients.print-historial', this.clientId), '_blank');
+            window.open(route('clients.print-cash-historial', this.clientId), '_blank');
         },
         update() {
             this.editing = true;
