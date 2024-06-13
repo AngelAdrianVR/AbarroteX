@@ -3,7 +3,7 @@
         <div ref="scrollContainer" style="height: 93vh; overflow-y: scroll;" @scroll="handleScroll" class="px-2 lg:px-10 py-7">
             <!-- tabs -->
             <div v-show="canTransfer" class="flex justify-center">
-                <ToggleButton ref="togglebutton" @update="handleToggle" :labels="['Mis productos', 'Catálogo base']"
+                <ToggleButton id="start" ref="togglebutton" @update="handleToggle" :labels="['Mis productos', 'Catálogo base']"
                     class="w-3/4 md:w-[45%] lg:w-[35%] xl:w-[20%]" />
             </div>
             <!-- <div v-if="canTransfer" class="flex items-center justify-center text-sm">
@@ -61,28 +61,22 @@ export default {
             window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
         },
         handleScroll() {
-            // console.log(this.$refs.scrollContainer);
             const container = this.$refs.scrollContainer;
-            const scrollHeight = container.scrollHeight;
+            // const scrollHeight = container.scrollHeight;
             const scrollTop = container.scrollTop;
-            const clientHeight = container.clientHeight;
-            // console.log('scrollHeight',scrollHeight);
-            // console.log('scrollTop',scrollTop);
-            // console.log('clientHeight',clientHeight);
+            // const clientHeight = container.clientHeight;
 
             // Determinar si has llegado al final de la vista
-            if (scrollTop > 400) {
+            if (scrollTop > 500) {
                 this.showScrollButton = true;
             } else {
                 this.showScrollButton = false;
             }
         },
         scrollToTop() {
-            console.log('entró');
-            document.documentElement.scrollTop = 0; // Para navegadores modernos
-            document.body.scrollTop = 0; // Para navegadores más antiguos
-            // window.scrollTo({ top: 0, behavior: 'smooth' });
-        },  
+            const section = document.getElementById('start');
+            section.scrollIntoView({ behavior: 'smooth' });
+        },
     },
     mounted() {
         // Obtener la URL actual

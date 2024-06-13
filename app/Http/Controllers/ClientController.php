@@ -45,7 +45,6 @@ class ClientController extends Controller
 
         Client::create($request->all() + ['store_id' => auth()->user()->store_id]);
 
-        return to_route('clients.index');
     }
 
 

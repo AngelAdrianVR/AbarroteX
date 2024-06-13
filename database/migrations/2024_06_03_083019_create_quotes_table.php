@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
-            $table->string('client');
+            $table->string('client')->nullable();
             $table->unsignedDouble('total');
-            $table->timestamp('expired_date')->nullable();
             $table->json('products')->nullable(); //revisar si es conveniente guardarlos en un json.
+            $table->timestamp('expired_date')->nullable();
+            $table->string('notes')->nullable();
+            $table->boolean('is_percentage_discount')->nullable(); //el descuento es porcentage
+            $table->unsignedFloat('discount')->nullable(); //cantidad o porcentage de descuento.
+            $table->foreignId('client_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
