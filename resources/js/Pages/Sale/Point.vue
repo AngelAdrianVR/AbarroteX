@@ -152,6 +152,28 @@
           <!-- Pestañas -->
           <div class="mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
+              <div class="m-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3 w-full md:w-1/2">
+                  <p class="font-bold">Cliente</p>
+                  <el-tooltip content="Si no es necesario agregar un cliente específico, no selecciones ninguna opción"
+                    placement="top">
+                    <div class="rounded-full border border-primary w-3 h-3 flex items-center justify-center px-1">
+                      <i class="fa-solid fa-info text-primary text-[7px]"></i>
+                    </div>
+                  </el-tooltip>
+                  <el-select v-model="editableTabs[this.editableTabsValue - 1].client_id" clearable filterable
+                    placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                    no-match-text="No se encontraron coincidencias">
+                    <el-option v-for="client in clients" :key="client" :label="client.name" :value="client.id" />
+                  </el-select>
+                  <!-- <i :class="editableTabs[this.editableTabsValue - 1].client_id ? 'text-green-500' : 'text-gray-400'"
+                    class="fa-solid fa-user-check text-sm"></i> -->
+                  <button @click="showClientFormModal = true" type="button"
+                    class="rounded-full  border-primary size-5 flex items-center justify-center text-primary text-lg">
+                    <i class="fa-solid fa-circle-plus"></i>
+                  </button>
+                </div>
+              </div>
               <el-tab-pane v-for="tab in editableTabs" :key="tab.name" :label="tab.title" :name="tab.name">
                 <el-popconfirm v-if="tab.saleProducts.length" confirm-button-text="Si" cancel-button-text="No"
                   icon-color="#C30303" title="Se eliminará todo el registro de productos ¿Deseas continuar?"
@@ -486,6 +508,39 @@
     </Modal>
     <!-- --------------------------- Modal corte de caja ends ------------------------------------ -->
 
+    <!-- client form -->
+    <DialogModal :show="showClientFormModal" @close="showClientFormModal = false; resetClientForm()">
+      <template #title> Agregar cliente </template>
+      <template #content>
+        <form @submit.prevent="storeClient" class="md:grid grid-cols-2 gap-x-3">
+          <div class="mt-3">
+            <InputLabel value="Nombre*" class="ml-3 mb-1" />
+            <el-input v-model="clientForm.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
+            <InputError :message="clientForm.errors.name" />
+          </div>
+          <div class="mt-3">
+            <InputLabel class="mb-1 ml-2" value="Teléfono *" />
+            <el-input v-model="clientForm.phone"
+            :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+            :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+            placeholder="Escribe el número de teléfono" />
+            <InputError :message="clientForm.errors.phone" />
+          </div>
+          <div class="mt-3 col-span-full">
+            <InputLabel value="RFC (opcional)" class="ml-3 mb-1" />
+            <el-input v-model="clientForm.rfc" placeholder="Escribe el RFC en caso de tenerlo" :maxlength="100" clearable />
+            <InputError :message="clientForm.errors.rfc" />
+          </div>
+        </form>
+      </template>
+      <template #footer>
+        <div class="flex items-center space-x-2">
+          <CancelButton @click="showClientFormModal = false; resetClientForm()" :disabled="clientForm.processing">Cancelar</CancelButton>
+          <PrimaryButton @click="storeClient()" :disabled="clientForm.processing">Crear</PrimaryButton>
+        </div>
+      </template>
+    </DialogModal>
+
     <!-- Modal para advertir que se ha excedido del dinero permitido en caja -->
     <ConfirmationModal :show="showLimitCashModal" @close="showLimitCashModal = false">
       <template #title>
@@ -509,6 +564,7 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import DialogModal from "@/Components/DialogModal.vue";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
@@ -530,6 +586,12 @@ export default {
       registerNotes: null, //notas al entrar o sacar dinero
     });
 
+    const clientForm = useForm({
+      name: null,
+      rfc: null,
+      phone: null,
+    });
+
     const cutForm = useForm({
       counted_cash: null,
       difference: null,
@@ -543,6 +605,7 @@ export default {
     return {
       form,
       cutForm,
+      clientForm,
 
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
       asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
@@ -553,6 +616,7 @@ export default {
       syncingData: false,
 
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
+      showClientFormModal: false, //muestra u oculta el modal de creación de cliente
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
       localCurrentCash: 0, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
@@ -590,6 +654,7 @@ export default {
           paying: false,
           discount: 0,
           moneyReceived: null,
+          client_id: null,
         },
         {
           title: "Registro 2",
@@ -598,6 +663,7 @@ export default {
           paying: false,
           discount: 0,
           moneyReceived: null,
+          client_id: null,
         },
         {
           title: "Registro 3",
@@ -606,6 +672,7 @@ export default {
           paying: false,
           discount: 0,
           moneyReceived: null,
+          client_id: null,
         },
       ],
     }
@@ -616,6 +683,7 @@ export default {
     PrimaryButton,
     ThirthButton,
     CancelButton,
+    DialogModal,
     InputLabel,
     InputError,
     SaleTable,
@@ -623,9 +691,30 @@ export default {
   },
   props: {
     products: Array,
-    cash_registers: Array
+    cash_registers: Array,
+    clients: Array
   },
   methods: {
+    storeClient() {
+      this.clientForm.post(route('clients.store'), {
+        onSuccess: () => {
+          this.$notify({
+            title: "Éxito",
+            message: "Se ha creado un nuevo cliente",
+            type: "success",
+          });
+          this.showClientFormModal = false;
+        },
+      });
+    },
+    resetClientForm() {
+      this.clientForm.reset();
+    },
+    disabledDate(time) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return time.getTime() < today.getTime();
+    },
     sumCashForSale() {
       this.localCurrentCash += this.editableTabs[this.editableTabsValue - 1]?.saleProducts.reduce((accum, item) => {
         return accum += item.product.public_price * item.quantity;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\Client;
 use App\Models\CreditSaleData;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
@@ -39,7 +40,9 @@ class SaleController extends Controller
         //recupera todas las cajas registradoras de la tienda
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
 
-        return inertia('Sale/Point', compact('products', 'cash_registers'));
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+
+        return inertia('Sale/Point', compact('products', 'cash_registers', 'clients'));
     }
 
     public function index()
@@ -48,7 +51,7 @@ class SaleController extends Controller
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
         $groupedSales = null;
         $total_sales = 1;
-
+        
         return inertia('Sale/Index', compact('groupedSales', 'total_sales', 'cash_registers'));
     }
 
