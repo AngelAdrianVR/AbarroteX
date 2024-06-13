@@ -452,6 +452,7 @@ export default {
                         currentURL.searchParams.set('page', this.currentPage);
                         window.history.replaceState({}, document.title, currentURL.href);
                     }
+                    // location.reload(); se requiere recargar la pagina para guardar el parametro de page en la url
                 }
             } catch (error) {
                 console.log(error)

@@ -56,7 +56,8 @@
           <div class="w-3/4 space-y-1">
             <p class="font-bold mb-3">Efectivo esperado</p>
             <p class="text-gray99">Efectivo inicial</p>
-            <p class="text-gray99">Ventas</p>
+            <p class="text-gray99">Ventas en tienda</p>
+            <p class="text-gray99">Ventas en línea</p>
 
             <p v-if="currentMovements?.length" @click="showcashRegisterMovements = !showcashRegisterMovements"
                 class="text-primary flex items-center cursor-pointer">Movimientos de caja 
@@ -76,16 +77,24 @@
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </div>
             <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
-              (cash_register.started_cash + cutForm.totalSaleForCashCut +
+              (cash_register.started_cash + cutForm.totalStoreSale +
                 cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
             <p class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                     cash_register.started_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
+            
+            <div v-if="cutLoading">
+              <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+            </div>
+
+            <p v-else class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+                    cutForm.totalStoreSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+
             <div v-if="cutLoading">
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </div>
 
             <p v-else class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                    cutForm.totalSaleForCashCut?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    cutForm.totalOnlineSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
 
             <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
               <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus'"
@@ -104,7 +113,7 @@
             <span class="mr-3">
               $
             </span>
-            <b>{{ (cash_register.started_cash + cutForm.totalSaleForCashCut +
+            <b>{{ (cash_register.started_cash + cutForm.totalStoreSale + cutForm.totalOnlineSale +
               cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
           </p>
         </footer>
@@ -245,7 +254,7 @@
             <div v-if="cutLoading">
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </div>
-            <p v-else>${{ (cash_register.started_cash + cutForm.totalSaleForCashCut +
+            <p v-else>${{ (cash_register.started_cash + cutForm.totalStoreSale + cutForm.totalOnlineSale +
               cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
             <el-input @input="difference()" v-model="cutForm.counted_cash" type="text" placeholder="0.00"
               :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
@@ -301,9 +310,9 @@
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
           <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
-          <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing || (!currentMovements.length && cutForm.totalSaleForCashCut == 0)">Hacer corte</PrimaryButton>
+          <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing || (!currentMovements.length && cutForm.totalStoreSale == 0)">Hacer corte</PrimaryButton>
         </div>
-          <p v-if="!currentMovements.length && cutForm.totalSaleForCashCut == 0" 
+          <p v-if="!currentMovements.length && cutForm.totalStoreSale == 0" 
             class="text-xs text-red-600 text-right">*Para hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
       </form>
     </div>
@@ -338,7 +347,8 @@ export default {
       counted_cash: null,
       difference: null,
       notes: null,
-      totalSaleForCashCut: null, //dinero esperado de ventas hechas para hacer corte
+      totalStoreSale: null, //dinero esperado de ventas hechas para hacer corte
+      totalOnlineSale: null, //dinero esperado de ventas en linea para hacer corte
       totalCashMovements: null, //dinero de movimientos de caja para hacer corte
       withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
     });
@@ -439,7 +449,8 @@ export default {
       try {
         const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.cash_register.id));
         if (response.status === 200) {
-          this.cutForm.totalSaleForCashCut = response.data;
+          this.cutForm.totalStoreSale = response.data.store_sales; //ventas en tienda
+          this.cutForm.totalOnlineSale = response.data.online_sales; // ventas en linea
         }
       } catch (error) {
         console.log(error);
@@ -490,7 +501,7 @@ export default {
     },
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
-      this.cutForm.difference = (this.cutForm.totalSaleForCashCut + this.cutForm.totalCashMovements + this.cash_register.started_cash) - this.cutForm.counted_cash
+      this.cutForm.difference = (this.cutForm.totalStoreSale + this.cutForm.totalOnlineSale + this.cutForm.totalCashMovements + this.cash_register.started_cash) - this.cutForm.counted_cash
     },
   },
   mounted() {

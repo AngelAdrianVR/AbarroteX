@@ -200,6 +200,7 @@ methods:{
                     message: "Cliente creado correctamente",
                     type: "success",
                 });
+                this.$inertia.get(route('clients.index'));
             },
         });
     },
