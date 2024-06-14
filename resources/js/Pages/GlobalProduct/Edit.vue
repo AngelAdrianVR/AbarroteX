@@ -14,7 +14,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría*" class="ml-3 mb-1" />
+                        <InputLabel value="Categoría" class="ml-3 mb-1" />
                         <button
                             @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -31,7 +31,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor *" class="ml-3 mb-1" />
+                        <InputLabel value="Proveedor" class="ml-3 mb-1" />
                         <button
                             @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -83,7 +83,10 @@
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar cambios</PrimaryButton>
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Guardar cambios
+                    </PrimaryButton>
                 </div>
             </form>
         </div>

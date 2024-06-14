@@ -5,7 +5,9 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Admin;
+use App\Models\Banner;
 use App\Models\CashRegister;
+use App\Models\Logo;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Setting;
@@ -26,14 +28,23 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // crear la primera tienda
-        Store::create([
+        $store = Store::create([
             'name' => 'Tienda de pruebas',
             'contact_name' => 'Administrador',
             'contact_phone' => '3312155731',
-            'address' => '---',
+            'address' => 'Dirección de prueba',
             'type' => 'Abarrotes',
             'next_payment' => now()->addDays(15),
             'default_card_id' => 1,
+        ]);
+
+        //crea el registro de banners y logo
+        Banner::create([
+            'store_id' => $store->id
+        ]);
+
+        Logo::create([
+            'store_id' => $store->id
         ]);
 
         // crear la primera caja registradora de la tienda

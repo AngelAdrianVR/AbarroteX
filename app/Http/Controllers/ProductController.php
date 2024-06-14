@@ -48,8 +48,8 @@ class ProductController extends Controller
             'description' => 'nullable|string|max:255',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         // forzar default de 1 en stock
@@ -61,25 +61,34 @@ class ProductController extends Controller
             $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
-        return to_route('products.show', $product->id);
+        //codifica el id del producto
+        $encoded_product_id = base64_encode($product->id);
+
+        return to_route('products.show', $encoded_product_id);
     }
 
-    public function show($product_id)
+    public function show($encoded_product_id)
     {
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
         $cash_register = auth()->user()->cashRegister;
         $product = ProductResource::make(Product::with('category', 'brand')
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($product_id));
+            ->findOrFail($decoded_product_id));
 
             return inertia('Product/Show', compact('product', 'cash_register'));
     }
 
 
-    public function edit($product_id)
+    public function edit($encoded_product_id)
     {
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
         $product = ProductResource::make(Product::with('category', 'brand')
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($product_id));
+            ->findOrFail($decoded_product_id));
         $store = auth()->user()->store;
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
@@ -98,8 +107,8 @@ class ProductController extends Controller
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -122,7 +131,10 @@ class ProductController extends Controller
             $product->clearMediaCollection('imageCover');
         }
 
-        return to_route('products.show', $product->id);
+        //codifica el id del producto
+        $encoded_product_id = base64_encode($product->id);
+
+        return to_route('products.show', $encoded_product_id);
     }
 
     public function updateWithMedia(Request $request, Product $product)
@@ -136,8 +148,8 @@ class ProductController extends Controller
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -223,7 +235,7 @@ class ProductController extends Controller
         $product = Product::find($product_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
-        $product->current_stock += intval($request->quantity);
+        $product->current_stock += floatval($request->quantity);
 
         // Guarda el producto
         $product->save();
@@ -470,12 +482,13 @@ class ProductController extends Controller
 
     public function getDataForProductsView()
     {
+        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
         $all_products = $this->getAllProducts();
         $total_products = $all_products->count();
         $total_local_products = $all_products->whereNull('global_product_id')->count();
 
         //tomar solo primeros 30 productos
-        $products = $all_products->take(30);
+        $products = $all_products->take($page);
 
         return response()->json(compact('products', 'total_products', 'total_local_products'));
     }

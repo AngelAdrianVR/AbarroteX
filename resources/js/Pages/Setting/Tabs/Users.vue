@@ -1,6 +1,7 @@
 <template>
     <section>
         <h1 class="rounded-full pl-10 bg-[#F2F2F2] py-1 text-sm">Usuarios</h1>
+        <p class="px-9 text-sm md:text-base mt-4">Los usuarios pueden iniciar sesión con el correo electrónico registrado y la contraseña: <span class="bg-primarylight">ezyventas</span> , la cual pueden cambiar luego en su perfil</P>
 
         <!-- Botones -->
         <div class="text-right mt-3">
@@ -23,7 +24,7 @@
                     <tbody>
                         <tr v-for="(user, index) in users" :key="user"
                             class="*:text-xs *:px-3 *:py-2 hover:bg-primarylight">
-                            <td class="rounded-s-full w-[20%]">{{ user.id }}</td>
+                            <td class="rounded-s-full w-[20%]">{{ index + 1 }}</td>
                             <td class="w-[10%]">{{ user.name }}</td>
                             <td class="w-[20%]">{{ user.email }}</td>
                             <td class="w-[20%]">{{ user.rol ?? '--' }}</td>
@@ -64,8 +65,7 @@
                                                 </svg>
                                                 <span class="text-xs">Editar</span>
                                             </el-dropdown-item>
-                                            <!-- Solo se puede eliminar si no es el usuario administrador de la tienda -->
-                                            <el-dropdown-item v-if="index != 0" :command="'delete|' + user.id">
+                                            <el-dropdown-item :command="'delete|' + user.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"
                                                     class="size-[14px] mr-2 text-red-600">

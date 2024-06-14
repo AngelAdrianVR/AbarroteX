@@ -3,7 +3,7 @@
         <div ref="scrollContainer" style="height: 91vh; overflow-y: scroll;" @scroll="handleScroll">
             <!-- Banners -->
             <section v-if="banners?.media?.length" class="my-4">
-                <figure class="md:w-1/2 h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
+                <figure class="lg:h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
                     <img class="!rounded-md h-full object-contain" :src="banners?.media[currentBanner].original_url" alt="">
                     <div class="flex items-center justify-center space-x-3 mt-4">
                         <i @click="currentBanner = index" v-for="(dot, index) in banners?.media?.length" :key="dot" :class="index == currentBanner ? 'text-primary' : 'cursor-pointer text-xs' "
@@ -18,6 +18,8 @@
             <!-- Productos -->
             <section class="pb-16">
                 <h1 class="font-bold text-3xl text-center mb-12">Productos</h1>
+                <h1 v-if="store.online_store_properties.enabled_free_delivery" class="font-bold text-xl text-center text-primary mb-1">
+                    Envío gratis en compra mínima de ${{ store.online_store_properties.min_free_delivery }}</h1>
                 
                 <div class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-7 md:mx-9 space-y-4 md:space-y-0">
                     <OnlineProductCard v-for="product in visibleProducts" :key="product" :product="product" />
@@ -28,7 +30,6 @@
                     <i class="fa-sharp fa-solid fa-circle-notch text-4xl fa-spin ml-2 text-primary"></i>
                 </div>
             </section>
-
         </div>
     </OnlineStoreLayout>
   
@@ -45,7 +46,8 @@ data() {
     return {
         loading: false, // bandera de carga para recuperar mas items con scroll.
         visibleProducts: this.products, //variable local de productos visibles
-        currentBanner: 0 //index de banners
+        currentBanner: 0, //index de banners
+        store: null, //informacion de la tienda
     }
 },
 components:{
@@ -107,6 +109,16 @@ methods:{
             this.currentBanner = (this.currentBanner + 1) % this.banners?.media?.length;
         }, 5000);
     },
+    async fetchStoreInfo() {
+        try {
+            const response = await axios.get(route('stores.fetch-store-info', this.store_id));
+            if ( response.status === 200 ) {
+                this.store = response.data.store;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 },
 mounted() {
     this.visibleProducts = this.products;
@@ -116,8 +128,12 @@ mounted() {
     // Guardar store_id en el localStorage
     localStorage.setItem('storeId', this.store_id);
 
+    // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
+    this.fetchStoreInfo();
+
     //iniciar contador para cambiar banners automaticamente.
-    this.startTimer()
+    this.startTimer();
+
 }
 }
 </script>

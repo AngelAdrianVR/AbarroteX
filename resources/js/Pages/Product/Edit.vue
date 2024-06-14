@@ -46,7 +46,7 @@
                 <div></div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría*" />
+                        <InputLabel value="Categoría" />
                         <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -62,7 +62,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor *" />
+                        <InputLabel value="Proveedor" />
                         <button @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -120,7 +120,10 @@
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar cambios</PrimaryButton>
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Guardar cambios
+                    </PrimaryButton>
                 </div>
             </form>
         </div>
