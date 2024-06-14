@@ -136,6 +136,11 @@ Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllF
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 
 
+//services routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+Route::resource('services', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+
+
 //global-product-store routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-product-store', GlobalProductStoreController::class)->middleware(['auth', 'activeSuscription', 'verified']);
