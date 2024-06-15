@@ -1,14 +1,15 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="Object.keys(products)?.length" class="w-full">
+        <table v-if="Object.keys(products)?.length" class="w-full table-fixed">
             <thead>
-                <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th></th>
-                    <th>Código</th>
-                    <th>Nombre de producto</th>
-                    <th>Precio</th>
-                    <th>Existencias</th>
-                    <th>Existencias mínimas</th>
+                <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
+                    <th class="w-20 md:w-[10%]"></th>
+                    <th class="w-36 md:w-[15%]">Código</th>
+                    <th class="w-44 md:w-[20%]">Nombre de producto</th>
+                    <th class="w-20 md:w-[15%]">Precio</th>
+                    <th class="w-32 md:w-[15%]">Existencias</th>
+                    <th class="w-32 md:w-[15%]">Existencias mínimas</th>
+                    <th class="w-16 md:w-[10%]"></th>
                 </tr>
             </thead>
             <tbody>
@@ -18,6 +19,14 @@
                         <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
                             class="size-10 bg-white object-contain rounded-md"
                             :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                        <div v-else
+                            class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
+                        </div>
                     </td>
                     <td>
                         {{ product.global_product_id ? product.global_product?.code : product.code ?? 'N/A' }}
@@ -26,7 +35,7 @@
                         {{ product.global_product_id ? product.global_product?.name : product.name }}
                     </td>
                     <td>
-                        ${{ product.public_price }}
+                        ${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </td>
                     <td>
                         <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
@@ -148,17 +157,19 @@ export default {
             }
         },
         handleEdit(product) {
+            const encodedId = btoa(product.id.toString());
             if (product.global_product_id) {
-                this.$inertia.get(route('global-product-store.edit', product.id));
+                this.$inertia.get(route('global-product-store.edit', encodedId));
             } else {
-                this.$inertia.get(route('products.edit', product.id))
+                this.$inertia.get(route('products.edit', encodedId))
             }
         },
         handleShow(product) {
+            const encodedId = btoa(product.id.toString());
             if (product.global_product_id) {
-                this.$inertia.get(route('global-product-store.show', product.id));
+                this.$inertia.get(route('global-product-store.show', encodedId));
             } else {
-                this.$inertia.get(route('products.show', product.id))
+                this.$inertia.get(route('products.show', encodedId))
             }
         },
         async deleteItem() {
@@ -184,7 +195,7 @@ export default {
                     }
 
                     // buscar producto en indexedDB
-                    const products = await getItemByAttributes('products', {name: productName});
+                    const products = await getItemByAttributes('products', { name: productName });
 
                     // eliminar de indexedDB
                     await deleteItem('products', products[0].id);

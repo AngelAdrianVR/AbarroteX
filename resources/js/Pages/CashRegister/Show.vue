@@ -36,11 +36,12 @@
                             <div class="w-3/4 space-y-1">
                                 <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                                 <p class="text-gray99">Efectivo inicial</p>
-                                <p class="text-gray99">Ventas</p>
+                                <p class="text-gray99">Ventas en tienda</p>
+                                <p class="text-gray99">Ventas en línea</p>
 
                                 <p  v-if="cashCutMovements[index]?.length"
                                     class="text-primary flex items-center">Movimientos de caja 
-                                    <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i>
+                                    <!-- <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i> -->
                                 </p>
 
                                 <div v-if="loadingMovements">
@@ -57,12 +58,12 @@
                             <div class="w-1/4 space-y-1">
                                 <!-- <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
                                     cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
-                                <p class="text-gray99"><span class="text-gray99 mr-3"><i
-                                    class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
+                                <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                                <p class="text-gray99 pb-5"><span class="text-gray99 mr-3"><i
-                                    class="fa-solid fa-plus text-xs px-1"></i>$</span>{{
-                                    cash_cut.sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                                <p class="text-gray99  ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
+                                    cash_cut.store_sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
+                                <p class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+                                    cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
                                 <div v-if="loadingMovements">
                                     <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                                 </div>
@@ -70,7 +71,7 @@
                                 <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in cashCutMovements[index]"
 
                                     :key="cashRegisterMovement" class="text-gray99">
-                                    <i :class="cashRegisterMovement.type === 'Ingreso' ? 'fa-plus' : 'fa-minus'"
+                                    <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus'"
                                         class="fa-solid text-xs px-1"></i>
                                     <span class="text-gray99 mr-3">$</span>{{
                                         cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
@@ -89,7 +90,7 @@
                     </div>
 
                     <!-- resumen de corte en pequeño--------------------- -->
-                    <div class="mt-7 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 rounded-lg self-start">
+                    <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 rounded-lg self-start">
                         <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-t-lg">Resumen de corte</h2>
                         <div class="flex justify-between space-x-1 p-5">
                             <div class="font-semibold space-y-1">
@@ -111,7 +112,7 @@
                                     (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US',
                                     {minimumFractionDigits: 2}) }}</p>
                                 <p><span class="text-gray99 pr-3">$</span>{{
-                                    cash_cut.withdrawn_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                                    cash_cut.withdrawn_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
                                 <p><span class="text-gray99 pr-3">$</span>{{ (cash_cut.counted_cash -
                                     cash_cut.withdrawn_cash)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                             </div>
@@ -132,7 +133,7 @@
                                 : 'Faltante de efectivo' ) }} </p>
                     </div>
                 </article>
-                <div class="border-b my-7"></div>
+                <div class="border-b my-12"></div>
             </section>
         </div>
     </AppLayout>

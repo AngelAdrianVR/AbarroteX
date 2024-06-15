@@ -47,7 +47,7 @@
         <p v-if="localOrders?.length" class="text-gray66 text-[11px] mb-3">{{ localOrders?.length }} de {{ totalOnlineOrders }}
             elementos
         </p>
-        <div class="overflow-auto h-[465px] border-b py-3">
+        <div class="overflow-auto h-[465px] py-3">
             <table v-if="localOrders?.length" class="w-full">
                 <thead>
                     <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
@@ -81,19 +81,19 @@
                                 </button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
-                                        <el-dropdown-item :command="'processing|' + online_order.id">
+                                        <el-dropdown-item v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado' && online_order.status != 'Procesando'" :command="'processing|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2 text-blue-500">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                             </svg>
                                             <span class="text-xs">Procesando</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'delivered|' + online_order.id">
+                                        <el-dropdown-item v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado'" :command="'delivered|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2 text-green-500">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                             </svg>
                                             <span class="text-xs">Entregado</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'cancel|' + online_order.id">
+                                        <el-dropdown-item v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado'" :command="'cancel|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2 text-red-500">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                                             </svg>
@@ -109,14 +109,10 @@
                                             </svg>
                                             <span class="text-xs">Ver</span>
                                         </el-dropdown-item>
-                                        <!-- <el-dropdown-item :command="'edit|' + online_order.id">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                            </svg>
-                                            <span class="text-xs">Editar</span>
-                                        </el-dropdown-item> -->
+                                        <el-dropdown-item v-if="online_order.phone" :command="'whatsapp|' + online_order.phone">
+                                            <i class="fa-brands fa-whatsapp text-green-500"></i>
+                                            <span class="text-xs">Mandar whatapp</span>
+                                        </el-dropdown-item>
                                         <el-dropdown-item :command="'delete|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
@@ -140,13 +136,13 @@
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <!-- <button v-else-if="localOrders?.length && totalOnlineOrders > 20 && localOrders?.length < totalOnlineOrders && !filtered"
-                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button> -->
+            <button v-else-if="localOrders?.length && totalOnlineOrders > 5 && localOrders?.length < totalOnlineOrders && !filtered"
+                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más elementos</button>
         </div>
     </div>
 
     <!-- -------------- Modal creación de orden starts----------------------- -->
-    <Modal :show="createOnlineOrderModal" @close="createOnlineOrderModal = false; form.reset">
+    <Modal :show="createOnlineOrderModal" @close="createOnlineOrderModal = false">
         <div class="py-4 px-7 relative text-sm">
         <i @click="createOnlineOrderModal = false"
             class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
@@ -183,6 +179,21 @@
                     <InputLabel value="Colonia*" class="ml-3 mb-1" />
                     <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
                     <InputError :message="form.errors.suburb" />
+                </div>
+
+                <div>
+                    <InputLabel class="mb-1 ml-2" value="Código postal" />
+                    <el-input v-model="form.postal_code"
+                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                    :parser="(value) => value.replace(/\D/g, '')" maxlength="6" clearable
+                    placeholder="Escribe el código postal" />
+                    <InputError :message="form.errors.postal_code" />
+                </div>
+
+                <div>
+                    <InputLabel value="Estado*" class="ml-3 mb-1" />
+                    <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan" :maxlength="255" clearable />
+                    <InputError :message="form.errors.polity_state" />
                 </div>
 
                 <div>
@@ -231,7 +242,7 @@
 
             <div class="flex justify-end space-x-1 pt-5 pb-1 py-3">
             <CancelButton @click="createOnlineOrderModal = false">Cancelar</CancelButton>
-            <PrimaryButton :disabled="form.processing">Confirmar</PrimaryButton>
+            <PrimaryButton :disabled="form.processing || !form.products[0].name">Confirmar</PrimaryButton>
             </div>
         </form>
         </div>
@@ -255,6 +266,26 @@
             </div>
         </template>
     </ConfirmationModal>
+
+    <!-- Confirmación de Actualización de estatus -->
+        <ConfirmationModal :show="showUpdateStatusConfirm" @close="showUpdateStatusConfirm = false">
+            <template #title>
+                <h1>Cambiar estatus de pedido</h1>
+            </template>
+            <template #content>
+                <p>
+                    Se cambiará el estatus del pedido seleccionado, esto es un proceso irreversible. ¿Continuar
+                    de todas formas?
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="showUpdateStatusConfirm = false">Cancelar</CancelButton>
+                    <DangerButton @click="updateStatus(tempStatus, orderId);">Confirmar</DangerButton>
+                </div>
+            </template>
+        </ConfirmationModal>
+        <!-- Confirmación de Actualización de estatus -->
 </template>
 
 <script>
@@ -283,17 +314,20 @@ data() {
         street: null,
         ext_number: null,
         int_number: null,
+        postal_code: null, 
+        polity_state: null,
         delivery_price: null, //precio de envío
         total: 0,
         store_id: this.$page.props.auth.user.store_id,
         created_from_app: true,
+        store_inventory: this.$page.props.auth.user.store?.online_store_properties?.inventory,
         products: [
             {
                 id: 1,
                 name: null,
                 product_id: null,
                 price: 1,
-                is_local: null,
+                isLocal: null,
                 quantity: 1,
                 image_url: null,
             }
@@ -311,6 +345,7 @@ data() {
         currentPage: 1, //para paginación
         products: null, //se obtienne todos los productos de la tienda
         showDeleteConfirm: false, //modal de eliminación
+        showUpdateStatusConfirm: false, //modal de actualizacion de estatus
         next_item_id: 2, //para el index de productos creados como venta en linea
         payment_methods: [
             'Efectivo',
@@ -318,7 +353,9 @@ data() {
             'Tarjeta de débito',
             'Trandferencia o depósito',
             'Mercado pago',
-        ]
+        ],
+        tempStatus: null, //estatus temporal para usar en modal de confirmacion 
+        orderId: null, //id de la orden para usar en modal de confirmacion 
     }
 },
 components:{
@@ -339,7 +376,7 @@ totalOnlineOrders: Number
 },
 methods:{
     addNewItem() {
-      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, is_local:null, quantity: null });
+      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, isLocal: null, quantity: null });
     },
     deleteItem(index) {
       if (this.form.products.length > 1) {
@@ -370,16 +407,26 @@ methods:{
 
         if (commandName == 'see') {
             this.$inertia.get(route('online-sales.show', data));
-        } else if (commandName == 'processing' || commandName == 'delivered' || commandName == 'cancel') {
+        } else if (commandName == 'processing') {
             this.updateStatus(commandName, data);
+        } else if (commandName == 'delivered' || commandName == 'cancel') {
+            this.tempStatus = commandName;
+            this.orderId = data;
+            this.showUpdateStatusConfirm = true;
         } else if (commandName == 'delete') {
             this.showDeleteConfirm = true;
             this.itemIdToDelete = data;
+        } else if (commandName == 'whatsapp') {
+            this.whatsappMessage(data);
         }
     },
     async updateStatus(status, orderId) {
         try {
-            const response = await axios.put(route('online-sales.update-status', orderId), { status: status, online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties.online_sales_cash_register});
+            const response = await axios.put(route('online-sales.update-status', orderId), { 
+                status: status,
+                online_sales_cash_register: this.$page.props.auth.user.store.online_store_properties.online_sales_cash_register,
+                store_inventory: this.$page.props.auth.user.store?.online_store_properties?.inventory
+            });
             if ( response.status === 200 ) {
                 //buscar la orden seleccionada para actualizar estatus
                 const orderIndex = this.localOrders.findIndex(item => item.id == orderId);
@@ -398,6 +445,8 @@ methods:{
             }
         } catch (error) {
             console.log(error);
+        } finally {
+            this.showUpdateStatusConfirm = false;
         }
     },
     async fetchItemsByPage() {
@@ -406,7 +455,7 @@ methods:{
             const response = await axios.post(route('online-sales.get-by-page', this.currentPage));
 
             if (response.status === 200) {
-                this.localOrders.push(response.data.items);
+                this.localOrders = [...this.localOrders, ...response.data.items];
                 this.currentPage++;
             }
         } catch (error) {
@@ -530,6 +579,11 @@ methods:{
         this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery 
         ? 0 
         : parseFloat(storeProperties?.delivery_price);
+    },
+    whatsappMessage(phone) {
+        const text = encodeURIComponent('Hola! hemos recibido tu pedido en línea');
+        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
+        window.open(url, '_blank');    
     }
 },
 watch: {

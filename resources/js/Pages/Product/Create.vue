@@ -49,7 +49,7 @@
                 <div></div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría*" class="ml-3 mb-1" />
+                        <InputLabel value="Categoría" class="ml-3 mb-1" />
                         <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -65,7 +65,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor *" class="ml-3 mb-1" />
+                        <InputLabel value="Proveedor" class="ml-3 mb-1" />
                         <button @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -99,7 +99,7 @@
                 <div class="mt-3 col-span-full">
                     <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255" show-word-limit
+                        placeholder="Escribe una descripción o características separadas por renglones" :maxlength="255" show-word-limit
                         clearable />
                     <InputError :message="form.errors.description" />
                 </div>
@@ -121,7 +121,10 @@
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar producto</PrimaryButton>
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Guardar producto
+                    </PrimaryButton>
                 </div>
             </form>
             <div v-else class="text-center text-gray37">
@@ -132,6 +135,7 @@
                 </p>
                 <div class="flex justify-center mt-5">
                     <PrimaryButton @click="$inertia.get(route('profile.show'))" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Explorar planes
                     </PrimaryButton>
                 </div>

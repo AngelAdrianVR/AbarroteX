@@ -20,10 +20,10 @@ return new class extends Migration
             $table->unsignedSmallInteger('min_stock')->nullable();
             $table->unsignedSmallInteger('max_stock')->nullable();
             $table->unsignedFloat('current_stock')->nullable()->default(1);
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('brand_id')->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -21,8 +21,15 @@
                 <h1 class="font-bold">{{ product?.global_product_id ? product?.global_product.name : product?.name }}</h1>
                 <p class="font-bold">${{ product?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 <div v-if="actions" class="flex justify-between">
-                    <el-input-number :disabled="product?.global_product?.current_stock < 1 || product?.current_stock < 1"
-                        v-model="quantity" size="small" :min="1" :max="product?.current_stock" :precision="2" />
+                    <div class="flex items-center space-x-2">
+                        <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
+                        <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product?.current_stock < 1"
+                            v-model="quantity" size="small" :min="1" :max="product?.current_stock" :precision="2" />
+
+                        <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
+                        <el-input-number v-else v-model="quantity" size="small" :min="1" :max="999" :precision="2" />
+                            <p v-if="store?.online_store_properties?.inventory" class="text-xs text-primary">disponibles: {{ product?.current_stock }}</p>
+                    </div>
                     <!-- Eliminar producto de carrito -->
                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                     title="¿Deseas continuar?" @confirm="deleteCartProduct()">
@@ -50,6 +57,7 @@ data() {
 },
 props:{
     cartProduct: Object,
+    store: Object,
     actions: { //acciones de borrar y editar cantidad
         type: Boolean,
         default: true

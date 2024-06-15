@@ -19,7 +19,8 @@ return new class extends Migration
             $table->boolean('is_global_product');
             $table->unsignedFloat('quantity');
             $table->timestamp('refunded_at')->nullable();
-            $table->string('group_id');
+            $table->string('folio');
+            $table->foreignId('client_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('cash_register_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

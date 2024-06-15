@@ -2,28 +2,11 @@
     <AppLayout :title="'Venta del día'">
         <div class="md:px-10 px-2 py-7 text-xs md:text-sm">
             <div class="flex justify-between items-center">
-                <Back />
-                <div class="flex items-center space-x-2">
-                    <!-- ** descomentar cuando se haga una plantilla para imprimir todas las ventas del día **  -->
-                    <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
-                        title="¿Continuar?" @confirm="print(Object.values(day_sales)[0].sales[0]?.created_at)">
-                        <template #reference>
-                            <i @click.stop
-                                class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
-                        </template>
-</el-popconfirm> -->
-                    <!-- <el-popconfirm v-if="canRefund" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
-                        title="¿Continuar?" @confirm="deleteItem(Object.values(day_sales)[0].sales[0]?.id)">
-                        <template #reference>
-                            <i @click.stop
-                                class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
-                        </template>
-                    </el-popconfirm> -->
-                </div>
+                <Back :to="route('sales.index')" />
             </div>
 
             <!-- Información de la venta -->
-            <div class="mt-7 lg:mx-16 text-gray99">
+            <header class="mt-7 lg:mx-16 text-gray99">
                 <p>Total de productos vendidos: <span class="font-thin ml-2 text-gray37">{{
                     Object.values(day_sales)[0].total_quantity }}</span></p>
                 <p>Fecha de venta: <span class="font-thin ml-2 text-gray37">{{
@@ -31,144 +14,138 @@
                 <p>Total de venta: <span class="font-black ml-2 text-gray37">${{
                     Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         }}</span></p>
-            </div>
+            </header>
 
             <!-- Productos -->
-            <section class="flex flex-col space-y-5 lg:mx-16 mt-10">
-                <article v-for="(group, index) in getGroupedSales" :key="index"
-                    class="border border-grayD9 *:px-1 *:md:px-5 *:py-1">
-                    <div class="flex items-center justify-between border-b border-grayD9 text-end">
-                        <div class="flex items-center space-x-3">
-                            <p class="text-gray99">Folio: <span class="text-gray37">{{ index }}</span></p>
-                            <span class="text-gray99">•</span>
-                            <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{
-                                formatDateHour(group[0].created_at) }}</span></p>
-                            <span class="text-gray99">•</span>
-                            <p class="text-gray99">Vendedor: <span class="text-gray37">{{ group[0].user.name }}</span>
-                            </p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <el-dropdown v-if="canEdit && canRefund && group.some(item => !item?.refunded_at)"
-                                trigger="click" @command="handleCommand">
-                                <button @click.stop
-                                    class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
-                                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                                </button>
-                                <template #dropdown>
-                                    <el-dropdown-menu>
-                                        <el-dropdown-item :command="'edit|' + index">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                            </svg>
-                                            <span class="text-xs">Editar</span>
-                                        </el-dropdown-item>
-                                        <el-dropdown-item v-if="canRefund" :command="'refund|' + index">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                                            </svg>
-                                            <span class="text-xs">Reembolso/Cancelar</span>
-                                        </el-dropdown-item>
-                                    </el-dropdown-menu>
-                                </template>
-                            </el-dropdown>
-                        </div>
-                    </div>
-                    <div class="border-b border-grayD9">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="*:px-2">
-                                    <th class="w-[55%] text-start">Producto</th>
-                                    <th class="w-[15%] text-start">Precio</th>
-                                    <th class="w-[15%] text-start">Cantidad</th>
-                                    <th class="w-[15%] text-end">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y-[1px]">
-                                <tr v-for="(sale, index2) in group" :key="index2"
-                                    class="*:px-2 *:py-[6px] *:align-top border-grayD9">
-                                    <td>
-                                        <button v-if="sale.product_id" @click="viewProduct(sale)"
-                                            class="text-start text-primary underline">
-                                            {{ sale.product_name }}
-                                        </button>
-                                        <el-tooltip v-else content="El producto fue eliminado" placement="right">
-                                            <span class="text-red-700">{{ sale.product_name }}</span>
-                                        </el-tooltip>
-                                    </td>
-                                    <td>${{ sale.current_price }}</td>
-                                    <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                                    <td class="text-end pb-1">${{ (sale.current_price *
-                                        sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="text-end">
-                        <!--*** descomentar cuado se guarden los descuentos sobre la venta total ***-->
-                        <!-- <div class="text-gray99 flex items-center justify-end space-x-2 *:w-12 px-3">
-                            <span>Subtotal:</span>
-                            <span class="text-gray37">$</span>
-                            <span class="text-gray37">{{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span>
-                        </div>
-                        <div class="text-gray99 flex items-center justify-end space-x-2 *:w-12 px-3">
-                            <span>Descuento:</span>
-                            <span class="text-gray37">$</span>
-                            <span class="text-gray37">21.50</span>
-                        </div> -->
-                        <div :class="group.some(item => item?.refunded_at) ? 'text-[#8C3DE4]' : 'text-gray37'"
-                            class="font-black flex items-center justify-end space-x-2 px-2">
-                            <el-tooltip v-if="group.some(item => item?.refunded_at)" placement="top">
-                                <template #content>
-                                    <p>El reembolso de realizó a las {{ formatDateHour(group[0].refunded_at) }}</p>
-                                </template>
-                                <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2">
-                                    Reembolsado</p>
-                            </el-tooltip>
-                            <span class="text-start w-12">Total:</span>
-                            <span class="w-12">$</span>
-                            <span class="w-12">{{ calcTotal(group).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                }}</span>
-                        </div>
-                    </div>
-                </article>
-            </section>
+            <main class="flex flex-col space-y-5 lg:mx-16 mt-10">
+                <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item"
+                    @show-modal="handleShowModal" :isOutOfCashCut="is_out_of_cash_cut" />
+            </main>
         </div>
+
+        <DialogModal :show="showInstallmentModal" @close="closeInstallmentModal()">
+            <template #title>
+                <h1>Abonos</h1>
+            </template>
+            <template #content>
+                <section class="border-t pt-1 border-grayD9">
+                    <div class="flex items-center justify-between">
+                        <span>Resumen de venta</span>
+                        <span :class="statusStyles" class="rounded-full px-4 py-[2px]">{{
+                            saleToSeeInstallments.credit_data.status }}</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-2 pb-2 border-b border-grayD9">
+                        <p class="text-gray99">Folio de venta: <span class="text-gray37">{{ saleToSeeInstallments.folio
+                                }}</span></p>
+                        <span class="text-grayD9">|</span>
+                        <p class="text-gray99">Total de venta: <span class="text-gray37">
+                                ${{ saleToSeeInstallments.total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span></p>
+                        <span class="text-grayD9">|</span>
+                        <p class="text-gray99">Fecha de vencimiento: <span class="text-gray37">
+                                {{ formatDate(saleToSeeInstallments.credit_data.expired_date) }}
+                            </span></p>
+                    </div>
+                    <table class="w-full mt-4 *:text-sm">
+                        <thead>
+                            <tr class="*:text-start">
+                                <th class="w-[13%]">Folio</th>
+                                <th class="w-[29%]">Fecha</th>
+                                <th class="w-[29%]">Monto abonado</th>
+                                <th class="w-[29%]">Deuda restante</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-[1px]">
+                            <tr v-for="(installment, index) in saleToSeeInstallments.credit_data.installments"
+                                :key="index" class="*:py-[6px] *:align-top border-grayD9">
+                                <td>{{ 'A' + String(installment.id).padStart(3, '0') }}</td>
+                                <td>{{ formatDateTime(installment.created_at) }}</td>
+                                <td>${{ installment.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                <td>${{ calcRemainingDebt(index).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                </td>
+                            </tr>
+                            <tr v-if="addInstallment">
+                                <td>-</td>
+                                <td>{{ formatDateTime(new Date().toISOString()) }}</td>
+                                <td>
+                                    <el-input v-model="installmentForm.amount" required type="text" class="!w-11/12"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" placeholder="0.00">
+                                        <template #prefix>
+                                            <i class="fa-solid fa-dollar-sign"></i>
+                                        </template>
+                                    </el-input>
+                                </td>
+                                <td>
+                                    ${{
+                                        calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                            ",") }}
+                                </td>
+                                <td>
+                                    <div
+                                        class="flex items-center space-x-1 *:size-5 *:flex *:items-center *:justify-center *:rounded-full *:text-[10px]">
+                                        <button @click="storeInstallment" type="button"
+                                            class="bg-primary text-white disabled:cursor-not-allowed disabled:bg-gray99"
+                                            :disabled="addingInstallment || !installmentForm.isDirty">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                        <button @click="addInstallment = false" type="button"
+                                            class="bg-grayF2 text-gray37" :disabled="addingInstallment">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-else-if="saleToSeeInstallments.credit_data.status !== 'Pagado'">
+                                <td colspan="4">
+                                    <button @click="addInstallment = true" type="button" class="text-primary mt-2">
+                                        + Agregar abono
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="closeInstallmentModal()" :disabled="addingInstallment">Cancelar</CancelButton>
+                </div>
+            </template>
+        </DialogModal>
         <DialogModal :show="showEditModal" @close="closeEditModal()">
             <template #title>
                 <h1>Editar venta</h1>
             </template>
             <template #content>
                 <form @submit.prevent="update">
-                    <section v-for="(sale, index) in form.sales" :key="index" class="flex items-center space-x-2 mb-1">
+                    <section v-for="(product, index) in form.products" :key="index"
+                        class="flex items-center space-x-2 mb-1">
                         <div class="w-1/3 md:w-1/2">
                             <InputLabel value="Producto" />
-                            <el-select v-model="sale.product_id" filterable placeholder="Selecciona el producto"
+                            <el-select v-model="product.product_id" filterable placeholder="Selecciona el producto"
                                 no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="item in products" :key="item.id" :label="item.name"
                                     :value="item.id" />
                             </el-select>
-                            <InputError :message="form.errors[`sales.${index}.product_id`]" />
+                            <InputError :message="form.errors[`products.${index}.product_id`]" />
                         </div>
                         <div class="w-1/3 md:w-1/4">
-                            <InputLabel value="Precio por unidad" />
-                            <el-input v-model.number="sale.current_price" placeholder="No olvides llenar este campo"
+                            <InputLabel value="$ por unidad" />
+                            <el-input v-model.number="product.current_price" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
                             </el-input>
-                            <InputError :message="form.errors[`sales.${index}.current_price`]" />
+                            <InputError :message="form.errors[`products.${index}.current_price`]" />
                         </div>
                         <div class="w-1/3 md:w-1/4">
                             <InputLabel value="Cantidad" />
-                            <el-input v-model.number="sale.quantity" placeholder="No olvides llenar este campo"
+                            <el-input v-model.number="product.quantity" placeholder="No olvides llenar este campo"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
                             </el-input>
-                            <InputError :message="form.errors[`sales.${index}.quantity`]" />
+                            <InputError :message="form.errors[`products.${index}.quantity`]" />
                         </div>
                     </section>
                 </form>
@@ -199,7 +176,7 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">
-                    <!-- <CancelButton @click="showRefundConfirm = false" :disabled="refunding">Cancelar</CancelButton> -->
+                    <CancelButton @click="showRefundConfirm = false" :disabled="refunding">Cancelar</CancelButton>
                     <PrimaryButton @click="refundSale" :disabled="refunding">Continuar</PrimaryButton>
                 </div>
             </template>
@@ -210,7 +187,7 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import SaleDetails from "@/Components/MyComponents/Sale/SaleDetails.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DialogModal from '@/Components/DialogModal.vue';
@@ -218,118 +195,144 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { format, parseISO } from 'date-fns';
-import es from 'date-fns/locale/es';
 import { addOrUpdateBatchOfItems, getAll } from '@/dbService.js';
 import axios from 'axios';
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
     data() {
         const form = useForm({
             folio: null,
-            sales: []
+            products: []
+        });
+
+        const installmentForm = useForm({
+            credit_sale_data_id: null,
+            amount: '',
         });
 
         return {
             form,
+            installmentForm,
             products: [],
             // modales
             showEditModal: false,
+            showInstallmentModal: false,
             showRefundConfirm: false,
+            saleToSeeInstallments: null,
             saleFolioToRefund: null,
-            saleFolioToEdit: null,
+            addInstallment: false,
             // cargas
+            addingInstallment: false,
             refunding: false,
             editing: false,
             // inventario de codigos activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
-            // Permisos de rol actual
-            canRefund: this.$page.props.auth.user.rol == 'Administrador',
-            canEdit: this.$page.props.auth.user.rol == 'Administrador',
-            // guardar estado de la vista en casi de ser necesario
-            buffer: null,
         }
     },
     components: {
         AppLayout,
         PrimaryButton,
-        ThirthButton,
         CancelButton,
         InputLabel,
         InputError,
         Back,
         ConfirmationModal,
         DialogModal,
+        SaleDetails,
     },
     props: {
         day_sales: Object,
+        is_out_of_cash_cut: Boolean //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
     },
     computed: {
         getGroupedSales() {
             // Obtener las ventas del primer día (si hay múltiples días, se debe ajustar esta parte)
             const sales = Object.values(this.day_sales)[0].sales;
 
-            // Agrupar las ventas por group_id
-            const salesGroupedByGroupId = sales.reduce((groupedSales, sale) => {
-                // Obtener el group_id de la venta
-                const groupId = sale.group_id;
-
-                // Verificar si ya existe un array para este group_id, de lo contrario, crear uno nuevo
-                if (!groupedSales[groupId]) {
-                    groupedSales[groupId] = [];
-                }
-
-                // Agregar la venta al array correspondiente al group_id
-                groupedSales[groupId].push(sale);
-
-                return groupedSales;
-            }, {});
-
-            // Resultado: objeto donde las claves son los group_id y los valores son arrays de ventas
-            return salesGroupedByGroupId;
-        }
+            return Object.values(sales);
+        },
+        statusStyles() {
+            const status = this.saleToSeeInstallments.credit_data.status;
+            if (status === 'Pendiente') {
+                return 'bg-[#FAFFDD] text-[#EFCE21]';
+            } else if (status === 'Parcial') {
+                return 'bg-[#F1F2FE] text-[#2D29FF]';
+            } else if (status === 'Pagado') {
+                return 'bg-[#E6FDDB] text-[#08B91A]';
+            }
+            return 'bg-[#C4FBAA] text-[#0AA91A]';
+        },
     },
     methods: {
+        calcRemainingDebtWithNewInstallment() {
+            const totalSale = this.saleToSeeInstallments.total_sale;
+            const installments = this.saleToSeeInstallments.credit_data.installments;
+
+            let totalPaid = 0;
+            installments.forEach(installment => {
+                totalPaid += installment.amount;
+            });
+
+            const newInstallmentAmount = this.installmentForm.amount ? parseFloat(this.installmentForm.amount) : 0;
+            return totalSale - totalPaid - newInstallmentAmount;
+        },
+        calcRemainingDebt(index) {
+            const totalSale = this.saleToSeeInstallments.total_sale;
+            const installments = this.saleToSeeInstallments.credit_data.installments;
+
+            let totalPaid = 0;
+            for (let i = 0; i <= index; i++) {
+                totalPaid += installments[i].amount;
+            }
+
+            return totalSale - totalPaid;
+        },
         formatSalesProductId() {
             // Obtener las ventas del primer día (si hay múltiples días, se debe ajustar esta parte)
             const sales = Object.values(this.day_sales)[0].sales;
 
             // cambiar el id de cada venta para que coincida con id de productos en indexedDB
-            sales.forEach(sale => {
-                // revisar si el id es un numero
-                if (Number.isFinite(sale.product_id)) {
-                    sale.product_id = sale.is_global_product
-                        ? 'global_' + sale.product_id
-                        : 'local_' + sale.product_id;
-                }
+            Object.values(sales).forEach(sale => {
+                sale.products.forEach(product => {
+                    // revisar si el id es un numero
+                    if (Number.isFinite(product.product_id)) {
+                        product.product_id = product.is_global_product
+                            ? 'global_' + product.product_id
+                            : 'local_' + product.product_id;
+                    }
+                })
             });
         },
-        formatDateHour(dateString) {
-            return format(parseISO(dateString), 'h:mm a', { locale: es });
+        closeInstallmentModal() {
+            this.showInstallmentModal = false;
         },
         closeEditModal() {
             this.showEditModal = false;
         },
         openEditModal(saleFolio) {
-            this.saleFolioToEdit = saleFolio;
-
             // Preparar form con una copia profunda de las ventas seleccionadas
-            this.form.folio = saleFolio;
-            this.form.sales = JSON.parse(JSON.stringify(this.getGroupedSales[saleFolio]));
+            let sale = this.getGroupedSales.find(item => item.folio == saleFolio);
+            this.form.folio = sale.folio;
+            this.form.products = JSON.parse(JSON.stringify(sale.products));
 
             // Abrir modal
             this.showEditModal = true;
         },
-        handleCommand(command) {
-            const commandName = command.split('|')[0];
-            const saleFolio = command.split('|')[1];
-
-            if (commandName == 'edit') {
-                this.openEditModal(saleFolio);
-            } else if (commandName == 'refund') {
-                this.showRefundConfirm = true;
-                this.saleFolioToRefund = saleFolio;
-            }
+        openRefundModal(saleFolio) {
+            this.showRefundConfirm = true;
+            this.saleFolioToRefund = saleFolio;
+        },
+        openInstallmentModal(saleFolio) {
+            this.showInstallmentModal = true;
+            let sale = this.getGroupedSales.find(item => item.folio == saleFolio);
+            this.saleToSeeInstallments = sale;
+        },
+        handleShowModal(modal, saleFolio) {
+            if (modal == 'edit') this.openEditModal(saleFolio);
+            else if (modal == 'refund') this.openRefundModal(saleFolio);
+            else if (modal == 'installment') this.openInstallmentModal(saleFolio);
         },
         update() {
             this.editing = true;
@@ -342,13 +345,13 @@ export default {
                     addOrUpdateBatchOfItems('products', products);
 
                     this.showEditModal = false;
-                    
+
                     this.$notify({
                         title: 'Venta actualizada',
                         message: '',
                         type: 'success',
                     });
-                    
+
                     // volver a formatear id de productos para que no de error al querer editar de nuevo la venta
                     this.formatSalesProductId();
                 },
@@ -357,42 +360,28 @@ export default {
                 }
             });
         },
-        calcTotal(sales) {
-            return sales.reduce((accumulator, currentValue) => {
-                const subtotal = currentValue.quantity * currentValue.current_price;
-                return accumulator + subtotal;
-            }, 0);
+        formatDateTime(dateTimeString) {
+            return format(parseISO(dateTimeString), 'dd MMM yy, hh:mm a', { locale: es });
         },
         formatDate(dateString) {
-            const months = {
-                'January': 'Enero',
-                'February': 'Febrero',
-                'March': 'Marzo',
-                'April': 'Abril',
-                'May': 'Mayo',
-                'June': 'Junio',
-                'July': 'Julio',
-                'August': 'Agosto',
-                'September': 'Septiembre',
-                'October': 'Octubre',
-                'November': 'Noviembre',
-                'December': 'Diciembre'
-            };
-
-            const [day, month, year] = dateString.split('-');
-            return `${day} ${months[month]}, ${year}`;
+            return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },
-        viewProduct(product) {
-            const productId = product.product_id.split('_')[1];
-
-            if (product.is_global_product) {
-                window.open(route('global-product-store.show', productId), '_blank');
-            } else {
-                window.open(route('products.show', productId), '_blank');
-            }
-        },
-        print(daySales) {
-            window.open(route('sales.print-ticket', daySales), '_blank');
+        storeInstallment() {
+            this.addingInstallment = true;
+            this.installmentForm.transform((data) => ({
+                ...data,
+                credit_sale_data_id: this.saleToSeeInstallments.credit_data.id,
+            })).post(route('installments.store'), {
+                onSuccess: () => {
+                    this.addInstallment = false;
+                    this.installmentForm.reset();
+                    this.saleToSeeInstallments = this.getGroupedSales.find(item => item.folio == this.saleToSeeInstallments.folio);
+                },
+                onFinish: () => {
+                    this.addingInstallment = false;
+                    this.installmentForm.reset();
+                }
+            });
         },
         async refundSale() {
             this.refunding = true;
@@ -408,8 +397,9 @@ export default {
                     this.showRefundConfirm = false;
 
                     // actualizar elementos de la vista (reactividad)
-                    this.getGroupedSales[this.saleFolioToRefund].forEach(element => {
-                        element.refunded_at = 1;
+                    let sale = this.getGroupedSales.find(item => item.folio == this.saleFolioToRefund);
+                    sale.products.forEach(element => {
+                        element.refunded_at = new Date().toISOString();
                     });
 
                     this.$notify({
@@ -429,30 +419,11 @@ export default {
                 this.refunding = false;
             }
         },
-        async deleteItem(saleId) {
-            try {
-                const response = await axios.delete(route('sales.destroy', saleId));
-                if (response.status == 200) {
-
-                    this.$notify({
-                        title: 'Correcto',
-                        message: 'Se ha eliminado la venta del día',
-                        type: 'success',
-                        position: 'bottom-right',
-                    });
-
-                    this.$inertia.get(route('sales.index'));
-                }
-            } catch (error) {
-                console.log(error);
-                this.$notify({
-                    title: 'Error',
-                    message: 'No se pudo eliminar la venta. Inténte más tarde',
-                    type: 'error',
-                    position: 'bottom-right',
-                });
-            }
-        },
+    },
+    watch: {
+        'installmentForm.amount': function () {
+            this.calcRemainingDebtWithNewInstallment();
+        }
     },
     async mounted() {
         this.products = await getAll('products');

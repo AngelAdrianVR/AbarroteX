@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\OnlineSale;
 use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -36,15 +37,18 @@ class CashCutController extends Controller
         //suma algebraica de todo el dinero que ingresó y salió de caja
         $expected_cash = $cash_register->started_cash
                             + $request->totalCashMovements 
-                            + $request->totalSaleForCashCut;
+                            + $request->totalStoreSale
+                            + $request->totalOnlineSale;
 
         //Crea el registro de corte de caja
         CashCut::create([
             'started_cash' => $cash_register->started_cash,
             'expected_cash' => $expected_cash, //suma de ventas, ingresos, retiros de caja y dinero inicial.
-            'sales_cash' => $request->totalSaleForCashCut,
+            'store_sales_cash' => $request->totalStoreSale, //ventas de tienda
+            'online_sales_cash' => $request->totalOnlineSale, //ventas en línea
             'counted_cash' => $request->counted_cash,
             'difference' => $request->difference * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
+            'withdrawn_cash' => $request->withdrawn_cash,
             'notes' => $request->notes,
             'cash_register_id' => $cash_register->id,
             'store_id' => auth()->user()->store_id,
@@ -107,16 +111,33 @@ class CashCutController extends Controller
 
 
     public function fetchTotalSaleForCashCut($cash_register_id)
-    {
+    {   
         //recupera el último corte realizado
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
-
+        $online_store_properties = auth()->user()->store->online_store_properties;
+        $online_sales = null;
+        
          // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
         if ($last_cash_cut !== null) {
             $sales = Sale::where('cash_register_id', $cash_register_id)
                         ->where('created_at', '>', $last_cash_cut->created_at)
                         ->get();
+            //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
+            if ( $online_store_properties && $online_store_properties['online_sales_cash_register'] == $cash_register_id ) {
+
+                $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+                            ->where('status', 'Entregado')
+                            ->where('created_at', '>', $last_cash_cut->created_at)
+                            ->get();
+            }
         } else {
+            //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
+            if ( $online_store_properties && $online_store_properties['online_sales_cash_register'] == $cash_register_id ) {
+
+                $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+                            ->where('status', 'Entregado')
+                            ->get();
+            }
             $sales = Sale::where('cash_register_id', $cash_register_id)->get();
         }
 
@@ -125,7 +146,15 @@ class CashCutController extends Controller
             return $sale->quantity * $sale->current_price;
         });
 
-        return $total_sales;
+        //suma todos los totales de las ventas en línea
+        $total_online_sales = $online_sales?->sum(function ($online_sale) {
+            return $online_sale->total;
+        });
+
+        return response()->json([
+            'store_sales' => $total_sales,
+            'online_sales' => $total_online_sales ?? 0,
+        ]);
     }
 
 

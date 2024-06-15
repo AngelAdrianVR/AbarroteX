@@ -14,7 +14,8 @@ class CashCut extends Model
     protected $fillable = [
         'started_cash',
         'expected_cash',
-        'sales_cash',
+        'store_sales_cash',
+        'online_sales_cash',
         'counted_cash',
         'withdrawn_cash',
         'difference',

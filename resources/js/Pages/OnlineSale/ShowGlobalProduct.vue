@@ -23,7 +23,21 @@
                     </p>
                     <div class="flex items-center space-x-3 mt-5">
                         <p class="text-gray99">Cantidad</p>
-                        <el-input-number v-model="quantity" :disabled=" global_product.current_stock < 1" :min="0" :max="global_product.current_stock" controls-position="right">
+                        
+                        <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
+                        <el-input-number v-if="store?.online_store_properties?.inventory"
+                         v-model="quantity" :disabled=" global_product.current_stock < 1" :min="0" :max="global_product.current_stock" controls-position="right">
+                            <template #decrease-icon>
+                            <i class="fa-solid fa-angle-down"></i>
+                            </template>
+                            <template #increase-icon>
+                            <i class="fa-solid fa-angle-up"></i>
+                            </template>
+                        </el-input-number>
+
+                        <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
+                        <el-input-number v-else
+                            v-model="quantity" :min="1" :max="999" controls-position="right">
                             <template #decrease-icon>
                             <i class="fa-solid fa-angle-down"></i>
                             </template>
@@ -32,7 +46,8 @@
                             </template>
                         </el-input-number>
                         </div>
-                        <p class="mt-2 text-sm">Unidades disponibles: <span> {{ global_product.current_stock }} </span></p>
+                        <!-- Se muestran las unidades disponibles si esta activada la configuración de inventario para tienda online -->
+                        <p v-if="store?.online_store_properties?.inventory" class="mt-2 text-sm">Unidades disponibles: <span> {{ global_product.current_stock }} </span></p>
                         <!-- Boton -->
                         <div class="text-center mt-7">
                         <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
@@ -60,6 +75,8 @@ data() {
     return {
         quantity: 1,
         formattedDescription: null, //descripción del producto formateado con viñetas
+        storeId: null, //recupera el id de la tienda almacenada en el local storage
+        store: null, //recupera toda la informacióon de la tienda.
     }
 },
 components:{
@@ -110,10 +127,26 @@ methods:{
             const formattedLines = lines.map(line => `• ${line.trim()}`);
             this.formattedDescription = formattedLines.join('\n');
         }
+    },
+    async fetchStoreInfo() {
+        try {
+            const response = await axios.get(route('stores.fetch-store-info', this.storeId));
+            if ( response.status === 200 ) {
+                this.store = response.data.store;
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 },
-mounted() {
-       this.formatDescription();
+created() {
+    this.formatDescription();
+
+    // recupera el store_id del localStorage
+    this.storeId = localStorage.getItem('storeId');
+
+    // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
+    this.fetchStoreInfo();
 },
 computed: {
     integerPart() {

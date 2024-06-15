@@ -27,19 +27,33 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders', 'cash_registers', 'total_online_orders'));
     }
 
+    public function clientIndex($encoded_store_id)
+    {
+        // Decodificar el ID de la tienda
+        $store_id = base64_decode($encoded_store_id);
 
-    public function clientIndex($store_id)
-    {   
+        $store_id = intval($store_id);
+
+        // Buscar la tienda
         $store = Store::find($store_id);
-        $all_products = $this->getAllProducts($store_id); //locales y transferidos 
-        $total_products = $all_products->count(); //Número de productos locales y transferidos 
 
-        //tomar solo primeros 12 productos
+        if (!$store) {
+            return inertia('Error/404'); // Manejar caso de tienda no encontrada
+        }
+
+        // Obtener todos los productos (locales y transferidos)
+        $all_products = $this->getAllProducts($store_id);
+
+        // Contar el total de productos
+        $total_products = $all_products->count();
+
+        // Tomar solo los primeros 12 productos
         $products = $all_products->take(12);
 
+        // Obtener los banners
         $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
 
-        // return $products;
+        // Retornar la vista con los datos
         return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id', 'banners'));
     }
 
@@ -66,20 +80,46 @@ class OnlineSaleController extends Controller
             'street' => 'required|string|max:255',
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
+            'postal_code' => 'nullable|string|max:6',
+            'polity_state' => 'required|string|max:100',
             'address_references' => 'nullable|string|min:1|max:255',
             'products' => 'required|array|min:1',
         ]);
 
         //descontar de inventario la cantidad solicitada si la configuración de inventario está activa
-        // Pendiente el codigo
+        if ( $request->store_inventory === true ) {
+            foreach ($request->products as $product) {
+                if ( $product['isLocal'] === true ) {
+                    $temp_product = Product::find($product['id']);
+                    $temp_product->current_stock -= $product['quantity'];
 
+                    //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
+                    // if ( $temp_product->current_stock < 0 ) {
+                        // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    // } else {
+                        $temp_product->save();
+                    // }
+                } else {
+                    $temp_product = GlobalProductStore::find($product['id']);
+                    $temp_product->current_stock -= $product['quantity'];
+                    //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
+                    // if ( $temp_product->current_stock < 0 ) {
+                        // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    // } else {
+                        $temp_product->save();
+                    // }
+                }
+            }
+        }
 
         $new_online_sale = OnlineSale::create($request->all());
 
+        $encoded_store_id = base64_encode($request->store_id);
+
         if ( $request->created_from_app === true ) {
             return to_route('online-sales.show', $new_online_sale->id );
-        } else {
-            return to_route('online-sales.client-index', ['store_id' => $request->store_id]);
+        } else { //creado desde la tienda en linea por el cliente
+            return redirect()->route('online-sales.client-index', ['encoded_store_id' => $encoded_store_id]);
         }
     }
 
@@ -121,6 +161,8 @@ class OnlineSaleController extends Controller
             'street' => 'required|string|max:255',
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
+            'postal_code' => 'nullable|string|max:6',
+            'polity_state' => 'required|string|max:100',
             'address_references' => 'nullable|string|min:1|max:255',
             'products' => 'required|array|min:1',
         ]);
@@ -265,6 +307,21 @@ class OnlineSaleController extends Controller
             $delivered_at = now();
         }
 
+        // Si se cambia el estado a 'cancel' y la configuración de inventario está activa
+        if ($request->status == 'cancel' && $request->store_inventory === true) {
+            foreach ($online_sale->products as $product) {
+                if ($product['isLocal'] === true) {
+                    $temp_product = Product::find($product['id']);
+                    $temp_product->current_stock += $product['quantity']; // Aumentar el stock
+                    $temp_product->save();
+                } else {
+                    $temp_product = GlobalProductStore::find($product['id']);
+                    $temp_product->current_stock += $product['quantity']; // Aumentar el stock
+                    $temp_product->save();
+                }
+            }
+        }
+
         $online_sale->update([
             'status' => $status,
             'delivered_at' => $delivered_at,
@@ -284,9 +341,9 @@ class OnlineSaleController extends Controller
 
         // Productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with('globalProduct.media', 'globalProduct:id,name,public_price')
-            ->where('store_id', auth()->user()->store_id)
-            ->get();
-
+        ->where('store_id', auth()->user()->store_id)
+        ->get();
+            
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
         
@@ -303,7 +360,9 @@ class OnlineSaleController extends Controller
                 'isLocal' => !$isLocal,
                 'current_stock' => $product['current_stock'],
                 'name' => $isLocal ? $product['global_product']['name'] : $product['name'],
-                'image_url' => $isLocal ? $product['global_product']['media'][0]['original_url'] : $product['media'][0]['original_url'],
+                'image_url' => $isLocal 
+                    ? ($product['global_product']['media'][0]['original_url'] ?? null) 
+                    : ($product['media'][0]['original_url'] ?? null),
                 'disabled' => false, //propiedad de deshabilitado para no mostrarlo en la creación de orden cuando ya se seleccionó
                 'relative_id' => $relative_id // Asignamos el relative_id actual
             ];
@@ -320,7 +379,7 @@ class OnlineSaleController extends Controller
     {
         $offset = $currentPage * 20;
 
-        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->skip($offset)->take(20);
+        $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->skip($offset)->take(20)->get();
 
         return response()->json(['items' => $online_orders]);
     }
