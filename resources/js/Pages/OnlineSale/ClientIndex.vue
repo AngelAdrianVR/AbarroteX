@@ -125,13 +125,25 @@ methods:{
         }
     }
 },
-mounted() {
-    this.visibleProducts = this.products;
-    // localStorage.clear(); //borrar local storage
-    // localStorage.removeItem('Ezycart'); //borrar una variable del local storage
-
+created() {
+    //obtengo el id del local storage para comparar si entró a otra tienda y borrar el carrito
+    const savedStoreId = localStorage.getItem('storeId');
+    
     // Guardar store_id en el localStorage
     localStorage.setItem('storeId', this.store_id);
+
+    console.log('viejo id', savedStoreId);
+    console.log('nuevo id', this.store_id);
+    console.log('son diferentes?', savedStoreId != this.store_id);
+
+    if ( savedStoreId != this.store_id ) {
+        localStorage.removeItem('Ezycart'); //borrar una variable del local storage
+    }
+},
+mounted() {
+    this.visibleProducts = this.products; // clona los productos para poder manipularlos
+    // localStorage.clear(); //borrar local storage
+    // localStorage.removeItem('Ezycart'); //borrar una variable del local storage
 
     // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
     this.fetchStoreInfo();

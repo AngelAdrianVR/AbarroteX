@@ -25,7 +25,7 @@
             </div>
 
             <section v-for="(cash_cut, index) in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" class="xl:w-[90%] text-xs md:text-sm">
-                <p class="mb-2 ml-2">Notas de corte: <strong class="ml-2">{{ cash_cut.notes }}</strong></p>
+                <p class="mb-2 ml-2">Notas de corte: <strong class="ml-2">{{ cash_cut.notes ?? 'Sin notas' }}</strong></p>
                 <article class="lg:flex lg:space-x-7 mx-auto">
                     <div class="w-full border border-grayD9 rounded-lg self-start">
                         <div class="flex justify-between border-b border-grayD9 py-2 md:px-4 px-2">
