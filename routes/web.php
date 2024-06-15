@@ -28,6 +28,7 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\UserController;
+use App\Models\Sale;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -67,9 +68,33 @@ Route::middleware([
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
+// Route::get('update-folio', function () {
+//     // Obtener las ventas de la tienda con id 5 y tomar los primeros 15
+//     $sales = Sale::where('store_id', 5)->get()->skip(5797);
+
+//     // Agrupar las ventas por 'created_at' truncado a segundos
+//     $groupedSales = $sales->groupBy(function ($sale) {
+//         return Carbon\Carbon::parse($sale->created_at)->format('Y-m-d H:i:s');
+//     });
+
+//     // Folio inicial
+//     $folio = 3121;
+
+//     // Iterar sobre cada grupo de ventas y actualizar el folio
+//     foreach ($groupedSales as $group) {
+//         foreach ($group as $sale) {
+//             $sale->update(['folio' => $folio]);
+//         }
+//         // Incrementar el folio para el próximo grupo
+//         $folio++;
+//     }
+
+//     return 'Folios actualizados correctamente!.';
+// });
+
 // Route::get('update-from-json', function () {
 //     // Ruta al archivo JSON
-//     $filePath = public_path('files/product_histories.json');
+//     $filePath = public_path('files/sales1.json');
 
 //     // Verificar si el archivo existe
 //     if (!Illuminate\Support\Facades\File::exists($filePath)) {
@@ -86,23 +111,17 @@ Route::middleware([
 //     }
 
 //     foreach ($items as $itemData) {
-//         $prd = App\Models\GlobalProductStore::where('store_id', 5)
-//             ->whereHas('globalProduct', function ($q) use ($itemData) {
-//                 $q->where('code', $itemData['code']);
-//             })->first();
+//         // $prd = App\Models\GlobalProductStore::where('store_id', 5)
+//         //     ->whereHas('globalProduct', function ($q) use ($itemData) {
+//         //         $q->where('code', $itemData['code']);
+//         //     })->first();
 
-//         if (!$prd) {
-//             // Manejar el caso cuando el producto no se encuentra, si es necesario
-//             continue;
-//         }
+//         // if (!$prd) {
+//         //     // Manejar el caso cuando el producto no se encuentra, si es necesario
+//         //     continue;
+//         // }
 
-//         App\Models\ProductHistory::create([
-//             'historicable_id' => $prd->id,
-//             'historicable_type' => App\Models\GlobalProductStore::class,
-//             'description' => $itemData['description'],
-//             'type' => $itemData['type'],
-//             'created_at' => $itemData['created_at'],
-//         ]);
+//         App\Models\Sale::create($itemData);
 //     }
 
 //     return 'items migrados correctamente!.';
@@ -134,6 +153,11 @@ Route::post('products/import', [ProductController::class, 'import'])->name('prod
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
+
+
+//services routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+Route::resource('services', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 //global-product-store routes----------------------------------------------------------------------------------

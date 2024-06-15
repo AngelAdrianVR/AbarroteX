@@ -152,7 +152,7 @@
           <!-- Pestañas -->
           <div class="mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
-              <div class="m-4 flex justify-between items-center">
+              <!-- <div class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
                   <el-tooltip content="Si no es necesario agregar un cliente específico, no selecciones ninguna opción"
@@ -166,14 +166,12 @@
                     no-match-text="No se encontraron coincidencias">
                     <el-option v-for="client in clients" :key="client" :label="client.name" :value="client.id" />
                   </el-select>
-                  <!-- <i :class="editableTabs[this.editableTabsValue - 1].client_id ? 'text-green-500' : 'text-gray-400'"
-                    class="fa-solid fa-user-check text-sm"></i> -->
                   <button @click="showClientFormModal = true" type="button"
                     class="rounded-full  border-primary size-5 flex items-center justify-center text-primary text-lg">
                     <i class="fa-solid fa-circle-plus"></i>
                   </button>
                 </div>
-              </div>
+              </div> -->
               <el-tab-pane v-for="tab in editableTabs" :key="tab.name" :label="tab.title" :name="tab.name">
                 <el-popconfirm v-if="tab.saleProducts.length" confirm-button-text="Si" cancel-button-text="No"
                   icon-color="#C30303" title="Se eliminará todo el registro de productos ¿Deseas continuar?"

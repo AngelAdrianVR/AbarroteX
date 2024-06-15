@@ -50,7 +50,7 @@
             <template #title> Importar productos </template>
             <template #content>
                 <div v-if="importWasWrong" class="flex flex-col items-center justify-center">
-                    <p>Se detectaron inconvnientes con la información</p>
+                    <p>Se detectaron inconvenientes con la información</p>
                     <p class="text-gray99">
                         A continuación verás una lista de la información que necesitamos que revises
                         para poder importar correctamente tus productos. Al editar tu archivo recuerda
