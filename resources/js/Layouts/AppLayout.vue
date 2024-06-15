@@ -198,10 +198,10 @@ const logout = () => {
                                 :active="route().current('services.*')">
                                 Servicios
                             </ResponsiveNavLink> -->
-                            <ResponsiveNavLink :href="route('clients.index')"
+                            <!-- <ResponsiveNavLink :href="route('clients.index')"
                                 :active="route().current('clients.*')">
                                 Clientes
-                            </ResponsiveNavLink>
+                            </ResponsiveNavLink> -->
                             <ResponsiveNavLink :href="route('cash-registers.index')"
                                 :active="route().current('cash-registers.*')">
                                 Caja

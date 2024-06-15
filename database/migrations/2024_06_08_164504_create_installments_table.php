@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedFloat('amount')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('credit_sale_data_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('credit_sale_data_id');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

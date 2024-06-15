@@ -114,14 +114,16 @@ class CashCutController extends Controller
     {   
         //recupera el último corte realizado
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
-
+        $online_store_properties = auth()->user()->store->online_store_properties;
+        $online_sales = null;
+        
          // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
         if ($last_cash_cut !== null) {
             $sales = Sale::where('cash_register_id', $cash_register_id)
                         ->where('created_at', '>', $last_cash_cut->created_at)
                         ->get();
             //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-            if ( auth()->user()->store->online_store_properties['online_sales_cash_register'] == $cash_register_id ) {
+            if ( $online_store_properties && $online_store_properties['online_sales_cash_register'] == $cash_register_id ) {
 
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
                             ->where('status', 'Entregado')
@@ -130,7 +132,7 @@ class CashCutController extends Controller
             }
         } else {
             //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-            if ( auth()->user()->store->online_store_properties['online_sales_cash_register'] == $cash_register_id ) {
+            if ( $online_store_properties && $online_store_properties['online_sales_cash_register'] == $cash_register_id ) {
 
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
                             ->where('status', 'Entregado')
@@ -145,13 +147,13 @@ class CashCutController extends Controller
         });
 
         //suma todos los totales de las ventas en línea
-        $total_online_sales = $online_sales->sum(function ($online_sale) {
+        $total_online_sales = $online_sales?->sum(function ($online_sale) {
             return $online_sale->total;
         });
 
         return response()->json([
             'store_sales' => $total_sales,
-            'online_sales' => $total_online_sales,
+            'online_sales' => $total_online_sales ?? 0,
         ]);
     }
 
