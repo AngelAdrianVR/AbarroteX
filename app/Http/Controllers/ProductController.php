@@ -134,7 +134,7 @@ class ProductController extends Controller
         //codifica el id del producto
         $encoded_product_id = base64_encode($product->id);
 
-        return to_route('products.show', $encoded_product_id);
+        return to_route('products.show', ['product' => $encoded_product_id]);
     }
 
     public function updateWithMedia(Request $request, Product $product)

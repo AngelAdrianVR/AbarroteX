@@ -28,11 +28,6 @@ defineProps({
 
                 <!-- <p class="py-1 px-3 bg-gradient-to-r from-[#dfb464] to-primary text-white font-bold">¡15 días de prueba
                     gratuitos!</p> -->
-                <div class="text-lg md:text-2xl font-black">
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">
-                        ¡15 días de prueba gratuitos!
-                    </span>
-                </div>
 
                 <div class="hidden sm:flex sm:items-center space-x-2 sm:ms-6">
                     <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">

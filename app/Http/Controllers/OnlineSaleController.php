@@ -198,11 +198,11 @@ class OnlineSaleController extends Controller
     }
 
     // para index de tienda en linea para clientes. (carga por scroll)
-    public function loadMoreProducts($offset, $limit)
+    public function loadMoreProducts()
     {
         // Cargar más productos desde la base de datos tomando sólo los requeridos y saltando los ya cargados
         $all_products = $this->getAllProducts(request('storeId'));
-        $moreProducts = $all_products->splice($offset)->take($limit);
+        $moreProducts = $all_products->splice(request('offset'))->take(request('limit'));
 
         return response()->json(['products' => $moreProducts]);
     }
