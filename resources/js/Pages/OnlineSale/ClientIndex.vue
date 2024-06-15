@@ -18,12 +18,13 @@
             <!-- Productos -->
             <section class="pb-16">
                 <h1 class="font-bold text-3xl text-center mb-12">Productos</h1>
-                <h1 v-if="store.online_store_properties.enabled_free_delivery" class="font-bold text-xl text-center text-primary mb-1">
-                    Envío gratis en compra mínima de ${{ store.online_store_properties.min_free_delivery }}</h1>
+                <h1 v-if="store.online_store_properties?.enabled_free_delivery" class="font-bold text-xl text-center text-primary mb-1">
+                    Envío gratis en compra mínima de ${{ store.online_store_properties?.min_free_delivery }}</h1>
                 
-                <div class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-7 md:mx-9 space-y-4 md:space-y-0">
-                    <OnlineProductCard v-for="product in visibleProducts" :key="product" :product="product" />
+                <div v-if="visibleProducts.length" class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-7 md:mx-9 space-y-4 md:space-y-0">
+                    <OnlineProductCard v-for="product in visibleProducts" :key="product" :product="product" :store="store" />
                 </div>
+                <el-empty v-else description="No hay productos en la tienda" />
 
                 <!-- estado de carga -->
                 <div v-if="loading" class="flex justify-center items-center py-10">
@@ -90,7 +91,11 @@ methods:{
             if ( ( this.total_products - this.visibleProducts.length ) !== 0 ) {
                 this.loading = true;
                 try {
-                    const response = await axios.post(route('online-sales.load-more-products', [offset, limit]), { storeId: this.store_id});
+                    console.log('offset', this.visibleProducts.length)
+                    console.log('limit', limit)
+                    const response = await axios.post(route('online-sales.load-more-products'), { 
+                        storeId: this.store_id, offset: offset, limit: limit
+                    });
                     if (response.status === 200 ) {
                         this.visibleProducts = [...this.visibleProducts, ...response.data.products]; //agrega los products obtenidos al array de products que se muestran 
                     }

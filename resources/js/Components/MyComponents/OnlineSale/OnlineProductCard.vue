@@ -1,7 +1,7 @@
 <template>
     <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col h-96 hover:border-primary relative group">
         <!-- Deatalle de cantidad disponible  -->
-        <div v-if="store?.online_store_properties?.inventory" class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg hidden group-hover:block">
+        <div v-if="store?.online_store_properties?.inventory" class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg lg:hidden lg:group-hover:block">
             <p class="text-white text-center py-2">{{  product.current_stock ?? '0' }} Unidades disponibles</p>
         </div>
             <!-- Imagen -->
@@ -28,7 +28,9 @@
 
             <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
             <el-input-number v-else v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
-            <PrimaryButton :disabled="store?.online_store_properties?.inventory && product.current_stock < 1" @click="addToCart" class="!px-9 !py-1">Agregar al carrito</PrimaryButton>
+            <PrimaryButton :disabled="(store?.online_store_properties?.inventory && product.current_stock < 1) || alreadyInCart" @click="addToCart" class="!px-9 !py-1">
+                {{ alreadyInCart ? 'Agregado' : 'Agregar al carrito' }}
+            </PrimaryButton>
         </div>
     </div>
 </template>
@@ -41,8 +43,7 @@ export default {
 data() {
     return {
         quantity: 1, //cantidad seleccionada para guardar al carrito
-        storeId: null, //recupera el id de la tienda almacenada en el local storage
-        store: null, //recupera toda la informacióon de la tienda.
+        alreadyInCart: false, //bandera para saber si ya esta en carrito para evitar error con cantidades
     }
 },
 components:{
@@ -50,7 +51,8 @@ PrimaryButton,
 Link
 },
 props:{
-product: Object
+product: Object,
+store: Object
 },
 methods:{
     addToCart() {
@@ -62,9 +64,10 @@ methods:{
             // Verificar si el producto ya está en el carrito comparando id y si es local o no
             const productInCart = cart.find(item => item.id === this.product.global_product_id && item.isLocal == false);
 
+            // no se ejecuta cuando tenga en el mounted la revisión de si ya está dentro del carrito
             if (productInCart) {
                 // Si el producto ya está en el carrito, actualizar la cantidad
-                productInCart.quantity += this.quantity;
+                // productInCart.quantity += this.quantity; //descomentar si se requiere sumar cantidad al agregar de nuevo a carrito. (problema con current stock)
             } else {
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
@@ -75,15 +78,17 @@ methods:{
                     quantity: this.quantity,
                     image_url: this.product.global_product.media[0]?.original_url
                 });
+                this.alreadyInCart = true; //bandera de que ya está agregado en carrito
             }
         } else {
 
              // Verificar si el producto ya está en el carrito
             const productInCart = cart.find(item => item.id === this.product.id && item.isLocal == true);
 
+            // no se ejecuta cuando tenga en el mounted la revisión de si ya está dentro del carrito
             if (productInCart) {
                 // Si el producto ya está en el carrito, actualizar la cantidad
-                productInCart.quantity += this.quantity;
+                // productInCart.quantity += this.quantity; //descomentar si se requiere sumar cantidad al agregar de nuevo a carrito. (problema con current stock)
             } else {
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
@@ -94,6 +99,7 @@ methods:{
                     quantity: this.quantity,
                     image_url: this.product.media[0]?.original_url
                 });
+                this.alreadyInCart = true; //bandera de que ya está agregado en carrito
             }
         }
 
@@ -107,23 +113,13 @@ methods:{
             type: "success",
         });
     },
-    async fetchStoreInfo() {
-        try {
-            const response = await axios.get(route('stores.fetch-store-info', this.storeId));
-            if ( response.status === 200 ) {
-                this.store = response.data.store;
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
 },
 mounted() {
-    // recupera el store_id del localStorage
-    this.storeId = localStorage.getItem('storeId');
-
-    // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
-    this.fetchStoreInfo();
+    let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
+    const productInCart = cart.find(item => item.id === this.product.id && item.isLocal == true);
+    if ( productInCart ) {
+        this.alreadyInCart = true;
+    }
 }
 }
 </script>
