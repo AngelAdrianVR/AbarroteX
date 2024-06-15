@@ -28,8 +28,9 @@
 
             <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
             <el-input-number v-else v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
-            <PrimaryButton :disabled="(store?.online_store_properties?.inventory && product.current_stock < 1) || alreadyInCart" @click="addToCart" class="!px-9 !py-1">
-                {{ alreadyInCart ? 'Agregado' : 'Agregar al carrito' }}
+            <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
+            <PrimaryButton v-else :disabled="store?.online_store_properties?.inventory && product.current_stock < 1" @click="addToCart" class="!px-9 !py-1 !active:scale-75">
+                {{ product.current_stock < 1 ? 'Agotado' : 'Agregar al carrito' }}
             </PrimaryButton>
         </div>
     </div>
