@@ -132,10 +132,6 @@ created() {
     // Guardar store_id en el localStorage
     localStorage.setItem('storeId', this.store_id);
 
-    console.log('viejo id', savedStoreId);
-    console.log('nuevo id', this.store_id);
-    console.log('son diferentes?', savedStoreId != this.store_id);
-
     if ( savedStoreId != this.store_id ) {
         localStorage.removeItem('Ezycart'); //borrar una variable del local storage
     }

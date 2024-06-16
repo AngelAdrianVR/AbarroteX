@@ -6,7 +6,7 @@
             <h1 class="font-bold mt-4">Detalles del cliente</h1>
 
             <article class="flex items-center space-x-3 justify-between mt-5">
-                <el-select @change="$inertia.get(route('clients.show', clientId))" class="!w-40 md:!w-80" filterable
+                <el-select @change="handleSelect()" class="!w-40 md:!w-80" filterable
                     v-model="clientId" clearable placeholder="Buscar cliente" no-data-text="No hay opciones registradas"
                     no-match-text="No se encontraron coincidencias">
                     <el-option v-for="item in clients" :key="item" :label="item.name" :value="item.id" />
@@ -59,7 +59,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 export default {
     data() {
         return {
-            clientId: this.client.id, //guarda el id del cliente seleccionado para ingresar a sus detalles
+            clientId: this.client.id, //guarda el id del cliente seleccionado para ingresar a sus detalles desde el select
             activeTab: '1',
             encodedId: null //id codificado
         }
@@ -88,6 +88,10 @@ export default {
             if (tab) {
                 this.activeTab = tab;
             }
+        },
+        handleSelect() {
+        const encodedId = btoa(this.clientId.toString());
+        this.$inertia.get(route('clients.show', encodedId))
         },
         encodeId(id) {
             const encodedId = btoa(id.toString());

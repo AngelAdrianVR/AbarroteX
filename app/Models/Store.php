@@ -103,4 +103,9 @@ class Store extends Model
     {
         return $this->hasMany(Client::class);
     }
+
+    public function services() :HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
 }

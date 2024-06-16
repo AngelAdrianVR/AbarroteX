@@ -21,6 +21,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
 use App\Http\Controllers\StoreController;
@@ -157,7 +158,9 @@ Route::post('products-get-data-for-products-view', [ProductController::class, 'g
 
 //services routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('services', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::resource('services', ServiceController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('services-get-by-page/{currentPage}', [ServiceController::class, 'getItemsByPage'])->name('services.get-by-page')->middleware('auth');
+Route::get('services-search', [ServiceController::class, 'searchService'])->name('services.search')->middleware('auth');
 
 
 //global-product-store routes----------------------------------------------------------------------------------
@@ -207,7 +210,7 @@ Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'p
 Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
 
 
-//history routes---------------------------------------------------------------------------------------
+//product history routes---------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::resource('product-histories', ProductHistoryController::class)->middleware('auth');
 

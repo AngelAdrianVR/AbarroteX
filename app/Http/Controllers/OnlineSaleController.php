@@ -94,25 +94,28 @@ class OnlineSaleController extends Controller
                     $temp_product->current_stock -= $product['quantity'];
 
                     //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
-                    // if ( $temp_product->current_stock < 0 ) {
-                        // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
-                    // } else {
+                    if ( $temp_product->current_stock < 0 ) {
+                        return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    } else {
                         $temp_product->save();
-                    // }
+                        $new_online_sale = OnlineSale::create($request->all());
+                    }
                 } else {
                     $temp_product = GlobalProductStore::find($product['id']);
                     $temp_product->current_stock -= $product['quantity'];
+
                     //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
-                    // if ( $temp_product->current_stock < 0 ) {
-                        // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
-                    // } else {
+                    if ( $temp_product->current_stock < 0 ) {
+                        return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    } else {
                         $temp_product->save();
-                    // }
+                        $new_online_sale = OnlineSale::create($request->all());
+                    }
                 }
             }
         }
 
-        $new_online_sale = OnlineSale::create($request->all());
+        // $new_online_sale = OnlineSale::create($request->all());
 
         $encoded_store_id = base64_encode($request->store_id);
 
