@@ -33,6 +33,7 @@ return new class extends Migration
             $table->unsignedFloat('delivery_price'); // costo de envío
             $table->unsignedFloat('total'); // total de venta $
             $table->timestamp('delivered_at')->nullable();
+            $table->timestamp('refunded_at')->nullable();
             $table->foreignId('store_id');
             $table->timestamps();
         });

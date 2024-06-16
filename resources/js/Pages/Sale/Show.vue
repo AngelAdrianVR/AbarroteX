@@ -18,8 +18,16 @@
 
             <!-- Productos -->
             <main class="flex flex-col space-y-5 lg:mx-16 mt-10">
-                <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item"
-                    @show-modal="handleShowModal" :isOutOfCashCut="is_out_of_cash_cut" />
+                <el-tabs v-model="activeTab" @tab-click="updateURL">
+                    <el-tab-pane label="Ventas en tienda" name="1">
+                        <StoreSales @show-modal="handleShowModal" :sales="getGroupedSales" />
+                    </el-tab-pane>
+                    <el-tab-pane label="Pedidos en línea" name="2">
+                        <OnlineSales @show-modal="handleShowModal" :date="Object.keys(day_sales)[0]" />
+                    </el-tab-pane>
+                </el-tabs>
+                <!-- <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item"
+                    @show-modal="handleShowModal" :isOutOfCashCut="is_out_of_cash_cut" /> -->
             </main>
         </div>
 
@@ -186,6 +194,8 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import StoreSales from './Tabs/StoreSales.vue';
+import OnlineSales from './Tabs/OnlineSales.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SaleDetails from "@/Components/MyComponents/Sale/SaleDetails.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
@@ -229,6 +239,8 @@ export default {
             editing: false,
             // inventario de codigos activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            // tabs
+            activeTab: '1',
         }
     },
     components: {
@@ -241,6 +253,8 @@ export default {
         ConfirmationModal,
         DialogModal,
         SaleDetails,
+        StoreSales,
+        OnlineSales,
     },
     props: {
         day_sales: Object,
@@ -266,6 +280,18 @@ export default {
         },
     },
     methods: {
+        updateURL(tab) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tab.props.name);
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        },
+        setActiveTabFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if (tab) {
+                this.activeTab = tab;
+            }
+        },
         calcRemainingDebtWithNewInstallment() {
             const totalSale = this.saleToSeeInstallments.total_sale;
             const installments = this.saleToSeeInstallments.credit_data.installments;
@@ -428,6 +454,11 @@ export default {
     async mounted() {
         this.products = await getAll('products');
         this.formatSalesProductId();
+
+
+        this.setActiveTabFromURL();
+        // resetear variable de local storage a false
+        localStorage.setItem('pendentProcess', false);
     }
 }
 </script>
