@@ -1,7 +1,7 @@
 <template>
     <div class="flex space-x-2 flex-row justify-between items-center common-container text-sm">
-        <figure class="border border-l-grayD9 rounded-md size-14 flex items-center p-1">
-            <img v-if="local_image_url" :src="local_image_url" alt="">
+        <figure class="border border-l-grayD9 rounded-md size-14 flex items-center justify-center p-1">
+            <img class="object-contain h-full" v-if="local_image_url" :src="local_image_url" alt="">
             <div v-else
                 class="size-12 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

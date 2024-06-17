@@ -109,7 +109,7 @@ class ServiceController extends Controller
     {
         $services = Service::where('store_id', auth()->user()->store_id)->get();
 
-        return response()->json(['items' => $services]);
+        return response()->json(compact('services'));
     }
 
 

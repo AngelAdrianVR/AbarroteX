@@ -33,16 +33,19 @@ class CashRegisterController extends Controller
                         return $date->created_at->format('Y-m-d');
                     })
                     ->map(function($group) {
-                        $total_sales = $group->sum('sales_cash');
+                        $total_store_sales = $group->sum('store_sales_cash');
+                        $total_online_sales = $group->sum('online_sales_cash');
                         $total_difference = $group->sum('difference');
                         
                         return [
                             'cuts' => $group,
-                            'total_sales' => $total_sales,
+                            'total_store_sales' => $total_store_sales,
+                            'total_online_sales' => $total_online_sales,
+                            'total_sales' => $total_online_sales + $total_store_sales,
                             'total_difference' => $total_difference
                         ];
                     })->take(7);
-
+                    
         return inertia('CashRegister/Index', compact('cash_registers', 'cash_cuts', 'total_cash_cuts'));
     }
 
