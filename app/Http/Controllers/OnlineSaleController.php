@@ -9,6 +9,7 @@ use App\Models\GlobalProductStore;
 use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
+use App\Models\ProductHistory;
 use App\Models\Store;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -388,39 +389,77 @@ class OnlineSaleController extends Controller
 
     public function refund(OnlineSale $onlineSale)
     {
-        // // obtiene la caja registradora asignada al cajero
-        // $cash_register = CashRegister::find(auth()->user()->cash_register_id);
-        // $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
-        // $saleProducts = collect($onlineSale->products);
-        // $total_amount = $saleProducts->sum(fn ($sale) => $sale['price'] * $sale['quantity']);
-        // $folio = 'L-' . $onlineSale->id;
+        // obtiene la caja registradora asignada al cajero
+        $cash_register = CashRegister::find(auth()->user()->cash_register_id);
+        $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+        $saleProducts = collect($onlineSale->products);
+        $total_amount = $saleProducts->sum(fn ($sale) => $sale['price'] * $sale['quantity']);
+        $folio = 'L-' . $onlineSale->id;
 
-        // // Crear movimiento de retiro de caja con el monto de la venta a cancelar
-        // CashRegisterMovement::create([
-        //     'amount' => $total_amount,
-        //     'type' => 'Retiro',
-        //     'notes' => "Venta con folio $folio fue reembolsada / cancelada",
-        //     'cash_register_id' => $cash_register->id,
-        // ]);
-        // // Restar dinero de caja
-        // if ($cash_register->current_cash < $total_amount) {
-        //     $cash_register->update(['current_cash' => 0]);
-        // } else {
-        //     $cash_register->decrement('current_cash', $total_amount);
-        // }
+        // Crear movimiento de retiro de caja con el monto de la venta a cancelar
+        CashRegisterMovement::create([
+            'amount' => $total_amount,
+            'type' => 'Retiro',
+            'notes' => "Venta con folio $folio fue reembolsada / cancelada",
+            'cash_register_id' => $cash_register->id,
+        ]);
+        // Restar dinero de caja
+        if ($cash_register->current_cash < $total_amount) {
+            $cash_register->update(['current_cash' => 0]);
+        } else {
+            $cash_register->decrement('current_cash', $total_amount);
+        }
 
-        // // si el control de inventario esta activado, devolver mercancia disponible para la venta
-        // if ($is_inventory_on) {
-        //     $saleProducts->each(function ($sale) {
-        //         $current_product = $sale['isLocal']
-        //             ? Product::find($sale['product_id'])
-        //             : GlobalProductStore::find($sale['product_id']);
-        //         $current_product->increment('current_stock', $sale['quantity']);
-        //     });
-        // }
+        // si el control de inventario esta activado, devolver mercancia disponible para la venta
+        if ($is_inventory_on) {
+            $saleProducts->each(function ($sale) use ($folio) {
+                $current_product = $sale['isLocal']
+                    ? Product::find($sale['product_id'])
+                    : GlobalProductStore::find($sale['product_id']);
+                $current_product->increment('current_stock', $sale['quantity']);
 
-        // // marcar productos de venta como reembolsados / cancelados
-        // $onlineSale->update(['refunded_at' => now(), 'status' => 'Cancelado']);
+                //Registra el historial de venta de cada producto
+                ProductHistory::create([
+                    'description' => "Registro de entrada de producto por reembolso de venta con folio $folio. " . $sale['quantity'] . ' piezas',
+                    'type' => 'Reembolso',
+                    'historicable_id' => $current_product->id,
+                    'historicable_type' => get_class($current_product),
+                ]);
+            });
+        }
+
+        // marcar venta como reembolsada
+        $onlineSale->update(['refunded_at' => now(), 'status' => 'Reembolsado']);
+    }
+
+    public function cancel(OnlineSale $onlineSale)
+    {
+        $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+        $saleProducts = collect($onlineSale->products);
+        $folio = 'L-' . $onlineSale->id;
+
+        // si el control de inventario esta activado, devolver mercancia disponible para la venta
+        if ($is_inventory_on && $onlineSale->status === 'Procesando') {
+            $saleProducts->each(function ($sale) use ($folio) {
+                $current_product = $sale['isLocal']
+                    ? Product::find($sale['product_id'])
+                    : GlobalProductStore::find($sale['product_id']);
+                $current_product->increment('current_stock', $sale['quantity']);
+
+                //Registra el historial de venta de cada producto
+                ProductHistory::create([
+                    'description' => "Registro de entrada de producto por cancelación de venta con folio $folio. " . $sale['quantity'] . ' piezas',
+                    'type' => 'Cancelación',
+                    'historicable_id' => $current_product->id,
+                    'historicable_type' => get_class($current_product),
+                ]);
+            });
+        }
+
+        $prev_status = $onlineSale->status;
+        // marcar venta como cancelada
+        $onlineSale->update(['refunded_at' => now(), 'status' => 'Cancelado']);
+        return response()->json(compact('prev_status'));
     }
 
     //para index en app

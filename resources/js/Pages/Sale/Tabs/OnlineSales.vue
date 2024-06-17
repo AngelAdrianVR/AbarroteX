@@ -6,7 +6,7 @@
 
         <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
             <template #title>
-                <h1>Reembolsar / Cancelar venta</h1>
+                <h1>Reembolsar venta</h1>
             </template>
             <template #content>
                 <p v-if="isInventoryOn">
@@ -24,6 +24,23 @@
                 <div class="flex items-center space-x-1">
                     <CancelButton @click="showRefundConfirm = false" :disabled="refunding">Cancelar</CancelButton>
                     <PrimaryButton @click="refundSale" :disabled="refunding">Continuar</PrimaryButton>
+                </div>
+            </template>
+        </ConfirmationModal>
+
+        <ConfirmationModal :show="showCancelConfirm" @close="showCancelConfirm = false">
+            <template #title>
+                <h1>Cancelar venta</h1>
+            </template>
+            <template #content>
+                <p>
+                    Se cancelará la venta y esto es irreversible. ¿Deseas continuar?
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <CancelButton @click="showCancelConfirm = false" :disabled="canceling">Cancelar</CancelButton>
+                    <PrimaryButton @click="cancelSale" :disabled="canceling">Continuar</PrimaryButton>
                 </div>
             </template>
         </ConfirmationModal>
@@ -45,13 +62,16 @@ export default {
         return {
             sales: [],
             saleIdToRefund: null,
+            saleIdToCancel: null,
             // carga
             loading: false,
             refunding: false,
+            canceling: false,
             // inventario de codigos activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // modales
             showRefundConfirm: false,
+            showCancelConfirm: false,
         };
     },
     components: {
@@ -72,6 +92,9 @@ export default {
             if (modal === 'refund') {
                 this.saleIdToRefund = saleId;
                 this.showRefundConfirm = true;
+            } else if (modal === 'cancel') {
+                this.saleIdToCancel = saleId;
+                this.showCancelConfirm = true;
             }
         },
         async fetchOnlineSalesByDate() {
@@ -103,11 +126,10 @@ export default {
 
                     // actualizar elementos de la vista (reactividad)
                     const reference = 'osd' + this.saleIdToRefund;
-                    console.log(this.$refs.reference);
-                    this.$refs.reference.updateRefundedAt(this.saleIdToRefund);
+                    this.$refs[reference][0].markAsRefunded(this.saleIdToRefund);
 
                     this.$notify({
-                        title: 'Venta reembolsada / cancelada',
+                        title: 'Venta reembolsada',
                         message: '',
                         type: 'success',
                     });
@@ -115,7 +137,44 @@ export default {
             } catch (error) {
                 console.log(error);
                 this.$notify({
-                    title: 'No se pudo procesar la peticion de cancelación/reembolso',
+                    title: 'No se pudo procesar la peticion de reembolso',
+                    message: '',
+                    type: 'error',
+                });
+            } finally {
+                this.refunding = false;
+            }
+        },
+        async cancelSale() {
+            this.canceling = true;
+            try {
+                let response = await axios.post(route('online-sales.cancel', this.saleIdToCancel));
+                if (response.status === 200) {
+                    // Obtener productos de servidor
+                    
+                    if (response.data.prevStatus === 'Procesando') {
+                        response = await axios.get(route('products.get-all-for-indexedDB'));
+                        const products = response.data.products;
+                        // actualizar lista de productos en indexedDB
+                        addOrUpdateBatchOfItems('products', products);
+                    }
+
+                    this.showCancelConfirm = false;
+
+                    // actualizar elementos de la vista (reactividad)
+                    const reference = 'osd' + this.saleIdToCancel;
+                    this.$refs[reference][0].markAsCanceled();
+
+                    this.$notify({
+                        title: 'Venta cancelada',
+                        message: '',
+                        type: 'success',
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'No se pudo procesar la peticion de cancelación',
                     message: '',
                     type: 'error',
                 });

@@ -47,7 +47,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                             </svg>
-                            <span class="text-xs">Reembolso/Cancelar</span>
+                            <span class="text-xs">Reembolsar</span>
+                        </el-dropdown-item>
+                        <el-dropdown-item v-if="canRefund && !wasCanceled" :command="'cancel|' + onlineSale.id">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-[14px] mr-2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                            <span class="text-xs">Cancelar</span>
                         </el-dropdown-item>
                     </template>
                 </el-dropdown>
@@ -94,15 +101,24 @@
         </main>
         <footer class="text-end md:flex justify-end">
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
-                <div class="flex items-center justify-end" :class="wasRefunded ? 'text-[#8C3DE4]' : 'text-gray37'">
+                <div class="flex items-center justify-end" :class="wasRefunded || wasCanceled ? 'text-[#8C3DE4]' : 'text-gray37'">
                     <el-tooltip v-if="wasRefunded" placement="top">
                         <template #content>
                             <p>
-                                El reembolso de realizó a las {{ formatDateHour(onlineSale.refunded_at) }}
+                                El reembolso se realizó a las {{ formatDateHour(onlineSale.refunded_at) }}
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
                             Reembolsado</p>
+                    </el-tooltip>
+                    <el-tooltip v-else-if="wasCanceled" placement="top">
+                        <template #content>
+                            <p>
+                                Se canceló a las {{ formatDateHour(onlineSale.refunded_at) }}
+                            </p>
+                        </template>
+                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
+                            Cancelado</p>
                     </el-tooltip>
                     <span class="text-start w-32">Total de la venta:</span>
                     <span class="w-12">$</span>
@@ -141,13 +157,20 @@ export default {
             return this.canSeeDetails;
         },
         wasRefunded() {
-            return this.onlineSale.refunded_at;
+            return this.onlineSale.refunded_at && this.onlineSale.status === 'Reembolsado';
+        },
+        wasCanceled() {
+            return this.onlineSale.refunded_at && this.onlineSale.status === 'Cancelado';
         },
     },
     methods: {
-        updateRefundedAt(saleIdRefunded) {
-            let sale = this.onlineSale.find(item => item.id == saleIdRefunded);
-            sale.refunded_at = new Date().toISOString();
+        markAsRefunded() {
+            this.onlineSale.refunded_at = new Date().toISOString();
+            this.onlineSale.status = 'Reembolsado';
+        },
+        markAsCanceled() {
+            this.onlineSale.refunded_at = new Date().toISOString();
+            this.onlineSale.status = 'Cancelado';
         },
         formatDateHour(dateString) {
             return format(parseISO(dateString), 'h:mm a', { locale: es });
@@ -171,6 +194,8 @@ export default {
             if (name === 'see') {
                 this.$inertia.visit(route('online-sales.show', saleId));
             } else if (name === 'refund') {
+                this.$emit('show-modal', name, saleId);
+            } else if (name === 'cancel') {
                 this.$emit('show-modal', name, saleId);
             }
         },
