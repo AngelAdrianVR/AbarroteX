@@ -50,9 +50,9 @@
     </section>
 
     <!-- Información de caja -->
-    <section class="lg:flex lg:space-x-7 md:w-full xl:w-[90%] mx-auto text-sm mt-7">
+    <section class="lg:flex lg:space-x-7 md:w-full xl:w-[90%] mx-auto text-xs md:text-sm mt-7">
       <div class="w-full border border-grayD9 rounded-lg self-start">
-        <div class="p-4 flex items-center space-x-2">
+        <div class="p-2 md:p-4 flex items-center space-x-2">
           <div class="w-3/4 space-y-1">
             <p class="font-bold mb-3">Efectivo esperado</p>
             <p class="text-gray99">Efectivo inicial</p>
@@ -66,7 +66,7 @@
 
             <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement"
               :title="cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
-              class="text-gray99 truncate w-60 md:w-auto">
+              class="text-gray99 truncate w-52 md:w-auto">
               {{ cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ??
                 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
             </p>
@@ -97,7 +97,7 @@
                     cutForm.totalOnlineSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p> -->
             <br>
             <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
-              <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus'"
+              <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"
                 class="fa-solid text-xs px-1"></i>
               <span class="text-gray99 mr-3">$</span>{{
                 cashRegisterMovement.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}

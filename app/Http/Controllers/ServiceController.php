@@ -7,59 +7,100 @@ use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
-        //
+        $services = Service::where('store_id', auth()->user()->store_id)->get()->take(30);
+        $total_services = Service::where('store_id', auth()->user()->store_id)->get()->count();
+
+        return inertia('Service/Index', compact('services', 'total_services'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
-        //
+        return inertia('Service/Create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'descripton' => 'nullable|string|max:800',
+            'price' => 'nullable|numeric|min:0|max:99999',
+        ]);
+
+        Service::create($request->all() + ['store_id' => auth()->user()->store_id]);
+
+        return to_route('services.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Service $service)
+    
+    public function show($encoded_service_id)
     {
-        //
+        // Decodificar el ID
+        $decoded_service = base64_decode($encoded_service_id);
+        $service = Service::find($decoded_service);
+        $services = Service::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+
+        return inertia('Service/Show', compact('service', 'services'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Service $service)
+    
+    public function edit($encoded_service_id)
     {
-        //
+        // Decodificar el ID
+        $decoded_service = base64_decode($encoded_service_id);
+        $service = Service::find($decoded_service);
+
+        return inertia('Service/Edit', compact('service'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, Service $service)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'descripton' => 'nullable|string|max:800',
+            'price' => 'nullable|numeric|min:0|max:99999',
+        ]);
+
+        $service->update($request->all());
+
+        return to_route('services.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(Service $service)
     {
-        //
+        $service->delete();
+    }
+
+
+    public function searchService(Request $request)
+    {
+        $query = $request->input('query');
+
+        $services = Service::where('store_id', auth()->user()->store_id)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%$query%")
+                    ->orWhere('category', 'like', "%$query%");
+            })
+            ->get();
+
+        return response()->json(['items' => $services]);
+    }
+
+
+    public function getItemsByPage($currentPage)
+    {
+        $offset = $currentPage * 30;
+
+        $services = Service::where('store_id', auth()->user()->store_id)->latest()->skip($offset)->take(30)->get();
+
+        return response()->json(['items' => $services]);
     }
 }

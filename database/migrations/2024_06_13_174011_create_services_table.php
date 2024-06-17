@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('category')->nullable();
+            $table->unsignedFloat('price')->nullable();
+            $table->text('description')->nullable();
+            $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
