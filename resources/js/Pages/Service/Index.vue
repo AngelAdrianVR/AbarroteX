@@ -1,16 +1,16 @@
 <template>
-    <AppLayout title="Cotizaciones">
+  <AppLayout title="Servicios">
     <div class="px-2 lg:px-10 py-7">
-      <h1>Cotizaciones</h1>
+      <h1>Servicios</h1>
 
       <div class="md:flex justify-between mt-3">
         <article class="flex items-center space-x-5 lg:w-1/3">
           <div class="lg:w-full relative">
             <input
               v-model="searchQuery"
-              @keydown.enter="searchQuotes"
+              @keydown.enter="searchServices"
               class="input w-full pl-9"
-              placeholder="Buscar cotización por nombre de cliente o folio"
+              placeholder="Buscar servicio por nombre o categoría"
               type="search"
             />
             <i
@@ -22,20 +22,20 @@
           </el-tag>
         </article>
         <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
-          <PrimaryButton @click="$inertia.get(route('quotes.create'))"
-            >Crear cotización</PrimaryButton
+          <PrimaryButton @click="$inertia.get(route('services.create'))"
+            >Nuevo servicio</PrimaryButton
           >
         </div>
       </div>
 
       <!-- Tabla de servicios -->
       <div class="mt-9">
-        <p v-if="localQuotes.length" class="text-gray66 text-[11px]">
-          {{ localQuotes.length }} de {{ total_quotes }} elementos
+        <p v-if="localServices.length" class="text-gray66 text-[11px]">
+          {{ localServices.length }} de {{ total_services }} elementos
         </p>
-        <QuotesTable :quotes="localQuotes" />
-        <p v-if="localQuotes.length" class="text-gray66 text-[11px] mt-3">
-          {{ localQuotes.length }} de {{ total_quotes }} elementos
+        <ServicesTable :services="localServices" />
+        <p v-if="localServices.length" class="text-gray66 text-[11px] mt-3">
+          {{ localServices.length }} de {{ total_services }} elementos
         </p>
         <p v-if="loadingItems" class="text-xs my-4 text-center">
           Cargando
@@ -43,9 +43,9 @@
         </p>
         <button
           v-else-if="
-            total_quotes > 30 &&
-            localQuotes.length < total_quotes &&
-            localQuotes.length
+            total_services > 30 &&
+            localServices.length < total_services &&
+            localServices.length
           "
           @click="fetchItemsByPage"
           class="w-full text-primary my-4 text-xs mx-auto underline ml-6"
@@ -61,40 +61,40 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import ThirthButton from "@/Components/MyComponents/ThirthButton.vue";
-import QuotesTable from "@/Components/MyComponents/Quote/QuotesTable.vue";
+import ServicesTable from "@/Components/MyComponents/Service/ServicesTable.vue";
 import axios from "axios";
 
 export default {
-data() {
+  data() {
     return {
-        searchQuery: null, //buscador de servicio.
-        searchedWord: null, //palabra con la que se hizo la última busqueda.
-        localQuotes: this.quotes, //arreglo local de cotizaciones
-        loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
-        loading: false, //estado de carga cuando se busca a un servicio por medio del buscador
-        currentPage: 1, //para paginación
-    }
-},
-components:{
-AppLayout,
-PrimaryButton,
-QuotesTable,
-ThirthButton,
-},
-props:{
-quotes: Array,
-total_quotes: Number,
-},
-methods:{
-    async searchQuotes() {
+      searchQuery: null, //buscador de servicio.
+      searchedWord: null, //palabra con la que se hizo la última busqueda.
+      localServices: this.services, //arreglo local de servicios
+      loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
+      loading: false, //estado de carga cuando se busca a un servicio por medio del buscador
+      currentPage: 1, //para paginación
+    };
+  },
+  components: {
+    AppLayout,
+    PrimaryButton,
+    ServicesTable,
+    ThirthButton,
+  },
+  props: {
+    services: Array,
+    total_services: Number,
+  },
+  methods: {
+    async searchServices() {
       this.loading = true;
       if (this.searchQuery != "") {
         try {
-          const response = await axios.get(route("quotes.search"), {
+          const response = await axios.get(route("services.search"), {
             params: { query: this.searchQuery },
           });
           if (response.status == 200) {
-            this.localQuotes = response.data.items;
+            this.localServices = response.data.items;
             this.searchedWord = this.searchQuery;
             this.searchQuery = null;
           }
@@ -104,16 +104,16 @@ methods:{
           this.loading = false;
         }
       } else {
-        this.localQuotes = this.quotes;
+        this.localServices = this.services;
       }
     },
     async fetchItemsByPage() {
       try {
         this.loadingItems = true;
-        const response = await axios.get(route("quotes.get-by-page", this.currentPage));
+        const response = await axios.get(route("services.get-by-page", this.currentPage));
 
         if (response.status === 200) {
-          this.localQuotes = [...this.localQuotes, ...response.data.items];
+          this.localServices = [...this.localServices, ...response.data.items];
           this.currentPage++;
 
           // Actualiza la URL con la pagina
@@ -130,9 +130,9 @@ methods:{
       }
     },
     closedTag() {
-      this.localQuotes = this.quotes;
+      this.localServices = this.services;
       this.searchedWord = null;
     },
-}
-}
+  },
+};
 </script>
