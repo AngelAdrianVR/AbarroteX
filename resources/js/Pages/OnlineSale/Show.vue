@@ -68,10 +68,10 @@
                             <tr v-for="product in online_sale.products" :key="product.id"
                                 class="*:text-xs *:py-2 *:px-4">
                                 <td>
-                                    <figure class="w-16">
+                                    <figure class="size-16">
                                         <img v-if="product.image_url" 
                                                 :src="product?.image_url" 
-                                                alt="producto" class="h-full mx-auto">
+                                                alt="producto" class="h-full object-contain mx-auto">
                                         <div class="flex flex-col items-center justify-center" v-else>
                                             <i class="fa-regular fa-image text-3xl text-gray-200"></i>
                                             <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>

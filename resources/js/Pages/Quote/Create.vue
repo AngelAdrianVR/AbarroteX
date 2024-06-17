@@ -78,18 +78,23 @@
                 <section class="max-h-72 overflow-auto col-span-full">
                     <div class="space-y-3">
                         <ServiceInput :services="services" v-for="(item, index) in form.services" :key="item.id" :id="item.id"
-                        @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
+                        @deleteItem="deleteItemService(index)" @syncItem="syncItemsService(index, $event)" class="mb-1" />
                     </div>
                     <p v-if="!form.services?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
                     servicios </p>
                 </section>
                 <div class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
-                    <button class="text-primary text-sm self-start" type="button" @click="addNewItem">
+                    <button class="text-primary text-sm self-start" type="button" @click="addNewService">
                         <i class="fa-solid fa-plus"></i>
                         Agregar Servicio
                     </button>
                 </div>
                 <!-- -------------------------------------------------------------------- -->
+                <div class="text-sm flex flex-col mr-7 items-end col-span-full">
+                    <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total + form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                </div>
 
                 <div class="mt-3 col-span-full">
                     <InputLabel value="Notas adicionales (opcional)" class="ml-3 mb-1 text-sm" />
@@ -98,6 +103,11 @@
                         clearable />
                     <InputError :message="form.errors.notes" />
                 </div>
+
+                <label for="iva" class="text-xs items-center flex mt-2 col-span-full">
+                    <el-checkbox id="iva" class="px-2" name="iva" v-model="form.show_iva"></el-checkbox>
+                    Mostrar IVA
+                </label>
 
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="form.processing">
@@ -132,6 +142,7 @@ data() {
         description: null,
         price: null,
         notes: null,
+        show_iva: false,
         products: [
             {
                 id: 1,
@@ -146,6 +157,7 @@ data() {
         services: [
             {
                 id: 1,
+                service_id: null,
                 name: null,
                 price: 1,
                 quantity: 1,
@@ -158,6 +170,7 @@ data() {
         products: null, //se obtienne todos los productos de la tienda
         services: null, //se obtienne todos los servicios de la tienda
         next_item_id: 2, //para el index de productos creados como venta en linea
+        next_service_id: 2, //para el index de servicios creados
     }
 },
 components:{
@@ -187,6 +200,9 @@ methods:{
     addNewItem() {
       this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, isLocal: null, quantity: null });
     },
+    addNewService() {
+      this.form.services.push({ id: this.next_service_id++, price: null, service_id: null, quantity: null });
+    },
     deleteItem(index) {
       if (this.form.products.length > 1) {
         this.form.products.splice(index, 1);
@@ -194,8 +210,18 @@ methods:{
         // this.syncItems();
       }
     },
+    deleteItemService(index) {
+      if (this.form.services.length > 1) {
+        this.form.services.splice(index, 1);
+        //actualiza el total y precio de envío cuando se elimina algun producto
+        // this.syncItems();
+      }
+    },
     syncItems(index, product_obj) {
         this.form.products[index] = product_obj;
+    },
+    syncItemsService(index, product_obj) {
+        this.form.services[index] = product_obj;
     },
     async fetchAllProducts() {
         try {
