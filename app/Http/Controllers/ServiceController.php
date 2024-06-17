@@ -103,4 +103,15 @@ class ServiceController extends Controller
 
         return response()->json(['items' => $services]);
     }
+
+
+    public function fetchAllServices()
+    {
+        $services = Service::where('store_id', auth()->user()->store_id)->get();
+
+        return response()->json(['items' => $services]);
+    }
+
+
+    
 }

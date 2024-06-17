@@ -115,7 +115,7 @@ class OnlineSaleController extends Controller
             }
         }
 
-        // $new_online_sale = OnlineSale::create($request->all());
+        $new_online_sale = OnlineSale::create($request->all());
 
         $encoded_store_id = base64_encode($request->store_id);
 
@@ -358,7 +358,7 @@ class OnlineSaleController extends Controller
             // Si el producto tiene 'global_product_id', se considera transferido
             $isLocal = isset($product['global_product_id']);
             $formatted_product = [
-                'id' => $isLocal ? $product['global_product_id'] : $product['id'],
+                'id' => $product['id'],
                 'price' => $isLocal ? $product['global_product']['public_price'] : $product['public_price'],
                 'isLocal' => !$isLocal,
                 'current_stock' => $product['current_stock'],
@@ -401,7 +401,7 @@ class OnlineSaleController extends Controller
         CashRegisterMovement::create([
             'amount' => $total_amount,
             'type' => 'Retiro',
-            'notes' => "Venta con folio $folio fue reembolsada / cancelada",
+            'notes' => "Venta con folio $folio fue reembolsada",
             'cash_register_id' => $cash_register->id,
         ]);
         // Restar dinero de caja

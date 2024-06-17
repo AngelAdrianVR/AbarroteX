@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\Quote;
 use Illuminate\Http\Request;
 
@@ -18,8 +19,10 @@ class QuoteController extends Controller
 
     
     public function create()
-    {
-        return inertia('Quote/Create');
+    {   
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+
+        return inertia('Quote/Create', compact('clients'));
     }
 
     
