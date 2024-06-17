@@ -161,6 +161,7 @@ Route::post('products-get-data-for-products-view', [ProductController::class, 'g
 Route::resource('services', ServiceController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('services-get-by-page/{currentPage}', [ServiceController::class, 'getItemsByPage'])->name('services.get-by-page')->middleware('auth');
 Route::get('services-search', [ServiceController::class, 'searchService'])->name('services.search')->middleware('auth');
+Route::get('services-fetch-all-products', [ServiceController::class, 'fetchAllServices'])->name('services.fetch-all-services');
 
 
 //global-product-store routes----------------------------------------------------------------------------------

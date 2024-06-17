@@ -11,7 +11,7 @@ class Quote extends Model
     use HasFactory;
 
     protected $fillable = [
-        'client',
+        'contact_name',
         'total',
         'products',
         'expired_date',
