@@ -6,10 +6,10 @@
     <section class="text-sm mt-2" v-else>
         <div class="flex space-x-4">
             <!-- Imagen del producto -->
-            <figure class="border border-grayD9 rounded-md p-3 w-28">
+            <figure class="border border-grayD9 rounded-md p-2 w-28">
                 <img v-if="product?.global_product_id ? product?.global_product.media?.length : product?.media?.length" 
                         :src="product?.global_product_id ? product?.global_product.media[0]?.original_url : product?.media[0]?.original_url" 
-                        alt="producto" class="h-full mx-auto">
+                        alt="producto" class="h-full w-full mx-auto object-contain">
                 <div class="flex flex-col items-center justify-center" v-else>
                     <i class="fa-regular fa-image text-3xl text-gray-200"></i>
                     <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>

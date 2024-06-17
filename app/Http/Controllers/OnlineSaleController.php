@@ -104,6 +104,7 @@ class OnlineSaleController extends Controller
                 } else {
                     $temp_product = GlobalProductStore::find($product['id']);
                     $temp_product->current_stock -= $product['quantity'];
+
                     //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
                     // if ( $temp_product->current_stock < 0 ) {
                     // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
@@ -114,7 +115,7 @@ class OnlineSaleController extends Controller
             }
         }
 
-        $new_online_sale = OnlineSale::create($request->all());
+        // $new_online_sale = OnlineSale::create($request->all());
 
         $encoded_store_id = base64_encode($request->store_id);
 
@@ -200,11 +201,11 @@ class OnlineSaleController extends Controller
     }
 
     // para index de tienda en linea para clientes. (carga por scroll)
-    public function loadMoreProducts($offset, $limit)
+    public function loadMoreProducts()
     {
         // Cargar más productos desde la base de datos tomando sólo los requeridos y saltando los ya cargados
         $all_products = $this->getAllProducts(request('storeId'));
-        $moreProducts = $all_products->splice($offset)->take($limit);
+        $moreProducts = $all_products->splice(request('offset'))->take(request('limit'));
 
         return response()->json(['products' => $moreProducts]);
     }

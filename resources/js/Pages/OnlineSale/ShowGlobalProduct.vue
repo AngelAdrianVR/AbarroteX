@@ -7,7 +7,7 @@
                 <!-- Imagen del producto -->
                 <figire class="border border-grayD9 rounded-md flex items-center justify-center h-96">
                     <img v-if="global_product.global_product?.media?.length" :src="global_product.global_product?.media[0]?.original_url" alt="producto" 
-                    class="h-full mx-auto">
+                    class="h-full mx-auto object-contain">
                     <div v-else>
                         <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                         <p class="text-sm text-gray-300">Imagen no disponible</p>
@@ -53,12 +53,12 @@
                         <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito</PrimaryButton>
                         </div>
                         <!-- Características del producto -->
-                        <div v-if="global_product.description" class="mt-7">
-                            <h2 class="font-bold mb-3">Acerca del producto</h2>
-                            <div>
-                                <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
-                            </div>
+                    <div v-if="global_product.description" class="mt-7">
+                        <h2 class="font-bold mb-3">Acerca del producto</h2>
+                        <div>
+                            <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
                         </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -89,6 +89,7 @@ global_product: Object
 },
 methods:{
     addToCart() {
+        console.log('entró')
         // Obtener el carrito actual desde localStorage
         let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
 
@@ -106,7 +107,7 @@ methods:{
                 isLocal: false,
                 price: this.global_product.public_price,
                 quantity: this.quantity,
-                image_url: this.product.global_product.media[0]?.original_url
+                image_url: this.global_product.global_product.media[0]?.original_url
             });
         }
 
