@@ -401,7 +401,7 @@ class OnlineSaleController extends Controller
         CashRegisterMovement::create([
             'amount' => $total_amount,
             'type' => 'Retiro',
-            'notes' => "Venta con folio $folio fue reembolsada / cancelada",
+            'notes' => "Venta con folio $folio fue reembolsada",
             'cash_register_id' => $cash_register->id,
         ]);
         // Restar dinero de caja
