@@ -28,12 +28,14 @@ class OnlineSale extends Model
         'delivery_price',
         'total',
         'delivered_at',
+        'refunded_at',
         'store_id'
     ];
 
     protected $casts = [
         'products' => 'array',
         'delivered_at' => 'datetime',
+        'refunded_at' => 'datetime',
     ];
 
     //relationships

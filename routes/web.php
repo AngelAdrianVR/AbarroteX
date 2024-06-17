@@ -339,6 +339,9 @@ Route::get('online-sales-filter', [OnlineSaleController::class, 'filterOnlineSal
 Route::put('online-sales-update-status/{online_sale}', [OnlineSaleController::class, 'updateOnlineSaleStatus'])->name('online-sales.update-status')->middleware('auth');
 Route::get('online-sales-fetch-all-products', [OnlineSaleController::class, 'fetchAllProducts'])->name('online-sales.fetch-all-products');
 Route::post('online-sales-get-by-page/{currentPage}', [OnlineSaleController::class, 'getItemsByPage'])->name('online-sales.get-by-page')->middleware('auth');
+Route::get('online-sales-get-sales-by-date/{date}', [OnlineSaleController::class, 'getSalesByDate'])->name('online-sales.get-sales-by-date');
+Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'refund'])->name('online-sales.refund');
+Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
 
 
 // comandos Artisan

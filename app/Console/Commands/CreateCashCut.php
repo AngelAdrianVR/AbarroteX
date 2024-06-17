@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class CreateCashCut extends Command
 {
-    protected $signature = 'store:create-cashcut';
+    protected $signature = 'stores:create-cashcut';
     protected $description = 'Crear corte de caja automatico para toda caja registradora de cada tienda';
 
     public function handle()
@@ -34,7 +34,7 @@ class CreateCashCut extends Command
                     CashCut::create([
                         'started_cash' => $cashRegister->started_cash,
                         'expected_cash' => $expected_cash, // suma de ventas, ingresos, retiros de caja y dinero inicial.
-                        'sales_cash' => $salesToday->sum('total'),
+                        'store_sales_cash' => $salesToday->sum('total'),
                         'counted_cash' => $expected_cash,
                         'difference' => 0, // asume que no hay diferencias
                         'notes' => 'Corte realizado automáticamente por el sistema al terminar el día',
