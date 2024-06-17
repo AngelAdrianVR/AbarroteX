@@ -331,7 +331,7 @@ data() {
                 quantity: 1,
                 image_url: null,
             }
-      ],
+        ],
     });
     return {
         form, //formulario para crear orden en linea
