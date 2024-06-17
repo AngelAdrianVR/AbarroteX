@@ -176,7 +176,10 @@ class ProductController extends Controller
             $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
         }
 
-        return to_route('products.show', $product->id);
+        //codifica el id del producto
+        $encoded_product_id = base64_encode($product->id);
+
+        return to_route('products.show', ['product' => $encoded_product_id]);
     }
 
 
