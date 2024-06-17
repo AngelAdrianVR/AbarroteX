@@ -41,7 +41,7 @@
                                 <span class="text-xs">Ver detalles</span>
                             </el-dropdown-item>
                         </el-dropdown-menu>
-                        <el-dropdown-item v-if="canRefund && !wasRefunded" :command="'refund|' + onlineSale.id">
+                        <el-dropdown-item v-if="canRefund && !wasRefunded && !wasCanceled" :command="'refund|' + onlineSale.id">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="size-[14px] mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -49,7 +49,7 @@
                             </svg>
                             <span class="text-xs">Reembolsar</span>
                         </el-dropdown-item>
-                        <el-dropdown-item v-if="canRefund && !wasCanceled" :command="'cancel|' + onlineSale.id">
+                        <el-dropdown-item v-if="canRefund && !wasCanceled && !wasRefunded" :command="'cancel|' + onlineSale.id">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="size-[14px] mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />

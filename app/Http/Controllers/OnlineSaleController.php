@@ -421,7 +421,7 @@ class OnlineSaleController extends Controller
 
                 //Registra el historial de venta de cada producto
                 ProductHistory::create([
-                    'description' => "Registro de entrada de producto por reembolso de venta con folio $folio. " . $sale['quantity'] . ' piezas',
+                    'description' => "Registro de entrada de producto por reembolso de venta con folio $folio. " . $sale['quantity'] . ' pieza(s)',
                     'type' => 'Reembolso',
                     'historicable_id' => $current_product->id,
                     'historicable_type' => get_class($current_product),
@@ -449,7 +449,7 @@ class OnlineSaleController extends Controller
 
                 //Registra el historial de venta de cada producto
                 ProductHistory::create([
-                    'description' => "Registro de entrada de producto por cancelación de venta con folio $folio. " . $sale['quantity'] . ' piezas',
+                    'description' => "Registro de entrada de producto por cancelación de venta con folio $folio. " . $sale['quantity'] . ' pieza(s)',
                     'type' => 'Cancelación',
                     'historicable_id' => $current_product->id,
                     'historicable_type' => get_class($current_product),
