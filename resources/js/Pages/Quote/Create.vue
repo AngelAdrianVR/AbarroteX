@@ -83,17 +83,19 @@
                     <p v-if="!form.services?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
                     servicios </p>
                 </section>
-                <div class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
+                <div class="mt-4 mb-3 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
                     <button class="text-primary text-sm self-start" type="button" @click="addNewService">
                         <i class="fa-solid fa-plus"></i>
                         Agregar Servicio
                     </button>
                 </div>
                 <!-- -------------------------------------------------------------------- -->
+
+                <!-- totales  -->
                 <div class="text-sm flex flex-col mr-7 items-end col-span-full">
                     <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total + form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p class="font-bold ">descuento: <span class="mx-2">$</span>{{ form.discount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+                    <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total - form.discount)?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 </div>
 
                 <div class="mt-3 col-span-full">
@@ -104,10 +106,42 @@
                     <InputError :message="form.errors.notes" />
                 </div>
 
-                <label for="iva" class="text-xs items-center flex mt-2 col-span-full">
-                    <el-checkbox id="iva" class="px-2" name="iva" v-model="form.show_iva"></el-checkbox>
-                    Mostrar IVA
-                </label>
+                <div class="flex items-center space-x-5 col-span-full">
+                    <label for="has_discount" class="text-xs items-center flex mt-2 col-span-full">
+                        <el-checkbox @change="resetDiscount()" id="has_discount" class="px-2" name="has_discount" v-model="form.has_discount"></el-checkbox>
+                        Aplicar descuento
+                    </label>
+                    <label v-if="form.has_discount" for="is_percentage_discount" class="text-xs items-center flex mt-2 col-span-full">
+                        <el-checkbox @change="resetDiscount()" id="is_percentage_discount" class="px-2" name="is_percentage_discount" v-model="form.is_percentage_discount"></el-checkbox>
+                        Descuento en porcentaje
+                    </label>
+                    <label for="iva" class="text-xs items-center flex mt-2 col-span-full">
+                        <el-checkbox id="iva" class="px-2" name="iva" v-model="form.show_iva"></el-checkbox>
+                        Mostrar IVA
+                    </label>
+                </div>
+
+                <!-- Descuento -->
+                <div class="mt-3" v-if="form.has_discount">
+                    <div v-if="form.is_percentage_discount">
+                        <InputLabel value="Porcentaje de descuento*" class="ml-3 mb-1 text-sm" />
+                        <el-input v-model="form.discount" max="100" type="number" placeholder="ingresa el porcentaje del 1 al 100">
+                            <template #prefix>
+                                <i class="fa-solid fa-percent"></i>
+                            </template>
+                        </el-input>
+                        <InputError :message="form.errors.discount" />
+                    </div>
+                    <div v-else>
+                        <InputLabel value="Cantidad de descuento*" class="ml-3 mb-1 text-sm" />
+                        <el-input v-model="form.discount" type="number" placeholder="ingresa el descuento">
+                            <template #prefix>
+                                <i class="fa-solid fa-dollar-sign"></i>
+                            </template>
+                        </el-input>
+                        <InputError :message="form.errors.discount" />
+                    </div>
+                </div>
 
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="form.processing">
@@ -143,34 +177,42 @@ data() {
         price: null,
         notes: null,
         show_iva: false,
-        products: [
-            {
-                id: 1,
-                name: null,
-                product_id: null,
-                price: 1,
-                isLocal: null,
-                quantity: 1,
-                image_url: null,
-            }
-        ],
-        services: [
-            {
-                id: 1,
-                service_id: null,
-                name: null,
-                price: 1,
-                quantity: 1,
-            }
-        ],
+        has_discount: false, //aplicar descuento
+        discount: null, //cantidad de descuento
+        is_percentage_discount: false, //tipo de descuento
+        total: 0, //cantidad total tomando en cuenta servcios, productos y descuento
+        products: [],
+        services: [],
+        // products: [
+        //     {
+        //         id: 1,
+        //         name: null,
+        //         product_id: null,
+        //         price: 1,
+        //         isLocal: null,
+        //         quantity: 1,
+        //         image_url: null,
+        //     }
+        // ],
+        // services: [
+        //     {
+        //         id: 1,
+        //         service_id: null,
+        //         name: null,
+        //         price: 1,
+        //         quantity: 1,
+        //     }
+        // ],
     });
 
     return {
         form,
         products: null, //se obtienne todos los productos de la tienda
         services: null, //se obtienne todos los servicios de la tienda
-        next_item_id: 2, //para el index de productos creados como venta en linea
-        next_service_id: 2, //para el index de servicios creados
+        next_item_id: 1, //para el index de productos creados como venta en linea
+        next_service_id: 1, //para el index de servicios creados
+        totalServicesMoney: null, //total de dinero para los servicios
+        totalProductsMoney: null, //total de dinero para los productos
     }
 },
 components:{
@@ -204,24 +246,31 @@ methods:{
       this.form.services.push({ id: this.next_service_id++, price: null, service_id: null, quantity: null });
     },
     deleteItem(index) {
-      if (this.form.products.length > 1) {
         this.form.products.splice(index, 1);
-        //actualiza el total y precio de envío cuando se elimina algun producto
-        // this.syncItems();
-      }
     },
     deleteItemService(index) {
-      if (this.form.services.length > 1) {
         this.form.services.splice(index, 1);
-        //actualiza el total y precio de envío cuando se elimina algun producto
-        // this.syncItems();
-      }
     },
     syncItems(index, product_obj) {
         this.form.products[index] = product_obj;
     },
     syncItemsService(index, product_obj) {
         this.form.services[index] = product_obj;
+    },
+    resetDiscount() {
+        this.form.discount = null;
+    },
+    totalMoneyOrder() {
+        //calcula el total de dinero para los productos 
+        this.totalProductsMoney = this.form.products.reduce((sum, item) => {
+            return sum + (item.price * item.quantity);
+        }, 0);
+
+        //calcula el total de dinero para los servicios 
+        this.totalServicesMoney = this.form.services.reduce((sum, item) => {
+            return sum + (item.price * item.quantity);
+        }, 0);
+        this.form.total = this.totalProductsMoney + this.totalServicesMoney;
     },
     async fetchAllProducts() {
         try {
@@ -243,6 +292,20 @@ methods:{
             console.log(error);
         }
     },
+},
+watch: {
+    'form.products': {
+        handler() {
+            this.totalMoneyOrder();
+        },
+        deep: true
+    },
+    'form.services': {
+        handler() {
+            this.totalMoneyOrder();
+        },
+        deep: true
+    }
 },
 mounted() {
     this.fetchAllProducts();

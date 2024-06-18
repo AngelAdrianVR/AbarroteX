@@ -397,8 +397,8 @@
               </template>
             </el-input>
             <p class="text-red-500 text-xs"
-              v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash">
-              *El monto no debe exceder el dinero actual de tu caja (${{ asignedCashRegister?.current_cash }})
+              v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > localCurrentCash">
+              *El monto no debe exceder el dinero actual de tu caja (${{ localCurrentCash }})
             </p>
             <InputError :message="form.errors.registerAmount" />
           </div>
