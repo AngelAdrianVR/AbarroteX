@@ -29,7 +29,7 @@ class CreateNewUser implements CreatesNewUsers
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'address' => ['required', 'string', 'max:255'],
-            'type' => ['nullable', 'string', 'max:255'],
+            'type' => ['required', 'string', 'max:255'],
             'contact_phone' => ['required', 'string', 'min:10', 'max:10'],
             'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
@@ -42,7 +42,7 @@ class CreateNewUser implements CreatesNewUsers
             'address' => $input['address'],
             'type' => $input['type'],
             'contact_phone' => $input['contact_phone'],
-            'next_payment' => now()->addDays(15),
+            'next_payment' => now()->addDays(2),
         ]);
 
         //Se crea el registro para guardar los banners en él con el id de la tienda. Pra tienda en línea
