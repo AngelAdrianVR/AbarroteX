@@ -7,6 +7,7 @@ use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\OnlineSale;
 use App\Models\Sale;
+use App\Models\Store;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -256,6 +257,5 @@ class CashCutController extends Controller
 
         return response()->json(['items' => $cash_cut_movements]);
     }
-
         
 }

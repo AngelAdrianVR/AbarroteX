@@ -1,6 +1,6 @@
 <template>
     <OnlineStoreLayout :title="store.name">
-        <div ref="scrollContainer" style="height: 91vh; overflow-y: scroll;" @scroll="handleScroll">
+        <div ref="scrollContainer" style="height: 90vh; overflow-y: scroll;" @scroll="handleScroll">
             <!-- Banners -->
             <section v-if="banners?.media?.length" class="my-4">
                 <figure class="lg:h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
@@ -18,10 +18,10 @@
             <!-- Productos -->
             <section class="pb-16">
                 <h1 class="font-bold text-3xl text-center mb-12">Productos</h1>
-                <h1 v-if="store.online_store_properties?.enabled_free_delivery" class="font-bold text-xl text-center text-primary mb-1">
+                <h1 v-if="store.online_store_properties?.enabled_free_delivery" class="font-bold md:text-xl text-center text-primary mb-1">
                     Envío gratis en compra mínima de ${{ store.online_store_properties?.min_free_delivery }}</h1>
                 
-                <div v-if="visibleProducts.length" class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-7 md:mx-9 space-y-4 md:space-y-0">
+                <div v-if="visibleProducts.length" class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-2 sm:mx-4 md:mx-9 space-y-4 md:space-y-0">
                     <OnlineProductCard v-for="product in visibleProducts" :key="product" :product="product" :store="store" />
                 </div>
                 <el-empty v-else description="No hay productos en la tienda" />
@@ -91,8 +91,8 @@ methods:{
             if ( ( this.total_products - this.visibleProducts.length ) !== 0 ) {
                 this.loading = true;
                 try {
-                    console.log('offset', this.visibleProducts.length)
-                    console.log('limit', limit)
+                    // console.log('offset', this.visibleProducts.length);
+                    // console.log('limit', limit);
                     const response = await axios.post(route('online-sales.load-more-products'), { 
                         storeId: this.store_id, offset: offset, limit: limit
                     });
