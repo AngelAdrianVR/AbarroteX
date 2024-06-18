@@ -65,7 +65,7 @@ const logout = () => {
                                             calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
                                             días de tu prueba gratuita</p>
                                         <p>¡Paga tu suscripción en cualquier momento! Tu pago
-                                            comenzarsá a contar al finalizar el
+                                            comenzará a contar al finalizar el
                                             periodo de
                                             prueba.</p>
                                     </div>
@@ -261,7 +261,7 @@ const logout = () => {
                                 Te quedan {{ calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
                                 días de tu prueba gratuita. <span class="font-normal">¡Paga tu suscripción en cualquier
                                     momento! Tu pago
-                                    comenzarsá a
+                                    comenzará a
                                     contar al finalizar el periodo de prueba.</span>
                             </p>
                         </div>
