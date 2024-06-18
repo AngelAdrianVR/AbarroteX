@@ -168,7 +168,7 @@
         </DialogModal>
         <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
             <template #title>
-                <h1>Reembolsar / Cancelar venta</h1>
+                <h1>Reembolsar venta</h1>
             </template>
             <template #content>
                 <p v-if="isInventoryOn">
@@ -429,7 +429,7 @@ export default {
                     });
 
                     this.$notify({
-                        title: 'Venta reembolsada / cancelada',
+                        title: 'Venta reembolsada',
                         message: '',
                         type: 'success',
                     });
@@ -437,7 +437,7 @@ export default {
             } catch (error) {
                 console.log(error);
                 this.$notify({
-                    title: 'No se pudo procesar la peticion',
+                    title: 'No se pudo procesar la peticion de reembolso',
                     message: '',
                     type: 'error',
                 });

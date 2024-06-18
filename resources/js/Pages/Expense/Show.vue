@@ -28,7 +28,7 @@
             </h2>
             <span></span>
         </header>
-        <main class="mx-2 lg:mx-32 text-xs md:text-sm mt-4">
+        <main class="mx-2 lg:mx-32 text-xs md:text-sm mt-4 mb-6">
             <section class="border border-gray9A rounded-[5px] p-4 grid grid-cols-4 gap-4">
                 <p class="text-gray77 font-semibold">Monto:</p>
                 <b class="col-span-3">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
