@@ -1,7 +1,7 @@
 <template>
     <OnlineStoreLayout :title="global_product.global_product.name">
         <div class="p-4 md:p-9">
-            <Back />
+            <Back :to="route('online-sales.client-index', encodedIdStore ?? 0)" />
 
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
                 <!-- Imagen del producto -->
@@ -77,6 +77,7 @@ data() {
         formattedDescription: null, //descripción del producto formateado con viñetas
         storeId: null, //recupera el id de la tienda almacenada en el local storage
         store: null, //recupera toda la informacióon de la tienda.
+        encodedIdStore: null, //id de la tienda codificado
     }
 },
 components:{
@@ -129,6 +130,10 @@ methods:{
             this.formattedDescription = formattedLines.join('\n');
         }
     },
+    encodeStoreId() {
+      const encodedId = btoa(this.storeId.toString());
+      this.encodedIdStore = encodedId;
+    },
     async fetchStoreInfo() {
         try {
             const response = await axios.get(route('stores.fetch-store-info', this.storeId));
@@ -146,6 +151,9 @@ created() {
     // recupera el store_id del localStorage
     this.storeId = localStorage.getItem('storeId');
 
+    //condifica el id de la tienda
+    this.encodeStoreId();
+    
     // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
     this.fetchStoreInfo();
 },
