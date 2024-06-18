@@ -91,8 +91,6 @@ methods:{
             if ( ( this.total_products - this.visibleProducts.length ) !== 0 ) {
                 this.loading = true;
                 try {
-                    // console.log('offset', this.visibleProducts.length);
-                    // console.log('limit', limit);
                     const response = await axios.post(route('online-sales.load-more-products'), { 
                         storeId: this.store_id, offset: offset, limit: limit
                     });
