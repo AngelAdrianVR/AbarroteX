@@ -12,13 +12,12 @@
             </div>
             <div v-if="Object.keys(productHistory)?.length">
                 <div v-for="(history, index) in productHistory" :key="history">
-
                     <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
                         translateMonth(index) }}</h2>
-                    <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span class="mr-2"
-                            v-html="getIcon(activity.type)"></span>{{ activity.description
-                                + ' ' +
-                                activity.created_at }}
+                    <p class="mt-1 ml-4 text-sm flex items-center space-x-2" v-for="activity in history"
+                        :key="activity">
+                        <span v-html="getIcon(activity.type)"></span>
+                        <span>{{ activity.description + ' ' + activity.created_at }}</span>
                     </p>
                 </div>
             </div>
@@ -58,6 +57,14 @@ export default {
                 return '<i class="fa-regular fa-square-plus"></i>';
             } else if (type === 'Venta') {
                 return '<i class="fa-solid fa-hand-holding-dollar"></i>';
+            } else if (type === 'Cancelación') {
+                return '<i class="fa-solid fa-hand-holding-dollar"></i>';
+            } else if (type === 'Reembolso') {
+                return '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>';
+            } else if (type === 'Cancelación') {
+                return '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>';
+            } else if (type === 'Edición') {
+                return '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>';
             }
         },
         castDate(month, year) {

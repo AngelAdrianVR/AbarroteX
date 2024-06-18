@@ -1,27 +1,23 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="clients?.length" class="w-full">
+        <table v-if="quotes?.length" class="w-full">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th>N°</th>
-                    <th>Cliente</th>
-                    <th>Teléfono</th>
-                    <th>RFC</th>
-                    <th>Dirección</th>
-                    <th>Deuda total</th>
+                    <th>Folio</th>
+                    <th>Creado el</th>
+                    <th>Nombre del cliente</th>
+                    <th>Monto</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('clients.show', encodeId(client.id)))"
-                    v-for="(client, index) in clients" :key="index"
+                <tr @click="$inertia.visit(route('quotes.show', encodeId(quote.id)))"
+                    v-for="(quote, index) in quotes" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td class="rounded-s-full">{{ index + 1 }}</td>
-                    <td>{{ client.name }}</td>
-                    <td>{{ client.phone }}</td>
-                    <td>{{ client.rfc ?? '-' }}</td>
-                    <td>{{ client.street ? client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state : '-' }}</td>
-                    <td>${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</td>
+                    <td class="rounded-s-full">{{ 'S-' + quote.id }}</td>
+                    <td>{{ quote.name }}</td>
+                    <td>{{ quote.category ?? '-' }}</td>
+                    <td>${{ quote.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
@@ -30,7 +26,7 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item :command="'see|' + encodeId(client.id)">
+                                    <el-dropdown-item :command="'see|' + encodeId(quote.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -40,7 +36,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'edit|' + encodeId(client.id)">
+                                    <el-dropdown-item :command="'edit|' + encodeId(quote.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -48,7 +44,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'delete|' + client.id">
+                                    <el-dropdown-item :command="'delete|' + quote.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -64,15 +60,15 @@
                 </tr>
             </tbody>
         </table>
-        <el-empty v-else description="No hay clientes registrados" />
+        <el-empty v-else description="No hay cotizaciones registradas" />
 
         <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
             <template #title>
-                <h1>Eliminar cliente</h1>
+                <h1>Eliminar cotización</h1>
             </template>
             <template #content>
                 <p>
-                    Se eliminará al cliente seleccionado, esto es un proceso irreversible. ¿Continuar
+                    Se eliminará al cotización seleccionado, esto es un proceso irreversible. ¿Continuar
                     de todas formas?
                 </p>
             </template>
@@ -105,7 +101,7 @@ PrimaryButton,
 CancelButton,
 },
 props:{
-clients: Array
+quotes: Array
 },
 methods:{
     handleCommand(command) {
@@ -113,9 +109,9 @@ methods:{
         const data = command.split('|')[1];
 
         if (commandName == 'see') {
-            this.$inertia.get(route('clients.show', data));
+            this.$inertia.get(route('quotes.show', data));
         } else if (commandName == 'edit') {
-            this.$inertia.get(route('clients.edit', data));
+            this.$inertia.get(route('quotes.edit', data));
         } else if (commandName == 'delete') {
             this.showDeleteConfirm = true;
             this.itemIdToDelete = data;
@@ -123,17 +119,17 @@ methods:{
     },
     async deleteItem() {
         try {
-            const response = await axios.delete(route('clients.destroy', this.itemIdToDelete));
+            const response = await axios.delete(route('quotes.destroy', this.itemIdToDelete));
             if (response.status == 200) {
                 this.$notify({
                     title: 'Correcto',
-                    message: 'Se ha eliminado al cliente',
+                    message: 'Se ha eliminado la cotización',
                     type: 'success',
                 });
                 //se busca el index del cliente eliminado para removerlo del arreglo
-                const indexClientDeleted = this.clients.findIndex(item => item.id == this.itemIdToDelete);
-                if ( indexClientDeleted != -1 ) {
-                    this.clients.splice(indexClientDeleted, 1);
+                const indexQuoteDeleted = this.services.findIndex(item => item.id == this.itemIdToDelete);
+                if ( indexQuoteDeleted != -1 ) {
+                    this.services.splice(indexQuoteDeleted, 1);
                 }
                 this.showDeleteConfirm = false;
             }
@@ -141,7 +137,7 @@ methods:{
             console.log(error);
             this.$notify({
                 title: 'El servidor no pudo procesar la petición',
-                message: 'No se pudo eliminar el cliente. Intente más tarde o si el problema persiste, contacte a soporte',
+                message: 'No se pudo eliminar la cotización. Intente más tarde o si el problema persiste, contacte a soporte',
                 type: 'error',
             });
         }

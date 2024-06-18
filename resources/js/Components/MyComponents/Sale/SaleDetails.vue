@@ -231,12 +231,11 @@ export default {
             return format(parseISO(dateString), 'h:mm a', { locale: es });
         },
         viewProduct(product) {
-            const productId = product.product_id.split('_')[1];
-
+            const encodedId = btoa(product.id.toString());
             if (product.is_global_product) {
-                window.open(route('global-product-store.show', productId), '_blank');
+                window.open(route('global-product-store.show', encodedId), '_blank');
             } else {
-                window.open(route('products.show', productId), '_blank');
+                window.open(route('products.show', encodedId), '_blank');
             }
         },
         print(daySales) {

@@ -24,20 +24,20 @@
                 </div>
             </div>
 
-            <section v-for="(cash_cut, index) in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" class="xl:w-[90%] text-xs lg:text-sm">
-                <p class="mb-2 ml-2">Notas de corte: <strong class="ml-2">{{ cash_cut.notes }}</strong></p>
+            <section v-for="(cash_cut, index) in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" class="xl:w-[90%] text-xs md:text-sm">
+                <p class="mb-2 ml-2">Notas de corte: <strong class="ml-2">{{ cash_cut.notes ?? 'Sin notas' }}</strong></p>
                 <article class="lg:flex lg:space-x-7 mx-auto">
                     <div class="w-full border border-grayD9 rounded-lg self-start">
-                        <div class="flex justify-between border-b border-grayD9 py-2 px-4">
+                        <div class="flex justify-between border-b border-grayD9 py-2 md:px-4 px-2">
                             <p>{{ cash_cut.cash_register.name + ' • ' + cash_cut.user.name }}</p>
                             <p class="text-gray99">{{ formatDateHour(cash_cut.created_at) }}</p>
                         </div>
-                        <div class="p-4 flex items-center space-x-2">
+                        <div class="md:p-4 p-2 flex items-center space-x-2">
                             <div class="w-3/4 space-y-1">
                                 <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                                 <p class="text-gray99">Efectivo inicial</p>
                                 <p class="text-gray99">Ventas en tienda</p>
-                                <p class="text-gray99">Ventas en línea</p>
+                                <!-- <p class="text-gray99">Ventas en línea</p> -->
 
                                 <p  v-if="cashCutMovements[index]?.length"
                                     class="text-primary flex items-center">Movimientos de caja 
@@ -62,8 +62,8 @@
                                     cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                                 <p class="text-gray99  ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.store_sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
-                                <p class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                                    cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+                                <!-- <p class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+                                    cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p> -->
                                 <div v-if="loadingMovements">
                                     <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                                 </div>

@@ -29,7 +29,7 @@ const calculateDaysSinceStoreCreated = (date) => {
 };
 
 const calculateRemainigFreeDays = (date) => {
-    const trialDays = 15;
+    const trialDays = 2;
     return trialDays - calculateDaysSinceStoreCreated(date);
 };
 

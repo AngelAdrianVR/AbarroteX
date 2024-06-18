@@ -21,6 +21,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
 use App\Http\Controllers\StoreController;
@@ -157,7 +158,10 @@ Route::post('products-get-data-for-products-view', [ProductController::class, 'g
 
 //services routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('services', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::resource('services', ServiceController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('services-get-by-page/{currentPage}', [ServiceController::class, 'getItemsByPage'])->name('services.get-by-page')->middleware('auth');
+Route::get('services-search', [ServiceController::class, 'searchService'])->name('services.search')->middleware('auth');
+Route::get('services-fetch-all-products', [ServiceController::class, 'fetchAllServices'])->name('services.fetch-all-services');
 
 
 //global-product-store routes----------------------------------------------------------------------------------
@@ -207,7 +211,7 @@ Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'p
 Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
 
 
-//history routes---------------------------------------------------------------------------------------
+//product history routes---------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::resource('product-histories', ProductHistoryController::class)->middleware('auth');
 
@@ -328,7 +332,7 @@ Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWit
 //-----------------------------------------------------------------------------------------------------------------------
 Route::resource('online-sales', OnlineSaleController::class);
 Route::get('online-sales-client-index/{encoded_store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
-Route::post('online-sales/{offset}{limit}/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
+Route::post('online-sales/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
 Route::get('online-sales-show-local-product/{product_id}', [OnlineSaleController::class, 'ShowLocalProduct'])->name('online-sales.show-local-product');
 Route::get('online-sales-show-global-product/{global_product_id}', [OnlineSaleController::class, 'ShowGlobalProduct'])->name('online-sales.show-global-product');
 Route::get('online-sales-cart', [OnlineSaleController::class, 'cartIndex'])->name('online-sales.cart');
@@ -339,6 +343,9 @@ Route::get('online-sales-filter', [OnlineSaleController::class, 'filterOnlineSal
 Route::put('online-sales-update-status/{online_sale}', [OnlineSaleController::class, 'updateOnlineSaleStatus'])->name('online-sales.update-status')->middleware('auth');
 Route::get('online-sales-fetch-all-products', [OnlineSaleController::class, 'fetchAllProducts'])->name('online-sales.fetch-all-products');
 Route::post('online-sales-get-by-page/{currentPage}', [OnlineSaleController::class, 'getItemsByPage'])->name('online-sales.get-by-page')->middleware('auth');
+Route::get('online-sales-get-sales-by-date/{date}', [OnlineSaleController::class, 'getSalesByDate'])->name('online-sales.get-sales-by-date');
+Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'refund'])->name('online-sales.refund');
+Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
 
 
 // comandos Artisan

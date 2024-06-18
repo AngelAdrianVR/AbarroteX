@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
-            $table->string('client')->nullable();
+            $table->string('contact_name')->nullable();
             $table->unsignedDouble('total');
             $table->json('products')->nullable(); //revisar si es conveniente guardarlos en un json.
             $table->timestamp('expired_date')->nullable();

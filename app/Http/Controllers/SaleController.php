@@ -51,7 +51,7 @@ class SaleController extends Controller
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
         $groupedSales = null;
         $total_sales = 1;
-        
+
         return inertia('Sale/Index', compact('groupedSales', 'total_sales', 'cash_registers'));
     }
 
@@ -84,7 +84,7 @@ class SaleController extends Controller
 
         // si el corte tiene una fecha posterior a la venta entonces esta fuera de corte
         // y no se muestran las opciones de editar y reembolso.
-        if ( $last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at ) { 
+        if ($last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at) {
             $is_out_of_cash_cut = true;
         } else {
             $is_out_of_cash_cut = false;
@@ -307,11 +307,19 @@ class SaleController extends Controller
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
         if ($is_inventory_on) {
-            $saleProducts->each(function ($sale) {
+            $saleProducts->each(function ($sale) use ($saleFolio) {
                 $current_product = $sale->is_global_product
                     ? GlobalProductStore::find($sale->product_id)
                     : Product::find($sale->product_id);
                 $current_product->increment('current_stock', $sale->quantity);
+
+                //Registra el historial de venta de cada producto
+                ProductHistory::create([
+                    'description' => "Registro de entrada de producto por reembolso de venta con folio $saleFolio. " . $sale['quantity'] . ' pieza(s)',
+                    'type' => 'Reembolso',
+                    'historicable_id' => $current_product->id,
+                    'historicable_type' => get_class($current_product),
+                ]);
             });
         }
 
@@ -354,7 +362,7 @@ class SaleController extends Controller
         $total_diff_amount = 0;
 
         // Procesar cada venta y actualizar los productos e inventario
-        $sales->each(function ($sale) use ($products_in_request, $is_inventory_on, &$total_diff_amount) {
+        $sales->each(function ($sale) use ($products_in_request, $is_inventory_on, &$total_diff_amount, $request) {
             $sale_updated = $products_in_request->firstWhere('id', $sale->id);
 
             if ($sale_updated) {
@@ -378,6 +386,17 @@ class SaleController extends Controller
                     if ($old_quantity != $new_quantity || $sale->product_id != $product_id) {
                         if ($sale->product_id != $product_id) {
                             $current_product->increment('current_stock', $old_quantity);
+                            $current_product_name = $sale->is_global_product
+                                ? $current_product->globalProduct->name
+                                : $current_product->name;
+
+                            // registrar regreso de producto a stock de viejo producto
+                            ProductHistory::create([
+                                'description' => "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity . ' pieza(s)',
+                                'type' => 'Edición',
+                                'historicable_id' => $current_product->id,
+                                'historicable_type' => get_class($current_product),
+                            ]);
                             $new_product = $sale->is_global_product
                                 ? GlobalProductStore::find($product_id)
                                 : Product::find($product_id);
@@ -385,12 +404,36 @@ class SaleController extends Controller
                             $new_stock = $new_product->current_stock - $new_quantity;
                             $new_product->current_stock = max($new_stock, 0);
                             $new_product->save();
+                            ProductHistory::create([
+                                'description' => "Registro de venta por reemplazo del producto $current_product_name por este en la venta con folio $request->folio. " . $new_quantity . ' pieza(s)',
+                                'type' => 'Edición',
+                                'historicable_id' => $new_product->id,
+                                'historicable_type' => get_class($new_product),
+                            ]);
                         } else {
                             $current_product->increment('current_stock', $old_quantity);
 
                             $new_stock = $current_product->current_stock - $new_quantity;
                             $current_product->current_stock = max($new_stock, 0);
                             $current_product->save();
+
+                            if ($old_quantity < $new_quantity) {
+                                $abs_quantity = $new_quantity - $old_quantity;
+                                $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
+                                $type = "Edición";
+                            } else {
+                                $abs_quantity = $old_quantity - $new_quantity;
+                                $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
+                                $type = "Edición";
+                            }
+
+                            // movimiento de producto por edicion
+                            ProductHistory::create([
+                                'description' => $description,
+                                'type' => $type,
+                                'historicable_id' => $current_product->id,
+                                'historicable_type' => get_class($current_product),
+                            ]);
                         }
                     }
                 }

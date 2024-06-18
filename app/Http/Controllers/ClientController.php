@@ -115,7 +115,6 @@ class ClientController extends Controller
     {
         $query = $request->input('query');
 
-        // Realiza la búsqueda en la base de datos local
         $clients = Client::where('store_id', auth()->user()->store_id)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%$query%")

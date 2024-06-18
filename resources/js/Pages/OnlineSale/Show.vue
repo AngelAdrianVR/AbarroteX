@@ -68,17 +68,17 @@
                             <tr v-for="product in online_sale.products" :key="product.id"
                                 class="*:text-xs *:py-2 *:px-4">
                                 <td>
-                                    <figure class="w-16">
+                                    <figure class="size-16">
                                         <img v-if="product.image_url" 
                                                 :src="product?.image_url" 
-                                                alt="producto" class="h-full mx-auto">
+                                                alt="producto" class="h-full object-contain mx-auto">
                                         <div class="flex flex-col items-center justify-center" v-else>
                                             <i class="fa-regular fa-image text-3xl text-gray-200"></i>
                                             <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>
                                         </div>
                                     </figure>
                                 </td>
-                                <td @click="product.isLocal ? $inertia.get(route('products.show', product.id)) : $inertia.get(route('global-products.show', product.id))" 
+                                <td @click="handledShowProduct(product)" 
                                     class="text-primary underline cursor-pointer">{{ product.name }}</td>
                                 <td >${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 <td>{{ product.quantity }}</td>
@@ -451,6 +451,15 @@ methods:{
         this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery 
         ? 0 
         : parseFloat(storeProperties?.delivery_price);
+    },
+    handledShowProduct(product) {
+        const encodedId = btoa(product.product_id.toString());
+        console.log(product);
+        if ( product.isLocal ) {
+            this.$inertia.get(route('products.show', encodedId));
+        } else {
+            this.$inertia.get(route('global-product-store.show', encodedId))
+        }
     }
 },
 watch: {

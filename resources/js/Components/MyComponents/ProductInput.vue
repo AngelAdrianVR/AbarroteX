@@ -1,6 +1,17 @@
 <template>
-    <div class="flex space-x-2 flex-row justify-between items-center common-container">
-        <div class="w-72">
+    <div class="flex space-x-2 flex-row justify-between items-center common-container text-sm">
+        <figure class="border border-l-grayD9 rounded-md size-14 flex items-center justify-center p-1">
+            <img class="object-contain h-full" v-if="local_image_url" :src="local_image_url" alt="">
+            <div v-else
+                class="size-12 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+            </div>
+        </figure>
+        <div class="!w-56">
             <div class="flex items-center space-x-2">
                 <InputLabel value="Producto*" class="mb-1" />
                 <p v-if="error_validation" class="text-red-400 text-xs mb-1">Seleccionar un producto</p>
@@ -45,6 +56,7 @@ export default {
             price: 0, //propiedad requeridas para una venta en linea.
             isLocal: false, //propiedad requeridas para una venta en linea.
             quantity: 1, //propiedad requeridas para una venta en linea.
+            local_image_url: null, //guarda el url de la imagen del producto.
             error_validation: false,
             last_product_index_selected: null //guarda el producto seleccionado para habilitarlo de nuevo si se cambia
         };
@@ -103,6 +115,7 @@ export default {
 
                     // Emite el evento con la información del producto seleccionado
                     this.price = this.products[productSelectedIndex].price;
+                    this.local_image_url = this.products[productSelectedIndex].image_url;
                     this.$emit('syncItem', {
                         id: this.id,
                         name: this.products[productSelectedIndex].name,
