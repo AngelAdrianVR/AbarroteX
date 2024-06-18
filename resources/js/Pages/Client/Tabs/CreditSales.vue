@@ -237,7 +237,7 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DialogModal from '@/Components/DialogModal.vue';
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateBatchOfItems, getAll } from '@/dbService.js';
+import { addOrUpdateBatchOfItems, getAll, getItemByAttributes } from '@/dbService.js';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
@@ -460,11 +460,7 @@ export default {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
                     await this.fetchSales(false);
-                    // Obtener productos de servidor
-                    response = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response.data.products;
-                    // actualizar lista de productos en indexedDB
-                    addOrUpdateBatchOfItems('products', products);
+                    this.updateIndexedDBproductsStock(response.data.updated_items);
 
                     this.showRefundConfirm = false;
 
@@ -475,7 +471,7 @@ export default {
                     });
 
                     this.$notify({
-                        title: 'Venta reembolsada / cancelada',
+                        title: 'Venta reembolsada',
                         message: '',
                         type: 'success',
                     });
@@ -483,7 +479,7 @@ export default {
             } catch (error) {
                 console.log(error);
                 this.$notify({
-                    title: 'No se pudo procesar la peticion',
+                    title: 'No se pudo procesar la peticion de reembolso',
                     message: '',
                     type: 'error',
                 });
@@ -505,6 +501,29 @@ export default {
                 this.loading = false;
             }
         },
+        async updateIndexedDBproductsStock(updatedItems) {
+            // actualizar stock de productos de indexedDB
+            const products = await Promise.all(updatedItems.map(async (item) => {
+                // Obtener productos por código
+                let foundProducts = await getItemByAttributes('products', { name: item.name });
+
+                // Verificar si se encontró el producto
+                if (foundProducts.length > 0) {
+                    // Actualizar el stock
+                    foundProducts[0].current_stock = item.current_stock || 0;
+                    return foundProducts[0];
+                }
+
+                // Manejar el caso donde no se encuentre el producto
+                return null;
+            }));
+
+            // Filtrar productos que no fueron encontrados
+            const validProducts = products.filter(product => product !== null);
+
+            // Actualizar los productos en IndexedDB
+            await addOrUpdateBatchOfItems('products', validProducts);
+        }
     },
     async mounted() {
         await this.fetchSales();

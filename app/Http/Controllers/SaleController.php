@@ -80,15 +80,16 @@ class SaleController extends Controller
         $day_sales = $this->getGroupedSalesByDate($sales, true);
 
         //evalúa si la venta está dentro del corte---------------
-        $last_cash_cut = CashCut::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cashRegisterId)->latest()->first();
+        // $last_cash_cut = CashCut::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cashRegisterId)->latest()->first();
 
         // si el corte tiene una fecha posterior a la venta entonces esta fuera de corte
         // y no se muestran las opciones de editar y reembolso.
-        if ($last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at) {
-            $is_out_of_cash_cut = true;
-        } else {
-            $is_out_of_cash_cut = false;
-        }
+        // if ($last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at) {
+        //     $is_out_of_cash_cut = true;
+        // } else {
+        //     $is_out_of_cash_cut = false;
+        // }
+        $is_out_of_cash_cut = false;
 
         return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut'));
     }
@@ -295,7 +296,7 @@ class SaleController extends Controller
         CashRegisterMovement::create([
             'amount' => $total_amount,
             'type' => 'Retiro',
-            'notes' => "Venta con folio $saleFolio fue reembolsada / cancelada",
+            'notes' => "Venta con folio $saleFolio fue reembolsada",
             'cash_register_id' => $cash_register->id,
         ]);
         // Restar dinero de caja
@@ -306,11 +307,17 @@ class SaleController extends Controller
         }
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
+        $updated_items = [];
         if ($is_inventory_on) {
-            $saleProducts->each(function ($sale) use ($saleFolio) {
-                $current_product = $sale->is_global_product
-                    ? GlobalProductStore::find($sale->product_id)
-                    : Product::find($sale->product_id);
+            $saleProducts->each(function ($sale) use ($saleFolio, &$updated_items) {
+                if ($sale->is_global_product) {
+                    $current_product = GlobalProductStore::find($sale->product_id);
+                    $indexedDB_name = $current_product->globalProduct->name;
+                } else {
+                    $current_product = Product::find($sale->product_id);
+                    $indexedDB_name = $current_product->name;
+                }
+
                 $current_product->increment('current_stock', $sale->quantity);
 
                 //Registra el historial de venta de cada producto
@@ -320,6 +327,9 @@ class SaleController extends Controller
                     'historicable_id' => $current_product->id,
                     'historicable_type' => get_class($current_product),
                 ]);
+
+                // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
+                $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
             });
         }
 
@@ -330,6 +340,8 @@ class SaleController extends Controller
         if ($credit_sale_data) {
             $credit_sale_data->update(['status' => 'Reembolsado']);
         }
+
+        return response()->json(compact('updated_items'));
     }
 
     public function updateGroupSale(Request $request)
