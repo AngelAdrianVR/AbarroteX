@@ -477,10 +477,9 @@ class OnlineSaleController extends Controller
             });
         }
 
-        $prev_status = $onlineSale->status;
         // marcar venta como cancelada
         $onlineSale->update(['refunded_at' => now(), 'status' => 'Cancelado']);
-        return response()->json(compact('prev_status', 'updated_items'));
+        return response()->json(compact('updated_items'));
     }
 
     //para index en app

@@ -8,6 +8,7 @@ use App\Models\CashRegisterMovement;
 use App\Models\Client;
 use App\Models\CreditSaleData;
 use App\Models\GlobalProductStore;
+use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
@@ -74,6 +75,11 @@ class SaleController extends Controller
             ->whereDate('created_at', $date)
             ->get();
 
+        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+            ->whereDate('created_at', $date)
+            ->get()
+            ->sum('total');
+
         $this->addCreditDataToSales($sales);
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
@@ -91,7 +97,7 @@ class SaleController extends Controller
         // }
         $is_out_of_cash_cut = false;
 
-        return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut'));
+        return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut', 'online_sales'));
     }
 
     public function edit(Sale $sale)

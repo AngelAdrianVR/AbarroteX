@@ -116,7 +116,9 @@ export default {
             try {
                 let response = await axios.post(route('online-sales.refund', this.saleIdToRefund));
                 if (response.status === 200) {
-                    this.updateIndexedDBproductsStock(response.data.updated_items);
+                    if (this.isInventoryOn) {
+                        this.updateIndexedDBproductsStock(response.data.updated_items);
+                    }
 
                     this.showRefundConfirm = false;
 
@@ -148,9 +150,7 @@ export default {
                 if (response.status === 200) {
                     // Obtener productos de servidor
                     
-                    console.log('status', response.data.prev_status);
-                    if (response.data.prev_status === 'Procesando') {
-                        console.log('update indexedDB');
+                    if (this.isInventoryOn) {
                         this.updateIndexedDBproductsStock(response.data.updated_items);
                     }
 

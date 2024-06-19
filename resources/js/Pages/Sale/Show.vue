@@ -6,18 +6,38 @@
             </div>
 
             <!-- Información de la venta -->
-            <header class="mt-7 lg:mx-16 text-gray99">
-                <p>Total de productos vendidos: <span class="font-thin ml-2 text-gray37">{{
-                    Object.values(day_sales)[0].total_quantity }}</span></p>
-                <p>Fecha de venta: <span class="font-thin ml-2 text-gray37">{{
-                    formatDate(Object.keys(day_sales)[0]) }}</span></p>
-                <p>Total de venta: <span class="font-black ml-2 text-gray37">${{
-                    Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}</span></p>
+            <header class="w-80 inline-block mt-7 lg:mx-16 rounded-[5px] border border-grayD9 text-gray99 px-4 py-2 space-y-2">
+                <div class="flex items-center space-x-3">
+                    <span class="w-2/3">Total de pedidos en línea: </span>
+                    <p class="flex text-gray37 w-1/3 font-bold">
+                        <span class="w-1/3">$</span>
+                        <span class="w-2/3 ml-3 text-gray37 text-end">
+                            {{ online_sales.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        </span>
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="w-2/3">Total de ventas en tienda: </span>
+                    <p class="flex text-gray37 w-1/3 font-bold">
+                        <span class="w-1/3">$</span>
+                        <span class="w-2/3 ml-3 text-gray37 text-end">
+                            {{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        </span>
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3 border-t border-grayD9 pt-1">
+                    <span class="w-2/3 font-bold">Total de ventas del Día: </span>
+                    <p class="flex text-gray37 w-1/3 font-bold">
+                        <span class="w-1/3">$</span>
+                        <span class="w-2/3 ml-3 text-gray37 text-end">
+                            {{ (online_sales + Object.values(day_sales)[0].total_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        </span>
+                    </p>
+                </div>
             </header>
 
             <!-- Productos -->
-            <main class="flex flex-col space-y-5 lg:mx-16 mt-10">
+            <main class="flex flex-col space-y-5 lg:mx-16 mt-8">
                 <el-tabs v-model="activeTab" @tab-click="updateURL">
                     <el-tab-pane label="Ventas en tienda" name="1">
                         <StoreSales @show-modal="handleShowModal" :sales="getGroupedSales" />
@@ -258,6 +278,7 @@ export default {
     },
     props: {
         day_sales: Object,
+        online_sales: Number,
         is_out_of_cash_cut: Boolean //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
     },
     computed: {
@@ -414,7 +435,9 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
-                    this.updateIndexedDBproductsStock(response.data.updated_items);
+                    if (this.isInventoryOn) {
+                        this.updateIndexedDBproductsStock(response.data.updated_items);
+                    }
 
                     this.showRefundConfirm = false;
 
