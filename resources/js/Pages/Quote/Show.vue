@@ -12,18 +12,19 @@
             </div>
             
             <div class="flex flex-col space-y-1 mr-16 text-right">
-                <p>{{ 'COT-' + quote.id }}</p>
+                <p>{{ 'COT-' + (quote.id < 10 ? '0' + quote.id : quote.id) }}</p>
                 <p class="font-bold">Fecha: <span class="font-light">{{ formatDate(quote.created_at) }}</span></p>
             </div>
         </section>
 
         <!-- body ---------------------------- -->
-        <body class="my-4 md:mx-5 lg:w-[80%] mx-auto">
+        <body class="my-4 md:w-[95%] lg:w-[80%] mx-auto">
             <h2 class="font-bold text-center">Cotización</h2>
             <!-- cliente -->
-            <p v-if="quote.client.name">{{ quote.client.name }}</p>
+            <p class="font-bold" v-if="quote.client?.name">Cliente: <span class="font-thin">{{ quote.client?.name }}</span></p>
+            <p class="font-bold">Contacto: <span class="font-thin">{{ quote.contact_name }}</span></p>
             <!-- dirección -->
-            <p v-if="quote.address">{{ quote.address }}</p>
+            <p class="font-bold" v-if="quote.address">Dirección: <span class="font-thin">{{ quote.address }}</span></p>
 
             <!-- tabla de productos y servicios -->
             <table class="w-full my-5">
@@ -55,7 +56,10 @@
                     :class="{'bg-[#EDEDED]': (index % 2 != 0 && quote.products.length % 2 == 0) || (index % 2 == 0 && quote.products.length % 2 != 0)}">
                     <td>{{ 'S-' + service.id }}</td>
                     <td>{{ service.name }}</td>
-                    <td>-</td>
+                    <td class="w-96 relative">
+                        {{ service.description ?? '-' }}
+                        <i class="fa-solid fa-pencil text-[10px] absolute top-1 right-0 text-gray99 border border-gray99 rounded-full p-[4px] px-[4px] cursor-pointer"></i>
+                    </td>
                     <td>${{ service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                     <td>{{ service.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                     <td>${{ (service.quantity * service.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
@@ -92,7 +96,7 @@
 
         <!-- footer -------------------------- -->
         <footer>
-            <section class="flex item space-x-4 absolute bottom-20 left-3">
+            <section class="flex flex-col space-y-2 absolute bottom-16 left-3">
                 <!-- telefono -->
                 <div class="flex items-center space-x-2">
                     <div class="border border-[#F68C0F] rounded-full">

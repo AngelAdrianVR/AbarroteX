@@ -5,13 +5,13 @@
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th>Folio</th>
                     <th>Creado el</th>
-                    <th>Nombre del cliente</th>
+                    <th>Nombre del contacto</th>
                     <th>Monto</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('quotes.show', encodeId(quote.id)))"
+                <tr @click="handleShow(encodeId(quote.id))"
                     v-for="(quote, index) in quotes" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ 'S-' + quote.id }}</td>
@@ -121,6 +121,9 @@ methods:{
     },
     formatDate(dateString) {
         return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+    },
+    handleShow(encodedId) {
+        window.open(route('quotes.show', encodedId, '_blank'));
     },
     async deleteItem() {
         try {

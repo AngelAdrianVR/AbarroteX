@@ -76,6 +76,20 @@ class QuoteController extends Controller
     
     public function destroy(Quote $quote)
     {
-        //
+        $quote->delete();
+    }
+
+    public function searchQuote(Request $request)
+    {
+        $query = $request->input('query');
+
+        $quotes = Quote::where('store_id', auth()->user()->store_id)
+            ->where(function ($q) use ($query) {
+                $q->where('contact_name', 'like', "%$query%")
+                    ->orWhere('id', 'like', "%$query%");
+            })
+            ->get();
+
+        return response()->json(['items' => $quotes]);
     }
 }
