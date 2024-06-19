@@ -68,14 +68,15 @@ class SaleController extends Controller
 
     public function show($date, $cashRegisterId)
     {
+        $storeId = auth()->user()->store_id;
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
-            ->where('store_id', auth()->user()->store_id)
+            ->where('store_id', $storeId)
             ->where('cash_register_id', $cashRegisterId) //recuperar solo las  ventas de la caja involucrada.
             ->whereDate('created_at', $date)
             ->get();
 
-        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+        $online_sales = OnlineSale::where('store_id', $storeId)
             ->whereDate('created_at', $date)
             ->get()
             ->sum('total');
@@ -84,6 +85,22 @@ class SaleController extends Controller
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $this->getGroupedSalesByDate($sales, true);
+
+        // Obtener la fecha de la venta anterior
+        $date = Carbon::parse($date);
+        $previous_sale_date = Sale::where('store_id', $storeId)
+            ->where('cash_register_id', $cashRegisterId)
+            ->whereDate('created_at', '<', $date->copy()->subDay()) // Excluir la fecha actual
+            ->orderBy('created_at', 'desc')
+            ->first()
+            ->created_at ?? null;
+        // Obtener la fecha de la venta siguiente
+        $next_sale_date = Sale::where('store_id', $storeId)
+            ->where('cash_register_id', $cashRegisterId)
+            ->whereDate('created_at', '>', $date) // Excluir la fecha actual
+            ->orderBy('created_at', 'asc')
+            ->first()
+            ->created_at ?? null;
 
         //evalúa si la venta está dentro del corte---------------
         // $last_cash_cut = CashCut::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cashRegisterId)->latest()->first();
@@ -97,7 +114,7 @@ class SaleController extends Controller
         // }
         $is_out_of_cash_cut = false;
 
-        return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut', 'online_sales'));
+        return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut', 'online_sales', 'previous_sale_date', 'next_sale_date'));
     }
 
     public function edit(Sale $sale)
