@@ -24,7 +24,7 @@
                                 <div v-if="searchFocus && searchQuery"
                                 class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
                                 <ul v-if="productsFound?.length > 0 && !loading">
-                                    <li @click="product.global_product_id ? $inertia.get(route('online-sales.show-global-product', product.global_product_id))
+                                    <li @click="product.global_product_id ? $inertia.get(route('online-sales.show-global-product', product.id))
                                         :$inertia.get(route('online-sales.show-local-product', product.id))" v-for="(product, index) in productsFound" :key="index"
                                     class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{ product.global_product_id ?
                                         product.global_product?.name : product.name }}</li>

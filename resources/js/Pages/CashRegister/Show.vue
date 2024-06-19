@@ -60,7 +60,7 @@
                                     cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
                                 <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                                <p class="text-gray99  ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
+                                <p class="text-gray99 pb-5 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.store_sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
                                 <!-- <p class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                                     cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p> -->
@@ -71,7 +71,7 @@
                                 <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in cashCutMovements[index]"
 
                                     :key="cashRegisterMovement" class="text-gray99">
-                                    <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus'"
+                                    <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"
                                         class="fa-solid text-xs px-1"></i>
                                     <span class="text-gray99 mr-3">$</span>{{
                                         cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
