@@ -212,6 +212,9 @@ methods:{
 
         this.form.post(route("online-sales.store"), {
             onSuccess: () => {
+                // Mandar informacion de actualizacion de stock para IDB del admin de la tienda
+                // Aqui
+
                 this.$notify({
                     title: "Correcto",
                     message: "Se ha creado tu pedido correctamente. Nos comunicaremos contigo",

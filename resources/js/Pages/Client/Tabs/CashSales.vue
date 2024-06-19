@@ -290,7 +290,9 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
-                    this.updateIndexedDBproductsStock(response.data.updated_items);
+                    if (this.isInventoryOn) {
+                        this.updateIndexedDBproductsStock(response.data.updated_items);
+                    }
 
                     this.showRefundConfirm = false;
 
