@@ -15,9 +15,9 @@
                     v-for="(quote, index) in quotes" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ 'S-' + quote.id }}</td>
-                    <td>{{ quote.name }}</td>
-                    <td>{{ quote.category ?? '-' }}</td>
-                    <td>${{ quote.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    <td>{{ formatDate(quote.created_at) }}</td>
+                    <td>{{ quote.contact_name }}</td>
+                    <td>${{ quote.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
@@ -84,8 +84,10 @@
 
 <script>
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 import axios from 'axios';
 
 export default {
@@ -116,6 +118,9 @@ methods:{
             this.showDeleteConfirm = true;
             this.itemIdToDelete = data;
         }
+    },
+    formatDate(dateString) {
+        return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
     },
     async deleteItem() {
         try {
