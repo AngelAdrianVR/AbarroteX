@@ -80,7 +80,7 @@ class ExpenseController extends Controller
                 CashRegisterMovement::create([
                     'amount' => $expenseData['current_price'],
                     'type' => 'Retiro',
-                    'notes' => 'Registro de gasto',
+                    'notes' => 'Registro de gasto: '. $expenseData['concept'] ?? 'Sin concepto',
                     'cash_register_id' => $cash_register->id,
                 ]);
                 //actualizar el dinero actual de la caja
