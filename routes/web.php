@@ -228,7 +228,7 @@ Route::resource('stores', StoreController::class)->middleware(['auth']);
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
 Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
-Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->middleware('auth')->name('stores.fetch-store-info');
+Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
 
 
 // User routes-----------------------------------------------------------------------------------------

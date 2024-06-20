@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
@@ -36,6 +36,13 @@ const calculateRemainigFreeDays = (date) => {
 const logout = () => {
     router.post(route('logout'));
 };
+
+onMounted(() => {
+  setInterval(() => {
+    console.log('hola');
+  }, 5000); // 5000 ms = 5 seg
+});
+
 </script>
 
 <template>
