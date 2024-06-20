@@ -311,7 +311,7 @@ defineProps({
             <figure class="mt-4 relative">
                 <img class="mx-auto w-screen" src="@/../../public/images/landing-02.png" alt="">
                 <Link class="hidden md:block" :href="route('register')">
-                <PrimaryButton class="absolute bottom-[14%] right-[37%]">Comienza gratis</PrimaryButton>
+                <PrimaryButton class="absolute bottom-[14%] right-[37%]">¡Comienza ahora!</PrimaryButton>
                 </Link>
             </figure>
         </section>
