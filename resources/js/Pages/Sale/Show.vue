@@ -4,9 +4,38 @@
             <div class="flex justify-between items-center">
                 <Back :to="route('sales.index')" />
             </div>
-
+            <section class="flex justify-around mx-auto mt-2 w-1/6">
+                <button @click="SeePrevDaySales()" type="button"
+                    class="text-primary text-[10px] disabled:text-grayD9 disabled:cursor-not-allowed"
+                    :disabled="changingDay || !previous_sale_date">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="text-gray99 flex items-center space-x-2">
+                    <p class="flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                        </svg>
+                        <span>|</span>
+                        <span>Fecha:</span>
+                    </p>
+                    <p v-if="changingDay" class="text-gray37">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    </p>
+                    <p v-else class="text-gray37">
+                        {{ formatDate(getGroupedSales[0].products[0].created_at) }}
+                    </p>
+                </div>
+                <button @click="SeeNextDaySales()" type="button"
+                    class="text-primary text-[10px] disabled:text-grayD9 disabled:cursor-not-allowed"
+                    :disabled="changingDay || !next_sale_date">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </section>
             <!-- Información de la venta -->
-            <header class="w-80 inline-block mt-7 lg:mx-16 rounded-[5px] border border-grayD9 text-gray99 px-4 py-2 space-y-2">
+            <header
+                class="w-80 inline-block mt-7 lg:mx-16 rounded-[5px] border border-grayD9 text-gray99 px-4 py-2 space-y-2">
                 <div class="flex items-center space-x-3">
                     <span class="w-2/3">Total de pedidos en línea: </span>
                     <p class="flex text-gray37 w-1/3 font-bold">
@@ -21,7 +50,8 @@
                     <p class="flex text-gray37 w-1/3 font-bold">
                         <span class="w-1/3">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }}
                         </span>
                     </p>
                 </div>
@@ -30,7 +60,8 @@
                     <p class="flex text-gray37 w-1/3 font-bold">
                         <span class="w-1/3">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ (online_sales + Object.values(day_sales)[0].total_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ (online_sales +
+                                Object.values(day_sales)[0].total_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
                 </div>
@@ -257,6 +288,7 @@ export default {
             addingInstallment: false,
             refunding: false,
             editing: false,
+            changingDay: false,
             // inventario de codigos activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // tabs
@@ -279,7 +311,9 @@ export default {
     props: {
         day_sales: Object,
         online_sales: Number,
-        is_out_of_cash_cut: Boolean //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
+        is_out_of_cash_cut: Boolean, //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
+        previous_sale_date: String,
+        next_sale_date: String,
     },
     computed: {
         getGroupedSales() {
@@ -301,6 +335,24 @@ export default {
         },
     },
     methods: {
+        SeePrevDaySales() {
+            this.changingDay = true;
+            const params = {
+                date: this.previous_sale_date.split('T')[0],
+                cashRegisterId: this.$page.props.auth.user.cash_register_id
+            };
+
+            this.$inertia.visit(route('sales.show', params));
+        },
+        SeeNextDaySales() {
+            this.changingDay = true;
+            const params = {
+                date: this.next_sale_date.split('T')[0],
+                cashRegisterId: this.$page.props.auth.user.cash_register_id
+            };
+
+            this.$inertia.visit(route('sales.show', params));
+        },
         updateURL(tab) {
             const params = new URLSearchParams(window.location.search);
             params.set('tab', tab.props.name);

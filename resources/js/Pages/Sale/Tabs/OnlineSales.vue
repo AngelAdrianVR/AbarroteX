@@ -1,50 +1,53 @@
 <template>
     <Loading v-if="loading" />
-    <div v-else class="text-sm mt-5 space-y-4">
-        <OnlineSaleDetails v-for="(item, index) in sales" :key="index" :onlineSale="item" @show-modal="showModal"
-            :ref="'osd' + item.id" />
-
-        <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
-            <template #title>
-                <h1>Reembolsar venta</h1>
-            </template>
-            <template #content>
-                <p v-if="isInventoryOn">
-                    Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
-                    correspondiente de la caja.
-                    Si en caja no hay suficiente dinero, quedará en $0.00
-                    ¿Deseas continuar?
-                </p>
-                <p v-else>
-                    Se retirará el monto correspondiente a esta venta de la caja. Si en caja no hay suficiente dinero,
-                    quedará en $0.00 ¿Deseas continuar?
-                </p>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-1">
-                    <CancelButton @click="showRefundConfirm = false" :disabled="refunding">Cancelar</CancelButton>
-                    <PrimaryButton @click="refundSale" :disabled="refunding">Continuar</PrimaryButton>
-                </div>
-            </template>
-        </ConfirmationModal>
-
-        <ConfirmationModal :show="showCancelConfirm" @close="showCancelConfirm = false">
-            <template #title>
-                <h1>Cancelar venta</h1>
-            </template>
-            <template #content>
-                <p>
-                    Se cancelará la venta y esto es irreversible. ¿Deseas continuar?
-                </p>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-1">
-                    <CancelButton @click="showCancelConfirm = false" :disabled="canceling">Cancelar</CancelButton>
-                    <PrimaryButton @click="cancelSale" :disabled="canceling">Continuar</PrimaryButton>
-                </div>
-            </template>
-        </ConfirmationModal>
-    </div>
+    <section v-else class="text-sm mt-5 space-y-4">
+        <div v-if="sales.length">
+            <OnlineSaleDetails v-for="(item, index) in sales" :key="index" :onlineSale="item" @show-modal="showModal"
+                :ref="'osd' + item.id" />
+    
+            <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
+                <template #title>
+                    <h1>Reembolsar venta</h1>
+                </template>
+                <template #content>
+                    <p v-if="isInventoryOn">
+                        Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
+                        correspondiente de la caja.
+                        Si en caja no hay suficiente dinero, quedará en $0.00
+                        ¿Deseas continuar?
+                    </p>
+                    <p v-else>
+                        Se retirará el monto correspondiente a esta venta de la caja. Si en caja no hay suficiente dinero,
+                        quedará en $0.00 ¿Deseas continuar?
+                    </p>
+                </template>
+                <template #footer>
+                    <div class="flex items-center space-x-1">
+                        <CancelButton @click="showRefundConfirm = false" :disabled="refunding">Cancelar</CancelButton>
+                        <PrimaryButton @click="refundSale" :disabled="refunding">Continuar</PrimaryButton>
+                    </div>
+                </template>
+            </ConfirmationModal>
+    
+            <ConfirmationModal :show="showCancelConfirm" @close="showCancelConfirm = false">
+                <template #title>
+                    <h1>Cancelar venta</h1>
+                </template>
+                <template #content>
+                    <p>
+                        Se cancelará la venta y esto es irreversible. ¿Deseas continuar?
+                    </p>
+                </template>
+                <template #footer>
+                    <div class="flex items-center space-x-1">
+                        <CancelButton @click="showCancelConfirm = false" :disabled="canceling">Cancelar</CancelButton>
+                        <PrimaryButton @click="cancelSale" :disabled="canceling">Continuar</PrimaryButton>
+                    </div>
+                </template>
+            </ConfirmationModal>
+        </div>
+        <el-empty v-else description="No hay ventas para mostrar" />
+    </section>
 </template>
 
 <script>
