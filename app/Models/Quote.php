@@ -12,8 +12,14 @@ class Quote extends Model
 
     protected $fillable = [
         'contact_name',
+        'phone',
+        'email',
+        'address',
+        'show_iva',
+        'has_discount',
         'total',
         'products',
+        'services',
         'expired_date',
         'notes',
         'is_percentage_discount',
@@ -23,7 +29,9 @@ class Quote extends Model
     ];
 
     protected $casts = [
-        'expired_date' => 'date'
+        'expired_date' => 'date',
+        'products' => 'array',
+        'services' => 'array'
     ];
 
     //relationships

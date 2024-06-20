@@ -77,7 +77,7 @@ class ProductController extends Controller
             ->where('store_id', auth()->user()->store_id)
             ->findOrFail($decoded_product_id));
 
-            return inertia('Product/Show', compact('product', 'cash_register'));
+        return inertia('Product/Show', compact('product', 'cash_register'));
     }
 
 

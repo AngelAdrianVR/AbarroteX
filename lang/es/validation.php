@@ -185,6 +185,6 @@ return [
         'postal_code' => 'código postal',
         'town' => 'municipio',
         'polity_state' => 'estado',
-        'polity_state' => 'estado',
+        'contact_name' => 'nombre de contacto',
     ],
 ];
