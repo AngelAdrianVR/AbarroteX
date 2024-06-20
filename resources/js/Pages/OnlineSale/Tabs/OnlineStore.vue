@@ -253,7 +253,9 @@
       <h2 class="font-bold mb-4">Inventario <i class="fa-solid fa-boxes-stacked ml-3"></i></h2>
       
       <div class="flex items-center justify-between space-x-2">
-        <p class="mx-7 text-sm">Actualiza el inventario automáticamente al hacer una venta y toma en cuenta el inventario</p>
+        <p class="mx-7 text-sm">Actualiza el inventario automáticamente al hacer una venta y lo toma en cuenta para no permitir ventas
+          de prosuctos agotados.
+        </p>
         <el-switch v-model="onlineStoreForm.online_store_properties.inventory" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
       </div>
     </article>
