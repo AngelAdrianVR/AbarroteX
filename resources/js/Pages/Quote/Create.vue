@@ -94,8 +94,10 @@
                 <!-- totales  -->
                 <div class="text-sm flex flex-col mr-7 items-end col-span-full">
                     <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p class="font-bold ">descuento: <span class="mx-2">$</span>{{ form.discount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-                    <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total - form.discount)?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p v-if="form.is_percentage_discount" class="font-bold ">descuento: <span class="mx-2">$</span>{{ (percentageDiscount())?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+                    <p v-else class="font-bold ">descuento: <span class="mx-2">$</span>{{ form.discount?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+                    <p v-if="form.is_percentage_discount" class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total - percentageDiscount())?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p v-else class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total - form.discount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 </div>
 
                 <div class="mt-3 col-span-full">
@@ -124,39 +126,67 @@
                 <!-- Descuento -->
                 <div class="mt-3" v-if="form.has_discount">
                     <div v-if="form.is_percentage_discount">
-                        <InputLabel value="Porcentaje de descuento*" class="ml-3 mb-1 text-sm" />
-                        <el-input v-model="form.discount" max="100" type="number" placeholder="ingresa el porcentaje del 1 al 100">
-                            <template #prefix>
-                                <i class="fa-solid fa-percent"></i>
-                            </template>
-                        </el-input>
+                        <InputLabel value="% Porcentaje de descuento*" class="ml-3 mb-1 text-sm" />
+                        <el-input-number v-model="form.discount" :min="0" :max="100" />
                         <InputError :message="form.errors.discount" />
                     </div>
                     <div v-else>
                         <InputLabel value="Cantidad de descuento*" class="ml-3 mb-1 text-sm" />
-                        <el-input v-model="form.discount" type="number" placeholder="ingresa el descuento">
-                            <template #prefix>
-                                <i class="fa-solid fa-dollar-sign"></i>
-                            </template>
-                        </el-input>
+                        <el-input-number v-model="form.discount" :precision="2" :step="0.1" :min="0" :max="form.total" />
                         <InputError :message="form.errors.discount" />
                     </div>
                 </div>
 
                 <div class="col-span-2 text-right mt-5">
-                    <PrimaryButton :disabled="form.processing">
+                    <PrimaryButton :disabled="form.processing || (!form.products.length && !form.services.length)">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Crear cotización
                     </PrimaryButton>
                 </div>
             </form>
         </div>
+
+        <!-- client form ---------------------------->
+        <DialogModal :show="showClientFormModal" @close="showClientFormModal = false; resetClientForm()">
+            <template #title> Agregar cliente </template>
+            <template #content>
+                <form @submit.prevent="storeClient" class="md:grid grid-cols-2 gap-x-3">
+                <div class="mt-3">
+                    <InputLabel value="Nombre*" class="ml-3 mb-1" />
+                    <el-input v-model="clientForm.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
+                    <InputError :message="clientForm.errors.name" />
+                </div>
+                <div class="mt-3">
+                    <InputLabel class="mb-1 ml-2" value="Teléfono *" />
+                    <el-input v-model="clientForm.phone"
+                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                    :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+                    placeholder="Escribe el número de teléfono" />
+                    <InputError :message="clientForm.errors.phone" />
+                </div>
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="RFC (opcional)" class="ml-3 mb-1" />
+                    <el-input v-model="clientForm.rfc" placeholder="Escribe el RFC en caso de tenerlo" :maxlength="100" clearable />
+                    <InputError :message="clientForm.errors.rfc" />
+                </div>
+                </form>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-2">
+                <CancelButton @click="showClientFormModal = false; resetClientForm()" :disabled="clientForm.processing">Cancelar</CancelButton>
+                <PrimaryButton @click="storeClient()" :disabled="clientForm.processing">Crear</PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
+        <!-- client form ---------------------------->
     </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import DialogModal from "@/Components/DialogModal.vue";
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ProductInput from "@/Components/MyComponents/ProductInput.vue";
 import ServiceInput from "@/Components/MyComponents/ServiceInput.vue";
 import InputLabel from "@/Components/InputLabel.vue";
@@ -166,15 +196,19 @@ import { useForm } from "@inertiajs/vue3";
 
 export default {
 data() {
+
+    const clientForm = useForm({
+      name: null,
+      rfc: null,
+      phone: null,
+    });
+
     const form = useForm({
         client_id: null,
         contact_name: null,
         phone: null,
         email: null,
         address: null,
-        category: null,
-        description: null,
-        price: null,
         notes: null,
         show_iva: false,
         has_discount: false, //aplicar descuento
@@ -183,30 +217,12 @@ data() {
         total: 0, //cantidad total tomando en cuenta servcios, productos y descuento
         products: [],
         services: [],
-        // products: [
-        //     {
-        //         id: 1,
-        //         name: null,
-        //         product_id: null,
-        //         price: 1,
-        //         isLocal: null,
-        //         quantity: 1,
-        //         image_url: null,
-        //     }
-        // ],
-        // services: [
-        //     {
-        //         id: 1,
-        //         service_id: null,
-        //         name: null,
-        //         price: 1,
-        //         quantity: 1,
-        //     }
-        // ],
     });
 
     return {
         form,
+        clientForm,
+        showClientFormModal: false, //modal para registrar un cliente
         products: null, //se obtienne todos los productos de la tienda
         services: null, //se obtienne todos los servicios de la tienda
         next_item_id: 1, //para el index de productos creados como venta en linea
@@ -218,8 +234,10 @@ data() {
 components:{
     AppLayout,
     PrimaryButton,
+    CancelButton,
     ProductInput,
     ServiceInput,
+    DialogModal,
     InputLabel,
     InputError,
     Back
@@ -238,6 +256,18 @@ methods:{
                 });
             },
         });
+    },
+    storeClient() {
+      this.clientForm.post(route('clients.store'), {
+        onSuccess: () => {
+          this.$notify({
+            title: "Éxito",
+            message: "Se ha creado un nuevo cliente",
+            type: "success",
+          });
+          this.showClientFormModal = false;
+        },
+      });
     },
     addNewItem() {
       this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, isLocal: null, quantity: null });
@@ -258,7 +288,10 @@ methods:{
         this.form.services[index] = product_obj;
     },
     resetDiscount() {
-        this.form.discount = null;
+        this.form.discount = 0;
+    },
+    resetClientForm() {
+      this.clientForm.reset();
     },
     totalMoneyOrder() {
         //calcula el total de dinero para los productos 
@@ -271,6 +304,9 @@ methods:{
             return sum + (item.price * item.quantity);
         }, 0);
         this.form.total = this.totalProductsMoney + this.totalServicesMoney;
+    },
+     percentageDiscount() {
+        return this.form.discount * 0.01 * this.form.total;
     },
     async fetchAllProducts() {
         try {
