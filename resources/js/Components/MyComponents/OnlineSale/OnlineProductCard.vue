@@ -24,16 +24,19 @@
             <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
             <p class="text-3xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price :
                 product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                
             <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
             <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product.current_stock < 1"
                 v-model="quantity" class="mb-5" size="small" :min="0" :max="product.current_stock" :precision="2" />
 
             <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
             <el-input-number v-else v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
+
             <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
+
             <PrimaryButton v-else :disabled="store?.online_store_properties?.inventory && product.current_stock < 1"
                 @click="addToCart" class="!px-9 !py-1 !active:scale-75">
-                {{ product.current_stock < 1 ? 'Agotado' : 'Agregar al carrito' }} </PrimaryButton>
+                {{ store?.online_store_properties?.inventory && product.current_stock < 1 ? 'Agotado' : 'Agregar al carrito' }} </PrimaryButton>
         </div>
     </div>
 </template>
@@ -124,9 +127,17 @@ export default {
     },
     mounted() {
         let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
-        const productInCart = cart.find(item => item.id === this.product.id && item.isLocal == true);
-        if (productInCart) {
-            this.alreadyInCart = true;
+        if ( this.product.global_product_id ) {
+            const globalProductInCart = cart.find(item => item.name == this.product.global_product.name );
+            if (globalProductInCart) {
+                this.alreadyInCart = true;
+            }
+        } else {
+
+            const productInCart = cart.find(item => item.name == this.product.name );
+            if (productInCart) {
+                this.alreadyInCart = true;
+            }
         }
     }
 }

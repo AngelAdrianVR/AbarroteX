@@ -5,14 +5,14 @@
 
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
                 <!-- Imagen del producto -->
-                <figire class="border border-grayD9 rounded-md flex items-center justify-center h-96">
+                <figure class="border border-grayD9 rounded-md flex items-center justify-center h-96">
                     <img v-if="product.media.length" :src="product.media[0]?.original_url" alt="producto"
                         class="h-full mx-auto object-contain">
                     <div v-else>
                         <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                         <p class="text-sm text-gray-300">Imagen no disponible</p>
                     </div>
-                </figire>
+                </figure>
 
                 <!-- Detalles del producto -->
                 <div>
@@ -50,9 +50,13 @@
                     <!-- Se muestran las unidades disponibles si esta activada la configuración de inventario para tienda online -->
                     <p v-if="store?.online_store_properties?.inventory" class="mt-2 text-sm">Unidades disponibles:
                         <span> {{
-                            product.current_stock }} </span></p>
+                            product.current_stock }} </span>
+                    </p>
+
+                    <p v-if="alreadyInCart" class="text-green-500 text-lg mt-5 text-center"><i class="fa-regular fa-circle-check"></i> Agregado a carrito</p>
+
                     <!-- Boton -->
-                    <div class="text-center mt-7">
+                    <div v-else class="text-center mt-7">
                         <PrimaryButton @click="addToCart" :disabled="quantity < 1" class="!px-10">Agregar al carrito
                         </PrimaryButton>
                     </div>
@@ -83,6 +87,7 @@ export default {
             storeId: null, //recupera el id de la tienda almacenada en el local storage
             store: null, //recupera toda la informacióon de la tienda.
             encodedIdStore: null, //id de la tienda codificado
+            alreadyInCart: false, //bandera para saber si ya esta en carrito para evitar error con cantidades
         }
     },
     components: {
@@ -114,6 +119,7 @@ export default {
                     quantity: this.quantity,
                     image_url: this.product.media[0]?.original_url
                 });
+                this.alreadyInCart = true; //bandera de que ya está agregado en carrito
             }
 
             // Guardar el carrito actualizado en localStorage
@@ -163,6 +169,14 @@ export default {
 
         // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
         this.fetchStoreInfo();
+    },
+    mounted() {
+        //revisa si el producto ya ha sido agregado al carrito
+        let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
+        const productInCart = cart.find(item => item.name == this.product.name );
+        if (productInCart) {
+            this.alreadyInCart = true;
+        }
     },
     computed: {
         integerPart() {
