@@ -360,7 +360,7 @@
 
         <div class="flex justify-between space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
 
-          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan != 'Plan básico'" class="text-gray99">
+          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan != 'Plan Básico'" class="text-gray99">
             Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))"
               class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
               
