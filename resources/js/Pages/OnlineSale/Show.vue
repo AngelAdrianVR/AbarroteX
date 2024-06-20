@@ -327,7 +327,7 @@ methods:{
         }
     },
     addNewItem() {
-      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, is_local:null, quantity: null });
+      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, is_local:null, quantity: 1 });
     },
     deleteItem(index) {
       if (this.form.products.length > 1) {

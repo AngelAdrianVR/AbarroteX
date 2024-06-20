@@ -83,7 +83,7 @@ export default {
     },
     computed: {
         syncItem() {
-            if (this.selection != null && this.quantity) {
+            if (this.selection != null) {
                 // Encuentra el índice del servicio seleccionado en la lista de servicios
                 const serviceSelectedIndex = this.services.findIndex(item => item.id === this.selection);
 

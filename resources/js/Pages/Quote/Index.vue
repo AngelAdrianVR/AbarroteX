@@ -43,7 +43,7 @@
         </p>
         <button
           v-else-if="
-            total_quotes > 30 &&
+            total_quotes > 20 &&
             localQuotes.length < total_quotes &&
             localQuotes.length
           "
