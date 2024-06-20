@@ -265,7 +265,7 @@ async function initializeProducts() {
   const indexedDBProducts = await getAll('products');
   // revisar si hay mas productos en la base de datos del servidor que en indexedDB
   if (indexedDBProducts.length != serverProducts.length) {
-    console.log('Sincronizando indexedDB');
+    console.log('Sincronizando indexedDB por diferencia en cantidad de productos');
     clearObjectStore('products');
     // actualizar BDD local
     addOrUpdateBatchOfItems('products', serverProducts);
