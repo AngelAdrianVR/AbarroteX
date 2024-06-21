@@ -65,7 +65,7 @@
                 <div class="overflow-y-auto h-[calc(100vh-5rem)] flex flex-col justify-between bg-white">
                     <slot />
                     <footer v-if="!loadigLogo && !loadigStore"
-                        class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-24 md:px-7">
+                        class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-20 md:px-7">
                         <!-- Logo de la tienda -->
                         <figure class="flex items-center space-x-2">
                             <img v-if="logo?.media?.length" class="h-10 md:h-12" :src="logo?.media[0]?.original_url"
@@ -78,12 +78,12 @@
                             <h2 class="text-white font-bold">Contáctanos</h2>
                             <div class="flex items-center space-x-3 mt-2">
                                 <i class="fa-brands fa-whatsapp text-[24px] text-gray99"></i>
-                                <p class="text-gray99 tracking-widest">{{ store?.online_store_properties?.whatsapp }}
+                                <p class="text-gray99">{{ store?.online_store_properties?.whatsapp?.replace(/(\d{2})(?=\d)/g, '$1 ') }}
                                 </p>
                             </div>
                         </div>
                         <!-- ubicación de tienda -->
-                        <div class="hidden md:flex flex-col items-center">
+                        <div v-if="store?.address" class="hidden md:flex flex-col items-center">
                             <h2 class="text-white font-bold text-sm md:text-base">Encuéntranos en</h2>
                             <div class="flex items-center space-x-3 mt-2">
                                 <i class="fa-solid fa-location-dot text-xs md:text-[24px] text-gray99"></i>
@@ -200,7 +200,7 @@ export default {
             return this.cart.length;
         },
         whatsappLink() {
-            const text = encodeURIComponent('Hola! vi tu página, me interesa su servicio!');
+            const text = encodeURIComponent('Hola! quiero hacer un pedido de tu tienda en línea!');
             return `https://api.whatsapp.com/send?phone=${this.store?.online_store_properties?.whatsapp}&text=${text}`;
         }
     },

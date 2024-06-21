@@ -1,14 +1,14 @@
 <template>
     <Head :title="'COT-' + quote.id" />
-    <main class="w-screen">
+    <main class="w-screen h-screen">
 
         <!-- Header --------------------------- -->
         <section class="flex justify-between items-center">
             <div class="relative">
-                <svg width="577" height="125" class="text-white" viewBox="0 0 577 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="500" height="109" class="text-white" viewBox="0 0 577 125" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M392.167 125L577 0L0 0V125L392.167 125Z" fill="#373B46"/>
                 </svg>
-                <p class="text-white font-bold text-3xl absolute top-9 left-14 font-sans">{{ $page.props.auth.user.store.name }}</p>
+                <p class="text-white font-bold text-2xl absolute top-9 left-14 font-sans">{{ $page.props.auth.user.store.name }}</p>
             </div>
             
             <div class="flex flex-col space-y-1 mr-16 text-right">
@@ -52,13 +52,17 @@
                 </tr>
                 <!-- servicios -->
                 <tr v-for="(service, index) in quote.services" :key="index"
-                    class="*:text-xs *:py-2 *:px-4"
+                    class="*:text-xs *:py-2 *:px-4 border-b border-[#EDEDED]"
                     :class="{'bg-[#EDEDED]': (index % 2 != 0 && quote.products.length % 2 == 0) || (index % 2 == 0 && quote.products.length % 2 != 0)}">
                     <td>{{ 'S-' + service.id }}</td>
                     <td>{{ service.name }}</td>
-                    <td class="w-96 relative">
-                        {{ service.description ?? '-' }}
-                        <i class="fa-solid fa-pencil text-[10px] absolute top-1 right-0 text-gray99 border border-gray99 rounded-full p-[4px] px-[4px] cursor-pointer"></i>
+                    <td class="w-[500px] relative">
+                        <i v-if="indexEdit != index" @click="indexEdit = index" class="fa-solid fa-pencil text-[10px] absolute top-1 right-0 text-gray99 border border-gray99 rounded-full p-[4px] px-[4px] cursor-pointer"></i>
+                        <i v-else-if="indexEdit == index" @click="handleEditDescription()" class="fa-solid fa-check text-[10px] absolute top-1 right-0 text-white bg-primary rounded-full p-[4px] px-[5px] cursor-pointer"></i>
+                        <p class="mr-2" v-if="indexEdit != index">{{ service.description ?? '-' }}</p>
+                        <el-input v-else v-model="service.description" :autosize="{ minRows: 2, maxRows: 5 }" class="!w-[95%]" type="textarea"
+                        placeholder="Escribe una descripción" :maxlength="500" show-word-limit
+                        clearable />
                     </td>
                     <td>${{ service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                     <td>{{ service.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
@@ -69,7 +73,7 @@
 
         <!-- desgloce de total -->
         <div class="text-right text-sm">
-            <p>
+            <p v-if="quote.has_discount || quote.show_iva">
                 Subtotal: <span class="ml-4">$</span> 
                 <span class="inline-block w-20" v-if="quote.show_iva">{{ (quote.total - (quote.total * 0.16))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                 <span class="inline-block w-20" v-else>{{ quote.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
@@ -77,7 +81,7 @@
             <p v-if="quote.show_iva">IVA: <span class="ml-4">$</span><span class="inline-block w-20">{{ (quote.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
             <p v-if="quote.has_discount">
                 Descuento: <span class="ml-4">$</span>
-                <span class="inline-block w-20" v-if="is_percentage_discount">{{ (quote.discount * quote.total * 0.01)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                <span class="inline-block w-20" v-if="quote.is_percentage_discount">{{ (quote.discount * quote.total * 0.01)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                 <span class="inline-block w-20" v-else>{{ quote.discount?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
             <p class="font-bold">
@@ -144,15 +148,15 @@
                 </div>
             </section>
 
-            <svg class="hidden xl:block absolute bottom-10 left-0" width="917" height="127" viewBox="0 0 917 127" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="hidden xl:block absolute bottom-7 left-0" width="917" height="127" viewBox="0 0 917 127" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M792 126.5H0V113H702.5L818 0H916.5L792 126.5Z" fill="#373B46"/>
             </svg>
 
-            <svg class="hidden xl:block absolute bottom-16 right-0" width="602" height="128" viewBox="0 0 602 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="hidden xl:block absolute bottom-12 right-0" width="602" height="128" viewBox="0 0 602 128" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M101 128H0.5L128 0H603V11H217.5L101 128Z" fill="#F68C0F"/>
             </svg>
 
-            <svg class="hidden xl:block absolute bottom-0 right-0" width="538" height="173" viewBox="0 0 538 173" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="hidden xl:block absolute bottom-0 right-0" width="500" height="160" viewBox="0 0 538 173" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M172.5 0.5L0 173H538.5V0.5H172.5Z" fill="#373B46"/>
             </svg>
         </footer>
@@ -167,7 +171,7 @@ import { Head, Link } from '@inertiajs/vue3';
 export default {
 data() {
     return {
-
+        indexEdit: null,
     }
 },
 components:{
@@ -181,6 +185,9 @@ methods:{
     formatDate(dateString) {
         return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
     },
+    handleEditDescription() {
+        this.indexEdit = null;
+    }
 }
 }
 </script>

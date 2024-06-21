@@ -24,7 +24,7 @@
                     </div>
 
                     <!-- Parte derecha -->
-                    <div class="md:w-[30%] md:py-4 md:px-5 text-sm">
+                    <div class="md:w-[30%] md:py-4 md:px-2 text-xs lg:text-sm">
                         <section v-if="cart.length">
                             <div class="border border-grayD9 grid grid-cols-3 gap-x-1 rounded-lg p-3 mb-5 *:mb-1">
                                     <p class="col-span-2">Subtotal:</p>
