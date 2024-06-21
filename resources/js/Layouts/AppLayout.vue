@@ -39,7 +39,6 @@ const logout = () => {
 
 onMounted(() => {
   setInterval(() => {
-    console.log('hola');
   }, 5000); // 5000 ms = 5 seg
 });
 

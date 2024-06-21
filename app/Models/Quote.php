@@ -18,6 +18,7 @@ class Quote extends Model
         'show_iva',
         'has_discount',
         'total',
+        'status',
         'products',
         'services',
         'expired_date',
