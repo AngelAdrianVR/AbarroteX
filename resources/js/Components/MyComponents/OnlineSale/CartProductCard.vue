@@ -6,7 +6,7 @@
     <section class="text-sm mt-2" v-else>
         <div class="flex space-x-4">
             <!-- Imagen del producto -->
-            <figure class="border border-grayD9 rounded-md p-2 w-28">
+            <figure class="border border-grayD9 rounded-md p-2 size-24">
                 <img v-if="product?.global_product_id ? product?.global_product.media?.length : product?.media?.length" 
                         :src="product?.global_product_id ? product?.global_product.media[0]?.original_url : product?.media[0]?.original_url" 
                         alt="producto" class="h-full w-full mx-auto object-contain">

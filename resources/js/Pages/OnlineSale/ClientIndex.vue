@@ -53,7 +53,6 @@ export default {
             loading: false, // bandera de carga para recuperar mas items con scroll.
             visibleProducts: this.products, //variable local de productos visibles
             currentBanner: 0, //index de banners
-            store: null, //informacion de la tienda
         }
     },
     components: {
@@ -117,16 +116,6 @@ export default {
                 this.currentBanner = (this.currentBanner + 1) % this.banners?.media?.length;
             }, 5000);
         },
-        async fetchStoreInfo() {
-            try {
-                const response = await axios.get(route('stores.fetch-store-info', this.store_id));
-                if (response.status === 200) {
-                    this.store = response.data.store;
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
     },
     created() {
         //obtengo el id del local storage para comparar si entró a otra tienda y borrar el carrito
@@ -143,9 +132,6 @@ export default {
         this.visibleProducts = this.products; // clona los productos para poder manipularlos
         // localStorage.clear(); //borrar local storage
         // localStorage.removeItem('Ezycart'); //borrar una variable del local storage
-
-        // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
-        this.fetchStoreInfo();
 
         //iniciar contador para cambiar banners automaticamente.
         this.startTimer();
