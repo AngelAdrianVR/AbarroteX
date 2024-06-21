@@ -46,10 +46,6 @@ onMounted(() => {
     }, 300000); // 5 minutos
 });
 
-onUnmounted(() => {
-    clearInterval(syncInterval.value);
-});
-
 </script>
 
 <template>
