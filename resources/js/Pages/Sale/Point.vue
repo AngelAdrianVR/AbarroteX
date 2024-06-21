@@ -574,7 +574,7 @@ import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
-import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems, initializeProducts } from '@/dbService.js';
+import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems, syncIDBProducts } from '@/dbService.js';
 
 export default {
   data() {
@@ -1064,8 +1064,8 @@ export default {
     },
   },
   mounted() {
-    initializeProducts();
-
+    // sincronizar productos
+    syncIDBProducts();
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;
