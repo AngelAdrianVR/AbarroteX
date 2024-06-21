@@ -41,7 +41,7 @@
                     <p class="flex text-gray37 w-1/3 font-bold">
                         <span class="w-1/3">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ online_sales.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
                 </div>
@@ -60,7 +60,7 @@
                     <p class="flex text-gray37 w-1/3 font-bold">
                         <span class="w-1/3">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ (online_sales +
+                            {{ (Object.values(day_sales)[0].online_sales_total +
                                 Object.values(day_sales)[0].total_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
@@ -310,7 +310,6 @@ export default {
     },
     props: {
         day_sales: Object,
-        online_sales: Number,
         is_out_of_cash_cut: Boolean, //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
         previous_sale_date: String,
         next_sale_date: String,
