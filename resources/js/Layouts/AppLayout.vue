@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { syncIDBProducts } from '@/dbService.js';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
@@ -16,6 +17,7 @@ defineProps({
 });
 
 const showingNavigationDropdown = ref(false);
+const syncInterval = ref(null);
 
 const calculateDaysSinceStoreCreated = (date) => {
     const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
@@ -38,8 +40,10 @@ const logout = () => {
 };
 
 onMounted(() => {
-  setInterval(() => {
-  }, 5000); // 5000 ms = 5 seg
+    // sincronizacion periodica de IDB para todos los usuarios autenticados
+    syncInterval.value = setInterval(() => {
+        syncIDBProducts();
+    }, 300000); // 5 minutos
 });
 
 </script>
