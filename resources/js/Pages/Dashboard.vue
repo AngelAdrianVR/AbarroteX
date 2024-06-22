@@ -220,7 +220,7 @@ export default {
                 },
                 {
                     title: 'Gastos (compras)',
-                    colors: ['#C30303', '#F07209'],
+                    colors: ['#C77103', '#209209'],
                     categories: timeline.timeline,
                     series: [{
                         name: timeline.last.name,
@@ -338,12 +338,21 @@ export default {
                 return acumulador + current.quantity * current.current_price;
             }, 0);
 
+            let onlineSales = this.onlineSalesLastPeriod.reduce((acumulador, current) => {
+                return acumulador + current.total;
+            }, 0);
+
             let expenses = this.expensesLastPeriod.reduce((acumulador, current) => {
                 return acumulador + current.quantity * current.current_price;
             }, 0);
+
             if (period == 'current') {
                 sales = this.salesCurrentPeriod.reduce((acumulador, current) => {
                     return acumulador + current.quantity * current.current_price;
+                }, 0);
+
+                onlineSales = this.onlineSalesCurrentPeriod.reduce((acumulador, current) => {
+                    return acumulador + current.total;
                 }, 0);
 
                 expenses = this.expensesCurrentPeriod.reduce((acumulador, current) => {
@@ -351,7 +360,7 @@ export default {
                 }, 0);
             }
 
-            return sales - expenses;
+            return sales + onlineSales - expenses;
         },
         handleChangePeriodRange() {
             if (this.period == 'Semanal') {
