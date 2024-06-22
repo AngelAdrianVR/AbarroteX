@@ -57,6 +57,8 @@ export default {
             // sales
             salesCurrentPeriod: [],
             salesLastPeriod: [],
+            onlineSalesCurrentPeriod: [],
+            onlineSalesLastPeriod: [],
 
             // expenses
             expensesCurrentPeriod: [],
@@ -87,6 +89,11 @@ export default {
                 return acumulador + current.quantity * current.current_price;
             }, 0);
         },
+        calculateTotalOnlineSale() {
+            return this.onlineSalesCurrentPeriod?.reduce((acumulador, current) => {
+                return acumulador + current.total;
+            }, 0);
+        },
         calculateTotalExpense() {
             return this.expensesCurrentPeriod?.reduce((acumulador, current) => {
                 return acumulador + current.quantity * current.current_price;
@@ -95,6 +102,13 @@ export default {
         calculateTotalProductsSold() {
             return this.salesCurrentPeriod?.reduce((acumulador, current) => {
                 return acumulador + current.quantity;
+            }, 0);
+        },
+        calculateTotalProductsSoldOnline() {
+            return this.onlineSalesCurrentPeriod?.reduce((acumulador, current) => {
+                return acumulador + current.products.reduce((acc, product) => {
+                    return acc + product.quantity;
+                }, 0);
             }, 0);
         },
         calculateTotalProductsExpense() {
@@ -106,14 +120,24 @@ export default {
         getSimpleKpisOptions() {
             return [
                 {
-                    title: "Venta (ingresos)",
+                    title: "Ventas en tienda (ingresos)",
                     icon: "fa-solid fa-dollar-sign",
                     value: "$" + this.calculateTotalSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
                 {
-                    title: "Productos vendidos",
+                    title: "Unidades vendidas en tienda",
                     icon: "fa-solid fa-clipboard-list",
                     value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                },
+                {
+                    title: "Ventas en linea (ingresos)",
+                    icon: "fa-solid fa-dollar-sign",
+                    value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                },
+                {
+                    title: "Unidades vendidas en linea",
+                    icon: "fa-solid fa-clipboard-list",
+                    value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
                 {
                     title: "Compras (Gastos)",
@@ -150,17 +174,17 @@ export default {
         },
         getTimeLine() {
             let timeLine = ['6AM', '7AM', '8AM', '9PM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM'];
-            let last = { name: "Día anterior", data: { sales: this.calculateHourlySales(this.salesLastPeriod), expenses: this.calculateHourlySales(this.expensesLastPeriod) } };
-            let current = { name: "Día seleccionado", data: { sales: this.calculateHourlySales(this.salesCurrentPeriod), expenses: this.calculateHourlySales(this.expensesCurrentPeriod) } };
+            let last = { name: "Día anterior", data: { sales: this.calculateHourlySales(this.salesLastPeriod), onlineSales: this.calculateHourlySales(this.onlineSalesLastPeriod, true), expenses: this.calculateHourlySales(this.expensesLastPeriod) } };
+            let current = { name: "Día seleccionado", data: { sales: this.calculateHourlySales(this.salesCurrentPeriod), onlineSales: this.calculateHourlySales(this.onlineSalesCurrentPeriod, true), expenses: this.calculateHourlySales(this.expensesCurrentPeriod) } };
 
             if (this.period == 'Semanal') {
                 timeLine = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
-                last = { name: "Semana anterior", data: { sales: this.calculateDailySales(this.salesLastPeriod), expenses: this.calculateDailySales(this.expensesLastPeriod) } };
-                current = { name: "Semana seleccionada", data: { sales: this.calculateDailySales(this.salesCurrentPeriod), expenses: this.calculateDailySales(this.expensesCurrentPeriod) } };
+                last = { name: "Semana anterior", data: { sales: this.calculateDailySales(this.salesLastPeriod), onlineSales: this.calculateDailySales(this.onlineSalesLastPeriod, true), expenses: this.calculateDailySales(this.expensesLastPeriod) } };
+                current = { name: "Semana seleccionada", data: { sales: this.calculateDailySales(this.salesCurrentPeriod), onlineSales: this.calculateDailySales(this.onlineSalesCurrentPeriod, true), expenses: this.calculateDailySales(this.expensesCurrentPeriod) } };
             } else if (this.period == 'Mensual') {
                 timeLine = ['Del 1 al 7', 'Del 8 al 14', 'Del 15 al 21', 'Del 22 al 28', 'Del 29 al 31'];
-                last = { name: "Mes anterior", data: { sales: this.calculateWeeklySales(this.salesLastPeriod), expenses: this.calculateWeeklySales(this.expensesLastPeriod) } };
-                current = { name: "Mes seleccionado", data: { sales: this.calculateWeeklySales(this.salesCurrentPeriod), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod) } };
+                last = { name: "Mes anterior", data: { sales: this.calculateWeeklySales(this.salesLastPeriod), onlineSales: this.calculateWeeklySales(this.onlineSalesLastPeriod, true), expenses: this.calculateWeeklySales(this.expensesLastPeriod) } };
+                current = { name: "Mes seleccionado", data: { sales: this.calculateWeeklySales(this.salesCurrentPeriod), onlineSales: this.calculateWeeklySales(this.onlineSalesCurrentPeriod, true), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod) } };
             }
 
             return { timeline: timeLine, last: last, current: current };
@@ -169,7 +193,7 @@ export default {
             const timeline = this.getTimeLine;
             return [
                 {
-                    title: 'Ingresos (ventas)',
+                    title: 'Ingresos (ventas en tienda)',
                     colors: ['#C30303', '#F07209'],
                     categories: timeline.timeline,
                     series: [{
@@ -179,6 +203,19 @@ export default {
                     {
                         name: timeline.current.name,
                         data: timeline.current.data.sales,
+                    }],
+                },
+                {
+                    title: 'Ingresos (ventas en linea)',
+                    colors: ['#C30303', '#F07209'],
+                    categories: timeline.timeline,
+                    series: [{
+                        name: timeline.last.name,
+                        data: timeline.last.data.onlineSales,
+                    },
+                    {
+                        name: timeline.current.name,
+                        data: timeline.current.data.onlineSales,
                     }],
                 },
                 {
@@ -220,7 +257,7 @@ export default {
         setElementsWithNumberFormat(set) {
             return set.map(item => item.toFixed(2));
         },
-        calculateHourlySales(data) {
+        calculateHourlySales(data, isOnline = false) {
             // Inicializa el array hourlyData con ceros para cada hora del día
             let hourlyData = Array(18).fill(0);
 
@@ -237,27 +274,35 @@ export default {
                 // Convierte la fecha y hora a la hora del día en la zona horaria local
                 const saleHour = format(localSaleDateTime, 'H', { timeZone });
 
-                hourlyData[saleHour] += sale.quantity * sale.current_price;
+                if (isOnline) {
+                    hourlyData[saleHour] += sale.total;
+                } else {
+                    hourlyData[saleHour] += sale.quantity * sale.current_price;
+                }
             });
             hourlyData = this.setElementsWithNumberFormat(hourlyData);
 
             return hourlyData;
         },
-        calculateDailySales(data) {
+        calculateDailySales(data, isOnline = false) {
             let dailyData = Array(7).fill(0);
 
             data.forEach((sale) => {
                 const saleDayOfWeek = new Date(sale.created_at).getDay();
 
                 // Incrementa el total por día de la semana correspondiente
-                dailyData[saleDayOfWeek] += sale.quantity * sale.current_price;
+                if (isOnline) {
+                    dailyData[saleDayOfWeek] += sale.total;
+                } else {
+                    dailyData[saleDayOfWeek] += sale.quantity * sale.current_price;
+                }
             });
 
             dailyData = this.setElementsWithNumberFormat(dailyData);
 
             return dailyData;
         },
-        calculateWeeklySales(data) {
+        calculateWeeklySales(data, isOnline = false) {
             // Inicializa el array weeklyData con ceros para cada rango semanal
             let weeklyData = Array(5).fill(0);
 
@@ -265,17 +310,23 @@ export default {
             data.forEach((sale) => {
                 const saleDay = new Date(sale.created_at).getDate();
 
-                if (saleDay >= 1 && saleDay <= 7) {
-                    weeklyData[0] += sale.quantity * sale.current_price;
-                } else if (saleDay >= 8 && saleDay <= 14) {
-                    weeklyData[1] += sale.quantity * sale.current_price;
-                } else if (saleDay >= 15 && saleDay <= 21) {
-                    weeklyData[2] += sale.quantity * sale.current_price;
-                } else if (saleDay >= 22 && saleDay <= 28) {
-                    weeklyData[3] += sale.quantity * sale.current_price;
-                } else if (saleDay >= 29 && saleDay <= 31) {
-                    weeklyData[4] += sale.quantity * sale.current_price;
-                }
+                const intervals = [
+                    { start: 1, end: 7 },
+                    { start: 8, end: 14 },
+                    { start: 15, end: 21 },
+                    { start: 22, end: 28 },
+                    { start: 29, end: 31 }
+                ];
+
+                intervals.forEach((interval, index) => {
+                    if (saleDay >= interval.start && saleDay <= interval.end) {
+                        if (isOnline) {
+                            weeklyData[index] += sale.total;
+                        } else {
+                            weeklyData[index] += sale.quantity * sale.current_price;
+                        }
+                    }
+                });
             });
 
             weeklyData = this.setElementsWithNumberFormat(weeklyData);
@@ -341,6 +392,8 @@ export default {
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
                     this.salesLastPeriod = response.data.last_period_sales;
+                    this.onlineSalesCurrentPeriod = response.data.online_sales;
+                    this.onlineSalesLastPeriod = response.data.last_period_online_sales;
                     this.expensesCurrentPeriod = response.data.expenses;
                     this.expensesLastPeriod = response.data.last_period_expenses;
                     this.topProductsCurrentPeriod = response.data.top_products;
@@ -359,6 +412,8 @@ export default {
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
                     this.salesLastPeriod = response.data.last_period_sales;
+                    this.onlineSalesCurrentPeriod = response.data.online_sales;
+                    this.onlineSalesLastPeriod = response.data.last_period_online_sales;
                     this.expensesCurrentPeriod = response.data.expenses;
                     this.expensesLastPeriod = response.data.last_period_expenses;
                     this.topProductsCurrentPeriod = response.data.top_products;
@@ -377,6 +432,8 @@ export default {
                 if (response.status === 200) {
                     this.salesCurrentPeriod = response.data.sales;
                     this.salesLastPeriod = response.data.last_period_sales;
+                    this.onlineSalesCurrentPeriod = response.data.online_sales;
+                    this.onlineSalesLastPeriod = response.data.last_period_online_sales;
                     this.expensesCurrentPeriod = response.data.expenses;
                     this.expensesLastPeriod = response.data.last_period_expenses;
                     this.topProductsCurrentPeriod = response.data.top_products;
