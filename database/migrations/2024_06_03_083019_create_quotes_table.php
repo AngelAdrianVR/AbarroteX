@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->boolean('show_iva')->default(false);
             $table->boolean('has_discount')->default(false);
+            $table->string('status')->default('Esperando respuesta');
             $table->unsignedDouble('total');
             $table->json('products')->nullable(); //guarda los productos
             $table->json('services')->nullable(); //guarda los servicios

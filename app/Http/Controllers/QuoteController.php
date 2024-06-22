@@ -133,4 +133,16 @@ class QuoteController extends Controller
 
         return response()->json(['items' => $quotes]);
     }
+
+
+    public function updateStatus(Quote $quote)
+    {
+        $status = request('status');
+
+        $quote->update([
+            'status' => $status
+        ]);
+
+        return response()->json(compact('status'));
+    }
 }

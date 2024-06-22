@@ -211,6 +211,7 @@ Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'p
 Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
 Route::get('quotes-search', [QuoteController::class, 'searchQuote'])->name('quotes.search')->middleware('auth');
 Route::get('quotes-get-by-page/{currentPage}', [QuoteController::class, 'getItemsByPage'])->name('quotes.get-by-page')->middleware('auth');
+Route::post('quotes-update-status/{quote}', [QuoteController::class, 'updateStatus'])->name('quotes.update-status')->middleware('auth');
 
 
 //product history routes---------------------------------------------------------------------------------------
