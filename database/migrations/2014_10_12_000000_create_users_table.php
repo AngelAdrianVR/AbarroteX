@@ -24,6 +24,7 @@ return new class extends Migration
             $table->json('employee_properties')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('cash_register_id')->nullable()->constrained();
+            $table->boolean('tutorials_seen')->default(false);
             $table->timestamps();
         });
     }
