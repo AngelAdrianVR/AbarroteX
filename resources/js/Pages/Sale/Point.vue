@@ -1064,6 +1064,10 @@ export default {
     },
   },
   mounted() {
+    // redirigir a los tutoriales si no los ha finalizado
+    if (!this.$page.props.auth.user.tutorials_seen) {
+        this.$inertia.visit(route('tutorials.index'));
+    }
     // sincronizar productos
     syncIDBProducts();
     //verificar si el usuario tiene una caja asignada

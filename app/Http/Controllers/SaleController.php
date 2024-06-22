@@ -89,7 +89,7 @@ class SaleController extends Controller
         $date = Carbon::parse($date);
         $previous_sale_date = Sale::where('store_id', $storeId)
             ->where('cash_register_id', $cashRegisterId)
-            ->whereDate('created_at', '<', $date->copy()->subDay()) // Excluir la fecha actual
+            ->whereDate('created_at', '<', $date) // Excluir la fecha actual
             ->orderBy('created_at', 'desc')
             ->first()
             ->created_at ?? null;

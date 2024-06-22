@@ -124,16 +124,16 @@ export default {
                     icon: "fa-solid fa-dollar-sign",
                     value: "$" + this.calculateTotalSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
-                {
-                    title: "Unidades vendidas en tienda",
-                    icon: "fa-solid fa-clipboard-list",
-                    value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
-                },
-                {
-                    title: "Ventas en linea (ingresos)",
-                    icon: "fa-solid fa-dollar-sign",
-                    value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
-                },
+                // {
+                //     title: "Unidades vendidas en tienda",
+                //     icon: "fa-solid fa-clipboard-list",
+                //     value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                // },
+                // {
+                //     title: "Ventas en linea (ingresos)",
+                //     icon: "fa-solid fa-dollar-sign",
+                //     value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                // },
                 {
                     title: "Unidades vendidas en linea",
                     icon: "fa-solid fa-clipboard-list",
@@ -205,19 +205,19 @@ export default {
                         data: timeline.current.data.sales,
                     }],
                 },
-                {
-                    title: 'Ingresos (ventas en linea)',
-                    colors: ['#C30303', '#F07209'],
-                    categories: timeline.timeline,
-                    series: [{
-                        name: timeline.last.name,
-                        data: timeline.last.data.onlineSales,
-                    },
-                    {
-                        name: timeline.current.name,
-                        data: timeline.current.data.onlineSales,
-                    }],
-                },
+                // {
+                //     title: 'Ingresos (ventas en linea)',
+                //     colors: ['#C30303', '#F07209'],
+                //     categories: timeline.timeline,
+                //     series: [{
+                //         name: timeline.last.name,
+                //         data: timeline.last.data.onlineSales,
+                //     },
+                //     {
+                //         name: timeline.current.name,
+                //         data: timeline.current.data.onlineSales,
+                //     }],
+                // },
                 {
                     title: 'Gastos (compras)',
                     colors: ['#C77103', '#209209'],
@@ -455,8 +455,13 @@ export default {
         }
     },
     mounted() {
+         // redirigir a punto de venta si no tiene permiso para ver dashboard
         if (!this.canSeeDashboard) {
             this.$inertia.visit(route('sales.point'));
+        }
+        // redirigir a los tutoriales si no los ha finalizado
+        if (!this.$page.props.auth.user.tutorials_seen) {
+            this.$inertia.visit(route('tutorials.index'));
         }
         this.periodRange = this.getCurrentDate();
         this.fetchDailyData();
