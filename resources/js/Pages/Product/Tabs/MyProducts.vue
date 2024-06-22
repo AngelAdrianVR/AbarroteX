@@ -29,6 +29,10 @@
             </div>
         </section>
 
+        <!-- <section v-if="isInventoryOn">
+            costo de almacén: {{ products }}
+        </section> -->
+
         <div class="mt-8">
             <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
                 totalProducts }} elementos
@@ -392,6 +396,13 @@ export default {
                 }, 500); // Cambia este tiempo si es necesario
             });
         },
+        getPageFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const page = params.get('page');
+            if (page) {
+                this.currentPage = parseInt(page);
+            }
+        },
         async fetchDataForProductsView() {
             try {
                 this.loading = true;
@@ -515,13 +526,6 @@ export default {
                 this.loading = false;
             }
         },
-        getPageFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const page = params.get('page');
-            if (page) {
-                this.currentPage = parseInt(page);
-            }
-        }
     },
     mounted() {
         this.getPageFromUrl(); //obtiene la variable page de la url.
