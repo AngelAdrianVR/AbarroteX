@@ -59,7 +59,7 @@
                     <td class="w-[500px] relative">
                         <i v-if="indexEdit != index" @click="indexEdit = index" class="fa-solid fa-pencil text-[10px] absolute top-1 right-0 text-gray99 border border-gray99 rounded-full p-[4px] px-[4px] cursor-pointer"></i>
                         <i v-else-if="indexEdit == index" @click="handleEditDescription()" class="fa-solid fa-check text-[10px] absolute top-1 right-0 text-white bg-primary rounded-full p-[4px] px-[5px] cursor-pointer"></i>
-                        <p class="mr-2" v-if="indexEdit != index">{{ service.description ?? '-' }}</p>
+                        <p style="white-space: pre-line;" class="mr-2" v-if="indexEdit != index">{{ service.description ?? '-' }}</p>
                         <el-input v-else v-model="service.description" :autosize="{ minRows: 2, maxRows: 5 }" class="!w-[95%]" type="textarea"
                         placeholder="Escribe una descripción" :maxlength="500" show-word-limit
                         clearable />
@@ -94,7 +94,7 @@
 
         <div v-if="quote.notes">
             <p class="font-bold">Notas adicionales:</p>
-            <p class="mt-1">{{ quote.notes }}</p>
+            <p style="white-space: pre-line;" class="mt-1">{{ quote.notes }}</p>
         </div>
         </body>
 
