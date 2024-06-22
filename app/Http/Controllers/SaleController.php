@@ -8,6 +8,7 @@ use App\Models\CashRegisterMovement;
 use App\Models\Client;
 use App\Models\CreditSaleData;
 use App\Models\GlobalProductStore;
+use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
@@ -67,30 +68,52 @@ class SaleController extends Controller
 
     public function show($date, $cashRegisterId)
     {
+        $storeId = auth()->user()->store_id;
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
-            ->where('store_id', auth()->user()->store_id)
+            ->where('store_id', $storeId)
             ->where('cash_register_id', $cashRegisterId) //recuperar solo las  ventas de la caja involucrada.
+            ->whereDate('created_at', $date)
+            ->get();
+
+        $online_sales = OnlineSale::where('store_id', $storeId)
             ->whereDate('created_at', $date)
             ->get();
 
         $this->addCreditDataToSales($sales);
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $this->getGroupedSalesByDate($sales, true);
+        $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, true);
+
+        // Obtener la fecha de la venta anterior
+        $date = Carbon::parse($date);
+        $previous_sale_date = Sale::where('store_id', $storeId)
+            ->where('cash_register_id', $cashRegisterId)
+            ->whereDate('created_at', '<', $date->copy()->subDay()) // Excluir la fecha actual
+            ->orderBy('created_at', 'desc')
+            ->first()
+            ->created_at ?? null;
+        // Obtener la fecha de la venta siguiente
+        $next_sale_date = Sale::where('store_id', $storeId)
+            ->where('cash_register_id', $cashRegisterId)
+            ->whereDate('created_at', '>', $date) // Excluir la fecha actual
+            ->orderBy('created_at', 'asc')
+            ->first()
+            ->created_at ?? null;
 
         //evalúa si la venta está dentro del corte---------------
-        $last_cash_cut = CashCut::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cashRegisterId)->latest()->first();
+        // $last_cash_cut = CashCut::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cashRegisterId)->latest()->first();
 
         // si el corte tiene una fecha posterior a la venta entonces esta fuera de corte
         // y no se muestran las opciones de editar y reembolso.
-        if ($last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at) {
-            $is_out_of_cash_cut = true;
-        } else {
-            $is_out_of_cash_cut = false;
-        }
+        // if ($last_cash_cut && $last_cash_cut?->created_at > $sales[0]->created_at) {
+        //     $is_out_of_cash_cut = true;
+        // } else {
+        //     $is_out_of_cash_cut = false;
+        // }
+        $is_out_of_cash_cut = false;
 
-        return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut'));
+        return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut', 'previous_sale_date', 'next_sale_date'));
     }
 
     public function edit(Sale $sale)
@@ -131,8 +154,14 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
+        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate)
+            ->latest()
+            ->get();
+
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSalesByDate($sales);
+        $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales);
 
         return response()->json(['items' => $groupedSales]);
     }
@@ -146,8 +175,12 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
+        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+            ->latest()
+            ->get();
+
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSalesByDate($sales)->skip($offset)
+        $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->skip($offset)
             ->take(30);
 
         return response()->json(['items' => $groupedSales]);
@@ -156,16 +189,16 @@ class SaleController extends Controller
     public function printTicket($created_at)
     {
         // Parsear la fecha recibida para obtener solo la parte de la fecha
-        $date = Carbon::parse($created_at)->toDateString();
+        // $date = Carbon::parse($created_at)->toDateString();
 
-        // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
+        // // Obtener las ventas registradas en la fecha recibida
+        // $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
-        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $this->getGroupedSalesByDate($sales, true);
+        // // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        // $day_sales = $this->getGroupedSalesByDate($sales, true);
 
-        // return $day_sales;
-        return inertia('Sale/PrintTicket', compact('day_sales'));
+        // // return $day_sales;
+        // return inertia('Sale/PrintTicket', compact('day_sales'));
     }
 
     public function syncLocalstorage(Request $request)
@@ -273,8 +306,12 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
+        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+            ->latest()
+            ->get();
+
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSalesByDate($sales)->take(30);
+        $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->take(30);
 
         // Retornar los datos agrupados
         return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);
@@ -295,7 +332,7 @@ class SaleController extends Controller
         CashRegisterMovement::create([
             'amount' => $total_amount,
             'type' => 'Retiro',
-            'notes' => "Venta con folio $saleFolio fue reembolsada / cancelada",
+            'notes' => "Venta con folio $saleFolio fue reembolsada",
             'cash_register_id' => $cash_register->id,
         ]);
         // Restar dinero de caja
@@ -306,11 +343,17 @@ class SaleController extends Controller
         }
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
+        $updated_items = [];
         if ($is_inventory_on) {
-            $saleProducts->each(function ($sale) use ($saleFolio) {
-                $current_product = $sale->is_global_product
-                    ? GlobalProductStore::find($sale->product_id)
-                    : Product::find($sale->product_id);
+            $saleProducts->each(function ($sale) use ($saleFolio, &$updated_items) {
+                if ($sale->is_global_product) {
+                    $current_product = GlobalProductStore::find($sale->product_id);
+                    $indexedDB_name = $current_product->globalProduct->name;
+                } else {
+                    $current_product = Product::find($sale->product_id);
+                    $indexedDB_name = $current_product->name;
+                }
+
                 $current_product->increment('current_stock', $sale->quantity);
 
                 //Registra el historial de venta de cada producto
@@ -320,6 +363,9 @@ class SaleController extends Controller
                     'historicable_id' => $current_product->id,
                     'historicable_type' => get_class($current_product),
                 ]);
+
+                // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
+                $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
             });
         }
 
@@ -330,6 +376,8 @@ class SaleController extends Controller
         if ($credit_sale_data) {
             $credit_sale_data->update(['status' => 'Reembolsado']);
         }
+
+        return response()->json(compact('updated_items'));
     }
 
     public function updateGroupSale(Request $request)
@@ -472,18 +520,32 @@ class SaleController extends Controller
     }
 
     // private
-    private function getGroupedSalesByDate($sales, $returnSales = false)
+    private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
     {
-        return $sales->groupBy(function ($sale) {
+        // Combinar las ventas normales y las ventas en línea
+        $allSales = collect($sales)->merge($onlineSales);
+
+        return $allSales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->toDateString();
         })->map(function ($sales) use ($returnSales) {
-            $totalQuantity = $sales->sum('quantity');
-            $totalSale = $sales->sum(function ($sale) {
+            // Filtrar ventas normales y en línea
+            $normalSales = $sales->filter(fn ($sale) => isset($sale->current_price));
+            $onlineSales = $sales->filter(fn ($sale) => !isset($sale->current_price));
+
+            $totalQuantityNormalSale = $normalSales->sum('quantity');
+            $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
+                return count($onlineSale->products);
+            });
+            $totalSale = $normalSales->sum(function ($sale) {
                 return $sale->quantity * $sale->current_price;
             });
-            $uniqueFolios = $sales->unique('folio')->count();
 
-            $salesByFolio = $sales->groupBy('folio')->map(function ($folioSales) {
+            $totalOnlineSale = $onlineSales->sum('total');
+
+            $normalFolios = $normalSales->unique('folio')->count();
+            $onlineFolios = $onlineSales->count();
+
+            $salesByFolio = $normalSales->groupBy('folio')->map(function ($folioSales) {
                 $firstSale = $folioSales->first();
 
                 // Calcular el total de todos los productos en la venta
@@ -515,10 +577,14 @@ class SaleController extends Controller
             });
 
             return [
-                'total_quantity' => $totalQuantity,
+                'total_normal_quantity' => $totalQuantityNormalSale,
+                'total_online_quantity' => $totalQuantityOnlineSale,
                 'total_sale' => $totalSale,
-                'unique_folios' => $uniqueFolios,
+                'normal_folios' => $normalFolios,
+                'online_folios' => $onlineFolios,
+                'online_sales_total' => $totalOnlineSale,
                 'sales' => $returnSales ? $salesByFolio : [],
+                'online_sales' => $returnSales ? $onlineSales->values() : [],
             ];
         });
     }

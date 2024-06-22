@@ -1,11 +1,11 @@
 <template>
-    <AppLayout title="Crear cotización">
+    <AppLayout title="Editar cotización">
         <div class="px-3 md:px-10 py-7">
             <Back />
 
-            <form @submit.prevent="store"
+            <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
-                <h1 class="font-bold ml-2 col-span-full">Crear cotización</h1>
+                <h1 class="font-bold ml-2 col-span-full">Editar cotización</h1>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Cliente (en caso de tenerlo registrado)" class="ml-3 mb-1" />
@@ -56,7 +56,10 @@
 
                 <section class="max-h-72 overflow-auto col-span-full">
                     <div class="space-y-3">
-                        <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id"
+                        <div v-if="loadingProducts">
+                            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                        </div>
+                        <ProductInput v-else :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id" :init_state="item"
                         @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
                     </div>
                     <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
@@ -77,7 +80,10 @@
 
                 <section class="max-h-72 overflow-auto col-span-full">
                     <div class="space-y-3">
-                        <ServiceInput :services="services" v-for="(item, index) in form.services" :key="item.id" :id="item.id"
+                        <div v-if="loadingServices">
+                            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                        </div>
+                        <ServiceInput v-else :services="services" v-for="(item, index) in form.services" :key="item.id" :id="item.id" :init_state="item"
                         @deleteItem="deleteItemService(index)" @syncItem="syncItemsService(index, $event)" class="mb-1" />
                     </div>
                     <p v-if="!form.services?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
@@ -140,7 +146,7 @@
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="form.processing || (!form.products.length && !form.services.length)">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                        Crear cotización
+                        Guardar cambios
                     </PrimaryButton>
                 </div>
             </form>
@@ -204,24 +210,26 @@ data() {
     });
 
     const form = useForm({
-        client_id: null,
-        contact_name: null,
-        phone: null,
-        email: null,
-        address: null,
-        notes: null,
-        show_iva: false,
-        has_discount: false, //aplicar descuento
-        discount: null, //cantidad de descuento
-        is_percentage_discount: false, //tipo de descuento
-        total: 0, //cantidad total tomando en cuenta servcios, productos y descuento
-        products: [],
-        services: [],
+        client_id: this.quote.client.id ?? null,
+        contact_name: this.quote.contact_name,
+        phone: this.quote.phone,
+        email: this.quote.email,
+        address: this.quote.address,
+        notes: this.quote.notes,
+        show_iva: !! this.quote.show_iva,
+        has_discount: !! this.quote.has_discount, //aplicar descuento
+        discount: this.quote.discount, //cantidad de descuento
+        is_percentage_discount: !! this.quote.is_percentage_discount, //tipo de descuento
+        total: this.quote.total, //cantidad total tomando en cuenta servcios, productos y descuento
+        products: this.quote.products ?? [],
+        services: this.quote.services ?? [],
     });
 
     return {
         form,
         clientForm,
+        loadingProducts: false, //estado de carga para productos
+        loadingServices: false, //estado de carga para servicios
         showClientFormModal: false, //modal para registrar un cliente
         products: null, //se obtienne todos los productos de la tienda
         services: null, //se obtienne todos los servicios de la tienda
@@ -243,11 +251,12 @@ components:{
     Back
 },
 props:{
+    quote: Object,
     clients: Array,
 },
 methods:{
-    store() {
-        this.form.post(route("quotes.store"), {
+    update() {
+        this.form.put(route("quotes.update", this.quote.id), {
             onSuccess: () => {
                 this.$notify({
                     title: "Correcto",
@@ -270,10 +279,10 @@ methods:{
       });
     },
     addNewItem() {
-      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, isLocal: null, quantity: null });
+      this.form.products.push({ id: this.next_item_id++, price: null, product_id: null, isLocal: null, quantity: 1 });
     },
     addNewService() {
-      this.form.services.push({ id: this.next_service_id++, price: null, service_id: null, quantity: null });
+      this.form.services.push({ id: this.next_service_id++, price: null, service_id: null, quantity: 1 });
     },
     deleteItem(index) {
         this.form.products.splice(index, 1);
@@ -309,6 +318,7 @@ methods:{
         return this.form.discount * 0.01 * this.form.total;
     },
     async fetchAllProducts() {
+        this.loadingProducts = true;
         try {
           const response = await axios.get(route('online-sales.fetch-all-products'));
           if ( response.status === 200 ) {
@@ -316,9 +326,12 @@ methods:{
           }  
         } catch (error) {
             console.log(error);
+        } finally {
+            this.loadingProducts = false;
         }
     },
     async fetchAllServices() {
+        this.loadingServices = true;
         try {
           const response = await axios.get(route('services.fetch-all-services'));
           if ( response.status === 200 ) {
@@ -326,6 +339,8 @@ methods:{
           }  
         } catch (error) {
             console.log(error);
+        } finally {
+            this.loadingServices = false;
         }
     },
 },
@@ -343,7 +358,7 @@ watch: {
         deep: true
     }
 },
-mounted() {
+created() {
     this.fetchAllProducts();
     this.fetchAllServices();
 }

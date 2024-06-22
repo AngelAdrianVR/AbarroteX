@@ -120,7 +120,7 @@
       </div>
 
       <!-- Lado derecho -->
-      <div class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 my-4 lg:mt-0">
+      <div class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 my-4 lg:mt-0 self-start">
         <p class="font-bold text-center">Ajustes generales</p>
         <!-- Editar cantidad maxima permitida en caja -->
         <div v-if="isMaxCashOn" class="py-3 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">

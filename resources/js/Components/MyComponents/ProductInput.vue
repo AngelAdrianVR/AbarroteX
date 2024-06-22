@@ -76,7 +76,7 @@ export default {
     mounted() {
         if (this.init_state != null) {
             if ( this.init_state.name ) {
-                const productSelectedIndex = this.products.findIndex(item => item.name === this.init_state.name);
+                const productSelectedIndex = this.products.findIndex(item => item.name == this.init_state.name);
                 this.selection = this.products[productSelectedIndex].relative_id;
             } else {
                 this.selection = null;
@@ -97,7 +97,7 @@ export default {
     },
     computed: {
         syncItem() {
-            if (this.selection != null && this.quantity) {
+            if (this.selection != null) {
                 // Encuentra el índice del producto seleccionado en la lista de productos
                 const productSelectedIndex = this.products.findIndex(item => item.relative_id === this.selection);
 

@@ -12,6 +12,13 @@
                     {{ onlineSale.delivered_at ? formatDateHour(onlineSale.delivered_at) : '--' }}
                 </span>
             </p>
+            <span class="text-gray99">•</span>
+            <p class="text-gray99">
+                Status:
+                <span class="text-gray37">
+                    {{ onlineSale.status }}
+                </span>
+            </p>
         </div>
         <header class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1">
             <div class="flex items-center space-x-3">

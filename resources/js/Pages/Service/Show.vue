@@ -23,7 +23,7 @@
                     service.category ?? '-' }}</span></p>
                 <div class="flex space-x-5 md:w-2/3">
                     <p class="text-[#373737]">Descripción:</p>
-                    <span class="font-bold ml-5">{{service.description ?? '-' }}</span>
+                    <span class="font-bold ml-5" style="white-space: pre-line;">{{service.description ?? '-' }}</span>
                 </div>
                 <p class="text-[#373737]">Precio: <span class="font-bold ml-14">${{
                     service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>

@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { syncIDBProducts } from '@/dbService.js';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
@@ -16,6 +17,7 @@ defineProps({
 });
 
 const showingNavigationDropdown = ref(false);
+const syncInterval = ref(null);
 
 const calculateDaysSinceStoreCreated = (date) => {
     const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
@@ -36,6 +38,14 @@ const calculateRemainigFreeDays = (date) => {
 const logout = () => {
     router.post(route('logout'));
 };
+
+onMounted(() => {
+    // sincronizacion periodica de IDB para todos los usuarios autenticados
+    syncInterval.value = setInterval(() => {
+        syncIDBProducts();
+    }, 300000); // 5 minutos
+});
+
 </script>
 
 <template>
@@ -65,7 +75,7 @@ const logout = () => {
                                             calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
                                             días de tu prueba gratuita</p>
                                         <p>¡Paga tu suscripción en cualquier momento! Tu pago
-                                            comenzarsá a contar al finalizar el
+                                            comenzará a contar al finalizar el
                                             periodo de
                                             prueba.</p>
                                     </div>
@@ -261,7 +271,7 @@ const logout = () => {
                                 Te quedan {{ calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
                                 días de tu prueba gratuita. <span class="font-normal">¡Paga tu suscripción en cualquier
                                     momento! Tu pago
-                                    comenzarsá a
+                                    comenzará a
                                     contar al finalizar el periodo de prueba.</span>
                             </p>
                         </div>

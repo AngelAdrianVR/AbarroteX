@@ -5,19 +5,25 @@
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th>Folio</th>
                     <th>Creado el</th>
-                    <th>Nombre del cliente</th>
+                    <th>Nombre del contacto</th>
                     <th>Monto</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('quotes.show', encodeId(quote.id)))"
+                <tr @click="handleShow(encodeId(quote.id))"
                     v-for="(quote, index) in quotes" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td class="rounded-s-full">{{ 'S-' + quote.id }}</td>
-                    <td>{{ quote.name }}</td>
-                    <td>{{ quote.category ?? '-' }}</td>
-                    <td>${{ quote.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    <td class="rounded-s-full">
+                        <el-tooltip :content="quote.status" placement="right">
+                            <i class="mr-1"
+                            :class="getStatusIcont(quote.status)"></i>
+                        </el-tooltip>
+                        {{ 'S-' + quote.id }}
+                    </td>
+                    <td>{{ formatDate(quote.created_at) }}</td>
+                    <td>{{ quote.contact_name }}</td>
+                    <td>${{ quote.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
@@ -26,6 +32,22 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
+                                    <el-dropdown-item :command="'status|' + quote.id + '|Autorizada'">
+                                        <i class="fa-solid fa-check text-xs text-blue-500"></i>
+                                        <span class="text-xs">Autorizada</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item :command="'status|' + quote.id + '|Rechazada'">
+                                        <i class="fa-solid fa-x text-xs text-red-500"></i>
+                                        <span class="text-xs">Rechazada</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item :command="'status|' + quote.id + '|Pago parcial'">
+                                        <i class="fa-solid fa-circle-dollar-to-slot text-indigo-500 text-xs"></i>
+                                        <span class="text-xs">Pago parcial</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item :command="'status|' + quote.id + '|Pagado'">
+                                        <i class="fa-solid fa-dollar-sign text-green-500 text-xs"></i>
+                                        <span class="text-xs">Pagado</span>
+                                    </el-dropdown-item>
                                     <el-dropdown-item :command="'see|' + encodeId(quote.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -84,8 +106,10 @@
 
 <script>
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 import axios from 'axios';
 
 export default {
@@ -112,9 +136,53 @@ methods:{
             this.$inertia.get(route('quotes.show', data));
         } else if (commandName == 'edit') {
             this.$inertia.get(route('quotes.edit', data));
-        } else if (commandName == 'delete') {
+        } else if (commandName == 'status') {
+            this.updateStatus(data, command.split('|')[2]); 
+        }
+        else if (commandName == 'delete') {
             this.showDeleteConfirm = true;
             this.itemIdToDelete = data;
+        }
+    },
+    async updateStatus(quoteId, status) {
+        try {
+            const response = await axios.post(route('quotes.update-status', quoteId), {status: status });
+            if ( response.status == 200 ) {
+                const quoteIndex = this.quotes.findIndex(item => item.id == quoteId);
+                if ( quoteIndex != -1 ) {
+                    this.quotes[quoteIndex].status = response.data.status;
+                }
+                this.$notify({
+                    title: 'Correcto',
+                    message: 'Se ha actualizazo el estatus de la cotización',
+                    type: 'success',
+                });
+            }
+        } catch (error) {
+            this.$notify({
+                title: 'No se pudo completar la petición',
+                message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
+                type: 'success',
+            });
+        }
+    },
+    formatDate(dateString) {
+        return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+    },
+    handleShow(encodedId) {
+        window.open(route('quotes.show', encodedId, '_blank'));
+    },
+    getStatusIcont(status) {
+        if ( status === 'Esperando respuesta' ) {
+            return 'fa-regular fa-clock text-amber-500';
+        } else if ( status === 'Rechazada' ) {
+            return 'fa-solid fa-x text-red-500';
+        } else if ( status === 'Autorizada' ) {
+            return 'fa-solid fa-check text-blue-500';
+        } else if ( status === 'Pagado' ) {
+            return 'fa-solid fa-dollar-sign text-green-500';
+        } else if ( status === 'Pago parcial' ) {
+            return 'fa-solid fa-circle-dollar-to-slot text-indigo-500';
         }
     },
     async deleteItem() {

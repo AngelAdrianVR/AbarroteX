@@ -4,20 +4,71 @@
             <div class="flex justify-between items-center">
                 <Back :to="route('sales.index')" />
             </div>
-
+            <section class="flex justify-around mx-auto mt-2 w-1/6">
+                <button @click="SeePrevDaySales()" type="button"
+                    class="text-primary text-[10px] disabled:text-grayD9 disabled:cursor-not-allowed"
+                    :disabled="changingDay || !previous_sale_date">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="text-gray99 flex items-center space-x-2">
+                    <p class="flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                        </svg>
+                        <span>|</span>
+                        <span>Fecha:</span>
+                    </p>
+                    <p v-if="changingDay" class="text-gray37">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    </p>
+                    <p v-else class="text-gray37">
+                        {{ formatDate(getGroupedSales[0].products[0].created_at) }}
+                    </p>
+                </div>
+                <button @click="SeeNextDaySales()" type="button"
+                    class="text-primary text-[10px] disabled:text-grayD9 disabled:cursor-not-allowed"
+                    :disabled="changingDay || !next_sale_date">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </section>
             <!-- Información de la venta -->
-            <header class="mt-7 lg:mx-16 text-gray99">
-                <p>Total de productos vendidos: <span class="font-thin ml-2 text-gray37">{{
-                    Object.values(day_sales)[0].total_quantity }}</span></p>
-                <p>Fecha de venta: <span class="font-thin ml-2 text-gray37">{{
-                    formatDate(Object.keys(day_sales)[0]) }}</span></p>
-                <p>Total de venta: <span class="font-black ml-2 text-gray37">${{
-                    Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}</span></p>
+            <header
+                class="w-80 inline-block mt-7 lg:mx-16 rounded-[5px] border border-grayD9 text-gray99 px-4 py-2 space-y-2">
+                <div class="flex items-center space-x-3">
+                    <span class="w-2/3">Total de pedidos en línea: </span>
+                    <p class="flex text-gray37 w-1/3 font-bold">
+                        <span class="w-1/3">$</span>
+                        <span class="w-2/3 ml-3 text-gray37 text-end">
+                            {{ Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        </span>
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="w-2/3">Total de ventas en tienda: </span>
+                    <p class="flex text-gray37 w-1/3 font-bold">
+                        <span class="w-1/3">$</span>
+                        <span class="w-2/3 ml-3 text-gray37 text-end">
+                            {{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }}
+                        </span>
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3 border-t border-grayD9 pt-1">
+                    <span class="w-2/3 font-bold">Total de ventas del Día: </span>
+                    <p class="flex text-gray37 w-1/3 font-bold">
+                        <span class="w-1/3">$</span>
+                        <span class="w-2/3 ml-3 text-gray37 text-end">
+                            {{ (Object.values(day_sales)[0].online_sales_total +
+                                Object.values(day_sales)[0].total_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        </span>
+                    </p>
+                </div>
             </header>
 
             <!-- Productos -->
-            <main class="flex flex-col space-y-5 lg:mx-16 mt-10">
+            <main class="flex flex-col space-y-5 lg:mx-16 mt-8">
                 <el-tabs v-model="activeTab" @tab-click="updateURL">
                     <el-tab-pane label="Ventas en tienda" name="1">
                         <StoreSales @show-modal="handleShowModal" :sales="getGroupedSales" />
@@ -205,7 +256,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateBatchOfItems, getAll } from '@/dbService.js';
+import { addOrUpdateBatchOfItems, getAll, getItemByAttributes } from '@/dbService.js';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
@@ -237,6 +288,7 @@ export default {
             addingInstallment: false,
             refunding: false,
             editing: false,
+            changingDay: false,
             // inventario de codigos activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // tabs
@@ -258,7 +310,9 @@ export default {
     },
     props: {
         day_sales: Object,
-        is_out_of_cash_cut: Boolean //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
+        is_out_of_cash_cut: Boolean, //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
+        previous_sale_date: String,
+        next_sale_date: String,
     },
     computed: {
         getGroupedSales() {
@@ -280,6 +334,24 @@ export default {
         },
     },
     methods: {
+        SeePrevDaySales() {
+            this.changingDay = true;
+            const params = {
+                date: this.previous_sale_date.split('T')[0],
+                cashRegisterId: this.$page.props.auth.user.cash_register_id
+            };
+
+            this.$inertia.visit(route('sales.show', params));
+        },
+        SeeNextDaySales() {
+            this.changingDay = true;
+            const params = {
+                date: this.next_sale_date.split('T')[0],
+                cashRegisterId: this.$page.props.auth.user.cash_register_id
+            };
+
+            this.$inertia.visit(route('sales.show', params));
+        },
         updateURL(tab) {
             const params = new URLSearchParams(window.location.search);
             params.set('tab', tab.props.name);
@@ -414,11 +486,9 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
-                    // Obtener productos de servidor
-                    response = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response.data.products;
-                    // actualizar lista de productos en indexedDB
-                    addOrUpdateBatchOfItems('products', products);
+                    if (this.isInventoryOn) {
+                        this.updateIndexedDBproductsStock(response.data.updated_items);
+                    }
 
                     this.showRefundConfirm = false;
 
@@ -445,6 +515,29 @@ export default {
                 this.refunding = false;
             }
         },
+        async updateIndexedDBproductsStock(updatedItems) {
+            // actualizar stock de productos de indexedDB
+            const products = await Promise.all(updatedItems.map(async (item) => {
+                // Obtener productos por código
+                let foundProducts = await getItemByAttributes('products', { name: item.name });
+
+                // Verificar si se encontró el producto
+                if (foundProducts.length > 0) {
+                    // Actualizar el stock
+                    foundProducts[0].current_stock = item.current_stock || 0;
+                    return foundProducts[0];
+                }
+
+                // Manejar el caso donde no se encuentre el producto
+                return null;
+            }));
+
+            // Filtrar productos que no fueron encontrados
+            const validProducts = products.filter(product => product !== null);
+
+            // Actualizar los productos en IndexedDB
+            await addOrUpdateBatchOfItems('products', validProducts);
+        }
     },
     watch: {
         'installmentForm.amount': function () {

@@ -95,22 +95,22 @@ class OnlineSaleController extends Controller
                     $temp_product = Product::find($product['id']);
                     $temp_product->current_stock -= $product['quantity'];
 
-                    //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
-                    // if ( $temp_product->current_stock < 0 ) {
-                    // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
-                    // } else {
+                    // si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
+                    if ( $temp_product->current_stock < 0 ) {
+                    return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    } else {
                     $temp_product->save();
-                    // }
+                    }
                 } else {
                     $temp_product = GlobalProductStore::find($product['id']);
                     $temp_product->current_stock -= $product['quantity'];
 
                     //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
-                    // if ( $temp_product->current_stock < 0 ) {
-                    // return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
-                    // } else {
+                    if ( $temp_product->current_stock < 0 ) {
+                    return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
+                    } else {
                     $temp_product->save();
-                    // }
+                    }
                 }
             }
         }
@@ -412,11 +412,17 @@ class OnlineSaleController extends Controller
         }
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
+        $updated_items = [];
         if ($is_inventory_on) {
-            $saleProducts->each(function ($sale) use ($folio) {
-                $current_product = $sale['isLocal']
-                    ? Product::find($sale['product_id'])
-                    : GlobalProductStore::find($sale['product_id']);
+            $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
+                if ($sale['isLocal']) {
+                    $current_product = Product::find($sale['product_id']);
+                    $indexedDB_name = $current_product->name;
+                } else {
+                    $current_product = GlobalProductStore::find($sale['product_id']);
+                    $indexedDB_name = $current_product->globalProduct->name;
+                }
+               
                 $current_product->increment('current_stock', $sale['quantity']);
 
                 //Registra el historial de venta de cada producto
@@ -426,11 +432,16 @@ class OnlineSaleController extends Controller
                     'historicable_id' => $current_product->id,
                     'historicable_type' => get_class($current_product),
                 ]);
+
+                // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
+                $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
             });
         }
 
         // marcar venta como reembolsada
         $onlineSale->update(['refunded_at' => now(), 'status' => 'Reembolsado']);
+
+        return response()->json(compact('updated_items'));
     }
 
     public function cancel(OnlineSale $onlineSale)
@@ -440,11 +451,17 @@ class OnlineSaleController extends Controller
         $folio = 'L-' . $onlineSale->id;
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
+        $updated_items = [];
         if ($is_inventory_on && $onlineSale->status === 'Procesando') {
-            $saleProducts->each(function ($sale) use ($folio) {
-                $current_product = $sale['isLocal']
-                    ? Product::find($sale['product_id'])
-                    : GlobalProductStore::find($sale['product_id']);
+            $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
+                if ($sale['isLocal']) {
+                    $current_product = Product::find($sale['product_id']);
+                    $indexedDB_name = $current_product->name;
+                } else {
+                    $current_product = GlobalProductStore::find($sale['product_id']);
+                    $indexedDB_name = $current_product->globalProduct->name;
+                }
+
                 $current_product->increment('current_stock', $sale['quantity']);
 
                 //Registra el historial de venta de cada producto
@@ -454,13 +471,15 @@ class OnlineSaleController extends Controller
                     'historicable_id' => $current_product->id,
                     'historicable_type' => get_class($current_product),
                 ]);
+
+                // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
+                $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
             });
         }
 
-        $prev_status = $onlineSale->status;
         // marcar venta como cancelada
         $onlineSale->update(['refunded_at' => now(), 'status' => 'Cancelado']);
-        return response()->json(compact('prev_status'));
+        return response()->json(compact('updated_items'));
     }
 
     //para index en app

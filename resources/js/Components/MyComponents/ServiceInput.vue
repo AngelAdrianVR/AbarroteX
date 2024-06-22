@@ -83,7 +83,7 @@ export default {
     },
     computed: {
         syncItem() {
-            if (this.selection != null && this.quantity) {
+            if (this.selection != null) {
                 // Encuentra el índice del servicio seleccionado en la lista de servicios
                 const serviceSelectedIndex = this.services.findIndex(item => item.id === this.selection);
 
@@ -107,6 +107,7 @@ export default {
                         name: this.services[serviceSelectedIndex].name,
                         service_id: this.services[serviceSelectedIndex].id,
                         price: this.services[serviceSelectedIndex].price,
+                        description: this.services[serviceSelectedIndex].description,
                         quantity: this.quantity,
                     });
                     this.error_validation = false;

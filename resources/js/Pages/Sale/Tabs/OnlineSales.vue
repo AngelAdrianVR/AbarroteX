@@ -1,50 +1,53 @@
 <template>
     <Loading v-if="loading" />
-    <div v-else class="text-sm mt-5 space-y-4">
-        <OnlineSaleDetails v-for="(item, index) in sales" :key="index" :onlineSale="item" @show-modal="showModal"
-            :ref="'osd' + item.id" />
-
-        <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
-            <template #title>
-                <h1>Reembolsar venta</h1>
-            </template>
-            <template #content>
-                <p v-if="isInventoryOn">
-                    Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
-                    correspondiente de la caja.
-                    Si en caja no hay suficiente dinero, quedará en $0.00
-                    ¿Deseas continuar?
-                </p>
-                <p v-else>
-                    Se retirará el monto correspondiente a esta venta de la caja. Si en caja no hay suficiente dinero,
-                    quedará en $0.00 ¿Deseas continuar?
-                </p>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-1">
-                    <CancelButton @click="showRefundConfirm = false" :disabled="refunding">Cancelar</CancelButton>
-                    <PrimaryButton @click="refundSale" :disabled="refunding">Continuar</PrimaryButton>
-                </div>
-            </template>
-        </ConfirmationModal>
-
-        <ConfirmationModal :show="showCancelConfirm" @close="showCancelConfirm = false">
-            <template #title>
-                <h1>Cancelar venta</h1>
-            </template>
-            <template #content>
-                <p>
-                    Se cancelará la venta y esto es irreversible. ¿Deseas continuar?
-                </p>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-1">
-                    <CancelButton @click="showCancelConfirm = false" :disabled="canceling">Cancelar</CancelButton>
-                    <PrimaryButton @click="cancelSale" :disabled="canceling">Continuar</PrimaryButton>
-                </div>
-            </template>
-        </ConfirmationModal>
-    </div>
+    <section v-else class="text-sm mt-5 space-y-4">
+        <div v-if="sales.length">
+            <OnlineSaleDetails v-for="(item, index) in sales" :key="index" :onlineSale="item" @show-modal="showModal"
+                :ref="'osd' + item.id" />
+    
+            <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
+                <template #title>
+                    <h1>Reembolsar venta</h1>
+                </template>
+                <template #content>
+                    <p v-if="isInventoryOn">
+                        Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
+                        correspondiente de la caja.
+                        Si en caja no hay suficiente dinero, quedará en $0.00
+                        ¿Deseas continuar?
+                    </p>
+                    <p v-else>
+                        Se retirará el monto correspondiente a esta venta de la caja. Si en caja no hay suficiente dinero,
+                        quedará en $0.00 ¿Deseas continuar?
+                    </p>
+                </template>
+                <template #footer>
+                    <div class="flex items-center space-x-1">
+                        <CancelButton @click="showRefundConfirm = false" :disabled="refunding">Cancelar</CancelButton>
+                        <PrimaryButton @click="refundSale" :disabled="refunding">Continuar</PrimaryButton>
+                    </div>
+                </template>
+            </ConfirmationModal>
+    
+            <ConfirmationModal :show="showCancelConfirm" @close="showCancelConfirm = false">
+                <template #title>
+                    <h1>Cancelar venta</h1>
+                </template>
+                <template #content>
+                    <p>
+                        Se cancelará la venta y esto es irreversible. ¿Deseas continuar?
+                    </p>
+                </template>
+                <template #footer>
+                    <div class="flex items-center space-x-1">
+                        <CancelButton @click="showCancelConfirm = false" :disabled="canceling">Cancelar</CancelButton>
+                        <PrimaryButton @click="cancelSale" :disabled="canceling">Continuar</PrimaryButton>
+                    </div>
+                </template>
+            </ConfirmationModal>
+        </div>
+        <el-empty v-else description="No hay ventas para mostrar" />
+    </section>
 </template>
 
 <script>
@@ -52,7 +55,7 @@ import OnlineSaleDetails from "@/Components/MyComponents/OnlineSale/OnlineSaleDe
 import Loading from "@/Components/MyComponents/Loading.vue";
 import axios from "axios";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { addOrUpdateBatchOfItems } from '@/dbService.js';
+import { addOrUpdateBatchOfItems, getItemByAttributes } from '@/dbService.js';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 
@@ -116,11 +119,9 @@ export default {
             try {
                 let response = await axios.post(route('online-sales.refund', this.saleIdToRefund));
                 if (response.status === 200) {
-                    // Obtener productos de servidor
-                    response = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response.data.products;
-                    // actualizar lista de productos en indexedDB
-                    addOrUpdateBatchOfItems('products', products);
+                    if (this.isInventoryOn) {
+                        this.updateIndexedDBproductsStock(response.data.updated_items);
+                    }
 
                     this.showRefundConfirm = false;
 
@@ -152,11 +153,8 @@ export default {
                 if (response.status === 200) {
                     // Obtener productos de servidor
                     
-                    if (response.data.prevStatus === 'Procesando') {
-                        response = await axios.get(route('products.get-all-for-indexedDB'));
-                        const products = response.data.products;
-                        // actualizar lista de productos en indexedDB
-                        addOrUpdateBatchOfItems('products', products);
+                    if (this.isInventoryOn) {
+                        this.updateIndexedDBproductsStock(response.data.updated_items);
                     }
 
                     this.showCancelConfirm = false;
@@ -182,6 +180,29 @@ export default {
                 this.refunding = false;
             }
         },
+        async updateIndexedDBproductsStock(updatedItems) {
+            // actualizar stock de productos de indexedDB
+            const products = await Promise.all(updatedItems.map(async (item) => {
+                // Obtener productos por código
+                let foundProducts = await getItemByAttributes('products', { name: item.name });
+
+                // Verificar si se encontró el producto
+                if (foundProducts.length > 0) {
+                    // Actualizar el stock
+                    foundProducts[0].current_stock = item.current_stock || 0;
+                    return foundProducts[0];
+                }
+
+                // Manejar el caso donde no se encuentre el producto
+                return null;
+            }));
+
+            // Filtrar productos que no fueron encontrados
+            const validProducts = products.filter(product => product !== null);
+
+            // Actualizar los productos en IndexedDB
+            await addOrUpdateBatchOfItems('products', validProducts);
+        }
     },
     async mounted() {
         await this.fetchOnlineSalesByDate();

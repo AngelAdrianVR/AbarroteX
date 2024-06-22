@@ -10,7 +10,7 @@
               v-model="searchQuery"
               @keydown.enter="searchQuotes"
               class="input w-full pl-9"
-              placeholder="Buscar cotización por nombre de cliente o folio"
+              placeholder="Buscar cotización por nombre de contacto o folio"
               type="search"
             />
             <i
@@ -43,7 +43,7 @@
         </p>
         <button
           v-else-if="
-            total_quotes > 30 &&
+            total_quotes > 20 &&
             localQuotes.length < total_quotes &&
             localQuotes.length
           "
