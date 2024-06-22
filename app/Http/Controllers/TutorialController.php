@@ -41,7 +41,7 @@ class TutorialController extends Controller
     
     public function update(Request $request, Tutorial $tutorial)
     {
-        //
+
     }
 
     
@@ -49,4 +49,5 @@ class TutorialController extends Controller
     {
         //
     }
+
 }

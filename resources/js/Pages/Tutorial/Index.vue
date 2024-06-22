@@ -101,7 +101,7 @@
                 </div>
                 
                 <div class="text-center">
-                    <PrimaryButton class="!px-12" @click="$inertia.get(route('sales.point'))">¡Comenzar ahora!</PrimaryButton>
+                    <PrimaryButton class="!px-12" @click="$inertia.put(route('users.tutorials-completed'))">¡Comenzar ahora!</PrimaryButton>
                 </div>
 
                 <p class="text-xs text-center mt-8">¡Descubre lo que Ezy Ventas puede hacer por ti y tu negocio!</p>

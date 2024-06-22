@@ -101,4 +101,13 @@ class UserController extends Controller
     {
         $user->delete();
     }
+
+    public function tutorialsCompleted() 
+    {
+        $user = auth()->user();
+        $user->tutorials_seen = true;
+        $user->save();
+
+        return to_route('sales.point');
+    }
 }
