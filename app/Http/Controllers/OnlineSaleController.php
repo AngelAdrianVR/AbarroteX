@@ -10,6 +10,7 @@ use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
+use App\Models\Service;
 use App\Models\Store;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -45,18 +46,21 @@ class OnlineSaleController extends Controller
 
         // Obtener todos los productos (locales y transferidos)
         $all_products = $this->getAllProducts($store_id);
-
         // Contar el total de productos
         $total_products = $all_products->count();
 
         // Tomar solo los primeros 12 productos
         $products = $all_products->take(12);
 
+        //servicios
+        $services = Service::with('media')->where('store_id', auth()->user()->store_id)->get();
+        $total_services = Service::where('store_id', auth()->user()->store_id)->get()->count();
+
         // Obtener los banners
         $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
 
         // Retornar la vista con los datos
-        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'store_id', 'banners'));
+        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id', 'banners'));
     }
 
 
@@ -69,6 +73,12 @@ class OnlineSaleController extends Controller
     public function create()
     {
         return inertia('OnlineSale/Create');
+    }
+
+
+    public function quoteService($service)
+    {
+        return inertia('OnlineSale/QuoteService');
     }
 
 
@@ -92,7 +102,7 @@ class OnlineSaleController extends Controller
         if ($request->store_inventory === true) {
             foreach ($request->products as $product) {
                 if ($product['isLocal'] === true) {
-                    $temp_product = Product::find($product['id']);
+                    $temp_product = Product::find($product['product_id']);
                     $temp_product->current_stock -= $product['quantity'];
 
                     // si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
@@ -102,10 +112,10 @@ class OnlineSaleController extends Controller
                     $temp_product->save();
                     }
                 } else {
-                    $temp_product = GlobalProductStore::find($product['id']);
+                    $temp_product = GlobalProductStore::find($product['product_id']);
                     $temp_product->current_stock -= $product['quantity'];
 
-                    //si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
+                    // si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
                     if ( $temp_product->current_stock < 0 ) {
                     return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
                     } else {
@@ -145,6 +155,14 @@ class OnlineSaleController extends Controller
     {
         $global_product = GlobalProductStore::with(['globalProduct' => ['media', 'category:id,name', 'brand:id,name']])->find($global_product_id);
         return inertia('OnlineSale/ShowGlobalProduct', compact('global_product'));
+    }
+
+
+    public function showService($service)
+    {   
+        $service = Service::with('media')->find($service);
+
+        return inertia('OnlineSale/ShowService', compact('service'));
     }
 
 

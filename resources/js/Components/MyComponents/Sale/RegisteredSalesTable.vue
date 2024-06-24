@@ -57,7 +57,7 @@
                     <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                         <th>Fecha</th>
                         <th>Ventas en tienda</th>
-                        <th>Ventas en linea</th>
+                        <!-- <th>Ventas en linea</th> -->
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -69,10 +69,10 @@
                             {{ sale.normal_folios != 1 ? sale.normal_folios + ' ventas' : sale.normal_folios + ' venta' }}
                             ({{ sale.total_normal_quantity }} productos en total)
                         </td>
-                        <td> 
+                        <!-- <td> 
                             {{ sale.online_folios != 1 ? sale.online_folios + ' ventas' : sale.online_folios + ' venta' }}
                             ({{ sale.total_online_quantity }} productos en total)
-                        </td>
+                        </td> -->
                         <td>${{ (sale.total_sale + sale.online_sales_total)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         <td class="rounded-e-full text-end">
                             <el-dropdown trigger="click" @command="handleCommand">

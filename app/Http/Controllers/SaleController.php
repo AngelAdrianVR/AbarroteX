@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SaleController extends Controller
 {
@@ -85,21 +86,23 @@ class SaleController extends Controller
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, true);
 
+        $date = Carbon::parse($date)->startOfDay(); // Comienza el día actual para la comparación
+
         // Obtener la fecha de la venta anterior
-        $date = Carbon::parse($date);
-        $previous_sale_date = Sale::where('store_id', $storeId)
+        $previous_sale = Sale::where('store_id', $storeId)
             ->where('cash_register_id', $cashRegisterId)
-            ->whereDate('created_at', '<', $date->copy()->subDay()) // Excluir la fecha actual
+            ->where('created_at', '<', $date) // Excluir la fecha actual
             ->orderBy('created_at', 'desc')
-            ->first()
-            ->created_at ?? null;
+            ->first();
+        $previous_sale_date = $previous_sale ? $previous_sale->created_at->toDateString() : null;
+
         // Obtener la fecha de la venta siguiente
-        $next_sale_date = Sale::where('store_id', $storeId)
+        $next_sale = Sale::where('store_id', $storeId)
             ->where('cash_register_id', $cashRegisterId)
-            ->whereDate('created_at', '>', $date) // Excluir la fecha actual
+            ->where('created_at', '>', $date->endOfDay()) // Excluir la fecha actual
             ->orderBy('created_at', 'asc')
-            ->first()
-            ->created_at ?? null;
+            ->first();
+        $next_sale_date = $next_sale ? $next_sale->created_at->toDateString() : null;
 
         //evalúa si la venta está dentro del corte---------------
         // $last_cash_cut = CashCut::where('store_id', auth()->user()->store_id)->where('cash_register_id', $cashRegisterId)->latest()->first();
