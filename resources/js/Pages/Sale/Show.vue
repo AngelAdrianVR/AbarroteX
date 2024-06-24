@@ -4,7 +4,7 @@
             <div class="flex justify-between items-center">
                 <Back :to="route('sales.index')" />
             </div>
-            <section class="flex justify-around mx-auto mt-2 w-1/6">
+            <section class="flex justify-around mx-auto mt-2 w-1/2 lg:w-1/3 xl:w-1/6">
                 <button @click="SeePrevDaySales()" type="button"
                     class="text-primary text-[10px] disabled:text-grayD9 disabled:cursor-not-allowed"
                     :disabled="changingDay || !previous_sale_date">
@@ -41,7 +41,9 @@
                     <p class="flex text-gray37 w-1/3 font-bold">
                         <span class="w-1/3">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{
+                                Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    ",") }}
                         </span>
                     </p>
                 </div>
@@ -192,17 +194,15 @@
                         </div>
                         <div class="w-1/3 md:w-1/4">
                             <InputLabel value="$ por unidad" />
-                            <el-input v-model.number="product.current_price" placeholder="No olvides llenar este campo"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
+                            <el-input v-model.number="product.current_price" type="number"
+                                placeholder="No olvides llenar este campo" required>
                             </el-input>
                             <InputError :message="form.errors[`products.${index}.current_price`]" />
                         </div>
                         <div class="w-1/3 md:w-1/4">
                             <InputLabel value="Cantidad" />
-                            <el-input v-model.number="product.quantity" placeholder="No olvides llenar este campo"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')" required>
+                            <el-input v-model.number="product.quantity" type="number"
+                                placeholder="No olvides llenar este campo" required>
                             </el-input>
                             <InputError :message="form.errors[`products.${index}.quantity`]" />
                         </div>
