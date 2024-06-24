@@ -53,8 +53,8 @@ class OnlineSaleController extends Controller
         $products = $all_products->take(12);
 
         //servicios
-        $services = Service::with('media')->where('store_id', auth()->user()->store_id)->get();
-        $total_services = Service::where('store_id', auth()->user()->store_id)->get()->count();
+        $services = Service::with('media')->where('store_id', $store_id)->get();
+        $total_services = Service::where('store_id', $store_id)->get()->count();
 
         // Obtener los banners
         $banners = Banner::with(['media'])->where('store_id', $store_id)->first();

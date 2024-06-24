@@ -1,6 +1,6 @@
 <template>
     <OnlineStoreLayout :title="store.name">
-        <div ref="scrollContainer" style="height: 82vh; overflow-y: scroll;" @scroll="handleScroll">
+        <div ref="scrollContainer" style="height: 90vh; overflow-y: scroll;" @scroll="handleScroll">
             <!-- Banners -->
             <section v-if="banners?.media?.length" class="my-4">
                 <figure class="lg:h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
@@ -82,7 +82,7 @@ export default {
             const clientHeight = container.clientHeight;
 
             // Determinar si has llegado al final de la vista
-            if (scrollHeight - scrollTop === clientHeight) {
+            if (scrollHeight - scrollTop <= clientHeight + 50) {
 
                 // Ejecutar tu método cuando llegues al final. No se ejecuta si se estan cargando ya products
                 if (!this.loading && this.activeTab === 'Productos') {
