@@ -24,8 +24,14 @@ class DashboardController extends Controller
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
         $last_period_expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
         // activar solo si la tienda tiene el paquete para hacer ventas en linea
-        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
-        $last_period_online_sales = OnlineSale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
+        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+            ->whereNotNull('delivered_at')
+            ->whereDate('created_at', $date)
+            ->get();
+        $last_period_online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+            ->whereNotNull('delivered_at')
+            ->whereDate('created_at', $prev_date)
+            ->get();
         // $top_products = Sale::with('saleable')
         //     ->select('saleable_id', DB::raw('SUM(quantity) as total_quantity'))
         //     ->where('store_id', auth()->user()->store_id)
@@ -73,9 +79,11 @@ class DashboardController extends Controller
 
         $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->whereNotNull('delivered_at')
             ->get();
 
         $last_period_online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+            ->whereNotNull('delivered_at')
             ->whereBetween('created_at', [
                 Carbon::parse($prev_date)->startOfWeek(Carbon::SUNDAY)->toDateString(),
                 Carbon::parse($prev_date)->endOfWeek(Carbon::SATURDAY)->toDateString()
@@ -124,11 +132,13 @@ class DashboardController extends Controller
 
         $online_sales = OnlineSale::whereYear('created_at', $current_month->year)
             ->where('store_id', auth()->user()->store_id)
+            ->whereNotNull('delivered_at')
             ->whereMonth('created_at', $current_month->month)
             ->get();
 
         $last_period_online_sales = OnlineSale::whereYear('created_at', $prev_month->year)
             ->where('store_id', auth()->user()->store_id)
+            ->whereNotNull('delivered_at')
             ->whereMonth('created_at', $prev_month->month)
             ->get();
 
