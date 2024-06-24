@@ -1,10 +1,10 @@
 <template>
     <OnlineStoreLayout :title="store.name">
-        <div ref="scrollContainer" style="height: 90vh; overflow-y: scroll;" @scroll="handleScroll">
+        <div ref="scrollContainer" style="height: 82vh; overflow-y: scroll;" @scroll="handleScroll">
             <!-- Banners -->
             <section v-if="banners?.media?.length" class="my-4">
                 <figure class="lg:h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
-                    <img class="!rounded-md h-full object-contain" :src="banners?.media[currentBanner].original_url"
+                    <img class="!rounded-md h-full object-contain" :src="banners?.media[currentBanner]?.original_url"
                         alt="">
                     <div class="flex items-center justify-center space-x-3 mt-4">
                         <i @click="currentBanner = index" v-for="(dot, index) in banners?.media?.length" :key="dot"
@@ -15,21 +15,22 @@
             </section>
 
             <!-- Separador de banner y productos -->
-            <div class="border-b border-grayD9 my-10"></div>
+            <div class="border-b border-grayD9 my-8"></div>
 
             <!-- Productos -->
             <section class="pb-16">
-                <h1 class="font-bold text-3xl text-center mb-12">Productos</h1>
-                <h1 v-if="store.online_store_properties?.enabled_free_delivery"
-                    class="font-bold md:text-xl text-center text-primary mb-1">
-                    Envío gratis en compra mínima de ${{ store.online_store_properties?.min_free_delivery }}</h1>
-
-                <div v-if="visibleProducts.length"
-                    class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-2 sm:mx-4 md:mx-9 space-y-4 md:space-y-0">
-                    <OnlineProductCard v-for="product in visibleProducts" :key="product" :product="product"
-                        :store="store" />
+                <!-- tabs -->
+                <div class="flex justify-center pb-5">
+                    <ToggleButton id="start" ref="togglebutton" @update="handleToggle" :labels="['Productos', 'Servicios']"
+                        class="w-3/4 md:w-[45%] lg:w-[35%] xl:w-[20%]" />
                 </div>
-                <el-empty v-else description="No hay productos en la tienda" />
+
+                <section v-if="activeTab === 'Productos'">
+                    <Products :store="store" :visibleProducts="visibleProducts" />
+                </section>
+                <section v-else>
+                    <Services :store="store" :visibleServices="visibleServices" />
+                </section>
 
                 <!-- estado de carga -->
                 <div v-if="loading" class="flex justify-center items-center py-10">
@@ -43,8 +44,9 @@
 
 <script>
 import OnlineStoreLayout from '@/Layouts/OnlineStoreLayout.vue';
-import OnlineProductCard from '@/Components/MyComponents/OnlineSale/OnlineProductCard.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ToggleButton from "@/Components/MyComponents/ToggleButton.vue";
+import Products from './Tabs/Products.vue';
+import Services from './Tabs/Services.vue';
 import axios from 'axios';
 
 export default {
@@ -52,18 +54,23 @@ export default {
         return {
             loading: false, // bandera de carga para recuperar mas items con scroll.
             visibleProducts: this.products, //variable local de productos visibles
+            visibleServices: this.services, //variable local de servicios visibles
             currentBanner: 0, //index de banners
+            activeTab: 'Productos',
         }
     },
     components: {
         OnlineStoreLayout,
-        OnlineProductCard,
-        PrimaryButton,
+        ToggleButton,
+        Products,
+        Services,
     },
     props: {
         store: Object,
         products: Array,
         total_products: Number,
+        services: Array,
+        total_services: Number,
         store_id: Number, //id de la tienda para guardarla en el localStorage
         banners: Object, //banners
     },
@@ -78,7 +85,7 @@ export default {
             if (scrollHeight - scrollTop === clientHeight) {
 
                 // Ejecutar tu método cuando llegues al final. No se ejecuta si se estan cargando ya products
-                if (!this.loading) {
+                if (!this.loading && this.activeTab === 'Productos') {
                     this.loadMoreProducts();
                 }
             }
@@ -116,6 +123,17 @@ export default {
                 this.currentBanner = (this.currentBanner + 1) % this.banners?.media?.length;
             }, 5000);
         },
+        handleToggle(active) {
+            this.activeTab = active;
+
+            const tab = active == 'Productos' ? 'products' : 'services';
+            this.updateURL(tab);
+        },
+        updateURL(tab) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tab);
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        },
     },
     created() {
         //obtengo el id del local storage para comparar si entró a otra tienda y borrar el carrito
@@ -136,6 +154,16 @@ export default {
         //iniciar contador para cambiar banners automaticamente.
         this.startTimer();
 
+         // Obtener la URL actual
+        const currentURL = new URL(window.location.href);
+        // Extraer el valor de 'activeTab' de los parámetros de búsqueda
+        const activeTabFromURL = currentURL.searchParams.get('tab');
+        if (activeTabFromURL) {
+            if (activeTabFromURL == 'services') {
+                const tab = 'Servicios';
+                this.$refs.togglebutton.toggle();
+            }
+        }
     }
 }
 </script>

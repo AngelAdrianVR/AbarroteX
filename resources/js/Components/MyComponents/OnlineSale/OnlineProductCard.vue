@@ -3,7 +3,7 @@
         <!-- Deatalle de cantidad disponible  -->
         <div v-if="store?.online_store_properties?.inventory"
             class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg lg:hidden lg:group-hover:block">
-            <p class="text-white text-center py-2">{{ product.current_stock ?? '0' }} Unidades disponibles</p>
+            <p class="text-white text-center py-1">{{ product.current_stock ?? '0' }} Unidades disponibles</p>
         </div>
         <!-- Imagen -->
         <figure class="h-1/2 text-center">

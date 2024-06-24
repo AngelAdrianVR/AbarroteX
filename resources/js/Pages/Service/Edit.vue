@@ -29,6 +29,11 @@
                     <InputError :message="form.errors.price" />
                 </div>
 
+                <div class="col-span-full w-full overflow-auto flex items-end">
+                    <InputFilePreview v-show="index < 3" v-for="(file, index) in form.media" :key="index" :canDelete="index == (form.media.length - 2)"
+                        @imagen="saveImage" @cleared="handleCleared(index)" :imageUrl="service?.media[index]?.original_url" class="p-2" />
+                </div>
+
                 <div class="mt-3 col-span-full">
                     <InputLabel value="Descripción del servicio (opcional)" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
@@ -49,6 +54,7 @@
 </template>
 
 <script>
+import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
@@ -63,6 +69,8 @@ data() {
         category: this.service.category,
         description: this.service.description,
         price: this.service.price,
+        media: [...this.service.media, null],
+        media_edited: false,
     });
 
     return {
@@ -70,6 +78,7 @@ data() {
     }
 },
 components:{
+InputFilePreview,
 AppLayout,
 PrimaryButton,
 InputLabel,
@@ -81,6 +90,18 @@ service: Object,
 },
 methods:{
     update() {
+      if (this.form.media_edited === true) {
+        this.form.post(route("services.update-with-media", this.service.id), {
+          method: '_put',
+          onSuccess: () => {
+            this.$notify({
+              title: "Éxito",
+              message: "Se ha editado tu servicio",
+              type: "success",
+            });
+          },
+        });
+      } else {
         this.form.put(route("services.update", this.service.id), {
             onSuccess: () => {
                 this.$notify({
@@ -90,6 +111,18 @@ methods:{
                 });
             },
         });
+      }
+    },
+    saveImage(image) {
+        const currentIndex = this.form.media.length -1;
+        this.form.media[currentIndex] = image;
+        this.form.media.push(null);
+        this.form.media_edited = true;
+    },
+    handleCleared(index) {
+      // Eliminar el componente y su informacion correspondiente cuando se borra la imagen
+      this.form.media.splice(index, 1);
+      this.form.media_edited = true;
     },
 }
 }

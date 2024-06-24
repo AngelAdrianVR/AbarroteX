@@ -15,22 +15,42 @@
                 </div>
             </article>
 
-            <!-- Información del servicio -->
-            <header class="mt-7 lg:mx-8 text-sm lg:text-base space-y-2">
-                <p class="text-[#373737]">Nombre: <span class="font-bold ml-10">{{
-                    service.name }}</span></p>
-                <p class="text-[#373737]">Categoría: <span class="font-bold ml-8">{{
-                    service.category ?? '-' }}</span></p>
-                <div class="flex space-x-5 md:w-2/3">
-                    <p class="text-[#373737]">Descripción:</p>
-                    <span class="font-bold ml-5" style="white-space: pre-line;">{{service.description ?? '-' }}</span>
-                </div>
-                <p class="text-[#373737]">Precio: <span class="font-bold ml-14">${{
-                    service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-                <p class="text-[#373737]">Creado el: <span class="font-bold ml-8">{{
-                    formatDate(service.created_at) }}</span></p>
+            <section class="md:flex space-x-5 mt-7 md:mx-5">
+                <!-- imágenes -->
+                <article>
+                    <figure class="border border-grayD9 rounded-md flex items-center justify-center w-96 h-72">
+                        <img v-if="service.media?.length" :src="service.media[currentImage]?.original_url" alt="servicio"
+                            class="h-full mx-auto object-contain">
+                        <div v-else>
+                            <i class="fa-regular fa-image text-9xl text-gray-200"></i>
+                            <p class="text-sm text-gray-300">Imagen no disponible</p>
+                        </div>
+                    </figure>
 
-            </header>
+                    <!-- Selector de imagen -->
+                    <div v-if="service.media?.length > 1" class="mt-3 flex items-center justify-center space-x-3">
+                    <i @click="currentImage = index" v-for="(image, index) in service.media?.length" :key="index" 
+                        :class="index == currentImage ? 'text-primary' : 'text-gray-300'" 
+                        class="fa-solid fa-circle text-xs cursor-pointer"></i>
+                    </div>
+                </article>
+
+                <!-- Información del servicio -->
+                <header class="mt-7 lg:mx-8 text-sm lg:text-base space-y-2 w-full">
+                    <p class="text-[#373737]">Nombre: <span class="font-bold ml-10">{{
+                        service.name }}</span></p>
+                    <p class="text-[#373737]">Categoría: <span class="font-bold ml-8">{{
+                        service.category ?? '-' }}</span></p>
+                    <div class="flex space-x-5 md:w-2/3">
+                        <p class="text-[#373737]">Descripción:</p>
+                        <span class="font-bold ml-5" style="white-space: pre-line;">{{service.description ?? '-' }}</span>
+                    </div>
+                    <p class="text-[#373737]">Precio: <span class="font-bold ml-14">${{
+                        service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+                    <p class="text-[#373737]">Creado el: <span class="font-bold ml-8">{{
+                        formatDate(service.created_at) }}</span></p>
+                </header>
+            </section>
         </section>
     </AppLayout>
 </template>
@@ -48,7 +68,8 @@ data() {
     return {
         activeTab: '1',
         serviceId: this.service.id, //guarda el id del servicio seleccionado para ingresar a sus detalles desde el select
-        encodedId: null //id codificado
+        encodedId: null, //id codificado
+        currentImage: 0, //imagen de servicio actual
     }
 },
 components:{

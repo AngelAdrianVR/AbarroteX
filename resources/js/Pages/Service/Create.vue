@@ -29,6 +29,11 @@
                     <InputError :message="form.errors.price" />
                 </div>
 
+                <div class="col-span-full w-full overflow-auto flex items-end">
+                    <InputFilePreview v-show="index < 3" v-for="(file,index) in form.media" :key="index" :canDelete="index == (form.media.length - 2)"
+                        @imagen="saveImage" @cleared="handleCleared(index)" class="p-2" />
+                </div>
+
                 <div class="mt-3 col-span-full">
                     <InputLabel value="Descripción del servicio (opcional)" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
@@ -50,6 +55,7 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -63,6 +69,7 @@ data() {
         category: null,
         description: null,
         price: null,
+        media: [null],
     });
 
     return {
@@ -71,6 +78,7 @@ data() {
 },
 components:{
 AppLayout,
+InputFilePreview,
 PrimaryButton,
 InputLabel,
 InputError,
@@ -90,6 +98,15 @@ methods:{
             },
         });
     },
+    saveImage(image) {
+        const currentIndex = this.form.media.length -1;
+        this.form.media[currentIndex] = image;
+        this.form.media.push(null);
+    },
+    handleCleared(index) {
+      // Eliminar el componente y su informacion correspondiente cuando se borra la imagen
+      this.form.media.splice(index, 1);
+    }
 }
 }
 </script>

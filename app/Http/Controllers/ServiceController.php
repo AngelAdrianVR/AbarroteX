@@ -32,7 +32,10 @@ class ServiceController extends Controller
             'price' => 'nullable|numeric|min:0|max:99999',
         ]);
 
-        Service::create($request->all() + ['store_id' => auth()->user()->store_id]);
+        $service = Service::create($request->all() + ['store_id' => auth()->user()->store_id]);
+
+        // Subir y asociar las imagenes
+        $service->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
 
         return to_route('services.index');
     }
@@ -42,7 +45,7 @@ class ServiceController extends Controller
     {
         // Decodificar el ID
         $decoded_service = base64_decode($encoded_service_id);
-        $service = Service::find($decoded_service);
+        $service = Service::with('media')->find($decoded_service);
         $services = Service::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
 
         return inertia('Service/Show', compact('service', 'services'));
@@ -53,7 +56,7 @@ class ServiceController extends Controller
     {
         // Decodificar el ID
         $decoded_service = base64_decode($encoded_service_id);
-        $service = Service::find($decoded_service);
+        $service = Service::with('media')->find($decoded_service);
 
         return inertia('Service/Edit', compact('service'));
     }
@@ -69,6 +72,25 @@ class ServiceController extends Controller
         ]);
 
         $service->update($request->all());
+
+        return to_route('services.index');
+    }
+
+
+    public function updateWithMedia(Request $request, Service $service)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'descripton' => 'nullable|string|max:800',
+            'price' => 'nullable|numeric|min:0|max:99999',
+        ]);
+
+        $service->update($request->all());
+
+        // update image
+        $service->clearMediaCollection();
+        $service->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
 
         return to_route('services.index');
     }
