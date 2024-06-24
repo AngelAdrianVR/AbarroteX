@@ -162,6 +162,7 @@ Route::resource('services', ServiceController::class)->middleware('auth')->middl
 Route::get('services-get-by-page/{currentPage}', [ServiceController::class, 'getItemsByPage'])->name('services.get-by-page')->middleware('auth');
 Route::get('services-search', [ServiceController::class, 'searchService'])->name('services.search')->middleware('auth');
 Route::get('services-fetch-all-products', [ServiceController::class, 'fetchAllServices'])->name('services.fetch-all-services');
+Route::post('services/update-with-media/{service}', [ServiceController::class, 'updateWithMedia'])->name('services.update-with-media')->middleware('auth');
 
 
 //global-product-store routes----------------------------------------------------------------------------------
@@ -351,6 +352,8 @@ Route::post('online-sales-get-by-page/{currentPage}', [OnlineSaleController::cla
 Route::get('online-sales-get-sales-by-date/{date}', [OnlineSaleController::class, 'getSalesByDate'])->name('online-sales.get-sales-by-date');
 Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'refund'])->name('online-sales.refund');
 Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
+Route::get('online-sales-show-service/{service}', [OnlineSaleController::class, 'showService'])->name('online-sales.show-service');
+Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class, 'quoteService'])->name('online-sales.quote-service');
 
 
 // comandos Artisan
