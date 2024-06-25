@@ -200,6 +200,10 @@ onMounted(() => {
                             <!-- <ResponsiveNavLink :href="route('quotes.index')" :active="route().current('quotes.*')">
                                 Cotizaciones
                             </ResponsiveNavLink> -->
+                            <ResponsiveNavLink :href="route('product-rentals.index')"
+                                :active="route().current('product-rentals.*')">
+                                Renta de productos
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('products.index')"
                                 :active="route().current('products.*') || route().current('global-product-store.*')">
                                 Productos

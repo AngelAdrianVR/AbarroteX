@@ -60,7 +60,7 @@ export default {
             if (tab) {
                 this.activeTab = tab;
             }
-        }
+        },
     },
     mounted() {
         this.setActiveTabFromURL();
