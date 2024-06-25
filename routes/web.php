@@ -19,6 +19,7 @@ use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
+use App\Http\Controllers\ProductRentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
@@ -165,6 +166,11 @@ Route::post('products/import', [ProductController::class, 'import'])->name('prod
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
+
+
+//product-rentals routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+Route::resource('product-rentals', ProductRentalController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 //services routes----------------------------------------------------------------------------------
