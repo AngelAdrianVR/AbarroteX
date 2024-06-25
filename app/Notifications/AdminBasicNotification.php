@@ -29,7 +29,7 @@ class AdminBasicNotification extends Notification
         if (app()->environment() == 'production') {
             return ['database', 'mail'];
         } else {
-            return ['database', 'mail'];
+            return ['database'];
         }
     }
 
@@ -45,7 +45,6 @@ class AdminBasicNotification extends Notification
                 'description' => $this->description,
                 'url' => $this->url,
                 'salutation' => 'No olvides revisarlo en el sistema. Saludos',
-                'subcopy' => 'Si tienes alguna duda, dirígete a <a href="https://ezyventas.com/support/faqs">Soporte</a>, directamente desde el sistema. Si ya no deseas recibir nuestros correos electrónicos, <a href="https://ezyventas.com/support/faqs">cancela tu suscripción</a>.'
             ]);
     }
 
