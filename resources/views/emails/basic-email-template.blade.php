@@ -4,7 +4,11 @@
 {!! $description !!}
 
 @component('mail::button', ['url' => $url])
-Ver en sistema
+@if (isset($button_label))
+{{ $button_label }}
+@else
+Ver en sistema    
+@endif   
 @endcomponent
 
 {{ $salutation }}
