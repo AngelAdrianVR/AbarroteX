@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('type'); // tipo de tienda ej. ropa, carniceria, abarrotes
             $table->string('contact_name');
             $table->json('online_store_properties')->nullable(); //whatsapp,delivery_price,delivery_conditions,min_free_delivery, metodos de pago
+            $table->json('printer_config')->nullable(); //información de configuración de impresora
             $table->string('contact_phone')->nullable(); // telefono de contacto
             $table->string('address')->nullable();
             $table->string('plan')->default('Plan Básico');
