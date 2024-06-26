@@ -1,6 +1,6 @@
 <template>
-    <Head title="imprimir ticket" />
-    <div class="w-full md:w-[420px] mx-auto text-sm border-2 border-black p-5 my-16">
+    <Head :title="'imprimir ticket folio ' + sales[0].folio" />
+    <div id="text-to-print" class="w-full md:w-[420px] mx-auto text-sm border-2 border-black p-5 my-16">
         <div class="flex items-center space-x-3">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -10,7 +10,7 @@
             </svg>
             {{ $page.props.auth.user.store.name }}
         </div>
-        <p class="text-right mt-2">{{ formatDate(Object.values(day_sales)[0].sales[0]?.created_at) }}</p>
+        <p class="text-right mt-2">{{ formatDate(sales[0]?.created_at) }}</p>
 
 
         <!-- tabla de productos -->
@@ -20,7 +20,7 @@
                 <th class="px-[2px]">Cantidad</th>
                 <th class="px-[2px]">Total</th>
             </tr>
-            <tr v-for="sale in Object.values(day_sales)[0].sales" :key="sale">
+            <tr v-for="sale in sales" :key="sale">
                 <td class="uppercase px-[2px]">{{ sale.product_name }}</td>
                 <td>{{ sale.quantity }}</td>
                 <td class=""><span class="px-2">$</span>{{ (sale.quantity * sale.current_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
@@ -28,7 +28,7 @@
         </table>
 
         <div class="flex justify-end mt-5 mr-11">
-            <p class="font-bold text-xs">Total <span class="px-2">$</span> <span>{{ Object.values(day_sales)[0].total_sale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+            <p class="font-bold text-xs">Total <span class="px-2">$</span> <span>{{ totalSale() }}</span></p>
         </div>
 
         <p class="h-2 border-b-2 border-[#D9D9D9] my-5"></p>
@@ -39,44 +39,178 @@
         </div>
 
         <p class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p>
-
-        <div v-if="!printTicket" class="flex justify-center mt-7">
-            <PrimaryButton @click="print">Imprimir ticket</PrimaryButton>
-        </div>
     </div>
 
+    <!-- Botones de conexión e impresión -->
+    <section class="text-center lg:space-x-2 mt-7 mx-10">
+    <ThirthButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="!printTicket" @click="conectarBluetooth" class="!py-1 !border-blue-600 !text-blue-600 mr-2 mb-2">
+        <i class="fa-brands fa-bluetooth text-lg mr-2"></i>
+        Conectar impresora
+    </ThirthButton>
+
+    <!-- imprimir desde dispositivo movil -->
+    <PrimaryButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="device && !printTicket" class="mb-2 mr-2" @click="convertToImage()">
+        <i class="fa-solid fa-print"></i>
+        Imprimir ticket
+    </PrimaryButton>
+
+    <!-- imprimir desde pc de escritorio o dispositivo con windows -->
+    <PrimaryButton v-if="!printTicket" @click="print">
+        <i class="fa-solid fa-display"></i>
+        Imprimir Pantalla 
+    </PrimaryButton>
+    </section>
+    <p v-if="!UUIDService && !UUIDCharacteristic" class="text-sm text-center text-red-600 mt-4">
+        No tienes ninguna impresora configurada.
+        Para conectar con una impresora térmica vía bluetooth
+        <strong @click="$inertia.get(route('settings.index', { tab: 3 }))" class="text-primary underline cursor-pointer">configurala aquí</strong>
+    </p>
+
+    
 
 </template>
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import { Head } from '@inertiajs/vue3';
 import { format, parseISO } from 'date-fns';
+import html2canvas from 'html2canvas'; // para convertir la url en imagen
 import es from 'date-fns/locale/es';
 
 export default {
 data() {
     return {
         printTicket: false,
+        device: null, //Dispositivo de impresora guardada al hacer vínculo
+        text: null, //guarda el texto a pimprimir. (ticket)
+        UUIDService: this.$page.props.auth.user.store.printer_config?.UUIDService,
+        UUIDCharacteristic: this.$page.props.auth.user.store.printer_config?.UUIDCharacteristic,
     }
 },
 components:{
 PrimaryButton,
+ThirthButton,
 Head
 },
 props:{
-day_sales: Object,
+sales: Object,
 },
 methods:{
+    conectarBluetooth() {
+      // Solicitar al usuario que seleccione la impresora vía Bluetooth
+      navigator.bluetooth.requestDevice({
+        acceptAllDevices: true, // Aceptar cualquier dispositivo Bluetooth
+        optionalServices: [this.UUIDService] // UUID del servicio de la impresora
+      })
+      .then(device => {
+        console.log('Dispositivo Bluetooth conectado:', device);
+        this.device = device;
+
+      })
+      .catch(error => {
+        console.error('Error al conectar con dispositivo Bluetooth:', error);
+      });
+    },
+    // async enviarDatosImpresion(device) {
+    //   try {
+    //     // Obtener el servicio de impresión
+    //     const service = await device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
+
+    //     // Obtener el carácterística de escritura
+    //     const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
+
+    //     // // Aquí puedes enviar los datos de impresión a través de la característica de escritura
+    //     // // Por ejemplo, puedes enviar una cadena de texto a imprimir
+
+    //     // Dividir el texto en fragmentos
+    //     const fragmentSize = 20; // Ajusta este tamaño según sea necesario
+    //     const fragments = this.chunkText(this.text, fragmentSize);
+
+    //     // Enviar cada fragmento por separado
+    //     for (const fragment of fragments) {
+    //       await characteristic.writeValue(new TextEncoder().encode(fragment));
+    //     }
+
+    //     console.log('Datos de impresión enviados correctamente');
+    //   } catch (error) {
+    //     console.error('Error al enviar datos de impresión:', error);
+    //   }
+    // },
+    // chunkText(text, size) {
+    //   const chunks = [];
+    //   for (let i = 0; i < text.length; i += size) {
+    //     chunks.push(text.slice(i, i + size));
+    //   }
+    //   return chunks;
+    // },
+    
+    // -------------------------------------------------------------------------
+     async convertToImage() {
+         
+         // Obtener el contenedor que deseas imprimir
+        const element = document.getElementById('text-to-print');
+
+        // Convertir el contenedor a un canvas
+        const canvas = await html2canvas(element);
+        
+        // Convertir el canvas a un data URL
+        const dataUrl = canvas.toDataURL('image/png');
+        
+        // Convertir el data URL a un array buffer
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        
+        // Llamar al método para enviar los datos de impresión
+        this.enviarDatosImpresion(this.device, arrayBuffer);
+    },
+    async enviarDatosImpresion(device, arrayBuffer) {
+        try {
+        // Obtener el servicio de impresión
+        const service = await device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
+
+        // Obtener la característica de escritura
+        const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
+
+        // Dividir el array buffer en fragmentos
+        const fragmentSize = 20; // Ajusta este tamaño según sea necesario
+        for (let i = 0; i < arrayBuffer.byteLength; i += fragmentSize) {
+            const fragment = arrayBuffer.slice(i, i + fragmentSize);
+            await characteristic.writeValue(fragment);
+        }
+
+        console.log('Datos de impresión enviados correctamente');
+        } catch (error) {
+        console.error('Error al enviar datos de impresión:', error);
+        }
+    },
+    // ----------------------------------------------------------------------------
+
+    print() {
+      this.printTicket = true;
+      setTimeout(() => {
+        window.print();
+      }, 200);
+    },
+    handleAfterPrint() {
+      this.printTicket = false;
+    },
     formatDate(dateString) {
         return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
     },
-    print() {
-        this.printTicket = true;
-        setTimeout(() => {
-        window.print();
-      }, 80);
+    totalSale() {
+      return this.sales.reduce((total, item) => {
+        return total + item.current_price * item.quantity;
+      }, 0);
     }
-}
+},
+    mounted() {
+        window.addEventListener('afterprint', this.handleAfterPrint);
+        this.text = document.getElementById('text-to-print').innerText;
+    },
+    beforeDestroy() {
+        window.removeEventListener('afterprint', this.handleAfterPrint);
+    }
 }
 </script>

@@ -17,6 +17,7 @@ class Store extends Model
         'contact_name',
         'contact_phone',
         'online_store_properties', //json
+        'printer_config', //json
         'address',
         'plan',
         'is_active',
@@ -30,6 +31,7 @@ class Store extends Model
     protected $casts = [
         'next_payment' => 'date',
         'online_store_properties' => 'array',
+        'printer_config' => 'array',
     ];
 
     //relationships

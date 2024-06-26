@@ -116,6 +116,8 @@ class SaleController extends Controller
         // }
         $is_out_of_cash_cut = false;
 
+        // return $day_sales;
+
         return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut', 'previous_sale_date', 'next_sale_date'));
     }
 
@@ -189,19 +191,16 @@ class SaleController extends Controller
         return response()->json(['items' => $groupedSales]);
     }
 
-    public function printTicket($created_at)
-    {
-        // Parsear la fecha recibida para obtener solo la parte de la fecha
-        // $date = Carbon::parse($created_at)->toDateString();
+    public function printTicket($folio)
+    {   
+        // Obtener las ventas registradas en la fecha recibida
+        $sales = Sale::where('store_id', auth()->user()->store_id)->where('folio', $folio)->get();
 
-        // // Obtener las ventas registradas en la fecha recibida
-        // $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
-
-        // // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         // $day_sales = $this->getGroupedSalesByDate($sales, true);
 
-        // // return $day_sales;
-        // return inertia('Sale/PrintTicket', compact('day_sales'));
+        // return $sales;
+        return inertia('Sale/PrintTicket', compact('sales'));
     }
 
     public function syncLocalstorage(Request $request)
@@ -270,8 +269,8 @@ class SaleController extends Controller
                     $title = "Sin stock!";
                     $description = "Te has quedado sin existencias del producto <span class='text-primary'>$product_name</span>";
                     $url =  $is_global_product
-                        ? route('global-product-store.show', $current_product->id)
-                        : route('products.show', $current_product->id);
+                        ? route('global-product-store.show', base64_encode($current_product->id))
+                        : route('products.show', base64_encode($current_product->id));
 
                     auth()->user()->notify(new BasicNotification($title, $description, $url));
                 } else {
@@ -282,9 +281,8 @@ class SaleController extends Controller
                         $title = "Bajo stock!";
                         $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
                         $url =  $is_global_product
-                            ? route('global-product-store.show', $current_product->id)
-                            : route('products.show', $current_product->id);
-
+                            ? route('global-product-store.show', base64_encode($current_product->id))
+                            : route('products.show', base64_encode($current_product->id));
                         auth()->user()->notify(new BasicNotification($title, $description, $url));
                     }
                 }
