@@ -355,11 +355,22 @@ function closeDatabaseConnection() {
 
 async function prepareImageToStore(item) {
   if (item.image_url) {
-    const imageResponse = await axios.get(item.image_url, { responseType: 'blob' });
-    const imageBlob = imageResponse.data;
-    item.image = imageBlob;
+    try {
+      const imageResponse = await axios.get(item.image_url, { responseType: 'blob' });
+      const imageBlob = imageResponse.data;
+      item.image = imageBlob;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn(`Imagen no encontrada para el producto ${item.id}, continuando sin imagen.`);
+      } else {
+        console.error(`Error al obtener la imagen para el producto ${item.id}:`, error);
+      }
+      // No agregar la imagen al item si hay un error
+      item.image = null;
+    }
   }
 }
+
 
 export {
   openDatabase,
