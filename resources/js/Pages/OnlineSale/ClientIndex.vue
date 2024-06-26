@@ -27,6 +27,9 @@
 
                 <section v-if="activeTab === 'Productos'">
                     <Products :store="store" :visibleProducts="visibleProducts" />
+                    <button v-if="total_products > visibleProducts.length" @click="loadMoreProducts" class="w-full lg:hidden text-primary my-4 text-xs mx-auto underline">
+                        Cargar más elementos
+                    </button>
                 </section>
                 <section v-else>
                     <Services :store="store" :visibleServices="visibleServices" />
@@ -82,7 +85,7 @@ export default {
             const clientHeight = container.clientHeight;
 
             // Determinar si has llegado al final de la vista
-            if (scrollHeight - scrollTop <= clientHeight + 50) {
+            if (scrollHeight - scrollTop <= clientHeight) {
 
                 // Ejecutar tu método cuando llegues al final. No se ejecuta si se estan cargando ya products
                 if (!this.loading && this.activeTab === 'Productos') {
