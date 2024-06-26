@@ -14,8 +14,9 @@
                 <el-tab-pane label="Usuarios" name="2">
                     <Users :users="users" />
                 </el-tab-pane>
-                <!-- <el-tab-pane label="Tienda en línea" name="3">
-                </el-tab-pane> -->
+                <el-tab-pane label="Impresora" name="3">
+                    <Printer />
+                </el-tab-pane>
                 <!-- <el-tab-pane label="Productos" name="4">
                     Productos
                 </el-tab-pane> -->
@@ -32,6 +33,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Point from '@/Pages/Setting/Tabs/Point.vue';
 import Users from '@/Pages/Setting/Tabs/Users.vue';
+import Printer from '@/Pages/Setting/Tabs/Printer.vue';
 
 export default {
     data() {
@@ -42,6 +44,7 @@ export default {
     components: {
         AppLayout,
         PrimaryButton,
+        Printer,
         Users,
         Point
     },
