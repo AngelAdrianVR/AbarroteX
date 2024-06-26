@@ -19,6 +19,7 @@ use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
+use App\Http\Controllers\ProductRentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
@@ -128,6 +129,17 @@ Route::middleware([
 //     return 'items migrados correctamente!.';
 // });
 
+// ---------email de prueba
+Route::get('email-test', function () {
+    $admin = App\Models\Admin::find(1);
+    $title = "Nuevo pago registrado";
+    $description = "La tienda 'tienda de prueba' ha pagado una suscripción 'mensual' ($ 199.00).";
+    $url = 'http://localhost:8000/stores';
+    $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
+
+    return "Email sent to $admin->name successfuly!";
+});
+
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
@@ -154,6 +166,11 @@ Route::post('products/import', [ProductController::class, 'import'])->name('prod
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
+
+
+//product-rentals routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+Route::resource('product-rentals', ProductRentalController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 //services routes----------------------------------------------------------------------------------
@@ -191,7 +208,7 @@ Route::get('sales/{date}/{cashRegisterId}', [SaleController::class, 'show'])->na
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
-Route::get('sales-print-ticket/{created_at}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
+Route::get('sales-print-ticket/{folio}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
 Route::get('sales-fetch-cash-register-sales/{cash_register_id}', [SaleController::class, 'fetchCashRegisterSales'])->middleware('auth')->name('sales.fetch-cash-register-sales');
 Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage'])->middleware('auth')->name('sales.sync-localstorage');
 Route::post('sales/refund/{saleFolio}', [SaleController::class, 'refund'])->middleware('auth')->name('sales.refund');
@@ -231,6 +248,7 @@ Route::resource('stores', StoreController::class)->middleware(['auth']);
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
 Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
+Route::put('stores-update-printer-config/{store}', [StoreController::class, 'updatePrinterConfig'])->middleware('auth')->name('stores.update-printer-config');
 Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
 
 

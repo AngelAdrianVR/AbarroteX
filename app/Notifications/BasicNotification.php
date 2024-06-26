@@ -26,7 +26,8 @@ class BasicNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        if (app()->environment() == 'production') {
+        $is_email_notifications_on = $notifiable->store->settings()->where('key', 'Notificaciones por correo')->first()?->pivot->value;
+        if (app()->environment() == 'production' && $is_email_notifications_on) {
             return ['database', 'mail'];
         } else {
             return ['database'];
@@ -45,6 +46,7 @@ class BasicNotification extends Notification
                 'description' => $this->description,
                 'url' => $this->url,
                 'salutation' => 'Saludos',
+                'subcopy' => 'Si tienes alguna duda, dirígete a <a href="https://ezyventas.com/support/faqs">Soporte</a>, directamente desde el sistema. Si ya no deseas recibir nuestros correos electrónicos, <a href="https://ezyventas.com/settings">cancela tu suscripción</a>.'
             ]);
     }
 

@@ -24,10 +24,10 @@
                     <div class="flex items-center space-x-2">
                         <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
                         <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product?.current_stock < 1"
-                            v-model="quantity" size="small" :min="1" :max="product?.current_stock" :precision="2" />
+                            v-model="quantity" size="small" :min="0" :max="product?.current_stock" :precision="2" />
 
                         <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
-                        <el-input-number v-else v-model="quantity" size="small" :min="1" :max="999" :precision="2" />
+                        <el-input-number v-else v-model="quantity" size="small" :min="0" :max="999" :precision="2" />
                             <p v-if="store?.online_store_properties?.inventory" class="text-xs text-primary">disponibles: {{ product?.current_stock }}</p>
                     </div>
                     <!-- Eliminar producto de carrito -->

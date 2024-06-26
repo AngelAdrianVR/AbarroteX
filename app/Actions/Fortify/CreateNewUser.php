@@ -43,6 +43,10 @@ class CreateNewUser implements CreatesNewUsers
             'type' => $input['type'],
             'contact_phone' => $input['contact_phone'],
             'next_payment' => now()->addDays(2),
+            'online_store_properties' => json_encode([
+                'whatsapp' => $input['contact_phone'],
+                'online_sales_cash_register' => null,
+            ])
         ]);
 
         //Se crea el registro para guardar los banners en él con el id de la tienda. Pra tienda en línea

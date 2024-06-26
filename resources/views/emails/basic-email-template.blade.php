@@ -3,9 +3,20 @@
 
 {!! $description !!}
 
+@component('mail::button', ['url' => $url])
+@if (isset($button_label))
+{{ $button_label }}
+@else
+Ver en sistema    
+@endif   
+@endcomponent
+
 {{ $salutation }}
 
-@component('mail::button', ['url' => $url])
-Ver en sistema
+@isset($subcopy)
+@component('mail::subcopy')
+{!! $subcopy !!}
 @endcomponent
+@endisset
+
 @endcomponent
