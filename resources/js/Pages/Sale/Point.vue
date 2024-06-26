@@ -38,7 +38,7 @@
         <b>Es importante que no recargues la página para poder registrar ventas</b>
       </p>
     </div>
-    <div v-if="syncingData" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
+    <div v-if="syncingData || syncingIDB" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
       <p class="text-sm flex items-center space-x-3 font-semibold">
         <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
           id="Rotate-Right--Streamline-Sharp" height="16" width="16">
@@ -59,7 +59,10 @@
         </svg>
         <span>Sincronizando datos</span>
       </p>
-      <p class="text-xs">
+      <p v-if="syncingIDB" class="text-xs">
+        Por favor, evita recargar la página y espera a que los datos se carguen en el dispositivo.
+      </p>
+      <p v-else class="text-xs">
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
@@ -574,7 +577,7 @@ import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
-import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems, syncIDBProducts } from '@/dbService.js';
+import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems, syncIDBProducts, getAll } from '@/dbService.js';
 
 export default {
   data() {
@@ -612,6 +615,7 @@ export default {
       // conexion a internet
       isOnline: navigator.onLine, // Verificar el estado de conexión al cargar el componente
       syncingData: false,
+      syncingIDB: false,
 
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
       showClientFormModal: false, //muestra u oculta el modal de creación de cliente
@@ -1063,13 +1067,20 @@ export default {
       }
     },
   },
-  mounted() {
+  async mounted() {
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
         this.$inertia.visit(route('tutorials.index'));
     }
     // sincronizar productos
-    syncIDBProducts();
+    const productsInIDB = await getAll('products');
+    if (!productsInIDB.length) {
+      // mostrar carga solo si recien se estan cargando los productos
+      this.syncingIDB = true;
+    }
+    await syncIDBProducts();
+    this.syncingIDB = false;
+
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
       this.showCashRegisterSelectionModal = true;
