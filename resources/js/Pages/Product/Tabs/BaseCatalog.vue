@@ -77,7 +77,8 @@
                                         class="fa-solid fa-rotate-left"></i></button>
                             </el-tooltip>
                             <PrimaryButton :disabled="processing" @click="showConfirmModal = true">
-                                <i v-if="processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                                <i v-if="processing"
+                                    class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                                 Guardar cambios
                             </PrimaryButton>
                         </div>
@@ -119,9 +120,11 @@
             </template>
             <template #content>
                 <p>
-                    Los productos de catálogo base movidos a tu tienda ya estarán disponibles para crear ventas. <br>
-                    Los productos de tu tienda movidos a catálogo base ya no se mostrarán.
-                    ¿Deseas guardar los cambios?
+                    • Los productos de catálogo base movidos a tu tienda ya estarán disponibles para crear ventas. <br>
+                    • Los productos de tu tienda movidos a catálogo base ya no se mostrarán.
+                    ¿Deseas guardar los cambios? <br><br>
+                    El proceso puede demorar unos minutos, dependiendo de la cantidad de productos a cargar.
+
                 </p>
             </template>
             <template #footer>
@@ -314,6 +317,15 @@ export default {
                 let response = await axios.post(route('global-product-store.transfer'), { products: this.products });
 
                 if (response.status === 200) {
+                    this.initialProducts = this.products;
+
+                    // Obtener productos
+                    response = await axios.get(route('products.get-all-for-indexedDB'));
+                    const products = response.data.products;
+
+                    // actualizar lista de productos en indexedDB
+                    await addOrUpdateBatchOfItems('products', products);
+
                     if (response.data.rejected_products.length) {
                         this.$notify({
                             title: "Límite de productos alcanzado",
@@ -329,14 +341,6 @@ export default {
                     }
 
                     this.showConfirmModal = false;
-                    this.initialProducts = this.products;
-
-                    // Obtener productos
-                    response = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response.data.products;
-
-                    // actualizar lista de productos en indexedDB
-                    addOrUpdateBatchOfItems('products', products);
 
                     // resetear variable de local storage a false
                     localStorage.setItem('pendentProcess', false);
@@ -355,7 +359,7 @@ export default {
     },
     async mounted() {
         await this.fetchDataForBaseCatalogView();
-        
+
         // resetear variable de local storage a false
         localStorage.setItem('pendentProcess', false);
 
