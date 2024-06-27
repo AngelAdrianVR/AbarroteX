@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'rol',
         'password',
         'employee_properties',
+        'printer_config', //JSON
         'store_id',
         'cash_register_id',
         'tutorials_seen',
@@ -56,6 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'employee_properties' => 'array',
+        'printer_config' => 'array',
     ];
 
     /**

@@ -17,7 +17,7 @@
         <table class="mt-2 w-full text-xs">
             <tr class="text-left *:font-bold *:pb-2">
                 <th>Producto</th>
-                <th class="px-[2px]">Cantidad</th>
+                <th class="px-[2px]">Cant.</th>
                 <th class="px-[2px]">Total</th>
             </tr>
             <tr v-for="sale in sales" :key="sale">
@@ -32,13 +32,14 @@
         </div>
 
         <p class="h-2 border-b-2 border-[#D9D9D9] mt-5"></p>
-        <span class="mx-auto">------------------------------------------</span>
+        <span v-if="!printTicket" class="mx-auto hidden">--------------------------------</span>
         
-        <div class="flex justify-between text-[#373737]">
-            <p>Método de pago: {{ 'Efectivo' }}</p>
+        <div class="flex justify-between text-[#373737] mt-3">
+            <p>Metodo de pago: {{ 'Efectivo' }}</p>
         </div>
 
-        <p class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p>
+        <!-- <p class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p> -->
+        <span v-if="!printTicket" class="mx-auto hidden">--------------------------------</span>
     </div>
 
     <!-- Botones de conexión e impresión -->
@@ -65,7 +66,6 @@
         Para conectar con una impresora térmica vía bluetooth
         <strong @click="$inertia.get(route('settings.index', { tab: 3 }))" class="text-primary underline cursor-pointer">configurala aquí</strong>
     </p>
-
     
 
 </template>
@@ -84,8 +84,8 @@ data() {
         printTicket: false,
         device: null, //Dispositivo de impresora guardada al hacer vínculo
         text: null, //guarda el texto a pimprimir. (ticket)
-        UUIDService: this.$page.props.auth.user.store.printer_config?.UUIDService,
-        UUIDCharacteristic: this.$page.props.auth.user.store.printer_config?.UUIDCharacteristic,
+        UUIDService: this.$page.props.auth.user.printer_config?.UUIDService,
+        UUIDCharacteristic: this.$page.props.auth.user.printer_config?.UUIDCharacteristic,
     }
 },
 components:{
@@ -129,7 +129,8 @@ methods:{
 
         // Enviar cada fragmento por separado
         for (const fragment of fragments) {
-          await characteristic.writeValue(new TextEncoder().encode(fragment));
+            await characteristic.writeValue(new TextEncoder('utf-8').encode(fragment)); //con caracteres especiasles
+        //   await characteristic.writeValue(new TextEncoder().encode(fragment)); //sin caracteres especiasles
         }
 
         console.log('Datos de impresión enviados correctamente');
@@ -205,12 +206,12 @@ methods:{
       }, 0);
     }
 },
-    mounted() {
-        window.addEventListener('afterprint', this.handleAfterPrint);
-        this.text = document.getElementById('text-to-print').innerText;
-    },
-    beforeDestroy() {
-        window.removeEventListener('afterprint', this.handleAfterPrint);
-    }
+mounted() {
+    window.addEventListener('afterprint', this.handleAfterPrint);
+    this.text = document.getElementById('text-to-print').innerText;
+},
+beforeDestroy() {
+    window.removeEventListener('afterprint', this.handleAfterPrint);
+}
 }
 </script>

@@ -65,6 +65,11 @@ class SaleController extends Controller
     public function store(Request $request)
     {
         $this->storeEachProductSold($request->data['saleProducts']);
+
+        //me mando al punto de venta en respuesta la nueva venta creada para imprimirla en caso de tener la oopción de impresión automática activada
+        $new_sale = Sale::where('store_id', auth()->user()->store_id)->latest()->first();
+
+        return response()->json(compact('new_sale'));
     }
 
     public function show($date, $cashRegisterId)

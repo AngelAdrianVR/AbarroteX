@@ -10,10 +10,11 @@ class ProductRentalController extends Controller
     
     public function index()
     {   
-        // $product_rentals = ProductRental::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
-        // $total_product_rentals = ProductRental::where('store_id', auth()->user()->store_id)->get()->count();
-
-        return inertia('ProductRental/Index');
+        $total_rentals = ProductRental::where('store_id', auth()->user()->store_id)->latest()->get();
+        $total_product_rentals = $total_rentals->count();
+        $product_rentals = $total_rentals->take(30);
+        
+        return inertia('ProductRental/Index', compact('product_rentals', 'total_product_rentals'));
     }
 
    

@@ -130,15 +130,15 @@ Route::middleware([
 // });
 
 // ---------email de prueba
-Route::get('email-test', function () {
-    $admin = App\Models\Admin::find(1);
-    $title = "Nuevo pago registrado";
-    $description = "La tienda 'tienda de prueba' ha pagado una suscripción 'mensual' ($ 199.00).";
-    $url = 'http://localhost:8000/stores';
-    $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
+// Route::get('email-test', function () {
+//     $admin = App\Models\Admin::find(1);
+//     $title = "Nuevo pago registrado";
+//     $description = "La tienda 'tienda de prueba' ha pagado una suscripción 'mensual' ($ 199.00).";
+//     $url = 'http://localhost:8000/stores';
+//     $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
 
-    return "Email sent to $admin->name successfuly!";
-});
+//     return "Email sent to $admin->name successfuly!";
+// });`
 
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
@@ -248,7 +248,7 @@ Route::resource('stores', StoreController::class)->middleware(['auth']);
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
 Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
-Route::put('stores-update-printer-config/{store}', [StoreController::class, 'updatePrinterConfig'])->middleware('auth')->name('stores.update-printer-config');
+// Route::put('stores-update-printer-config/{store}', [StoreController::class, 'updatePrinterConfig'])->middleware('auth')->name('stores.update-printer-config');
 Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
 
 
@@ -260,6 +260,7 @@ Route::post('users-read-notifications', [UserController::class, 'readNotificatio
 Route::post('users-delete-notifications', [UserController::class, 'deleteNotifications'])->middleware('auth')->name('users.delete-user-notifications');
 Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword'])->middleware('auth')->name('users.reset-password');
 Route::put('tutorials-completed', [UserController::class, 'tutorialsCompleted'])->name('users.tutorials-completed')->middleware('auth');
+Route::put('users-update-printer-config/{user}', [UserController::class, 'updatePrinterConfig'])->middleware('auth')->name('users.update-printer-config');
 
 
 

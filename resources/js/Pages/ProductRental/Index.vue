@@ -1,7 +1,7 @@
 <template>
   <AppLayout title="Renta de productos">
     <div class="px-2 lg:px-10 py-7">
-      <h1 class="font-bold">Renta de productos</h1>
+      <h1 class="font-bold ml-5">Renta de productos</h1>
 
       <div class="md:flex justify-between mt-3">
         <article class="flex items-center space-x-5 lg:w-1/3">
@@ -23,20 +23,20 @@
         </article>
         <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
           <PrimaryButton @click="$inertia.get(route('services.create'))"
-            >Registrar renta de producto</PrimaryButton
+            >Crear renta de producto</PrimaryButton
           >
         </div>
       </div>
 
       <!-- Tabla de servicios -->
       <div class="mt-9">
-        <!-- <p v-if="localProductRentals.length" class="text-gray66 text-[11px]">
+        <p v-if="localProductRentals.length" class="text-gray66 text-[11px]">
           {{ localProductRentals.length }} de {{ total_product_rentals }} elementos
-        </p> -->
-        <!-- <ProductRentalsTable :products="localProductRentals" /> -->
-        <!-- <p v-if="localProductRentals.length" class="text-gray66 text-[11px] mt-3">
+        </p>
+        <ProductRentalsTable :rentals="localProductRentals" />
+        <p v-if="localProductRentals.length" class="text-gray66 text-[11px] mt-3">
           {{ localProductRentals.length }} de {{ total_product_rentals }} elementos
-        </p> -->
+        </p>
         <p v-if="loadingItems" class="text-xs my-4 text-center">
           Cargando
           <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>

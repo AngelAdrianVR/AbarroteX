@@ -110,4 +110,15 @@ class UserController extends Controller
 
         return to_route('sales.point');
     }
+
+
+    public function updatePrinterConfig(Request $request, User $user)
+    {
+        $request->validate([
+            'printer_config.UUIDService' => 'nullable|string|min:1|max:255',
+            'printer_config.UUIDCharacteristic' => 'nullable|string|min:1|max:255',
+        ]);
+
+        $user->update($request->all());
+    }
 }
