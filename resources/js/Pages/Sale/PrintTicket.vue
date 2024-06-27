@@ -17,7 +17,7 @@
         <table class="mt-2 w-full text-xs">
             <tr class="text-left *:font-bold *:pb-2">
                 <th>Producto</th>
-                <th class="px-[2px]">Cantidad</th>
+                <th class="px-[2px]">Cant.</th>
                 <th class="px-[2px]">Total</th>
             </tr>
             <tr v-for="sale in sales" :key="sale">
