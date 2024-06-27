@@ -82,7 +82,7 @@ class CreateCashCut extends Command
                         'notes' => 'Corte realizado automáticamente por el sistema al terminar el día',
                         'cash_register_id' => $cashRegister->id,
                         'store_id' => $store->id,
-                        'user_id' => 1, // Id del usuario que ejecuta el comando, se puede modificar según la lógica del sistema
+                        'user_id' => $store->users->first()->id, // Id del usuario que ejecuta el comando, se puede modificar según la lógica del sistema
                     ]);
 
                     // se asigna el dinero contado al dinero inicial de caja registradora para el próximo corte 

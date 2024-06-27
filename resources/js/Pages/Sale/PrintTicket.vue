@@ -32,14 +32,14 @@
         </div>
 
         <p class="h-2 border-b-2 border-[#D9D9D9] mt-5"></p>
-        <span v-if="!printTicket" class="mx-auto">--------------------------------</span>
+        <span v-if="!printTicket" class="mx-auto hidden">--------------------------------</span>
         
         <div class="flex justify-between text-[#373737] mt-3">
-            <p>Método de pago: {{ 'Efectivo' }}</p>
+            <p>Metodo de pago: {{ 'Efectivo' }}</p>
         </div>
 
-        <p class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p>
-        <p class="text-center mt-2">{{ '                    ' }}</p>
+        <!-- <p class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p> -->
+        <span v-if="!printTicket" class="mx-auto hidden">--------------------------------</span>
     </div>
 
     <!-- Botones de conexión e impresión -->
@@ -84,8 +84,8 @@ data() {
         printTicket: false,
         device: null, //Dispositivo de impresora guardada al hacer vínculo
         text: null, //guarda el texto a pimprimir. (ticket)
-        UUIDService: this.$page.props.auth.user.store.printer_config?.UUIDService,
-        UUIDCharacteristic: this.$page.props.auth.user.store.printer_config?.UUIDCharacteristic,
+        UUIDService: this.$page.props.auth.user.printer_config?.UUIDService,
+        UUIDCharacteristic: this.$page.props.auth.user.printer_config?.UUIDCharacteristic,
     }
 },
 components:{
