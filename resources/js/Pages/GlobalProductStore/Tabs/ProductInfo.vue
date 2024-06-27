@@ -33,8 +33,8 @@
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de compra:</p>
-                <p class="text-right font-bold">{{ product.global_product.cost ? '$' + product.global_product.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '-'
-                    }}
+                <p class="text-right font-bold">
+                    {{ product.cost ? '$' + product.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '-' }}
                 </p>
             </div>
             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">

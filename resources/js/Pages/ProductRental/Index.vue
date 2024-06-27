@@ -22,7 +22,7 @@
           </el-tag>
         </article>
         <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
-          <PrimaryButton @click="$inertia.get(route('services.create'))"
+          <PrimaryButton @click="$inertia.get(route('product-rentals.create'))"
             >Crear renta de producto</PrimaryButton
           >
         </div>

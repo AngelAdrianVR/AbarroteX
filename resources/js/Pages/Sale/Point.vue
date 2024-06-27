@@ -1072,14 +1072,6 @@ export default {
     if (!this.$page.props.auth.user.tutorials_seen) {
         this.$inertia.visit(route('tutorials.index'));
     }
-    // sincronizar productos
-    const productsInIDB = await getAll('products');
-    if (!productsInIDB.length) {
-      // mostrar carga solo si recien se estan cargando los productos
-      this.syncingIDB = true;
-    }
-    await syncIDBProducts();
-    this.syncingIDB = false;
 
     //verificar si el usuario tiene una caja asignada
     if (!this.$page.props.auth?.user?.cash_register_id) {
@@ -1093,6 +1085,15 @@ export default {
     } else {
       this.$refs.searchInput.focus(); // Enfocar el input de buscar producto cuando se abre el modal
     }
+
+    // sincronizar productos
+    const productsInIDB = await getAll('products');
+    if (!productsInIDB.length) {
+      // mostrar carga solo si recien se estan cargando los productos
+      this.syncingIDB = true;
+    }
+    await syncIDBProducts();
+    this.syncingIDB = false;
 
     // resetear variable de local storage a false
     localStorage.setItem('pendentProcess', false);
