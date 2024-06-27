@@ -32,13 +32,14 @@
         </div>
 
         <p class="h-2 border-b-2 border-[#D9D9D9] mt-5"></p>
-        <span class="mx-auto">------------------------------------------</span>
+        <span class="mx-auto">--------------------------------</span>
         
         <div class="flex justify-between text-[#373737]">
             <p>Método de pago: {{ 'Efectivo' }}</p>
         </div>
 
         <p class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p>
+        <p class="text-center mt-2">{{ '                    ' }}</p>
     </div>
 
     <!-- Botones de conexión e impresión -->
@@ -65,7 +66,7 @@
         Para conectar con una impresora térmica vía bluetooth
         <strong @click="$inertia.get(route('settings.index', { tab: 3 }))" class="text-primary underline cursor-pointer">configurala aquí</strong>
     </p>
-
+<p>{{ text }}</p>
     
 
 </template>
@@ -129,7 +130,8 @@ methods:{
 
         // Enviar cada fragmento por separado
         for (const fragment of fragments) {
-          await characteristic.writeValue(new TextEncoder().encode(fragment));
+            await characteristic.writeValue(new TextEncoder('utf-8').encode(fragment)); //con caracteres especiasles
+        //   await characteristic.writeValue(new TextEncoder().encode(fragment)); //sin caracteres especiasles
         }
 
         console.log('Datos de impresión enviados correctamente');
@@ -205,12 +207,12 @@ methods:{
       }, 0);
     }
 },
-    mounted() {
-        window.addEventListener('afterprint', this.handleAfterPrint);
-        this.text = document.getElementById('text-to-print').innerText;
-    },
-    beforeDestroy() {
-        window.removeEventListener('afterprint', this.handleAfterPrint);
-    }
+mounted() {
+    window.addEventListener('afterprint', this.handleAfterPrint);
+    this.text = document.getElementById('text-to-print').innerText;
+},
+beforeDestroy() {
+    window.removeEventListener('afterprint', this.handleAfterPrint);
+}
 }
 </script>
