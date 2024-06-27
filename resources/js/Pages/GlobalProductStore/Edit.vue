@@ -20,7 +20,8 @@
                         </el-tooltip>
                     </div>
                     <el-input v-model="form.cost" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -30,7 +31,8 @@
                 <div class="mt-3">
                     <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -40,7 +42,8 @@
                 <div class="mt-3 col-span-full w-1/2">
                     <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" />
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
 
@@ -82,24 +85,24 @@
                 <div class="mt-3">
                     <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/\D/g, '')" />
+                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.min_stock" />
                 </div>
 
                 <div class="mt-3">
                     <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/\D/g, '')" />
+                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.max_stock" />
                 </div>
 
                 <div class="mt-3 col-span-full">
                     <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255" show-word-limit
-                        clearable />
+                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255"
+                        show-word-limit clearable />
                     <InputError :message="form.errors.description" />
                 </div>
 

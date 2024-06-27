@@ -124,21 +124,21 @@ export default {
                     icon: "fa-solid fa-dollar-sign",
                     value: "$" + this.calculateTotalSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 },
-                // {
-                //     title: "Unidades vendidas en tienda",
-                //     icon: "fa-solid fa-clipboard-list",
-                //     value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
-                // },
+                {
+                    title: "Unidades vendidas en tienda",
+                    icon: "fa-solid fa-clipboard-list",
+                    value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                },
                 // {
                 //     title: "Ventas en linea (ingresos)",
                 //     icon: "fa-solid fa-dollar-sign",
                 //     value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
                 // },
-                {
-                    title: "Unidades vendidas en linea",
-                    icon: "fa-solid fa-clipboard-list",
-                    value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
-                },
+                // {
+                //     title: "Unidades vendidas en linea",
+                //     icon: "fa-solid fa-clipboard-list",
+                //     value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                // },
                 {
                     title: "Compras (Gastos)",
                     icon: "fa-solid fa-dollar-sign",
@@ -194,7 +194,7 @@ export default {
             return [
                 {
                     title: 'Ingresos (ventas en tienda)',
-                    colors: ['#C30303', '#F07209'],
+                    colors: ['#9a9a9a', '#209209'],
                     categories: timeline.timeline,
                     series: [{
                         name: timeline.last.name,
@@ -220,7 +220,7 @@ export default {
                 // },
                 {
                     title: 'Gastos (compras)',
-                    colors: ['#C77103', '#209209'],
+                    colors: ['#9a9a9a', '#C30303'],
                     categories: timeline.timeline,
                     series: [{
                         name: timeline.last.name,
