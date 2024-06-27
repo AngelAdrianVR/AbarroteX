@@ -32,9 +32,9 @@
         </div>
 
         <p class="h-2 border-b-2 border-[#D9D9D9] mt-5"></p>
-        <span class="mx-auto">--------------------------------</span>
+        <span v-if="!printTicket" class="mx-auto">--------------------------------</span>
         
-        <div class="flex justify-between text-[#373737]">
+        <div class="flex justify-between text-[#373737] mt-3">
             <p>Método de pago: {{ 'Efectivo' }}</p>
         </div>
 
@@ -66,7 +66,6 @@
         Para conectar con una impresora térmica vía bluetooth
         <strong @click="$inertia.get(route('settings.index', { tab: 3 }))" class="text-primary underline cursor-pointer">configurala aquí</strong>
     </p>
-<p>{{ text }}</p>
     
 
 </template>
