@@ -78,15 +78,15 @@ class StoreController extends Controller
     }
 
 
-    public function updatePrinterConfig(Request $request, Store $store)
-    {
-        $request->validate([
-            'printer_config.UUIDService' => 'nullable|string|min:1|max:255',
-            'printer_config.UUIDCharacteristic' => 'nullable|string|min:1|max:255',
-        ]);
+    // public function updatePrinterConfig(Request $request, Store $store)
+    // {
+    //     $request->validate([
+    //         'printer_config.UUIDService' => 'nullable|string|min:1|max:255',
+    //         'printer_config.UUIDCharacteristic' => 'nullable|string|min:1|max:255',
+    //     ]);
 
-        $store->update($request->all());
-    }
+    //     $store->update($request->all());
+    // }
 
 
     public function fetchStoreInfo(Store $store)

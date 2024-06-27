@@ -46,6 +46,18 @@
         </div>
         </article>
 
+        <!-- ACTIVAR IMPRESIÓN AUTOMÁTICA EN PUNTO DE VENTA-------------->
+        <!-- --------------------------------------------------------- -->
+        <article class="border border-grayD9 rounded-md p-4 relative">
+        <h2 class="font-bold">Impresión automática</h2>
+        <p class="text-sm text-gray99 mb-4">Imprime el ticket de cada venta realizada automáticamente</p>
+        <div class="flex items-center text-sm">
+
+            <p class="mx-7">Impresión automática:</p>
+            <el-switch v-model="form.printer_config.automaticPrinting" class="ml-4" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        </div>
+        </article>
+
         <div class="text-right pt-10 md:mx-7 col-span-full">
             <PrimaryButton :disabled="form.processing" @click="updatePrinterConfig">
                 <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -64,8 +76,9 @@ data() {
 
     const form = useForm({
       printer_config: {
-          UUIDService : this.$page.props.auth.user.store.printer_config?.UUIDService ?? null,
-          UUIDCharacteristic : this.$page.props.auth.user.store.printer_config?.UUIDCharacteristic ?? null,
+          UUIDService : this.$page.props.auth.user.printer_config?.UUIDService ?? null,
+          UUIDCharacteristic : this.$page.props.auth.user.printer_config?.UUIDCharacteristic ?? null,
+          automaticPrinting : !! this.$page.props.auth.user.printer_config?.automaticPrinting,
       }
     });
 
@@ -83,7 +96,7 @@ store: Object,
 },
 methods:{
     updatePrinterConfig() {
-      this.form.put(route('stores.update-printer-config', this.$page.props.auth.user.store.id), {
+      this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
           onSuccess: () => {
             this.$notify({
                 title: "Correcto",

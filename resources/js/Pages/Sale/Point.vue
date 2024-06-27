@@ -804,6 +804,11 @@ export default {
           });
 
           localStorage.setItem('pendentProcess', false);
+
+          //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
+          if ( this.$page.props.auth.user.printer_config?.automaticPrinting ) {
+            window.open(route('sales.print-ticket', response.data.new_sale.folio), '_blank');
+          }
         }
       } catch (error) {
         console.error(error);
