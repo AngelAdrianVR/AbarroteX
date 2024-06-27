@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\NotificationResource;
+use App\Models\CashRegister;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -24,12 +25,18 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
         ]);
 
+        $store_id = auth()->user()->store_id;
+
+        // primer caja registradora para asignar a empleado (paquete basico)
+        $cash_register = CashRegister::where('store_id', $store_id)->first();
+
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'rol' => $request->rol, 
-            'store_id' => auth()->user()->store_id, 
+            'store_id' => $store_id, 
             'password' => bcrypt('ezyventas'), 
+            'cash_register_id' => $cash_register->id, 
         ]);
         
         // return to_route('settings.index', ['tab' => 2]);
