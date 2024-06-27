@@ -130,15 +130,15 @@ Route::middleware([
 // });
 
 // ---------email de prueba
-Route::get('email-test', function () {
-    $admin = App\Models\Admin::find(1);
-    $title = "Nuevo pago registrado";
-    $description = "La tienda 'tienda de prueba' ha pagado una suscripción 'mensual' ($ 199.00).";
-    $url = 'http://localhost:8000/stores';
-    $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
+// Route::get('email-test', function () {
+//     $admin = App\Models\Admin::find(1);
+//     $title = "Nuevo pago registrado";
+//     $description = "La tienda 'tienda de prueba' ha pagado una suscripción 'mensual' ($ 199.00).";
+//     $url = 'http://localhost:8000/stores';
+//     $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
 
-    return "Email sent to $admin->name successfuly!";
-});
+//     return "Email sent to $admin->name successfuly!";
+// });`
 
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------

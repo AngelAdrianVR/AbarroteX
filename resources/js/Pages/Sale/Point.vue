@@ -60,7 +60,7 @@
         <span>Sincronizando datos</span>
       </p>
       <p v-if="syncingIDB" class="text-xs">
-        Por favor, evita recargar la página y espera a que los datos se carguen en el dispositivo.
+        Por favor, evita recargar la página y espera a que los datos se carguen en el dispositivo. Una vez terminado el proceso, ya podrás registrar ventas
       </p>
       <p v-else class="text-xs">
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
