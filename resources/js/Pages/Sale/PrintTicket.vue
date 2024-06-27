@@ -55,7 +55,7 @@
     </ThirthButton>
 
     <!-- imprimir desde dispositivo movil -->
-    <PrimaryButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="device && !printTicket" class="mb-2 mr-2" @click="enviarDatosImpresion(device)">
+    <PrimaryButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="(device && !printTicket)" class="mb-2 mr-2" @click="enviarDatosImpresion(device)">
         <i class="fa-solid fa-print"></i>
         Imprimir ticket
     </PrimaryButton>
@@ -125,6 +125,7 @@ methods:{
       .then(device => {
         console.log('Dispositivo Bluetooth conectado:', device);
         this.device = device;
+        console.log(this.device);
 
         // Enviar el objeto device al servidor
         axios.post(route('users.save-printer', this.$page.props.auth.user.id), {
