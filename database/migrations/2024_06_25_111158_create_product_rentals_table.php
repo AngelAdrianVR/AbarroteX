@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('product_rentals', function (Blueprint $table) {
             $table->id();
+            $table->string('period');
+            $table->unsignedFloat('cost');
+            $table->string('status')->default('En uso');
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
+            $table->text('notes')->nullable();
+            $table->timestamp('rented_at');
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
         });
     }
