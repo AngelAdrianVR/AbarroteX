@@ -320,8 +320,8 @@ export default {
                     this.initialProducts = this.products;
 
                     // Obtener productos
-                    response = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response.data.products;
+                    const response2 = await axios.get(route('products.get-all-for-indexedDB'));
+                    const products = response2.data.products;
 
                     // actualizar lista de productos en indexedDB
                     await addOrUpdateBatchOfItems('products', products);
