@@ -17,13 +17,15 @@
         <table class="mt-2 w-full text-xs">
             <tr class="text-left *:font-bold *:pb-2">
                 <th>Producto</th>
-                <th class="px-[2px]">Cant.</th>
+                <th class="px-[2px]"></th>
                 <th class="px-[2px]">Total</th>
             </tr>
             <tr v-for="sale in sales" :key="sale">
-                <td class="uppercase px-[2px]">{{ sale.product_name }}</td>
-                <td>{{ sale.quantity }}</td>
-                <td class=""><span class="px-2">$</span>{{ (sale.quantity * sale.current_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                <td class=" px-[2px]">
+                  <span class="uppercase">{{ truncatedProductName(sale.product_name) }}</span>
+                </td>
+                <td class="w-7"></td>
+                <td class=""><span>{{ sale.quantity + '  ' }}</span><span class="pl-2">$</span>{{ (sale.quantity * sale.current_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
             </tr>
         </table>
 
@@ -32,14 +34,17 @@
         </div>
 
         <p class="h-2 border-b-2 border-[#D9D9D9] mt-5"></p>
-        <span v-if="!printTicket" class="mx-auto hidden">--------------------------------</span>
+        <p v-if="!printTicket" class="mx-auto">--------------------------------</p>
         
-        <div class="flex justify-between text-[#373737] mt-3">
+        <div class="flex flex-col text-[#373737] mt-3">
             <p>Metodo de pago: {{ 'Efectivo' }}</p>
+            <span>GRACIAS POR SU COMPRA</span>
         </div>
 
-        <!-- <p class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p> -->
-        <span v-if="!printTicket" class="mx-auto hidden">--------------------------------</span>
+        <p v-if="$page.props.auth.user.store.address" class="text-center mt-2">{{ $page.props.auth.user.store.address }}</p>
+        <span v-if="!printTicket" class="mx-auto">--------------------------------</span>
+        <span v-if="!printTicket" class="mx-auto">--------------------------------</span>
+        <p v-if="!printTicket" class="mx-auto">--------------------------------</p>
     </div>
 
     <!-- Botones de conexión e impresión -->
@@ -65,8 +70,7 @@
         No tienes ninguna impresora configurada.
         Para conectar con una impresora térmica vía bluetooth
         <strong @click="$inertia.get(route('settings.index', { tab: 3 }))" class="text-primary underline cursor-pointer">configurala aquí</strong>
-    </p>
-    
+    </p>    
 
 </template>
 
@@ -97,6 +101,21 @@ props:{
 sales: Object,
 },
 methods:{
+    // conectarBluetooth() {
+    //   // Solicitar al usuario que seleccione la impresora vía Bluetooth
+    //   navigator.bluetooth.requestDevice({
+    //     acceptAllDevices: true, // Aceptar cualquier dispositivo Bluetooth
+    //     optionalServices: [this.UUIDService] // UUID del servicio de la impresora
+    //   })
+    //   .then(device => {
+    //     console.log('Dispositivo Bluetooth conectado:', device);
+    //     this.device = device;
+
+    //   })
+    //   .catch(error => {
+    //     console.error('Error al conectar con dispositivo Bluetooth:', error);
+    //   });
+    // },
     conectarBluetooth() {
       // Solicitar al usuario que seleccione la impresora vía Bluetooth
       navigator.bluetooth.requestDevice({
@@ -107,10 +126,28 @@ methods:{
         console.log('Dispositivo Bluetooth conectado:', device);
         this.device = device;
 
+        // Enviar el objeto device al servidor
+        axios.post(route('users.save-printer', this.$page.props.auth.user.id), {
+          printer: this.device
+        })
+        .then(response => {
+          console.log('Dispositivo guardado en la base de datos:', response.data);
+        })
+        .catch(error => {
+          console.error('Error al guardar el dispositivo en la base de datos:', error);
+        });
       })
       .catch(error => {
         console.error('Error al conectar con dispositivo Bluetooth:', error);
       });
+    },
+    truncatedProductName(name) {
+      const maxLength = 17;
+      if (name.length > maxLength) {
+        return name.slice(0, maxLength) + '..';
+      } else {
+        return name;
+      }
     },
     async enviarDatosImpresion(device) {
       try {

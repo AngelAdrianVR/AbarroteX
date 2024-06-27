@@ -261,6 +261,7 @@ Route::post('users-delete-notifications', [UserController::class, 'deleteNotific
 Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword'])->middleware('auth')->name('users.reset-password');
 Route::put('tutorials-completed', [UserController::class, 'tutorialsCompleted'])->name('users.tutorials-completed')->middleware('auth');
 Route::put('users-update-printer-config/{user}', [UserController::class, 'updatePrinterConfig'])->middleware('auth')->name('users.update-printer-config');
+Route::put('users-save-printer-config/{user}', [UserController::class, 'savePrinter'])->middleware('auth')->name('users.save-printer-config');
 
 
 

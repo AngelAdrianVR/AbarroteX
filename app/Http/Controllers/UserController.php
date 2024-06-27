@@ -128,4 +128,15 @@ class UserController extends Controller
 
         $user->update($request->all());
     }
+
+
+    public function savePrinter(Request $request, User $user)
+    {
+        $user->update([
+            'printer_config.printer' => $request->printer
+        ]);
+    }
+
+
+    
 }
