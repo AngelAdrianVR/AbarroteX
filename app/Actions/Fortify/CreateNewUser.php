@@ -43,10 +43,7 @@ class CreateNewUser implements CreatesNewUsers
             'type' => $input['type'],
             'contact_phone' => $input['contact_phone'],
             'next_payment' => now()->addDays(2),
-            'online_store_properties' => json_encode([
-                'whatsapp' => $input['contact_phone'],
-                'online_sales_cash_register' => null,
-            ])
+            'online_store_properties' => []
         ]);
 
         //Se crea el registro para guardar los banners en él con el id de la tienda. Pra tienda en línea
@@ -61,9 +58,9 @@ class CreateNewUser implements CreatesNewUsers
 
         // agregar las configuraciones iniciales a la tienda
         $settings = Setting::all();
-            $settings->each(function($setting) use ($store){
-                $store->settings()->attach($setting->id, ['value' => 1]);
-            });
+        $settings->each(function ($setting) use ($store) {
+            $store->settings()->attach($setting->id, ['value' => 1]);
+        });
 
         //Crea la caja registradora para esta nueva tienda
         $cash_register = CashRegister::create([
