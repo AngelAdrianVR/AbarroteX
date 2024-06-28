@@ -302,7 +302,7 @@
             </div>
             <!-- cobrando -->
             <div v-else>
-              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() -
+              <p class="text-gray-99 text-center mb-3 text-2xl">Total $ <strong>{{ (calculateTotal() -
                 editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
                   minimumFractionDigits: 2
                 }) }}</strong>
@@ -323,7 +323,7 @@
                       }) }}</p>
               </div>
               <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
-                class="text-xs text-primary text-center mb-3">
+                class="text-base font-bold text-primary text-center mb-3">
                 La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
               </p>
               <div class="flex space-x-2 justify-end">
