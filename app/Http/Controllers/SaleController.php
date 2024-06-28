@@ -23,14 +23,17 @@ class SaleController extends Controller
 {
     public function pointIndex()
     {
+        $store_id = auth()->user()->store_id;
         // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::where('store_id', auth()->user()->store_id)
+        $local_products = Product::where('store_id', $store_id)
             ->latest()
             ->get(['id', 'name', 'code']);
 
+        $products_quantity = Product::where('store_id', $store_id)->get()->count();
+
         // productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with(['globalProduct:id,name,code'])
-            ->where('store_id', auth()->user()->store_id)
+            ->where('store_id', $store_id)
             ->get(['id', 'global_product_id']);
 
         // Convertimos $local_products a un arreglo asociativo
@@ -40,11 +43,11 @@ class SaleController extends Controller
         $products = new Collection(array_merge($local_products_array, $transfered_products->toArray()));
 
         //recupera todas las cajas registradoras de la tienda
-        $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
+        $cash_registers = CashRegister::where('store_id', $store_id)->get();
 
-        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+        $clients = Client::where('store_id', $store_id)->get(['id', 'name']);
 
-        return inertia('Sale/Point', compact('products', 'cash_registers', 'clients'));
+        return inertia('Sale/Point', compact('products', 'cash_registers', 'clients', 'products_quantity'));
     }
 
     public function index()
@@ -197,7 +200,7 @@ class SaleController extends Controller
     }
 
     public function printTicket($folio)
-    {   
+    {
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::where('store_id', auth()->user()->store_id)->where('folio', $folio)->get();
 
