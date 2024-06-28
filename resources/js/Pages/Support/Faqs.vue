@@ -17,7 +17,10 @@
                 <h2 class="font-bold">¿Cómo puedo recibir notificaciones sobre bajo stock o ventas importantes?</h2>
                 <p class="mt-3">Ofrecemos la opción de configurar notificaciones automáticas por mensajes dentro del
                     sistema para alertarte sobre productos con bajo stock, ventas importantes, o cualquier otro evento
-                    relevante para tu negocio. Ve al módulo Configuraciones, en la pestaña de Notificaciones </p>
+                    relevante para tu negocio. <a :href="route('settings.index')" target="_blank" class="text-primary">
+                        Ve al módulo "Configuraciones", en la pestaña de "Punto de venta”
+                    </a> 
+                </p>
             </div>
             <div class="mt-8">
                 <h2 class="font-bold">¿Cuál es el proceso de renovación de la suscripción?</h2>

@@ -28,7 +28,8 @@ class ProductController extends Controller
 
     public function create()
     {
-        $products_quantity = Product::all()->count();
+        $store_id = auth()->user()->store_id;
+        $products_quantity = Product::where('store_id', $store_id)->get()->count();
         $store = auth()->user()->store;
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
@@ -39,8 +40,9 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        $store_id = auth()->user()->store_id;
         $vailidated = $request->validate([
-            'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . auth()->user()->store_id,
+            'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode()],
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
@@ -54,7 +56,7 @@ class ProductController extends Controller
 
         // forzar default de 1 en stock
         $vailidated['current_stock'] = $vailidated['current_stock'] ?? 1;
-        $product = Product::create($vailidated + ['store_id' => auth()->user()->store_id]);
+        $product = Product::create($vailidated + ['store_id' => $store_id]);
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
@@ -64,7 +66,9 @@ class ProductController extends Controller
         //codifica el id del producto
         $encoded_product_id = base64_encode($product->id);
 
-        return to_route('products.show', $encoded_product_id);
+        if (!request('stayInView')) {
+            return to_route('products.show', $encoded_product_id);
+        }
     }
 
     public function show($encoded_product_id)

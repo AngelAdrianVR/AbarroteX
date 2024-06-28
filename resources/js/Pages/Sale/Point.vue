@@ -38,7 +38,8 @@
         <b>Es importante que no recargues la página para poder registrar ventas</b>
       </p>
     </div>
-    <div v-if="syncingData || syncingIDB" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
+    <div v-if="syncingData || syncingIDB"
+      class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
       <p class="text-sm flex items-center space-x-3 font-semibold">
         <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
           id="Rotate-Right--Streamline-Sharp" height="16" width="16">
@@ -60,7 +61,8 @@
         <span>Sincronizando datos</span>
       </p>
       <p v-if="syncingIDB" class="text-xs">
-        Por favor, evita recargar la página y espera a que los datos se carguen en el dispositivo. Una vez terminado el proceso, ya podrás registrar ventas
+        Por favor, evita recargar la página y espera a que los datos se carguen en el dispositivo. Una vez terminado el
+        proceso, ya podrás registrar ventas
       </p>
       <p v-else class="text-xs">
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
@@ -247,10 +249,18 @@
                 </PrimaryButton>
               </div>
             </div>
-            <p v-else class="text-center text-gray99 text-sm">
-              Busca el producto
-              <i class="fa-regular fa-hand-point-up ml-3"></i>
-            </p>
+            <div v-else class="text-center text-gray99 text-sm">
+              <p>
+                Busca el producto
+                <i class="fa-regular fa-hand-point-up ml-3"></i>
+              </p>
+              <p>ó</p>
+              <button @click="showCreateProductModal = true" type="button"
+                class="text-primary w-full flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-circle-plus text-xs mb-px"></i>
+                <span>Crea uno nuevo</span>
+              </button>
+            </div>
           </div>
           <!-- Total por cobrar -->
           <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
@@ -292,7 +302,7 @@
             </div>
             <!-- cobrando -->
             <div v-else>
-              <p class="text-gray-99 text-center mb-3 text-lg">Total $ <strong>{{ (calculateTotal() -
+              <p class="text-gray-99 text-center mb-3 text-2xl">Total $ <strong>{{ (calculateTotal() -
                 editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
                   minimumFractionDigits: 2
                 }) }}</strong>
@@ -313,7 +323,7 @@
                       }) }}</p>
               </div>
               <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
-                class="text-xs text-primary text-center mb-3">
+                class="text-base font-bold text-primary text-center mb-3">
                 La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
               </p>
               <div class="flex space-x-2 justify-end">
@@ -366,7 +376,7 @@
           <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan != 'Plan Básico'" class="text-gray99">
             Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))"
               class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
-              
+
           <span v-else></span>
           <PrimaryButton :disabled="!selectedCashRegisterId" @click="asignCashRegister">Confirmar</PrimaryButton>
         </div>
@@ -500,14 +510,80 @@
 
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
-            <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing || (cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0)">Hacer corte</PrimaryButton>
+            <PrimaryButton
+              :disabled="!cutForm.counted_cash || cutForm.processing || (cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0)">
+              Hacer corte</PrimaryButton>
           </div>
-          <p v-if="cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0" 
-            class="text-xs text-red-600 text-right">*Para hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
+          <p v-if="cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0"
+            class="text-xs text-red-600 text-right">
+            *Para hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
         </form>
       </div>
     </Modal>
     <!-- --------------------------- Modal corte de caja ends ------------------------------------ -->
+
+    <!-- new product form -->
+    <DialogModal :show="showCreateProductModal" @close="showCreateProductModal = false">
+      <template #title> Creación rápida de nuevo producto </template>
+      <template #content>
+        <form v-if="products_quantity < 800" @submit.prevent="storeProduct" class="lg:grid lg:grid-cols-2 gap-x-3">
+          <div class="mt-3 col-span-2">
+            <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
+            <el-input v-model="productForm.name" placeholder="Escribe el nombre del producto" :maxlength="100"
+              clearable />
+            <InputError :message="productForm.errors.name" />
+          </div>
+          <div class="mt-3">
+            <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
+            <el-input v-model="productForm.public_price" placeholder="ingresa el precio"
+              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+              :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
+              <template #prefix>
+                <i class="fa-solid fa-dollar-sign"></i>
+              </template>
+            </el-input>
+            <InputError :message="productForm.errors.public_price" />
+          </div>
+          <div class="mt-3">
+            <InputLabel value="Existencia actual (opcional)" class="ml-3 mb-1 text-sm" />
+            <el-input v-model="productForm.current_stock" placeholder="ingresa la cantidad actual en stock"
+              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+              :parser="(value) => value.replace(/[^\d.]/g, '')" />
+            <InputError :message="productForm.errors.current_stock" />
+          </div>
+          <div class="mt-3 col-span-2">
+            <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
+            <el-input v-model="productForm.code" placeholder="Escribe el código del producto" :maxlength="100"
+              clearable>
+              <template #prefix>
+                <i class="fa-solid fa-barcode"></i>
+              </template>
+            </el-input>
+            <InputError :message="productForm.errors.code" />
+          </div>
+        </form>
+        <div v-else class="text-center text-gray37">
+          <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
+          <p class="text-xl text-center">Has llegado al límite de productos (800) de tu plan contratado.</p>
+          <p class="text-xl text-center">
+            Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
+          </p>
+          <div class="flex justify-center mt-5">
+            <PrimaryButton @click="$inertia.get(route('profile.show'))" :disabled="productForm.processing">
+              <i v-if="productForm.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+              Explorar planes
+            </PrimaryButton>
+          </div>
+        </div>
+      </template>
+      <template #footer>
+        <div v-if="products_quantity < 800" class="flex items-center space-x-2">
+          <CancelButton @click="showCreateProductModal = false; resetProductForm()" :disabled="creatingProduct">
+            Cancelar</CancelButton>
+          <PrimaryButton @click="storeProduct()" :disabled="creatingProduct">Crear</PrimaryButton>
+        </div>
+      </template>
+    </DialogModal>
 
     <!-- client form -->
     <DialogModal :show="showClientFormModal" @close="showClientFormModal = false; resetClientForm()">
@@ -516,27 +592,30 @@
         <form @submit.prevent="storeClient" class="md:grid grid-cols-2 gap-x-3">
           <div class="mt-3">
             <InputLabel value="Nombre*" class="ml-3 mb-1" />
-            <el-input v-model="clientForm.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
+            <el-input v-model="clientForm.name" placeholder="Escribe el nombre del cliente" :maxlength="100"
+              clearable />
             <InputError :message="clientForm.errors.name" />
           </div>
           <div class="mt-3">
             <InputLabel class="mb-1 ml-2" value="Teléfono *" />
             <el-input v-model="clientForm.phone"
-            :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
-            :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
-            placeholder="Escribe el número de teléfono" />
+              :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+              :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+              placeholder="Escribe el número de teléfono" />
             <InputError :message="clientForm.errors.phone" />
           </div>
           <div class="mt-3 col-span-full">
             <InputLabel value="RFC (opcional)" class="ml-3 mb-1" />
-            <el-input v-model="clientForm.rfc" placeholder="Escribe el RFC en caso de tenerlo" :maxlength="100" clearable />
+            <el-input v-model="clientForm.rfc" placeholder="Escribe el RFC en caso de tenerlo" :maxlength="100"
+              clearable />
             <InputError :message="clientForm.errors.rfc" />
           </div>
         </form>
       </template>
       <template #footer>
         <div class="flex items-center space-x-2">
-          <CancelButton @click="showClientFormModal = false; resetClientForm()" :disabled="clientForm.processing">Cancelar</CancelButton>
+          <CancelButton @click="showClientFormModal = false; resetClientForm()" :disabled="clientForm.processing">
+            Cancelar</CancelButton>
           <PrimaryButton @click="storeClient()" :disabled="clientForm.processing">Crear</PrimaryButton>
         </div>
       </template>
@@ -573,11 +652,19 @@ import InputLabel from "@/Components/InputLabel.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import SaleTable from '@/Components/MyComponents/Sale/SaleTable.vue';
 import InputError from "@/Components/InputError.vue";
+import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { format } from 'date-fns';
-import { getItemByPartialAttributes, getItemByAttributes, addOrUpdateBatchOfItems, syncIDBProducts, getAll } from '@/dbService.js';
+import {
+  getItemByPartialAttributes,
+  getItemByAttributes,
+  addOrUpdateBatchOfItems,
+  syncIDBProducts,
+  getAll,
+  addOrUpdateItem
+} from '@/dbService.js';
 
 export default {
   data() {
@@ -603,10 +690,35 @@ export default {
       withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
     });
 
+    const productForm = useForm({
+      name: null,
+      code: null,
+      public_price: null,
+      cost: null,
+      current_stock: null,
+      description: null,
+      category_id: null,
+      brand_id: null,
+      min_stock: null,
+      max_stock: null,
+      imageCover: null,
+    });
+
+    const categoryForm = useForm({
+      name: null,
+    });
+
+    const brandForm = useForm({
+      name: null,
+    });
+
     return {
       form,
       cutForm,
       clientForm,
+      productForm,
+      categoryForm,
+      brandForm,
 
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
       asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
@@ -620,6 +732,8 @@ export default {
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
       showClientFormModal: false, //muestra u oculta el modal de creación de cliente
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
+      showCreateProductModal: false,
+
       localCurrentCash: 0, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
       cashCutModal: false, //muestra el modal para el corte de caja
@@ -637,6 +751,7 @@ export default {
       storeProcessing: false, //cargando store de venta
       scanning: false, //cargando la busqueda de productos por escaner
       loading: false, //cargando la busqueda de productos
+      creatingProduct: false,
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
       //buscador
@@ -689,9 +804,11 @@ export default {
     InputLabel,
     InputError,
     SaleTable,
-    Modal
+    Modal,
+    InputFilePreview,
   },
   props: {
+    products_quantity: Number,
     products: Array,
     cash_registers: Array,
     clients: Array
@@ -709,8 +826,39 @@ export default {
         },
       });
     },
+    storeProduct() {
+      this.creatingProduct = true;
+      this.productForm.post(route('products.store', {stayInView: true}), {
+        onSuccess: async () => {
+          const response = await axios.get(route('products.get-all-for-indexedDB'));
+          const product = response.data.local_products[0];
+
+          this.showCreateProductModal = false;
+
+          // agregar al carrito de compras
+          this.addSaleProduct(product);
+
+          // agregar a indexedDB
+          addOrUpdateItem('products', product);
+
+          this.$notify({
+            title: "Producto creado",
+            message: "Ya puedes seleccionarlo para la venta",
+            type: "success",
+          });
+
+          this.creatingProduct = false;
+        },
+        onError: () => {
+          this.creatingProduct = false;
+        }
+      });
+    },
     resetClientForm() {
       this.clientForm.reset();
+    },
+    resetProductForm() {
+      this.productForm.reset();
     },
     disabledDate(time) {
       const today = new Date();
@@ -804,6 +952,11 @@ export default {
           });
 
           localStorage.setItem('pendentProcess', false);
+
+          //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
+          if (this.$page.props.auth.user.printer_config?.automaticPrinting) {
+            window.open(route('sales.print-ticket', response.data.new_sale.folio), '_blank');
+          }
         }
       } catch (error) {
         console.error(error);
@@ -1070,7 +1223,7 @@ export default {
   async mounted() {
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
-        this.$inertia.visit(route('tutorials.index'));
+      this.$inertia.visit(route('tutorials.index'));
     }
 
     //verificar si el usuario tiene una caja asignada

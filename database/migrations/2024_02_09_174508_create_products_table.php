@@ -17,8 +17,8 @@ return new class extends Migration
             $table->unsignedFloat('public_price');
             $table->unsignedFloat('cost')->nullable()->default(0);
             $table->string('code')->nullable();
-            $table->unsignedSmallInteger('min_stock')->nullable();
-            $table->unsignedSmallInteger('max_stock')->nullable();
+            $table->unsignedFloat('min_stock')->nullable();
+            $table->unsignedFloat('max_stock')->nullable();
             $table->unsignedFloat('current_stock')->nullable()->default(1);
             $table->text('description')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();

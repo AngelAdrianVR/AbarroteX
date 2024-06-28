@@ -1,69 +1,76 @@
 <template>  
 <Head title="Ezy Ventas tutorial" />
     <div>
-
         <!-- Videos del tutorial  -->
-        <Modal :maxWidth="'3xl'" :show="tutorialModal">
+        <Modal :maxWidth="'2xl'" :show="tutorialModal">
             <div class="py-7 px-7 relative">
-                <button v-if="step !== 1" @click="prevStep" class="hover:bg-grayD9 cursor-pointer rounded-full size-7"><i class="fa-solid fa-chevron-left"></i></button>
-                <figure class="mx-auto w-40">
+                <!-- <button v-if="step !== 1" @click="prevStep" class="hover:bg-grayD9 cursor-pointer rounded-full size-5 text-xs"><i class="fa-solid fa-chevron-left"></i></button> -->
+                <figure class="mx-auto w-32">
                     <img class="" src="@/../../public/images/black_logo.png" alt="logo">
                 </figure>
-                <h1 class="font-bold text-2xl text-center mb-2">Bienvenido (a) {{ $page.props.auth.user.store.name }}</h1>
+                <h1 class="font-bold text-2xl text-center mb-2">Bienvenido(a) {{ $page.props.auth.user.store.name }}</h1>
                 <p class="mb-5 text-center">Completa el siguiente tutorial para poder comenzar a utilizar Ezy Ventas</p>
 
                 <!-- Barra de progreso -->
-                <div class="grid grid-cols-4 gap-x-3 mb-4 mx-12">
-                    <template v-for="index in 4" :key="index">
-                        <div :class="{'border-2 border-primary w-full': index <= step, 'border-2 w-full': index > step}"></div>
+                <div class="grid grid-cols-3 gap-x-3 mb-4 mx-12">
+                    <template v-for="index in 3" :key="index">
+                        <button @click="step = index" :class="{'border-2 border-primary w-full': index <= step, 'border-2 w-full': index > step}"></button>
                     </template>
                 </div>
 
-                <p class="font-bold" v-text="tutorialContent[step - 1].title"></p>
+                <p class="font-bold mb-2 text-center" v-text="tutorialContent[step - 1].title"></p>
 
-                <video v-if="step === 1" controls>
-                    <source src="@/../../public/Videos/Tutorial_point_EzyV.mp4" type="video/mp4">
-                    Tu navegador no soporta la etiqueta de video.
-                </video>
-
-                <video v-if="step === 2" controls>
-                    <source src="@/../../public/Videos/Tutorial_productos_EzyV.mp4" type="video/mp4">
-                    Tu navegador no soporta la etiqueta de video.
-                </video>
-
-                <video v-if="step === 3" controls>
-                    <source src="@/../../public/Videos/Tutorial_graficas_EzyV.mp4" type="video/mp4">
-                    Tu navegador no soporta la etiqueta de video.
-                </video>
-
-                <div class="flex justify-end space-x-5 pt-2 pb-1 py-3 mt-9">
-                    <PrimaryButton @click="nextStep">Continuar</PrimaryButton>
+                <section class="flex justify-center h-72 *:h-full *:rounded-[5px]">
+                    <video v-if="step === 1" controls>
+                        <source src="@/../../public/Videos/Tutorial_point_EzyV.mp4" type="video/mp4">
+                        Tu navegador no soporta la etiqueta de video.
+                    </video>
+    
+                    <video v-if="step === 2" controls>
+                        <source src="@/../../public/Videos/Tutorial_productos_EzyV.mp4" type="video/mp4">
+                        Tu navegador no soporta la etiqueta de video.
+                    </video>
+    
+                    <video v-if="step === 3" controls>
+                        <source src="@/../../public/Videos/Tutorial_graficas_EzyV.mp4" type="video/mp4">
+                        Tu navegador no soporta la etiqueta de video.
+                    </video>
+                </section>
+                <div class="flex justify-end items-center space-x-5 pt-2 pb-1 py-3 mt-9">
+                    <button type="button" v-if="step !== 1" @click="prevStep" class="text-primary text-sm">
+                        <i class="fa-solid fa-chevron-left mr-2"></i>
+                        Regresar
+                    </button>
+                    <PrimaryButton @click="nextStep">
+                        Continuar
+                        <i class="fa-solid fa-chevron-right ml-2"></i>
+                    </PrimaryButton>
                 </div>
             </div>
         </Modal>
 
         <!-- Configuraciones de la tienda -->
-        <Modal :maxWidth="'3xl'" :show="configModal">
+        <Modal :maxWidth="'2xl'" :show="configModal">
             <div class="py-8 px-7 relative">
-                <button @click="tutorialModal = true; configModal = false" class="hover:bg-grayD9 cursor-pointer rounded-full size-7"><i class="fa-solid fa-chevron-left"></i></button>
-                <figure class="mx-auto w-40">
+                <button @click="tutorialModal = true; configModal = false" class="hover:bg-grayD9 cursor-pointer rounded-full size-5 text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+                <figure class="mx-auto w-32">
                     <img class="" src="@/../../public/images/black_logo.png" alt="logo">
                 </figure>
-                <h1 class="font-bold text-2xl text-center mb-5">Bienvenido (a) {{ $page.props.auth.user.store.name }}</h1>
+                <h1 class="font-bold text-2xl text-center mb-5">Bienvenido(a) {{ $page.props.auth.user.store.name }}</h1>
 
                 <!-- Barra de progreso -->
-                <div class="grid grid-cols-4 gap-x-3 mb-4 mx-12">
+                <!-- <div class="grid grid-cols-4 gap-x-3 mb-4 mx-12">
                     <div class="border-2 border-primary w-full"></div>
                     <div class="border-2 border-primary w-full"></div>
                     <div class="border-2 border-primary w-full"></div>
                     <div class="border-2 border-primary w-full"></div>
-                </div>
+                </div> -->
 
                 <p class="font-bold">Configura tu tienda.</p>
                 <p class="text-sm">La configuración inicial te permite personalizar tu experiencia de venta según tus necesidades. Puedes omitir este paso y ajustarlo más tarde en el módulo de configuraciones</p>
 
-                <section class="mt-5">
-                    <div v-for="(item, index) in settings" :key="item.id" class="mb-3">
+                <section class="mt-5 overflow-auto h-72">
+                    <div v-for="(item, index) in settings" :key="item.id" class="mb-3 mx-2">
                         <div class="flex items-center justify-between">
                             <p class="font-semibold">{{ item.key }}</p>
                             <el-switch 
@@ -76,13 +83,16 @@
                                 :loading="settingLoading[index]"
                                 size="small" class="ml-2" />
                         </div>
-                        <p class="text-gray99 text-sm">{{ configDescriptions[index] }}</p>
+                        <p class="text-gray99 text-sm w-5/6 text-justify">{{ item.description }}</p>
                     </div>
                 </section>
 
                 <div class="flex justify-end space-x-5 pt-2 pb-1 py-3 mt-9">
                     <button class="text-primary" @click="configModal = false; finishModal = true">Omitir</button>
-                    <PrimaryButton @click="configModal = false; finishModal = true">Continuar</PrimaryButton>
+                    <PrimaryButton @click="configModal = false; finishModal = true">
+                        Continuar
+                        <i class="fa-solid fa-chevron-right ml-2"></i>
+                    </PrimaryButton>
                 </div>
             </div>
         </Modal>
@@ -193,9 +203,11 @@ methods:{
     nextStep() {
         if ( this.step < 3 ) { 
             this.step++;
-        } else {
+        } else if (!this.$page.props.auth.user.tutorials_seen) {
             this.tutorialModal = false;
             this.configModal= true;
+        } else {
+            this.$inertia.visit(route('sales.point'));
         }
     },
     prevStep() {

@@ -66,7 +66,7 @@ class CreateNewUser implements CreatesNewUsers
             });
 
         //Crea la caja registradora para esta nueva tienda
-        CashRegister::create([
+        $cash_register = CashRegister::create([
             'name' => 'Caja principal',
             'started_cash' => 0,
             'current_cash' => 0,
@@ -81,6 +81,7 @@ class CreateNewUser implements CreatesNewUsers
             'rol' => 'Administrador',
             'password' => Hash::make($input['password']),
             'store_id' => $store->id,
+            'cash_register_id' => $cash_register->id,
         ]);
     }
 }
