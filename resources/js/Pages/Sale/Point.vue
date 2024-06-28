@@ -533,22 +533,6 @@
               clearable />
             <InputError :message="productForm.errors.name" />
           </div>
-          <!-- <div v-if="canSeeCost" class="mt-3">
-            <div class="flex items-center">
-              <InputLabel value="Precio de compra" class="ml-3 mb-1" />
-              <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
-                <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
-              </el-tooltip>
-            </div>
-            <el-input v-model="productForm.cost" placeholder="ingresa el precio"
-              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-              :parser="(value) => value.replace(/[^\d.]/g, '')">
-              <template #prefix>
-                <i class="fa-solid fa-dollar-sign"></i>
-              </template>
-            </el-input>
-            <InputError :message="productForm.errors.cost" />
-          </div> -->
           <div class="mt-3">
             <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
             <el-input v-model="productForm.public_price" placeholder="ingresa el precio"
@@ -567,56 +551,6 @@
               :parser="(value) => value.replace(/[^\d.]/g, '')" />
             <InputError :message="productForm.errors.current_stock" />
           </div>
-          <!-- <div></div>
-          <div class="mt-3">
-            <InputLabel value="Categoría" class="ml-3 mb-1" />
-            <el-select class="w-1/2" filterable v-model="productForm.category_id" clearable placeholder="Seleccione"
-              no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-              <el-option v-for="category in localCategories" :key="category" :label="category.name"
-                :value="category.id" />
-            </el-select>
-            <InputError :message="productForm.errors.category_id" />
-          </div>
-          <div class="mt-3">
-            <InputLabel value="Proveedor" class="ml-3 mb-1" />
-            <el-select class="w-1/2" v-model="productForm.brand_id" filterable clearable placeholder="Seleccione"
-              no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-              <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
-            </el-select>
-            <InputError :message="productForm.errors.brand_id" />
-          </div> -->
-
-          <!-- <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
-
-          <div class="mt-3">
-            <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
-            <el-input v-model="productForm.min_stock" placeholder="Cantidad mínima permitida en stock"
-              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-              :parser="(value) => value.replace(/[^\d.]/g, '')" />
-            <InputError :message="productForm.errors.min_stock" />
-          </div>
-
-          <div class="mt-3">
-            <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
-            <el-input v-model="productForm.max_stock" placeholder="Cantidad máxima permitida en stock"
-              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-              :parser="(value) => value.replace(/[^\d.]/g, '')" />
-            <InputError :message="productForm.errors.max_stock" />
-          </div>
-
-          <div class="mt-3 col-span-full">
-            <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
-            <el-input v-model="productForm.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-              placeholder="Escribe una descripción o características separadas por renglones" :maxlength="255"
-              show-word-limit clearable />
-            <InputError :message="productForm.errors.description" />
-          </div>
-
-          <div class="mt-7">
-            <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
-            <InputFilePreview @imagen="saveImage" @cleared="productForm.imageCover = null" />
-          </div> -->
-
           <div class="mt-3 col-span-2">
             <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
             <el-input v-model="productForm.code" placeholder="Escribe el código del producto" :maxlength="100"
@@ -915,6 +849,9 @@ export default {
 
           this.creatingProduct = false;
         },
+        onError: () => {
+          this.creatingProduct = false;
+        }
       });
     },
     resetClientForm() {
