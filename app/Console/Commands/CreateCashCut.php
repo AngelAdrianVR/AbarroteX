@@ -17,7 +17,7 @@ class CreateCashCut extends Command
     public function handle()
     {
         $stores = Store::with(['cashRegisters'])->get(['id', 'name', 'online_store_properties']);
-
+        
         foreach ($stores as $store) {
             foreach ($store->cashRegisters as $cashRegister) {
                 //recupera el último corte
@@ -30,6 +30,7 @@ class CreateCashCut extends Command
                     if ($online_cash_register_id == $cashRegister->id) { // si la caja registradora es la misma que la registrada para ventas en línea entonces lo toma en cuenta
                         // si existe el ultimo corte
                         if ($last_cash_cut != null) {
+                            
                             $onlineSalesPendentToday = OnlineSale::where('store_id', $store->id)
                                 ->where('status', 'Entregado')
                                 ->where('created_at', '>', $last_cash_cut->created_at)
@@ -58,20 +59,25 @@ class CreateCashCut extends Command
                     $salesPendentToday = $cashRegister->sales()->latest()->get();
                 }
 
+                //calcula el total de ventas en tienda
+                $totalStoreSalesToday = $salesPendentToday->sum(function ($sale) { //ventas en tienda
+                    return $sale->quantity * $sale->current_price;
+                });
+                
+                //calcula el total de ventas en línea
+                $totalOnlineSaleToday = $onlineSalesPendentToday->sum(function ($online_sale) { //ventas en línea
+                    return $online_sale->total;
+                });
 
                 //si hay movimientos y/o ventas pendientes
                 if ($movementsPendentToday->isNotEmpty() || $salesPendentToday->isNotEmpty() || $onlineSalesPendentToday->isNotEmpty()) {
-
                     // suma algebraica de todo el dinero que ingresó y salió de caja
                     $expected_cash = $cashRegister->started_cash //dinero inicial en caja
                         + $movementsPendentToday->where('type', 'Ingreso')->sum('amount') //movimientos de ingreso
                         - $movementsPendentToday->where('type', 'Retiro')->sum('amount') //movimientos de retiro
-                        + $totalOnlineSaleToday = $onlineSalesPendentToday->sum(function ($online_sale) { //ventas en línea
-                            return $online_sale->total;
-                        });
-                    +$totalStoreSalesToday = $salesPendentToday->sum(function ($sale) { //ventas en tienda
-                        return $sale->quantity * $sale->current_price;
-                    });
+                        + $totalStoreSalesToday
+                        + $totalOnlineSaleToday;
+
 
                     // Crea el registro de corte de caja
                     CashCut::create([
@@ -81,7 +87,7 @@ class CreateCashCut extends Command
                         'online_sales_cash' => $totalOnlineSaleToday, //ventas en línea
                         'counted_cash' => $expected_cash,
                         'difference' => 0, // asume que no hay diferencias
-                        'withdrawn_cash' => 0,
+                        'withdrawn_cash' => 0, //no se retira nada
                         'notes' => 'Corte realizado automáticamente por el sistema al terminar el día',
                         'cash_register_id' => $cashRegister->id,
                         'store_id' => $store->id,

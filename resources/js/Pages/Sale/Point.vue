@@ -425,7 +425,7 @@
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
             <PrimaryButton
-              :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > asignedCashRegister?.current_cash)">
+              :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && (form.registerAmount > localCurrentCash))">
               Confirmar</PrimaryButton>
           </div>
         </form>

@@ -153,7 +153,7 @@ class CashCutController extends Controller
         });
 
         return response()->json([
-            'store_sales' => $total_sales,
+            'store_sales' => $total_sales ?? 0,
             'online_sales' => $total_online_sales ?? 0,
         ]);
     }
@@ -213,6 +213,7 @@ class CashCutController extends Controller
     }
 
 
+    //--- Este método es para mostrar los movimientos relacionados a cada corte en el show de cortes ----
     public function getCashCutMovements(CashCut $cash_cut)
     {
         // Obtiene la caja registradora que realizó el corte

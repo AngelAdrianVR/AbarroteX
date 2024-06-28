@@ -1,106 +1,113 @@
 <template>
     <Head :title="'COT-' + quote.id" />
-    <main class="w-screen h-screen">
+    <main class="w-[1400px] mx-auto h-screen flex flex-col justify-between">
+        <div>   
+            <!-- Header --------------------------- -->
+            <section class="flex justify-between items-center">
+                <div class="relative">
+                    <svg width="500" height="109" class="text-white" viewBox="0 0 577 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M392.167 125L577 0L0 0V125L392.167 125Z" fill="#373B46"/>
+                    </svg>
+                    <p class="text-white font-bold text-3xl absolute top-9 left-14 font-sans">{{ $page.props.auth.user.store.name }}</p>
+                </div>
 
-        <!-- Header --------------------------- -->
-        <section class="flex justify-between items-center">
-            <div class="relative">
-                <svg width="500" height="109" class="text-white" viewBox="0 0 577 125" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M392.167 125L577 0L0 0V125L392.167 125Z" fill="#373B46"/>
-                </svg>
-                <p class="text-white font-bold text-2xl absolute top-9 left-14 font-sans">{{ $page.props.auth.user.store.name }}</p>
+                <div class="">
+                    <PrimaryButton v-if="showEditIcon" @click="print">
+                        Imprimir o guardar PDF 
+                    </PrimaryButton>
+                </div>
+                
+                <div class="flex flex-col space-y-1 mr-16 text-right">
+                    <p>{{ 'COT-' + (quote.id < 10 ? '0' + quote.id : quote.id) }}</p>
+                    <p class="font-bold">Fecha: <span class="font-light">{{ formatDate(quote.created_at) }}</span></p>
+                </div>
+            </section>
+
+            <!-- body ---------------------------- -->
+            <body class="my-4 md:w-[95%] lg:w-[80%] mx-auto">
+                <h2 class="font-bold text-center">Cotización</h2>
+                <!-- cliente -->
+                <p class="font-bold" v-if="quote.client?.name">Cliente: <span class="font-thin">{{ quote.client?.name }}</span></p>
+                <p class="font-bold">Contacto: <span class="font-thin">{{ quote.contact_name }}</span></p>
+                <!-- dirección -->
+                <p class="font-bold" v-if="quote.address">Dirección: <span class="font-thin">{{ quote.address }}</span></p>
+
+                <!-- tabla de productos y servicios -->
+                <table class="w-full my-5">
+                <thead>
+                    <tr class="*:text-left *:py-2 *:px-4 *:text-sm bg-[#373B46] text-white">
+                        <th class="rounded-s-full">Folio</th>
+                        <th>Producto o servicio</th>
+                        <th>Descripción</th>
+                        <th>Precio unitario</th>
+                        <th>Cantidad</th>
+                        <th class="rounded-e-full">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- productos -->
+                    <tr v-for="(product, index) in quote.products" :key="index"
+                        class="*:text-sm *:py-2 *:px-4 border-b border-[#EDEDED]"
+                        :class="{ 'bg-[#EDEDED]': index % 2 != 0 }">
+                        <td>{{ 'P-' + product.id }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>-</td>
+                        <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                        <td>{{ product.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                        <td>${{ (product.quantity * product.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    </tr>
+                    <!-- servicios -->
+                    <tr v-for="(service, index) in quote.services" :key="index"
+                        class="*:text-sm *:py-2 *:px-4 border-b border-[#EDEDED]"
+                        :class="{'bg-[#EDEDED]': (index % 2 != 0 && quote.products.length % 2 == 0) || (index % 2 == 0 && quote.products.length % 2 != 0)}">
+                        <td>{{ 'S-' + service.id }}</td>
+                        <td>{{ service.name }}</td>
+                        <td class="w-[500px] relative">
+                            <i v-if="indexEdit != index && showEditIcon" @click="indexEdit = index" class="fa-solid fa-pencil text-[10px] absolute top-1 right-0 text-gray99 border border-gray99 rounded-full p-[4px] px-[4px] cursor-pointer"></i>
+                            <i v-else-if="indexEdit == index" @click="handleEditDescription()" class="fa-solid fa-check text-[10px] absolute top-1 right-0 text-white bg-primary rounded-full p-[4px] px-[5px] cursor-pointer"></i>
+                            <p style="white-space: pre-line;" class="mr-2" v-if="indexEdit != index">{{ service.description ?? '-' }}</p>
+                            <el-input v-else v-model="service.description" :autosize="{ minRows: 2, maxRows: 5 }" class="!w-[95%]" type="textarea"
+                            placeholder="Escribe una descripción" :maxlength="500" show-word-limit
+                            clearable />
+                        </td>
+                        <td>${{ service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                        <td>{{ service.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                        <td>${{ (service.quantity * service.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- desgloce de total -->
+            <div class="text-right text-base">
+                <p v-if="quote.has_discount || quote.show_iva">
+                    Subtotal: <span class="ml-4">$</span> 
+                    <span class="inline-block w-20" v-if="quote.show_iva">{{ (quote.total - (quote.total * 0.16))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                    <span class="inline-block w-20" v-else>{{ quote.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                </p>
+                <p v-if="quote.show_iva">IVA: <span class="ml-4">$</span><span class="inline-block w-20">{{ (quote.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+                <p v-if="quote.has_discount">
+                    {{quote.is_percentage_discount ? 'Descuento (' + quote.discount + '%)' : 'Descuento:' }} <span class="ml-4">$</span>
+                    <span class="inline-block w-20" v-if="quote.is_percentage_discount">{{ (quote.discount * quote.total * 0.01)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                    <span class="inline-block w-20" v-else>{{ quote.discount?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                </p>
+                <p class="font-bold">
+                    Total: <span class="ml-4">$</span>
+                    <span class="inline-block w-20" v-if="quote.has_discount && quote.is_percentage_discount">{{ (quote.total - (quote.discount * quote.total * 0.01))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                    <span class="inline-block w-20" v-else-if="quote.has_discount">{{ (quote.total - quote.discount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                    <span class="inline-block w-20" v-else>{{ quote.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                </p>
             </div>
-            
-            <div class="flex flex-col space-y-1 mr-16 text-right">
-                <p>{{ 'COT-' + (quote.id < 10 ? '0' + quote.id : quote.id) }}</p>
-                <p class="font-bold">Fecha: <span class="font-light">{{ formatDate(quote.created_at) }}</span></p>
+
+            <div v-if="quote.notes">
+                <p class="font-bold">Notas adicionales:</p>
+                <p style="white-space: pre-line;" class="mt-1">{{ quote.notes }}</p>
             </div>
-        </section>
-
-        <!-- body ---------------------------- -->
-        <body class="my-4 md:w-[95%] lg:w-[80%] mx-auto">
-            <h2 class="font-bold text-center">Cotización</h2>
-            <!-- cliente -->
-            <p class="font-bold" v-if="quote.client?.name">Cliente: <span class="font-thin">{{ quote.client?.name }}</span></p>
-            <p class="font-bold">Contacto: <span class="font-thin">{{ quote.contact_name }}</span></p>
-            <!-- dirección -->
-            <p class="font-bold" v-if="quote.address">Dirección: <span class="font-thin">{{ quote.address }}</span></p>
-
-            <!-- tabla de productos y servicios -->
-            <table class="w-full my-5">
-            <thead>
-                <tr class="*:text-left *:py-2 *:px-4 *:text-sm bg-[#373B46] text-white">
-                    <th class="rounded-s-full">Folio</th>
-                    <th>Producto o servicio</th>
-                    <th>Descripción</th>
-                    <th>Precio unitario</th>
-                    <th>Cantidad</th>
-                    <th class="rounded-e-full">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- productos -->
-                <tr v-for="(product, index) in quote.products" :key="index"
-                    class="*:text-xs *:py-2 *:px-4 border-b border-[#EDEDED]"
-                    :class="{ 'bg-[#EDEDED]': index % 2 != 0 }">
-                    <td>{{ 'P-' + product.id }}</td>
-                    <td>{{ product.name }}</td>
-                    <td>-</td>
-                    <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                    <td>{{ product.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                    <td>${{ (product.quantity * product.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                </tr>
-                <!-- servicios -->
-                <tr v-for="(service, index) in quote.services" :key="index"
-                    class="*:text-xs *:py-2 *:px-4 border-b border-[#EDEDED]"
-                    :class="{'bg-[#EDEDED]': (index % 2 != 0 && quote.products.length % 2 == 0) || (index % 2 == 0 && quote.products.length % 2 != 0)}">
-                    <td>{{ 'S-' + service.id }}</td>
-                    <td>{{ service.name }}</td>
-                    <td class="w-[500px] relative">
-                        <i v-if="indexEdit != index" @click="indexEdit = index" class="fa-solid fa-pencil text-[10px] absolute top-1 right-0 text-gray99 border border-gray99 rounded-full p-[4px] px-[4px] cursor-pointer"></i>
-                        <i v-else-if="indexEdit == index" @click="handleEditDescription()" class="fa-solid fa-check text-[10px] absolute top-1 right-0 text-white bg-primary rounded-full p-[4px] px-[5px] cursor-pointer"></i>
-                        <p style="white-space: pre-line;" class="mr-2" v-if="indexEdit != index">{{ service.description ?? '-' }}</p>
-                        <el-input v-else v-model="service.description" :autosize="{ minRows: 2, maxRows: 5 }" class="!w-[95%]" type="textarea"
-                        placeholder="Escribe una descripción" :maxlength="500" show-word-limit
-                        clearable />
-                    </td>
-                    <td>${{ service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                    <td>{{ service.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                    <td>${{ (service.quantity * service.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- desgloce de total -->
-        <div class="text-right text-sm">
-            <p v-if="quote.has_discount || quote.show_iva">
-                Subtotal: <span class="ml-4">$</span> 
-                <span class="inline-block w-20" v-if="quote.show_iva">{{ (quote.total - (quote.total * 0.16))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                <span class="inline-block w-20" v-else>{{ quote.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-            </p>
-            <p v-if="quote.show_iva">IVA: <span class="ml-4">$</span><span class="inline-block w-20">{{ (quote.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-            <p v-if="quote.has_discount">
-                Descuento: <span class="ml-4">$</span>
-                <span class="inline-block w-20" v-if="quote.is_percentage_discount">{{ (quote.discount * quote.total * 0.01)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                <span class="inline-block w-20" v-else>{{ quote.discount?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-            </p>
-            <p class="font-bold">
-                Total: <span class="ml-4">$</span>
-                <span class="inline-block w-20" v-if="quote.has_discount && quote.is_percentage_discount">{{ (quote.total - (quote.discount * quote.total * 0.01))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                <span class="inline-block w-20" v-else-if="quote.has_discount">{{ (quote.total - quote.discount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                <span class="inline-block w-20" v-else>{{ quote.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-            </p>
+            </body>
         </div>
-
-        <div v-if="quote.notes">
-            <p class="font-bold">Notas adicionales:</p>
-            <p style="white-space: pre-line;" class="mt-1">{{ quote.notes }}</p>
-        </div>
-        </body>
 
         <!-- footer -------------------------- -->
         <footer>
-            <section class="flex flex-col space-y-2 absolute bottom-16 left-3">
+            <section class="flex flex-col space-y-1 text-base -mb-20">
                 <!-- telefono -->
                 <div class="flex items-center space-x-2">
                     <div class="border border-[#F68C0F] rounded-full">
@@ -148,7 +155,21 @@
                 </div>
             </section>
 
-            <svg class="hidden xl:block absolute bottom-7 left-0" width="917" height="127" viewBox="0 0 917 127" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+            <!------------- Decoraciones juntas en png ------------->
+            <img class="" src="@/../../public/images/quote_bottom_decoration.png" alt="">
+            
+            
+            <!------------- Decoraciones juntas en svg ------------->
+            <!-- <svg width="1438" height="149" viewBox="0 0 1438 149" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1072.66 18.3945L900 148.999H1439V18.3945H1072.66Z" fill="#373B46"/>
+                <path d="M937.417 96.5741H837L964.394 0H1439V8.29933H1053.82L937.417 96.5741Z" fill="#F68C0F"/>
+                <path d="M792.432 112.209H0V102.001H702.883L818.446 16.5547H917L792.432 112.209Z" fill="#373B46"/>
+            </svg> -->
+
+
+            <!------------- Decoraciones por separado para cambio de color ------------->
+            <!-- <svg class="hidden xl:block absolute bottom-7 left-0" width="917" height="127" viewBox="0 0 917 127" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M792 126.5H0V113H702.5L818 0H916.5L792 126.5Z" fill="#373B46"/>
             </svg>
 
@@ -158,12 +179,13 @@
 
             <svg class="hidden xl:block absolute bottom-0 right-0" width="500" height="160" viewBox="0 0 538 173" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M172.5 0.5L0 173H538.5V0.5H172.5Z" fill="#373B46"/>
-            </svg>
+            </svg> -->
         </footer>
     </main>
 </template>
 
 <script>
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { Head, Link } from '@inertiajs/vue3';
@@ -172,9 +194,11 @@ export default {
 data() {
     return {
         indexEdit: null,
+        showEditIcon: true,
     }
 },
 components:{
+PrimaryButton,
 Head,
 Link
 },
@@ -187,7 +211,22 @@ methods:{
     },
     handleEditDescription() {
         this.indexEdit = null;
-    }
+    },
+    print() {
+      this.showEditIcon = false;
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    },
+    handleAfterPrint() {
+      this.showEditIcon = true;
+    },
+},
+mounted() {
+    window.addEventListener('afterprint', this.handleAfterPrint);
+},
+beforeDestroy() {
+    window.removeEventListener('afterprint', this.handleAfterPrint);
 }
 }
 </script>
