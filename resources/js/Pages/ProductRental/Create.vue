@@ -63,9 +63,22 @@
                 <h2 class="font-bold mt-3 text-sm">Fecha y hora de entrega al cliente:</h2>
                 <h2 class="font-bold mt-3 text-sm">Fecha y hora de devolución:</h2>
                 <div class="mt-3 grid grid-cols-2 gap-x-3">
-                    <el-date-picker v-model="form.rented_date" type="date" class="!w-full" placeholder="día/mes/año" />
+                    <el-date-picker v-model="form.rented_date" type="date" class="!w-full" placeholder="día/mes/año"
+                        :disabled-date="disabledPrevDays" />
                     <el-time-select v-model="form.rented_time" class="!w-full" start="08:00" step="00:30" end="22:00"
                         placeholder="hh:mm" />
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-x-3">
+                    <el-date-picker v-model="form.estimated_end_date" type="date" class="!w-full"
+                        placeholder="día/mes/año" :disabled-date="disabledNextDays" />
+                    <el-time-select v-model="form.estimated_end_time" class="!w-full" start="08:00" step="00:30"
+                        end="22:00" placeholder="hh:mm" />
+                </div>
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Comentarios" />
+                    <el-input v-model="form.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                        placeholder="Escribe tus comentarios" :maxlength="400" show-word-limit clearable />
+                    <InputError :message="form.errors.notes" />
                 </div>
                 <!-- <div class="mt-3 col-span-2">
                     <InputLabel value="Nombre del producto*" />
@@ -255,6 +268,10 @@ export default {
             period_in_days: 1,
             cost: null,
             rented_date: null,
+            rented_time: null,
+            estimated_end_date: null,
+            estimated_end_time: null,
+            notes: null,
             // name: null,
             // code: null,
             // public_price: null,
@@ -311,12 +328,18 @@ export default {
         products: Array,
     },
     methods: {
-        // disabledPrevDays(date) {
-        //     if (this.form.rented_date) {
-        //         return date.getTime() > new Date(this.form.rented_date).getTime();
-        //     }
-        //     return false;
-        // },
+        disabledPrevDays(date) {
+            if (this.form.estimated_end_date) {
+                return date.getTime() > new Date(this.form.estimated_end_date).getTime();
+            }
+            return false;
+        },
+        disabledNextDays(date) {
+            if (this.form.rented_date) {
+                return date.getTime() < new Date(this.form.rented_date).getTime();
+            }
+            return false;
+        },
         async store() {
             try {
                 this.form.post(route("products.store"), {
