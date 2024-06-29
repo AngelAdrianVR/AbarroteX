@@ -186,5 +186,9 @@ return [
         'town' => 'municipio',
         'polity_state' => 'estado',
         'contact_name' => 'nombre de contacto',
+        'client_id' => 'cliente',
+        'product_id' => 'producto',
+        'rented_date' => 'fecha de entrega',
+        'rented_time' => 'hora de entrega',
     ],
 ];

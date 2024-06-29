@@ -46,6 +46,11 @@ onMounted(() => {
     }, 300000); // 5 minutos
 });
 
+onUnmounted(() => {
+    // Limpiar el intervalo cuando el componente se desmonte
+    clearInterval(syncInterval.value);
+});
+
 </script>
 
 <template>

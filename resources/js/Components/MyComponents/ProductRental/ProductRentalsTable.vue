@@ -1,6 +1,6 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="product-rentals?.length" class="w-full">
+        <table v-if="rentals?.length" class="w-full">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th>Folio</th>
@@ -20,9 +20,16 @@
                     </td>
                     <td>{{ rent.client.name }}</td>
                     <td>{{ rent.product.name }}</td>
-                    <td>${{ rent.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                    <td>{{ index }}</td>
-                    <td>{{ formatDate(rent.completed_at) ?? '-' }}</td>
+                    <td>${{ rent.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }} / {{ rent.period.name }}</td>
+                    <td>{{ getCalculateDaysElapsed(rent) }}</td>
+                    <td>
+                        <el-tooltip placement="top">
+                            <template #content>
+                                <p v-html="getTooltipContent(rent)" class="text-center"></p>
+                            </template>
+                            <span v-html="getReturnDate(rent)"></span>
+                        </el-tooltip>
+                    </td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
@@ -49,6 +56,14 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
+                                    <el-dropdown-item :command="'pay|' + rent.id">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                                        </svg>
+                                        <span class="text-xs">Registrar pago</span>
+                                    </el-dropdown-item>
                                     <el-dropdown-item :command="'delete|' + rent.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
@@ -58,15 +73,7 @@
                                         </svg>
                                         <span class="text-xs text-red-600">Eliminar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'pay|' + rent.id">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-                                        </svg>
-                                        <span class="text-xs">Registrar pago</span>
-                                    </el-dropdown-item>
-                                    <p class="text-gray99">Estado</p>
+                                    <p class="text-gray99 px-4">Estado</p>
                                     <el-dropdown-item :command="'complete|' + rent.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -94,11 +101,11 @@
 
         <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
             <template #title>
-                <h1>Eliminar cotización</h1>
+                <h1>Eliminar registro de renta</h1>
             </template>
             <template #content>
                 <p>
-                    Se eliminará al cotización seleccionado, esto es un proceso irreversible. ¿Continuar
+                    Se eliminará la renta seleccionada, esto es un proceso irreversible. ¿Continuar
                     de todas formas?
                 </p>
             </template>
@@ -116,7 +123,7 @@
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInDays } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
 
@@ -136,6 +143,38 @@ export default {
         rentals: Array
     },
     methods: {
+        getTooltipContent(rent) {
+            if (rent.status == 'En uso') {
+                return 'EN USO.<br>El producto ha sido entregado<br>y esta en uso por el cliente';
+            } else if (rent.status == 'Completado') {
+                return 'COMPLETADO.<br>El equipo se ha devuelto y<br>todos los pagos se ha recibido';
+            } else if (rent.status == 'Cancelado') {
+                return 'CANCELADO.<br>La renta ha sido cancelada';
+            }
+        },
+        getReturnDate(rent) {
+            if (rent.status == 'En uso') {
+                return '<i class="fa-solid fa-rotate text-xs text-[#09EE05] mr-2"></i>-';
+            } else if (rent.status == 'Completado') {
+                return '<i class="fa-solid fa-check text-xs text-[#06B918] mr-2"></i>' + this.formatDate(rent.completed_at);
+            } else if (rent.status == 'Cancelado') {
+                return '<i class="fa-solid fa-xmark text-xs text-[#D70808] mr-2"></i>' + this.formatDate(rent.cancelled_at);
+            }
+        },
+        getCalculateDaysElapsed(rent) {
+            if (rent.status == 'En uso') {
+                return this.calculateDaysElapsed(rent.rented_at) + ' hasta la fecha';
+            } else if (rent.status == 'Completado') {
+                return this.calculateDaysElapsed(rent.rented_at, rent.completed_at) + ' hasta que se completó';
+            } else if (rent.status == 'Cancelado') {
+                return this.calculateDaysElapsed(rent.rented_at, rent.cancelled_at) + ' hasta que se canceló';
+            }
+        },
+        calculateDaysElapsed(startDate, endDate = '') {
+            const past = new Date(startDate);
+            const end = endDate ? new Date(endDate) : new Date();
+            return differenceInDays(end, past);
+        },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const data = command.split('|')[1];
@@ -151,18 +190,20 @@ export default {
                 this.showDeleteConfirm = true;
                 this.itemIdToDelete = data;
             } else if (commandName == 'complete') {
-                this.showDeleteConfirm = true;
-                this.itemIdToDelete = data;
+                this.updateStatus(data, 'Completado');
             } else if (commandName == 'cancel') {
-                this.showDeleteConfirm = true;
-                this.itemIdToDelete = data;
+                this.updateStatus(data, 'Cancelado');
             }
         },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
         handleShow(encodedId) {
-            window.open(route('product-rentals.show', encodedId, '_blank'));
+            this.$inertia.visit(route('product-rentals.show', encodedId));
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
         },
         async deleteItem() {
             try {
@@ -174,9 +215,9 @@ export default {
                         type: 'success',
                     });
                     //se busca el index del cliente eliminado para removerlo del arreglo
-                    const indexQuoteDeleted = this.services.findIndex(item => item.id == this.itemIdToDelete);
-                    if (indexQuoteDeleted != -1) {
-                        this.services.splice(indexQuoteDeleted, 1);
+                    const indexRentDeleted = this.rentals.findIndex(item => item.id == this.itemIdToDelete);
+                    if (indexRentDeleted != -1) {
+                        this.rentals.splice(indexRentDeleted, 1);
                     }
                     this.showDeleteConfirm = false;
                 }
@@ -189,9 +230,25 @@ export default {
                 });
             }
         },
-        encodeId(id) {
-            const encodedId = btoa(id.toString());
-            return encodedId;
+        async updateStatus(rentId, status) {
+            try {
+                const response = await axios.put(route('product-rentals.update-status', rentId), { status });
+                if (response.status == 200) {
+                    // Buscar el índice del elemento en this.rentals
+                    const index = this.rentals.findIndex(item => item.id == rentId);
+                    if (index !== -1) {
+                        // Actualizar el elemento en this.rentals
+                        this.rentals[index] = response.data.item;
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'El servidor no pudo procesar la petición',
+                    message: 'No se pudo cambiar el status de la renta. Intente más tarde o si el problema persiste, contacte a soporte',
+                    type: 'error',
+                });
+            }
         },
     },
 }

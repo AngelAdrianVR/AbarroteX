@@ -23,21 +23,24 @@ class CreateCashCut extends Command
                 //recupera el último corte
                 $last_cash_cut = CashCut::where('cash_register_id', $cashRegister->id)->latest()->first();
 
-                //recupera el id de la caja registradora para ventas en linea
-                $online_cash_register_id = $store->online_store_properties['online_sales_cash_register'];
-                if ($online_cash_register_id == $cashRegister->id) { // si la caja registradora es la misma que la registrada para ventas en línea entonces lo toma en cuenta
-                    // si existe el ultimo corte
-                    if ($last_cash_cut != null) {
-                        $onlineSalesPendentToday = OnlineSale::where('store_id', $store->id)
-                            ->where('status', 'Entregado')
-                            ->where('created_at', '>', $last_cash_cut->created_at)
-                            ->latest()
-                            ->get();
-                    } else { //si no existe ningun corte, recupera todas las ventas en linea
-                        $onlineSalesPendentToday = OnlineSale::where('store_id', $store->id)
-                            ->where('status', 'Entregado')
-                            ->latest()
-                            ->get();
+                $onlineSalesPendentToday = collect();
+                if ($store->online_store_properties != []) {
+                    //recupera el id de la caja registradora para ventas en linea
+                    $online_cash_register_id = $store->online_store_properties['online_sales_cash_register'];
+                    if ($online_cash_register_id == $cashRegister->id) { // si la caja registradora es la misma que la registrada para ventas en línea entonces lo toma en cuenta
+                        // si existe el ultimo corte
+                        if ($last_cash_cut != null) {
+                            $onlineSalesPendentToday = OnlineSale::where('store_id', $store->id)
+                                ->where('status', 'Entregado')
+                                ->where('created_at', '>', $last_cash_cut->created_at)
+                                ->latest()
+                                ->get();
+                        } else { //si no existe ningun corte, recupera todas las ventas en linea
+                            $onlineSalesPendentToday = OnlineSale::where('store_id', $store->id)
+                                ->where('status', 'Entregado')
+                                ->latest()
+                                ->get();
+                        }
                     }
                 }
 
