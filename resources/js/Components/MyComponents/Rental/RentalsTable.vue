@@ -16,14 +16,14 @@
                 <tr @click="handleShow(encodeId(rent.id))" v-for="(rent, index) in rentals" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">
-                        {{ 'R-' + rent.id }}
+                        {{ 'R-' + rent.folio }}
                     </td>
                     <td>{{ rent.client.name }}</td>
                     <td>{{ rent.product.name }}</td>
                     <td>${{ rent.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }} / {{ rent.period.name }}</td>
                     <td>{{ getCalculateDaysElapsed(rent) }}</td>
                     <td>
-                        <el-tooltip placement="top">
+                        <el-tooltip placement="right">
                             <template #content>
                                 <p v-html="getTooltipContent(rent)" class="text-center"></p>
                             </template>
@@ -180,9 +180,9 @@ export default {
             const data = command.split('|')[1];
 
             if (commandName == 'see') {
-                this.$inertia.get(route('product-rentals.show', data));
+                this.$inertia.get(route('rentals.show', data));
             } else if (commandName == 'edit') {
-                this.$inertia.get(route('product-rentals.edit', data));
+                this.$inertia.get(route('rentals.edit', data));
             } else if (commandName == 'delete') {
                 this.showDeleteConfirm = true;
                 this.itemIdToDelete = data;
@@ -199,7 +199,7 @@ export default {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
         handleShow(encodedId) {
-            this.$inertia.visit(route('product-rentals.show', encodedId));
+            this.$inertia.visit(route('rentals.show', encodedId));
         },
         encodeId(id) {
             const encodedId = btoa(id.toString());
@@ -207,7 +207,7 @@ export default {
         },
         async deleteItem() {
             try {
-                const response = await axios.delete(route('product-rentals.destroy', this.itemIdToDelete));
+                const response = await axios.delete(route('rentals.destroy', this.itemIdToDelete));
                 if (response.status == 200) {
                     this.$notify({
                         title: 'Correcto',
@@ -232,7 +232,7 @@ export default {
         },
         async updateStatus(rentId, status) {
             try {
-                const response = await axios.put(route('product-rentals.update-status', rentId), { status });
+                const response = await axios.put(route('rentals.update-status', rentId), { status });
                 if (response.status == 200) {
                     // Buscar el índice del elemento en this.rentals
                     const index = this.rentals.findIndex(item => item.id == rentId);

@@ -205,8 +205,8 @@ onUnmounted(() => {
                             <!-- <ResponsiveNavLink :href="route('quotes.index')" :active="route().current('quotes.*')">
                                 Cotizaciones
                             </ResponsiveNavLink> -->
-                            <!-- <ResponsiveNavLink :href="route('product-rentals.index')"
-                                :active="route().current('product-rentals.*')">
+                            <!-- <ResponsiveNavLink :href="route('rentals.index')"
+                                :active="route().current('rentals.*')">
                                 Renta de productos
                             </ResponsiveNavLink> -->
                             <ResponsiveNavLink :href="route('products.index')"

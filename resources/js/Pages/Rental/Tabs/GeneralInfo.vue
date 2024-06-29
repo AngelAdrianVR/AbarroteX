@@ -34,7 +34,7 @@
         </span>
         <span class="text-gray37">Comentarios:</span>
         <p class="col-span-5" style="white-space: pre-line;">
-            {{ rent.notes }}
+            {{ rent.notes ?? '-' }}
         </p>
     </section>
 </template>
