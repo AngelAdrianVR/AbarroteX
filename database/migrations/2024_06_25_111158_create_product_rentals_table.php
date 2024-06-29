@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('product_rentals', function (Blueprint $table) {
             $table->id();
-            $table->unsignedMediumInteger('period_in_days');
+            $table->json('period');
             $table->unsignedFloat('cost');
             $table->string('status')->default('En uso');
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('client_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->text('notes')->nullable();
-            $table->timestamp('rented_at');
+            $table->timestamp('rented_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             $table->date('estimated_end_date')->nullable();
