@@ -9,7 +9,7 @@
                 <div>
                     <div class="flex items-center justify-between">
                         <InputLabel value="Cliente *" />
-                        <button @click="showClientFormModal = true" type="button"
+                        <button @click="showCreateClientModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
@@ -33,16 +33,16 @@
                 <div class="mt-3 grid grid-cols-2 gap-x-3">
                     <div>
                         <InputLabel value="La renta se paga cada *" />
-                        <el-select filterable v-model="form.period_in_days" placeholder="Selecciona el producto"
+                        <el-select filterable v-model="form.period" placeholder="Selecciona el producto"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                            <el-option v-for="period in periods" :key="period.name" :label="period.name"
-                                :value="period.days" />
+                            <el-option v-for="(period, index) in periods" :key="period" :label="period.name"
+                                :value="index" />
                         </el-select>
-                        <InputError :message="form.errors.period_in_days" />
+                        <InputError :message="form.errors.period" />
                     </div>
                     <div>
                         <InputLabel value="Costo *" class="ml-3 mb-1 text-sm" />
-                        <el-input v-model="form.cost" placeholder="Agrega el costo de renta "
+                        <el-input v-model="form.cost" placeholder="Costo de renta "
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                             :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
                             <template #prefix>
@@ -53,20 +53,31 @@
                     </div>
                 </div>
                 <div class="mt-3">
-                    <InputLabel value="Estado" />
+                    <InputLabel>
+                        Estado
+                        <i v-if="form.status == 'Completado'" class="fa-solid fa-check text-xs text-[#06B918] ml-2"></i>
+                        <i v-if="form.status == 'En uso'" class="fa-solid fa-rotate text-xs text-[#09EE05] ml-2"></i>
+                        <i v-if="form.status == 'Cancelado'" class="fa-solid fa-xmark text-xs text-[#D70808] ml-2"></i>
+                    </InputLabel>
                     <el-select filterable v-model="form.status" placeholder="Selecciona"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="status in statuses" :key="status" :label="status" :value="status" />
                     </el-select>
-                    <InputError :message="form.errors.product_id" />
+                    <InputError :message="form.errors.status" />
                 </div>
-                <h2 class="font-bold mt-3 text-sm">Fecha y hora de entrega al cliente:</h2>
-                <h2 class="font-bold mt-3 text-sm">Fecha y hora de devolución:</h2>
+                <h2 class="font-bold mt-3 text-sm">Fecha y hora de entrega al cliente *</h2>
+                <h2 class="font-bold mt-3 text-sm">Fecha y hora de devolución</h2>
                 <div class="mt-3 grid grid-cols-2 gap-x-3">
-                    <el-date-picker v-model="form.rented_date" type="date" class="!w-full" placeholder="día/mes/año"
-                        :disabled-date="disabledPrevDays" />
-                    <el-time-select v-model="form.rented_time" class="!w-full" start="08:00" step="00:30" end="22:00"
-                        placeholder="hh:mm" />
+                    <div>
+                        <el-date-picker v-model="form.rented_date" type="date" class="!w-full" placeholder="día/mes/año"
+                            :disabled-date="disabledPrevDays" />
+                        <InputError :message="form.errors.rented_date" />
+                    </div>
+                    <div>
+                        <el-time-select v-model="form.rented_time" class="!w-full" start="08:00" step="00:30"
+                            end="22:00" placeholder="hh:mm" />
+                        <InputError :message="form.errors.rented_time" />
+                    </div>
                 </div>
                 <div class="mt-3 grid grid-cols-2 gap-x-3">
                     <el-date-picker v-model="form.estimated_end_date" type="date" class="!w-full"
@@ -80,118 +91,6 @@
                         placeholder="Escribe tus comentarios" :maxlength="400" show-word-limit clearable />
                     <InputError :message="form.errors.notes" />
                 </div>
-                <!-- <div class="mt-3 col-span-2">
-                    <InputLabel value="Nombre del producto*" />
-                    <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100"
-                        clearable />
-                    <InputError :message="form.errors.name" />
-                </div> -->
-                <!-- <div v-if="canSeeCost" class="mt-3">
-                    <div class="flex items-center">
-                        <InputLabel value="Precio de compra" />
-                        <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
-                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
-                        </el-tooltip>
-                    </div>
-                    <el-input v-model="form.cost" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')">
-                        <template #prefix>
-                            <i class="fa-solid fa-dollar-sign"></i>
-                        </template>
-                </el-input>
-                <InputError :message="form.errors.cost" />
-                </div>
-                <div class="mt-3">
-                    <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.public_price" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
-                        <template #prefix>
-                                            <i class="fa-solid fa-dollar-sign"></i>
-                                        </template>
-                    </el-input>
-                    <InputError :message="form.errors.public_price" />
-                </div>
-                <div class="mt-3">
-                    <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                    <InputError :message="form.errors.current_stock" />
-                </div>
-                <div></div>
-                <div class="mt-3">
-                    <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría" />
-                        <button @click="showCategoryFormModal = true" type="button"
-                            class="rounded-full border border-primary size-4 flex items-center justify-center">
-                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
-                        </button>
-                    </div>
-                    <el-select filterable v-model="form.category_id" clearable placeholder="Seleccione"
-                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="category in localCategories" :key="category" :label="category.name" :value="category.id" />
-                    </el-select>
-                    <InputError :message="form.errors.category_id" />
-                </div>
-
-                <div class="mt-3">
-                    <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor" />
-                        <button @click="showBrandFormModal = true" type="button"
-                            class="rounded-full border border-primary size-4 flex items-center justify-center">
-                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
-                        </button>
-                    </div>
-                    <el-select v-model="form.brand_id" filterable clearable placeholder="Seleccione"
-                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
-                    </el-select>
-                    <InputError :message="form.errors.brand_id" />
-                </div>
-
-                <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
-
-                <div class="mt-3">
-                    <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/\D/g, '')" />
-                    <InputError :message="form.errors.min_stock" />
-                </div>
-
-                <div class="mt-3">
-                    <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/\D/g, '')" />
-                    <InputError :message="form.errors.max_stock" />
-                </div>
-
-                <div class="mt-3 col-span-full">
-                    <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-                        placeholder="Escribe una descripción o características separadas por renglones" :maxlength="255" show-word-limit
-                        clearable />
-                    <InputError :message="form.errors.description" />
-                </div>
-
-                <div class="mt-7">
-                    <InputLabel value="Agregar imagen" />
-                    <InputFilePreview @imagen="saveImage" @cleared="form.imageCover = null" />
-                </div>
-
-                <div class="mt-3 col-span-2">
-                    <InputLabel value="Código del producto (en caso de tener)" />
-                    <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100" clearable>
-                        <template #prefix>
-                                            <i class="fa-solid fa-barcode"></i>
-                                        </template>
-                    </el-input>
-                    <InputError :message="form.errors.code" />
-                </div> -->
-
                 <div class="col-span-2 text-right mt-3">
                     <PrimaryButton class="!rounded-full" :disabled="form.processing">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -201,49 +100,42 @@
             </form>
         </div>
 
-        <!-- category form -->
-        <!-- <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
-            <template #title> Agregar categoría </template>
+        <!-- client form -->
+        <DialogModal :show="showCreateClientModal" @close="showCreateClientModal = false; resetClientForm()">
+            <template #title> Agregar cliente </template>
             <template #content>
-                <form @submit.prevent="storeCategory" ref="categoryForm">
-                    <div>
-                        <label class="text-sm ml-3">Nombre de la categoría *</label>
-                        <el-input v-model="categoryForm.name" placeholder="Escribe el nombre de la categoría"
-                            :maxlength="100" required clearable />
-                        <InputError :message="categoryForm.errors.name" />
+                <form @submit.prevent="storeClient" class="md:grid grid-cols-2 gap-x-3">
+                    <div class="mt-3">
+                        <InputLabel value="Nombre*" class="ml-3 mb-1" />
+                        <el-input v-model="clientForm.name" placeholder="Escribe el nombre del cliente" :maxlength="100"
+                            clearable />
+                        <InputError :message="clientForm.errors.name" />
+                    </div>
+                    <div class="mt-3">
+                        <InputLabel class="mb-1 ml-2" value="Teléfono *" />
+                        <el-input v-model="clientForm.phone"
+                            :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                            :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+                            placeholder="Escribe el número de teléfono" />
+                        <InputError :message="clientForm.errors.phone" />
+                    </div>
+                    <div class="mt-3 col-span-full">
+                        <InputLabel value="RFC (opcional)" class="ml-3 mb-1" />
+                        <el-input v-model="clientForm.rfc" placeholder="Escribe el RFC en caso de tenerlo"
+                            :maxlength="100" clearable />
+                        <InputError :message="clientForm.errors.rfc" />
                     </div>
                 </form>
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="showCategoryFormModal = false" :disabled="categoryForm.processing">Cancelar
-                    </CancelButton>
-                    <PrimaryButton @click="storeCategory()" :disabled="categoryForm.processing">Crear</PrimaryButton>
+                    <CancelButton @click="showCreateClientModal = false; resetClientForm()"
+                        :disabled="clientForm.processing">
+                        Cancelar</CancelButton>
+                    <PrimaryButton @click="storeClient()" :disabled="clientForm.processing">Crear</PrimaryButton>
                 </div>
             </template>
-        </DialogModal> -->
-
-        <!-- brand form -->
-        <!-- <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
-            <template #title> Agregar proveedor </template>
-            <template #content>
-                <form @submit.prevent="storeBrand">
-                    <div>
-                        <label class="text-sm ml-3">Nombre del proveedor *</label>
-                        <el-input v-model="brandForm.name" placeholder="Escribe el nombre del proveedor"
-                            :maxlength="100" required clearable />
-                        <InputError :message="brandForm.errors.name" />
-                    </div>
-                </form>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-2">
-                    <CancelButton @click="showBrandFormModal = false" :disabled="brandForm.processing">Cancelar
-                    </CancelButton>
-                    <PrimaryButton @click="storeBrand()" :disabled="brandForm.processing">Crear</PrimaryButton>
-                </div>
-            </template>
-        </DialogModal> -->
+        </DialogModal>
     </AppLayout>
 </template>
 
@@ -257,59 +149,51 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateItem } from "@/dbService.js";
-import axios from 'axios';
 
 export default {
     data() {
         const form = useForm({
             client_id: null,
             product_id: null,
-            period_in_days: 1,
+            period: 0,
             cost: null,
+            status: "En uso",
             rented_date: null,
             rented_time: null,
             estimated_end_date: null,
             estimated_end_time: null,
             notes: null,
-            // name: null,
-            // code: null,
-            // public_price: null,
-            // cost: null,
-            // current_stock: null,
-            // description: null,
-            // category_id: null,
-            // brand_id: null,
-            // min_stock: null,
-            // max_stock: null,
-            // imageCover: null,
         });
 
-        const categoryForm = useForm({
+        const clientForm = useForm({
             name: null,
-        });
-
-        const brandForm = useForm({
-            name: null,
+            rfc: null,
+            phone: null,
         });
 
         return {
             form,
-            brandForm,
-            categoryForm,
+            clientForm,
+            showCreateClientModal: false,
             localClients: this.clients,
-            localBrands: this.brands,
-            showCategoryFormModal: false, //muestra formulario para agregar categoría
-            showBrandFormModal: false, //muestra formulario para agregar proveedor
-            // Permisos de rol actual
-            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
             // periodos de renta predefinidos
             periods: [
                 { name: 'Día', days: 1 },
+                { name: '3er Día', days: 3 },
                 { name: 'Semana', days: 7 },
                 { name: '2 semanas', days: 14 },
                 { name: 'Mes', days: 30 },
-                { name: 'Personalizado', days: 0 },
+                { name: 'Bimestre', days: 60 },
+                { name: 'Trimestre', days: 90 },
+                { name: 'Cuatrimestre', days: 120 },
+                { name: 'Semestre', days: 180 },
+                { name: 'Año', days: 365 },
+                // { name: 'Personalizado', days: 0 },
+            ],
+            statuses: [
+                'En uso',
+                'Completado',
+                'Cancelado',
             ],
         };
     },
@@ -328,6 +212,24 @@ export default {
         products: Array,
     },
     methods: {
+        storeClient() {
+            this.clientForm.post(route('clients.store'), {
+                onSuccess: () => {
+                    this.showCreateClientModal = false;
+                    this.localClients = this.clients;
+                    // seleccionar el cliente recien agregado
+                    this.form.client_id = this.clients[this.clients.length - 1].id;
+                    this.$notify({
+                        title: "Éxito",
+                        message: "Se ha creado un nuevo cliente",
+                        type: "success",
+                    });
+                },
+            });
+        },
+        resetClientForm() {
+            this.clientForm.reset();
+        },
         disabledPrevDays(date) {
             if (this.form.estimated_end_date) {
                 return date.getTime() > new Date(this.form.estimated_end_date).getTime();
@@ -342,17 +244,11 @@ export default {
         },
         async store() {
             try {
-                this.form.post(route("products.store"), {
+                this.form.transform((data) => ({
+                    ...data,
+                    period: this.periods[this.form.period],
+                })).post(route("product-rentals.store"), {
                     onSuccess: async () => {
-                        // guardar nuevo producto a IndexedDB
-                        // Obtener producto mas reciente agregado
-                        const response = await axios.get(route('products.get-all-for-indexedDB'));
-                        const product = response.data.local_products[0];
-
-                        // agregar a indexedDB
-                        await addOrUpdateItem('products', product);
-
-                        // toast
                         this.$notify({
                             title: "Correcto",
                             message: "",
@@ -363,49 +259,6 @@ export default {
             } catch (error) {
                 console.error(error);
             }
-        },
-        async storeCategory() {
-            try {
-                const response = await axios.post(route('categories.store'), {
-                    name: this.categoryForm.name
-                });
-                if (response.status === 200) {
-                    this.$notify({
-                        title: "Éxito",
-                        message: "Se ha creado una nueva categoría",
-                        type: "success",
-                    });
-                    this.form.category_id = response.data.item.id;
-                    this.localCategories.push(response.data.item);
-                    this.showCategoryFormModal = false;
-                    this.categoryForm.reset();
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        },
-        async storeBrand() {
-            try {
-                const response = await axios.post(route('brands.store'), {
-                    name: this.brandForm.name
-                });
-                if (response.status === 200) {
-                    this.$notify({
-                        title: "Éxito",
-                        message: "Se ha creado una nueva proveedor",
-                        type: "success",
-                    });
-                    this.localBrands.push(response.data.item);
-                    this.form.brand_id = response.data.item.id;
-                    this.showBrandFormModal = false;
-                    this.brandForm.reset();
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        },
-        saveImage(image) {
-            this.form.imageCover = image;
         },
     }
 }

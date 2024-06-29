@@ -170,7 +170,10 @@ Route::post('products-get-data-for-products-view', [ProductController::class, 'g
 
 //product-rentals routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('product-rentals', ProductRentalController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::resource('product-rentals', ProductRentalController::class)->middleware(['auth', 'activeSuscription', 'verified']);
+Route::put('product-rentals/update-status/{product_rental}', [ProductRentalController::class, 'updateStatus'])->name('product-rentals.update-status')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('product-rentals-search', [ProductRentalController::class, 'searchRent'])->name('product-rentals.search')->middleware('auth');
+Route::get('product-rentals-get-by-page/{currentPage}', [ProductRentalController::class, 'getItemsByPage'])->name('product-rentals.get-by-page')->middleware('auth');
 
 
 //services routes----------------------------------------------------------------------------------

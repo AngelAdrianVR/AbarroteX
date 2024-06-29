@@ -10,7 +10,7 @@ class ProductRental extends Model
     use HasFactory;
 
     protected $fillable = [
-        'period_in_days',
+        'period',
         'cost',
         'status',
         'product_id',
@@ -25,6 +25,7 @@ class ProductRental extends Model
     ];
 
     protected $casts = [
+        'period' => 'array',
         'rented_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
