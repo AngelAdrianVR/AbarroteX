@@ -188,7 +188,7 @@
   </div>
 
   <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
-  <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
+  <Modal :show="cashRegisterModal" @close="cashRegisterModal = false">
     <div class="p-4 relative">
       <i @click="cashRegisterModal = false"
         class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
@@ -234,9 +234,9 @@
   <!-- --------------------------- Modal Ingreso o retiro de dinero en caja ends ------------------------------------ -->
 
   <!-- -------------- Modal corte de caja starts----------------------- -->
-  <Modal :show="cashCutModal" @close="cashCutModal = false; form.reset">
+  <Modal :show="cashCutModal" @close="cashCutModal = false">
     <div class="p-4 relative">
-      <i @click="cashCutModal = false; cutForm.reset()"
+      <i @click="cashCutModal = false"
         class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
 
       <form class="mt-5 mb-2" @submit.prevent="storeCashCut">
@@ -309,7 +309,7 @@
         </div>
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
-          <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
+          <CancelButton @click="cashCutModal = false">Cancelar</CancelButton>
           <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing || (!currentMovements.length && cutForm.totalStoreSale == 0)">Hacer corte</PrimaryButton>
         </div>
           <p v-if="!currentMovements.length && cutForm.totalStoreSale == 0" 
