@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\OnlineSale;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +49,7 @@ class CashRegisterController extends Controller
                     })->take(7);
                     
         return inertia('CashRegister/Index', compact('cash_registers', 'cash_cuts', 'total_cash_cuts'));
+
     }
 
    

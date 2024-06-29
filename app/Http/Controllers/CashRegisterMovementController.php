@@ -85,7 +85,7 @@ class CashRegisterMovementController extends Controller
         //recupera el último corte realizado
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
 
-         // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
+         // Si existe el último corte, recupera todos los movimientos desde la fecha del último corte hasta ahora
         if ($last_cash_cut !== null) {
             $movements = CashRegisterMovement::where('cash_register_id', $cash_register_id)
                         ->where('created_at', '>', $last_cash_cut->created_at)

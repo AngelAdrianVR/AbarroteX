@@ -93,7 +93,7 @@
                     <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 rounded-lg self-start">
                         <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-t-lg">Resumen de corte</h2>
                         <div class="flex justify-between space-x-1 p-5">
-                            <div class="font-semibold space-y-1">
+                            <div class="font-semibold space-y-1 w-32">
                                 <p>Efectivo al iniciar</p>
                                 <p>Esperado</p>
                                 <p>Recuento manual</p>
@@ -142,7 +142,7 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import Back from "@/Components/MyComponents/Back.vue";
+import Back from "@/Components/MyComponents/Back.vue";  
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
