@@ -57,18 +57,18 @@ class ExpenseController extends Controller
 
     public function store(Request $request)
     {
-        
+
         // Itera sobre cada gasto recibido en la lista
         foreach ($request->expenses as $expenseData) {
 
             // Convierte el campo 'creado el' a un objeto Carbon y resta 6 horas
             // $created_at = Carbon::parse($expenseData['date'])->subHours(6);
 
-            Expense::create([
+            $expense = Expense::create([
                 'concept' => $expenseData['concept'],
                 'quantity' => $expenseData['quantity'],
                 'current_price' => $expenseData['current_price'],
-                'created_at' =>  now(),
+                // 'created_at' => now(),
                 'store_id' => auth()->user()->store_id,
             ]);
 
@@ -80,8 +80,9 @@ class ExpenseController extends Controller
                 CashRegisterMovement::create([
                     'amount' => $expenseData['current_price'],
                     'type' => 'Retiro',
-                    'notes' => 'Registro de gasto: '. $expenseData['concept'] ?? 'Sin concepto',
+                    'notes' => 'Registro de gasto: ' . $expenseData['concept'] ?? 'Sin concepto',
                     'cash_register_id' => $cash_register->id,
+                    'expense_id' => $expense->id,
                 ]);
                 //actualizar el dinero actual de la caja
                 $cash_register->decrement('current_cash', $expenseData['current_price']);
@@ -120,6 +121,12 @@ class ExpenseController extends Controller
         ]);
 
         $expense->update($validated);
+
+        // actualizar movimiento de caja relacionada si es que la hay
+        $expense->cashRegisterMovement?->update([
+            'notes' => $expense->concept,
+            'amount' => $expense->current_price * $expense->quantity,
+        ]);
     }
 
     public function destroy(Expense $expense)
@@ -127,7 +134,7 @@ class ExpenseController extends Controller
         // Eliminar el registro de gasto enviado como referencia
         $expense->delete();
     }
-    
+
     public function destroyDayExpenses(Expense $expense)
     {
         // Obtener la fecha de creación del registro de gasto
@@ -197,7 +204,7 @@ class ExpenseController extends Controller
                 'expenses' => $expenses,
             ];
         })->skip($offset)
-        ->take(30);
+            ->take(30);
 
         return response()->json(['items' => $groupedExpenses]);
     }

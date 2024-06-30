@@ -140,7 +140,7 @@ class GlobalProductStoreController extends Controller
         ]);
 
         // Crear gasto
-        Expense::create([
+        $expense = Expense::create([
             'concept' => 'Compra de producto: ' . $global_product_store->globalProduct->name,
             'current_price' => $global_product_store->cost ?? 0,
             'quantity' => $request->quantity,
@@ -159,6 +159,7 @@ class GlobalProductStoreController extends Controller
                 'type' => 'Retiro',
                 'notes' => "Compra de {$global_product_store->globalProduct->name} ($request->quantity $unit)",
                 'cash_register_id' => $cash_register->id,
+                'expense_id' => $expense->id,
             ]);
         }
     }
