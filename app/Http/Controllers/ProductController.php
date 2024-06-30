@@ -256,7 +256,7 @@ class ProductController extends Controller
         ]);
 
         // Crear gasto
-        Expense::create([
+        $expense = Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
             'current_price' => $product->cost ?? 0,
             'quantity' => $request->quantity,
@@ -275,6 +275,7 @@ class ProductController extends Controller
                 'type' => 'Retiro',
                 'notes' => "Compra de $product->name ($request->quantity $unit)",
                 'cash_register_id' => $cash_register->id,
+                'expense_id' => $expense->id,
             ]);
         }
     }

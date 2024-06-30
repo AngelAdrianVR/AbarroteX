@@ -82,7 +82,9 @@
                     <div class="text-left mt-4 ml-6">
                         <p v-if="!product.data.cost" class="text-xs text-redDanger">
                             <i class="fa-regular fa-hand-point-down mr-2"></i>
-                            Para poder descontar de caja, primero se debe especificar un precio de compra al producto.
+                            Para poder descontar de caja, primero se debe especificar un
+                            <Link :href="route('products.edit', encodedId)" class="underline"> precio de
+                            compra al producto dando click aqui </Link>.
                         </p>
                         <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register"
                             label="Se paga con dinero de caja" size="small" :disabled="!product.data.cost" />
@@ -123,7 +125,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
-import { useForm } from "@inertiajs/vue3";
+import { useForm, Link } from "@inertiajs/vue3";
 import { addOrUpdateItem } from "@/dbService.js";
 
 export default {
@@ -163,6 +165,7 @@ export default {
         Back,
         ProductInfo,
         ProductHistorical,
+        Link,
     },
     props: {
         product: Object,
