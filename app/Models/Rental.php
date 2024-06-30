@@ -45,6 +45,11 @@ class Rental extends Model
     {
         return $this->belongsTo(Client::class);
     }
+    
+    public function payments()
+    {
+        return $this->hasMany(RentalPayment::class);
+    }
 
     public function store()
     {

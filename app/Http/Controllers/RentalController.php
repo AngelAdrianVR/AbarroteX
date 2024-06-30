@@ -65,11 +65,11 @@ class RentalController extends Controller
     }
 
 
-    public function show($encoded_product_id)
+    public function show($encoded_rental_id)
     {
         // Decodificar el ID
-        $decoded_product_id = base64_decode($encoded_product_id);
-        $rental = Rental::with(['client', 'product'])->find($decoded_product_id);
+        $decoded_rental_id = base64_decode($encoded_rental_id);
+        $rental = Rental::with(['client', 'product', 'payments'])->find($decoded_rental_id);
         $rentals = Rental::where('store_id', auth()->user()->store_id)
             ->get()
             ->map(fn ($rent) => ['id' => $rent->id, 'folio' => "R-$rent->folio: {$rent->client->name}"]);
@@ -78,11 +78,11 @@ class RentalController extends Controller
     }
 
 
-    public function edit($encoded_product_id)
+    public function edit($encoded_rental_id)
     {
         // Decodificar el ID
-        $decoded_product_id = base64_decode($encoded_product_id);
-        $rental = Rental::with(['client', 'product'])->find($decoded_product_id);
+        $decoded_rental_id = base64_decode($encoded_rental_id);
+        $rental = Rental::with(['client', 'product'])->find($decoded_rental_id);
         $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
         $products = Product::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
 

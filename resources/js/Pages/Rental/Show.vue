@@ -26,7 +26,7 @@
                         <GeneralInfo :rent="rental" />
                     </el-tab-pane>
                     <el-tab-pane label="Pagos" name="2">
-                        <Payments />
+                        <Payments :payments="rental.payments" />
                     </el-tab-pane>
                 </el-tabs>
             </main>

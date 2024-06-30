@@ -1,51 +1,41 @@
 <template>
-    <Loading v-if="loading" class="mt-20" />
-    <div v-else>
-        
-    </div>
+    <section>
+        <header class="mt-3">
+            <p class="text-gray37">
+                Monto hasta el momento
+                <span class="text-black ml-3">${{ getTotalPaid().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+            </p>
+        </header>
+        <main class="mt-5 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <RentalPaymentCard v-for="(item, index) in payments" :key="item.id" :payment="item" :index="index" />
+        </main>
+        <el-empty v-if="!payments.length" description="No hay pagos registrados" />
+    </section>
 </template>
 
 <script>
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
-import CancelButton from "@/Components/MyComponents/CancelButton.vue";
-import ProductTable from '@/Components/MyComponents/Product/ProductTable.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import Loading from '@/Components/MyComponents/Loading.vue';
-import FileUploader from '@/Components/MyComponents/FileUploader.vue';
-import InputError from "@/Components/InputError.vue";
-import Modal from "@/Components/Modal.vue";
-import DialogModal from "@/Components/DialogModal.vue";
-import { useForm } from "@inertiajs/vue3";
-import axios from 'axios';
-import { addOrUpdateBatchOfItems } from '@/dbService.js';
+import RentalPaymentCard from '@/Components/MyComponents/Rental/RentalPaymentCard.vue';
 
 export default {
     data() {
         return {
-            // carga
-            loading: false,
         };
     },
     components: {
-        PrimaryButton,
-        CancelButton,
-        ProductTable,
-        ThirthButton,
-        InputError,
-        InputLabel,
-        Loading,
-        Modal,
-        DialogModal,
-        FileUploader,
+        RentalPaymentCard,
     },
     props: {
+        payments: Array,
     },
     methods: {
-        
+        getTotalPaid() {
+            return this.payments.reduce((accum, item) => {
+                return accum += item.amount;
+            }, 0);
+        },
     },
     mounted() {
-       
+
     }
 }
 </script>

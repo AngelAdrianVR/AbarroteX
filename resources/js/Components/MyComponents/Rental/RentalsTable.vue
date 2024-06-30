@@ -187,8 +187,7 @@ export default {
                 this.showDeleteConfirm = true;
                 this.itemIdToDelete = data;
             } else if (commandName == 'pay') {
-                this.showDeleteConfirm = true;
-                this.itemIdToDelete = data;
+                this.$inertia.get(route('rental-payments.create', {rentalId: data}));
             } else if (commandName == 'complete') {
                 this.updateStatus(data, 'Completado');
             } else if (commandName == 'cancel') {
