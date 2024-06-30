@@ -6,11 +6,16 @@
         </div>
 
         <section class="md:flex justify-between items-center">
-            <div class="lg:w-1/3 relative">
-                <input v-model="searchQuery" @keydown.enter="searchProducts" class="input w-full pl-9"
-                    placeholder="Buscar código o nombre de producto" type="search">
-                <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
-            </div>
+            <article class="flex items-center space-x-5 lg:w-1/3">
+                <div class="lg:w-full relative">
+                    <input v-model="searchQuery" @keydown.enter="searchProducts" class="input w-full pl-9"
+                        placeholder="Buscar código o nombre de producto" type="search" ref="scanInput" />
+                    <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
+                </div>
+                <el-tag @close="closedTag" v-if="searchedWord" closable type="primary">
+                    {{ searchedWord }}
+                </el-tag>
+            </article>
             <div class="my-4 lg:my-0 flex items-center justify-end space-x-3">
                 <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
@@ -305,6 +310,7 @@ export default {
             localProducts: [],
             totalProducts: null,
             totalLocalProducts: null,
+            searchedWord: null, //palabra con la que se hizo la última busqueda.
             // carga
             loading: false,
         };
@@ -403,6 +409,15 @@ export default {
                 this.currentPage = parseInt(page);
             }
         },
+        closedTag() {
+            this.localProducts = this.products;
+            this.searchedWord = null;
+        },
+        inputFocus() {
+            this.$nextTick(() => {
+                this.$refs.scanInput.focus();
+            });
+        },
         async fetchDataForProductsView() {
             try {
                 this.loading = true;
@@ -477,16 +492,19 @@ export default {
                 try {
                     const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
                     if (response.status == 200) {
-                        this.products = this.localProducts;
+                        // this.products = this.localProducts;
                         this.localProducts = response.data.items;
+                        this.searchedWord = this.searchQuery;
+                        this.searchQuery = null;
                     }
 
                 } catch (error) {
                     console.log(error);
                 } finally {
                     this.loading = false;
+                    this.inputFocus();
                 }
-            } else {
+            } else {    
                 // Aquí podemos simular una operación asíncrona para mostrar el indicador de carga
                 try {
                     await this.resetLocalProducts();
