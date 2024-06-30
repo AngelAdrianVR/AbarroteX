@@ -5,8 +5,8 @@
         <span class="text-gray37">Cliente:</span>
         <span class="col-span-5">{{ rent.client.name }}</span>
         <span class="text-gray37">Producto rentado:</span>
-        <span @click="$inertia.visit(route('products.show', rent.product.id))"
-            class="col-span-5 text-primary underline cursor-pointer">{{ rent.product.name }}</span>
+        <span @click="viewProduct(rent.product)" class="col-span-5 text-primary underline cursor-pointer">{{
+            rent.product.name }}</span>
         <span class="text-gray37">Fecha de entrega a cliente:</span>
         <span class="col-span-5">{{ formatDate(rent.rented_at) }}</span>
         <span class="text-gray37">Fecha de devolución:</span>
@@ -34,7 +34,7 @@
         </span>
         <span class="text-gray37">Comentarios:</span>
         <p class="col-span-5" style="white-space: pre-line;">
-            {{ rent.notes }}
+            {{ rent.notes ?? '-' }}
         </p>
     </section>
 </template>
@@ -75,8 +75,16 @@ export default {
         rent: Object,
     },
     methods: {
+        viewProduct(product) {
+            const encodedId = btoa(product.id.toString());
+            window.open(route('products.show', encodedId), '_blank');
+        },
         formatDate(date) {
             return format(parseISO(date), 'dd MMMM yyyy', { locale: es });
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
         },
         getCalculateDaysElapsed(rent) {
             let days = 0;
@@ -87,7 +95,7 @@ export default {
             } else if (rent.status == 'Cancelado') {
                 days = this.calculateDaysElapsed(rent.rented_at, rent.cancelled_at);
             }
-            return {days, periods: Math.ceil(days / rent.period.days)};
+            return { days, periods: Math.ceil(days / rent.period.days) };
         },
         calculateDaysElapsed(startDate, endDate = '') {
             const past = new Date(startDate);

@@ -15,7 +15,7 @@
           </el-tag>
         </article>
         <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
-          <PrimaryButton @click="$inertia.get(route('product-rentals.create'))">Crear renta de producto</PrimaryButton>
+          <PrimaryButton @click="$inertia.get(route('rentals.create'))">Crear renta de producto</PrimaryButton>
         </div>
       </div>
 
@@ -24,7 +24,7 @@
         <p v-if="localProductRentals.length" class="text-gray66 text-[11px]">
           {{ localProductRentals.length }} de {{ total_product_rentals }} elementos
         </p>
-        <ProductRentalsTable :rentals="localProductRentals" />
+        <RentalsTable :rentals="localProductRentals" />
         <p v-if="localProductRentals.length" class="text-gray66 text-[11px] mt-3">
           {{ localProductRentals.length }} de {{ total_product_rentals }} elementos
         </p>
@@ -48,7 +48,7 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import ThirthButton from "@/Components/MyComponents/ThirthButton.vue";
-import ProductRentalsTable from "@/Components/MyComponents/ProductRental/ProductRentalsTable.vue";
+import RentalsTable from "@/Components/MyComponents/Rental/RentalsTable.vue";
 import axios from "axios";
 
 export default {
@@ -56,7 +56,7 @@ export default {
     return {
       searchQuery: null, //buscador de producto en renta.
       searchedWord: null, //palabra con la que se hizo la última busqueda.
-      localProductRentals: this.product_rentals, //arreglo local de productos rentados
+      localProductRentals: this.rentals, //arreglo local de productos rentados
       loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
       loading: false, //estado de carga cuando se busca a un producto en renta por medio del buscador
       currentPage: 1, //para paginación
@@ -65,11 +65,11 @@ export default {
   components: {
     AppLayout,
     PrimaryButton,
-    ProductRentalsTable,
+    RentalsTable,
     ThirthButton,
   },
   props: {
-    product_rentals: Array,
+    rentals: Array,
     total_product_rentals: Number,
   },
   methods: {
@@ -77,7 +77,7 @@ export default {
       this.loading = true;
       if (this.searchQuery != "") {
         try {
-          const response = await axios.get(route("product-rentals.search"), {
+          const response = await axios.get(route("rentals.search"), {
             params: { query: this.searchQuery },
           });
           if (response.status == 200) {
@@ -91,13 +91,13 @@ export default {
           this.loading = false;
         }
       } else {
-        this.localProductRentals = this.product_rentals;
+        this.localProductRentals = this.rentals;
       }
     },
     async fetchItemsByPage() {
       try {
         this.loadingItems = true;
-        const response = await axios.get(route("product-rentals.get-by-page", this.currentPage));
+        const response = await axios.get(route("rentals.get-by-page", this.currentPage));
 
         if (response.status === 200) {
           this.localProductRentals = [...this.localProductRentals, ...response.data.items];
@@ -117,7 +117,7 @@ export default {
       }
     },
     closedTag() {
-      this.localProductRentals = this.product_rentals;
+      this.localProductRentals = this.rentals;
       this.searchedWord = null;
     },
   },

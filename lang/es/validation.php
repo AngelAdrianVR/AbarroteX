@@ -190,5 +190,6 @@ return [
         'product_id' => 'producto',
         'rented_date' => 'fecha de entrega',
         'rented_time' => 'hora de entrega',
+        'amount' => 'monto',
     ],
 ];

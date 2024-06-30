@@ -6,8 +6,8 @@
             <h1 class="font-bold mt-4">Detalles del cliente</h1>
 
             <article class="flex items-center space-x-3 justify-between mt-5">
-                <el-select @change="handleSelect()" class="!w-40 md:!w-80" filterable
-                    v-model="clientId" clearable placeholder="Buscar cliente" no-data-text="No hay opciones registradas"
+                <el-select @change="handleSelect()" class="!w-40 md:!w-80" filterable v-model="clientId" clearable
+                    placeholder="Buscar cliente" no-data-text="No hay opciones registradas"
                     no-match-text="No se encontraron coincidencias">
                     <el-option v-for="item in clients" :key="item" :label="item.name" :value="item.id" />
                 </el-select>
@@ -90,8 +90,8 @@ export default {
             }
         },
         handleSelect() {
-        const encodedId = btoa(this.clientId.toString());
-        this.$inertia.get(route('clients.show', encodedId))
+            const encodedId = btoa(this.clientId.toString());
+            this.$inertia.get(route('clients.show', encodedId))
         },
         encodeId(id) {
             const encodedId = btoa(id.toString());

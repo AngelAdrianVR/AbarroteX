@@ -1,21 +1,32 @@
 <template>
-    <AppLayout :title="'Detalles de renta R-' + product_rental.id">
+    <AppLayout :title="'Detalles de renta R-' + rental.id">
         <div class="md:px-10 px-2 py-7 text-xs md:text-sm">
             <div class="flex justify-between items-center">
-                <Back :to="route('product-rentals.index')" />
+                <Back :to="route('rentals.index')" />
             </div>
-            <!-- Información de la venta -->
-            <header class="">
-
+            <header class="flex items-center space-x-3 justify-between mt-5">
+                <el-select @change="handleSelect()" class="!w-40 md:!w-80" filterable v-model="rentId" clearable
+                    placeholder="Buscar registro de renta" no-data-text="No hay opciones registradas"
+                    no-match-text="No se encontraron coincidencias">
+                    <el-option v-for="item in rentals" :key="item.id" :label="item.folio" :value="item.id" />
+                </el-select>
+                <div class="flex items-center space-x-3">
+                    <ThirthButton @click="$inertia.get(route('rental-payments.create', {rentalId: rental.id}))">
+                        Registrar pago
+                    </ThirthButton>
+                    <PrimaryButton @click="$inertia.get(route('rentals.edit', encodedId))">
+                        Editar
+                    </PrimaryButton>
+                </div>
             </header>
             <!-- Productos -->
-            <main class="flex flex-col space-y-5 lg:mx-16 mt-8">
+            <main class="flex flex-col space-y-5 mt-8">
                 <el-tabs v-model="activeTab" @tab-click="updateURL">
                     <el-tab-pane label="Información de la renta" name="1">
-                        <GeneralInfo :rent="product_rental" />
+                        <GeneralInfo :rent="rental" />
                     </el-tab-pane>
                     <el-tab-pane label="Pagos" name="2">
-                        <Payments />
+                        <Payments :payments="rental.payments" />
                     </el-tab-pane>
                 </el-tabs>
             </main>
@@ -28,9 +39,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import GeneralInfo from './Tabs/GeneralInfo.vue';
 import Payments from './Tabs/Payments.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import DialogModal from '@/Components/DialogModal.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
@@ -38,21 +48,10 @@ import Back from "@/Components/MyComponents/Back.vue";
 export default {
     data() {
         return {
-            products: [],
-            // modales
-            showEditModal: false,
-            showInstallmentModal: false,
-            showRefundConfirm: false,
-            saleToSeeInstallments: null,
-            saleFolioToRefund: null,
-            addInstallment: false,
-            // cargas
-            addingInstallment: false,
-            refunding: false,
-            editing: false,
-            changingDay: false,
-            // inventario de codigos activado
-            isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            // selector
+            rentId: this.rental.id,
+            // otros
+            encodedId: null,
             // tabs
             activeTab: '1',
         }
@@ -60,22 +59,26 @@ export default {
     components: {
         AppLayout,
         PrimaryButton,
+        ThirthButton,
         CancelButton,
         InputLabel,
         InputError,
         Back,
-        ConfirmationModal,
-        DialogModal,
         GeneralInfo,
         Payments,
     },
     props: {
-        product_rental: Object,
+        rental: Object,
+        rentals: Array,
     },
     computed: {
-       
+
     },
     methods: {
+        handleSelect() {
+            const encodedId = btoa(this.rentId.toString());
+            this.$inertia.get(route('rentals.show', encodedId))
+        },
         updateURL(tab) {
             const params = new URLSearchParams(window.location.search);
             params.set('tab', tab.props.name);
@@ -88,9 +91,14 @@ export default {
                 this.activeTab = tab;
             }
         },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            this.encodedId = encodedId;
+        },
     },
     mounted() {
         this.setActiveTabFromURL();
+        this.encodeId(this.rental.id);
         // resetear variable de local storage a false
         localStorage.setItem('pendentProcess', false);
     }

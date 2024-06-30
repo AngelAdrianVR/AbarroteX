@@ -5,17 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductRental extends Model
+class Rental extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'folio',
         'period',
         'cost',
         'status',
         'product_id',
         'client_id',
         'store_id',
+        'user_id',
         'notes',
         'rented_at',
         'completed_at',
@@ -43,9 +45,19 @@ class ProductRental extends Model
     {
         return $this->belongsTo(Client::class);
     }
+    
+    public function payments()
+    {
+        return $this->hasMany(RentalPayment::class);
+    }
 
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

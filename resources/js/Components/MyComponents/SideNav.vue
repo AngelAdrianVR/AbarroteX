@@ -148,8 +148,8 @@ export default {
                 {
                     label: 'Renta de productos',
                     icon: '<svg stroke="currentColor" width="20" height="23" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.32656 2.03516H1.67656C1.45776 2.03516 1.24791 2.1406 1.0932 2.32828C0.938482 2.51596 0.851562 2.77052 0.851562 3.03594V15.0453C0.851562 15.3107 0.938482 15.5653 1.0932 15.753C1.24791 15.9407 1.45776 16.0461 1.67656 16.0461H12.4016C12.6204 16.0461 12.8302 15.9407 12.9849 15.753C13.1397 15.5653 13.2266 15.3107 13.2266 15.0453V3.03594C13.2266 2.77052 13.1397 2.51596 12.9849 2.32828C12.8302 2.1406 12.6204 2.03516 12.4016 2.03516H6.62656" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.62813 8.03866L4.97813 6.53816L3.32813 8.03932V1.53426C3.32805 1.46849 3.33867 1.40335 3.35937 1.34256C3.38007 1.28178 3.41044 1.22654 3.44875 1.18C3.48706 1.13346 3.53256 1.09655 3.58264 1.07136C3.63273 1.04617 3.68641 1.0332 3.74063 1.0332H6.21563C6.32502 1.0332 6.42996 1.08592 6.50729 1.17976C6.58468 1.27361 6.62813 1.40088 6.62813 1.53359V8.03866Z" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.32812 13.043H9.10313" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.32812 10.041H10.7531" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.7523 7.03906H8.27734" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                    route: route('product-rentals.index'),
-                    active: route().current('product-rentals.*'),
+                    route: route('rentals.index'),
+                    active: route().current('rentals.*'),
                     options: [],
                     dropdown: false,
                     show: ['Administrador'].includes(this.$page.props.auth.user.rol)
