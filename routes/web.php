@@ -167,6 +167,7 @@ Route::post('products/import', [ProductController::class, 'import'])->name('prod
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
+Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
 
 
 //rentals routes----------------------------------------------------------------------------------
@@ -198,6 +199,7 @@ Route::get('global-product-store-get-data-for-base-catalog-view', [GlobalProduct
 Route::post('global-product-store/transfer', [GlobalProductStoreController::class, 'transfer'])->name('global-product-store.transfer')->middleware('auth');
 Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
 Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
+Route::post('global-product-store-change-price', [GlobalProductStoreController::class, 'changePrice'])->name('global-product-store.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
 
 
 //categories routes----------------------------------------------------------------------------------

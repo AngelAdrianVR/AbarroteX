@@ -260,4 +260,15 @@ class GlobalProductStoreController extends Controller
 
         return response()->json(compact('rejected_products', 'total_products'));
     }
+
+    public function changePrice(Request $request)
+    {   
+        // Extraer el número del string
+        $idString = $request->product['id'];
+        $idNumber = (int) preg_replace('/[^0-9]/', '', $idString);
+
+        $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->where('id', $idNumber)->first();
+        $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
+        $product->save();
+    }
 }

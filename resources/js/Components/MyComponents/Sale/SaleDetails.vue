@@ -88,7 +88,14 @@
                                         <span class="text-red-700">{{ sale.product_name }}</span>
                                     </el-tooltip>
                                 </td>
-                                <td>${{ sale.current_price }}</td>
+                                <td v-if="sale.price_changed">
+                                    <el-tooltip content="El precio fue modificado solo para esta venta" placement="bottom">
+                                        <span class="border-b border-dashed border-primary cursor-default">${{ sale.current_price }}</span>
+                                    </el-tooltip>
+                                </td>
+                                <td v-else>
+                                    ${{ sale.current_price }}
+                                </td>
                                 <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 <td class="text-end pb-1">${{ (sale.current_price *
                                     sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
