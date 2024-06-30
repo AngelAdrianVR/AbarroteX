@@ -192,6 +192,7 @@
           </div>
         </section>
 
+
         <!-- seccion de desgloce de montos -->
         <section class="lg:w-[30%]">
           <!-- buscador de productos -->
@@ -851,14 +852,17 @@ export default {
         },
         onError: () => {
           this.creatingProduct = false;
+          this.inputFocus();
         }
       });
     },
     resetClientForm() {
       this.clientForm.reset();
+      this.inputFocus();
     },
     resetProductForm() {
       this.productForm.reset();
+      this.inputFocus();
     },
     disabledDate(time) {
       const today = new Date();
@@ -918,7 +922,7 @@ export default {
       // Actualizar los productos en IndexedDB
       await addOrUpdateBatchOfItems('products', validProducts);
     },
-    async store() {
+    async store() { //registra la venta
       if (this.storeProcessing) return;
 
       this.storeProcessing = true;
@@ -996,6 +1000,7 @@ export default {
           this.cashRegisterModal = false;
           this.form.reset();
           this.fetchCashRegister();
+          this.inputFocus();
         },
       });
     },
@@ -1010,6 +1015,7 @@ export default {
           this.cashCutModal = false;
           this.fetchCashRegister();
           this.cutForm.reset();
+          this.inputFocus();
         },
       });
     },
@@ -1098,6 +1104,7 @@ export default {
         });
         this.scannerQuery = null;
         this.scanning = false;
+        this.inputFocus();
       }
     },
     addSaleProduct(product) {
@@ -1114,7 +1121,8 @@ export default {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
-          quantity: this.quantity
+          quantity: this.quantity,
+          priceChanged: false,
         });
       }
       this.scannerQuery = null;

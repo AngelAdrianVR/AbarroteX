@@ -15,6 +15,7 @@ class Sale extends Model
         'product_name',
         'quantity',
         'refunded_at',
+        'price_changed', //bandera para indicar si se camibió el precio unicamente para esa venta
         'folio',
         'product_id',
         'client_id',
