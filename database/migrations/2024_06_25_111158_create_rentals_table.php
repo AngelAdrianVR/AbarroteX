@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_rentals', function (Blueprint $table) {
+        Schema::create('rentals', function (Blueprint $table) {
             $table->id();
+            $table->unsignedMediumInteger('folio');
             $table->json('period');
             $table->unsignedFloat('cost');
             $table->string('status')->default('En uso');
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('client_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('notes')->nullable();
             $table->timestamp('rented_at')->nullable();
             $table->timestamp('completed_at')->nullable();
@@ -34,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_rentals');
+        Schema::dropIfExists('rentals');
     }
 };

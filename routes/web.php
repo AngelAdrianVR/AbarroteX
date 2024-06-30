@@ -19,8 +19,9 @@ use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
-use App\Http\Controllers\ProductRentalController;
+use App\Http\Controllers\RentalController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\RentalPaymentController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
@@ -168,12 +169,17 @@ Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllF
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 
 
-//product-rentals routes----------------------------------------------------------------------------------
+//rentals routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('product-rentals', ProductRentalController::class)->middleware(['auth', 'activeSuscription', 'verified']);
-Route::put('product-rentals/update-status/{product_rental}', [ProductRentalController::class, 'updateStatus'])->name('product-rentals.update-status')->middleware(['auth', 'activeSuscription', 'verified']);
-Route::get('product-rentals-search', [ProductRentalController::class, 'searchRent'])->name('product-rentals.search')->middleware('auth');
-Route::get('product-rentals-get-by-page/{currentPage}', [ProductRentalController::class, 'getItemsByPage'])->name('product-rentals.get-by-page')->middleware('auth');
+Route::resource('rentals', RentalController::class)->middleware(['auth', 'activeSuscription', 'verified']);
+Route::put('rentals/update-status/{rental}', [RentalController::class, 'updateStatus'])->name('rentals.update-status')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('rentals-search', [RentalController::class, 'searchRent'])->name('rentals.search')->middleware('auth');
+Route::get('rentals-get-by-page/{currentPage}', [RentalController::class, 'getItemsByPage'])->name('rentals.get-by-page')->middleware('auth');
+
+
+//rental payments routes----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+Route::resource('rental-payments', RentalPaymentController::class)->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 //services routes----------------------------------------------------------------------------------

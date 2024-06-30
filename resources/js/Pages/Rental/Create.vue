@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Registrar renta">
         <div class="px-3 md:px-10 py-7">
-            <Back :to="route('product-rentals.index')" />
+            <Back :to="route('rentals.index')" />
 
             <form @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
@@ -247,7 +247,7 @@ export default {
                 this.form.transform((data) => ({
                     ...data,
                     period: this.periods[this.form.period],
-                })).post(route("product-rentals.store"), {
+                })).post(route("rentals.store"), {
                     onSuccess: async () => {
                         this.$notify({
                             title: "Correcto",
