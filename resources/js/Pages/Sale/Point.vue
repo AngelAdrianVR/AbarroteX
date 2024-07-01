@@ -244,6 +244,9 @@
                 <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
+                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">No te quedan existencias de este producto. 
+                  <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
+                </div>
                 <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
                   class="!rounded-full !px-24" :disabled="quantity == 0">
                   Agregar
@@ -716,10 +719,10 @@ export default {
     return {
       form,
       cutForm,
+      brandForm,
       clientForm,
       productForm,
       categoryForm,
-      brandForm,
 
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
       asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
