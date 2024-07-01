@@ -192,6 +192,7 @@
           </div>
         </section>
 
+
         <!-- seccion de desgloce de montos -->
         <section class="lg:w-[30%]">
           <!-- buscador de productos -->
@@ -243,6 +244,9 @@
                 <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
+                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">No te quedan existencias de este producto. 
+                  <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
+                </div>
                 <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
                   class="!rounded-full !px-24" :disabled="quantity == 0">
                   Agregar
@@ -715,10 +719,10 @@ export default {
     return {
       form,
       cutForm,
+      brandForm,
       clientForm,
       productForm,
       categoryForm,
-      brandForm,
 
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
       asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
@@ -851,14 +855,17 @@ export default {
         },
         onError: () => {
           this.creatingProduct = false;
+          this.inputFocus();
         }
       });
     },
     resetClientForm() {
       this.clientForm.reset();
+      this.inputFocus();
     },
     resetProductForm() {
       this.productForm.reset();
+      this.inputFocus();
     },
     disabledDate(time) {
       const today = new Date();
@@ -918,7 +925,7 @@ export default {
       // Actualizar los productos en IndexedDB
       await addOrUpdateBatchOfItems('products', validProducts);
     },
-    async store() {
+    async store() { //registra la venta
       if (this.storeProcessing) return;
 
       this.storeProcessing = true;
@@ -996,6 +1003,7 @@ export default {
           this.cashRegisterModal = false;
           this.form.reset();
           this.fetchCashRegister();
+          this.inputFocus();
         },
       });
     },
@@ -1010,6 +1018,7 @@ export default {
           this.cashCutModal = false;
           this.fetchCashRegister();
           this.cutForm.reset();
+          this.inputFocus();
         },
       });
     },
@@ -1098,6 +1107,7 @@ export default {
         });
         this.scannerQuery = null;
         this.scanning = false;
+        this.inputFocus();
       }
     },
     addSaleProduct(product) {
@@ -1114,7 +1124,8 @@ export default {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
-          quantity: this.quantity
+          quantity: this.quantity,
+          priceChanged: false,
         });
       }
       this.scannerQuery = null;

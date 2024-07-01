@@ -38,12 +38,12 @@ A<template>
           </template>
           <template v-else-if="editMode == index">
             <div class="flex items-center space-x-2">
-              <el-input v-model="editedPrice" @keyup.enter="stopEditing(sale)" type="number" step="0.01">
+              <el-input v-model="editedPrice" @keyup.enter="handleChangePrice(sale)" type="number" step="0.01">
                 <template #prefix>
                   <i class="fa-solid fa-dollar-sign"></i>
                 </template>
               </el-input>
-              <button @click="stopEditing(sale)"
+              <button @click="handleChangePrice(sale)"
                 class="flex items-center justify-center rounded-full size-5 bg-primary flex-shrink-0"><i
                   class="fa-solid fa-check text-white text-[10px]"></i></button>
               <button @click="editMode = false"
@@ -146,9 +146,32 @@ A<template>
       <i class="lg:hidden fa-regular fa-hand-point-down ml-3"></i>
     </p>
   </div>
+
+  <!-- Modal para preguntar si se quiere cambiar el precio definitivamente o solo en esa venta -->
+    <ConfirmationModal :show="showChangePriceConfirmation" @close="showChangePriceConfirmation = false">
+      <template #title>
+        <h1>Confirmar cambio de precio</h1>
+      </template>
+      <template #content>
+        <p>
+          ¿Deseas cambiar el precio definitivo del producto o sólo en esta venta?
+        </p>
+      </template>
+      <template #footer>
+        <div class="flex items-center space-x-1">
+          <CancelButton @click="stopEditing(true)">Sólo en esta venta</CancelButton>
+          <PrimaryButton @click="stopEditing(false)">Cambiar precio al producto</PrimaryButton>
+        </div>
+      </template>
+    </ConfirmationModal>
+    <!-- Modal para preguntar si se quiere cambiar el precio definitivamente o solo en esa venta -->
 </template>
 
 <script>
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+
 export default {
   data() {
     return {
@@ -161,16 +184,27 @@ export default {
       // Permisos de rol actual
       canDelete: this.$page.props.auth.user.rol == 'Administrador',
       // otros
+      showChangePriceConfirmation: false, //confirmacion para cambio de precio
+      saleProductToEdit: null, //guarda el producto al que se va editar el precio
       quantity: 1,
       editMode: null,
       editedPrice: null
     };
+  },
+  components:{
+    ConfirmationModal,
+    PrimaryButton,
+    CancelButton
   },
   props: {
     saleProducts: Array
   },
   emits: ['delete-product'],
   methods: {
+    handleChangePrice(sale) {
+      this.saleProductToEdit = sale;
+      this.showChangePriceConfirmation = true;
+    },
     deleteItem(productId) {
       this.$emit('delete-product', productId);
     },
@@ -178,10 +212,31 @@ export default {
       this.editMode = index;
       this.editedPrice = sale.product.public_price;
     },
-    stopEditing(sale) {
+    stopEditing(changeJustForThisSale) {
       this.editMode = null;
-      // Actualizamos el precio en el objeto de venta directamente.
-      sale.product.public_price = parseFloat(this.editedPrice);
+
+      //si se cambia el precio sólo para la venta
+      if ( changeJustForThisSale ) {
+        // Actualizamos el precio en el objeto de venta directamente.
+        this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
+        this.saleProductToEdit.priceChanged = true; //agrega bandera para indicar que se le cambió el precio solo para esa venta
+        this.showChangePriceConfirmation = false;
+
+      } else { //se cambia el precio definitivo al producto.
+
+        //si es local manda al controlador de locales 
+        if ( this.saleProductToEdit.product.id.split('_')[0] === 'local' ) {
+          axios.post(route('products.change-price'), {product: this.saleProductToEdit.product, newPrice: this.editedPrice});
+          this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
+          this.saleProductToEdit.priceChanged = false; //agrega bandera para indicar que no se cambio solo a la venta
+          this.showChangePriceConfirmation = false;
+        } else { //para un producto global
+          axios.post(route('global-product-store.change-price'), {product: this.saleProductToEdit.product, newPrice: this.editedPrice});
+          this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
+          this.saleProductToEdit.priceChanged = false; //agrega bandera para indicar que no se cambio solo a la venta
+          this.showChangePriceConfirmation = false;
+        }
+      } 
     },
   },
 };

@@ -82,8 +82,11 @@
                     <div class="text-left mt-4 ml-6">
                         <p v-if="!global_product_store.cost" class="text-xs text-redDanger flex items-center space-x-2">
                             <i class="fa-regular fa-hand-point-down"></i>
-                            <span>Para poder descontar de caja, primero se debe especificar un precio de compra al
-                                producto.</span>
+                            <span>
+                                Para poder descontar de caja, primero se debe especificar un
+                                <Link :href="route('global-product-store.edit', encodedId)" class="underline"> precio de
+                                compra al producto dando click aqui </Link>.
+                            </span>
                         </p>
                         <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register"
                             label="Se paga con dinero de caja" size="small" :disabled="!global_product_store.cost" />
@@ -124,7 +127,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
-import { useForm } from "@inertiajs/vue3";
+import { useForm, Link } from "@inertiajs/vue3";
 import { addOrUpdateItem } from '@/dbService.js';
 
 export default {
@@ -164,6 +167,7 @@ export default {
         Back,
         ProductInfo,
         ProductHistorical,
+        Link,
     },
     props: {
         global_product_store: Object,

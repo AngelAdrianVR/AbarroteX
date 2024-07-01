@@ -26,11 +26,13 @@ class Store extends Model
         'seller_id',
         'suscription_period',
         'default_card_id', //tarjata para pagar
+        'colors',
     ];
 
     protected $casts = [
         'next_payment' => 'date',
         'online_store_properties' => 'array',
+        'colors' => 'array',
         // 'printer_config' => 'array',
     ];
 
