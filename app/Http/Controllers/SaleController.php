@@ -8,6 +8,7 @@ use App\Models\CashRegisterMovement;
 use App\Models\Client;
 use App\Models\CreditSaleData;
 use App\Models\GlobalProductStore;
+use App\Models\Installment;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -69,8 +70,31 @@ class SaleController extends Controller
     {
         $this->storeEachProductSold($request->data['saleProducts']);
 
-        //me mando al punto de venta en respuesta la nueva venta creada para imprimirla en caso de tener la oopción de impresión automática activada
+        //me mando al punto de venta en respuesta la nueva venta creada para imprimirla en caso de tener la opción de impresión automática activada
         $new_sale = Sale::where('store_id', auth()->user()->store_id)->latest()->first();
+        
+        //agrega el id del cliente si se tiene
+        $new_sale->client_id = $request->data['client_id'];
+        $new_sale->save();
+
+        //Crea registro de venta a crédito si así lo fue
+        if ( $request->data['has_credit'] ) {
+            $new_credit_sale_data = CreditSaleData::create([
+                'folio' => $new_sale->folio,
+                'expired_date' => $request->data['limit_date'],
+                'status' => $request->data['deposit'] ? 'Parcial' : 'Pendiente',
+            ]);
+            
+            //si hay primer abono el dia de la compra se registra
+            if ( $request->data['deposit'] ) {
+                Installment::create([
+                    'amount' => $request->data['deposit'],
+                    'notes' => 'Primer abono hecho en la compra',
+                    'credit_sale_data_id' => $new_credit_sale_data->id,
+                    'user_id' => auth()->id(),
+                ]);
+            }
+        }
 
         return response()->json(compact('new_sale'));
     }
