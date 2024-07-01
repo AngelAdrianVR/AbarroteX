@@ -24,13 +24,17 @@
         <Loading v-if="loading" class="my-16" />
         <main v-else class="mx-2 lg:mx-14 my-6">
             <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
-                <SimpleKPI v-for="(item, index) in getSimpleKpisOptions" :key="index" :title="item.title"
-                    :icon="item.icon" class="self-start" :value="item.value" />
+                <template v-for="(item, index) in getSimpleKpisOptions" :key="index">
+                    <SimpleKPI v-if="item.show" :title="item.title"
+                        :icon="item.icon" class="self-start" :value="item.value" />
+                </template>
                 <Kpi v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
             </section>
             <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
-                <ComparisonBarChart v-for="(item, index) in getBarChartOptions" :key="index" :options="item"
-                    :title="getBarChartTitle(item.title)" />
+                <template v-for="(item, index) in getBarChartOptions" :key="index">
+                    <ComparisonBarChart v-if="item.show" :options="item"
+                        :title="getBarChartTitle(item.title)" />
+                </template>
                 <!-- <PieChart v-for="(item, index) in getPieChartOptions" :key="index" :options="item"
                     title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' /> -->
             </section>
@@ -122,32 +126,38 @@ export default {
                 {
                     title: "Ventas en tienda (ingresos)",
                     icon: "fa-solid fa-dollar-sign",
-                    value: "$" + this.calculateTotalSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                    value: "$" + this.calculateTotalSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: true,
                 },
                 {
                     title: "Unidades vendidas en tienda",
                     icon: "fa-solid fa-clipboard-list",
-                    value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                    value: this.calculateTotalProductsSold?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: true,
                 },
-                // {
-                //     title: "Ventas en linea (ingresos)",
-                //     icon: "fa-solid fa-dollar-sign",
-                //     value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
-                // },
-                // {
-                //     title: "Unidades vendidas en linea",
-                //     icon: "fa-solid fa-clipboard-list",
-                //     value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
-                // },
+                {
+                    title: "Ventas en linea (ingresos)",
+                    icon: "fa-solid fa-dollar-sign",
+                    value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                },
+                {
+                    title: "Unidades vendidas en linea",
+                    icon: "fa-solid fa-clipboard-list",
+                    value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                },
                 {
                     title: "Compras (Gastos)",
                     icon: "fa-solid fa-dollar-sign",
-                    value: "$" + this.calculateTotalExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                    value: "$" + this.calculateTotalExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: true,
                 },
                 {
                     title: "Gastos registrados",
                     icon: "fa-solid fa-clipboard-list",
-                    value: this.calculateTotalProductsExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }) //,
+                    value: this.calculateTotalProductsExpense?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: true,
                 },
             ]
         },
@@ -204,20 +214,22 @@ export default {
                         name: timeline.current.name,
                         data: timeline.current.data.sales,
                     }],
+                    show: true,
                 },
-                // {
-                //     title: 'Ingresos (ventas en linea)',
-                //     colors: ['#C30303', '#F07209'],
-                //     categories: timeline.timeline,
-                //     series: [{
-                //         name: timeline.last.name,
-                //         data: timeline.last.data.onlineSales,
-                //     },
-                //     {
-                //         name: timeline.current.name,
-                //         data: timeline.current.data.onlineSales,
-                //     }],
-                // },
+                {
+                    title: 'Ingresos (ventas en linea)',
+                    colors: ['#C30303', '#F07209'],
+                    categories: timeline.timeline,
+                    series: [{
+                        name: timeline.last.name,
+                        data: timeline.last.data.onlineSales,
+                    },
+                    {
+                        name: timeline.current.name,
+                        data: timeline.current.data.onlineSales,
+                    }],
+                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                },
                 {
                     title: 'Gastos (compras)',
                     colors: ['#9a9a9a', '#C30303'],
@@ -230,6 +242,7 @@ export default {
                         name: timeline.current.name,
                         data: timeline.current.data.expenses,
                     }],
+                    show: true,
                 },
             ]
         },
