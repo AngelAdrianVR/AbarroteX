@@ -406,6 +406,9 @@ export default {
             if (currentSuscription == 'Periodo de prueba') {
                 return 0.00;
             } else {
+                if (this.$page.props.auth.user.store.plan == 'Plan Intermedio') {
+                    return 569;
+                }
                 return this.suscriptions.find(item => item.name == currentSuscription).amount;
             }
         },

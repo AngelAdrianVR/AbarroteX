@@ -57,7 +57,7 @@
             <p class="font-bold mb-3">Efectivo esperado</p>
             <p class="text-gray99">Efectivo inicial</p>
             <p class="text-gray99">Ventas en tienda</p>
-            <!-- <p class="text-gray99">Ventas en línea</p> -->
+            <p v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99">Ventas en línea</p>
 
             <p v-if="currentMovements?.length" @click="showcashRegisterMovements = !showcashRegisterMovements"
                 class="text-primary flex items-center cursor-pointer">Movimientos de caja 
@@ -93,8 +93,8 @@
               <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </div>
 
-            <!-- <p v-else class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                    cutForm.totalOnlineSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p> -->
+            <p v-else-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+                    cutForm.totalOnlineSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
             <br>
             <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
               <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"

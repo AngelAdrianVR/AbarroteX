@@ -37,7 +37,7 @@
                                 <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                                 <p class="text-gray99">Efectivo inicial</p>
                                 <p class="text-gray99">Ventas en tienda</p>
-                                <!-- <p class="text-gray99">Ventas en línea</p> -->
+                                <p v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99">Ventas en línea</p>
 
                                 <p  v-if="cashCutMovements[index]?.length"
                                     class="text-primary flex items-center">Movimientos de caja 
@@ -62,8 +62,8 @@
                                     cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                                 <p class="text-gray99 pb-5 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.store_sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
-                                <!-- <p class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                                    cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p> -->
+                                <p v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+                                    cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
                                 <div v-if="loadingMovements">
                                     <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                                 </div>
