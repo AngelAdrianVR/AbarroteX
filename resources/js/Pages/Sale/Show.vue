@@ -104,7 +104,8 @@
                             </span></p>
                         <span class="text-grayD9">|</span>
                         <p class="text-gray99">Fecha de vencimiento: <span class="text-gray37">
-                                {{ formatDate(saleToSeeInstallments.credit_data.expired_date) }}
+                                {{ saleToSeeInstallments.credit_data?.expired_date ?
+                                    formatDate(saleToSeeInstallments.credit_data.expired_date) : 'No especificado' }}
                             </span></p>
                     </div>
                     <table class="w-full mt-4 *:text-sm">
@@ -138,16 +139,14 @@
                                     </el-input>
                                 </td>
                                 <td>
-                                    ${{
-                                        calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                            ",") }}
+                                    ${{ calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}
                                 </td>
                                 <td>
                                     <div
                                         class="flex items-center space-x-1 *:size-5 *:flex *:items-center *:justify-center *:rounded-full *:text-[10px]">
                                         <button @click="storeInstallment" type="button"
                                             class="bg-primary text-white disabled:cursor-not-allowed disabled:bg-gray99"
-                                            :disabled="addingInstallment || !installmentForm.isDirty">
+                                            :disabled="addingInstallment || !installmentForm.isDirty || installmentForm.amount > calcRemainingDebt(saleToSeeInstallments.credit_data.installments.length - 1)">
                                             <i class="fa-solid fa-check"></i>
                                         </button>
                                         <button @click="addInstallment = false" type="button"

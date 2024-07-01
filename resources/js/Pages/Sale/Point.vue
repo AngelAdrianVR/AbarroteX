@@ -146,7 +146,7 @@
         </div>
       </div>
       <!-- cuerpo de la pagina -->
-      <div class="lg:flex space-x-5 my-5">
+      <div class="lg:flex lg:space-x-5 my-5">
         <!-- scaner de código  -->
         <section class="lg:w-[70%]">
           <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
@@ -155,9 +155,10 @@
             <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <!-- Pestañas -->
-          <div class="mx-7">
+          <div class="lg:mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
-              <!-- <div class="m-4 flex justify-between items-center">
+              <div v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'"
+                class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
                   <el-tooltip content="Si no es necesario agregar un cliente específico, no selecciones ninguna opción"
@@ -176,7 +177,7 @@
                     <i class="fa-solid fa-circle-plus"></i>
                   </button>
                 </div>
-              </div> -->
+              </div>
               <el-tab-pane v-for="tab in editableTabs" :key="tab.name" :label="tab.title" :name="tab.name">
                 <el-popconfirm v-if="tab.saleProducts.length" confirm-button-text="Si" cancel-button-text="No"
                   icon-color="#C30303" title="Se eliminará todo el registro de productos ¿Deseas continuar?"
@@ -191,7 +192,6 @@
             </el-tabs>
           </div>
         </section>
-
 
         <!-- seccion de desgloce de montos -->
         <section class="lg:w-[30%]">
@@ -244,7 +244,9 @@
                 <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
-                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">No te quedan existencias de este producto. 
+                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">No
+                  te
+                  quedan existencias de este producto.
                   <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                 </div>
                 <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
@@ -266,10 +268,12 @@
               </button>
             </div>
           </div>
+
           <!-- Total por cobrar -->
           <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
             class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-            <div v-if="!editableTabs[editableTabsValue - 1]?.paying">
+            <div
+              v-if="!editableTabs[this.editableTabsValue - 1].cash && !editableTabs[this.editableTabsValue - 1].credit">
               <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
                 <p class="text-gray-99">$ <strong class="ml-3">{{
@@ -294,18 +298,38 @@
                       minimumFractionDigits: 2
                     }) }}</strong></p>
               </div>
+
+              <!------- botones venta a crédito y al contado ------->
               <div class="text-center mt-7">
-                <PrimaryButton @click="receive()"
-                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !this.$page.props.auth?.user?.cash_register_id"
-                  class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
-                <p v-if="!this.$page.props.auth?.user?.cash_register_id" class="text-xs text-red-600 mt-1">
-                  Para cobrar asigna una caja registradora <span @click="cashRegisterModal = true"
+                <p class="text-sm text-gray-400 text-left mb-3">Opciones de pago</p>
+                <div class="flex items-center justify-end space-x-4">
+                  <PrimaryButton v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" @click="creditPayment()"
+                    :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
+                    class="!px-9 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
+                  <PrimaryButton @click="cashPayment()"
+                    :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
+                    class="!px-9 !bg-[#5FCB1F] disabled:!bg-[#999999]">Al contado</PrimaryButton>
+                </div>
+                <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
+                  Para cobrar asigna una caja registradora <span @click="showCashRegisterSelectionModal = true"
                     class="underline cursor-pointer text-primary">asignar una</span>
                 </p>
               </div>
+
+              <!------- botones venta normal sin crédito ------->
+              <!-- <div class="text-center mt-7">
+                <PrimaryButton @click="cashPayment()"
+                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !$page.props.auth?.user?.cash_register_id"
+                  class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
+                <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
+                  Para cobrar asigna una caja registradora <span @click="showCashRegisterSelectionModal = true"
+                    class="underline cursor-pointer text-primary">asignar una</span>
+                </p>
+              </div> -->
             </div>
-            <!-- cobrando -->
-            <div v-else>
+
+            <!-- cobrando pago al contado -->
+            <div v-if="editableTabs[this.editableTabsValue - 1].cash">
               <p class="text-gray-99 text-center mb-3 text-2xl">Total $ <strong>{{ (calculateTotal() -
                 editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
                   minimumFractionDigits: 2
@@ -331,14 +355,60 @@
                 La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
               </p>
               <div class="flex space-x-2 justify-end">
-                <CancelButton @click="editableTabs[this.editableTabsValue - 1].paying = false">Cancelar</CancelButton>
+                <CancelButton @click="editableTabs[this.editableTabsValue - 1].cash = false">Cancelar</CancelButton>
                 <PrimaryButton :disabled="storeProcessing" @click="store" class="!rounded-full">
                   <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                   Aceptar
                 </PrimaryButton>
-                <!-- <PrimaryButton
-                  :disabled="storeProcessing || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived"
-                  @click="store" class="!rounded-full">Aceptar</PrimaryButton> boton con validaciones de deshabilitar-->
+              </div>
+            </div>
+
+            <!-- Cobrando a crédito  -->
+            <div v-if="editableTabs[this.editableTabsValue - 1]?.credit">
+              <div class="flex items-center justify-between">
+                <i @click="editableTabs[this.editableTabsValue - 1].credit = false; editableTabs[this.editableTabsValue - 1].deposit = null"
+                  class="fa-solid fa-angle-left text-xs p-2 cursor-pointer"></i>
+                <p class="text-gray-99 text-xl">$ <strong class="ml-3">{{
+                  calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                    ",") }}</strong></p>
+              </div>
+              <h3 class="text-lg font-bold">Registrar abono de la venta</h3>
+              <div class="flex items-center justify-between space-x-7 my-3">
+                <div class="w-2/3">
+                  <InputLabel value="Monto abonado (opcional)" class="!text-base ml-2 !text-gray-400" />
+                  <el-input type="number" v-model="editableTabs[this.editableTabsValue - 1].deposit"
+                    placeholder="ingresa el abono">
+                    <template #prefix>
+                      <i class="fa-solid fa-dollar-sign"></i>
+                    </template>
+                  </el-input>
+                </div>
+                <div class="w-1/3">
+                  <InputLabel value="Saldo restante" class="!text-base !text-gray-400" />
+                  <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) > 0">${{
+                    (calculateTotal() -
+                      editableTabs[this.editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }}</p>
+                  <p class="text-red-600 text-xs" v-else>La cantidad abonada debe de ser menor al monto total</p>
+                </div>
+              </div>
+              <div class="w-2/3 pr-5">
+                <InputLabel value="Fecha de vencimiento (opcional)" class="!text-base !text-gray-400 ml-2" />
+                <el-date-picker v-model="editableTabs[this.editableTabsValue - 1].limit_date" class="!w-full"
+                  type="date" placeholder="Seleccione" :disabled-date="disabledDate" />
+              </div>
+              <!-- <div class="mt-3">
+                <InputLabel value="Notas (opcional)" class="!text-base ml-2 !text-gray-400" />
+                <el-input v-model="editableTabs[this.editableTabsValue - 1].deposit_notes"
+                  :autosize="{ minRows: 3, maxRows: 5 }" type="textarea" placeholder="Escribe tus notas"
+                  :maxlength="200" show-word-limit clearable />
+              </div> -->
+              <div class="flex items-center justify-end space-x-3 mt-4">
+                <PrimaryButton @click="editableTabs[this.editableTabsValue - 1].has_credit = true; checkClientExist()"
+                  :disabled="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) < 0 || storeProcessing">
+                  <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                  Finalizar venta
+                </PrimaryButton>
               </div>
             </div>
           </div>
@@ -643,6 +713,18 @@
       </template>
     </ConfirmationModal>
     <!-- Modal para advertir que se ha excedido del dinero permitido en caja -->
+
+    <!-- Modal de venta a credito sin cliente -->
+    <ConfirmationModal :show="showClientConfirmModal" @close="showClientConfirmModal = false">
+      <template #title> No seleccionaste un cliente </template>
+      <template #content>Para realizar una venta a crédito es necesario que selecciones un cliente.</template>
+      <template #footer>
+        <div>
+          <PrimaryButton @click="showClientConfirmModal = false">De acuerdo</PrimaryButton>
+        </div>
+      </template>
+    </ConfirmationModal>
+    <!-- Modal de venta a credito sin cliente -->
   </AppLayout>
 </template>
 
@@ -736,6 +818,7 @@ export default {
       showLimitCashModal: false, //muestra u oculta el modal de excedencia de dinero permitido en caja
       showClientFormModal: false, //muestra u oculta el modal de creación de cliente
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
+      showClientConfirmModal: false, //muestra u oculta el modal de peticion de cliente para venta a crédito
       showCreateProductModal: false,
 
       localCurrentCash: 0, //dinero de caja local
@@ -758,6 +841,7 @@ export default {
       creatingProduct: false,
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
+
       //buscador
       searchQuery: null,
       searchFocus: false,
@@ -772,7 +856,10 @@ export default {
           title: "Registro 1",
           name: "1",
           saleProducts: [],
-          paying: false,
+          has_credit: false,
+          deposit: false,
+          cash: false, //Pago al contado
+          credit: false, //venta a crédito
           discount: 0,
           moneyReceived: null,
           client_id: null,
@@ -781,7 +868,10 @@ export default {
           title: "Registro 2",
           name: "2",
           saleProducts: [],
-          paying: false,
+          has_credit: false,
+          deposit: false,
+          cash: false, //Pago al contado
+          credit: false, //venta a crédito
           discount: 0,
           moneyReceived: null,
           client_id: null,
@@ -790,7 +880,10 @@ export default {
           title: "Registro 3",
           name: "3",
           saleProducts: [],
-          paying: false,
+          has_credit: false,
+          deposit: false,
+          cash: false, //Pago al contado
+          credit: false, //venta a crédito
           discount: 0,
           moneyReceived: null,
           client_id: null,
@@ -818,7 +911,71 @@ export default {
     clients: Array
   },
   methods: {
-    storeClient() {
+    checkClientExist() { //revisa si hay cliente seleccionado para venta a crédito
+      if (this.editableTabs[this.editableTabsValue - 1]?.client_id == null) {
+        this.showClientConfirmModal = true;
+      } else {
+        this.store();
+      }
+    },
+    async processOnlineSale() {
+      try {
+        const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
+          data: {
+            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts, //productos vendidos
+            has_credit: this.editableTabs[this.editableTabsValue - 1]?.has_credit, //bandera para indicar venta a crédito
+            client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id, //id del cliente al que se vendió
+            deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
+            // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
+            limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
+          }
+        });
+        if (response.status === 200) {
+          if (this.isInventoryOn) {
+            this.updateCurrentStockInIndexedDB();
+          }
+          this.clearTab();
+          this.fetchCashRegister();
+
+          this.$notify({
+            title: "Correcto",
+            message: "Se ha registrado la venta",
+            type: "success",
+          });
+
+          localStorage.setItem('pendentProcess', false);
+
+          //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
+          if (this.$page.props.auth.user.printer_config?.automaticPrinting) {
+            window.open(route('sales.print-ticket', response.data.new_sale.folio), '_blank');
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    processOfflineSale() {
+      this.saveToLocalStorage();
+      if (this.isInventoryOn) {
+        this.updateCurrentStockInIndexedDB();
+      }
+      this.sumCashForSale();
+      this.clearTab();
+    },
+    async store() { //registra la venta
+      if (this.storeProcessing) return;
+
+      this.storeProcessing = true;
+
+      if (this.isOnline) {
+        await this.processOnlineSale();
+      } else {
+        this.processOfflineSale();
+      }
+
+      this.storeProcessing = false;
+    },
+    storeClient() { //registra un cliente
       this.clientForm.post(route('clients.store'), {
         onSuccess: () => {
           this.$notify({
@@ -830,9 +987,24 @@ export default {
         },
       });
     },
-    storeProduct() {
+    storeCashCut() {
+      this.cutForm.post(route('cash-cuts.store', { cash_register_id: this.asignedCashRegister?.id }), {
+        onSuccess: () => {
+          this.$notify({
+            title: "Correcto",
+            message: "Se ha realizado el corte de caja",
+            type: "success",
+          });
+          this.cashCutModal = false;
+          this.fetchCashRegister();
+          this.cutForm.reset();
+          this.inputFocus();
+        },
+      });
+    },
+    storeProduct() { //registra un nuevo producto
       this.creatingProduct = true;
-      this.productForm.post(route('products.store', {stayInView: true}), {
+      this.productForm.post(route('products.store', { stayInView: true }), {
         onSuccess: async () => {
           const response = await axios.get(route('products.get-all-for-indexedDB'));
           const product = response.data.local_products[0];
@@ -852,6 +1024,8 @@ export default {
           });
 
           this.creatingProduct = false;
+
+          this.productForm.reset();
         },
         onError: () => {
           this.creatingProduct = false;
@@ -925,58 +1099,6 @@ export default {
       // Actualizar los productos en IndexedDB
       await addOrUpdateBatchOfItems('products', validProducts);
     },
-    async store() { //registra la venta
-      if (this.storeProcessing) return;
-
-      this.storeProcessing = true;
-
-      if (this.isOnline) {
-        await this.processOnlineSale();
-      } else {
-        this.processOfflineSale();
-      }
-
-      this.storeProcessing = false;
-    },
-    async processOnlineSale() {
-      try {
-        const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
-          data: {
-            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
-          }
-        });
-        if (response.status === 200) {
-          if (this.isInventoryOn) {
-            this.updateCurrentStockInIndexedDB();
-          }
-          this.clearTab();
-          this.fetchCashRegister();
-
-          this.$notify({
-            title: "Correcto",
-            message: "Se ha registrado la venta",
-            type: "success",
-          });
-
-          localStorage.setItem('pendentProcess', false);
-
-          //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
-          if (this.$page.props.auth.user.printer_config?.automaticPrinting) {
-            window.open(route('sales.print-ticket', response.data.new_sale.folio), '_blank');
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    processOfflineSale() {
-      this.saveToLocalStorage();
-      if (this.isInventoryOn) {
-        this.updateCurrentStockInIndexedDB();
-      }
-      this.sumCashForSale();
-      this.clearTab();
-    },
     async asignCashRegister() {
       try {
         const response = await axios.put(route('cash-registers.asign', [this.$page.props.auth?.user.id, this.selectedCashRegisterId]));
@@ -1007,21 +1129,6 @@ export default {
         },
       });
     },
-    storeCashCut() {
-      this.cutForm.post(route('cash-cuts.store', { cash_register_id: this.asignedCashRegister?.id }), {
-        onSuccess: () => {
-          this.$notify({
-            title: "Correcto",
-            message: "Se ha realizado el corte de caja",
-            type: "success",
-          });
-          this.cashCutModal = false;
-          this.fetchCashRegister();
-          this.cutForm.reset();
-          this.inputFocus();
-        },
-      });
-    },
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
       this.cutForm.difference = (this.cutForm.totalStoreSale + this.cutForm.totalOnlineSale + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
@@ -1029,6 +1136,13 @@ export default {
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
       this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
+    },
+    cashPayment() {
+      this.editableTabs[this.editableTabsValue - 1].cash = true;
+      this.receivedInputFocus();
+    },
+    creditPayment() {
+      this.editableTabs[this.editableTabsValue - 1].credit = true;
     },
     async fetchCashRegister() {
       try {
@@ -1146,10 +1260,14 @@ export default {
       this.searchFocus = false;
       this.productsFound = null;
       this.productSelected = null;
-      this.editableTabs[this.editableTabsValue - 1].saleProducts = [];
-      this.editableTabs[this.editableTabsValue - 1].paying = false;
-      this.editableTabs[this.editableTabsValue - 1].discount = 0;
-      this.editableTabs[this.editableTabsValue - 1].moneyReceived = null;
+      this.editableTabs[this.editableTabsValue - 1].saleProducts = []; //productos
+      this.editableTabs[this.editableTabsValue - 1].has_credit = false; //bandera para venta a crédito
+      this.editableTabs[this.editableTabsValue - 1].deposit = null; //abono en venta a crédito
+      this.editableTabs[this.editableTabsValue - 1].limit_date = null; //fecha límite de crédito
+      this.editableTabs[this.editableTabsValue - 1].cash = false; //bandera de venta al contado
+      this.editableTabs[this.editableTabsValue - 1].credit = false; //bandera de venta a crédito
+      this.editableTabs[this.editableTabsValue - 1].discount = 0; //descuento
+      this.editableTabs[this.editableTabsValue - 1].moneyReceived = null; //Dinero recibido para calcular cambio
       this.inputFocus();
     },
     calculateTotal() {
@@ -1161,10 +1279,6 @@ export default {
       // Formatear el resultado al final
       // return total?.toLocaleString('en-US', { minimumFractionDigits: 2 }); formatea el total con comas pero me manda a NaN despues de 1000
       return total;
-    },
-    receive() {
-      this.editableTabs[this.editableTabsValue - 1].paying = true;
-      this.receivedInputFocus();
     },
     inputFocus() {
       this.$nextTick(() => {
