@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('folio');
             $table->date('expired_date')->nullable();
-            $table->string('status');
+            $table->string('status'); //Pendiente cuando no hay abono, Parcial cuando tiene, Pagado
             $table->timestamps();
         });
     }

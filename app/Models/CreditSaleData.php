@@ -9,7 +9,7 @@ class CreditSaleData extends Model
 {
     use HasFactory;
 
-    protected $fillalble = [
+    protected $fillable = [
         'folio',
         'expired_date',
         'status',
