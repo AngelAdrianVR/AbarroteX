@@ -119,7 +119,9 @@
                         </td>
                         <td class="pr-5">
                             <div class="flex items-center space-x-1">
-                                <span>{{ formatDate(item.credit_data.expired_date) }}</span>
+                                <span>
+                                    {{ item.credit_data.expired_dat ? formatDate(item.credit_data.expired_date) : 'No especificado' }}
+                                </span>
                                 <svg v-if="isExpired(item)" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                     class="size-3 text-[#DD0808]">
@@ -192,6 +194,10 @@ export default {
             return products.some(item => item?.refunded_at);
         },
         isExpired(sale) {
+            if (!sale.credit_data.expired_date) {
+                return false;
+            }
+
             const expiredDate = parseISO(sale.credit_data.expired_date);
             const today = new Date();
             return isBefore(expiredDate, today) && sale.credit_data.status !== 'Pagado' && !this.wasRefunded(sale.products);

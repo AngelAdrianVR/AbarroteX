@@ -146,7 +146,7 @@
         </div>
       </div>
       <!-- cuerpo de la pagina -->
-      <div class="lg:flex space-x-5 my-5">
+      <div class="lg:flex lg:space-x-5 my-5">
         <!-- scaner de código  -->
         <section class="lg:w-[70%]">
           <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
@@ -155,9 +155,10 @@
             <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <!-- Pestañas -->
-          <div class="mx-7">
+          <div class="lg:mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
-              <div class="m-4 flex justify-between items-center">
+              <div v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'"
+                class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
                   <el-tooltip content="Si no es necesario agregar un cliente específico, no selecciones ninguna opción"
@@ -191,7 +192,6 @@
             </el-tabs>
           </div>
         </section>
-
 
         <!-- seccion de desgloce de montos -->
         <section class="lg:w-[30%]">
@@ -244,7 +244,9 @@
                 <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
-                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">No te quedan existencias de este producto. 
+                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">No
+                  te
+                  quedan existencias de este producto.
                   <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                 </div>
                 <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
@@ -270,7 +272,8 @@
           <!-- Total por cobrar -->
           <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
             class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-            <div v-if="!editableTabs[this.editableTabsValue - 1].cash && !editableTabs[this.editableTabsValue - 1].credit">
+            <div
+              v-if="!editableTabs[this.editableTabsValue - 1].cash && !editableTabs[this.editableTabsValue - 1].credit">
               <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                 <p>Subtotal</p>
                 <p class="text-gray-99">$ <strong class="ml-3">{{
@@ -300,14 +303,14 @@
               <div class="text-center mt-7">
                 <p class="text-sm text-gray-400 text-left mb-3">Opciones de pago</p>
                 <div class="flex items-center justify-end space-x-4">
-                  <PrimaryButton @click="creditPayment()"
+                  <PrimaryButton v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" @click="creditPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
                     class="!px-9 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
                   <PrimaryButton @click="cashPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
                     class="!px-9 !bg-[#5FCB1F] disabled:!bg-[#999999]">Al contado</PrimaryButton>
                 </div>
-                <p v-if="!this.$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
+                <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
                   Para cobrar asigna una caja registradora <span @click="showCashRegisterSelectionModal = true"
                     class="underline cursor-pointer text-primary">asignar una</span>
                 </p>
@@ -316,9 +319,9 @@
               <!------- botones venta normal sin crédito ------->
               <!-- <div class="text-center mt-7">
                 <PrimaryButton @click="cashPayment()"
-                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !this.$page.props.auth?.user?.cash_register_id"
+                  :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !$page.props.auth?.user?.cash_register_id"
                   class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
-                <p v-if="!this.$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
+                <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
                   Para cobrar asigna una caja registradora <span @click="showCashRegisterSelectionModal = true"
                     class="underline cursor-pointer text-primary">asignar una</span>
                 </p>
@@ -366,8 +369,8 @@
                 <i @click="editableTabs[this.editableTabsValue - 1].credit = false; editableTabs[this.editableTabsValue - 1].deposit = null"
                   class="fa-solid fa-angle-left text-xs p-2 cursor-pointer"></i>
                 <p class="text-gray-99 text-xl">$ <strong class="ml-3">{{
-                calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                ",") }}</strong></p>
+                  calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                    ",") }}</strong></p>
               </div>
               <h3 class="text-lg font-bold">Registrar abono de la venta</h3>
               <div class="flex items-center justify-between space-x-7 my-3">
@@ -383,8 +386,8 @@
                 <div class="w-1/3">
                   <InputLabel value="Saldo restante" class="!text-base !text-gray-400" />
                   <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) > 0">${{
-                  (calculateTotal() -
-                    editableTabs[this.editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    (calculateTotal() -
+                      editableTabs[this.editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }}</p>
                   <p class="text-red-600 text-xs" v-else>La cantidad abonada debe de ser menor al monto total</p>
                 </div>
@@ -402,7 +405,9 @@
               </div> -->
               <div class="flex items-center justify-end space-x-3 mt-4">
                 <PrimaryButton @click="editableTabs[this.editableTabsValue - 1].has_credit = true; checkClientExist()"
-                  :disabled="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) < 0">Finalizar venta
+                  :disabled="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) < 0 || storeProcessing">
+                  <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                  Finalizar venta
                 </PrimaryButton>
               </div>
             </div>
@@ -920,9 +925,9 @@ export default {
             saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts, //productos vendidos
             has_credit: this.editableTabs[this.editableTabsValue - 1]?.has_credit, //bandera para indicar venta a crédito
             client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id, //id del cliente al que se vendió
-            deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit, //abono para venta a crédito
+            deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
             // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
-            limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date, //fecha límite de crédito
+            limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
           }
         });
         if (response.status === 200) {
@@ -999,7 +1004,7 @@ export default {
     },
     storeProduct() { //registra un nuevo producto
       this.creatingProduct = true;
-      this.productForm.post(route('products.store', {stayInView: true}), {
+      this.productForm.post(route('products.store', { stayInView: true }), {
         onSuccess: async () => {
           const response = await axios.get(route('products.get-all-for-indexedDB'));
           const product = response.data.local_products[0];
@@ -1019,6 +1024,8 @@ export default {
           });
 
           this.creatingProduct = false;
+
+          this.productForm.reset();
         },
         onError: () => {
           this.creatingProduct = false;
