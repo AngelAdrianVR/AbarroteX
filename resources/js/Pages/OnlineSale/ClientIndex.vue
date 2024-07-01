@@ -21,7 +21,7 @@
             <section class="pb-16">
                 <!-- tabs -->
                 <div class="flex justify-center pb-5">
-                    <ToggleButton id="start" ref="togglebutton" @update="handleToggle" :labels="['Productos', 'Servicios']"
+                    <ToggleButton v-if="services.length && products.length" id="start" ref="togglebutton" @update="handleToggle" :labels="['Productos', 'Servicios']"
                         class="w-3/4 md:w-[45%] lg:w-[35%] xl:w-[20%]" />
                 </div>
 
@@ -163,10 +163,11 @@ export default {
         const activeTabFromURL = currentURL.searchParams.get('tab');
         if (activeTabFromURL) {
             if (activeTabFromURL == 'services') {
-                const tab = 'Servicios';
+                this.activeTab = 'Servicios';
                 this.$refs.togglebutton.toggle();
             }
         }
+        if (!this.products.length) this.activeTab = 'services';
     }
 }
 </script>

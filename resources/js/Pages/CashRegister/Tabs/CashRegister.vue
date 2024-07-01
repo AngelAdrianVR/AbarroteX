@@ -1,6 +1,6 @@
 <template>
   <Loading v-if="loading" />
-  <div v-else class="min-h-32">
+  <div v-else class="min-h-32 mb-6">
     <div v-if="total_cash_registers > 1" class="text-center">
       <p v-if="!cash_register.is_active" class="text-red-500 px-2 bg-red-50 self-start">Caja deshabilitada</p>
       <p v-else class="text-green-500 px-2 bg-green-50 self-start">Caja Habilitada</p>
