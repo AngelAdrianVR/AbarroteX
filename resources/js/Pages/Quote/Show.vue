@@ -10,13 +10,9 @@
                     </svg>
                     <p class="text-white font-bold text-3xl absolute top-9 left-14 font-sans">{{ $page.props.auth.user.store.name }}</p>
                 </div>
-
-                <div class="">
-                    <PrimaryButton v-if="showEditIcon" @click="print">
-                        Imprimir o guardar PDF 
-                    </PrimaryButton>
-                </div>
-                
+                <PrimaryButton v-if="showEditIcon" @click="print">
+                    Imprimir o guardar PDF 
+                </PrimaryButton>                
                 <div class="flex flex-col space-y-1 mr-16 text-right">
                     <p>{{ 'COT-' + (quote.id < 10 ? '0' + quote.id : quote.id) }}</p>
                     <p class="font-bold">Fecha: <span class="font-light">{{ formatDate(quote.created_at) }}</span></p>
