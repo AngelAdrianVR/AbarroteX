@@ -8,6 +8,7 @@ use App\Models\CashRegisterMovement;
 use App\Models\Client;
 use App\Models\CreditSaleData;
 use App\Models\GlobalProductStore;
+use App\Models\Installment;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -67,12 +68,9 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
-        $this->storeEachProductSold($request->data['saleProducts']);
+        $folio_stored = $this->storeEachProductSold($request->all());
 
-        //me mando al punto de venta en respuesta la nueva venta creada para imprimirla en caso de tener la oopción de impresión automática activada
-        $new_sale = Sale::where('store_id', auth()->user()->store_id)->latest()->first();
-
-        return response()->json(compact('new_sale'));
+        return response()->json(compact('folio_stored'));
     }
 
     public function show($date, $cashRegisterId)
@@ -102,6 +100,14 @@ class SaleController extends Controller
             ->where('created_at', '<', $date) // Excluir la fecha actual
             ->orderBy('created_at', 'desc')
             ->first();
+
+        // Si no hay ventas en tienda buscar ventas en linea
+        if (!$previous_sale) {
+            $previous_sale = OnlineSale::where('store_id', $storeId)
+                ->where('created_at', '<', $date) // Excluir la fecha actual
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
         $previous_sale_date = $previous_sale ? $previous_sale->created_at->toDateString() : null;
 
         // Obtener la fecha de la venta siguiente
@@ -110,6 +116,14 @@ class SaleController extends Controller
             ->where('created_at', '>', $date->endOfDay()) // Excluir la fecha actual
             ->orderBy('created_at', 'asc')
             ->first();
+
+        // Si no hay ventas en tienda buscar ventas en linea
+        if (!$next_sale) {
+            $next_sale = OnlineSale::where('store_id', $storeId)
+                ->where('created_at', '>', $date->endOfDay()) // Excluir la fecha actual
+                ->orderBy('created_at', 'asc')
+                ->first();
+        }
         $next_sale_date = $next_sale ? $next_sale->created_at->toDateString() : null;
 
         //evalúa si la venta está dentro del corte---------------
@@ -216,11 +230,11 @@ class SaleController extends Controller
         //recorre el arreglo de ventas registradas.
         foreach ($request->sales as $sale) {
             //recorre el arreglo de productos registrados en la venta.
-            $this->storeEachProductSold($sale['saleProducts'], $sale['created_at']);
+            $this->storeEachProductSold($sale, $sale['created_at']);
         }
     }
 
-    private function storeEachProductSold($sold_products, $created_at = null)
+    private function storeEachProductSold($sale_data, $created_at = null)
     {
         // Generar un id unico para productos vendidos a este cliente
         $last_sale = Sale::where('store_id', auth()->user()->store_id)->latest('id')->first();
@@ -228,7 +242,7 @@ class SaleController extends Controller
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
-        foreach ($sold_products as $product) {
+        foreach ($sale_data['saleProducts'] as $product) {
             $is_global_product = explode('_', $product['product']['id'])[0] == 'global';
             $product_id = explode('_', $product['product']['id'])[1];
 
@@ -297,6 +311,27 @@ class SaleController extends Controller
                 }
             }
         }
+
+        //Crea registro de venta a crédito si así lo fue
+        if ($sale_data['has_credit']) {
+            $new_credit_sale_data = CreditSaleData::create([
+                'folio' => $folio,
+                'expired_date' => $sale_data['limit_date'],
+                'status' => $sale_data['deposit'] ? 'Parcial' : 'Pendiente',
+            ]);
+
+            //si hay primer abono el dia de la compra se registra
+            if ($sale_data['deposit']) {
+                Installment::create([
+                    'amount' => $sale_data['deposit'],
+                    'notes' => 'Primer abono hecho en la compra',
+                    'credit_sale_data_id' => $new_credit_sale_data->id,
+                    'user_id' => auth()->id(),
+                ]);
+            }
+        }
+
+        return $folio;
     }
 
     public function fetchCashRegisterSales($cash_register_id)
@@ -320,6 +355,7 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
+        // dd($online_sales);
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->take(30);
 
@@ -533,7 +569,7 @@ class SaleController extends Controller
     private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
     {
         // Combinar las ventas normales y las ventas en línea
-        $allSales = collect($sales)->merge($onlineSales);
+        $allSales = collect($onlineSales)->merge($sales);
 
         return $allSales->groupBy(function ($sale) {
             return Carbon::parse($sale->created_at)->toDateString();

@@ -16,10 +16,10 @@
         <header class="mx-10 mb-3">
             <section class="flex items-center justify-between text-gray37 text-sm">
                 <ApplicationMark class="block h-11 w-auto" />
-                <div v-show="showAdditionalElements"
-                    class="border-2 border-primary px-3 py-2 rounded-[5px] text-center font-bold">
-                    Presiona Crl+P para imprimir o<br>
-                    guardar en PDF
+                <div v-show="showAdditionalElements" @click="print">
+                    <PrimaryButton>
+                        Imprimir o guardar PDF 
+                    </PrimaryButton> 
                 </div>
                 <p class="flex items-center space-x-2 self-end">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -119,7 +119,9 @@
                         </td>
                         <td class="pr-5">
                             <div class="flex items-center space-x-1">
-                                <span>{{ formatDate(item.credit_data.expired_date) }}</span>
+                                <span>
+                                    {{ item.credit_data.expired_dat ? formatDate(item.credit_data.expired_date) : 'No especificado' }}
+                                </span>
                                 <svg v-if="isExpired(item)" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                     class="size-3 text-[#DD0808]">
@@ -136,9 +138,10 @@
 </template>
 
 <script>
-import { Head } from '@inertiajs/vue3';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
+import { Head } from '@inertiajs/vue3';
 import { format, parseISO, isBefore } from 'date-fns';
 import es from 'date-fns/locale/es';
 
@@ -153,9 +156,10 @@ export default {
         }
     },
     components: {
-        Head,
         ApplicationMark,
+        PrimaryButton,
         Loading,
+        Head,
     },
     props: {
         client: Object,
@@ -192,6 +196,10 @@ export default {
             return products.some(item => item?.refunded_at);
         },
         isExpired(sale) {
+            if (!sale.credit_data.expired_date) {
+                return false;
+            }
+
             const expiredDate = parseISO(sale.credit_data.expired_date);
             const today = new Date();
             return isBefore(expiredDate, today) && sale.credit_data.status !== 'Pagado' && !this.wasRefunded(sale.products);
@@ -220,7 +228,10 @@ export default {
             this.showAdditionalElements = true;
         },
         print() {
-            window.print();
+            this.showAdditionalElements = false;
+            setTimeout(() => {
+                window.print();
+            }, 100);
         },
         async fetchSales(loading = true) {
             this.loading = loading;
@@ -241,7 +252,6 @@ export default {
         await this.fetchSales();
         window.addEventListener('beforeprint', this.handleBeforePrint);
         window.addEventListener('afterprint', this.handleAfterPrint);
-        // this.print();
     },
     beforeDestroy() {
         window.removeEventListener('beforeprint', this.handleBeforePrint);

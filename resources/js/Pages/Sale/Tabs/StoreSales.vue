@@ -1,8 +1,9 @@
 <template>
-    <div class="text-sm mt-5 space-y-4">
+    <div v-if="sales.length" class="text-sm mt-5 space-y-4">
         <SaleDetails v-for="(item, index) in sales" :key="index" :groupedSales="item"
                     @show-modal="showModal" :isOutOfCashCut="false" />
     </div>
+    <el-empty v-else description="No hay ventas para mostrar" />
 </template>
 
 <script>

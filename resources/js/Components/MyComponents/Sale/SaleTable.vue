@@ -101,13 +101,13 @@ A<template>
           <template v-else-if="editMode == index">
             <div class="flex items-center space-x-2">
               <div class="w-1/2">
-                <el-input v-model="editedPrice" @keyup.enter="stopEditing(sale)" type="number" step="0.01">
+                <el-input v-model="editedPrice" @keyup.enter="handleChangePrice(sale)" type="number" step="0.01">
                   <template #prefix>
                     <i class="fa-solid fa-dollar-sign"></i>
                   </template>
                 </el-input>
               </div>
-              <button @click="stopEditing(sale)"
+              <button @click="handleChangePrice(sale)"
                 class="flex items-center justify-center rounded-full size-5 bg-primary flex-shrink-0"><i
                   class="fa-solid fa-check text-white text-[10px]"></i></button>
               <button @click="editMode = false"

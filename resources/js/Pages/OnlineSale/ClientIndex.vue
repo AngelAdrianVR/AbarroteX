@@ -27,7 +27,7 @@
 
                 <section v-if="activeTab === 'Productos'">
                     <Products :store="store" :visibleProducts="visibleProducts" />
-                    <button v-if="total_products > visibleProducts.length" @click="loadMoreProducts" class="w-full lg:hidden text-primary my-4 text-xs mx-auto underline">
+                    <button v-if="total_products > visibleProducts.length" @click="loadMoreProducts" class="w-full text-primary my-4 text-xs mx-auto underline">
                         Cargar más elementos
                     </button>
                 </section>

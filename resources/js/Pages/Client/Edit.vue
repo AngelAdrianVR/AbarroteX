@@ -32,13 +32,13 @@
                 <section class="col-span-full md:grid md:grid-cols-2 gap-x-3" v-if="form.addAddress">
                     <div class="mt-3">
                         <InputLabel value="Calle*" class="ml-3 mb-1" />
-                        <el-input v-model="form.street" placeholder="Escribe tu calle" :maxlength="255" clearable />
+                        <el-input v-model="form.street" placeholder="Escribe la calle" :maxlength="255" clearable />
                         <InputError :message="form.errors.street" />
                     </div>
 
                     <div class="mt-3">
                         <InputLabel value="Colonia*" class="ml-3 mb-1" />
-                        <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
+                        <el-input v-model="form.suburb" placeholder="Escribe la colonia" :maxlength="255" clearable />
                         <InputError :message="form.errors.suburb" />
                     </div>
 
