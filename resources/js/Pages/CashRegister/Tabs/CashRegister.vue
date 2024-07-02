@@ -7,10 +7,9 @@
     </div>
     <section class="flex flex-col md:flex-row justify-between space-y-2 md:space-x-3 mt-2">
       <!-- Boton para activar/desactivar caja registradora -->
-      <el-tooltip v-if="canDelete && total_cash_registers > 1" :content="cash_register.is_active 
-        ? 'Desactivar caja. Si no planeas utilizar esta caja, puedes desactivarla para evitar que los usuarios accedan a ella.' 
-        : 'Habilitar caja para volver a ponerla en funcionamiento'"
-        placement="right">
+      <el-tooltip v-if="canDelete && total_cash_registers > 1" :content="cash_register.is_active
+        ? 'Desactivar caja. Si no planeas utilizar esta caja, puedes desactivarla para evitar que los usuarios accedan a ella.'
+        : 'Habilitar caja para volver a ponerla en funcionamiento'" placement="right">
         <div class="flex items-center space-x-4 text-sm">
           <button class="flex justify-center items-center rounded-full size-8 bg-grayF2 active:scale-90 self-start">
             <i @click="form.is_active = false; update()" v-if="cash_register.is_active"
@@ -18,7 +17,8 @@
             <i v-else @click="form.is_active = true; update()" class="fa-solid fa-check text-primary"></i>
           </button>
           <p v-if="!cash_register.is_active" class="text-gray99 w-60">
-            <i class="fa-solid fa-arrow-left-long mr-3"></i>Esta caja está deshabilitada, por lo que los usuarios no pueden utilizarla.
+            <i class="fa-solid fa-arrow-left-long mr-3"></i>Esta caja está deshabilitada, por lo que los usuarios no
+            pueden utilizarla.
             Para habilitarla, haz clic en el botón
           </p>
         </div>
@@ -28,8 +28,9 @@
 
       <div class="flex space-x-3 items-center self-start">
         <!-- Eliminar caja -->
-        <el-popconfirm v-if="canDelete && total_cash_registers > 1" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
-          title="Se eliminará la caja registradora. ¿Deseas continuar?" @confirm="deleteCashRegister()">
+        <el-popconfirm v-if="canDelete && total_cash_registers > 1" confirm-button-text="Si" cancel-button-text="No"
+          icon-color="#C30303" title="Se eliminará la caja registradora. ¿Deseas continuar?"
+          @confirm="deleteCashRegister()">
           <template #reference>
             <i
               class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-[#F2F2F2] rounded-full py-1 px-[7px] cursor-pointer"></i>
@@ -52,51 +53,42 @@
     <!-- Información de caja -->
     <section class="lg:flex lg:space-x-7 md:w-full xl:w-[90%] mx-auto text-xs md:text-sm mt-7">
       <div class="w-full border border-grayD9 rounded-lg self-start">
-        <div class="p-2 md:p-4 flex items-center space-x-2">
-          <div class="w-3/4 space-y-1">
-            <p class="font-bold mb-3">Efectivo esperado</p>
-            <p class="text-gray99">Efectivo inicial</p>
-            <p class="text-gray99">Ventas en tienda</p>
-            <p v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99">Ventas en línea</p>
-
-            <p v-if="currentMovements?.length" @click="showcashRegisterMovements = !showcashRegisterMovements"
-                class="text-primary flex items-center cursor-pointer">Movimientos de caja 
-                <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i>
-            </p>
-
-            <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement"
-              :title="cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
-              class="text-gray99 truncate w-52 md:w-auto">
-              {{ cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ??
-                'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
-            </p>
+        <div class="p-2 md:p-4 grid grid-cols-4 gap-x-2 gap-y-1">
+          <p class="font-bold mb-3 col-span-3">Efectivo esperado</p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
           </div>
-
-          <div class="w-1/4 space-y-1">
-            <div v-if="cutLoading">
-              <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-            </div>
-            <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
-              (cash_register.started_cash + cutForm.totalStoreSale +
-                cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-            <p class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                    cash_register.started_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
-            
-            <div v-if="cutLoading">
-              <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-            </div>
-
-            <p v-else class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                    cutForm.totalStoreSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-
-            <div v-if="cutLoading">
-              <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-            </div>
-
-            <p v-else-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                    cutForm.totalOnlineSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-            <br>
-            <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements" :key="cashRegisterMovement" class="text-gray99">
+          <p v-else class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
+            (cash_register.started_cash + cutForm.totalStoreSale +
+              cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+          <p class="text-gray99 col-span-3">Efectivo inicial</p>
+          <p class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+            cash_register.started_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
+          <p class="text-gray99 col-span-3">Ventas en tienda</p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+            cutForm.totalStoreSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+          <p v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99 col-span-3">Ventas en línea
+          </p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99 pb-5"><span
+              class="text-gray99 mr-3 ml-[17px]">$</span>{{
+                cutForm.totalOnlineSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+          <p v-if="currentMovements?.length" @click="showcashRegisterMovements = !showcashRegisterMovements"
+            class="text-primary flex items-center cursor-pointer col-span-full">Movimientos de caja
+            <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i>
+          </p>
+          <div v-if="showcashRegisterMovements" v-for="cashRegisterMovement in currentMovements"
+            :key="cashRegisterMovement"
+            :title="cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
+            class="text-gray99 col-span-full flex items-center space-x-2">
+            <p class="truncate w-3/4">{{ cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ??
+              'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}</p>
+            <p class="text-gray99 w-1/4">
               <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"
                 class="fa-solid text-xs px-1"></i>
               <span class="text-gray99 mr-3">$</span>{{
@@ -120,7 +112,8 @@
       </div>
 
       <!-- Lado derecho -->
-      <div class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 my-4 lg:mt-0 self-start">
+      <div
+        class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 my-4 lg:mt-0 self-start">
         <p class="font-bold text-center">Ajustes generales</p>
         <!-- Editar cantidad maxima permitida en caja -->
         <div v-if="isMaxCashOn" class="py-3 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">
@@ -212,7 +205,8 @@
               <i class="fa-solid fa-dollar-sign"></i>
             </template>
           </el-input>
-          <p class="text-red-500 text-xs" v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > cash_register.current_cash">
+          <p class="text-red-500 text-xs"
+            v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > cash_register.current_cash">
             *El monto no debe exceder el dinero actual de tu caja (${{ cash_register.current_cash }})
           </p>
           <InputError :message="form.errors.registerAmount" />
@@ -226,7 +220,9 @@
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
           <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
-          <PrimaryButton :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > cash_register.current_cash)">Confirmar</PrimaryButton>
+          <PrimaryButton
+            :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && form.registerAmount > cash_register.current_cash)">
+            Confirmar</PrimaryButton>
         </div>
       </form>
     </div>
@@ -310,10 +306,12 @@
 
         <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
           <CancelButton @click="cashCutModal = false">Cancelar</CancelButton>
-          <PrimaryButton :disabled="!cutForm.counted_cash || cutForm.processing || (!currentMovements.length && cutForm.totalStoreSale == 0)">Hacer corte</PrimaryButton>
+          <PrimaryButton
+            :disabled="!cutForm.counted_cash || cutForm.processing || (!currentMovements.length && cutForm.totalStoreSale == 0)">
+            Hacer corte</PrimaryButton>
         </div>
-          <p v-if="!currentMovements.length && cutForm.totalStoreSale == 0" 
-            class="text-xs text-red-600 text-right">*Para hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
+        <p v-if="!currentMovements.length && cutForm.totalStoreSale == 0" class="text-xs text-red-600 text-right">*Para
+          hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
       </form>
     </div>
   </Modal>
