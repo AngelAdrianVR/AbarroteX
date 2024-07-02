@@ -388,7 +388,7 @@
                   <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) > 0">${{
                     (calculateTotal() -
                       editableTabs[this.editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }}</p>
+                  }}</p>
                   <p class="text-red-600 text-xs" v-else>La cantidad abonada debe de ser menor al monto total</p>
                 </div>
               </div>
@@ -921,14 +921,12 @@ export default {
     async processOnlineSale() {
       try {
         const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
-          data: {
-            saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts, //productos vendidos
-            has_credit: this.editableTabs[this.editableTabsValue - 1]?.has_credit, //bandera para indicar venta a crédito
-            client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id, //id del cliente al que se vendió
-            deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
-            // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
-            limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
-          }
+          saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts, //productos vendidos
+          has_credit: this.editableTabs[this.editableTabsValue - 1]?.has_credit, //bandera para indicar venta a crédito
+          client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id, //id del cliente al que se vendió
+          deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
+          // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
+          limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
         });
         if (response.status === 200) {
           if (this.isInventoryOn) {
@@ -947,7 +945,7 @@ export default {
 
           //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
           if (this.$page.props.auth.user.printer_config?.automaticPrinting) {
-            window.open(route('sales.print-ticket', response.data.new_sale.folio), '_blank');
+            window.open(route('sales.print-ticket', response.data.folio_stored), '_blank');
           }
         }
       } catch (error) {
@@ -1310,7 +1308,12 @@ export default {
 
       const dataToStore = {
         created_at: format(new Date(), 'yyyy-MM-dd HH:mm'),
-        saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts
+        saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts,
+        has_credit: this.editableTabs[this.editableTabsValue - 1]?.has_credit,
+        client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id ?? null, //id del cliente al que se vendió
+        deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
+        // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
+        limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
       };
 
       // Agrega el nuevo objeto al arreglo
