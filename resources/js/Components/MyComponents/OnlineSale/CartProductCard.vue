@@ -73,7 +73,7 @@ methods:{
     async fetchProductInfo() {
         this.loading = true;
         try {
-            const response = await axios.get(route('online-sales.fetch-product', [this.cartProduct.id, this.cartProduct.isLocal]));
+            const response = await axios.get(route('online-sales.fetch-product', [this.cartProduct.product_id, this.cartProduct.isLocal]));
             if ( response.status === 200 ) {
                 this.product = response.data.item;
             }
@@ -86,7 +86,7 @@ methods:{
     updateCartQuantity(newQuantity) {
         // Encuentra el producto en el carrito y actualiza su cantidad
         const cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
-        const productIndex = cart.findIndex(item => item.id === this.cartProduct.id);
+        const productIndex = cart.findIndex(item => item.product_id === this.cartProduct.product_id);
 
         if (productIndex !== -1) {
             cart[productIndex].quantity = newQuantity;
@@ -94,16 +94,16 @@ methods:{
 
             // //recupera el nuvo carrito actualizado para mandarlo en el emit
             // const newCart = JSON.parse(localStorage.getItem('Ezycart')) || [];
-            this.$emit('updateCart', { id: this.cartProduct.id, quantity: this.quantity });
+            this.$emit('updateCart', { id: this.cartProduct.product_id, quantity: this.quantity });
         }
     },
     deleteCartProduct() {
         // Eliminar el producto del carrito
         const cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
-        const updatedCart = cart.filter(item => item.id !== this.cartProduct.id);
+        const updatedCart = cart.filter(item => item.product_id !== this.cartProduct.product_id);
         localStorage.setItem('Ezycart', JSON.stringify(updatedCart));
 
-        this.$emit('productRemoved', this.cartProduct.id); // Emitir un evento para notificar al padre
+        this.$emit('productRemoved', this.cartProduct.product_id); // Emitir un evento para notificar al padre
     }
 },
 mounted() {

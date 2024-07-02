@@ -102,7 +102,7 @@ class OnlineSaleController extends Controller
         if ($request->store_inventory === true) {
             foreach ($request->products as $product) {
                 if ($product['isLocal'] === true) {
-                    $temp_product = Product::find($product['id']);
+                    $temp_product = Product::find($product['product_id']);
                     $temp_product->current_stock -= $product['quantity'];
 
                     // si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
@@ -112,7 +112,7 @@ class OnlineSaleController extends Controller
                     $temp_product->save();
                     }
                 } else {
-                    $temp_product = GlobalProductStore::find($product['id']);
+                    $temp_product = GlobalProductStore::find($product['product_id']);
                     $temp_product->current_stock -= $product['quantity'];
 
                     // si no hay suficiente stock y al restar la cantidad se hace negativo manda el error

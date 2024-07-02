@@ -75,6 +75,8 @@ class StoreController extends Controller
         ]);
 
         $store->update($request->all());
+
+        return to_route('online-sales.index', ['tab' => 2]);
     }
 
 

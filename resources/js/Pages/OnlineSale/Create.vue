@@ -132,7 +132,7 @@
                             ${{ (parseFloat(store?.online_store_properties?.min_free_delivery || 0) - form.total)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                         más para conseguir envió gratis. 
-                        <span @click="$inertia.get(route('online-sales.client-index', form.store_id ?? 0))" class="text-primary cursor-pointer ml-1">Seguir comprando</span>
+                        <span @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))" class="text-primary cursor-pointer ml-1">Seguir comprando</span>
                     </p>
                     
                     <label for="confirm" class="text-xs items-center flex">
@@ -149,7 +149,6 @@
                 </article>
             </section>
         </div>
-        {{form.products}}
     </OnlineStoreLayout>
 </template>
 
@@ -190,6 +189,7 @@ data() {
         form,
         confirmSale: false,
         cart: [],
+        encodedIdStore: null, //id codificado de la tienda
         store: {} //guarda la información de la tienda
     }
 },
@@ -226,6 +226,10 @@ methods:{
             },
         });
     },
+    encodeStoreId() {
+        const encodedId = btoa(this.form.store_id?.toString());
+        this.encodedIdStore = encodedId;
+    },
     async fetchStoreInfo() {
         try {
             const response = await axios.get(route('stores.fetch-store-info', this.form.store_id));
@@ -250,6 +254,7 @@ mounted() {
         return sum + (item.price * item.quantity);
     }, 0);
 
+    this.encodeStoreId(); //codifica el id de la tienda para mandarlo como parametro e ir al index
 },
 created() {
     // recupera el store_id del localStorage

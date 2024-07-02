@@ -104,7 +104,7 @@ export default {
             let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
 
             // Verificar si el producto ya está en el carrito
-            const productInCart = cart.find(item => item.id === this.product.id && item.isLocal == true);
+            const productInCart = cart.find(item => item.product_id === this.product.id && item.isLocal == true);
 
             if (productInCart) {
                 // Si el producto ya está en el carrito, actualizar la cantidad
@@ -112,7 +112,7 @@ export default {
             } else {
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
-                    id: this.product.id,
+                    product_id: this.product.id,
                     name: this.product.name,
                     isLocal: true,
                     price: this.product.public_price,

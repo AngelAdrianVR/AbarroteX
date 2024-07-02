@@ -78,7 +78,7 @@ export default {
                 } else {
                     // Si el producto no está en el carrito, agregarlo
                     cart.push({
-                        id: this.product.id,
+                        product_id: this.product.id,
                         name: this.product.global_product.name,
                         isLocal: false,
                         price: this.product.public_price,
@@ -99,7 +99,7 @@ export default {
                 } else {
                     // Si el producto no está en el carrito, agregarlo
                     cart.push({
-                        id: this.product.id,
+                        product_id: this.product.id,
                         name: this.product.name,
                         price: this.product.public_price,
                         isLocal: true,
