@@ -261,6 +261,7 @@ class ProductController extends Controller
             'current_price' => $product->cost ?? 0,
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
+            'amount_from_cash_register' => $request->cash_amount,
         ]);
 
         // restar de caja en caso de que el usuario asi lo haya especificado

@@ -1016,8 +1016,8 @@ export default {
           addOrUpdateItem('products', product);
 
           this.$notify({
-            title: "Producto creado",
-            message: "Ya puedes seleccionarlo para la venta",
+            title: "Producto creado y seleccionado para la venta",
+            message: "",
             type: "success",
           });
 

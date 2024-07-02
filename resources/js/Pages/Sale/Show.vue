@@ -48,6 +48,18 @@
                     </p>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <span class="w-2/3">Total de pedidos en línea cancelados o reembolsados: </span>
+                    <p class="flex text-gray37 w-1/3 font-bold">
+                        <span class="w-1/3">$</span>
+                        <span class="w-2/3 ml-3 text-gray37 text-end">
+                            {{
+                                Object.values(day_sales)[0].online_sales.filter(item => item.status == 'Cancelado' ||
+                                    item.status == 'Reembolsado')[0].total
+                            }}
+                        </span>
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
                     <span class="w-2/3">Total de ventas en tienda: </span>
                     <p class="flex text-gray37 w-1/3 font-bold">
                         <span class="w-1/3">$</span>
@@ -139,7 +151,9 @@
                                     </el-input>
                                 </td>
                                 <td>
-                                    ${{ calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}
+                                    ${{
+                                        calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")
+                                    }}
                                 </td>
                                 <td>
                                     <div

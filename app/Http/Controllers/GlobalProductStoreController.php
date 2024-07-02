@@ -144,6 +144,7 @@ class GlobalProductStoreController extends Controller
             'concept' => 'Compra de producto: ' . $global_product_store->globalProduct->name,
             'current_price' => $global_product_store->cost ?? 0,
             'quantity' => $request->quantity,
+            'amount_from_cash_register' => $request->cash_amount,
             'store_id' => auth()->user()->store_id,
         ]);
 
