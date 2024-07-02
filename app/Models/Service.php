@@ -14,6 +14,7 @@ class Service extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
+        'folio',
         'name',
         'category',
         'price',

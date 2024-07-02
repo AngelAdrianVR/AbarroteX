@@ -15,10 +15,10 @@
         </figure>
 
         <!-- Detalles -->
-        <div class="text-center mt-8 flex flex-col justify-between items-center h-1/2">
-            <div class="mb-4 h-max-48 overflow-auto">
-                <h1 class="mb-4 font-bold">{{ service.name }}</h1>
-                <p v-if="service.description">{{ service.description }}</p>
+        <div class="text-center mt-5 flex flex-col justify-between items-center h-1/2">
+            <div class="mb-4">
+                <h1 class="mb-4 mx-auto font-bold w-96 truncate">{{ service.name }}</h1>
+                <p class="h-24 overflow-auto" v-if="service.description">{{ service.description }}</p>
                 <p v-else>No hay descripción en este servicio...</p>
             </div>
 

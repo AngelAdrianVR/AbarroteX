@@ -104,7 +104,7 @@ export default {
             let cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
 
             // Verificar si el producto ya está en el carrito
-            const productInCart = cart.find(item => item.id === this.global_product.global_product_id && item.isLocal == false);
+            const productInCart = cart.find(item => item.product_id === this.global_product.global_product_id && item.isLocal == false);
 
             if (productInCart) {
                 // Si el producto ya está en el carrito, actualizar la cantidad
@@ -112,7 +112,7 @@ export default {
             } else {
                 // Si el producto no está en el carrito, agregarlo
                 cart.push({
-                    id: this.global_product.id,
+                    product_id: this.global_product.id,
                     name: this.global_product.global_product.name,
                     isLocal: false,
                     price: this.global_product.public_price,
