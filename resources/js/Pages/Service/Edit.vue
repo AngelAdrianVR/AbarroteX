@@ -21,7 +21,8 @@
                 <div class="mt-3">
                     <InputLabel value="Precio del servicio (opcional)" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.price" placeholder="ingresa el precio del servicio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/\D/g, '')">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>

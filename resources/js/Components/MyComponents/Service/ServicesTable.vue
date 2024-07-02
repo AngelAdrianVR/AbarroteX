@@ -3,7 +3,7 @@
         <table v-if="services?.length" class="w-full">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th>Código</th>
+                    <th>Folio</th>
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Precio</th>

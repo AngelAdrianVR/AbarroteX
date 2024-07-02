@@ -86,7 +86,7 @@
                             Una vez que confirmes tu pedido, nos pondremos en contacto contigo a través de WhatsApp <i class="fa-brands fa-whatsapp text-sm text-green-500"></i> al número proporcionado para coordinar
                             todos los detalles de la entrega y el pago.
                         </p>
-                        <p v-if="store?.online_store_properties?.delivery_conditions" class="mt-4 text-primary text-sm">Condiciones de envío: <strong>{{ store?.online_store_properties?.delivery_conditions }}</strong></p>
+                        <p v-if="store?.online_store_properties?.delivery_conditions" class="mt-4 text-red-500 text-sm">Condiciones de envío: <strong>{{ store?.online_store_properties?.delivery_conditions }}</strong></p>
                     </div>
                 </form>
 
@@ -149,6 +149,7 @@
                 </article>
             </section>
         </div>
+        {{form.products}}
     </OnlineStoreLayout>
 </template>
 

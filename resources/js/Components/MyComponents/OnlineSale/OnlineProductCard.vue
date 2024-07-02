@@ -1,5 +1,5 @@
 <template>
-    <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col h-96 hover:border-primary relative group">
+    <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col h-[400px] hover:border-primary relative group">
         <!-- Deatalle de cantidad disponible  -->
         <div v-if="store?.online_store_properties?.inventory"
             class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg lg:hidden lg:group-hover:block">
@@ -20,9 +20,9 @@
         </figure>
 
         <!-- Detalles -->
-        <div class="text-center mt-5 flex flex-col justify-center items-center">
+        <div class="text-center mt-4 flex flex-col justify-center items-center">
             <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
-            <p class="text-3xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price :
+            <p class="text-2xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price :
                 product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 
             <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->

@@ -1,6 +1,6 @@
 <template>
     <div class="flex justify-between items-center mx-3">
-        <h1 class="font-bold text-lg">Pedidos en línea</h1>
+        <h1 class="font-bold">Pedidos en línea</h1>
         <div class="flex items-center space-x-4">
             <div class="relative">
                 <!-- filtro -->

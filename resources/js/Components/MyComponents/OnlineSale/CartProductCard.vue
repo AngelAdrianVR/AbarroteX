@@ -28,7 +28,7 @@
 
                         <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
                         <el-input-number v-else v-model="quantity" size="small" :min="0" :max="999" :precision="2" />
-                            <p v-if="store?.online_store_properties?.inventory" class="text-xs text-primary">disponibles: {{ product?.current_stock }}</p>
+                            <p v-if="store?.online_store_properties?.inventory" class="text-xs text-gray99">disponibles: {{ product?.current_stock }}</p>
                     </div>
                     <!-- Eliminar producto de carrito -->
                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
