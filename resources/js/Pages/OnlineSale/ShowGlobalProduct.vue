@@ -130,6 +130,7 @@ export default {
                 title: "Correcto",
                 message: "Se ha agregado correctamente al carrito",
                 type: "success",
+                position: "bottom-right",
             });
 
             // Emitir el evento personalizado
