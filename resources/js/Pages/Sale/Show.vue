@@ -36,34 +36,75 @@
             <!-- Información de la venta -->
             <header
                 class="w-80 inline-block mt-7 lg:mx-16 rounded-[5px] border border-grayD9 text-gray99 px-4 py-2 space-y-2">
-                <div class="flex items-center space-x-3">
-                    <span class="w-2/3">Total de pedidos en línea: </span>
-                    <p class="flex text-gray37 w-1/3 font-bold">
-                        <span class="w-1/3">$</span>
-                        <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{
-                                Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                    ",") }}
-                        </span>
-                    </p>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="w-2/3">Total de ventas en tienda: </span>
-                    <p class="flex text-gray37 w-1/3 font-bold">
-                        <span class="w-1/3">$</span>
-                        <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                            }}
-                        </span>
-                    </p>
-                </div>
+                <section>
+                    <div class="flex items-center space-x-3">
+                        <span class="w-2/3">Total de pedidos en línea: </span>
+                        <p class="flex text-gray37 w-1/3 font-bold">
+                            <span class="w-1/4"></span>
+                            <span class="w-1/4">$</span>
+                            <span class="w-2/3 ml-3 text-gray37 text-end">
+                                {{
+                                    Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",") }}
+                            </span>
+                        </p>
+                    </div>
+                    <div v-if="getCanceledOnlineSales" class="flex items-center space-x-3">
+                        <span class="w-2/3">Cancelados: </span>
+                        <p class="flex text-gray37 w-1/3 font-bold">
+                            <span class="w-1/4 text-gray99">-</span>
+                            <span class="w-1/4">$</span>
+                            <span class="w-2/3 ml-3 text-gray37 text-end">
+                                {{ getCanceledOnlineSales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
+                    <div v-if="getRefundedOnlineSales" class="flex items-center space-x-3">
+                        <span class="w-2/3">Reembolsados: </span>
+                        <p class="flex text-gray37 w-1/3 font-bold">
+                            <span class="w-1/4 text-gray99">-</span>
+                            <span class="w-1/4">$</span>
+                            <span class="w-2/3 ml-3 text-gray37 text-end">
+                                {{ getRefundedOnlineSales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
+                </section>
+                <section>
+                    <div class="flex items-center space-x-3">
+                        <span class="w-2/3">Total de ventas en tienda: </span>
+                        <p class="flex text-gray37 w-1/3 font-bold">
+                            <span class="w-1/4"></span>
+                            <span class="w-1/4">$</span>
+                            <span class="w-2/3 ml-3 text-gray37 text-end">
+                                {{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    ",")
+                                }}
+                            </span>
+                        </p>
+                    </div>
+                    <div v-if="getRefundedSales" class="flex items-center space-x-3">
+                        <span class="w-2/3">Reembolsados: </span>
+                        <p class="flex text-gray37 w-1/3 font-bold">
+                            <span class="w-1/4 text-gray99">-</span>
+                            <span class="w-1/4">$</span>
+                            <span class="w-2/3 ml-3 text-gray37 text-end">
+                                {{ getRefundedSales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
+                </section>
                 <div class="flex items-center space-x-3 border-t border-grayD9 pt-1">
                     <span class="w-2/3 font-bold">Total de ventas del Día: </span>
                     <p class="flex text-gray37 w-1/3 font-bold">
-                        <span class="w-1/3">$</span>
+                        <span class="w-1/4"></span>
+                        <span class="w-1/4">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
                             {{ (Object.values(day_sales)[0].online_sales_total +
-                                Object.values(day_sales)[0].total_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                Object.values(day_sales)[0].total_sale -
+                                getRefundedOnlineSales - 
+                                getCanceledOnlineSales - 
+                                getRefundedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
                 </div>
@@ -139,7 +180,10 @@
                                     </el-input>
                                 </td>
                                 <td>
-                                    ${{ calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}
+                                    ${{
+                                        calcRemainingDebtWithNewInstallment().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                            ",")
+                                    }}
                                 </td>
                                 <td>
                                     <div
@@ -330,6 +374,21 @@ export default {
                 return 'bg-[#E6FDDB] text-[#08B91A]';
             }
             return 'bg-[#C4FBAA] text-[#0AA91A]';
+        },
+        getCanceledOnlineSales() {
+            return Object.values(this.day_sales)[0]?.online_sales
+                ?.filter(item => item.status == 'Cancelado')
+                ?.reduce((accum, onlineSale) => accum += onlineSale.total, 0)
+        },
+        getRefundedOnlineSales() {
+            return Object.values(this.day_sales)[0]?.online_sales
+                ?.filter(item => item.status == 'Reembolsado')
+                ?.reduce((accum, onlineSale) => accum += onlineSale.total, 0)
+        },
+        getRefundedSales() {
+            return Object.values(this.day_sales)[0]?.sales
+                ?.filter(item => item.refunded_at)
+                ?.reduce((accum, sale) => accum += sale.current_price * sale.quantity, 0)
         },
     },
     methods: {

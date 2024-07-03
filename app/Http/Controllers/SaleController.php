@@ -94,36 +94,38 @@ class SaleController extends Controller
 
         $date = Carbon::parse($date)->startOfDay(); // Comienza el día actual para la comparación
 
-        // Obtener la fecha de la venta anterior
-        $previous_sale = Sale::where('store_id', $storeId)
-            ->where('cash_register_id', $cashRegisterId)
-            ->where('created_at', '<', $date) // Excluir la fecha actual
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        // Si no hay ventas en tienda buscar ventas en linea
-        if (!$previous_sale) {
-            $previous_sale = OnlineSale::where('store_id', $storeId)
-                ->where('created_at', '<', $date) // Excluir la fecha actual
+        // Obtener todas las ventas anteriores de ambas tablas
+        $previous_sales = collect([
+            ...Sale::where('store_id', $storeId)
+                ->where('cash_register_id', $cashRegisterId)
+                ->where('created_at', '<', $date)
                 ->orderBy('created_at', 'desc')
-                ->first();
-        }
+                ->get(),
+            ...OnlineSale::where('store_id', $storeId)
+                ->where('created_at', '<', $date)
+                ->orderBy('created_at', 'desc')
+                ->get()
+        ])->sortByDesc('created_at');
+
+        // Obtener la fecha de la venta anterior más cercana
+        $previous_sale = $previous_sales->first();
         $previous_sale_date = $previous_sale ? $previous_sale->created_at->toDateString() : null;
 
-        // Obtener la fecha de la venta siguiente
-        $next_sale = Sale::where('store_id', $storeId)
-            ->where('cash_register_id', $cashRegisterId)
-            ->where('created_at', '>', $date->endOfDay()) // Excluir la fecha actual
-            ->orderBy('created_at', 'asc')
-            ->first();
-
-        // Si no hay ventas en tienda buscar ventas en linea
-        if (!$next_sale) {
-            $next_sale = OnlineSale::where('store_id', $storeId)
-                ->where('created_at', '>', $date->endOfDay()) // Excluir la fecha actual
+        // Obtener todas las ventas siguientes de ambas tablas
+        $next_sales = collect([
+            ...Sale::where('store_id', $storeId)
+                ->where('cash_register_id', $cashRegisterId)
+                ->where('created_at', '>', $date->endOfDay())
                 ->orderBy('created_at', 'asc')
-                ->first();
-        }
+                ->get(),
+            ...OnlineSale::where('store_id', $storeId)
+                ->where('created_at', '>', $date->endOfDay())
+                ->orderBy('created_at', 'asc')
+                ->get()
+        ])->sortBy('created_at');
+
+        // Obtener la fecha de la venta siguiente más cercana
+        $next_sale = $next_sales->first();
         $next_sale_date = $next_sale ? $next_sale->created_at->toDateString() : null;
 
         //evalúa si la venta está dentro del corte---------------
@@ -257,6 +259,7 @@ class SaleController extends Controller
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
                 'price_changed' => $product['priceChanged'],
+                'client_id' => $sale_data['client_id'],
                 'store_id' => auth()->user()->store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
                 'user_id' => auth()->id(),
@@ -619,6 +622,7 @@ class SaleController extends Controller
                     'credit_data' => $firstSale->credit_data,
                     'folio' => $firstSale->folio,
                     'user_name' => $firstSale->user->name,
+                    'client_name' => $firstSale->client?->name ?? 'Pulico en general',
                     'total_sale' => $totalSale,
                 ];
             });

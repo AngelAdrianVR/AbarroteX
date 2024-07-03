@@ -16,6 +16,7 @@ class Expense extends Model
         'quantity',
         'current_price',
         'store_id',
+        'amount_from_cash_register', //para saber si se retiro dinero de caja y cuanto
         'created_at', // para poderponer cambiar la fecha desde el registro
     ];
 

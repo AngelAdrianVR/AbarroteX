@@ -57,19 +57,18 @@ class ExpenseController extends Controller
 
     public function store(Request $request)
     {
-
         // Itera sobre cada gasto recibido en la lista
         foreach ($request->expenses as $expenseData) {
 
             // Convierte el campo 'creado el' a un objeto Carbon y resta 6 horas
             // $created_at = Carbon::parse($expenseData['date'])->subHours(6);
-
             $expense = Expense::create([
                 'concept' => $expenseData['concept'],
                 'quantity' => $expenseData['quantity'],
                 'current_price' => $expenseData['current_price'],
-                // 'created_at' => now(),
+                'amount_from_cash_register' => $expenseData['from_cash_register'] ? $expenseData['current_price'] : null,
                 'store_id' => auth()->user()->store_id,
+                // 'created_at' => now(),
             ]);
 
             // crear retiro de dinero en caja si el dinero se toma de ahi

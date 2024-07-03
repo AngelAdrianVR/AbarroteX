@@ -37,9 +37,10 @@
                     <thead>
                         <tr
                             class="*:py-1 *:px-2 *:md:px-4 *:text-xs *:md:text-sm text-gray37 bg-primarylight text-start">
-                            <th class="w-[60%] rounded-s-full text-start">Concepto</th>
+                            <th class="w-[40%] rounded-s-full text-start">Concepto</th>
                             <th class="w-[15%] text-end">Cantidad</th>
                             <th class="w-[20%] text-end">Costo</th>
+                            <th class="w-[20%] text-end">$ tomado de caja</th>
                             <th class="w-[5%] rounded-e-full"></th>
                         </tr>
                     </thead>
@@ -52,6 +53,9 @@
                                 ${{ (expense.quantity *
                                     expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",") }}
+                            </td>
+                            <td class="text-end">
+                                ${{ expense.amount_from_cash_register?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? 0.00 }}
                             </td>
                             <td class="text-end">
                                 <el-dropdown v-if="canEdit && canDelete" trigger="click" @command="handleCommand">
