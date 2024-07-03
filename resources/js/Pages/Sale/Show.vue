@@ -83,7 +83,7 @@
                             </span>
                         </p>
                     </div>
-                    <div v-if="getRefundedSales" class="flex items-center space-x-3">
+                    <div v-if="getRefundedSales || true" class="flex items-center space-x-3">
                         <span class="w-2/3">Reembolsados: </span>
                         <p class="flex text-gray37 w-1/3 font-bold">
                             <span class="w-1/4 text-gray99">-</span>
@@ -102,8 +102,8 @@
                         <span class="w-2/3 ml-3 text-gray37 text-end">
                             {{ (Object.values(day_sales)[0].online_sales_total +
                                 Object.values(day_sales)[0].total_sale -
-                                getRefundedOnlineSales - 
-                                getCanceledOnlineSales - 
+                                getRefundedOnlineSales -
+                                getCanceledOnlineSales -
                                 getRefundedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
@@ -386,9 +386,11 @@ export default {
                 ?.reduce((accum, onlineSale) => accum += onlineSale.total, 0)
         },
         getRefundedSales() {
-            return Object.values(this.day_sales)[0]?.sales
-                ?.filter(item => item.refunded_at)
-                ?.reduce((accum, sale) => accum += sale.current_price * sale.quantity, 0)
+            return this.getGroupedSales.reduce((accum1, sale) => {
+                return accum1 += sale.products
+                    ?.filter(item => item.refunded_at)
+                    ?.reduce((accum, sale) => accum += sale.current_price * sale.quantity, 0)
+            }, 0)
         },
     },
     methods: {
