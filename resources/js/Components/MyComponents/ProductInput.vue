@@ -40,7 +40,7 @@
             <InputLabel value="Total" class="mb-1 text-sm" />
             <p><span class="mr-2">$</span>{{ (quantity * price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
         </div>
-        <button type="button" @click="handleDelete">
+        <button v-if="showDeleteButton" type="button" @click="handleDelete">
             <i class="fa-regular fa-trash-can text-sm text-primary cursor-pointer pt-2"></i>
         </button>
     </div>
@@ -67,6 +67,7 @@ export default {
     emits: ['deleteItem', 'syncItem'],
     props: {
         products: Array,
+        showDeleteButton: Boolean,
         id: Number,
         init_state: {
             type: Object,

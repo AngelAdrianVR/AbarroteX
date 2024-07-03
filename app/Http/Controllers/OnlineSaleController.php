@@ -300,7 +300,8 @@ class OnlineSaleController extends Controller
             'pendent' => 'Pendiente',
             'processing' => 'Procesando',
             'delivered' => 'Entregado',
-            'cancel' => 'Cancelado'
+            'cancel' => 'Cancelado',
+            'refunded' => 'Reembolsado',
         ];
 
         // Verifica si el estado solicitado es válido
@@ -312,12 +313,12 @@ class OnlineSaleController extends Controller
         $delivered_at = null;
 
         // Si se cambia desde 'delivered' a otro estado y existe una caja configurada
-        if ($online_sale->delivered_at && $request->online_sales_cash_register) {
-            $total_sale = $online_sale->total + $online_sale->delivery_price;
-            $cash_register = CashRegister::find($request->online_sales_cash_register);
-            $cash_register->current_cash -= $total_sale;
-            $cash_register->save();
-        }
+        // if ($online_sale->delivered_at && $request->online_sales_cash_register) {
+        //     $total_sale = $online_sale->total + $online_sale->delivery_price;
+        //     $cash_register = CashRegister::find($request->online_sales_cash_register);
+        //     $cash_register->current_cash -= $total_sale;
+        //     $cash_register->save();
+        // }
 
         // Si se cambia el estado a 'delivered' y existe una caja configurada
         if ($request->status == 'delivered' && $request->online_sales_cash_register) {
@@ -341,6 +342,10 @@ class OnlineSaleController extends Controller
                     $temp_product->save();
                 }
             }
+        }
+
+        if ($request->status == 'refunded') {
+            $this->refund($online_sale);
         }
 
         $online_sale->update([

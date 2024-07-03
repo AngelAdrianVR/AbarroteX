@@ -83,7 +83,7 @@
                             </span>
                         </p>
                     </div>
-                    <div v-if="getRefundedSales || true" class="flex items-center space-x-3">
+                    <div v-if="getRefundedSales" class="flex items-center space-x-3">
                         <span class="w-2/3">Reembolsados: </span>
                         <p class="flex text-gray37 w-1/3 font-bold">
                             <span class="w-1/4 text-gray99">-</span>
