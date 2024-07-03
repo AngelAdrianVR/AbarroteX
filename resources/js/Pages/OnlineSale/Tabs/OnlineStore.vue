@@ -113,7 +113,7 @@
           placeholder="Escribe el número de teléfono" />
           <InputError :message="onlineStoreForm.errors.whatsapp" />
           <button v-if="editWhatsapp">
-            <i @click="editWhatsapp = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+            <i @click="editWhatsapp = false; updateOnlineSalesInfo()" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
           </button>
           <button @click="editWhatsapp = false;">
               <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
@@ -137,10 +137,10 @@
         </div>
 
         <div class="flex flex-col w-14 md:w-36 mx-7 space-y-1">
-          <el-switch v-model="onlineStoreForm.online_store_properties.cash_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
-          <el-switch v-model="onlineStoreForm.online_store_properties.credit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
-          <el-switch v-model="onlineStoreForm.online_store_properties.debit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
-          <el-switch v-model="onlineStoreForm.online_store_properties.mercado_pago" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+          <el-switch @change="updateOnlineSalesInfo()" v-model="onlineStoreForm.online_store_properties.cash_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+          <el-switch @change="updateOnlineSalesInfo()" v-model="onlineStoreForm.online_store_properties.credit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+          <el-switch @change="updateOnlineSalesInfo()" v-model="onlineStoreForm.online_store_properties.debit_payment" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+          <el-switch @change="updateOnlineSalesInfo()" v-model="onlineStoreForm.online_store_properties.mercado_pago" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
         </div>
       </div>
     </article>
@@ -166,9 +166,9 @@
             </template>
           </el-input>
           <button v-if="editDelivery">
-            <i @click="editDelivery = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+            <i @click="editDelivery = false; updateOnlineSalesInfo()" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
           </button>
-          <button @click="editDelivery = false;">
+          <button @click="editDelivery = false">
               <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
             </button>
         </div>
@@ -185,7 +185,7 @@
               placeholder="Escribe las condiciones de envío" :maxlength="500" show-word-limit class="!w-48"
               clearable />
           <button v-if="editDelivery">
-            <i @click="editDelivery = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+            <i @click="editDelivery = false; updateOnlineSalesInfo()" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
           </button>
           <button @click="editDelivery = false;">
               <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
@@ -217,15 +217,15 @@
               </template>
             </el-input>
             <button v-if="editMinFreeDelivery">
-              <i @click="editMinFreeDelivery = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+              <i @click="editMinFreeDelivery = false; updateOnlineSalesInfo()" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
             </button>
-            <button @click="editMinFreeDelivery = false;">
+            <button @click="editMinFreeDelivery = false">
                 <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
               </button>
           </div>
         </div>
 
-        <el-switch v-model="onlineStoreForm.online_store_properties.enabled_free_delivery" class="ml-4" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch @change="updateOnlineSalesInfo()" v-model="onlineStoreForm.online_store_properties.enabled_free_delivery" class="ml-4" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
       </div>
     </article>
 
@@ -239,10 +239,10 @@
       <!-- Gestión de cajas -->
       <div class="flex items-center text-sm mt-3">
         <p class="mx-7">Caja para pedidos a domicilio:</p>
-        <el-select v-model="onlineStoreForm.online_store_properties.online_sales_cash_register" class="!w-40" filterable required clearable placeholder="Seleccione"
+        <el-select @change="updateOnlineSalesInfo()" v-model="onlineStoreForm.online_store_properties.online_sales_cash_register" class="!w-40" filterable required clearable placeholder="Seleccione"
             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-            <el-option v-for="item in cash_registers" :key="item" :value="item.id" 
-            :label="item.name" />
+            <el-option v-for="item in cash_registers" :key="item" :value="item.id" :label="item.name" />
+            <el-option :value="null" label="Ninguna caja" />
         </el-select>
       </div>
     </article>
@@ -254,17 +254,17 @@
       
       <div class="flex items-center justify-between space-x-2">
         <p class="mx-7 text-sm">Actualiza el inventario automáticamente al hacer una venta y lo toma en cuenta para no permitir ventas
-          de prosuctos agotados.
+          de productos agotados.
         </p>
-        <el-switch v-model="onlineStoreForm.online_store_properties.inventory" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+        <el-switch @change="updateOnlineSalesInfo()" v-model="onlineStoreForm.online_store_properties.inventory" class="ml-2" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
       </div>
     </article>
 
     <div class="text-right pt-10 md:mx-7 col-span-full">
-      <PrimaryButton :disabled="onlineStoreForm.processing" @click="updateOnlineSalesInfo">
+      <!-- <PrimaryButton :disabled="onlineStoreForm.processing" @click="updateOnlineSalesInfo">
         <i v-if="onlineStoreForm.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
         Guadar cambios
-      </PrimaryButton>
+      </PrimaryButton> -->
     </div>
 
   </section>
@@ -335,11 +335,11 @@ export default {
     updateOnlineSalesInfo() {
       this.onlineStoreForm.put(route('stores.update-online-sales-info', this.$page.props.auth.user.store.id), {
           onSuccess: () => {
-            this.$notify({
-                title: "Correcto",
-                message: "¡Configuraciones actualizadas!",
-                type: "success",
-            });
+            // this.$notify({
+            //     title: "Correcto",
+            //     message: "¡Configuraciones actualizadas!",
+            //     type: "success",
+            // });
             this.editWhatsapp = false;
             this.editDeliveryPrice = false;
             this.editDeliveryConditions = false;

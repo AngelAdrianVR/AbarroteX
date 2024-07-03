@@ -1,6 +1,6 @@
 <template>
     <div class="flex justify-between items-center mx-3">
-        <h1 class="font-bold text-lg">Pedidos en línea</h1>
+        <h1 class="font-bold">Pedidos en línea</h1>
         <div class="flex items-center space-x-4">
             <div class="relative">
                 <!-- filtro -->
@@ -233,6 +233,12 @@
                             :maxlength="255" clearable />
                         <InputError :message="form.errors.int_number" />
                     </div>
+
+                    <div class="mt-3 col-span-full">
+                        <InputLabel value="Referencias (opcional)" class="ml-3 mb-1" />
+                        <el-input v-model="form.address_references" placeholder="Escribe referencias que nos ayuden a encontrar tu domicilio. Ej. Oxxo en la esquina" :maxlength="255" clearable />
+                        <InputError :message="form.errors.address_references" />
+                    </div>
                 </div>
 
                 <p class="font-bold my-5">Detalles del pedido</p>
@@ -350,6 +356,7 @@ export default {
             int_number: null,
             postal_code: null,
             polity_state: null,
+            address_references: null,
             delivery_price: null, //precio de envío
             total: 0,
             store_id: this.$page.props.auth.user.store_id,

@@ -32,7 +32,14 @@ class ServiceController extends Controller
             'price' => 'nullable|numeric|min:0|max:99999',
         ]);
 
-        $service = Service::create($request->all() + ['store_id' => auth()->user()->store_id]);
+        $storeId = auth()->user()->store_id;
+        $last_service = Service::where('store_id', $storeId)->latest('id')->first();
+        $folio = $last_service ? intval($last_service->folio) + 1 : 1;
+
+        $service = Service::create($request->all() + [
+            'store_id' => $storeId,
+            'folio' => $folio,
+        ]);
 
         // Subir y asociar las imagenes
         $service->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());

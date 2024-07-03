@@ -3,7 +3,7 @@
         <table v-if="services?.length" class="w-full">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th>Código</th>
+                    <th>Folio</th>
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Precio</th>
@@ -15,7 +15,7 @@
                 <tr @click="$inertia.visit(route('services.show', encodeId(service.id)))"
                     v-for="(service, index) in services" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td class="rounded-s-full">{{ 'S-' + service.id }}</td>
+                    <td class="rounded-s-full">{{ 'S-' + service.folio }}</td>
                     <td>{{ service.name }}</td>
                     <td>{{ service.category ?? '-' }}</td>
                     <td>${{ service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>

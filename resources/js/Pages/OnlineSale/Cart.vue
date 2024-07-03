@@ -91,14 +91,14 @@ props:{
 },
 methods:{
     updateCart(data) {
-        const productIndex = this.cart.findIndex(item => item.id === data.id);
+        const productIndex = this.cart.findIndex(item => item.product_id === data.id);
 
          if (productIndex !== -1) {
             this.cart[productIndex].quantity = data.quantity;
          }
     },
     removeCartProduct(cartProductId) {
-        const productIndex = this.cart.findIndex(item => item.id === cartProductId);
+        const productIndex = this.cart.findIndex(item => item.product_id === cartProductId);
 
          if (productIndex !== -1) {
             this.cart.splice(productIndex, 1);

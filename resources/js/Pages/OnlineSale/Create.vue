@@ -86,7 +86,7 @@
                             Una vez que confirmes tu pedido, nos pondremos en contacto contigo a través de WhatsApp <i class="fa-brands fa-whatsapp text-sm text-green-500"></i> al número proporcionado para coordinar
                             todos los detalles de la entrega y el pago.
                         </p>
-                        <p v-if="store?.online_store_properties?.delivery_conditions" class="mt-4 text-primary text-sm">Condiciones de envío: <strong>{{ store?.online_store_properties?.delivery_conditions }}</strong></p>
+                        <p v-if="store?.online_store_properties?.delivery_conditions" class="mt-4 text-red-500 text-sm">Condiciones de envío: <strong>{{ store?.online_store_properties?.delivery_conditions }}</strong></p>
                     </div>
                 </form>
 
@@ -132,7 +132,7 @@
                             ${{ (parseFloat(store?.online_store_properties?.min_free_delivery || 0) - form.total)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                         más para conseguir envió gratis. 
-                        <span @click="$inertia.get(route('online-sales.client-index', form.store_id ?? 0))" class="text-primary cursor-pointer ml-1">Seguir comprando</span>
+                        <span @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))" class="text-primary cursor-pointer ml-1">Seguir comprando</span>
                     </p>
                     
                     <label for="confirm" class="text-xs items-center flex">
@@ -189,6 +189,7 @@ data() {
         form,
         confirmSale: false,
         cart: [],
+        encodedIdStore: null, //id codificado de la tienda
         store: {} //guarda la información de la tienda
     }
 },
@@ -225,6 +226,10 @@ methods:{
             },
         });
     },
+    encodeStoreId() {
+        const encodedId = btoa(this.form.store_id?.toString());
+        this.encodedIdStore = encodedId;
+    },
     async fetchStoreInfo() {
         try {
             const response = await axios.get(route('stores.fetch-store-info', this.form.store_id));
@@ -249,6 +254,7 @@ mounted() {
         return sum + (item.price * item.quantity);
     }, 0);
 
+    this.encodeStoreId(); //codifica el id de la tienda para mandarlo como parametro e ir al index
 },
 created() {
     // recupera el store_id del localStorage

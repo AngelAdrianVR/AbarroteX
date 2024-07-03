@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="'Detalles del servicio'">
-        <section class="mx-2 lg:mx-10 mt-7">
+        <section class="mx-2 lg:mx-20 mt-7">
             <Back :to="route('services.index')" />
 
             <h1 class="font-bold mt-4">Detalles del servicio</h1>
@@ -15,9 +15,9 @@
                 </div>
             </article>
 
-            <section class="md:flex space-x-5 mt-7 md:mx-5">
+            <section class="lg:flex space-x-5 my-7 lg:mx-5">
                 <!-- imágenes -->
-                <article>
+                <article class="flex flex-col justify-center items-center">
                     <figure class="border border-grayD9 rounded-md flex items-center justify-center w-96 h-72">
                         <img v-if="service.media?.length" :src="service.media[currentImage]?.original_url" alt="servicio"
                             class="h-full mx-auto object-contain">
@@ -36,18 +36,18 @@
                 </article>
 
                 <!-- Información del servicio -->
-                <header class="mt-7 lg:mx-8 text-sm lg:text-base space-y-2 w-full">
-                    <p class="text-[#373737]">Nombre: <span class="font-bold ml-10">{{
+                <header class="mt-7 lg:mt-1 lg:mx-8 text-sm lg:text-base space-y-2 w-[95%] p-3">
+                    <p class="text-gray99">Nombre: <span class="font-bold ml-10">{{
                         service.name }}</span></p>
-                    <p class="text-[#373737]">Categoría: <span class="font-bold ml-8">{{
+                    <p class="text-gray99">Categoría: <span class="font-bold ml-8">{{
                         service.category ?? '-' }}</span></p>
-                    <div class="flex space-x-5 md:w-2/3">
-                        <p class="text-[#373737]">Descripción:</p>
-                        <span class="font-bold ml-5" style="white-space: pre-line;">{{service.description ?? '-' }}</span>
+                    <div class="flex space-x-5 lg:w-1/2">
+                        <p class="text-gray99">Descripción:</p>
+                        <span class="font-bold ml-5 !text-gray99" style="white-space: pre-line;">{{service.description ?? '-' }}</span>
                     </div>
-                    <p class="text-[#373737]">Precio: <span class="font-bold ml-14">${{
+                    <p class="text-gray99">Precio: <span class="font-bold ml-14">${{
                         service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-                    <p class="text-[#373737]">Creado el: <span class="font-bold ml-8">{{
+                    <p class="text-gray99">Creado el: <span class="font-bold ml-8">{{
                         formatDate(service.created_at) }}</span></p>
                 </header>
             </section>
