@@ -28,7 +28,7 @@
                                 <el-dropdown-item @click="showDeleteConfirm = true">Eliminar</el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
-                    </el-dropdown> -->
+</el-dropdown> -->
                 </div>
             </article>
 
@@ -232,9 +232,11 @@
 
                     <section class="max-h-56 overflow-auto">
                         <div class="space-y-3">
+                            <InputError :message="form.errors.products" />
                             <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id"
                                 :id="item.id" :init_state="item" @deleteItem="deleteItem(index)"
-                                @syncItem="syncItems(index, $event)" class="mb-1" :showDeleteButton="form.products.length > 1" />
+                                @syncItem="syncItems(index, $event)" class="mb-1"
+                                :showDeleteButton="form.products.length > 1" />
                         </div>
                         <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para
                             empezar a
@@ -312,6 +314,7 @@ export default {
             created_from_app: true,
             products: this.online_sale.products,
             address_references: this.online_sale.address_references, //referencias para dar con el lugar
+            store_inventory: this.$page.props.auth.user.store?.online_store_properties?.inventory,
         });
         return {
             form,

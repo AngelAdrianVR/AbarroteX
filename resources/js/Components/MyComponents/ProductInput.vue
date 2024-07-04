@@ -2,8 +2,7 @@
     <div class="flex space-x-2 flex-row justify-between items-center common-container text-sm">
         <figure class="border border-l-grayD9 rounded-md size-14 flex items-center justify-center p-1">
             <img class="object-contain h-full" v-if="local_image_url" :src="local_image_url" alt="">
-            <div v-else
-                class="size-12 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
+            <div v-else class="size-12 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-5">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -16,17 +15,18 @@
                 <InputLabel value="Producto*" class="mb-1" />
                 <p v-if="error_validation" class="text-red-400 text-xs mb-1">Seleccionar un producto</p>
             </div>
-            <el-select @change="syncItem" v-model="selection" class="!w-full" filterable required clearable placeholder="Seleccione"
-                no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                <el-option :disabled="product.disabled" v-for="product in products" :key="product" :value="product.relative_id" :label="product.name" />
+            <el-select ref="productSelector" @change="syncItem" v-model="selection" class="!w-full" filterable required clearable
+                placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                no-match-text="No se encontraron coincidencias">
+                <el-option :disabled="product.disabled" v-for="product in products" :key="product"
+                    :value="product.relative_id" :label="product.name" />
             </el-select>
         </div>
         <div class="w-24">
             <InputLabel value="Precio unitario" class="mb-1 text-sm" />
             <el-input disabled v-model="price" min="1" required type="number"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                :parser="(value) => value.replace(/[^\d.]/g, '')"
-                placeholder="0.00">
+                :parser="(value) => value.replace(/[^\d.]/g, '')" placeholder="0.00">
                 <template #prefix>
                     <i class="fa-solid fa-dollar-sign"></i>
                 </template>
@@ -34,7 +34,8 @@
         </div>
         <div class="w-24">
             <InputLabel value="Cantidad" class="mb-1 text-sm" />
-            <el-input @change="syncItem" min="1" v-model.number="quantity" type="number" placeholder="Ingresa la cantidad" />
+            <el-input @change="syncItem" @blur="handleBlur" min="1" v-model.number="quantity" type="number"
+                placeholder="Ingresa la cantidad" />
         </div>
         <div>
             <InputLabel value="Total" class="mb-1 text-sm" />
@@ -61,7 +62,7 @@ export default {
             last_product_index_selected: null //guarda el producto seleccionado para habilitarlo de nuevo si se cambia
         };
     },
-    components:{
+    components: {
         InputLabel
     },
     emits: ['deleteItem', 'syncItem'],
@@ -76,7 +77,7 @@ export default {
     },
     mounted() {
         if (this.init_state != null) {
-            if ( this.init_state.name ) {
+            if (this.init_state.name) {
                 const productSelectedIndex = this.products.findIndex(item => item.name == this.init_state.name);
                 this.selection = this.products[productSelectedIndex].relative_id;
             } else {
@@ -86,15 +87,22 @@ export default {
             this.isLocal = this.init_state.isLocal;
             this.quantity = this.init_state.quantity;
         }
+        this.$refs.productSelector.focus();
     },
-    methods:{
+    methods: {
         handleDelete() {
             const productSelectedIndex = this.products.findIndex(item => item.relative_id === this.selection);
-            if ( productSelectedIndex != -1 ) {
+            if (productSelectedIndex != -1) {
                 this.products[productSelectedIndex].disabled = false;
             }
             this.$emit('deleteItem');
-        }
+        },
+        handleBlur() {
+            // Agergr el valor de 1 en caso de que se deje vacio el campo
+            if (!this.quantity) {
+                this.quantity = 1;
+            }
+        },
     },
     computed: {
         syncItem() {

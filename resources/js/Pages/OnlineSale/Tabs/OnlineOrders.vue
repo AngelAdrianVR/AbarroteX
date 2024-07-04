@@ -247,6 +247,7 @@
 
                 <section class="max-h-72 overflow-auto">
                     <div class="space-y-3">
+                        <InputError :message="form.errors.products" />
                         <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id"
                             :id="item.id" :showDeleteButton="form.products.length > 1" @deleteItem="deleteItem(index)"
                             @syncItem="syncItems(index, $event)" class="mb-1" />
