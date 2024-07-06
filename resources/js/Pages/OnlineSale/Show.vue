@@ -354,7 +354,7 @@ export default {
             if (this.status == 'Entregado') {
                 return ['Entregado', 'Reembolsado'];
             } else {
-                return this.statuses;
+                return ['Entregado', 'Procesando', 'Cancelado'];
             }
         },
     },

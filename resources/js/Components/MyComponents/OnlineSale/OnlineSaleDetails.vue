@@ -48,7 +48,7 @@
                                 <span class="text-xs">Ver detalles</span>
                             </el-dropdown-item>
                         </el-dropdown-menu>
-                        <el-dropdown-item v-if="canRefund && !wasRefunded && !wasCanceled" :command="'refund|' + onlineSale.id">
+                        <el-dropdown-item v-if="canRefund && !wasRefunded && !wasCanceled && saleDelivered" :command="'refund|' + onlineSale.id">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="size-[14px] mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -97,7 +97,7 @@
                                     </el-tooltip>
                                 </td>
                                 <td>${{ product.price }}</td>
-                                <td>{{ product.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                <td>{{ product.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 <td class="text-end pb-1">${{ (product.price *
                                     product.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                             </tr>
@@ -168,6 +168,9 @@ export default {
         },
         wasCanceled() {
             return this.onlineSale.refunded_at && this.onlineSale.status === 'Cancelado';
+        },
+        saleDelivered() {
+            return this.onlineSale.status === 'Entregado';
         },
     },
     methods: {

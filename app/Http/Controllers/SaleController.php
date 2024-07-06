@@ -585,11 +585,21 @@ class SaleController extends Controller
             $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
                 return count($onlineSale->products);
             });
+
+            // obtener el total solo de las ventas al contado
             $totalSale = $normalSales->sum(function ($sale) {
-                return $sale->quantity * $sale->current_price;
+                $credit_data = CreditSaleData::where('folio', $sale->folio)->first();
+                if (!$credit_data) {
+                    return $sale->quantity * $sale->current_price;
+                }
             });
 
-            $totalOnlineSale = $onlineSales->sum('total');
+            // total de ventas en linea entregados
+            $totalOnlineSale = $onlineSales->sum(function ($online_sale) {
+                if ($online_sale->status == 'Entregado') {
+                    return $online_sale->total;
+                }
+            });
 
             $normalFolios = $normalSales->unique('folio')->count();
             $onlineFolios = $onlineSales->count();

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashRegisterMovement;
 use App\Models\CreditSaleData;
 use App\Models\Installment;
 use App\Models\Sale;
@@ -31,9 +32,16 @@ class InstallmentController extends Controller
 
         // actualizar status de la venta a credito
         $credit_sale_data = CreditSaleData::findOrFail($validated['credit_sale_data_id']);
-
+        
         // Obtener todas las ventas asociadas a la venta a crédito
         $sales = $credit_sale_data->sales;
+        
+        CashRegisterMovement::create([
+            'amount' => $validated['amount'],
+            'type' => 'Ingreso',
+            'notes' => "Abono registrado de la venta con folio $credit_sale_data->folio",
+            'cash_register_id' => $sales->first()->cash_register_id,
+        ]);
 
         // Calcular el monto total de la venta
         $totalSaleAmount = $sales->sum(function ($sale) {
