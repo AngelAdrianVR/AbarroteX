@@ -34,7 +34,10 @@ class InstallmentController extends Controller
         $credit_sale_data = CreditSaleData::findOrFail($validated['credit_sale_data_id']);
         
         // Obtener todas las ventas asociadas a la venta a crédito
-        $sales = $credit_sale_data->sales;
+        $sales = Sale::where([
+            'folio' => $credit_sale_data->folio,
+            'store_id' => auth()->user()->store_id,
+        ])->get();
         
         CashRegisterMovement::create([
             'amount' => $validated['amount'],
@@ -52,8 +55,12 @@ class InstallmentController extends Controller
         $totalInstallmentsAmount = $credit_sale_data->installments->sum('amount');
 
         // obtener cualquier producto para actualizar a cliente
-        $first_sale = Sale::firstWhere('folio', $credit_sale_data->folio);
-        $first_sale->client->update(['debt' => $totalSaleAmount - $totalInstallmentsAmount]);
+        $first_sale = Sale::firstWhere([
+            'folio' => $credit_sale_data->folio,
+            'store_id' => auth()->user()->store_id,
+        ]);
+        $first_sale->client->debt -= $installment->amount;
+        $first_sale->client->save();
         
         // Actualizar el estado de la venta a crédito
         if ($totalInstallmentsAmount >= $totalSaleAmount) {

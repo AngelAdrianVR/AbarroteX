@@ -194,7 +194,6 @@ class SaleController extends Controller
         return response()->json(['items' => $groupedSales]);
     }
 
-
     public function getItemsByPage($currentPage)
     {
         $offset = $currentPage * 30;
@@ -243,7 +242,10 @@ class SaleController extends Controller
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
+        // total de dinero en venta
+        $total_amount = 0;
         foreach ($sale_data['saleProducts'] as $product) {
+            $total_amount += $product['product']['public_price'] * $product['quantity'];
             $is_global_product = explode('_', $product['product']['id'])[0] == 'global';
             $product_id = explode('_', $product['product']['id'])[1];
 
@@ -264,10 +266,6 @@ class SaleController extends Controller
                 'user_id' => auth()->id(),
                 'created_at' => $created_at ?? now(),
             ]);
-
-            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
-            $cash_register->current_cash += $product['product']['public_price'] * $product['quantity'];
-            $cash_register->save();
 
             //Registra el historial de venta de cada producto
             ProductHistory::create([
@@ -330,7 +328,24 @@ class SaleController extends Controller
                     'credit_sale_data_id' => $new_credit_sale_data->id,
                     'user_id' => auth()->id(),
                 ]);
+                //Suma la cantidad abonada
+                $cash_register->current_cash += $sale_data['deposit'];
+                $cash_register->save();
             }
+
+            // sumar la deuda al cliente tomando en cuenta el abono
+            $client = Client::find($sale_data['client_id']);
+            if ($client->debt) {
+                $client->debt += $total_amount - $sale_data['deposit'];
+            } else {
+                $client->debt = $total_amount - $sale_data['deposit'];
+            }
+
+            $client->save();
+        } else {
+            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+            $cash_register->current_cash += $total_amount;
+            $cash_register->save();
         }
 
         return $folio;
@@ -566,88 +581,6 @@ class SaleController extends Controller
             }
         }
     }
-
-    // private
-    // private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
-    // {
-    //     // Combinar las ventas normales y las ventas en línea
-    //     $allSales = collect($onlineSales)->merge($sales);
-
-    //     return $allSales->groupBy(function ($sale) {
-    //         return Carbon::parse($sale->created_at)->toDateString();
-    //     })->map(function ($sales) use ($returnSales) {
-    //         // Filtrar ventas normales y en línea
-    //         $normalSales = $sales->filter(fn ($sale) => isset($sale->current_price));
-    //         $onlineSales = $sales->filter(fn ($sale) => !isset($sale->current_price));
-
-    //         $totalQuantityNormalSale = $normalSales->sum('quantity');
-    //         $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
-    //             return count($onlineSale->products);
-    //         });
-
-    //         // obtener el total solo de las ventas al contado
-    //         $totalSale = $normalSales->sum(function ($sale) {
-    //             $credit_data = CreditSaleData::where('folio', $sale->folio)->first();
-    //             if (!$credit_data) {
-    //                 return $sale->quantity * $sale->current_price;
-    //             }
-    //         });
-
-    //         // total de ventas en linea entregados
-    //         $totalOnlineSale = $onlineSales->sum(function ($online_sale) {
-    //             if ($online_sale->status == 'Entregado') {
-    //                 return $online_sale->total;
-    //             }
-    //         });
-
-    //         $normalFolios = $normalSales->unique('folio')->count();
-    //         $onlineFolios = $onlineSales->count();
-
-    //         $salesByFolio = $normalSales->groupBy('folio')->map(function ($folioSales) {
-    //             $firstSale = $folioSales->first();
-
-    //             // Calcular el total de todos los productos en la venta
-    //             $totalSale = $folioSales->sum(function ($sale) {
-    //                 return $sale->quantity * $sale->current_price;
-    //             });
-
-    //             return [
-    //                 'products' => $folioSales->map(function ($sale) {
-    //                     return [
-    //                         'id' => $sale->id,
-    //                         'current_price' => $sale->current_price,
-    //                         'product_name' => $sale->product_name,
-    //                         'product_id' => $sale->product_id,
-    //                         'is_global_product' => $sale->is_global_product,
-    //                         'quantity' => $sale->quantity,
-    //                         'price_changed' => $sale->price_changed,
-    //                         'refunded_at' => $sale->refunded_at,
-    //                         'cash_register_id' => $sale->cash_register_id,
-    //                         'store_id' => $sale->store_id,
-    //                         'created_at' => $sale->created_at,
-    //                         'updated_at' => $sale->updated_at,
-    //                     ];
-    //                 })->values(),
-    //                 'credit_data' => $firstSale->credit_data,
-    //                 'folio' => $firstSale->folio,
-    //                 'user_name' => $firstSale->user->name,
-    //                 'client_name' => $firstSale->client?->name ?? 'Pulico en general',
-    //                 'total_sale' => $totalSale,
-    //             ];
-    //         });
-
-    //         return [
-    //             'total_normal_quantity' => $totalQuantityNormalSale,
-    //             'total_online_quantity' => $totalQuantityOnlineSale,
-    //             'total_sale' => $totalSale,
-    //             'normal_folios' => $normalFolios,
-    //             'online_folios' => $onlineFolios,
-    //             'online_sales_total' => $totalOnlineSale,
-    //             'sales' => $returnSales ? $salesByFolio : [],
-    //             'online_sales' => $returnSales ? $onlineSales->values() : [],
-    //         ];
-    //     });
-    // }
 
     private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
     {
