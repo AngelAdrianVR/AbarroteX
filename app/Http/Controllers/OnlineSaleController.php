@@ -452,7 +452,8 @@ class OnlineSaleController extends Controller
         // Obtener las ventas registradas en la fecha recibida
         $sales = OnlineSale::with(['store:id,name'])
             ->where('store_id', auth()->user()->store_id)
-            ->whereDate('created_at', $date)
+            ->whereDate('delivered_at', $date)
+            ->orWhereDate('refunded_at', $date)
             ->get();
 
 

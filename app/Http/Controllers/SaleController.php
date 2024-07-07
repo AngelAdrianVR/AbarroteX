@@ -84,7 +84,8 @@ class SaleController extends Controller
             ->get();
 
         $online_sales = OnlineSale::where('store_id', $storeId)
-            ->whereDate('created_at', $date)
+            ->whereDate('delivered_at', $date)
+            ->orWhereDate('refunded_at', $date)
             ->get();
 
         $this->addCreditDataToSales($sales);
@@ -155,7 +156,6 @@ class SaleController extends Controller
         //
     }
 
-
     public function destroy(Sale $sale)
     {
         // Obtener la fecha de creación del registro de venta
@@ -167,7 +167,6 @@ class SaleController extends Controller
         // Eliminar el registro de venta enviado como referencia
         $sale->delete();
     }
-
 
     public function searchProduct(Request $request)
     {
@@ -259,7 +258,7 @@ class SaleController extends Controller
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
                 'price_changed' => $product['priceChanged'],
-                'client_id' => $sale_data['client_id'],
+                'client_id' => $sale_data['client_id'] == false ? null : $sale_data['client_id'],
                 'store_id' => auth()->user()->store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
                 'user_id' => auth()->id(),
@@ -553,12 +552,12 @@ class SaleController extends Controller
         // Crear movimiento de caja según la diferencia calculada
         if ($total_diff_amount != 0) {
             $movement_type = $total_diff_amount > 0 ? 'Ingreso' : 'Retiro';
-            CashRegisterMovement::create([
-                'amount' => abs($total_diff_amount),
-                'type' => $movement_type,
-                'notes' => "Actualización de venta con folio {$request->folio}",
-                'cash_register_id' => $cash_register->id,
-            ]);
+            // CashRegisterMovement::create([
+            //     'amount' => abs($total_diff_amount),
+            //     'type' => $movement_type,
+            //     'notes' => "Actualización de venta con folio {$request->folio}",
+            //     'cash_register_id' => $cash_register->id,
+            // ]);
 
             if ($movement_type == 'Ingreso') {
                 $cash_register->increment('current_cash', abs($total_diff_amount));
@@ -569,13 +568,106 @@ class SaleController extends Controller
     }
 
     // private
+    // private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
+    // {
+    //     // Combinar las ventas normales y las ventas en línea
+    //     $allSales = collect($onlineSales)->merge($sales);
+
+    //     return $allSales->groupBy(function ($sale) {
+    //         return Carbon::parse($sale->created_at)->toDateString();
+    //     })->map(function ($sales) use ($returnSales) {
+    //         // Filtrar ventas normales y en línea
+    //         $normalSales = $sales->filter(fn ($sale) => isset($sale->current_price));
+    //         $onlineSales = $sales->filter(fn ($sale) => !isset($sale->current_price));
+
+    //         $totalQuantityNormalSale = $normalSales->sum('quantity');
+    //         $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
+    //             return count($onlineSale->products);
+    //         });
+
+    //         // obtener el total solo de las ventas al contado
+    //         $totalSale = $normalSales->sum(function ($sale) {
+    //             $credit_data = CreditSaleData::where('folio', $sale->folio)->first();
+    //             if (!$credit_data) {
+    //                 return $sale->quantity * $sale->current_price;
+    //             }
+    //         });
+
+    //         // total de ventas en linea entregados
+    //         $totalOnlineSale = $onlineSales->sum(function ($online_sale) {
+    //             if ($online_sale->status == 'Entregado') {
+    //                 return $online_sale->total;
+    //             }
+    //         });
+
+    //         $normalFolios = $normalSales->unique('folio')->count();
+    //         $onlineFolios = $onlineSales->count();
+
+    //         $salesByFolio = $normalSales->groupBy('folio')->map(function ($folioSales) {
+    //             $firstSale = $folioSales->first();
+
+    //             // Calcular el total de todos los productos en la venta
+    //             $totalSale = $folioSales->sum(function ($sale) {
+    //                 return $sale->quantity * $sale->current_price;
+    //             });
+
+    //             return [
+    //                 'products' => $folioSales->map(function ($sale) {
+    //                     return [
+    //                         'id' => $sale->id,
+    //                         'current_price' => $sale->current_price,
+    //                         'product_name' => $sale->product_name,
+    //                         'product_id' => $sale->product_id,
+    //                         'is_global_product' => $sale->is_global_product,
+    //                         'quantity' => $sale->quantity,
+    //                         'price_changed' => $sale->price_changed,
+    //                         'refunded_at' => $sale->refunded_at,
+    //                         'cash_register_id' => $sale->cash_register_id,
+    //                         'store_id' => $sale->store_id,
+    //                         'created_at' => $sale->created_at,
+    //                         'updated_at' => $sale->updated_at,
+    //                     ];
+    //                 })->values(),
+    //                 'credit_data' => $firstSale->credit_data,
+    //                 'folio' => $firstSale->folio,
+    //                 'user_name' => $firstSale->user->name,
+    //                 'client_name' => $firstSale->client?->name ?? 'Pulico en general',
+    //                 'total_sale' => $totalSale,
+    //             ];
+    //         });
+
+    //         return [
+    //             'total_normal_quantity' => $totalQuantityNormalSale,
+    //             'total_online_quantity' => $totalQuantityOnlineSale,
+    //             'total_sale' => $totalSale,
+    //             'normal_folios' => $normalFolios,
+    //             'online_folios' => $onlineFolios,
+    //             'online_sales_total' => $totalOnlineSale,
+    //             'sales' => $returnSales ? $salesByFolio : [],
+    //             'online_sales' => $returnSales ? $onlineSales->values() : [],
+    //         ];
+    //     });
+    // }
+
     private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
     {
-        // Combinar las ventas normales y las ventas en línea
-        $allSales = collect($onlineSales)->merge($sales);
+        // Filtrar las ventas en línea que no tienen ni delivered_at ni refunded_at
+        $onlineSales = collect($onlineSales)->filter(function ($onlineSale) {
+            return $onlineSale->delivered_at || $onlineSale->refunded_at;
+        });
+
+        // Combinar las ventas normales y las ventas en línea agrupadas
+        $allSales = collect($sales)->merge($onlineSales);
 
         return $allSales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->toDateString();
+            if (isset($sale->current_price)) {
+                // Agrupar ventas normales por created_at
+                return Carbon::parse($sale->created_at)->toDateString();
+            } else {
+                // Agrupar ventas en línea por delivered_at o refunded_at
+                $date = $sale->delivered_at ? $sale->delivered_at : $sale->refunded_at;
+                return Carbon::parse($date)->toDateString();
+            }
         })->map(function ($sales) use ($returnSales) {
             // Filtrar ventas normales y en línea
             $normalSales = $sales->filter(fn ($sale) => isset($sale->current_price));
@@ -594,7 +686,7 @@ class SaleController extends Controller
                 }
             });
 
-            // total de ventas en linea entregados
+            // total de ventas en línea entregados
             $totalOnlineSale = $onlineSales->sum(function ($online_sale) {
                 if ($online_sale->status == 'Entregado') {
                     return $online_sale->total;
@@ -632,7 +724,7 @@ class SaleController extends Controller
                     'credit_data' => $firstSale->credit_data,
                     'folio' => $firstSale->folio,
                     'user_name' => $firstSale->user->name,
-                    'client_name' => $firstSale->client?->name ?? 'Pulico en general',
+                    'client_name' => $firstSale->client?->name ?? 'Público en general',
                     'total_sale' => $totalSale,
                 ];
             });

@@ -127,7 +127,7 @@
               </p>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item v-if="$page.props.auth.user.store.plan != 'Plan Básico'"
+                  <el-dropdown-item v-if="$page.props.auth.user.store.plan == 'Plan Avanzado'"
                     @click="showCashRegisterSelectionModal = true"><i
                       class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
                   <el-dropdown-item :disabled="!asignedCashRegister"
@@ -447,7 +447,7 @@
 
         <div class="flex justify-between space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
 
-          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan != 'Plan Básico'" class="text-gray99">
+          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan == 'Plan Avanzado'" class="text-gray99">
             Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))"
               class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
 
@@ -923,7 +923,7 @@ export default {
         const response = await axios.post(route('sales.store', { cash_register_id: this.asignedCashRegister?.id }), {
           saleProducts: this.editableTabs[this.editableTabsValue - 1]?.saleProducts, //productos vendidos
           has_credit: this.editableTabs[this.editableTabsValue - 1]?.has_credit, //bandera para indicar venta a crédito
-          client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id, //id del cliente al que se vendió
+          client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id ?? false, //id del cliente al que se vendió
           deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
           // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
           limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
@@ -1261,6 +1261,7 @@ export default {
       this.editableTabs[this.editableTabsValue - 1].saleProducts = []; //productos
       this.editableTabs[this.editableTabsValue - 1].has_credit = false; //bandera para venta a crédito
       this.editableTabs[this.editableTabsValue - 1].deposit = null; //abono en venta a crédito
+      this.editableTabs[this.editableTabsValue - 1].client_id = null; //abono en venta a crédito
       this.editableTabs[this.editableTabsValue - 1].limit_date = null; //fecha límite de crédito
       this.editableTabs[this.editableTabsValue - 1].cash = false; //bandera de venta al contado
       this.editableTabs[this.editableTabsValue - 1].credit = false; //bandera de venta a crédito

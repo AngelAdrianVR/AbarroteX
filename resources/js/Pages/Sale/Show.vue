@@ -49,7 +49,7 @@
                             </span>
                         </p>
                     </div>
-                    <div v-if="getCanceledOnlineSales" class="flex items-center space-x-3">
+                    <!-- <div v-if="getCanceledOnlineSales" class="flex items-center space-x-3">
                         <span class="w-2/3">Cancelados: </span>
                         <p class="flex text-gray37 w-1/3 font-bold">
                             <span class="w-1/4 text-gray99">-</span>
@@ -58,7 +58,7 @@
                                 {{ getCanceledOnlineSales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                             </span>
                         </p>
-                    </div>
+                    </div> -->
                     <div v-if="getRefundedOnlineSales" class="flex items-center space-x-3">
                         <span class="w-2/3">Reembolsados: </span>
                         <p class="flex text-gray37 w-1/3 font-bold">
@@ -103,7 +103,6 @@
                             {{ (Object.values(day_sales)[0].online_sales_total +
                                 Object.values(day_sales)[0].total_sale -
                                 getRefundedOnlineSales -
-                                getCanceledOnlineSales -
                                 getRefundedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
