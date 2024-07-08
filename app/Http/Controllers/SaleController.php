@@ -76,6 +76,8 @@ class SaleController extends Controller
     public function show($date, $cashRegisterId)
     {
         $storeId = auth()->user()->store_id;
+        $storeUsers = auth()->user()->store->users->pluck('id');
+
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
             ->where('store_id', $storeId)
@@ -84,13 +86,19 @@ class SaleController extends Controller
             ->get();
 
         $online_sales = OnlineSale::where('store_id', $storeId)
+            ->whereDate('delivered_at', $date)
+            ->orWhereDate('refunded_at', $date)
+            ->get();
+
+        // Obtener los abonos registrados en la fecha especificada y que pertenezcan a los usuarios de la tienda autenticada
+        $installments = Installment::whereIn('user_id', $storeUsers)
             ->whereDate('created_at', $date)
             ->get();
 
         $this->addCreditDataToSales($sales);
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, true);
+        $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, $installments, true);
 
         $date = Carbon::parse($date)->startOfDay(); // Comienza el día actual para la comparación
 
@@ -155,7 +163,6 @@ class SaleController extends Controller
         //
     }
 
-
     public function destroy(Sale $sale)
     {
         // Obtener la fecha de creación del registro de venta
@@ -167,7 +174,6 @@ class SaleController extends Controller
         // Eliminar el registro de venta enviado como referencia
         $sale->delete();
     }
-
 
     public function searchProduct(Request $request)
     {
@@ -194,7 +200,6 @@ class SaleController extends Controller
 
         return response()->json(['items' => $groupedSales]);
     }
-
 
     public function getItemsByPage($currentPage)
     {
@@ -244,7 +249,10 @@ class SaleController extends Controller
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
+        // total de dinero en venta
+        $total_amount = 0;
         foreach ($sale_data['saleProducts'] as $product) {
+            $total_amount += $product['product']['public_price'] * $product['quantity'];
             $is_global_product = explode('_', $product['product']['id'])[0] == 'global';
             $product_id = explode('_', $product['product']['id'])[1];
 
@@ -259,16 +267,12 @@ class SaleController extends Controller
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
                 'price_changed' => $product['priceChanged'],
-                'client_id' => $sale_data['client_id'],
+                'client_id' => $sale_data['client_id'] == false ? null : $sale_data['client_id'],
                 'store_id' => auth()->user()->store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
                 'user_id' => auth()->id(),
                 'created_at' => $created_at ?? now(),
             ]);
-
-            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
-            $cash_register->current_cash += $product['product']['public_price'] * $product['quantity'];
-            $cash_register->save();
 
             //Registra el historial de venta de cada producto
             ProductHistory::create([
@@ -331,7 +335,24 @@ class SaleController extends Controller
                     'credit_sale_data_id' => $new_credit_sale_data->id,
                     'user_id' => auth()->id(),
                 ]);
+                //Suma la cantidad abonada
+                $cash_register->current_cash += $sale_data['deposit'];
+                $cash_register->save();
             }
+
+            // sumar la deuda al cliente tomando en cuenta el abono
+            $client = Client::find($sale_data['client_id']);
+            if ($client->debt) {
+                $client->debt += $total_amount - $sale_data['deposit'];
+            } else {
+                $client->debt = $total_amount - $sale_data['deposit'];
+            }
+
+            $client->save();
+        } else {
+            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+            $cash_register->current_cash += $total_amount;
+            $cash_register->save();
         }
 
         return $folio;
@@ -553,12 +574,12 @@ class SaleController extends Controller
         // Crear movimiento de caja según la diferencia calculada
         if ($total_diff_amount != 0) {
             $movement_type = $total_diff_amount > 0 ? 'Ingreso' : 'Retiro';
-            CashRegisterMovement::create([
-                'amount' => abs($total_diff_amount),
-                'type' => $movement_type,
-                'notes' => "Actualización de venta con folio {$request->folio}",
-                'cash_register_id' => $cash_register->id,
-            ]);
+            // CashRegisterMovement::create([
+            //     'amount' => abs($total_diff_amount),
+            //     'type' => $movement_type,
+            //     'notes' => "Actualización de venta con folio {$request->folio}",
+            //     'cash_register_id' => $cash_register->id,
+            // ]);
 
             if ($movement_type == 'Ingreso') {
                 $cash_register->increment('current_cash', abs($total_diff_amount));
@@ -568,15 +589,26 @@ class SaleController extends Controller
         }
     }
 
-    // private
-    private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
+    private function getGroupedSalesByDate($sales, $onlineSales = null, $installments = null, $returnSales = false)
     {
-        // Combinar las ventas normales y las ventas en línea
-        $allSales = collect($onlineSales)->merge($sales);
+        // Filtrar las ventas en línea que no tienen ni delivered_at ni refunded_at
+        $onlineSales = collect($onlineSales)->filter(function ($onlineSale) {
+            return $onlineSale->delivered_at || $onlineSale->refunded_at;
+        });
+
+        // Combinar las ventas normales y las ventas en línea agrupadas
+        $allSales = collect($sales)->merge($onlineSales);
 
         return $allSales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) use ($returnSales) {
+            if (isset($sale->current_price)) {
+                // Agrupar ventas normales por created_at
+                return Carbon::parse($sale->created_at)->toDateString();
+            } else {
+                // Agrupar ventas en línea por delivered_at o refunded_at
+                $date = $sale->delivered_at ? $sale->delivered_at : $sale->refunded_at;
+                return Carbon::parse($date)->toDateString();
+            }
+        })->map(function ($sales) use ($returnSales, $installments) {
             // Filtrar ventas normales y en línea
             $normalSales = $sales->filter(fn ($sale) => isset($sale->current_price));
             $onlineSales = $sales->filter(fn ($sale) => !isset($sale->current_price));
@@ -585,11 +617,21 @@ class SaleController extends Controller
             $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
                 return count($onlineSale->products);
             });
+
+            // obtener el total solo de las ventas al contado
             $totalSale = $normalSales->sum(function ($sale) {
-                return $sale->quantity * $sale->current_price;
+                $credit_data = CreditSaleData::where('folio', $sale->folio)->first();
+                if (!$credit_data) {
+                    return $sale->quantity * $sale->current_price;
+                }
             });
 
-            $totalOnlineSale = $onlineSales->sum('total');
+            // total de ventas en línea entregados
+            $totalOnlineSale = $onlineSales->sum(function ($online_sale) {
+                if ($online_sale->status == 'Entregado') {
+                    return $online_sale->total;
+                }
+            });
 
             $normalFolios = $normalSales->unique('folio')->count();
             $onlineFolios = $onlineSales->count();
@@ -622,7 +664,7 @@ class SaleController extends Controller
                     'credit_data' => $firstSale->credit_data,
                     'folio' => $firstSale->folio,
                     'user_name' => $firstSale->user->name,
-                    'client_name' => $firstSale->client?->name ?? 'Pulico en general',
+                    'client_name' => $firstSale->client?->name ?? 'Público en general',
                     'total_sale' => $totalSale,
                 ];
             });
@@ -636,6 +678,7 @@ class SaleController extends Controller
                 'online_sales_total' => $totalOnlineSale,
                 'sales' => $returnSales ? $salesByFolio : [],
                 'online_sales' => $returnSales ? $onlineSales->values() : [],
+                'installments' => $returnSales ? $installments->values() : [],
             ];
         });
     }

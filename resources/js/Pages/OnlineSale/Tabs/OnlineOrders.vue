@@ -236,7 +236,9 @@
 
                     <div class="mt-3 col-span-full">
                         <InputLabel value="Referencias (opcional)" class="ml-3 mb-1" />
-                        <el-input v-model="form.address_references" placeholder="Escribe referencias que nos ayuden a encontrar tu domicilio. Ej. Oxxo en la esquina" :maxlength="255" clearable />
+                        <el-input v-model="form.address_references"
+                            placeholder="Escribe referencias que nos ayuden a encontrar tu domicilio. Ej. Oxxo en la esquina"
+                            :maxlength="255" clearable />
                         <InputError :message="form.errors.address_references" />
                     </div>
                 </div>
@@ -245,13 +247,13 @@
 
                 <section class="max-h-72 overflow-auto">
                     <div class="space-y-3">
+                        <InputError :message="form.errors.products" />
                         <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id"
-                            :id="item.id" @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)"
-                            class="mb-1" />
+                            :id="item.id" :showDeleteButton="form.products.length > 1" @deleteItem="deleteItem(index)"
+                            @syncItem="syncItems(index, $event)" class="mb-1" />
                     </div>
-                    <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a
-                        agregar
-                        productos </p>
+                    <p v-if="!form.products?.length" class="text-sm text-gray-600"> 
+                        lick al botón de "+" para empezar a agregar productos </p>
                 </section>
                 <div class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm">
                     <button class="text-primary text-sm self-start" type="button" @click="addNewItem">

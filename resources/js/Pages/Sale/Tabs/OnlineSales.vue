@@ -1,7 +1,7 @@
 <template>
     <Loading v-if="loading" />
-    <section v-else class="text-sm mt-5 space-y-4">
-        <div v-if="sales.length">
+    <section v-else class="text-sm mt-5">
+        <div v-if="sales.length" class="space-y-4">
             <OnlineSaleDetails v-for="(item, index) in sales" :key="index" :onlineSale="item" @show-modal="showModal"
                 :ref="'osd' + item.id" />
     

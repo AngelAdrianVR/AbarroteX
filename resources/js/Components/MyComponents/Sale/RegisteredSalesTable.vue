@@ -62,18 +62,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr @click="$inertia.visit(route('sales.show', {date: index, cashRegisterId: this.cashRegister.id}))" v-for="(sale, index) in sales" :key="index"
+                    <tr @click="$inertia.visit(route('sales.show', { date: index, cashRegisterId: this.cashRegister.id }))"
+                        v-for="(sale, index) in sortedData()" :key="index"
                         class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                         <td class="rounded-s-full">{{ formatDate(index) }}</td>
-                        <td> 
-                            {{ sale.normal_folios != 1 ? sale.normal_folios + ' ventas' : sale.normal_folios + ' venta' }}
+                        <td>
+                            {{ sale.normal_folios != 1 ? sale.normal_folios + ' ventas' : sale.normal_folios + ' venta'
+                            }}
                             ({{ sale.total_normal_quantity }} productos en total)
                         </td>
-                        <td v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'"> 
-                            {{ sale.online_folios != 1 ? sale.online_folios + ' ventas' : sale.online_folios + ' venta' }}
+                        <td v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'">
+                            {{ sale.online_folios != 1 ? sale.online_folios + ' ventas' : sale.online_folios + ' venta'
+                            }}
                             ({{ sale.total_online_quantity }} productos en total)
                         </td>
-                        <td>${{ (sale.total_sale + sale.online_sales_total)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                        <td>${{ (sale.total_sale + sale.online_sales_total)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                            ",") }}</td>
                         <td class="rounded-e-full text-end">
                             <el-dropdown trigger="click" @command="handleCommand">
                                 <button @click.stop
@@ -92,24 +96,6 @@
                                             </svg>
                                             <span class="text-xs">Ver</span>
                                         </el-dropdown-item>
-                                        <!-- ** descomentar cuando se haga una plantilla para imprimir todas las ventas del día **  -->
-                                        <!-- <el-dropdown-item :command="'print|' + index">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
-                                            </svg>
-                                            <span class="text-xs">Imprimir</span>
-                                        </el-dropdown-item> -->
-                                        <!-- <el-dropdown-item :command="'delete|' + index">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor"
-                                                class="size-[14px] mr-2 text-red-600">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                            </svg>
-                                            <span class="text-xs text-red-600">Eliminar</span>
-                                        </el-dropdown-item> -->
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
@@ -200,6 +186,18 @@ export default {
         }
     },
     methods: {
+        sortedData() {
+            // Convertir el objeto en un array de entradas
+            const entries = Object.entries(this.sales);
+
+            // Ordenar el array por la fecha de la más reciente a la más antigua
+            entries.sort((a, b) => new Date(b[0]) - new Date(a[0]));
+
+            // Convertir el array de vuelta en un objeto
+            const sortedObject = Object.fromEntries(entries);
+
+            return sortedObject;
+        },
         handleStartDateChange(value) {
             this.startDate = value;
             // Si finishDate es nulo, aplica la regla de deshabilitación
@@ -231,7 +229,7 @@ export default {
             const data = command.split('|')[1];
 
             if (commandName == 'see') {
-                this.$inertia.get(route('sales.show', {date: data, cashRegisterId: this.cashRegister.id}));
+                this.$inertia.get(route('sales.show', { date: data, cashRegisterId: this.cashRegister.id }));
             } else if (commandName == 'print') {
                 this.print(data);
             } else if (commandName == 'delete') {

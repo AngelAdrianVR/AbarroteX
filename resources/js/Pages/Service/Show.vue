@@ -37,17 +37,17 @@
 
                 <!-- Información del servicio -->
                 <header class="mt-7 lg:mt-1 lg:mx-8 text-sm lg:text-base space-y-2 w-[95%] p-3">
-                    <p class="text-gray99">Nombre: <span class="font-bold ml-10">{{
+                    <p class="text-gray99">Nombre: <span class="text-gray37 ml-10">{{
                         service.name }}</span></p>
-                    <p class="text-gray99">Categoría: <span class="font-bold ml-8">{{
+                    <p class="text-gray99">Categoría: <span class="text-gray37 ml-8">{{
                         service.category ?? '-' }}</span></p>
                     <div class="flex space-x-5 lg:w-1/2">
                         <p class="text-gray99">Descripción:</p>
-                        <span class="font-bold ml-5 !text-gray99" style="white-space: pre-line;">{{service.description ?? '-' }}</span>
+                        <span class="ml-5 text-gray37 text-justify" style="white-space: pre-line;">{{service.description ?? '-' }}</span>
                     </div>
-                    <p class="text-gray99">Precio: <span class="font-bold ml-14">${{
+                    <p class="text-gray99">Precio: <span class="text-gray37 ml-14">${{
                         service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-                    <p class="text-gray99">Creado el: <span class="font-bold ml-8">{{
+                    <p class="text-gray99">Creado el: <span class="text-gray37 ml-8">{{
                         formatDate(service.created_at) }}</span></p>
                 </header>
             </section>

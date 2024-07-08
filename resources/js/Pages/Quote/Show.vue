@@ -1,6 +1,6 @@
 <template>
     <Head :title="'COT-' + quote.id" />
-    <main class="w-[1400px] mx-auto h-screen flex flex-col justify-between">
+    <main class="w-full mx-auto h-screen flex flex-col justify-between">
         <div>   
             <!-- Header --------------------------- -->
             <section class="flex justify-between items-center">

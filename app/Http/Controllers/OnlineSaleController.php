@@ -14,6 +14,7 @@ use App\Models\Service;
 use App\Models\Store;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class OnlineSaleController extends Controller
 {
@@ -63,32 +64,29 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id', 'banners'));
     }
 
-
     public function cartIndex()
     {
         return inertia('OnlineSale/Cart');
     }
-
 
     public function create()
     {
         return inertia('OnlineSale/Create');
     }
 
-
     public function quoteService($service)
     {
         return inertia('OnlineSale/QuoteService');
     }
 
-
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
-            'email' => 'nullable|email',
+            'payment_method' => 'required|string|max:255',
             'suburb' => 'required|string|max:255',
+            'email' => 'nullable|email',
             'street' => 'required|string|max:255',
             'ext_number' => 'required|string|min:1|max:50',
             'int_number' => 'nullable|string|min:1|max:50',
@@ -96,52 +94,40 @@ class OnlineSaleController extends Controller
             'polity_state' => 'required|string|max:100',
             'address_references' => 'nullable|string|min:1|max:255',
             'products' => 'required|array|min:1',
+            'delivery_price' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'store_id' => 'required|numeric|min:0',
+            'created_from_app' => 'boolean',
+            'store_inventory' => 'boolean',
         ]);
 
-        //descontar de inventario la cantidad solicitada si la configuración de inventario está activa
-        if ($request->store_inventory === true) {
-            foreach ($request->products as $product) {
-                if ($product['isLocal'] === true) {
-                    $temp_product = Product::find($product['product_id']);
-                    $temp_product->current_stock -= $product['quantity'];
-
-                    // si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
-                    if ( $temp_product->current_stock < 0 ) {
-                    return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
-                    } else {
-                    $temp_product->save();
-                    }
-                } else {
-                    $temp_product = GlobalProductStore::find($product['product_id']);
-                    $temp_product->current_stock -= $product['quantity'];
-
-                    // si no hay suficiente stock y al restar la cantidad se hace negativo manda el error
-                    if ( $temp_product->current_stock < 0 ) {
-                    return response()->json(['error' => 'No hay suficiente stock disponible de ' . $product['name']]);
-                    } else {
-                    $temp_product->save();
-                    }
+        $validated['products'] = array_filter($request->products, function ($product) {
+            foreach ($product as $key => $value) {
+                if (is_null($value)) {
+                    return false;
                 }
             }
-        }
+            return true;
+        });
 
-        $new_online_sale = OnlineSale::create($request->all());
+        $this->checkProductStock($validated['products'], $request->store_inventory);
+        $this->updateProductStock($validated['products'], $request->store_inventory);
+
+        $new_online_sale = OnlineSale::create($validated);
 
         $encoded_store_id = base64_encode($request->store_id);
 
         if ($request->created_from_app === true) {
             return to_route('online-sales.show', $new_online_sale->id);
-        } else { //creado desde la tienda en linea por el cliente
+        } else {
             return redirect()->route('online-sales.client-index', ['encoded_store_id' => $encoded_store_id]);
         }
     }
-
 
     public function show(OnlineSale $online_sale)
     {
         return inertia('OnlineSale/Show', compact('online_sale'));
     }
-
 
     public function ShowLocalProduct($product_id)
     {
@@ -150,31 +136,27 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/ShowLocalProduct', compact('product'));
     }
 
-
     public function ShowGlobalProduct($global_product_id)
     {
         $global_product = GlobalProductStore::with(['globalProduct' => ['media', 'category:id,name', 'brand:id,name']])->find($global_product_id);
         return inertia('OnlineSale/ShowGlobalProduct', compact('global_product'));
     }
 
-
     public function showService($service)
-    {   
+    {
         $service = Service::with('media')->find($service);
 
         return inertia('OnlineSale/ShowService', compact('service'));
     }
-
 
     public function edit(OnlineSale $online_sale)
     {
         //
     }
 
-
     public function update(Request $request, OnlineSale $online_sale)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
             'email' => 'nullable|email',
@@ -186,19 +168,91 @@ class OnlineSaleController extends Controller
             'polity_state' => 'required|string|max:100',
             'address_references' => 'nullable|string|min:1|max:255',
             'products' => 'required|array|min:1',
+            'delivery_price' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'store_id' => 'required|numeric|min:0',
+            'created_from_app' => 'boolean',
+            'store_inventory' => 'boolean',
         ]);
 
-        $online_sale->update($request->all());
+        // Obtener los productos originales antes de la actualización
+        $original_products = $online_sale->products;
+
+        // Crear un array de productos originales para compararlos
+        $original_products_array = [];
+        foreach ($original_products as $product) {
+            $original_products_array[$product['product_id']] = $product;
+        }
+
+        $new_products = array_filter($request->products, function ($product) {
+            foreach ($product as $key => $value) {
+                if (is_null($value)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        if ($request->store_inventory === true) {
+            // Comparar productos y ajustar el stock en consecuencia
+            foreach ($new_products as $new_product) {
+                $product_id = $new_product['product_id'];
+                $new_quantity = $new_product['quantity'];
+
+                if (isset($original_products_array[$product_id])) {
+                    $original_quantity = $original_products_array[$product_id]['quantity'];
+
+                    if ($new_quantity > $original_quantity) {
+                        // Aumentar cantidad
+                        $difference = $new_quantity - $original_quantity;
+                        $temp_product = $new_product['isLocal'] ? Product::find($product_id) : GlobalProductStore::find($product_id);
+                        if ($temp_product->current_stock < $difference) {
+                            throw ValidationException::withMessages([
+                                'products' => 'No hay suficiente stock disponible de ' . $new_product['name'],
+                            ]);
+                        }
+                        $temp_product->current_stock -= $difference;
+                    } elseif ($new_quantity < $original_quantity) {
+                        // Disminuir cantidad
+                        $difference = $original_quantity - $new_quantity;
+                        $temp_product = $new_product['isLocal'] ? Product::find($product_id) : GlobalProductStore::find($product_id);
+                        $temp_product->current_stock += $difference;
+                    }
+
+                    unset($original_products_array[$product_id]);
+                } else {
+                    // Nuevo producto
+                    $temp_product = $new_product['isLocal'] ? Product::find($product_id) : GlobalProductStore::find($product_id);
+                    if ($temp_product->current_stock < $new_quantity) {
+                        throw ValidationException::withMessages([
+                            'products' => 'No hay suficiente stock disponible de ' . $new_product['name'],
+                        ]);
+                    }
+                    $temp_product->current_stock -= $new_quantity;
+                }
+
+                $temp_product->save();
+            }
+
+            // Los productos restantes en $original_products_array fueron eliminados
+            foreach ($original_products_array as $original_product) {
+                $temp_product = $original_product['isLocal']
+                    ? Product::find($original_product['product_id'])
+                    : GlobalProductStore::find($original_product['product_id']);
+                $temp_product->current_stock += $original_product['quantity'];
+                $temp_product->save();
+            }
+        }
+
+        $online_sale->update($validated);
 
         return to_route('online-sales.show', $online_sale->id);
     }
-
 
     public function destroy(OnlineSale $online_sale)
     {
         $online_sale->delete();
     }
-
 
     public function getAllProducts($store_id)
     {
@@ -228,7 +282,6 @@ class OnlineSaleController extends Controller
         return response()->json(['products' => $moreProducts]);
     }
 
-
     public function fetchProduct($product_id, $is_local)
     {
         if ($is_local === 'true') {
@@ -239,7 +292,6 @@ class OnlineSaleController extends Controller
 
         return response()->json(['item' => $product]);
     }
-
 
     public function searchProducts(Request $request, $store_id)
     {
@@ -271,14 +323,12 @@ class OnlineSaleController extends Controller
         return response()->json(['items' => $products]);
     }
 
-
     public function getLogo($store_id)
     {
         $logo = Logo::with(['media'])->where('store_id', $store_id)->first();
 
         return response()->json(['item' => $logo]);
     }
-
 
     public function filterOnlineSales(Request $request)
     {
@@ -292,7 +342,6 @@ class OnlineSaleController extends Controller
         return response()->json(['items' => $online_orders]);
     }
 
-
     public function updateOnlineSaleStatus(Request $request, OnlineSale $online_sale)
     {
         // Diccionario de estados válidos y sus traducciones
@@ -300,7 +349,8 @@ class OnlineSaleController extends Controller
             'pendent' => 'Pendiente',
             'processing' => 'Procesando',
             'delivered' => 'Entregado',
-            'cancel' => 'Cancelado'
+            'cancel' => 'Cancelado',
+            'refunded' => 'Reembolsado',
         ];
 
         // Verifica si el estado solicitado es válido
@@ -312,12 +362,12 @@ class OnlineSaleController extends Controller
         $delivered_at = null;
 
         // Si se cambia desde 'delivered' a otro estado y existe una caja configurada
-        if ($online_sale->delivered_at && $request->online_sales_cash_register) {
-            $total_sale = $online_sale->total + $online_sale->delivery_price;
-            $cash_register = CashRegister::find($request->online_sales_cash_register);
-            $cash_register->current_cash -= $total_sale;
-            $cash_register->save();
-        }
+        // if ($online_sale->delivered_at && $request->online_sales_cash_register) {
+        //     $total_sale = $online_sale->total + $online_sale->delivery_price;
+        //     $cash_register = CashRegister::find($request->online_sales_cash_register);
+        //     $cash_register->current_cash -= $total_sale;
+        //     $cash_register->save();
+        // }
 
         // Si se cambia el estado a 'delivered' y existe una caja configurada
         if ($request->status == 'delivered' && $request->online_sales_cash_register) {
@@ -329,18 +379,23 @@ class OnlineSaleController extends Controller
         }
 
         // Si se cambia el estado a 'cancel' y la configuración de inventario está activa
-        if ($request->status == 'cancel' && $request->store_inventory === true) {
-            foreach ($online_sale->products as $product) {
-                if ($product['isLocal'] === true) {
-                    $temp_product = Product::find($product['id']);
-                    $temp_product->current_stock += $product['quantity']; // Aumentar el stock
-                    $temp_product->save();
-                } else {
-                    $temp_product = GlobalProductStore::find($product['id']);
-                    $temp_product->current_stock += $product['quantity']; // Aumentar el stock
-                    $temp_product->save();
-                }
-            }
+        if ($request->status == 'cancel') {
+            // foreach ($online_sale->products as $product) {
+            //     if ($product['isLocal'] === true) {
+            //         $temp_product = Product::find($product['id']);
+            //         $temp_product->current_stock += $product['quantity']; // Aumentar el stock
+            //         $temp_product->save();
+            //     } else {
+            //         $temp_product = GlobalProductStore::find($product['id']);
+            //         $temp_product->current_stock += $product['quantity']; // Aumentar el stock
+            //         $temp_product->save();
+            //     }
+            // }
+            $this->cancel($online_sale);
+        }
+
+        if ($request->status == 'refunded') {
+            $this->refund($online_sale);
         }
 
         $online_sale->update([
@@ -350,8 +405,6 @@ class OnlineSaleController extends Controller
 
         return response()->json(compact('status', 'delivered_at'));
     }
-
-
 
     public function fetchAllProducts()
     {
@@ -399,7 +452,8 @@ class OnlineSaleController extends Controller
         // Obtener las ventas registradas en la fecha recibida
         $sales = OnlineSale::with(['store:id,name'])
             ->where('store_id', auth()->user()->store_id)
-            ->whereDate('created_at', $date)
+            ->whereDate('delivered_at', $date)
+            ->orWhereDate('refunded_at', $date)
             ->get();
 
 
@@ -440,7 +494,7 @@ class OnlineSaleController extends Controller
                     $current_product = GlobalProductStore::find($sale['product_id']);
                     $indexedDB_name = $current_product->globalProduct->name;
                 }
-               
+
                 $current_product->increment('current_stock', $sale['quantity']);
 
                 //Registra el historial de venta de cada producto
@@ -470,7 +524,7 @@ class OnlineSaleController extends Controller
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
         $updated_items = [];
-        if ($is_inventory_on && $onlineSale->status === 'Procesando') {
+        if ($is_inventory_on) {
             $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
                 if ($sale['isLocal']) {
                     $current_product = Product::find($sale['product_id']);
@@ -508,5 +562,32 @@ class OnlineSaleController extends Controller
         $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->skip($offset)->take(20)->get();
 
         return response()->json(['items' => $online_orders]);
+    }
+
+    // PRIVATE
+    private function checkProductStock(array $products, $storeInventory)
+    {
+        if ($storeInventory === true) {
+            foreach ($products as $product) {
+                $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
+
+                if ($temp_product->current_stock < $product['quantity']) {
+                    throw ValidationException::withMessages([
+                        'products' => 'No hay suficiente stock disponible de ' . $product['name'],
+                    ]);
+                }
+            }
+        }
+    }
+
+    private function updateProductStock(array $products, $storeInventory)
+    {
+        if ($storeInventory === true) {
+            foreach ($products as $product) {
+                $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
+                $temp_product->current_stock -= $product['quantity'];
+                $temp_product->save();
+            }
+        }
     }
 }

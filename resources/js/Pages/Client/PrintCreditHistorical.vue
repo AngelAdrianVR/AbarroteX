@@ -49,7 +49,7 @@
             </section>
             <section class="flex flex-col items-center justify-center space-y-1 mt-3 text-sm">
                 <p>Saldo total pendiente de pago</p>
-                <p class="font-bold">${{ client.debt.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                <p class="font-bold">${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? 0.00 }}</p>
             </section>
         </header>
         <main>

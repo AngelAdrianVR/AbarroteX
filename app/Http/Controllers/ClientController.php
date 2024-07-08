@@ -191,6 +191,7 @@ class ClientController extends Controller
                     'credit_data' => $firstSale->credit_data,
                     'folio' => $firstSale->folio,
                     'user_name' => $firstSale->user->name,
+                    'client_name' => $firstSale->client?->name ?? 'Público en general',
                     'total_sale' => $totalSale,
                 ];
             });
