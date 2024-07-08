@@ -55,7 +55,9 @@
                                         ",") }}
                             </td>
                             <td class="text-end">
-                                ${{ expense.amount_from_cash_register?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? 0.00 }}
+                                ${{ expense.amount_from_cash_register?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                ?? 0.00
+                                }}
                             </td>
                             <td class="text-end">
                                 <el-dropdown v-if="canEdit && canDelete" trigger="click" @command="handleCommand">
@@ -96,7 +98,19 @@
                 <h1>Editar gasto</h1>
             </template>
             <template #content>
-                <form @submit.prevent="update">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                    </svg>
+                    <p class="text-gray37">
+                        Si se tomó dinero de caja para este gasto, los cambios que se hagan no se verán
+                        reflejados en el dinero de caja actual. Para esto debes de registrar un "Ingreso"
+                        o "Retiro" de caja.
+                    </p>
+                </div>
+                <form @submit.prevent="update" class="mt-3">
                     <div>
                         <InputLabel value="Concept" ref="conceptInput" />
                         <el-input v-model="form.concept" placeholder="No olvides llenar este campo">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\CreditSaleData;
 use App\Models\Installment;
@@ -68,9 +69,13 @@ class InstallmentController extends Controller
         } else {
             $credit_sale_data->status = 'Parcial';
         }
-
         // Guardar los cambios
         $credit_sale_data->save();
+
+        // sumar a caja el monto abonado
+        $cash_register = CashRegister::find(auth()->user()->cash_register_id);
+        $cash_register->current_cash += $installment->amount;
+        $cash_register->save();
     }
 
     public function show(Installment $installment)

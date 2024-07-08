@@ -76,6 +76,8 @@ class SaleController extends Controller
     public function show($date, $cashRegisterId)
     {
         $storeId = auth()->user()->store_id;
+        $storeUsers = auth()->user()->store->users->pluck('id');
+
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
             ->where('store_id', $storeId)
@@ -88,10 +90,15 @@ class SaleController extends Controller
             ->orWhereDate('refunded_at', $date)
             ->get();
 
+        // Obtener los abonos registrados en la fecha especificada y que pertenezcan a los usuarios de la tienda autenticada
+        $installments = Installment::whereIn('user_id', $storeUsers)
+            ->whereDate('created_at', $date)
+            ->get();
+
         $this->addCreditDataToSales($sales);
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, true);
+        $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, $installments, true);
 
         $date = Carbon::parse($date)->startOfDay(); // Comienza el día actual para la comparación
 
@@ -582,7 +589,7 @@ class SaleController extends Controller
         }
     }
 
-    private function getGroupedSalesByDate($sales, $onlineSales = null, $returnSales = false)
+    private function getGroupedSalesByDate($sales, $onlineSales = null, $installments = null, $returnSales = false)
     {
         // Filtrar las ventas en línea que no tienen ni delivered_at ni refunded_at
         $onlineSales = collect($onlineSales)->filter(function ($onlineSale) {
@@ -601,7 +608,7 @@ class SaleController extends Controller
                 $date = $sale->delivered_at ? $sale->delivered_at : $sale->refunded_at;
                 return Carbon::parse($date)->toDateString();
             }
-        })->map(function ($sales) use ($returnSales) {
+        })->map(function ($sales) use ($returnSales, $installments) {
             // Filtrar ventas normales y en línea
             $normalSales = $sales->filter(fn ($sale) => isset($sale->current_price));
             $onlineSales = $sales->filter(fn ($sale) => !isset($sale->current_price));
@@ -671,6 +678,7 @@ class SaleController extends Controller
                 'online_sales_total' => $totalOnlineSale,
                 'sales' => $returnSales ? $salesByFolio : [],
                 'online_sales' => $returnSales ? $onlineSales->values() : [],
+                'installments' => $returnSales ? $installments->values() : [],
             ];
         });
     }

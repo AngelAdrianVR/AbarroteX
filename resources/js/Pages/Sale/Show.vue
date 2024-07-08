@@ -83,6 +83,16 @@
                             </span>
                         </p>
                     </div>
+                    <div v-if="getTotalInstallmentsAmount" class="flex items-center space-x-3">
+                        <span class="w-2/3">Total de abonos: </span>
+                        <p class="flex text-gray37 w-1/3 font-bold">
+                            <span class="w-1/4"></span>
+                            <span class="w-1/4">$</span>
+                            <span class="w-2/3 ml-3 text-gray37 text-end">
+                                {{ getTotalInstallmentsAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
                     <div v-if="getRefundedSales" class="flex items-center space-x-3">
                         <span class="w-2/3">Reembolsados: </span>
                         <p class="flex text-gray37 w-1/3 font-bold">
@@ -101,6 +111,7 @@
                         <span class="w-1/4">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
                             {{ (Object.values(day_sales)[0].online_sales_total +
+                                getTotalInstallmentsAmount +
                                 Object.values(day_sales)[0].total_sale -
                                 getRefundedOnlineSales -
                                 getRefundedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -362,6 +373,10 @@ export default {
             const sales = Object.values(this.day_sales)[0].sales;
 
             return Object.values(sales);
+        },
+        getTotalInstallmentsAmount() {
+            return Object.values(this.day_sales)[0].installments.reduce((accum, item) => accum +=
+                item.amount, 0);
         },
         statusStyles() {
             const status = this.saleToSeeInstallments.credit_data.status;
