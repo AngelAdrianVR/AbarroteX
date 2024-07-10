@@ -3,7 +3,7 @@
         <div class="px-3 md:px-10 py-7">
             <Back :to="route('products.index')" />
 
-            <form v-if="products_quantity < 800" @submit.prevent="store"
+            <form v-if="products_quantity < 1500" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3 col-span-2">
@@ -129,7 +129,7 @@
             </form>
             <div v-else class="text-center text-gray37">
                 <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
-                <p class="text-xl text-center">Has llegado al límite de productos (800) de tu plan contratado.</p>
+                <p class="text-xl text-center">Has llegado al límite de productos (1,500) de tu plan contratado.</p>
                 <p class="text-xl text-center">
                     Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
                 </p>
