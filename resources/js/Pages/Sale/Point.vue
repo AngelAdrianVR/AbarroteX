@@ -305,10 +305,10 @@
                 <div class="flex items-center justify-end space-x-4">
                   <PrimaryButton v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' || true " @click="creditPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
-                    class="!px-9 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
+                    class="!px-4 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
                   <PrimaryButton @click="cashPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
-                    class="!px-9 !bg-[#5FCB1F] disabled:!bg-[#999999]">Al contado</PrimaryButton>
+                    class="!px-4 !bg-[#5FCB1F] disabled:!bg-[#999999]">Al contado</PrimaryButton>
                 </div>
                 <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
                   Para cobrar asigna una caja registradora <span @click="showCashRegisterSelectionModal = true"
@@ -600,7 +600,7 @@
     <DialogModal :show="showCreateProductModal" @close="showCreateProductModal = false">
       <template #title> Creación rápida de nuevo producto </template>
       <template #content>
-        <form v-if="products_quantity < 800" @submit.prevent="storeProduct" class="lg:grid lg:grid-cols-2 gap-x-3">
+        <form v-if="products_quantity < 1500" @submit.prevent="storeProduct" class="lg:grid lg:grid-cols-2 gap-x-3">
           <div class="mt-3 col-span-2">
             <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
             <el-input v-model="productForm.name" placeholder="Escribe el nombre del producto" :maxlength="100"
@@ -638,7 +638,7 @@
         </form>
         <div v-else class="text-center text-gray37">
           <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
-          <p class="text-xl text-center">Has llegado al límite de productos (800) de tu plan contratado.</p>
+          <p class="text-xl text-center">Has llegado al límite de productos (1,500) de tu plan contratado.</p>
           <p class="text-xl text-center">
             Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
           </p>
@@ -651,7 +651,7 @@
         </div>
       </template>
       <template #footer>
-        <div v-if="products_quantity < 800" class="flex items-center space-x-2">
+        <div v-if="products_quantity < 1500" class="flex items-center space-x-2">
           <CancelButton @click="showCreateProductModal = false; resetProductForm()" :disabled="creatingProduct">
             Cancelar</CancelButton>
           <PrimaryButton @click="storeProduct()" :disabled="creatingProduct">Crear</PrimaryButton>
