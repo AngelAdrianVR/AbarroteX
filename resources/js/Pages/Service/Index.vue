@@ -4,27 +4,18 @@
       <h1>Servicios</h1>
 
       <div class="md:flex justify-between mt-3">
-        <article class="flex items-center space-x-5 lg:w-1/3">
-          <div class="lg:w-full relative">
-            <input
-              v-model="searchQuery"
-              @keydown.enter="searchServices"
-              class="input w-full pl-9"
-              placeholder="Buscar servicio por nombre o categoría"
-              type="search"
-            />
-            <i
-              class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"
-            ></i>
+        <article class="flex items-center flex-col space-y-2 lg:flex-row lg:space-x-2 lg:space-y-0 lg:w-1/3">
+          <div class="w-full relative">
+            <input v-model="searchQuery" @keydown.enter="searchServices" class="input w-full pl-9"
+              placeholder="Buscar servicio por nombre o categoría" type="search" />
+            <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <el-tag @close="closedTag" v-if="searchedWord" closable type="primary">
             {{ searchedWord }}
           </el-tag>
         </article>
         <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
-          <PrimaryButton @click="$inertia.get(route('services.create'))"
-            >Nuevo servicio</PrimaryButton
-          >
+          <PrimaryButton @click="$inertia.get(route('services.create'))">Nuevo servicio</PrimaryButton>
         </div>
       </div>
 
@@ -41,15 +32,11 @@
           Cargando
           <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
         </p>
-        <button
-          v-else-if="
-            total_services > 30 &&
-            localServices.length < total_services &&
-            localServices.length
-          "
-          @click="fetchItemsByPage"
-          class="w-full text-primary my-4 text-xs mx-auto underline ml-6"
-        >
+        <button v-else-if="
+          total_services > 30 &&
+          localServices.length < total_services &&
+          localServices.length
+        " @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">
           Cargar más elementos
         </button>
       </div>

@@ -3,7 +3,7 @@
         <table v-if="Object.keys(products)?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th class="w-20 md:w-[10%]"></th>
+                    <th class="w-40 md:w-[10%]"></th>
                     <th class="w-36 md:w-[15%]">Código</th>
                     <th class="w-44 md:w-[20%]">Nombre de producto</th>
                     <th class="w-20 md:w-[15%]">Precio</th>
