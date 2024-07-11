@@ -10,15 +10,14 @@
         </div>
         <div>
             <div v-for="product in products" :key="product.id"
-                class="*:px-2 *:py-1 cursor-pointer flex items-center space-x-4 border rounded-full mb-2 hover:border-primary"
-                @click="$inertia.get(route('global-products.show', product.id))">
-                <div class="hidden md:block w-[10%] h-14 rounded-l-full">
+                class="*:px-2 *:py-1 cursor-pointer flex items-center space-x-4 border rounded-full mb-2 hover:border-primary">
+                <Link class="hidden md:block w-[10%] h-14 rounded-l-full" :href="route('global-products.show', product.id)">
                     <img class="mx-auto h-12 object-contain rounded-lg" :src="product.media[0]?.original_url">
-                </div>
+                </Link>
                 <div class="w-[18%] md:w-[13%]">{{ product.code ?? 'N/A' }}</div>
-                <div class="w-[30%] md:w-[20%]">{{ product.name }}</div>
-                <div class="w-[18%] md:w-[13%]">{{ product.category?.name }}</div>
-                <div class="w-[10%]">${{ product.public_price }}</div>
+                <div @click="$inertia.get(route('global-products.show', product.id))" class="w-[30%] md:w-[20%]">{{ product.name }}</div>
+                <div @click="$inertia.get(route('global-products.show', product.id))" class="w-[18%] md:w-[13%]">{{ product.category?.name }}</div>
+                <div @click="$inertia.get(route('global-products.show', product.id))" class="w-[10%]">${{ product.public_price }}</div>
                 <div class="rounded-r-full w-[17%] text-right">
                     <i @click.stop="$inertia.visit(route('global-products.edit', product.id))"
                         class="fa-solid fa-pencil text-primary cursor-pointer hover:bg-gray-200 rounded-full mr-1 p-2"></i>
@@ -37,7 +36,8 @@
 </template>
 
 <script>
-import { ElNotification } from 'element-plus'
+import { ElNotification } from 'element-plus';
+import { Link } from '@inertiajs/vue3';
 import axios from 'axios';
 
 export default {
@@ -47,7 +47,7 @@ export default {
         };
     },
     components: {
-
+        Link
     },
     props: {
         products: Object
