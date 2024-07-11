@@ -20,8 +20,8 @@
         </figure>
 
         <!-- Detalles -->
-        <div class="text-center mt-4 flex flex-col justify-center items-center">
-            <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
+        <div class="text-center mt-2 flex flex-col justify-center items-center h-1/2">
+            <h1 class="h-12">{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
             <p class="text-2xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price :
                 product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 
