@@ -1,15 +1,15 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="rentals?.length" class="w-full">
+        <table v-if="rentals?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th>Folio</th>
-                    <th>Nombre del cliente</th>
-                    <th>Producto rentado</th>
-                    <th>Costo</th>
-                    <th>Días transcurridos</th>
-                    <th>Fecha de devolución</th>
-                    <th></th>
+                    <th class="w-24 md:w-[15%]">Folio</th>
+                    <th class="w-32 md:w-[15%]">Nombre del cliente</th>
+                    <th class="w-32 md:w-[15%]">Producto rentado</th>
+                    <th class="w-32 md:w-[15%]">Costo</th>
+                    <th class="w-32 md:w-[15%]">Días transcurridos</th>
+                    <th class="w-32 md:w-[15%]">Fecha de devolución</th>
+                    <th class="w-10 md:w-[5%]"></th>
                 </tr>
             </thead>
             <tbody>

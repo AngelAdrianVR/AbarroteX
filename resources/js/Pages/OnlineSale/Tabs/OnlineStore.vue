@@ -6,7 +6,7 @@
   <!-- Portada -->
   <section class="mt-5">
     <h2 class="my-2 font-bold">Portada y logotipo</h2>
-    <p class="text-sm text-gray99">
+    <p class="text-sm text-gray99 text-justify">
       En esta sección, puedes subir imágenes que representen tu marca, promociones, o
       cualquier mensaje importante que desees comunicar a tus clientes. Puedes agregar
       hasta 3 imágenes que rotarán en la portada de tu tienda en línea, ayudándote a
@@ -81,7 +81,7 @@
   <!-- -------------------------------------------------->
   <section class="my-7">
     <h2 class="my-2 font-bold">Productos</h2>
-    <p class="text-sm mx-7">
+    <p class="text-sm mx-7 text-justify">
       Todos los productos disponibles en tu inventario serán reflejados en la tienda en línea. 
       Si no deseas que algún producto aparezca en la tienda en línea, deberás eliminarlo directamente desde tu inventario. 
       Esto asegura que todos los productos que tienes disponibles se muestren automáticamente en la tienda en línea sin necesidad de configuración adicional.
@@ -93,7 +93,7 @@
   <div class="border-b border-grayD9 my-4"></div>
 
   <!-- información de tienda -->
-  <section class="my-5 lg:grid grid-cols-2 gap-3">
+  <section class="my-5 lg:grid grid-cols-2 gap-3 *:mt-2">
 
     <!-- Numero de whatsapp ----------------------------------------->
     <!-- --------------------------------------------------------- -->
