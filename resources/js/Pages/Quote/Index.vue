@@ -1,30 +1,21 @@
 <template>
-    <AppLayout title="Cotizaciones">
+  <AppLayout title="Cotizaciones">
     <div class="px-2 lg:px-10 py-7">
       <h1>Cotizaciones</h1>
 
       <div class="md:flex justify-between mt-3">
-        <article class="flex items-center space-x-5 lg:w-1/3">
-          <div class="lg:w-full relative">
-            <input
-              v-model="searchQuery"
-              @keydown.enter="searchQuotes"
-              class="input w-full pl-9"
-              placeholder="Buscar cotización por nombre de contacto o folio"
-              type="search"
-            />
-            <i
-              class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"
-            ></i>
+        <article class="flex items-center flex-col space-y-2 lg:flex-row lg:space-x-2 lg:space-y-0 lg:w-1/3">
+          <div class="w-full relative">
+            <input v-model="searchQuery" @keydown.enter="searchQuotes" class="input pl-9"
+              placeholder="Buscar cotización por nombre de contacto o folio" type="search" />
+            <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <el-tag @close="closedTag" v-if="searchedWord" closable type="primary">
             {{ searchedWord }}
           </el-tag>
         </article>
         <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
-          <PrimaryButton @click="$inertia.get(route('quotes.create'))"
-            >Crear cotización</PrimaryButton
-          >
+          <PrimaryButton @click="$inertia.get(route('quotes.create'))">Crear cotización</PrimaryButton>
         </div>
       </div>
 
@@ -41,15 +32,11 @@
           Cargando
           <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
         </p>
-        <button
-          v-else-if="
-            total_quotes > 20 &&
-            localQuotes.length < total_quotes &&
-            localQuotes.length
-          "
-          @click="fetchItemsByPage"
-          class="w-full text-primary my-4 text-xs mx-auto underline ml-6"
-        >
+        <button v-else-if="
+          total_quotes > 20 &&
+          localQuotes.length < total_quotes &&
+          localQuotes.length
+        " @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">
           Cargar más elementos
         </button>
       </div>
@@ -65,27 +52,27 @@ import QuotesTable from "@/Components/MyComponents/Quote/QuotesTable.vue";
 import axios from "axios";
 
 export default {
-data() {
+  data() {
     return {
-        searchQuery: null, //buscador de servicio.
-        searchedWord: null, //palabra con la que se hizo la última busqueda.
-        localQuotes: this.quotes, //arreglo local de cotizaciones
-        loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
-        loading: false, //estado de carga cuando se busca a un servicio por medio del buscador
-        currentPage: 1, //para paginación
+      searchQuery: null, //buscador de servicio.
+      searchedWord: null, //palabra con la que se hizo la última busqueda.
+      localQuotes: this.quotes, //arreglo local de cotizaciones
+      loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
+      loading: false, //estado de carga cuando se busca a un servicio por medio del buscador
+      currentPage: 1, //para paginación
     }
-},
-components:{
-AppLayout,
-PrimaryButton,
-QuotesTable,
-ThirthButton,
-},
-props:{
-quotes: Array,
-total_quotes: Number,
-},
-methods:{
+  },
+  components: {
+    AppLayout,
+    PrimaryButton,
+    QuotesTable,
+    ThirthButton,
+  },
+  props: {
+    quotes: Array,
+    total_quotes: Number,
+  },
+  methods: {
     async searchQuotes() {
       this.loading = true;
       if (this.searchQuery != "") {
@@ -133,6 +120,6 @@ methods:{
       this.localQuotes = this.quotes;
       this.searchedWord = null;
     },
-}
+  }
 }
 </script>

@@ -5,8 +5,8 @@
 
             <h1 class="font-bold mt-4">Detalles del cliente</h1>
 
-            <article class="flex items-center space-x-3 justify-between mt-5">
-                <el-select @change="handleSelect()" class="!w-40 md:!w-80" filterable v-model="clientId" clearable
+            <article class="flex flex-col lg:flex-row items-end lg:items-center space-y-2 lg:space-y-0 space-x-3 justify-between mt-5">
+                <el-select @change="handleSelect()" class="w-full md:!w-1/4" filterable v-model="clientId" clearable
                     placeholder="Buscar cliente" no-data-text="No hay opciones registradas"
                     no-match-text="No se encontraron coincidencias">
                     <el-option v-for="item in clients" :key="item" :label="item.name" :value="item.id" />

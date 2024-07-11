@@ -72,9 +72,11 @@
                         <td>{{ formatDate(online_order.delivered_at) ?? '--' }}</td>
                         <td>{{ online_order.name }}</td>
                         <td>${{ online_order.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                        <td class="flex items-center space-x-2">
-                            <span v-html="getStatusIcon(online_order.status)"></span>
-                            <p>{{ online_order.status }}</p>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <span v-html="getStatusIcon(online_order.status)"></span>
+                                <p>{{ online_order.status }}</p>
+                            </div>
                         </td>
                         <td class="rounded-e-full text-end">
                             <el-dropdown trigger="click" @command="handleCommand">

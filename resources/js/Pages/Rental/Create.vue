@@ -21,7 +21,7 @@
                     </el-select>
                     <InputError :message="form.errors.client_id" />
                 </div>
-                <div>
+                <div class="mt-3">
                     <InputLabel value="Producto a rentar*" />
                     <el-select filterable v-model="form.product_id" placeholder="Selecciona el producto"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
@@ -65,9 +65,8 @@
                     </el-select>
                     <InputError :message="form.errors.status" />
                 </div>
-                <h2 class="font-bold mt-3 text-sm">Fecha y hora de entrega al cliente *</h2>
-                <h2 class="font-bold mt-3 text-sm">Fecha y hora de devolución</h2>
                 <div class="mt-3 grid grid-cols-2 gap-x-3">
+                    <h2 class="font-bold mt-3 text-sm col-span-full mb-1">Fecha y hora de entrega al cliente *</h2>
                     <div>
                         <el-date-picker v-model="form.rented_date" type="date" class="!w-full" placeholder="día/mes/año"
                             :disabled-date="disabledPrevDays" />
@@ -75,11 +74,12 @@
                     </div>
                     <div>
                         <el-time-select v-model="form.rented_time" class="!w-full" start="08:00" step="00:30"
-                            end="22:00" placeholder="hh:mm" />
+                        end="22:00" placeholder="hh:mm" />
                         <InputError :message="form.errors.rented_time" />
                     </div>
                 </div>
                 <div class="mt-3 grid grid-cols-2 gap-x-3">
+                    <h2 class="font-bold mt-3 text-sm col-span-full mb-1">Fecha y hora de devolución</h2>
                     <el-date-picker v-model="form.estimated_end_date" type="date" class="!w-full"
                         placeholder="día/mes/año" :disabled-date="disabledNextDays" />
                     <el-time-select v-model="form.estimated_end_time" class="!w-full" start="08:00" step="00:30"

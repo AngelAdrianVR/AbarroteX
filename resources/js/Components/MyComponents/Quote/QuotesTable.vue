@@ -1,13 +1,13 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="quotes?.length" class="w-full">
+        <table v-if="quotes?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th>Folio</th>
-                    <th>Creado el</th>
-                    <th>Nombre del contacto</th>
-                    <th>Monto</th>
-                    <th></th>
+                    <th class="w-24">Folio</th>
+                    <th class="w-32">Creado el</th>
+                    <th class="w-32">Nombre del contacto</th>
+                    <th class="w-32">Monto</th>
+                    <th class="w-32"></th>
                 </tr>
             </thead>
             <tbody>

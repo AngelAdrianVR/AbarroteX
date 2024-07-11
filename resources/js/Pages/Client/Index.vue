@@ -4,8 +4,8 @@
             <h1>Clientes</h1>
 
             <div class="md:flex justify-between mt-3">
-                <article class="flex items-center space-x-5 lg:w-1/3">
-                    <div class="lg:w-full relative">
+                <article class="flex items-center flex-col space-y-2 lg:flex-row lg:space-x-2 lg:space-y-0 lg:w-1/3">
+                    <div class="w-full relative">
                         <input v-model="searchQuery" @keydown.enter="searchClients" class="input w-full pl-9"
                             placeholder="Buscar cliente por nombre, teléfono o rfc" type="search">
                         <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
