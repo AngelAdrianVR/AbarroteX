@@ -305,10 +305,10 @@
                 <div class="flex items-center justify-end space-x-4">
                   <PrimaryButton v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" @click="creditPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
-                    class="!px-9 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
+                    class="!px-4 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
                   <PrimaryButton @click="cashPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
-                    class="!px-9 !bg-[#5FCB1F] disabled:!bg-[#999999]">Al contado</PrimaryButton>
+                    class="!px-4 !bg-[#5FCB1F] disabled:!bg-[#999999]">Al contado</PrimaryButton>
                 </div>
                 <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
                   Para cobrar asigna una caja registradora <span @click="showCashRegisterSelectionModal = true"
