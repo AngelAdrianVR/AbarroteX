@@ -1,4 +1,4 @@
-A<template>
+<template>
   <!-- vista desktop -->
   <div v-if="saleProducts?.length" class="w-full mx-auto text-[11px] lg:text-sm over hidden md:block">
     <div class="text-center lg:text-base flex items-center space-x-4 mb-3 border-b border-primary">
@@ -14,7 +14,8 @@ A<template>
         <div class="grid grid-cols-2 items-center h-14 w-[45%]">
           <img class="mx-auto h-14 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
             :alt="sale.product.name">
-          <div v-else class="size-10 ml-10 bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
+          <div v-else
+            class="size-10 ml-10 bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="size-4">
               <path stroke-linecap="round" stroke-linejoin="round"
@@ -23,7 +24,7 @@ A<template>
           </div>
           <p class="font-bold">{{ sale.product.name }}</p>
         </div>
-        <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-base flex items-center">
+        <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">
             ${{ sale.product.public_price }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
@@ -57,7 +58,7 @@ A<template>
             :max="sale.product.current_stock" :precision="2" />
           <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
         </div>
-        <div class="text-[#5FCB1F] font-bold w-[15%]">${{ (sale.product.public_price *
+        <div class="text-[#5FCB1F] font-bold w-[15%] text-lg">${{ (sale.product.public_price *
           sale.quantity).toLocaleString('en-US', {
             minimumFractionDigits: 2
           }) }}</div>
@@ -85,7 +86,7 @@ A<template>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
         <p class="font-bold">{{ sale.product.name }}
         </p>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 text-lg">
           <template v-if="editMode !== index">
             ${{ sale.product.public_price }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
@@ -116,13 +117,14 @@ A<template>
             </div>
           </template>
         </div>
-        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small"
+        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0"
           :max="sale.product.current_stock" :precision="2" />
         <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
-        <div class="text-[#5FCB1F] font-bold">${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
-          minimumFractionDigits: 2
-        }) }}</div>
-        <div class="self-end">
+        <div class="text-[#5FCB1F] font-bold text-lg">
+          ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
+            minimumFractionDigits: 2
+          }) }}</div>
+        <div class="self-end text-lg">
           <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
             @confirm="deleteItem(sale.product.id)" class="justify-self-end">
             <template #reference>
@@ -148,23 +150,23 @@ A<template>
   </div>
 
   <!-- Modal para preguntar si se quiere cambiar el precio definitivamente o solo en esa venta -->
-    <ConfirmationModal :show="showChangePriceConfirmation" @close="showChangePriceConfirmation = false">
-      <template #title>
-        <h1>Confirmar cambio de precio</h1>
-      </template>
-      <template #content>
-        <p>
-          ¿Deseas cambiar el precio definitivo del producto o sólo en esta venta?
-        </p>
-      </template>
-      <template #footer>
-        <div class="flex items-center space-x-1">
-          <CancelButton @click="stopEditing(true)">Sólo en esta venta</CancelButton>
-          <PrimaryButton @click="stopEditing(false)">Cambiar precio al producto</PrimaryButton>
-        </div>
-      </template>
-    </ConfirmationModal>
-    <!-- Modal para preguntar si se quiere cambiar el precio definitivamente o solo en esa venta -->
+  <ConfirmationModal :show="showChangePriceConfirmation" @close="showChangePriceConfirmation = false">
+    <template #title>
+      <h1>Confirmar cambio de precio</h1>
+    </template>
+    <template #content>
+      <p>
+        ¿Deseas cambiar el precio definitivo del producto o sólo en esta venta?
+      </p>
+    </template>
+    <template #footer>
+      <div class="flex items-center space-x-1">
+        <CancelButton @click="stopEditing(true)">Sólo en esta venta</CancelButton>
+        <PrimaryButton @click="stopEditing(false)">Cambiar precio al producto</PrimaryButton>
+      </div>
+    </template>
+  </ConfirmationModal>
+  <!-- Modal para preguntar si se quiere cambiar el precio definitivamente o solo en esa venta -->
 </template>
 
 <script>
@@ -191,7 +193,7 @@ export default {
       editedPrice: null
     };
   },
-  components:{
+  components: {
     ConfirmationModal,
     PrimaryButton,
     CancelButton
@@ -216,7 +218,7 @@ export default {
       this.editMode = null;
 
       //si se cambia el precio sólo para la venta
-      if ( changeJustForThisSale ) {
+      if (changeJustForThisSale) {
         // Actualizamos el precio en el objeto de venta directamente.
         this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
         this.saleProductToEdit.priceChanged = true; //agrega bandera para indicar que se le cambió el precio solo para esa venta
@@ -225,18 +227,18 @@ export default {
       } else { //se cambia el precio definitivo al producto.
 
         //si es local manda al controlador de locales 
-        if ( this.saleProductToEdit.product.id.split('_')[0] === 'local' ) {
-          axios.post(route('products.change-price'), {product: this.saleProductToEdit.product, newPrice: this.editedPrice});
+        if (this.saleProductToEdit.product.id.split('_')[0] === 'local') {
+          axios.post(route('products.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
           this.saleProductToEdit.priceChanged = false; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
         } else { //para un producto global
-          axios.post(route('global-product-store.change-price'), {product: this.saleProductToEdit.product, newPrice: this.editedPrice});
+          axios.post(route('global-product-store.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
           this.saleProductToEdit.priceChanged = false; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
         }
-      } 
+      }
     },
   },
 };

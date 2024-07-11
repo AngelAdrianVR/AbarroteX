@@ -39,7 +39,7 @@
             </div>
             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de venta: </p>
-                <p class="text-right font-bold">${{ product.global_product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                <p class="text-right font-bold">${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
             </div>
             <div v-if="product.current_stock >= product.min_stock || !isInventoryOn"
                 class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
