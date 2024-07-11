@@ -13,33 +13,31 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(product, index) in products" :key="product.id"
+                <tr @click="handleShow(product)" v-for="(product, index) in products" :key="product.id"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <button @click="ShowInAnotherTab(product)">
-                        <td @click="handleShow(product)" class="rounded-s-full">
-                            <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
-                                class="size-10 bg-white object-contain rounded-md"
-                                :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
-                            <div v-else
-                                class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor" class="size-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                </svg>
-                            </div>
-                        </td>
-                    </button>
-                    <td @click="handleShow(product)">
+                    <td class="rounded-s-full">
+                        <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
+                            class="size-10 bg-white object-contain rounded-md"
+                            :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                        <div v-else
+                            class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
+                        </div>
+                    </td>
+                    <td>
                         {{ product.global_product_id ? product.global_product?.code : product.code ?? 'N/A' }}
                     </td>
-                    <td @click="handleShow(product)">
+                    <td>
                         {{ product.global_product_id ? product.global_product?.name : product.name }}
                     </td>
-                    <td @click="handleShow(product)">
+                    <td>
                         ${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </td>
-                    <td @click="handleShow(product)">
+                    <td>
                         <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
                             {{ product.current_stock ?? '-' }}
                             <i v-if="product.current_stock < product.min_stock && isInventoryOn"
@@ -121,7 +119,6 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
-import { Link } from '@inertiajs/vue3';
 import { deleteItem, getItemByAttributes } from "@/dbService.js";
 
 export default {
@@ -140,7 +137,6 @@ export default {
         ConfirmationModal,
         PrimaryButton,
         CancelButton,
-        Link
     },
     props: {
         products: Object
@@ -171,23 +167,10 @@ export default {
         handleShow(product) {
             const encodedId = btoa(product.id.toString());
             if (product.global_product_id) {
-                return route('global-product-store.show', encodedId);
+                this.$inertia.get(route('global-product-store.show', encodedId));
             } else {
-                return this.$inertia.get(route('products.show', encodedId));
+                this.$inertia.get(route('products.show', encodedId))
             }
-        },
-        ShowInAnotherTab(product) {
-            const encodedId = btoa(product.id.toString());
-            let url;
-
-            if (product.global_product_id) {
-                url = route('global-product-store.show', encodedId);
-            } else {
-                url = route('products.show', encodedId);
-            }
-
-            // Abre la URL en una nueva pestaña
-            window.open(url, '_blank');
         },
         async deleteItem() {
             let routePage;
