@@ -39,6 +39,16 @@
                     </el-input>
                     <InputError :message="form.errors.public_price" />
                 </div>
+                <!-- <div class="mt-3 col-span-full">
+                    <InputLabel value="Moneda*" class="ml-3 mb-1 text-sm" />
+                    <el-select v-model="form.currency" placeholder="Moneda *" :fit-input-width="true" class="!w-1/2">
+                        <el-option v-for="item in currencies" :key="item.value" :label="item.label" :value="item.label">
+                            <span style="float: left">{{ item.label }}</span>
+                            <span style="float: right; color: #cccccc; font-size: 13px">{{ item.value }}</span>
+                        </el-option>
+                    </el-select>
+                    <InputError :message="form.errors.currency" />
+                </div> -->
                 <div class="mt-3">
                     <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
@@ -207,6 +217,7 @@ export default {
             name: null,
             code: null,
             public_price: null,
+            currency: '$MXN',
             cost: null,
             current_stock: null,
             description: null,
@@ -233,6 +244,10 @@ export default {
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showBrandFormModal: false, //muestra formulario para agregar proveedor
+            currencies: [
+                { value: "Peso Mexicano", label: "$MXN" },
+                { value: "Dolar Americano", label: "$USD" },
+            ],
             // Permisos de rol actual
             canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
         };

@@ -30,8 +30,9 @@
                     <InputError :message="form.errors.price" />
                 </div>
 
+                <!-- Está adaptado para seleccionar varias imagenes pero falta la lógica de edición (se eliminan todas si se quiere cambiar una). Se dejó en una sola imagen -->
                 <div class="col-span-full w-full overflow-auto flex items-end">
-                    <InputFilePreview v-show="index < 3" v-for="(file,index) in form.media" :key="index" :canDelete="index == (form.media.length - 2)"
+                    <InputFilePreview v-show="index < 1" v-for="(file,index) in form.media" :key="index" :canDelete="index == (form.media.length - 2)"
                         @imagen="saveImage" @cleared="handleCleared(index)" class="p-2" />
                 </div>
 

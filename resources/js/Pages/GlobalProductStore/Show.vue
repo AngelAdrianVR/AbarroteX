@@ -53,7 +53,7 @@
                             <ProductInfo :product="global_product_store" />
                         </el-tab-pane>
                         <el-tab-pane label="Historial de movimientos" name="2">
-                            <ProductHistorical :product="global_product_store" />
+                            <ProductHistorical ref="historyTab" :product="global_product_store" />
                         </el-tab-pane>
                     </el-tabs>
                 </section>
@@ -216,7 +216,7 @@ export default {
                             text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
                             type: 'success',
                         });
-                        this.fetchHistory();
+                        this.$refs.historyTab.fetchHistory();
 
                         // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
                         if (this.isInventoryOn) {

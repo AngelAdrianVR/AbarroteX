@@ -1,14 +1,14 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="services?.length" class="w-full">
+        <table v-if="services?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th>Folio</th>
-                    <th>Nombre</th>
-                    <th>Categoría</th>
-                    <th>Precio</th>
-                    <th class="w-96">Descripción</th>
-                    <th></th>
+                    <th class="w-20 md:w-[15%]">Folio</th>
+                    <th class="w-32 md:w-[15%]">Nombre</th>
+                    <th class="w-32 md:w-[15%]">Categoría</th>
+                    <th class="w-32 md:w-[15%]">Precio</th>
+                    <th class="w-96 md:w-[30]">Descripción</th>
+                    <th class="w-12 md:w-[5%]"></th>
                 </tr>
             </thead>
             <tbody>

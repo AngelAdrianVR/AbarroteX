@@ -1,13 +1,13 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="quotes?.length" class="w-full">
+        <table v-if="quotes?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                    <th>Folio</th>
-                    <th>Creado el</th>
-                    <th>Nombre del contacto</th>
-                    <th>Monto</th>
-                    <th></th>
+                    <th class="w-24">Folio</th>
+                    <th class="w-32">Creado el</th>
+                    <th class="w-32">Nombre del contacto</th>
+                    <th class="w-32">Monto</th>
+                    <th class="w-32"></th>
                 </tr>
             </thead>
             <tbody>
@@ -23,7 +23,13 @@
                     </td>
                     <td>{{ formatDate(quote.created_at) }}</td>
                     <td>{{ quote.contact_name }}</td>
-                    <td>${{ quote.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    <td>
+                        <div v-if="quote.has_discount">
+                            <p v-if="quote.is_percentage_discount">${{ (quote.total - (quote.discount * quote.total * 0.01))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                            <p v-else>${{ (quote.total - quote.discount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                        </div>
+                        <p v-else>${{ quote.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                    </td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
