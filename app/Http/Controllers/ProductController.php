@@ -44,8 +44,8 @@ class ProductController extends Controller
         $vailidated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode()],
-            'public_price' => 'required|numeric|min:0|max:9999',
-            'cost' => 'nullable|numeric|min:0|max:9999',
+            'public_price' => 'required|numeric|min:0|max:999999',
+            'cost' => 'nullable|numeric|min:0|max:999999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'description' => 'nullable|string|max:255',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
@@ -105,8 +105,8 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
-            'public_price' => 'required|numeric|min:0|max:9999',
-            'cost' => 'nullable|numeric|min:0|max:9999',
+            'public_price' => 'required|numeric|min:0|max:999999',
+            'cost' => 'nullable|numeric|min:0|max:999999',
             'description' => 'nullable|string|max:255',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',

@@ -330,7 +330,7 @@ export default {
                 'Efectivo',
                 'Tarjeta de crédito',
                 'Tarjeta de débito',
-                'Trandferencia o depósito',
+                'Transferencia o depósito',
                 'Mercado pago',
             ]
         }
