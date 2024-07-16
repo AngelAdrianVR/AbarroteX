@@ -1,5 +1,5 @@
 <template>
-    <div class="flex space-x-2 flex-row justify-between items-center common-container text-sm">
+    <div class="flex flex-row justify-between items-center common-container text-sm">
         <figure class="border border-l-grayD9 rounded-md size-14 flex items-center justify-center p-1">
             <img class="object-contain h-full" v-if="local_image_url" :src="local_image_url" alt="">
             <div v-else class="size-12 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
@@ -23,10 +23,10 @@
             </el-select>
         </div>
         <div class="w-24">
-            <InputLabel value="Precio unitario" class="mb-1 text-sm" />
-            <el-input disabled v-model="price" min="1" required type="number"
+            <InputLabel value="Precio/u" class="mb-1 text-sm" />
+            <el-input disabled v-model="price" min="1" required type="text"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                :parser="(value) => value.replace(/[^\d.]/g, '')" placeholder="0.00">
+                :parser="(value) => value.replace(/[^\d.]/g, '')">
                 <template #prefix>
                     <i class="fa-solid fa-dollar-sign"></i>
                 </template>

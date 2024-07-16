@@ -23,7 +23,13 @@
                     </td>
                     <td>{{ formatDate(quote.created_at) }}</td>
                     <td>{{ quote.contact_name }}</td>
-                    <td>${{ quote.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    <td>
+                        <div v-if="quote.has_discount">
+                            <p v-if="quote.is_percentage_discount">${{ (quote.total - (quote.discount * quote.total * 0.01))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                            <p v-else>${{ (quote.total - quote.discount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                        </div>
+                        <p v-else>${{ quote.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                    </td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop

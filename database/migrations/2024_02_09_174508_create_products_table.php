@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedFloat('public_price');
+            $table->string('currency')->default('$MXN');
             $table->unsignedFloat('cost')->nullable()->default(0);
             $table->string('code')->nullable();
             $table->unsignedFloat('min_stock')->nullable();
