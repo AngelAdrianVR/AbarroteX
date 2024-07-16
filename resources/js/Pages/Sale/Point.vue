@@ -233,7 +233,7 @@
                 <p v-else class="text-center text-xs text-gray99 pt-10 px-8">Este producto no tiene imagen registrada
                 </p>
               </figure>
-              <div class="flex justify-between items-center mt-2 mb-4">
+              <div class="flex justify-between items-center mt-2 mb-4 text-lg">
                 <p class="font-bold">{{ productFoundSelected.name }}</p>
                 <p class="text-[#5FCB1F]">${{ productFoundSelected.public_price }}</p>
               </div>
@@ -288,7 +288,7 @@
                   </template>
                 </el-input>
               </div> -->
-              <div class="flex items-center justify-between text-lg mx-5">
+              <div class="flex items-center justify-between text-xl mx-5">
                 <p class="font-bold">Total</p>
                 <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
                   class="text-red-600 text-xs">El descuento es más grande que el total</p>
@@ -303,7 +303,7 @@
               <div class="text-center mt-7">
                 <p class="text-sm text-gray-400 text-left mb-3">Opciones de pago</p>
                 <div class="flex items-center justify-end space-x-4">
-                  <PrimaryButton v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' || true " @click="creditPayment()"
+                  <PrimaryButton v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" @click="creditPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
                     class="!px-4 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
                   <PrimaryButton @click="cashPayment()"
@@ -335,12 +335,12 @@
                   minimumFractionDigits: 2
                 }) }}</strong>
               </p>
-              <div class="flex items-center justify-between mx-5 space-x-10">
+              <div class="flex items-center justify-between mx-5 space-x-10 text-lg">
                 <p>Entregado</p>
                 <input v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" @keydown.enter="store"
                   type="number" class="input !rounded-md w-1/3" ref="receivedInput" placeholder="$0.00">
               </div>
-              <div class="flex items-center justify-between mx-5 my-2 relative">
+              <div class="flex items-center justify-between mx-5 my-2 relative text-lg">
                 <p>Cambio</p>
                 <p
                   v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived">
@@ -356,7 +356,7 @@
               </p>
               <div class="flex space-x-2 justify-end">
                 <CancelButton @click="editableTabs[this.editableTabsValue - 1].cash = false">Cancelar</CancelButton>
-                <PrimaryButton :disabled="storeProcessing" @click="store" class="!rounded-full">
+                <PrimaryButton :disabled="storeProcessing" @click="store" class="!rounded-full w-1/2">
                   <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                   Aceptar
                 </PrimaryButton>

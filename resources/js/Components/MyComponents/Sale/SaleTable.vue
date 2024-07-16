@@ -11,7 +11,7 @@
     <div class="overflow-auto h-[500px]">
       <div v-for="(sale, index) in saleProducts" :key="index"
         class="mb-2 flex items-center space-x-4 border rounded-full relative">
-        <div class="grid grid-cols-2 items-center h-14 w-[45%]">
+        <div class="grid grid-cols-2 items-center min-h-14 w-[45%]">
           <img class="mx-auto h-14 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
             :alt="sale.product.name">
           <div v-else
@@ -22,7 +22,7 @@
                 d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
             </svg>
           </div>
-          <p class="font-bold">{{ sale.product.name }}</p>
+          <p class="font-bold text-sm">{{ sale.product.name }}</p>
         </div>
         <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">
@@ -76,7 +76,7 @@
   </div>
 
   <!-- vista movil -->
-  <div :class="saleProducts.length ? 'h-[230px]' : 'h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
+  <div :class="saleProducts.length ? 'min-h-[230px]' : 'min-h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-2 border rounded-md items-center relative">
       <figure>
@@ -84,7 +84,7 @@
           :alt="sale.product.name">
       </figure>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
-        <p class="font-bold">{{ sale.product.name }}
+        <p class="font-bold text-base">{{ sale.product.name }}
         </p>
         <div class="flex items-center space-x-2 text-lg">
           <template v-if="editMode !== index">
