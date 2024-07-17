@@ -1237,7 +1237,7 @@ export default {
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
           quantity: this.quantity,
-          priceChanged: false,
+          originalPrice: null,
         });
       }
       this.scannerQuery = null;
