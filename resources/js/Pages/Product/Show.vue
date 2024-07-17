@@ -4,12 +4,14 @@
             <!-- header botones -->
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
-                <div class="flex items-center space-x-3 my-2 lg:my-0">
+                <div class="flex items-center space-x-2 my-2 lg:my-0">
                     <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('products.edit', encodedId))" class="!rounded-full">
                         Editar</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
+                        <i class="fa-solid fa-plus"></i> Nuevo</PrimaryButton>
                 </div>
             </div>
             <div class="lg:w-1/4 relative">

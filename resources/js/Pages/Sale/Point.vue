@@ -157,7 +157,7 @@
           <!-- Pestañas -->
           <div class="lg:mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
-              <div v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' ||true"
+              <div v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'"
                 class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
