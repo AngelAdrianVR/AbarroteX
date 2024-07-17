@@ -19,7 +19,7 @@
                             <i class="mr-1"
                             :class="getStatusIcont(quote.status)"></i>
                         </el-tooltip>
-                        {{ 'S-' + quote.id }}
+                        {{ 'C-' + quote.folio }}
                     </td>
                     <td>{{ formatDate(quote.created_at) }}</td>
                     <td>{{ quote.contact_name }}</td>
@@ -38,19 +38,19 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item :command="'status|' + quote.id + '|Autorizada'">
+                                    <el-dropdown-item v-if="quote.status === 'Esperando respuesta' || quote.status === 'Rechazada'" :command="'status|' + quote.id + '|Autorizada'">
                                         <i class="fa-solid fa-check text-xs text-blue-500"></i>
                                         <span class="text-xs">Autorizada</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'status|' + quote.id + '|Rechazada'">
+                                    <el-dropdown-item v-if="quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Rechazada'">
                                         <i class="fa-solid fa-x text-xs text-red-500"></i>
                                         <span class="text-xs">Rechazada</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'status|' + quote.id + '|Pago parcial'">
+                                    <el-dropdown-item v-if="quote.status !== 'Pagado' && quote.status !== 'Pago parcial' && quote.status !== 'Rechazada'" :command="'status|' + quote.id + '|Pago parcial'">
                                         <i class="fa-solid fa-circle-dollar-to-slot text-indigo-500 text-xs"></i>
                                         <span class="text-xs">Pago parcial</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'status|' + quote.id + '|Pagado'">
+                                    <el-dropdown-item v-if="quote.status === 'Autorizada' || quote.status === 'Pago parcial' || quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Pagado'">
                                         <i class="fa-solid fa-dollar-sign text-green-500 text-xs"></i>
                                         <span class="text-xs">Pagado</span>
                                     </el-dropdown-item>

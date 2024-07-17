@@ -220,8 +220,8 @@ export default {
       //si se cambia el precio sólo para la venta
       if (changeJustForThisSale) {
         // Actualizamos el precio en el objeto de venta directamente.
+        this.saleProductToEdit.originalPrice = this.saleProductToEdit.product.public_price; //agrega bandera para indicar que se le cambió el precio solo para esa venta
         this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
-        this.saleProductToEdit.priceChanged = true; //agrega bandera para indicar que se le cambió el precio solo para esa venta
         this.showChangePriceConfirmation = false;
 
       } else { //se cambia el precio definitivo al producto.
@@ -230,12 +230,12 @@ export default {
         if (this.saleProductToEdit.product.id.split('_')[0] === 'local') {
           axios.post(route('products.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
-          this.saleProductToEdit.priceChanged = false; //agrega bandera para indicar que no se cambio solo a la venta
+          this.saleProductToEdit.originalPrice = null; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
         } else { //para un producto global
           axios.post(route('global-product-store.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
-          this.saleProductToEdit.priceChanged = false; //agrega bandera para indicar que no se cambio solo a la venta
+          this.saleProductToEdit.originalPrice = null; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
         }
       }

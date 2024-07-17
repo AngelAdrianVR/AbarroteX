@@ -100,6 +100,7 @@
                 <!-- totales  -->
                 <div class="text-sm flex flex-col mr-7 items-end col-span-full">
                     <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <p v-if="form.show_iva" class="font-bold">IVA: <span class="mx-2">$</span>{{ (form.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     <p v-if="form.is_percentage_discount" class="font-bold ">descuento: <span class="mx-2">$</span>{{ (percentageDiscount())?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
                     <p v-else class="font-bold ">descuento: <span class="mx-2">$</span>{{ form.discount?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
                     <p v-if="form.is_percentage_discount" class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total - percentageDiscount())?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
@@ -123,10 +124,10 @@
                         <el-checkbox @change="resetDiscount()" id="is_percentage_discount" class="px-2" name="is_percentage_discount" v-model="form.is_percentage_discount"></el-checkbox>
                         Descuento en porcentaje
                     </label>
-                    <label for="iva" class="text-xs items-center flex mt-2 col-span-full">
+                    <!-- <label for="iva" class="text-xs items-center flex mt-2 col-span-full">
                         <el-checkbox id="iva" class="px-2" name="iva" v-model="form.show_iva"></el-checkbox>
                         Mostrar IVA
-                    </label>
+                    </label> -->
                 </div>
 
                 <!-- Descuento -->

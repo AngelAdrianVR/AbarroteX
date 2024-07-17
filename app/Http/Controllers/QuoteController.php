@@ -44,7 +44,14 @@ class QuoteController extends Controller
             'client_id' => 'nullable',
         ]);
 
-        Quote::create($request->all() + ['store_id' => auth()->user()->store_id]);
+        $storeId = auth()->user()->store_id;
+        $last_quote = Quote::where('store_id', $storeId)->latest('id')->first();
+        $folio = $last_quote ? intval($last_quote->folio) + 1 : 1;
+
+        Quote::create($request->all() + [
+            'store_id' => auth()->user()->store_id,
+            'folio' => $folio,
+        ]);
 
         return to_route('quotes.index');
     }

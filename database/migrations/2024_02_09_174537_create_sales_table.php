@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('product_name');
             $table->unsignedMediumInteger('product_id')->nullable();
             $table->boolean('is_global_product');
-            $table->boolean('price_changed')->default(false); //indica si se cambió el precio para esa venta solamente
+            $table->unsignedFloat('original_price'); //indica el precio que se cambió para esa venta solamente
             $table->unsignedFloat('quantity');
             $table->timestamp('refunded_at')->nullable();
             $table->string('folio');

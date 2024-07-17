@@ -11,6 +11,7 @@ class Quote extends Model
     use HasFactory;
 
     protected $fillable = [
+        'folio',
         'contact_name',
         'phone',
         'email',
