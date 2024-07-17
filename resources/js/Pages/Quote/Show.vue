@@ -1,6 +1,6 @@
 <template>
     <Head :title="'COT-' + quote.id" />
-    <main class="w-full mx-auto h-screen flex flex-col justify-between">
+    <main class="w-full mx-auto h-screen flex flex-col justify-between overflow-hidden">
         <div>   
             <!-- Header --------------------------- -->
             <section class="flex justify-between items-center">
@@ -50,7 +50,7 @@
                         <td>-</td>
                         <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                         <td>{{ product.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                        <td>${{ (product.quantity * product.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                        <td>${{ ((product.quantity * product.price) - (product.quantity * product.price) * 0.16).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }} + IVA</td>
                     </tr>
                     <!-- servicios -->
                     <tr v-for="(service, index) in quote.services" :key="index"
@@ -103,7 +103,7 @@
 
         <!-- footer -------------------------- -->
         <footer>
-            <section class="flex flex-col space-y-1 text-base -mb-20">
+            <section class="flex flex-col space-y-1 text-base -mb-10">
                 <!-- telefono -->
                 <div class="flex items-center space-x-2">
                     <div class="border border-[#F68C0F] rounded-full">
@@ -154,7 +154,6 @@
 
             <!------------- Decoraciones juntas en png ------------->
             <img class="" src="@/../../public/images/quote_bottom_decoration.png" alt="">
-            
             
             <!------------- Decoraciones juntas en svg ------------->
             <!-- <svg width="1438" height="149" viewBox="0 0 1438 149" fill="none" xmlns="http://www.w3.org/2000/svg">

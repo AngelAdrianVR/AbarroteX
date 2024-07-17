@@ -157,7 +157,7 @@
           <!-- Pestañas -->
           <div class="lg:mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
-              <div v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' ||true"
+              <div v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'"
                 class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
@@ -188,6 +188,7 @@
                   </template>
                 </el-popconfirm>
                 <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
+                {{tab}}
               </el-tab-pane>
             </el-tabs>
           </div>
@@ -1237,7 +1238,7 @@ export default {
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
           quantity: this.quantity,
-          priceChanged: false,
+          originalPrice: null,
         });
       }
       this.scannerQuery = null;

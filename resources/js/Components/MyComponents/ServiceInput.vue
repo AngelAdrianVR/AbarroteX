@@ -5,7 +5,7 @@
                 <InputLabel value="Servicio*" class="mb-1" />
                 <p v-if="error_validation" class="text-red-400 text-xs mb-1">Seleccionar un servicio</p>
             </div>
-            <el-select @change="syncItem" v-model="selection" class="!w-full" filterable required clearable placeholder="Seleccione"
+            <el-select ref="serviceSelector" @change="syncItem" v-model="selection" class="!w-full" filterable required clearable placeholder="Seleccione"
                 no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                 <el-option :disabled="service.disabled" v-for="service in services" :key="service" :value="service.id" :label="service.name" />
             </el-select>
@@ -71,6 +71,7 @@ export default {
             this.price = this.init_state.price;
             this.quantity = this.init_state.quantity;
         }
+        this.$refs.serviceSelector.focus();
     },
     methods:{
         handleDelete() {
