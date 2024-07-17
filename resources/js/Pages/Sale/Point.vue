@@ -188,7 +188,6 @@
                   </template>
                 </el-popconfirm>
                 <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts" />
-                {{tab}}
               </el-tab-pane>
             </el-tabs>
           </div>
