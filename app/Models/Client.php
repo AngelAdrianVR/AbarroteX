@@ -40,4 +40,14 @@ class Client extends Model
     {
         return $this->hasMany(Sale::class);
     }
+
+    public function quotes() :HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function rentals() :HasMany
+    {
+        return $this->hasMany(Rental::class);
+    }
 }

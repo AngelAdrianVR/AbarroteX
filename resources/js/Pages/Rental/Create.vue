@@ -21,7 +21,7 @@
                     </el-select>
                     <InputError :message="form.errors.client_id" />
                 </div>
-                <div class="mt-3">
+                <div>
                     <InputLabel value="Producto a rentar*" />
                     <el-select filterable v-model="form.product_id" placeholder="Selecciona el producto"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
