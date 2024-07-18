@@ -57,7 +57,7 @@
                 <section class="max-h-72 overflow-auto col-span-full">
                     <div class="space-y-3">
                         <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id"
-                        @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" />
+                        @deleteItem="deleteItem(index)" @syncItem="syncItems(index, $event)" class="mb-1" :showDeleteButton="true" />
                     </div>
                     <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
                     productos </p>

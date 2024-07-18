@@ -76,7 +76,7 @@ export default {
         },
         getReturnDate(rent) {
             if (rent.status == 'En uso') {
-                return '<i class="fa-solid fa-rotate text-xs text-[#09EE05] mr-2"></i>-';
+                return '<i class="fa-solid fa-rotate text-xs text-[#0355B5] mr-2"></i>-';
             } else if (rent.status == 'Completado') {
                 return '<i class="fa-solid fa-check text-xs text-[#06B918] mr-2"></i>' + this.formatDate(rent.completed_at);
             } else if (rent.status == 'Cancelado') {

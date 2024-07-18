@@ -15,8 +15,8 @@
                 <InputLabel value="Producto*" class="mb-1" />
                 <p v-if="error_validation" class="text-red-400 text-xs mb-1">Seleccionar un producto</p>
             </div>
-            <el-select ref="productSelector" @change="syncItem" v-model="selection" class="!w-full" filterable required clearable
-                placeholder="Seleccione" no-data-text="No hay opciones registradas"
+            <el-select ref="productSelector" @change="syncItem" v-model="selection" class="!w-full" filterable required
+                clearable placeholder="Seleccione" no-data-text="No hay opciones registradas"
                 no-match-text="No se encontraron coincidencias">
                 <el-option :disabled="product.disabled" v-for="product in products" :key="product"
                     :value="product.relative_id" :label="product.name" />
@@ -45,6 +45,9 @@
             <i class="fa-regular fa-trash-can text-sm text-primary cursor-pointer pt-2"></i>
         </button>
     </div>
+    <p v-if="isOutOfStock" class="text-[#0355B5] text-xs">
+        Este producto tiene {{ getSelectedProductStock }} {{ getSelectedProductStock == 1 ? ' unidad' : ' unidades' }} en existencia. Tenlo en cuenta para reabastecerlo pronto.
+    </p>
 </template>
 
 <script>
@@ -105,6 +108,12 @@ export default {
         },
     },
     computed: {
+        isOutOfStock() {
+            return this.getSelectedProductStock < this.quantity;
+        },
+        getSelectedProductStock() {
+            return this.products.find(item => item.relative_id == this.selection)?.current_stock;
+        },
         syncItem() {
             if (this.selection != null) {
                 // Encuentra el índice del producto seleccionado en la lista de productos
