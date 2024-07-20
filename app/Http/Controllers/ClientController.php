@@ -44,7 +44,6 @@ class ClientController extends Controller
         ]);
 
         Client::create($request->all() + ['store_id' => auth()->user()->store_id]);
-
     }
 
 
@@ -131,7 +130,7 @@ class ClientController extends Controller
     {
         return inertia('Client/PrintCreditHistorical', compact('client'));
     }
-    
+
     public function PrintCashHistorical(Client $client)
     {
         return inertia('Client/PrintCashHistorical', compact('client'));
@@ -150,6 +149,25 @@ class ClientController extends Controller
         $items = $this->getGroupedSalesByDate($sales, true);
 
         return response()->json(['items' => $items]);
+    }
+
+    public function getClientQuotes(Client $client)
+    {
+        $quotes = $client->quotes()
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        return response()->json(['items' => $quotes]);
+    }
+
+    public function getClientRentals(Client $client)
+    {
+        $rentals = $client->rentals()
+            ->with(['product'])
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        return response()->json(['items' => $rentals]);
     }
 
     // private

@@ -19,7 +19,7 @@
             <i v-if="rent.status == 'Completado'"
                 class="absolute -left-6 top-1 fa-solid fa-check text-xs text-[#06B918]"></i>
             <i v-if="rent.status == 'En uso'"
-                class="absolute -left-6 top-1 fa-solid fa-rotate text-xs text-[#09EE05]"></i>
+                class="absolute -left-6 top-1 fa-solid fa-rotate text-xs text-[#0355B5]"></i>
             <i v-if="rent.status == 'Cancelado'"
                 class="absolute -left-6 top-1 fa-solid fa-xmark text-xs text-[#D70808]"></i>
             <span>{{ rent.status }}</span>

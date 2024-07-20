@@ -21,7 +21,7 @@
                     </el-select>
                     <InputError :message="form.errors.client_id" />
                 </div>
-                <div class="mt-3">
+                <div>
                     <InputLabel value="Producto a rentar*" />
                     <el-select filterable v-model="form.product_id" placeholder="Selecciona el producto"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
@@ -55,9 +55,32 @@
                 <div class="mt-3">
                     <InputLabel>
                         Estado
-                        <i v-if="form.status == 'Completado'" class="fa-solid fa-check text-xs text-[#06B918] ml-2"></i>
-                        <i v-if="form.status == 'En uso'" class="fa-solid fa-rotate text-xs text-[#09EE05] ml-2"></i>
-                        <i v-if="form.status == 'Cancelado'" class="fa-solid fa-xmark text-xs text-[#D70808] ml-2"></i>
+                        <el-tooltip v-if="form.status == 'Completado'" placement="right">
+                            <template #content>
+                                <p>
+                                    El equipo se ha devuelto y <br>
+                                    todos los pagos se han recibido
+                                </p>
+                            </template>
+                            <i class="fa-solid fa-check text-xs text-[#06B918] ml-2"></i>
+                        </el-tooltip>
+                        <el-tooltip v-if="form.status == 'En uso'" placement="right">
+                            <template #content>
+                                <p>
+                                    El equipo ha sido entregado y <br>
+                                    se encuentra en uso por el cliente
+                                </p>
+                            </template>
+                            <i class="fa-solid fa-rotate text-xs text-[#0355B5] ml-2"></i>
+                        </el-tooltip>
+                        <el-tooltip v-if="form.status == 'Cancelado'" placement="right">
+                            <template #content>
+                                <p>
+                                    La renta del equipo ha sido cancelada
+                                </p>
+                            </template>
+                            <i class="fa-solid fa-xmark text-xs text-[#D70808] ml-2"></i>
+                        </el-tooltip>
                     </InputLabel>
                     <el-select filterable v-model="form.status" placeholder="Selecciona"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
@@ -74,7 +97,7 @@
                     </div>
                     <div>
                         <el-time-select v-model="form.rented_time" class="!w-full" start="08:00" step="00:30"
-                        end="22:00" placeholder="hh:mm" />
+                            end="22:00" placeholder="hh:mm" />
                         <InputError :message="form.errors.rented_time" />
                     </div>
                 </div>

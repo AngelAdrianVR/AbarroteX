@@ -48,9 +48,9 @@
                         <td>{{ 'P-' + product.id }}</td>
                         <td>{{ product.name }}</td>
                         <td>-</td>
-                        <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                        <td>${{ (product.price / 1.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                         <td>{{ product.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                        <td>${{ ((product.quantity * product.price) - (product.quantity * product.price) * 0.16).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }} + IVA</td>
+                        <td>${{ (product.price / 1.16).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }} + IVA</td>
                     </tr>
                     <!-- servicios -->
                     <tr v-for="(service, index) in quote.services" :key="index"

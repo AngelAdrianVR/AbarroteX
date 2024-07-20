@@ -8,6 +8,9 @@
                     <ThirthButton v-if="isInventoryOn" @click="openEntryModal">Entrada de producto</ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('global-product-store.edit', encodedId))"
                         class="!rounded-full">Editar</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
+                        <i class="fa-solid fa-plus"></i> Nuevo
+                    </PrimaryButton>
                 </div>
             </div>
             <div class="lg:w-1/4 relative">

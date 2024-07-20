@@ -5,7 +5,8 @@
 
             <h1 class="font-bold mt-4">Detalles del cliente</h1>
 
-            <article class="flex flex-col lg:flex-row items-end lg:items-center space-y-2 lg:space-y-0 space-x-3 justify-between mt-5">
+            <article
+                class="flex flex-col lg:flex-row items-end lg:items-center space-y-2 lg:space-y-0 space-x-3 justify-between mt-5">
                 <el-select @change="handleSelect()" class="w-full md:!w-1/4" filterable v-model="clientId" clearable
                     placeholder="Buscar cliente" no-data-text="No hay opciones registradas"
                     no-match-text="No se encontraron coincidencias">
@@ -30,8 +31,9 @@
             </header>
 
             <div class="text-center text-sm lg:text-base my-5">
-                <h2>Saldo total pendiente de pago</h2>
-                <h3 class="font-bold">${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
+                <h2>Saldo total pendiente de ventas a crédito</h2>
+                <h3 class="font-bold">
+                    ${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
                 </h3>
             </div>
 
@@ -42,6 +44,12 @@
                 </el-tab-pane>
                 <el-tab-pane label="Ventas al contado" name="2">
                     <CashSales :clientId="client.id" />
+                </el-tab-pane>
+                <el-tab-pane label="Cotizaciones" name="3">
+                    <Quotes :clientId="client.id" />
+                </el-tab-pane>
+                <el-tab-pane label="Rentas" name="4">
+                    <Rentals :clientId="client.id" />
                 </el-tab-pane>
             </el-tabs>
         </section>
@@ -54,6 +62,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CreditSales from '@/Pages/Client/Tabs/CreditSales.vue';
 import CashSales from '@/Pages/Client/Tabs/CashSales.vue';
+import Quotes from '@/Pages/Client/Tabs/Quotes.vue';
+import Rentals from '@/Pages/Client/Tabs/Rentals.vue';
 import Back from "@/Components/MyComponents/Back.vue";
 
 export default {
@@ -70,7 +80,9 @@ export default {
         ThirthButton,
         CreditSales,
         CashSales,
-        Back
+        Back,
+        Quotes,
+        Rentals,
     },
     props: {
         client: Object,
