@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\CreditSaleData;
 use App\Models\OnlineSale;
 use App\Models\Sale;
 use App\Models\Store;
@@ -77,18 +78,22 @@ class CashCutController extends Controller
             return $date->created_at->format('Y-m-d');
         })
             ->map(function ($group) {
-                $total_sales = $group->sum('sales_cash');
+                $total_store_sales = $group->sum('store_sales_cash');
+                $total_online_sales = $group->sum('online_sales_cash');
                 $total_difference = $group->sum('difference');
                 $amount_sales_products = $group->count();
 
                 return [
                     'cuts' => $group,
-                    'total_sales' => $total_sales,
+                    'total_store_sales' => $total_store_sales,
+                    'total_online_sales' => $total_online_sales,
+                    'total_sales' => $total_store_sales + $total_online_sales,
                     'total_difference' => $total_difference,
                     'amount_sales_products' => $amount_sales_products
                 ];
             });
-
+        
+        // return $groupedCashCuts;
         return inertia('CashRegister/Show', compact('groupedCashCuts'));
     }
 
@@ -115,6 +120,7 @@ class CashCutController extends Controller
     {
         //recupera el último corte realizado
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
+        //recupera las configuraciones de la tienda en linea.
         $online_store_properties = auth()->user()->store->online_store_properties;
         $online_sales = null;
 
@@ -142,12 +148,18 @@ class CashCutController extends Controller
             $sales = Sale::where('cash_register_id', $cash_register_id)->get();
         }
 
+        // Filtra las ventas a crédito por folio
+        $credit_sales_folios = CreditSaleData::pluck('folio')->toArray();
+        $filtered_sales = $sales->reject(function ($sale) use ($credit_sales_folios) {
+            return in_array($sale->folio, $credit_sales_folios);
+        });
+
         // Calcula el total de ventas
-        $total_sales = $sales->sum(function ($sale) {
+        $total_sales = $filtered_sales->sum(function ($sale) {
             return $sale->quantity * $sale->current_price;
         });
 
-        //suma todos los totales de las ventas en línea
+        // Suma todos los totales de las ventas en línea
         $total_online_sales = $online_sales?->sum(function ($online_sale) {
             return $online_sale->total;
         });
