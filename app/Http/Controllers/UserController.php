@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\NotificationResource;
 use App\Models\CashRegister;
 use App\Models\User;
+use App\Notifications\OnlineSaleNotification;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -16,10 +17,9 @@ class UserController extends Controller
         return inertia('User/Create', compact('total_users'));
     }
 
-
     public function store(Request $request)
     {
-        $request-> validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'rol' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
@@ -33,25 +33,23 @@ class UserController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'rol' => $request->rol, 
-            'store_id' => $store_id, 
-            'password' => bcrypt('ezyventas'), 
-            'cash_register_id' => $cash_register->id, 
+            'rol' => $request->rol,
+            'store_id' => $store_id,
+            'password' => bcrypt('ezyventas'),
+            'cash_register_id' => $cash_register->id,
         ]);
-        
+
         // return to_route('settings.index', ['tab' => 2]);
     }
-
 
     public function edit(User $user)
     {
         return inertia('User/Edit', compact('user'));
     }
 
-
     public function update(Request $request, User $user)
     {
-        $request-> validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'rol' => 'required|string|max:255',
@@ -62,16 +60,21 @@ class UserController extends Controller
         return to_route('settings.index', ['tab' => 2]);
     }
 
-
     public function show(User $user)
     {
         return inertia('User/Show');
     }
 
-
     public function getNotifications()
     {
-        $items = NotificationResource::collection(auth()->user()->notifications);
+        $items = NotificationResource::collection(auth()->user()->notifications->where('type', '!=', OnlineSaleNotification::class));
+
+        return response()->json(compact('items'));
+    }
+
+    public function getOnlineSalesNotifications()
+    {
+        $items = NotificationResource::collection(auth()->user()->notifications->where('type', OnlineSaleNotification::class));
 
         return response()->json(compact('items'));
     }
@@ -89,12 +92,23 @@ class UserController extends Controller
         if ($request->notifications_ids) {
             auth()->user()->notifications->whereIn('id', $request->notifications_ids)->markAsRead();
         } else {
-            auth()->user()->notifications->markAsRead();
+            auth()->user()->notifications->where('type', '!=', OnlineSaleNotification::class)->markAsRead();
         }
 
         return response()->json(compact('unread'));
     }
 
+    public function readOnlineSalesNotifications(Request $request)
+    {
+        $unread = auth()->user()->unreadNotifications->count();
+        if ($request->notifications_ids) {
+            auth()->user()->notifications->whereIn('id', $request->notifications_ids)->markAsRead();
+        } else {
+            auth()->user()->notifications->where('type', OnlineSaleNotification::class)->markAsRead();
+        }
+
+        return response()->json(compact('unread'));
+    }
 
     public function resetPassword(User $user)
     {
@@ -103,13 +117,12 @@ class UserController extends Controller
         ]);
     }
 
-
     public function destroy(User $user)
     {
         $user->delete();
     }
 
-    public function tutorialsCompleted() 
+    public function tutorialsCompleted()
     {
         $user = auth()->user();
         $user->tutorials_seen = true;
@@ -117,7 +130,6 @@ class UserController extends Controller
 
         return to_route('sales.point');
     }
-
 
     public function updatePrinterConfig(Request $request, User $user)
     {
@@ -129,14 +141,10 @@ class UserController extends Controller
         $user->update($request->all());
     }
 
-
     public function savePrinter(Request $request, User $user)
     {
         $user->update([
             'printer_config.printer' => $request->printer
         ]);
     }
-
-
-    
 }
