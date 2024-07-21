@@ -7,8 +7,8 @@
         <span class="text-gray37">Producto rentado:</span>
         <span @click="viewProduct(rent.product)" class="col-span-3 lg:col-span-5 text-primary underline cursor-pointer">{{
             rent.product.name }}</span>
-        <span class="text-gray37">Fecha de entrega a cliente:</span>
-        <span class="col-span-3 lg:col-span-5">{{ formatDate(rent.rented_at) }}</span>
+        <span class="text-gray37">Fecha y hora de entrega a cliente:</span>
+        <span class="col-span-3 lg:col-span-5">{{ formatDateTime(rent.rented_at) }}</span>
         <span class="text-gray37">Fecha de devolución:</span>
         <p class="col-span-3 lg:col-span-5">
             <span>{{ rent.completed_at ? formatDate(rent.completed_at) : 'Sigue con el cliente' }}</span>
@@ -78,6 +78,9 @@ export default {
         viewProduct(product) {
             const encodedId = btoa(product.id.toString());
             window.open(route('products.show', encodedId), '_blank');
+        },
+        formatDateTime(date) {
+            return format(parseISO(date), 'dd MMMM yyyy, hh:mm a', { locale: es });
         },
         formatDate(date) {
             return format(parseISO(date), 'dd MMMM yyyy', { locale: es });

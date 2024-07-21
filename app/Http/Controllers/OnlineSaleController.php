@@ -485,7 +485,7 @@ class OnlineSaleController extends Controller
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
         $updated_items = [];
-        if ($is_inventory_on) {
+        // if ($is_inventory_on) {
             $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
                 if ($sale['isLocal']) {
                     $current_product = Product::find($sale['product_id']);
@@ -508,7 +508,7 @@ class OnlineSaleController extends Controller
                 // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
                 $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
             });
-        }
+        // }
 
         // marcar venta como reembolsada
         $onlineSale->update(['refunded_at' => now(), 'status' => 'Reembolsado']);
@@ -524,7 +524,7 @@ class OnlineSaleController extends Controller
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
         $updated_items = [];
-        if ($is_inventory_on) {
+        // if ($is_inventory_on) {
             $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
                 if ($sale['isLocal']) {
                     $current_product = Product::find($sale['product_id']);
@@ -547,7 +547,7 @@ class OnlineSaleController extends Controller
                 // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
                 $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
             });
-        }
+        // }
 
         // marcar venta como cancelada
         $onlineSale->update(['refunded_at' => now(), 'status' => 'Cancelado']);

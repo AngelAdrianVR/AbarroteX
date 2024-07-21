@@ -244,9 +244,8 @@
                 <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
               </div>
               <div class="text-center mt-7">
-                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">No
-                  te
-                  quedan existencias de este producto.
+                <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">
+                  No te quedan existencias de este producto.
                   <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                 </div>
                 <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
@@ -929,9 +928,7 @@ export default {
           limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
         });
         if (response.status === 200) {
-          if (this.isInventoryOn) {
-            this.updateCurrentStockInIndexedDB();
-          }
+          this.updateCurrentStockInIndexedDB();
           this.clearTab();
           this.fetchCashRegister();
 
@@ -954,9 +951,7 @@ export default {
     },
     processOfflineSale() {
       this.saveToLocalStorage();
-      if (this.isInventoryOn) {
-        this.updateCurrentStockInIndexedDB();
-      }
+      this.updateCurrentStockInIndexedDB();
       this.sumCashForSale();
       this.clearTab();
     },
