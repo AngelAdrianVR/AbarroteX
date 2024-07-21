@@ -11,7 +11,8 @@
                     <PrimaryButton @click="$inertia.get(route('products.edit', encodedId))" class="!rounded-full">
                         Editar</PrimaryButton>
                     <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
-                        <i class="fa-solid fa-plus"></i> Nuevo</PrimaryButton>
+                        <i class="fa-solid fa-plus"></i> Nuevo
+                    </PrimaryButton>
                 </div>
             </div>
             <div class="lg:w-1/4 relative">
@@ -227,17 +228,17 @@ export default {
                     this.fetchHistory();
 
                     // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
-                    if (this.isInventoryOn) {
-                        const product = {
-                            id: 'local_' + this.product.data.id,
-                            name: this.product.data.name,
-                            code: this.product.data.code,
-                            public_price: this.product.data.public_price,
-                            current_stock: this.product.data.current_stock + this.form.quantity,
-                            image_url: this.product.data.imageCover[0]?.original_url,
-                        };
-                        addOrUpdateItem('products', product);
-                    }
+                    // if (this.isInventoryOn) {
+                    const product = {
+                        id: 'local_' + this.product.data.id,
+                        name: this.product.data.name,
+                        code: this.product.data.code,
+                        public_price: this.product.data.public_price,
+                        current_stock: this.product.data.current_stock + this.form.quantity,
+                        image_url: this.product.data.imageCover[0]?.original_url,
+                    };
+                    addOrUpdateItem('products', product);
+                    // }
                 },
                 onFinish: () => this.entryLoading = false,
             });

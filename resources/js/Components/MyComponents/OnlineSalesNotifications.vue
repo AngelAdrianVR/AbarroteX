@@ -1,11 +1,13 @@
 <template>
-    <Dropdown @click="readNotifications()" align="right" width="notifications" class="mt-2 mr-2" :closeInClick="false">
+    <Dropdown @click="readNotifications()" align="right" width="notifications" class="mt-2" :closeInClick="false">
         <template #trigger>
-            <button class="ml-6 relative text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150" :class="getUnreadMessages.length ? 'text-primary' : 'text-[#97989A]'">
+            <button
+                class="ml-6 relative text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150"
+                :class="getUnreadMessages.length ? 'text-primary' : 'text-[#97989A]'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-4">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                 </svg>
             </button>
             <span v-if="getUnreadMessages.length"
@@ -14,8 +16,10 @@
             </span>
         </template>
         <template #content>
-            <h1 class="text-gray66 text-center text-sm my-2">Notificaciones <span class="text-primary">({{
-                notifications.length }})</span></h1>
+            <h1 class="text-gray66 text-center text-sm my-2">
+                Notificaciones tienda en línea
+                <span class="text-primary">({{ notifications.length }})</span>
+            </h1>
             <header v-if="notifications.length" class="py-1 px-4 flex justify-between items-center border-b mt-3">
                 <label class="text-gray99 text-xs has-[:checked]:text-primary">
                     <Checkbox v-model:checked="allItems" @change="handleChange" class="size-3 mr-2" />
@@ -126,9 +130,9 @@ export default {
                 });
             }
         },
-        async fetchNotifications() {
+        async fetchOnlineSalesNotifications() {
             try {
-                const response = await axios.get(route('users.get-notifications'));
+                const response = await axios.get(route('users.get-online-sales-notifications'));
 
                 if (response.status === 200) {
                     this.notifications = response.data.items;
@@ -137,17 +141,17 @@ export default {
                 console.log(error);
                 this.$notify({
                     title: "No se pudo completar la solicitud",
-                    message: "El servidor no pudo procesar la petición para obtener las notificaciones. Inténtalo más tarde",
+                    message: "El servidor no pudo procesar la petición para obtener las notificaciones de tienda en linea. Inténtalo más tarde",
                     type: "error",
                 });
             }
         },
         async readNotifications() {
             try {
-                const response = await axios.post(route("users.read-user-notifications"));
+                const response = await axios.post(route("users.read-user-online-sales-notifications"));
 
                 if (response.data.unread) {
-                    this.fetchNotifications();
+                    this.fetchOnlineSalesNotifications();
                 }
             } catch (error) {
                 console.log(error);
@@ -160,7 +164,7 @@ export default {
         }
     },
     mounted() {
-        this.fetchNotifications();
+        this.fetchOnlineSalesNotifications();
     },
 
 };
