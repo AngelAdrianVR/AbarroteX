@@ -170,6 +170,11 @@ class ClientController extends Controller
         return response()->json(['items' => $rentals]);
     }
 
+    public function getClientInfo(Client $client)
+    {
+        return response()->json(compact('client'));
+    }
+
     // private
     private function getGroupedSalesByDate($sales, $returnSales = false)
     {

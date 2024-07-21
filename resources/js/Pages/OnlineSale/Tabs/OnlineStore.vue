@@ -329,7 +329,10 @@ export default {
   },
   methods: {
     update() {
-      this.updateBanners();
+      //Se agrega un timer para que termine de cargar las imagenes de banners y prosiga con el logo
+      setTimeout(() => {
+        this.updateBanners();
+      }, 1000);
       this.updateLogo();
     },
     updateOnlineSalesInfo() {

@@ -46,7 +46,7 @@
             <!-- tabs options -->
             <el-tabs v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane label="Pedidos" name="1">
-                    <OnlineOrders :orders="online_orders" :totalOnlineOrders="total_online_orders" />
+                    <OnlineOrders :orders="online_orders" :totalOnlineOrders="total_online_orders" :clients="clients" />
                 </el-tab-pane>
                 <el-tab-pane label="Ajustes generales" name="2">
                     <OnlineStore :banners="banners" :logo="logo" :cash_registers="cash_registers" />
@@ -85,7 +85,8 @@ banners: Object, //imagenes banners para tienda online
 online_orders: Array, //imagenes banners para tienda online
 logo: Object, //imagenes logo para tienda online
 total_online_orders: Number, //total de ordenes para paginación
-cash_registers: Array //cajas registradoras de la tienda
+cash_registers: Array, //cajas registradoras de la tienda
+clients: Array //clientes de la tienda
 },
 methods:{
     updateURL(tab) {

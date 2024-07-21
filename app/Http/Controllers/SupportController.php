@@ -15,4 +15,9 @@ class SupportController extends Controller
     {
         return inertia('Support/Faqs');
     }
+
+    public function suscription()
+    {
+        return inertia('Support/Suscription');
+    }
 }

@@ -297,6 +297,7 @@ Route::get('clients-print-cash-historial/{client}', [ClientController::class, 'P
 Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getClientSales'])->name('clients.get-client-sales')->middleware('auth');
 Route::get('clients-get-client-quotes/{client}', [ClientController::class, 'getClientQuotes'])->name('clients.get-client-quotes')->middleware('auth');
 Route::get('clients-get-client-rentals/{client}', [ClientController::class, 'getClientRentals'])->name('clients.get-client-rentals')->middleware('auth');
+Route::get('clients-get-client-info/{client}', [ClientController::class, 'getClientInfo'])->name('clients.get-client-info')->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------
@@ -309,6 +310,7 @@ Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'upda
 //----------------------------------------------------------------------------------------------------
 Route::get('support/index', [SupportController::class, 'index'])->middleware('auth')->name('supports.index');
 Route::get('support/faqs', [SupportController::class, 'faqs'])->middleware('auth')->name('supports.faqs');
+Route::get('support/suscription', [SupportController::class, 'suscription'])->middleware('auth')->name('supports.suscription');
 Route::get('support/create-report', [SupportController::class, 'createReport'])->middleware('auth')->name('supports.create-report');
 
 

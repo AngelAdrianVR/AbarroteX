@@ -71,7 +71,7 @@
                         <td>{{ formatDate(online_order.created_at) }}</td>
                         <td>{{ formatDate(online_order.delivered_at) ?? '--' }}</td>
                         <td>{{ online_order.name }}</td>
-                        <td>${{ online_order.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                        <td>${{ (online_order.total + online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         <td>
                             <div class="flex items-center space-x-2">
                                 <span v-html="getStatusIcon(online_order.status)"></span>
@@ -176,6 +176,26 @@
                 <p>Datos del cliente</p>
 
                 <div class="md:grid grid-cols-2 gap-y-2 gap-x-7 space-y-2 md:space-y-0 mt-3">
+
+                    <div class="col-span-full flex items-center space-x-3">
+                        <div class="lg:w-1/2 lg:pr-3">
+                            <InputLabel class="mb-1 ml-2" value="Selecciona un cliente (opcional)" />
+                            <div class="flex items-center space-x-3">
+                                <el-select :disabled="loadingClientInfo" @change="getClientInfo" v-model="client_id" clearable filterable
+                                    placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                                    no-match-text="No se encontraron coincidencias">
+                                    <el-option v-for="client in clients" :key="client" :label="client.name" :value="client.id" />
+                                </el-select>
+                                <button @click="openClientCreationForm" type="button"
+                                    class="rounded-full border-primary size-5 flex items-center justify-center text-primary text-lg">
+                                    <i class="fa-solid fa-circle-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p v-if="loadingClientInfo" class="text-xs text-center">
+                            Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin text-primary"></i>
+                        </p>
+                    </div>
                     <div>
                         <InputLabel value="Nombre del cliente*" class="ml-3 mb-1" />
                         <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100"
@@ -380,9 +400,11 @@ export default {
         });
         return {
             form, //formulario para crear orden en linea
+            client_id: null,
             createOnlineOrderModal: false, //modal para crear orden en linea.
             localOrders: this.orders, //ordenes locales 
             loading: false,
+            loadingClientInfo: false, //estado de carga al obtener la info del cliente seleccionado en la orden
             showFilter: false, //filtro opciones
             searchDate: null, //filtro fechas
             loadingItems: false, //para paginación
@@ -419,7 +441,8 @@ export default {
     },
     props: {
         orders: Array,
-        totalOnlineOrders: Number
+        totalOnlineOrders: Number,
+        clients: Array
     },
     methods: {
         addNewItem() {
@@ -548,6 +571,33 @@ export default {
                 this.loadingItems = false;
             }
         },
+        async getClientInfo() {
+            try {
+                this.loadingClientInfo = true;
+                const response = await axios.get(route('clients.get-client-info', this.client_id));
+
+                if (response.status === 200) {
+                    const client = response.data.client;
+                    this.form.name = client.name;
+                    this.form.phone = client.phone;
+                    this.form.street = client.street;
+                    this.form.suburb = client.suburb;
+                    this.form.postal_code = client.postal_code;
+                    this.form.polity_state = client.polity_state;
+                    this.form.ext_number = client.ext_number;
+                    this.form.int_number = client.int_number;
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                        title: 'No se completó la petición',
+                        message: 'No se pudo recuperar la nformación del cliente',
+                        type: 'success',
+                    });
+            } finally {
+                this.loadingClientInfo = false;
+            }
+        },
         async deleteOnlineOrder() {
             try {
                 const response = await axios.delete(route('online-sales.destroy', this.itemIdToDelete));
@@ -668,6 +718,9 @@ export default {
             const text = encodeURIComponent('Hola! hemos recibido tu pedido en línea');
             const url = `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
             window.open(url, '_blank');
+        },
+        openClientCreationForm() {
+            window.open(route('clients.create'), '_blank');
         }
     },
     watch: {
