@@ -14,7 +14,7 @@ class OnlineSaleNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(public $title, public $description, public $url, public $type)
     {
         //
     }
@@ -26,7 +26,12 @@ class OnlineSaleNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $is_email_notifications_on = $notifiable->store->settings()->where('key', 'Notificaciones por correo')->first()?->pivot->value;
+        if (app()->environment() == 'production' && $is_email_notifications_on) {
+            return ['database', 'mail'];
+        } else {
+            return ['database'];
+        }
     }
 
     /**
@@ -35,9 +40,14 @@ class OnlineSaleNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject($this->title)
+            ->markdown('emails.basic-email-template', [
+                'greeting' => '¡Hola!',
+                'description' => $this->description,
+                'url' => $this->url,
+                'salutation' => 'Saludos',
+                'subcopy' => 'Si tienes alguna duda, dirígete a <a href="https://ezyventas.com/support/faqs">Soporte</a>, directamente desde el sistema. Si ya no deseas recibir nuestros correos electrónicos, <a href="https://ezyventas.com/settings">cancela tu suscripción</a>.'
+            ]);
     }
 
     /**
@@ -48,7 +58,10 @@ class OnlineSaleNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => $this->title,
+            'description' => $this->description,
+            'url' => $this->url,
+            'type' => $this->type,
         ];
     }
 }
