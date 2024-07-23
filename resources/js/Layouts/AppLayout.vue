@@ -106,7 +106,7 @@ onUnmounted(() => {
                             </div>
                             <div class="hidden sm:flex sm:items-center sm:ms-6">
                                 <!-- notificaciones de tienda en linea -->
-                                <OnlineSalesNotifications />
+                                <OnlineSalesNotifications v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" />
                                 <!-- notifications -->
                                 <NotificationsCenter />
 
@@ -169,7 +169,7 @@ onUnmounted(() => {
                             <!-- Hamburger -->
                             <div class="-me-2 flex items-center sm:hidden">
                                 <!-- notificaciones de tienda en linea -->
-                                <OnlineSalesNotifications class="-mr-4" />
+                                <OnlineSalesNotifications v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="-mr-4" />
                                 <!-- notifications -->
                                 <NotificationsCenter />
                                 <button
