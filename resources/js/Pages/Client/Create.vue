@@ -8,7 +8,14 @@
                 <h1 class="font-bold ml-2 col-span-full">Nuevo cliente</h1>
 
                 <div class="mt-3 col-span-full">
-                    <InputLabel value="Nombre*" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre de la empresa (opcional)" class="ml-3 mb-1" />
+                    <el-input v-model="form.company" placeholder="Escribe el nombre del cliente" :maxlength="100"
+                        clearable />
+                    <InputError :message="form.errors.company" />
+                </div>
+
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Nombre del contacto*" class="ml-3 mb-1" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100"
                         clearable />
                     <InputError :message="form.errors.name" />
@@ -143,7 +150,8 @@ import { useForm } from "@inertiajs/vue3";
 export default {
     data() {
         const form = useForm({
-            name: null,
+            company: null, //nombre de la empresa
+            name: null, //nombre del contacto
             phone: null,
             street: null,
             suburb: null,
