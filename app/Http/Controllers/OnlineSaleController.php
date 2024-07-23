@@ -85,7 +85,7 @@ class OnlineSaleController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
-            'payment_method' => 'required|string|max:255',
+            'payment_method' => 'nullable|string|max:255',
             'suburb' => 'required|string|max:255',
             'email' => 'nullable|email',
             'street' => 'required|string|max:255',

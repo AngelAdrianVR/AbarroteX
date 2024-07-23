@@ -4,7 +4,8 @@
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th>N°</th>
-                    <th>Cliente</th>
+                    <th>Cliente/empresa</th>
+                    <th>Contacto</th>
                     <th>Teléfono</th>
                     <th>RFC</th>
                     <th>Dirección</th>
@@ -17,6 +18,7 @@
                     v-for="(client, index) in clients" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ index + 1 }}</td>
+                    <td>{{ client.company ?? '-' }}</td>
                     <td>{{ client.name }}</td>
                     <td>{{ client.phone }}</td>
                     <td>{{ client.rfc ?? '-' }}</td>

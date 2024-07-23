@@ -28,6 +28,7 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'company' => 'nullable|string|max:150',
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
             'notes' => 'nullable|string|max:255',
@@ -73,6 +74,7 @@ class ClientController extends Controller
     public function update(Request $request, Client $client)
     {
         $request->validate([
+            'company' => 'nullable|string|max:150',
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
             'notes' => 'nullable|string|max:255',

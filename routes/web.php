@@ -176,6 +176,7 @@ Route::resource('rentals', RentalController::class)->middleware(['auth', 'active
 Route::put('rentals/update-status/{rental}', [RentalController::class, 'updateStatus'])->name('rentals.update-status')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('rentals-search', [RentalController::class, 'searchRent'])->name('rentals.search')->middleware('auth');
 Route::get('rentals-get-by-page/{currentPage}', [RentalController::class, 'getItemsByPage'])->name('rentals.get-by-page')->middleware('auth');
+Route::get('rentals-print-contract/{rental}', [RentalController::class, 'printContract'])->name('rentals.print-contract')->middleware('auth');
 
 
 //rental payments routes----------------------------------------------------------------------------------

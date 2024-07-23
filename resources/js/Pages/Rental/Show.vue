@@ -11,12 +11,15 @@
                     <el-option v-for="item in rentals" :key="item.id" :label="item.folio" :value="item.id" />
                 </el-select>
                 <div class="flex items-center space-x-3">
-                    <ThirthButton @click="$inertia.get(route('rental-payments.create', {rentalId: rental.id}))">
-                        Registrar pago
-                    </ThirthButton>
-                    <PrimaryButton @click="$inertia.get(route('rentals.edit', encodedId))">
-                        Editar
-                    </PrimaryButton>
+                    <el-dropdown split-button type="primary" @click="$inertia.get(route('rentals.edit', encodedId))">
+                    Editar
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                        <el-dropdown-item @click="printContract()">Imprimir contrato</el-dropdown-item>
+                        <el-dropdown-item @click="$inertia.get(route('rental-payments.create', {rentalId: rental.id}))">Registrar pago</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                    </el-dropdown>
                 </div>
             </header>
             <!-- Productos -->
@@ -78,6 +81,9 @@ export default {
         handleSelect() {
             const encodedId = btoa(this.rentId.toString());
             this.$inertia.get(route('rentals.show', encodedId))
+        },
+        printContract() {
+            window.open(route('rentals.print-contract', this.rental.id), '_blank');
         },
         updateURL(tab) {
             const params = new URLSearchParams(window.location.search);
