@@ -214,7 +214,7 @@ export default {
             total: null, //cantidad total de venta $
             address_references: null, //referencias para dar con el lugar
             store_id: null,
-            store_inventory: null //bandera para saber si la configuración de inventario está activa y descontar productos
+            store_inventory: null, //bandera para saber si la configuración de inventario está activa y descontar productos
         });
 
         return {

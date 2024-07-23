@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Service;
 use App\Models\Store;
+use App\Notifications\OnlineSaleNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -85,7 +86,7 @@ class OnlineSaleController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
-            'payment_method' => 'required|string|max:255',
+            'payment_method' => 'nullable|string|max:255',
             'suburb' => 'required|string|max:255',
             'email' => 'nullable|email',
             'street' => 'required|string|max:255',
@@ -115,12 +116,21 @@ class OnlineSaleController extends Controller
         $this->updateProductStock($validated['products'], $request->store_inventory);
 
         $new_online_sale = OnlineSale::create($validated);
-
         $encoded_store_id = base64_encode($request->store_id);
-
+        
         if ($request->created_from_app === true) {
             return to_route('online-sales.show', $new_online_sale->id);
         } else {
+            // notificar
+            $store = Store::find($validated['store_id']);
+            $store->users->each(function($user) use ($new_online_sale){
+                $user->notify(new OnlineSaleNotification(
+                    'Nuevo pedido en linea',
+                    "Nuevo pedido a domicilio con folio $new_online_sale->id, de $new_online_sale->name",
+                    route('online-sales.show', $new_online_sale->id),
+                    'new',
+                ));
+            });
             return redirect()->route('online-sales.client-index', ['encoded_store_id' => $encoded_store_id]);
         }
     }
@@ -487,28 +497,28 @@ class OnlineSaleController extends Controller
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
         $updated_items = [];
         // if ($is_inventory_on) {
-            $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
-                if ($sale['isLocal']) {
-                    $current_product = Product::find($sale['product_id']);
-                    $indexedDB_name = $current_product->name;
-                } else {
-                    $current_product = GlobalProductStore::find($sale['product_id']);
-                    $indexedDB_name = $current_product->globalProduct->name;
-                }
+        $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
+            if ($sale['isLocal']) {
+                $current_product = Product::find($sale['product_id']);
+                $indexedDB_name = $current_product->name;
+            } else {
+                $current_product = GlobalProductStore::find($sale['product_id']);
+                $indexedDB_name = $current_product->globalProduct->name;
+            }
 
-                $current_product->increment('current_stock', $sale['quantity']);
+            $current_product->increment('current_stock', $sale['quantity']);
 
-                //Registra el historial de venta de cada producto
-                ProductHistory::create([
-                    'description' => "Registro de entrada de producto por reembolso de venta con folio $folio. " . $sale['quantity'] . ' pieza(s)',
-                    'type' => 'Reembolso',
-                    'historicable_id' => $current_product->id,
-                    'historicable_type' => get_class($current_product),
-                ]);
+            //Registra el historial de venta de cada producto
+            ProductHistory::create([
+                'description' => "Registro de entrada de producto por reembolso de venta con folio $folio. " . $sale['quantity'] . ' pieza(s)',
+                'type' => 'Reembolso',
+                'historicable_id' => $current_product->id,
+                'historicable_type' => get_class($current_product),
+            ]);
 
-                // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
-                $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
-            });
+            // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
+            $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
+        });
         // }
 
         // marcar venta como reembolsada
@@ -526,28 +536,28 @@ class OnlineSaleController extends Controller
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
         $updated_items = [];
         // if ($is_inventory_on) {
-            $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
-                if ($sale['isLocal']) {
-                    $current_product = Product::find($sale['product_id']);
-                    $indexedDB_name = $current_product->name;
-                } else {
-                    $current_product = GlobalProductStore::find($sale['product_id']);
-                    $indexedDB_name = $current_product->globalProduct->name;
-                }
+        $saleProducts->each(function ($sale) use ($folio, &$updated_items) {
+            if ($sale['isLocal']) {
+                $current_product = Product::find($sale['product_id']);
+                $indexedDB_name = $current_product->name;
+            } else {
+                $current_product = GlobalProductStore::find($sale['product_id']);
+                $indexedDB_name = $current_product->globalProduct->name;
+            }
 
-                $current_product->increment('current_stock', $sale['quantity']);
+            $current_product->increment('current_stock', $sale['quantity']);
 
-                //Registra el historial de venta de cada producto
-                ProductHistory::create([
-                    'description' => "Registro de entrada de producto por cancelación de venta con folio $folio. " . $sale['quantity'] . ' pieza(s)',
-                    'type' => 'Cancelación',
-                    'historicable_id' => $current_product->id,
-                    'historicable_type' => get_class($current_product),
-                ]);
+            //Registra el historial de venta de cada producto
+            ProductHistory::create([
+                'description' => "Registro de entrada de producto por cancelación de venta con folio $folio. " . $sale['quantity'] . ' pieza(s)',
+                'type' => 'Cancelación',
+                'historicable_id' => $current_product->id,
+                'historicable_type' => get_class($current_product),
+            ]);
 
-                // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
-                $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
-            });
+            // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
+            $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
+        });
         // }
 
         // marcar venta como cancelada
@@ -568,27 +578,27 @@ class OnlineSaleController extends Controller
     // PRIVATE
     private function checkProductStock(array $products, $storeInventory)
     {
-        if ($storeInventory === true) {
-            foreach ($products as $product) {
-                $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
+        // if ($storeInventory === true) {
+        foreach ($products as $product) {
+            $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
 
-                if ($temp_product->current_stock < $product['quantity']) {
-                    throw ValidationException::withMessages([
-                        'products' => 'No hay suficiente stock disponible de ' . $product['name'],
-                    ]);
-                }
+            if ($temp_product->current_stock < $product['quantity']) {
+                throw ValidationException::withMessages([
+                    'products' => 'No hay suficiente stock disponible de ' . $product['name'],
+                ]);
             }
         }
+        // }
     }
 
     private function updateProductStock(array $products, $storeInventory)
     {
-        if ($storeInventory === true) {
-            foreach ($products as $product) {
-                $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
-                $temp_product->current_stock -= $product['quantity'];
-                $temp_product->save();
-            }
+        // if ($storeInventory === true) {
+        foreach ($products as $product) {
+            $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
+            $temp_product->current_stock -= $product['quantity'];
+            $temp_product->save();
         }
+        // }
     }
 }
