@@ -31,7 +31,9 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\UserController;
+use App\Models\Category;
 use App\Models\Sale;
+use App\Models\Size;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -139,8 +141,38 @@ Route::middleware([
 //     $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
 
 //     return "Email sent to $admin->name successfuly!";
-// });`
+// });
 
+
+// Route::get('add-categories', function () {
+//     $categories = [
+//         'Ropa de mujer' => ['0' => null, '1' => null, '3' => null, '5' => null, '7' => null, '9' => null, '11' => null, '13' => null, '15' => null, 'Extra chica' => 'XS', 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Exta grande' => 'XL', 'Doble exta grande' => '2XL', 'Triple exta grande' => '3XL'],
+//         'Ropa de hombre' => ['28' => null, '29' => null, '30' => null, '31' => null, '32' => null, '33' => null, '34' => null, '36' => null, '38' => null, '40' => null, 'Extra chica' => 'XS', 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Exta grande' => 'XL', 'Doble exta grande' => '2XL', 'Triple exta grande' => '3XL'],
+//         'Ropa de niño(a)' => ['2' => null, '4' => null, '6' => null, '8' => null, '10' => null, '12' => null, '14' => null],
+//         'Calzado de mujer' => ['23' => null, '23.5' => null, '24' => null, '24.5' => null, '25' => null, '25.5' => null, '26' => null, '26.5' => null, '27' => null, '27.5' => null, '28' => null],
+//         'Calzado de hombre' => ['23' => null, '23.5' => null, '24' => null, '24.5' => null, '25' => null, '25.5' => null, '26' => null, '26.5' => null, '27' => null, '27.5' => null, '28' => null, '28.5' => null, '29' => null, '29.5' => null, '30' => null, '30.5' => null, '31' => null],
+//         'Calzado de niño(a)' => ['13' => null, '13.5' => null, '14' => null, '14.5' => null, '15' => null, '15.5' => null, '16' => null, '16.5' => null, '17' => null, '17.5' => null, '18' => null, '18.5' => null, '19' => null, '19.5' => null, '20' => null, '21.5' => null, '22' => null],
+//         'Accesorios' => ['Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L'],
+//         'Lencería' => ['32A' => null, '32B' => null, '34B' => null,'34C' => null, '36C' => null, '36D' => null, '38D' => null, '40E' => null, 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Extra grande' => 'XL', 'Doble extra grande' => '2XL'],
+//     ];
+
+//     foreach ($categories as $category => $sizes) {
+//         Category::create([
+//             'name' => $category,
+//             'business_line_name' => 'Boutique / Tienda de Ropa / Zapatería',
+//         ]);
+
+//         foreach ($sizes as $size => $short) {
+//             Size::create([
+//                 'name' => $size,
+//                 'short' => $short,
+//                 'category' => $category,
+//             ]);
+//         }
+//     }
+
+//     return "Categorias agregadas!";
+// });
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
