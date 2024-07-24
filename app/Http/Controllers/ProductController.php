@@ -11,6 +11,7 @@ use App\Models\Expense;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
+use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -28,13 +29,18 @@ class ProductController extends Controller
 
     public function create()
     {
-        $store_id = auth()->user()->store_id;
-        $products_quantity = Product::where('store_id', $store_id)->get()->count();
         $store = auth()->user()->store;
+        $products_quantity = Product::where('store_id', $store->id)->get()->count();
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
-        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
-
-        return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
+        
+        // selector de vista para crear producto
+        if ($store->type === 'Boutique / Tienda de Ropa / Zapatería') {
+            $sizes = Size::whereIn('category', $categories->pluck(['name']))->get();
+            return inertia('Product/Boutique/Create', compact('products_quantity', 'categories', 'sizes'));
+        } else {
+            $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
+            return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
+        }
     }
 
 
