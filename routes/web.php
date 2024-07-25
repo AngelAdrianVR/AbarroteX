@@ -26,6 +26,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
+use App\Http\Controllers\SizeController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
@@ -200,6 +201,7 @@ Route::get('products-export', [ProductController::class, 'export'])->name('produ
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
+Route::post('products/store-boutique', [ProductController::class, 'storeBoutique'])->name('products.store-boutique')->middleware('auth'); //cambia el precio del producto desde el punto de venta
 
 
 //rentals routes----------------------------------------------------------------------------------
@@ -390,6 +392,11 @@ Route::resource('tutorials', TutorialController::class)->middleware('auth');
 //Abonos routes-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('installments', InstallmentController::class)->middleware('auth');
+
+
+//rutas de tallas-----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('sizes', SizeController::class)->middleware('auth');
 
 
 //Banners online store routes------------------------------------------------------------------------------------------------------
