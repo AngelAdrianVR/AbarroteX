@@ -18,6 +18,7 @@ class GlobalProductStore extends Model
         'max_stock',
         'current_stock',
         'description',
+        'has_inventory_control',
         'global_product_id',
         'store_id',
     ];

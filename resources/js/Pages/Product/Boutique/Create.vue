@@ -7,14 +7,14 @@
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3">
-                    <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre del producto*" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100"
                         clearable />
                     <InputError :message="form.errors.name" />
                 </div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría" class="ml-3 mb-1" />
+                        <InputLabel value="Categoría" />
                         <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -36,7 +36,7 @@
                 </div>
                 <div v-if="canSeeCost" class="mt-3">
                     <div class="flex items-center">
-                        <InputLabel value="Precio de compra" class="ml-3 mb-1" />
+                        <InputLabel value="Precio de compra" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
@@ -64,7 +64,7 @@
                 <section class="col-span-full mt-3">
                     <h2 class="font-bold text-sm mt-3">Control de stock</h2>
                     <div class="flex items-center space-x-3 mt-1 mb-4">
-                        <el-checkbox v-model="form.inventory_control" name="inventory" required size="small"
+                        <el-checkbox v-model="form.has_inventory_control" name="inventory" required size="small"
                             label="Habilitar control de stock" />
                         <el-tooltip placement="right">
                             <template #content>
@@ -77,9 +77,13 @@
                         </el-tooltip>
                     </div>
 
-                    <article v-for="(item, index) in form.sizes" :key="index" class="flex items-center space-x-3">
-                        <div class="w-[34%]">
-                            <InputLabel value="Talla *" />
+                    <article v-for="(item, index) in form.sizes" :key="index" class="flex items-center space-x-3 mb-2">
+                        <div class="w-[33%]">
+                            <div class="w-full flex items-center justify-between">
+                                <InputLabel value="Talla *" />
+                                <button @click="showSizeFormModal = true" v-if="index == 0" type="button"
+                                    class="text-primary text-xs">Crear talla</button>
+                            </div>
                             <el-select filterable v-model="form.sizes[index].size_id" clearable placeholder="Seleccione"
                                 no-data-text="Primero seleccione la categoria"
                                 no-match-text="No se encontraron coincidencias">
@@ -91,36 +95,43 @@
                                             }})</span>
                                     </p>
                                 </el-option>
-                                <!-- <InputError :message="form.errors.public_price" /> -->
                             </el-select>
+                            <InputError :message="form.errors[`sizes.${index}.size_id`]" />
                         </div>
-                        <div class="w-[20%]">
+                        <div class="w-[14%]">
                             <InputLabel value="Existencias *" />
                             <el-input v-model="form.sizes[index].current_stock" placeholder="Stock actual"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <!-- <InputError :message="form.errors.public_price" /> -->
+                            <InputError :message="form.errors[`sizes.${index}.current_stock`]" />
                         </div>
-                        <div v-if="form.inventory_control" class="w-[20%]">
+                        <div v-if="form.has_inventory_control" class="w-[21%]">
                             <InputLabel value="Cantidad mínima" />
                             <el-input v-model="form.min_stock" placeholder="Mínimo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <!-- <InputError :message="form.errors.min_stock" /> -->
                         </div>
-                        <div v-if="form.inventory_control" class="w-[20%]">
+                        <div v-if="form.has_inventory_control" class="w-[21%]">
                             <InputLabel value="Cantidad máxima" />
                             <el-input v-model="form.max_stock" placeholder="Máximo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <!-- <InputError :message="form.errors.max_stock" /> -->
                         </div>
-                        <div class="w-[5%] flex justify-end mt-5">
-                            <button v-if="index >= 0" type="button">
-                                <i class="fa-regular fa-trash-can text-sm text-primary"></i>
-                            </button>
+                        <div class="w-[4%] flex justify-end mt-5">
+                            <el-popconfirm v-if="form.sizes.length > 1" confirm-button-text="Si" cancel-button-text="No"
+                                icon-color="#373737" :title="'¿Desea eliminar la talla seleccionada?'"
+                                @confirm="deleteSize(index)">
+                                <template #reference>
+                                    <button type="button">
+                                        <i class="fa-regular fa-trash-can text-sm text-primary"></i>
+                                    </button>
+                                </template>
+                            </el-popconfirm>
                         </div>
                     </article>
+                    <button @click="addSize" type="button" class="text-primary ml-3">+ Añadir talla</button>
                 </section>
                 <!-- <div class="mt-3 col-span-full">
                     <InputLabel value="Moneda*" />
@@ -133,12 +144,12 @@
                     <InputError :message="form.errors.currency" />
                 </div> -->
                 <div class="mt-7">
-                    <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
+                    <InputLabel value="Agregar imagen" />
                     <InputFilePreview @imagen="saveImage" @cleared="form.imageCover = null" />
                 </div>
 
                 <div class="mt-3 col-span-2">
-                    <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
+                    <InputLabel value="Código del producto (en caso de tener)" />
                     <el-input v-model="form.code" placeholder="Ej. RM-4332" :maxlength="100" clearable>
                         <template #prefix>
                             <i class="fa-solid fa-barcode"></i>
@@ -192,24 +203,40 @@
             </template>
         </DialogModal>
 
-        <!-- brand form -->
+        <!-- sizes form -->
         <DialogModal :show="showSizeFormModal" @close="showSizeFormModal = false">
-            <template #title> Agregar proveedor </template>
+            <template #title> Agregar talla </template>
             <template #content>
-                <form @submit.prevent="storeBrand">
+                <p class="text-gray99 mb-3">En este apartado puedes crear tallas que no se encuentren en la lista de
+                    tallas</p>
+                <form @submit.prevent="storeSize" class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-sm ml-3">Nombre del proveedor *</label>
-                        <el-input v-model="sizeForm.name" placeholder="Escribe el nombre del proveedor" :maxlength="100"
+                        <InputLabel value="Categoria *" />
+                        <el-select filterable v-model="sizeForm.category" clearable placeholder="Seleccione"
+                            no-data-text="No hay opciones" no-match-text="No se encontraron coincidencias">
+                            <el-option v-for="category in localCategories" :key="category.id" :label="category.name"
+                                :value="category.name" />
+                            <InputError :message="sizeForm.errors.category" />
+                        </el-select>
+                    </div>
+                    <div>
+                        <InputLabel value="Nombre de la talla *" />
+                        <el-input v-model="sizeForm.name" placeholder="Ej. Triple extra grande" :maxlength="100"
                             required clearable />
                         <InputError :message="sizeForm.errors.name" />
+                    </div>
+                    <div>
+                        <InputLabel value="Abreviación (opcional)" />
+                        <el-input v-model="sizeForm.short" placeholder="Ej. 3XL" :maxlength="100" required clearable />
+                        <InputError :message="sizeForm.errors.short" />
                     </div>
                 </form>
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="showSizeFormModal = false" :disabled="sizeForm.processing">Cancelar
+                    <CancelButton @click="showSizeFormModal = false" :disabled="sizeLoading">Cancelar
                     </CancelButton>
-                    <PrimaryButton @click="storeBrand()" :disabled="sizeForm.processing">Crear</PrimaryButton>
+                    <PrimaryButton @click="storeSize()" :disabled="sizeLoading">Crear</PrimaryButton>
                 </div>
             </template>
         </DialogModal>
@@ -240,7 +267,7 @@ export default {
             description: null,
             category_id: null,
             imageCover: null,
-            inventory_control: false,
+            has_inventory_control: false,
             sizes: [
                 {
                     size_id: null,
@@ -275,7 +302,9 @@ export default {
             ],
             // Permisos de rol actual
             canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
-            productsLimit: this.$page.props.auth.user.store.plan == 'Plan Básico' ? 1500 : 3000
+            productsLimit: this.$page.props.auth.user.store.plan == 'Plan Básico' ? 1500 : 3000,
+            // cargas
+            sizeLoading: false,
         };
     },
     components: {
@@ -301,12 +330,25 @@ export default {
         },
     },
     methods: {
+        deleteSize(index) {
+            this.form.sizes.splice(index, 1);
+        },
+        addSize() {
+            const newSize = {
+                size_id: null,
+                current_stock: 1,
+                min_stock: null,
+                max_stock: null,
+            }
+
+            this.form.sizes.push(newSize);
+        },
         saveImage(image) {
             this.form.imageCover = image;
         },
         async store() {
             try {
-                this.form.post(route("products.store"), {
+                this.form.post(route("products.store-boutique"), {
                     onSuccess: async () => {
                         // guardar nuevo producto a IndexedDB
                         // Obtener producto mas reciente agregado
@@ -348,24 +390,28 @@ export default {
                 console.log(error)
             }
         },
-        async storeBrand() {
+        async storeSize() {
+            this.sizeLoading = true;
             try {
-                const response = await axios.post(route('brands.store'), {
-                    name: this.sizeForm.name
+                const response = await axios.post(route('sizes.store'), {
+                    name: this.sizeForm.name,
+                    short: this.sizeForm.short,
+                    category: this.sizeForm.category
                 });
                 if (response.status === 200) {
                     this.$notify({
-                        title: "Éxito",
-                        message: "Se ha creado una nueva proveedor",
+                        title: "Talla creada",
+                        message: "",
                         type: "success",
                     });
-                    this.localBrands.push(response.data.item);
-                    this.form.brand_id = response.data.item.id;
+                    this.localSizes.unshift(response.data.item);
                     this.showSizeFormModal = false;
                     this.sizeForm.reset();
                 }
             } catch (error) {
                 console.log(error)
+            } finally {
+                this.sizeLoading = false;
             }
         },
     }
