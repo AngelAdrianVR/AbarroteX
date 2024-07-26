@@ -1,9 +1,9 @@
 <template>
-    <AppLayout :title="product.data.name">
+    <AppLayout :title="products[0].name">
         <div class="px-2 lg:px-10 py-7">
             <!-- header botones -->
             <div class="lg:flex justify-between items-center mx-3">
-                <h1 class="font-bold text-lg">Productos boutique</h1>
+                <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-2 my-2 lg:my-0">
                     <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
@@ -39,8 +39,8 @@
                 <!-- fotografia de producto -->
                 <section class="mt-7">
                     <figure class="border h-64 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
-                        <img v-if="product.data.imageCover?.length" class="h-52 md:h-80 mx-auto object-contain"
-                            :src="product.data.imageCover[0]?.original_url" alt="">
+                        <img v-if="products[0].imageCover?.length" class="h-52 md:h-80 mx-auto object-contain"
+                            :src="products[0].imageCover[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                             <p class="text-sm text-gray-300">Imagen no disponible</p>
@@ -53,10 +53,10 @@
                     <!-- Pestañas -->
                     <el-tabs class="" v-model="activeTab" @tab-click="updateURL">
                         <el-tab-pane label="Información del producto" name="1">
-                            <ProductInfo :product="product.data" />
+                            <ProductInfo :products="products" />
                         </el-tab-pane>
                         <el-tab-pane label="Historial de movimientos" name="2">
-                            <ProductHistorical :product="product.data" />
+                            <!-- <ProductHistorical :products="products" /> -->
                         </el-tab-pane>
                     </el-tabs>
                 </section>
@@ -77,20 +77,20 @@
                         <InputError :message="form.errors.quantity" />
                     </div>
 
-                    <div v-if="form.quantity && product.data.cost" class="text-sm mt-2">
-                        Total de compra: {{ form.quantity }} x ${{ product.data.cost }} => ${{ (product.data.cost *
+                    <div v-if="form.quantity && products[0].cost" class="text-sm mt-2">
+                        Total de compra: {{ form.quantity }} x ${{ products[0].cost }} => ${{ (products[0].cost *
                             form.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </div>
 
                     <div class="text-left mt-4 ml-6">
-                        <p v-if="!product.data.cost" class="text-xs text-redDanger">
+                        <p v-if="!products[0].cost" class="text-xs text-redDanger">
                             <i class="fa-regular fa-hand-point-down mr-2"></i>
                             Para poder descontar de caja, primero se debe especificar un
                             <Link :href="route('products.edit', encodedId)" class="underline"> precio de
                             compra al producto dando click aqui </Link>.
                         </p>
                         <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register"
-                            label="Se paga con dinero de caja" size="small" :disabled="!product.data.cost" />
+                            label="Se paga con dinero de caja" size="small" :disabled="!products[0].cost" />
                         <div v-if="form.is_paid_by_cash_register" class="w-1/3 mt-3">
                             <InputLabel value="Dinero a retirar de caja" class="ml-3 mb-1 text-sm" />
                             <el-input v-model="form.cash_amount" @keyup="handleChangeCashAmount" placeholder="Ej. $190"
@@ -141,9 +141,9 @@ export default {
         return {
             form,
             encodedId: null, //id codificado
-            searchQuery: this.product.data.name,
+            searchQuery: this.products[0].name,
             searchFocus: false,
-            productsFound: [this.product.data],
+            productsFound: [this.products],
             entryProductModal: false,
             // loading
             entryLoading: false,
@@ -171,7 +171,7 @@ export default {
         Link,
     },
     props: {
-        product: Object,
+        products: Array,
         cash_register: Object,
     },
     methods: {
@@ -189,7 +189,7 @@ export default {
         },
         handleChangeCashAmount() {
             // total redondeado a 2 decimales
-            const total = Math.round((this.product.data.cost * this.form.quantity + Number.EPSILON) * 100) / 100;
+            const total = Math.round((this.products[0].cost * this.form.quantity + Number.EPSILON) * 100) / 100;
             if (this.form.cash_amount > this.cash_register.current_cash) {
                 this.cashAmountMessage =
                     'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
@@ -216,7 +216,7 @@ export default {
             if (this.entryLoading) return;
 
             this.entryLoading = true;
-            this.form.put(route('products.entry', this.product.data?.id), {
+            this.form.put(route('products.entry', this.products?.id), {
                 onSuccess: () => {
                     this.form.reset();
                     this.entryProductModal = false;
@@ -230,12 +230,12 @@ export default {
                     // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
                     // if (this.isInventoryOn) {
                     const product = {
-                        id: 'local_' + this.product.data.id,
-                        name: this.product.data.name,
-                        code: this.product.data.code,
-                        public_price: this.product.data.public_price,
-                        current_stock: this.product.data.current_stock + this.form.quantity,
-                        image_url: this.product.data.imageCover[0]?.original_url,
+                        id: 'local_' + this.products[0].id,
+                        name: this.products[0].name,
+                        code: this.products[0].code,
+                        public_price: this.products[0].public_price,
+                        current_stock: this.products[0].current_stock + this.form.quantity,
+                        image_url: this.products[0].imageCover[0]?.original_url,
                     };
                     addOrUpdateItem('products', product);
                     // }
@@ -272,7 +272,7 @@ export default {
     },
     mounted() {
         this.setActiveTabFromURL();
-        this.encodeId(this.product.data.id);
+        this.encodeId(this.products[0].id);
     },
 }
 </script>
