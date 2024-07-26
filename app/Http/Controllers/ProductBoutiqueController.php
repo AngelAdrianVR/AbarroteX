@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductResource;
 use App\Models\Category;
+use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\Size;
 use Illuminate\Http\Request;
@@ -59,15 +60,15 @@ class ProductBoutiqueController extends Controller
             // forzar default de 1 en stock
             $product['current_stock'] = $product['current_stock'] ?? 1;
 
-            $size = Size::find($product['size_id'])->toArray();   
-            
-            if($vailidated['code']) {
+            $size = Size::where('id', $product['size_id'])->get(['id', 'name', 'short', 'category'])->toArray();
+
+            if ($vailidated['code']) {
                 // Crear codigo unico para talla actual
                 $vailidated['code'] = $vailidated['code'] . "-$key";
             }
 
             $product = Product::create($vailidated + ['store_id' => $store_id, 'additional' => $size]);
-            
+
             // resetear a nombre y codigo base
             $vailidated['code'] = $request->code;
 
@@ -94,11 +95,14 @@ class ProductBoutiqueController extends Controller
         $decoded_product_id = base64_decode($encoded_product_id);
 
         $cash_register = auth()->user()->cashRegister;
-        $product = ProductResource::make(Product::with('category', 'brand')
-            ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($decoded_product_id));
+        $product_name = Product::findOrFail($decoded_product_id)?->name;
+        $products = Product::with('category')
+            ->where([
+                'store_id' => auth()->user()->store_id,
+                'name' => $product_name
+            ])->get();
 
-        return inertia('Product/Boutique/Show', compact('product', 'cash_register'));
+        return inertia('Product/Boutique/Show', compact('products', 'cash_register'));
     }
 
     // public function edit($encoded_product_id)
@@ -207,12 +211,12 @@ class ProductBoutiqueController extends Controller
     public function destroy($product)
     {
         $product_name = Product::find($product)->name;
-    
+
         // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
         // eliminar producto
         $products = Product::where([
-            'name' => $product_name, 
-            'store_id' => auth()->user()->store_id, 
+            'name' => $product_name,
+            'store_id' => auth()->user()->store_id,
         ])->get();
 
         $products->each(fn ($prd) =>  $prd->delete());
@@ -355,23 +359,24 @@ class ProductBoutiqueController extends Controller
     //     return response()->json(['items' => $products]);
     // }
 
-    // public function getAllProducts()
-    // {
-    //     // productos creados localmente en la tienda que no están en el catálogo base o global
-    //     $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
-    //         ->where('store_id', auth()->user()->store_id)
-    //         ->latest('id')
-    //         ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
+    public function getAllProducts()
+    {
+        // productos creados localmente en la tienda que no están en el catálogo base o global
+        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
+            ->where('store_id', auth()->user()->store_id)
+            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock'])
+            ->unique('name')
+            ->sortByDesc('id');
 
-    //     // productos transferidos desde el catálogo base
-    //     $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
+        // productos transferidos desde el catálogo base
+        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
 
-    //     // Creamos un nuevo arreglo combinando los dos conjuntos de datos
-    //     $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
-    //     $products = collect($merged);
+        // Creamos un nuevo arreglo combinando los dos conjuntos de datos
+        $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
+        $products = collect($merged);
 
-    //     return $products;
-    // }
+        return $products;
+    }
 
     // public function import(Request $request)
     // {
@@ -512,18 +517,18 @@ class ProductBoutiqueController extends Controller
     //     return response()->json(compact('products', 'local_products', 'transfered_products'));
     // }
 
-    // public function getDataForProductsView()
-    // {
-    //     $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
-    //     $all_products = $this->getAllProducts();
-    //     $total_products = $all_products->count();
-    //     $total_local_products = $all_products->whereNull('global_product_id')->count();
+    public function getDataForProductsView()
+    {
+        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
+        $all_products = $this->getAllProducts();
+        $total_products = $all_products->count();
+        $total_local_products = $all_products->whereNull('global_product_id')->count();
 
-    //     //tomar solo primeros 30 productos
-    //     $products = $all_products->take($page);
+        //tomar solo primeros 30 productos
+        $products = $all_products->take($page);
 
-    //     return response()->json(compact('products', 'total_products', 'total_local_products'));
-    // }
+        return response()->json(compact('products', 'total_products', 'total_local_products'));
+    }
 
     // private function validateProductsFromFile($worksheet)
     // {

@@ -2,26 +2,26 @@
     <div class="text-sm">
         <div class="lg:flex justify-between items-center">
             <div class="md:flex space-y-1 md:space-x-4 items-center">
-                <p class="text-gray37">Categoría: <span class="font-bold">{{ product.category?.name ?? 'N/A'
+                <p class="text-gray37">Categoría: <span class="font-bold">{{ products[0].category?.name ?? 'N/A'
                         }}</span></p>
             </div>
         </div>
-        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.created_at
+        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ products[0].created_at
                 }}</strong></p>
-        <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ product.name }}</h1>
+        <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ products[0].name }}</h1>
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de compra:</p>
-                <p class="text-right font-bold">{{ product.cost ? '$' +
-                    product.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '-' }}
+                <p class="text-right font-bold">{{ products[0].cost ? '$' +
+                    products[0].cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '-' }}
                 </p>
             </div>
             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de venta: </p>
-                <p class="text-right font-bold">${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                <p class="text-right font-bold">${{ products[0].public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",") }}</p>
             </div>
-            <div v-if="product.description" class="md:!w-[600px]">
+            <div v-if="products[0].description" class="md:!w-[600px]">
                 <h2 class="mt-3 ml-5 font-bold text-lg">Sobre el producto</h2>
                 <div class="grid grid-cols-3 md:grid-cols-2 items-center rounded-md px-5 py-1">
                     <p class="text-gray37">Descripción: </p>
@@ -43,7 +43,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y-[1px]">
-                    <tr class="*:px-3 *:py-1">
+                    <tr v-for="(product, index) in products" :key="index" class="*:px-3 *:py-1">
                         <td class="flex items-center justify-between">
                             <span>Chica</span>
                             <span class="text-gray99 text-xs">(S)</span>
@@ -52,7 +52,7 @@
                             <div class="flex items-center">
                                 <span>{{ product.code ?? 'N/A' }}</span>
                                 <el-tooltip v-if="product.code" content="Copiar código" placement="right">
-                                    <button @click="copyToClipboard"
+                                    <button @click="copyToClipboard(product)"
                                         class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -90,14 +90,14 @@ export default {
     components: {
     },
     props: {
-        product: Object,
+        products: Array,
     },
     computed: {
 
     },
     methods: {
-        copyToClipboard() {
-            const textToCopy = this.product.code;
+        copyToClipboard(product) {
+            const textToCopy = product.code;
 
             // Create a temporary input element
             const input = document.createElement("input");
@@ -115,13 +115,13 @@ export default {
 
             this.$notify({
                 title: "Éxito",
-                message: this.product.code + " copiado",
+                message: product.code + " copiado",
                 type: "success",
             });
         },
         formatDescription() {
-            if (this.product.description != null) {
-                const text = this.product.description;
+            if (this.product[0].description != null) {
+                const text = this.product[0].description;
                 const lines = text.split('\n');
                 const formattedLines = lines.map(line => `• ${line.trim()}`);
                 this.formattedDescription = formattedLines.join('\n');

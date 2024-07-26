@@ -338,7 +338,7 @@ export default {
             }
         },
         exportProducts() {
-            this.$inertia.visit(route('products.export'));
+            this.$inertia.visit(route('boutique-products.export'));
         },
         openEntryModal() {
             this.entryProductModal = true;
@@ -347,18 +347,16 @@ export default {
             });
         },
         entryProduct(product) {
-            console.log(product);
             let routePage;
             if (product.global_product_id) {
                 routePage = 'global-product-store.entry';
             } else {
-                routePage = 'products.entry';
+                routePage = 'boutique-products.entry';
             }
             this.form.put(route(routePage, product.id), {
                 onSuccess: () => {
                     if (product.global_product_id) {
                         const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
-                        console.log(IndexProductEntry);
                         if (IndexProductEntry !== -1) {
                             this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
                         }
@@ -421,7 +419,7 @@ export default {
         async fetchDataForProductsView() {
             try {
                 this.loading = true;
-                const response = await axios.post(route('products.get-data-for-products-view'), {page: this.currentPage});
+                const response = await axios.post(route('boutique-products.get-data-for-products-view'), {page: this.currentPage});
 
                 if (response.status === 200) {
                     this.products = response.data.products;
@@ -438,7 +436,7 @@ export default {
         async importProducts() {
             try {
                 this.isImporting = true;
-                const response = await axios.post(route('products.import'), {
+                const response = await axios.post(route('boutique-products.import'), {
                     file: this.importForm.file
                 }, {
                     headers: {
@@ -448,7 +446,7 @@ export default {
 
                 if (response.status === 200) {
                     // Obtener productos
-                    const response = await axios.get(route('products.get-all-for-indexedDB'));
+                    const response = await axios.get(route('boutique-products.get-all-for-indexedDB'));
                     const products = response.data.products;
                     // actualizar indexedDB
                     await addOrUpdateBatchOfItems('products', products);
@@ -466,7 +464,7 @@ export default {
         async fetchItemsByPage() {
             try {
                 this.loadingItems = true;
-                const response = await axios.get(route('products.get-by-page', this.currentPage));
+                const response = await axios.get(route('boutique-products.get-by-page', this.currentPage));
 
                 if (response.status === 200) {
                     this.localProducts = [...this.localProducts, ...response.data.items];
@@ -490,7 +488,7 @@ export default {
             this.loading = true;
             if (this.searchQuery != '') {
                 try {
-                    const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
+                    const response = await axios.get(route('boutique-products.search'), { params: { query: this.searchQuery } });
                     if (response.status == 200) {
                         // this.products = this.localProducts;
                         this.localProducts = response.data.items;
@@ -516,7 +514,7 @@ export default {
         async getProduct() {
             try {
                 this.loading = true;
-                const response = await axios.get(route('products.search'), { params: { query: this.form.code } });
+                const response = await axios.get(route('boutique-products.search'), { params: { query: this.form.code } });
                 if (response.status == 200) {
                     this.productEntryFound = response.data.items;
                     this.$nextTick(() => {
@@ -533,7 +531,7 @@ export default {
         async fetchAllItemsForCurrentPage() {
             try {
                 this.loading = true;
-                const response = await axios.get(route('products.get-all-until-page', this.currentPage));
+                const response = await axios.get(route('boutique-products.get-all-until-page', this.currentPage));
 
                 if (response.status === 200) {
                     this.localProducts = response.data.items;
