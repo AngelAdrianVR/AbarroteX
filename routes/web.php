@@ -17,6 +17,7 @@ use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductBoutiqueController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\RentalController;
@@ -201,7 +202,11 @@ Route::get('products-export', [ProductController::class, 'export'])->name('produ
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
-Route::post('products/store-boutique', [ProductController::class, 'storeBoutique'])->name('products.store-boutique')->middleware('auth'); //cambia el precio del producto desde el punto de venta
+
+
+// productos de boutique
+//-------------------------------------------------------------------------------------------------
+Route::resource('boutique-products', ProductBoutiqueController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 //rentals routes----------------------------------------------------------------------------------

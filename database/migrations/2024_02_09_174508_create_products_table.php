@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedFloat('current_stock')->nullable()->default(1);
             $table->text('description')->nullable();
             $table->boolean('has_inventory_control')->default(true);
+            $table->json('additional')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('brand_id')->nullable()->constrained()->cascadeOnDelete();
