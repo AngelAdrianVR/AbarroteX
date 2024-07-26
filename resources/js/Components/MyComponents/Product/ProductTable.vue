@@ -161,7 +161,11 @@ export default {
             if (product.global_product_id) {
                 this.$inertia.get(route('global-product-store.edit', encodedId));
             } else {
-                this.$inertia.get(route('products.edit', encodedId))
+                if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                    this.$inertia.get(route('boutique-products.edit', encodedId))
+                } else {
+                    this.$inertia.get(route('products.edit', encodedId))
+                }
             }
         },
         handleShow(product) {
@@ -169,15 +173,23 @@ export default {
             if (product.global_product_id) {
                 this.$inertia.get(route('global-product-store.show', encodedId));
             } else {
-                this.$inertia.get(route('products.show', encodedId))
+                if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                    this.$inertia.get(route('boutique-products.show', encodedId))
+                } else {
+                    this.$inertia.get(route('products.show', encodedId))
+                }
             }
         },
         async deleteItem() {
             let routePage;
             if (this.itemToDelete.global_product_id) {
-                routePage = 'global-product-store.show';
+                routePage = 'global-product-store.destroy';
             } else {
-                routePage = 'products.show';
+                if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                    routePage = 'boutique-products.destroy';
+                } else {
+                    routePage = 'products.destroy';
+                }
             }
             try {
                 this.deleting = true;
@@ -193,12 +205,19 @@ export default {
                         const indexToDelete = this.products.findIndex(item => item.id == this.itemToDelete.id);
                         this.products.splice(indexToDelete, 1);
                     }
-
+                    
                     // buscar producto en indexedDB
                     const products = await getItemByAttributes('products', { name: productName });
-
+                    
                     // eliminar de indexedDB
-                    await deleteItem('products', products[0].id);
+                    if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                        // Eliminar todos los productos con el mismo nombre
+                        products.forEach(async element => {
+                            await deleteItem('products', element.id);
+                        });
+                    } else {
+                        await deleteItem('products', products[0].id);
+                    }
 
                     this.showDeleteConfirm = false;
                     this.$notify({

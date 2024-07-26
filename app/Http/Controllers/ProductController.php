@@ -32,15 +32,9 @@ class ProductController extends Controller
         $store = auth()->user()->store;
         $products_quantity = Product::where('store_id', $store->id)->get()->count();
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
-        // selector de vista para crear producto
-        if ($store->type === 'Boutique / Tienda de Ropa / Zapatería') {
-            $sizes = Size::whereIn('category', $categories->pluck(['name']))->latest('id')->get();
-            return inertia('Product/Boutique/Create', compact('products_quantity', 'categories', 'sizes'));
-        } else {
-            $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
-            return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
-        }
+        return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
     }
 
 
@@ -72,63 +66,6 @@ class ProductController extends Controller
 
         //codifica el id del producto
         $encoded_product_id = base64_encode($product->id);
-
-        if (!request('stayInView')) {
-            return to_route('products.show', $encoded_product_id);
-        }
-    }
-
-    public function storeBoutique(Request $request)
-    {
-        $store_id = auth()->user()->store_id;
-        $sizeCount = count($request->input('sizes', []));
-        
-        $vailidated = $request->validate([
-            'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
-            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $sizeCount)],
-            'public_price' => 'required|numeric|min:0|max:999999',
-            'cost' => 'nullable|numeric|min:0|max:999999',
-            'currency' => 'required|string',
-            'description' => 'nullable|string|max:255',
-            'category_id' => 'nullable',
-            'brand_id' => 'nullable',
-            'sizes' => 'nullable|array|min:1',
-            'sizes.*.size_id' => 'required|numeric|min:1',
-            'sizes.*.current_stock' => 'required|numeric|min:0',
-        ], [
-            'sizes.*.size_id.required' => 'obligatorio.',
-            'sizes.*.current_stock.required' => 'obligatorio.',
-            'sizes.*.current_stock.numeric' => 'Este campo debe ser un número.',
-            'sizes.*.current_stock.min' => 'Este campo debe ser positivo.',
-            'sizes.*.current_stock.max' => 'Este campo debe ser máximo 999,999.99',
-        ]);
-
-        // registrar productos por talla registrada
-        foreach ($vailidated['sizes'] as $key => $product) {
-            // si el registro de talla esta vacio, saltar
-            if (!$product['size_id']) continue;
-
-            // forzar default de 1 en stock
-            $product['current_stock'] = $product['current_stock'] ?? 1;
-
-            // Crear codigo unico para talla actual y nombre
-            $vailidated['code'] = $vailidated['code'] . "-$key";
-            $size = Size::find($product['size_id']);
-            $vailidated['name'] = $vailidated['name'] . " ($size->name)";
-
-            $product = Product::create($vailidated + ['store_id' => $store_id]);
-
-            // primer producto para registrado
-            if ($key == 0) {
-                //codifica el id del producto
-                $encoded_product_id = base64_encode($product->id);
-
-                // Guardar el archivo en la colección 'imageCover' solo en el primer producto registrado
-                if ($request->hasFile('imageCover')) {
-                    $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
-                }
-            }
-        }
 
         if (!request('stayInView')) {
             return to_route('products.show', $encoded_product_id);
@@ -527,6 +464,7 @@ class ProductController extends Controller
                     'id' => 'local_' . $product->id,
                     'name' => $product->name,
                     'code' => $product->code,
+                    'additional' => $product->additional,
                     'public_price' => $product->public_price,
                     'current_stock' => $product->current_stock,
                     'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
