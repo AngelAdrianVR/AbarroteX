@@ -1,26 +1,24 @@
 <template>
     <div class="overflow-auto">
-        {{Object.keys(products)}}
         <table v-if="Object.keys(products)?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th class="w-40 md:w-[10%]"></th>
-                    <!-- <th class="w-36 md:w-[15%]">Código</th>
+                    <th class="w-36 md:w-[15%]">Código</th>
                     <th class="w-44 md:w-[20%]">Nombre de producto</th>
+                    <th class="w-32 md:w-[15%]">Categoría</th>
                     <th class="w-20 md:w-[15%]">Precio</th>
                     <th class="w-32 md:w-[15%]">Existencias</th>
-                    <th class="w-32 md:w-[15%]">Existencias mínimas</th>
-                    <th class="w-16 md:w-[10%]"></th> -->
+                    <th class="w-16 md:w-[10%]"></th>
                 </tr>
             </thead>
             <tbody>
-                <tr @click="handleShow(product)" v-for="(product, index) in Object.keys(products)" :key="product.id"
+                <tr @click="handleShow(set)" v-for="(set, index) in Object.values(products)" :key="set[0].id"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td>{{ product }}</td>
-                    <!-- <td class="rounded-s-full">
-                        <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
+                    <td class="rounded-s-full">
+                        <img v-if="set[0].global_product_id ? set[0].global_product?.media[0]?.original_url : set[0].media[0]?.original_url"
                             class="size-10 bg-white object-contain rounded-md"
-                            :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                            :src="set[0].global_product_id ? set[0].global_product?.media[0]?.original_url : set[0].media[0]?.original_url">
                         <div v-else
                             class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -31,19 +29,19 @@
                         </div>
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.code : getBaseCode(product) }}
+                        {{ set[0].global_product_id ? set[0].global_product?.code : getBaseCode(set) }}
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.name : product.name }}
+                        {{ set[0].global_product_id ? set[0].global_product?.name : set[0].name }}
                     </td>
                     <td>
-                        ${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ set[0].global_product_id ? set[0].global_product?.category.name : set[0].category.name }}
                     </td>
                     <td>
-                        {{ getTotalStock() }}
+                        ${{ set[0].public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </td>
                     <td>
-                        {{ product.min_stock ?? '-' }}
+                        {{ getTotalStock(set) }}
                     </td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
@@ -83,7 +81,7 @@
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown>
-                    </td> -->
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -137,18 +135,23 @@ export default {
         products: Object
     },
     methods: {
-        getBaseCode(product) {
-            if (!product.code) {
+        getTotalStock(set) {
+            return set.reduce((accum, item) => {
+               return accum += item.current_stock; 
+            }, 0);
+        },
+        getBaseCode(set) {
+            if (!set[0].code) {
                 return 'N/A';
             }
-            let splited = product.code.split('-');
+            let splited = set[0].code.split('-');
             splited.pop(); // Elimina el último elemento del array
             return splited.join('-'); // Une los elementos restantes con guiones medios
         },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const index = command.split('|')[1];
-            const product = this.products[index];
+            const product = Object.values(this.products)[index];
 
             if (commandName == 'see') {
                 this.handleShow(product);
@@ -159,17 +162,17 @@ export default {
                 this.itemToDelete = product;
             }
         },
-        handleEdit(product) {
-            const encodedId = btoa(product.id.toString());
-            if (product.global_product_id) {
+        handleEdit(set) {
+            const encodedId = btoa(set[0].id.toString());
+            if (set[0].global_product_id) {
                 this.$inertia.get(route('global-product-store.edit', encodedId));
             } else {
                 this.$inertia.get(route('boutique-products.edit', encodedId))
             }
         },
-        handleShow(product) {
-            const encodedId = btoa(product.id.toString());
-            if (product.global_product_id) {
+        handleShow(set) {
+            const encodedId = btoa(set[0].id.toString());
+            if (set[0].global_product_id) {
                 this.$inertia.get(route('global-product-store.show', encodedId));
             } else {
                 this.$inertia.get(route('boutique-products.show', encodedId))

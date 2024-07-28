@@ -20,8 +20,8 @@
                 <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton> -->
-                <el-dropdown split-button type="primary" @click="$inertia.get(route('boutique-products.create'))" trigger="click"
-                    @command="handleCommand">
+                <el-dropdown split-button type="primary" @click="$inertia.get(route('boutique-products.create'))"
+                    trigger="click" @command="handleCommand">
                     Nuevo producto
                     <template #dropdown>
                         <el-dropdown-menu>
@@ -33,22 +33,22 @@
                 </el-dropdown>
             </div>
         </section>
-        <!-- <section v-if="isInventoryOn">
-            costo de almacén: {{ products }}
-        </section> -->
-
+        <section class="text-center mt-3">
+            <p>Total invertido en almacén: ${{ getTotalInvestInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+            <p>Total para venta en almacén: ${{ getTotalSaleInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+        </section>
         <div class="mt-8">
-            <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
+            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px]">{{ Object.keys(localProducts).length }} de {{
                 totalProducts }} elementos
             </p>
             <BoutiqueProductTable :products="localProducts" />
-            <p v-if="localProducts.length" class="text-gray66 text-[11px] mt-3">{{ localProducts.length }} de {{
+            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px] mt-3">{{ Object.keys(localProducts).length }} de {{
                 totalProducts }} elementos
             </p>
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <button v-else-if="totalProducts > 30 && localProducts.length < totalProducts && localProducts.length"
+            <button v-else-if="totalProducts > 30 && Object.keys(localProducts).length < totalProducts && Object.keys(localProducts).length"
                 @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
                 elementos</button>
         </div>
@@ -329,6 +329,22 @@ export default {
     props: {
     },
     methods: {
+        getTotalSaleInventory() {
+            return Object.values(this.products).reduce((accum, set) => {
+                return accum += set.reduce((sub, element) => {
+                    const price = element.public_price ?? 0;
+                    return sub += element.current_stock * price;
+                }, 0);
+            }, 0);
+        },
+        getTotalInvestInventory() {
+            return Object.values(this.products).reduce((accum, set) => {
+                return accum += set.reduce((sub, element) => {
+                    const cost = element.cost ?? 0;
+                    return sub += element.current_stock * cost;
+                }, 0);
+            }, 0);
+        },
         handleCommand(command) {
             if (command == 'import') {
                 this.showImportModal = true;
@@ -418,7 +434,7 @@ export default {
         async fetchDataForProductsView() {
             try {
                 this.loading = true;
-                const response = await axios.post(route('boutique-products.get-data-for-products-view'), {page: this.currentPage});
+                const response = await axios.post(route('boutique-products.get-data-for-products-view'), { page: this.currentPage });
 
                 if (response.status === 200) {
                     this.products = response.data.products;
@@ -501,7 +517,7 @@ export default {
                     this.loading = false;
                     this.inputFocus();
                 }
-            } else {    
+            } else {
                 // Aquí podemos simular una operación asíncrona para mostrar el indicador de carga
                 try {
                     await this.resetLocalProducts();
