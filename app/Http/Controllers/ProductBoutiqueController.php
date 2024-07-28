@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductHistoryResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
+use App\Models\ProductHistory;
 use App\Models\Size;
 use Illuminate\Http\Request;
 
@@ -31,7 +33,7 @@ class ProductBoutiqueController extends Controller
         $store_id = auth()->user()->store_id;
         $sizeCount = count($request->input('sizes', []));
 
-        $vailidated = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $sizeCount)],
             'public_price' => 'required|numeric|min:0|max:999999',
@@ -44,42 +46,59 @@ class ProductBoutiqueController extends Controller
             'sizes' => 'nullable|array|min:1',
             'sizes.*.size_id' => 'required|numeric|min:1',
             'sizes.*.current_stock' => 'required|numeric|min:0',
+            'sizes.*.min_stock' => 'nullable|numeric|min:0',
+            'sizes.*.max_stock' => 'nullable|numeric|min:0',
         ], [
             'sizes.*.size_id.required' => 'obligatorio.',
             'sizes.*.current_stock.required' => 'obligatorio.',
             'sizes.*.current_stock.numeric' => 'Este campo debe ser un número.',
             'sizes.*.current_stock.min' => 'Este campo debe ser positivo.',
             'sizes.*.current_stock.max' => 'Este campo debe ser máximo 999,999.99',
+            'sizes.*.min_stock.min' => 'Este campo debe ser positivo',
+            'sizes.*.max_stock.min' => 'Este campo debe ser positivo',
         ]);
 
+        $mediaItem = null;
+
         // registrar productos por talla registrada
-        foreach ($vailidated['sizes'] as $key => $product) {
+        foreach ($validated['sizes'] as $key => $product) {
             // si el registro de talla esta vacio, saltar
             if (!$product['size_id']) continue;
 
             // forzar default de 1 en stock
             $product['current_stock'] = $product['current_stock'] ?? 1;
 
-            $size = Size::where('id', $product['size_id'])->get(['id', 'name', 'short', 'category'])->toArray();
+            $size = Size::where('id', $product['size_id'])->get(['id', 'name', 'short', 'category'])->first()->toArray();
 
-            if ($vailidated['code']) {
+            if ($validated['code']) {
                 // Crear codigo unico para talla actual
-                $vailidated['code'] = $vailidated['code'] . "-$key";
+                $validated['code'] = $validated['code'] . "-$key";
             }
 
-            $product = Product::create($vailidated + ['store_id' => $store_id, 'additional' => $size]);
+            $new_product = Product::create($validated + [
+                'store_id' => $store_id,
+                'additional' => $size,
+                'current_stock' => $product['current_stock'],
+                'min_stock' => $product['min_stock'],
+                'max_stock' => $product['max_stock'],
+            ]);
 
             // resetear a nombre y codigo base
-            $vailidated['code'] = $request->code;
+            $validated['code'] = $request->code;
 
-            // primer producto para registrado
+            // primer producto registrado
             if ($key == 0) {
                 //codifica el id del producto
-                $encoded_product_id = base64_encode($product->id);
+                $encoded_product_id = base64_encode($new_product->id);
 
                 // Guardar el archivo en la colección 'imageCover' solo en el primer producto registrado
                 if ($request->hasFile('imageCover')) {
-                    $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+                    $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+                }
+            } else {
+                // Copiar el medio al nuevo producto registrado
+                if ($mediaItem) {
+                    $new_product->copyMedia($mediaItem->getPath())->usingName($mediaItem->name)->toMediaCollection('imageCover');
                 }
             }
         }
@@ -96,7 +115,7 @@ class ProductBoutiqueController extends Controller
 
         $cash_register = auth()->user()->cashRegister;
         $product_name = Product::findOrFail($decoded_product_id)?->name;
-        $products = Product::with('category')
+        $products = Product::with(['category', 'media'])
             ->where([
                 'store_id' => auth()->user()->store_id,
                 'name' => $product_name
@@ -308,34 +327,35 @@ class ProductBoutiqueController extends Controller
     //     }
     // }
 
-    // public function fetchHistory($product_id, $month = null, $year = null)
-    // {
-    //     // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-    //     $query = ProductHistory::where('historicable_id', $product_id)
-    //         ->where('historicable_type', Product::class);
+    public function fetchHistory($product_name, $month = null, $year = null)
+    {
+        $products_ids = Product::where('name', $product_name)->get()->pluck('id');
+        // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
+        $query = ProductHistory::whereIn('historicable_id', $products_ids)
+            ->where('historicable_type', Product::class);
 
-    //     if ($month && $year) {
-    //         $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
-    //     } else {
-    //         // Obtener el mes y el año actuales
-    //         $currentMonth = date('m');
-    //         $currentYear = date('Y');
-    //         $query->whereMonth('created_at', $currentMonth)->whereYear('created_at', $currentYear);
-    //     }
+        if ($month && $year) {
+            $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
+        } else {
+            // Obtener el mes y el año actuales
+            $currentMonth = date('m');
+            $currentYear = date('Y');
+            $query->whereMonth('created_at', $currentMonth)->whereYear('created_at', $currentYear);
+        }
 
-    //     // Obtener el historial ordenado por fecha de creación
-    //     $product_history = ProductHistoryResource::collection($query->latest('id')->get());
+        // Obtener el historial ordenado por fecha de creación
+        $product_history = ProductHistoryResource::collection($query->latest('id')->get());
 
-    //     // Agrupar por mes y año
-    //     $groupedHistory = $product_history->groupBy(function ($item) {
-    //         return $item->created_at->format('F Y');
-    //     });
+        // Agrupar por mes y año
+        $groupedHistory = $product_history->groupBy(function ($item) {
+            return $item->created_at->format('F Y');
+        });
 
-    //     // Convertir el grupo en un array
-    //     $groupedHistoryArray = $groupedHistory->toArray();
+        // Convertir el grupo en un array
+        $groupedHistoryArray = $groupedHistory->toArray();
 
-    //     return response()->json(['items' => $groupedHistoryArray]);
-    // }
+        return response()->json(['items' => $groupedHistoryArray]);
+    }
 
     // public function getItemsByPage($currentPage)
     // {
@@ -364,19 +384,17 @@ class ProductBoutiqueController extends Controller
         // productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
             ->where('store_id', auth()->user()->store_id)
-            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock'])
-            ->unique('name')
-            ->sortByDesc('id');
-
+            ->latest('id')
+            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
         // productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
-        $products = collect($merged);
+        $products = collect($merged)->groupBy('name');
 
         return $products;
-    }
+    } 
 
     // public function import(Request $request)
     // {

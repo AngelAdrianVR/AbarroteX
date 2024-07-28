@@ -6,8 +6,8 @@
                         }}</span></p>
             </div>
         </div>
-        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ products[0].created_at
-                }}</strong></p>
+        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">
+            {{ formatDateTime(products[0].created_at) }}</strong></p>
         <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ products[0].name }}</h1>
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
@@ -18,15 +18,16 @@
             </div>
             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de venta: </p>
-                <p class="text-right font-bold">${{ products[0].public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                <p class="text-right font-bold">${{
+                    products[0].public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",") }}</p>
             </div>
-            <div v-if="products[0].description" class="md:!w-[600px]">
+            <div v-if="products[0].description">
                 <h2 class="mt-3 ml-5 font-bold text-lg">Sobre el producto</h2>
-                <div class="grid grid-cols-3 md:grid-cols-2 items-center rounded-md px-5 py-1">
+                <div class="grid grid-cols-3 md:grid-cols-3 items-start rounded-md px-5 py-1">
                     <p class="text-gray37">Descripción: </p>
                     <div>
-                        <p class="whitespace-break-spaces col-span-2 md:col-span-1">{{ formattedDescription }}</p>
+                        <p class="whitespace-break-spaces col-span-2">{{ formattedDescription }}</p>
                     </div>
                 </div>
             </div>
@@ -45,8 +46,8 @@
                 <tbody class="divide-y-[1px]">
                     <tr v-for="(product, index) in products" :key="index" class="*:px-3 *:py-1">
                         <td class="flex items-center justify-between">
-                            <span>Chica</span>
-                            <span class="text-gray99 text-xs">(S)</span>
+                            <span>{{ product.additional.name }}</span>
+                            <span class="text-gray99 text-xs">{{ product.additional?.short }}</span>
                         </td>
                         <td>
                             <div class="flex items-center">
@@ -63,17 +64,18 @@
                                 </el-tooltip>
                             </div>
                         </td>
-                        <td>10</td>
-                        <td>10</td>
-                        <td>10</td>
+                        <td>{{ product.current_stock }}</td>
+                        <td>{{ product.min_stock ?? 'No especificado' }}</td>
+                        <td>{{ product.max_stock ?? 'No especificado' }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </template>
-
 <script>
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
     name: 'ProductInfo',
@@ -96,6 +98,9 @@ export default {
 
     },
     methods: {
+        formatDateTime(dateString) {
+            return format(parseISO(dateString), 'dd MMMM yyyy • hh:mm a', { locale: es });
+        },
         copyToClipboard(product) {
             const textToCopy = product.code;
 
@@ -120,8 +125,8 @@ export default {
             });
         },
         formatDescription() {
-            if (this.product[0].description != null) {
-                const text = this.product[0].description;
+            if (this.products[0].description != null) {
+                const text = this.products[0].description;
                 const lines = text.split('\n');
                 const formattedLines = lines.map(line => `• ${line.trim()}`);
                 this.formattedDescription = formattedLines.join('\n');

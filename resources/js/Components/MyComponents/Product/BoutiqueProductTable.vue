@@ -1,21 +1,23 @@
 <template>
     <div class="overflow-auto">
+        {{Object.keys(products)}}
         <table v-if="Object.keys(products)?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th class="w-40 md:w-[10%]"></th>
-                    <th class="w-36 md:w-[15%]">Código</th>
+                    <!-- <th class="w-36 md:w-[15%]">Código</th>
                     <th class="w-44 md:w-[20%]">Nombre de producto</th>
                     <th class="w-20 md:w-[15%]">Precio</th>
                     <th class="w-32 md:w-[15%]">Existencias</th>
                     <th class="w-32 md:w-[15%]">Existencias mínimas</th>
-                    <th class="w-16 md:w-[10%]"></th>
+                    <th class="w-16 md:w-[10%]"></th> -->
                 </tr>
             </thead>
             <tbody>
-                <tr @click="handleShow(product)" v-for="(product, index) in products" :key="product.id"
+                <tr @click="handleShow(product)" v-for="(product, index) in Object.keys(products)" :key="product.id"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td class="rounded-s-full">
+                    <td>{{ product }}</td>
+                    <!-- <td class="rounded-s-full">
                         <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
                             class="size-10 bg-white object-contain rounded-md"
                             :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
@@ -29,7 +31,7 @@
                         </div>
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.code : product.code ?? 'N/A' }}
+                        {{ product.global_product_id ? product.global_product?.code : getBaseCode(product) }}
                     </td>
                     <td>
                         {{ product.global_product_id ? product.global_product?.name : product.name }}
@@ -38,14 +40,7 @@
                         ${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </td>
                     <td>
-                        <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
-                            {{ product.current_stock ?? '-' }}
-                            <i v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
-                            <span v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                class="text-[11px]">Bajo
-                                stock</span>
-                        </p>
+                        {{ getTotalStock() }}
                     </td>
                     <td>
                         {{ product.min_stock ?? '-' }}
@@ -88,7 +83,7 @@
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown>
-                    </td>
+                    </td> -->
                 </tr>
             </tbody>
         </table>
@@ -142,6 +137,14 @@ export default {
         products: Object
     },
     methods: {
+        getBaseCode(product) {
+            if (!product.code) {
+                return 'N/A';
+            }
+            let splited = product.code.split('-');
+            splited.pop(); // Elimina el último elemento del array
+            return splited.join('-'); // Une los elementos restantes con guiones medios
+        },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const index = command.split('|')[1];
@@ -161,7 +164,7 @@ export default {
             if (product.global_product_id) {
                 this.$inertia.get(route('global-product-store.edit', encodedId));
             } else {
-                this.$inertia.get(route('products.edit', encodedId))
+                this.$inertia.get(route('boutique-products.edit', encodedId))
             }
         },
         handleShow(product) {
@@ -169,7 +172,7 @@ export default {
             if (product.global_product_id) {
                 this.$inertia.get(route('global-product-store.show', encodedId));
             } else {
-                this.$inertia.get(route('products.show', encodedId))
+                this.$inertia.get(route('boutique-products.show', encodedId))
             }
         },
         async deleteItem() {
@@ -177,7 +180,7 @@ export default {
             if (this.itemToDelete.global_product_id) {
                 routePage = 'global-product-store.destroy';
             } else {
-                routePage = 'products.destroy';
+                routePage = 'boutique-products.destroy';
             }
             try {
                 this.deleting = true;
@@ -193,12 +196,15 @@ export default {
                         const indexToDelete = this.products.findIndex(item => item.id == this.itemToDelete.id);
                         this.products.splice(indexToDelete, 1);
                     }
-                    
+
                     // buscar producto en indexedDB
                     const products = await getItemByAttributes('products', { name: productName });
-                    
+
                     // eliminar de indexedDB
-                    await deleteItem('products', products[0].id);
+                    // Eliminar todos los productos con el mismo nombre
+                    products.forEach(async element => {
+                        await deleteItem('products', element.id);
+                    });
 
                     this.showDeleteConfirm = false;
                     this.$notify({

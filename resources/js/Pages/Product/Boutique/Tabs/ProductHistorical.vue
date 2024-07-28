@@ -44,7 +44,7 @@ export default {
         Loading2,
     },
     props: {
-        product: Object,
+        products: Array,
     },
     computed: {
 
@@ -130,8 +130,8 @@ export default {
         async fetchHistory() {
             this.loading = true;
             try {
-                const response = await axios.get(route("products.fetch-history", {
-                    product_id: this.product.id,
+                const response = await axios.get(route("boutique-products.fetch-history", {
+                    product_name: this.products[0].name,
                     month: this.currentMonth,
                     year: this.currentYear,
                 }));

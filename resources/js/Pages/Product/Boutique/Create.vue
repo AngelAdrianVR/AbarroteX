@@ -107,17 +107,17 @@
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
                             <InputLabel value="Cantidad mínima" />
-                            <el-input v-model="form.min_stock" placeholder="Mínimo permitido"
+                            <el-input v-model="form.sizes[index].min_stock" placeholder="Mínimo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <!-- <InputError :message="form.errors.min_stock" /> -->
+                            <InputError :message="form.errors[`sizes.${index}.min_stock`]" />
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
                             <InputLabel value="Cantidad máxima" />
-                            <el-input v-model="form.max_stock" placeholder="Máximo permitido"
+                            <el-input v-model="form.sizes[index].max_stock" placeholder="Máximo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <!-- <InputError :message="form.errors.max_stock" /> -->
+                            <InputError :message="form.errors[`sizes.${index}.max_stock`]" />
                         </div>
                         <div class="w-[4%] flex justify-end mt-5">
                             <el-popconfirm v-if="form.sizes.length > 1" confirm-button-text="Si" cancel-button-text="No"

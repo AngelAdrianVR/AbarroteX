@@ -39,8 +39,8 @@
                 <!-- fotografia de producto -->
                 <section class="mt-7">
                     <figure class="border h-64 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
-                        <img v-if="products[0].imageCover?.length" class="h-52 md:h-80 mx-auto object-contain"
-                            :src="products[0].imageCover[0]?.original_url" alt="">
+                        <img v-if="products[0].media?.length" class="h-52 md:h-80 mx-auto object-contain"
+                            :src="products[0].media[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                             <p class="text-sm text-gray-300">Imagen no disponible</p>
@@ -56,7 +56,7 @@
                             <ProductInfo :products="products" />
                         </el-tab-pane>
                         <el-tab-pane label="Historial de movimientos" name="2">
-                            <!-- <ProductHistorical :products="products" /> -->
+                            <ProductHistorical :products="products" />
                         </el-tab-pane>
                     </el-tabs>
                 </section>
@@ -235,7 +235,7 @@ export default {
                         code: this.products[0].code,
                         public_price: this.products[0].public_price,
                         current_stock: this.products[0].current_stock + this.form.quantity,
-                        image_url: this.products[0].imageCover[0]?.original_url,
+                        image_url: this.products[0].media[0]?.original_url,
                     };
                     addOrUpdateItem('products', product);
                     // }

@@ -33,7 +33,6 @@
                 </el-dropdown>
             </div>
         </section>
-
         <!-- <section v-if="isInventoryOn">
             costo de almacén: {{ products }}
         </section> -->
@@ -42,7 +41,7 @@
             <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
                 totalProducts }} elementos
             </p>
-            <ProductTable :products="localProducts" />
+            <BoutiqueProductTable :products="localProducts" />
             <p v-if="localProducts.length" class="text-gray66 text-[11px] mt-3">{{ localProducts.length }} de {{
                 totalProducts }} elementos
             </p>
@@ -260,7 +259,7 @@
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
-import ProductTable from '@/Components/MyComponents/Product/ProductTable.vue';
+import BoutiqueProductTable from '@/Components/MyComponents/Product/BoutiqueProductTable.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import FileUploader from '@/Components/MyComponents/FileUploader.vue';
@@ -318,7 +317,7 @@ export default {
     components: {
         PrimaryButton,
         CancelButton,
-        ProductTable,
+        BoutiqueProductTable,
         ThirthButton,
         InputError,
         InputLabel,

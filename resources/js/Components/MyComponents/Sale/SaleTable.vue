@@ -15,14 +15,20 @@
           <img class="mx-auto h-14 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
             :alt="sale.product.name">
           <div v-else
-            class="size-10 ml-10 bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
+            class="size-10 mx-auto bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="size-4">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
             </svg>
           </div>
-          <p class="font-bold text-sm">{{ sale.product.name }}</p>
+          <p class="font-bold text-sm">
+            {{ sale.product.name }}
+            <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+              class="text-gray99">
+              ({{ sale.product.additional?.name }})
+            </span>
+          </p>
         </div>
         <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">
@@ -82,9 +88,21 @@
       <figure>
         <img class="mx-auto w-3/4 h-24 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
           :alt="sale.product.name">
+        <div v-else
+          class="size-24 mx-auto bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="0.8"
+            stroke="currentColor" class="size-10">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+          </svg>
+        </div>
       </figure>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
-        <p class="font-bold text-base">{{ sale.product.name }}
+        <p class="font-bold text-base">
+          {{ sale.product.name }}
+          <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'" class="text-gray99">
+            ({{ sale.product.additional?.name }})
+          </span>
         </p>
         <div class="flex items-center space-x-2 text-lg">
           <template v-if="editMode !== index">
@@ -117,8 +135,8 @@
             </div>
           </template>
         </div>
-        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0"
-          :max="sale.product.current_stock" :precision="2" />
+        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" :max="sale.product.current_stock"
+          :precision="2" />
         <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
         <div class="text-[#5FCB1F] font-bold text-lg">
           ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {

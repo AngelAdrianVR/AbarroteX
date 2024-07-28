@@ -272,17 +272,6 @@ class SaleController extends Controller
                 'created_at' => $created_at ?? now(),
             ]);
 
-            //Registra el historial de venta de cada producto
-            ProductHistory::create([
-                'description' => 'Registro de venta. ' . $product['quantity'] . ' piezas',
-                'type' => 'Venta',
-                'historicable_id' => $product_id,
-                'historicable_type' => $is_global_product
-                    ? GlobalProductStore::class
-                    : Product::class,
-                'created_at' => $created_at ?? now(),
-            ]);
-
             //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
             $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
             // if ($is_inventory_on) {
@@ -300,7 +289,7 @@ class SaleController extends Controller
                     $url =  $is_global_product
                         ? route('global-product-store.show', base64_encode($current_product->id))
                         : route('products.show', base64_encode($current_product->id));
-    
+
                     auth()->user()->notify(new BasicNotification($title, $description, $url));
                 }
             } else {
@@ -317,6 +306,21 @@ class SaleController extends Controller
                 }
             }
             // }
+            //Registra el historial de venta de cada producto
+            $size = '';
+            if ($current_product->additional) {
+                // agregar la talla al historial si es que la tiene
+                $size = ' talla ' . $current_product->additional['name'];
+            }
+            ProductHistory::create([
+                'description' => 'Registro de venta. ' . $product['quantity'] . ' pieza(s)' . $size,
+                'type' => 'Venta',
+                'historicable_id' => $product_id,
+                'historicable_type' => $is_global_product
+                    ? GlobalProductStore::class
+                    : Product::class,
+                'created_at' => $created_at ?? now(),
+            ]);
         }
 
         //Crea registro de venta a crédito si así lo fue
