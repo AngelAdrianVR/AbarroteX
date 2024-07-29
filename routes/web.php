@@ -208,7 +208,7 @@ Route::post('products-change-price', [ProductController::class, 'changePrice'])-
 //-------------------------------------------------------------------------------------------------
 Route::resource('boutique-products', ProductBoutiqueController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('boutique-products/update-with-media/{product}', [ProductBoutiqueController::class, 'updateWithMedia'])->name('boutique-products.update-with-media')->middleware('auth');
-Route::put('boutique-products-entry/{product_id}', [ProductBoutiqueController::class, 'entryStock'])->name('boutique-products.entry')->middleware('auth');
+Route::put('boutique-products-entry', [ProductBoutiqueController::class, 'entryStock'])->name('boutique-products.entry')->middleware('auth');
 Route::get('boutique-products-search', [ProductBoutiqueController::class, 'searchProduct'])->name('boutique-products.search')->middleware('auth');
 Route::get('boutique-products-get-product-scaned/{product_id}', [ProductBoutiqueController::class, 'getProductScaned'])->name('boutique-products.get-product-scaned')->middleware('auth');
 Route::get('boutique-products-fetch-history/{product_name}/{month}/{year}', [ProductBoutiqueController::class, 'fetchHistory'])->name('boutique-products.fetch-history')->middleware('auth');

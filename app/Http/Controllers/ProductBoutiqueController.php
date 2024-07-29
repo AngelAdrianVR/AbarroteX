@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ProductHistoryResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Category;
+use App\Models\Expense;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -146,7 +147,7 @@ class ProductBoutiqueController extends Controller
 
         // obtener el nombre original de los productos que fueron editados
         $productName = Product::findOrFail($product)?->name;
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $productName)],
@@ -188,8 +189,12 @@ class ProductBoutiqueController extends Controller
 
             // Usar preg_match para obtener el consecutivo
             if (preg_match('/-(\d+)$/', $lastCode, $matches)) {
-                $lastConsecutive = (int)$matches[1];
+                $lastConsecutive = (int)$matches[1] + 1;
             }
+
+            // obtener el codigo base del codigo existente (antes de la edicion)
+            $firstCode = $existingProducts->first()->code;
+            $existingBaseCode = substr($firstCode, 0, strrpos($firstCode, '-'));
         }
 
         // Eliminar productos que no están en la solicitud
@@ -209,14 +214,16 @@ class ProductBoutiqueController extends Controller
 
             $existingProduct = $existingProducts->where('id', $productData['id'])->first();
 
-            if ($validated['code']) {
-                // Crear código único para talla actual desde el utimo consecutivo
-                $validated['code'] = $validated['code'] . "-$lastConsecutive";
-                // aumentar consecutivo
-                $lastConsecutive++;
-            }
-
             if ($existingProduct) {
+                if ($validated['code']) {
+                    if ($existingBaseCode == $validated['code']) {
+                        // Crear código único para talla actual desde el utimo consecutivo
+                        $validated['code'] = $existingProduct->code;
+                    } else {
+                        // Crear codigo unico para talla actual
+                        $validated['code'] = $validated['code'] . "-$key";
+                    }
+                }
                 // Actualizar producto existente
                 $existingProduct->update($validated + [
                     'additional' => $size,
@@ -226,6 +233,17 @@ class ProductBoutiqueController extends Controller
                 ]);
                 $new_product = $existingProduct;
             } else {
+                if ($validated['code']) {
+                    if ($existingBaseCode == $validated['code']) {
+                        // Crear código único para talla actual desde el utimo consecutivo
+                        $validated['code'] = $validated['code'] . "-$lastConsecutive";
+                        // aumentar consecutivo
+                        $lastConsecutive++;
+                    } else {
+                        // Crear codigo unico para talla actual
+                        $validated['code'] = $validated['code'] . "-$key";
+                    }
+                }
                 // Crear nuevo producto
                 $new_product = Product::create($validated + [
                     'store_id' => $store_id,
@@ -235,7 +253,6 @@ class ProductBoutiqueController extends Controller
                     'max_stock' => $productData['max_stock'],
                 ]);
             }
-
             // resetear a código base
             $validated['code'] = $request->code;
 
@@ -299,8 +316,12 @@ class ProductBoutiqueController extends Controller
 
             // Usar preg_match para obtener el consecutivo
             if (preg_match('/-(\d+)$/', $lastCode, $matches)) {
-                $lastConsecutive = (int)$matches[1];
+                $lastConsecutive = (int)$matches[1] + 1;
             }
+
+            // obtener el codigo base del codigo existente (antes de la edicion)
+            $firstCode = $existingProducts->first()->code;
+            $existingBaseCode = substr($firstCode, 0, strrpos($firstCode, '-'));
         }
 
         // Eliminar productos que no están en la solicitud
@@ -320,14 +341,17 @@ class ProductBoutiqueController extends Controller
 
             $existingProduct = $existingProducts->where('id', $productData['id'])->first();
 
-            if ($validated['code']) {
-                // Crear código único para talla actual desde el utimo consecutivo
-                $validated['code'] = $validated['code'] . "-$lastConsecutive";
-                // aumentar consecutivo
-                $lastConsecutive++;
-            }
-
             if ($existingProduct) {
+                // cambiar codigo unico
+                if ($validated['code']) {
+                    if ($existingBaseCode == $validated['code']) {
+                        // Crear código único para talla actual desde el utimo consecutivo
+                        $validated['code'] = $existingProduct->code;
+                    } else {
+                        // Crear codigo unico para talla actual
+                        $validated['code'] = $validated['code'] . "-$key";
+                    }
+                }
                 // Actualizar producto existente
                 $existingProduct->update($validated + [
                     'additional' => $size,
@@ -337,6 +361,17 @@ class ProductBoutiqueController extends Controller
                 ]);
                 $new_product = $existingProduct;
             } else {
+                if ($validated['code']) {
+                    if ($existingBaseCode == $validated['code']) {
+                        // Crear código único para talla actual desde el utimo consecutivo
+                        $validated['code'] = $validated['code'] . "-$lastConsecutive";
+                        // aumentar consecutivo
+                        $lastConsecutive++;
+                    } else {
+                        // Crear codigo unico para talla actual
+                        $validated['code'] = $validated['code'] . "-$key";
+                    }
+                }
                 // Crear nuevo producto
                 $new_product = Product::create($validated + [
                     'store_id' => $store_id,
@@ -346,7 +381,6 @@ class ProductBoutiqueController extends Controller
                     'max_stock' => $productData['max_stock'],
                 ]);
             }
-
             // resetear a código base
             $validated['code'] = $request->code;
 
@@ -419,61 +453,46 @@ class ProductBoutiqueController extends Controller
     //     return response()->json(['items' => $products]);
     // }
 
-    // public function entryStock(Request $request, $product_id)
-    // {
-    //     $messages = [
-    //         'cash_amount.required_if' => 'El monto a retirar es obligatorio cuando el pago se realiza mediante la caja registradora.',
-    //         'cash_amount.numeric' => 'El monto a retirar debe ser un número.',
-    //         'cash_amount.min' => 'El monto a retirar debe ser al menos 1.',
-    //     ];
+    public function entryStock(Request $request)
+    {
+        $messages = [
+            'sizes.*.quantity.required' => 'obligatorio.',
+            'sizes.*.quantity.numeric' => 'Este campo debe ser un número.',
+            'sizes.*.quantity.min' => 'Este campo debe ser positivo.',
+        ];
 
-    //     $request->validate([
-    //         'quantity' => 'required|numeric|min:1',
-    //         'is_paid_by_cash_register' => 'boolean',
-    //         'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
-    //     ], $messages);
+        $validated = $request->validate([
+            'sizes.*.product_id' => 'required|numeric|min:1',
+            'sizes.*.size_name' => 'nullable',
+            'sizes.*.quantity' => 'required|numeric|min:1',
+        ], $messages);
 
-    //     $product = Product::find($product_id);
-
-    //     // Asegúrate de convertir la cantidad a un número antes de sumar
-    //     $product->current_stock += floatval($request->quantity);
-
-    //     // Guarda el producto
-    //     $product->save();
-
-    //     // Crear entrada
-    //     ProductHistory::create([
-    //         'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
-    //         'type' => 'Entrada',
-    //         'historicable_id' => $product_id,
-    //         'historicable_type' => Product::class
-    //     ]);
-
-    //     // Crear gasto
-    //     $expense = Expense::create([
-    //         'concept' => 'Compra de producto: ' . $product->name,
-    //         'current_price' => $product->cost ?? 0,
-    //         'quantity' => $request->quantity,
-    //         'store_id' => auth()->user()->store_id,
-    //         'amount_from_cash_register' => $request->cash_amount,
-    //     ]);
-
-    //     // restar de caja en caso de que el usuario asi lo haya especificado
-    //     if ($request->is_paid_by_cash_register) {
-    //         $unit = $request->quantity == 1 ? 'unidad' : 'unidades';
-    //         $cash_register = auth()->user()->cashRegister;
-    //         $cash_register->decrement('current_cash', $request->cash_amount);
-
-    //         // crear movimiento de caja
-    //         CashRegisterMovement::create([
-    //             'amount' => $request->cash_amount,
-    //             'type' => 'Retiro',
-    //             'notes' => "Compra de $product->name ($request->quantity $unit)",
-    //             'cash_register_id' => $cash_register->id,
-    //             'expense_id' => $expense->id,
-    //         ]);
-    //     }
-    // }
+        foreach ($validated['sizes'] as $entry) {
+            $product = Product::find($entry['product_id']);
+    
+            // Asegurar convertir la cantidad a un número antes de sumar
+            $product->current_stock += floatval($entry['quantity']);
+    
+            // Guarda el producto
+            $product->save();
+    
+            // Crear entrada
+            ProductHistory::create([
+                'description' => 'Entrada de producto. ' . $entry['quantity'] . ' unidad(es) de talla ' . $entry['size_name'],
+                'type' => 'Entrada',
+                'historicable_id' => $entry['product_id'],
+                'historicable_type' => Product::class
+            ]);
+    
+            // Crear gasto
+            Expense::create([
+                'concept' => 'Compra de producto: ' . $product->name,
+                'current_price' => $product->cost ?? 0,
+                'quantity' => $entry['quantity'],
+                'store_id' => auth()->user()->store_id,
+            ]);
+        }
+    }
 
     public function fetchHistory($product_name, $month = null, $year = null)
     {

@@ -212,15 +212,6 @@ export default {
                 this.entryLoading = true;
                 this.form.put(route('global-product-store.entry', this.global_product_store.id), {
                     onSuccess: () => {
-                        this.form.reset();
-                        this.entryProductModal = false;
-                        this.$notify({
-                            title: 'Correcto',
-                            text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
-                            type: 'success',
-                        });
-                        this.$refs.historyTab.fetchHistory();
-
                         // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
                         // if (this.isInventoryOn) {
                         const product = {
@@ -233,6 +224,16 @@ export default {
                         };
                         addOrUpdateItem('products', product);
                         // }
+
+                        this.form.reset();
+                        this.entryProductModal = false;
+                        this.$notify({
+                            title: 'Correcto',
+                            message: '',
+                            type: 'success',
+                        });
+                        this.$refs.historyTab.fetchHistory();
+
                     },
                     onFinish: () => this.entryLoading = false,
                 });
