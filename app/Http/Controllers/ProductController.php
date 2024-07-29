@@ -11,6 +11,7 @@ use App\Models\Expense;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
+use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -28,9 +29,8 @@ class ProductController extends Controller
 
     public function create()
     {
-        $store_id = auth()->user()->store_id;
-        $products_quantity = Product::where('store_id', $store_id)->get()->count();
         $store = auth()->user()->store;
+        $products_quantity = Product::where('store_id', $store->id)->get()->count();
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
@@ -241,7 +241,7 @@ class ProductController extends Controller
             'is_paid_by_cash_register' => 'boolean',
             'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
         ], $messages);
-        
+
         $product = Product::find($product_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
@@ -464,6 +464,7 @@ class ProductController extends Controller
                     'id' => 'local_' . $product->id,
                     'name' => $product->name,
                     'code' => $product->code,
+                    'additional' => $product->additional,
                     'public_price' => $product->public_price,
                     'current_stock' => $product->current_stock,
                     'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
