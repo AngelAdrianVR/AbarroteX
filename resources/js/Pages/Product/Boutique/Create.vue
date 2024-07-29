@@ -20,7 +20,7 @@
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" filterable v-model="form.category_id" clearable placeholder="Seleccione"
+                    <el-select @change="handleCategory" class="w-1/2" filterable v-model="form.category_id" clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="category in localCategories" :key="category" :label="category.name"
                             :value="category.id" />
@@ -76,7 +76,6 @@
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
                     </div>
-
                     <article v-for="(item, index) in form.sizes" :key="index" class="flex items-center space-x-3 mb-2">
                         <div class="w-[33%]">
                             <div class="w-full flex items-center justify-between">
@@ -84,11 +83,11 @@
                                 <button @click="showSizeFormModal = true" v-if="index == 0" type="button"
                                     class="text-primary text-xs">Crear talla</button>
                             </div>
-                            <el-select filterable v-model="form.sizes[index].size_id" clearable placeholder="Seleccione"
+                            <el-select :ref="'size' + index" filterable v-model="item.size_id" clearable placeholder="Seleccione"
                                 no-data-text="Primero seleccione la categoria"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="size in getCategorySizes" :key="size.id" :label="size.name"
-                                    :value="size.id">
+                                    :value="size.id" :disabled="form.sizes.some(item => item.size_id == size.id)">
                                     <p class="flex items-center justify-between">
                                         <span>{{ size.name }}</span>
                                         <span v-if="size.short" class="text-[10px] text-gray99">({{ size.short
@@ -100,21 +99,21 @@
                         </div>
                         <div class="w-[14%]">
                             <InputLabel value="Existencias *" />
-                            <el-input v-model="form.sizes[index].current_stock" placeholder="Stock actual"
+                            <el-input v-model="item.current_stock" placeholder="Stock actual"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <InputError :message="form.errors[`sizes.${index}.current_stock`]" />
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
                             <InputLabel value="Cantidad mínima" />
-                            <el-input v-model="form.sizes[index].min_stock" placeholder="Mínimo permitido"
+                            <el-input v-model="item.min_stock" placeholder="Mínimo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <InputError :message="form.errors[`sizes.${index}.min_stock`]" />
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
                             <InputLabel value="Cantidad máxima" />
-                            <el-input v-model="form.sizes[index].max_stock" placeholder="Máximo permitido"
+                            <el-input v-model="item.max_stock" placeholder="Máximo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <InputError :message="form.errors[`sizes.${index}.max_stock`]" />
@@ -330,6 +329,15 @@ export default {
         },
     },
     methods: {
+        handleCategory() {
+            this.form.sizes.forEach(item => {
+                item.size_id = null;
+            });
+
+            this.$nextTick(() => {
+                this.$refs.size0[0].focus();
+            });
+        },
         deleteSize(index) {
             this.form.sizes.splice(index, 1);
         },
@@ -382,7 +390,7 @@ export default {
                         type: "success",
                     });
                     this.form.category_id = response.data.item.id;
-                    this.localCategories.push(response.data.item);
+                    this.localCategories.unshift(response.data.item);
                     this.showCategoryFormModal = false;
                     this.categoryForm.reset();
                 }

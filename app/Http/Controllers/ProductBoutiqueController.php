@@ -22,7 +22,7 @@ class ProductBoutiqueController extends Controller
     {
         $store = auth()->user()->store;
         $products_quantity = Product::where('store_id', $store->id)->get()->count();
-        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->latest('id')->get();
         $sizes = Size::whereIn('category', $categories->pluck(['name']))->latest('id')->get();
 
         return inertia('Product/Boutique/Create', compact('products_quantity', 'categories', 'sizes'));
@@ -31,11 +31,10 @@ class ProductBoutiqueController extends Controller
     public function store(Request $request)
     {
         $store_id = auth()->user()->store_id;
-        $sizeCount = count($request->input('sizes', []));
 
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
-            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $sizeCount)],
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code)],
             'public_price' => 'required|numeric|min:0|max:999999',
             'cost' => 'nullable|numeric|min:0|max:999999',
             'currency' => 'required|string',
@@ -135,20 +134,22 @@ class ProductBoutiqueController extends Controller
                 'name' => $product_name,
             ])->get();
         $store = auth()->user()->store;
-        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->latest('id')->get();
         $sizes = Size::whereIn('category', $categories->pluck(['name']))->latest('id')->get();
 
         return inertia('Product/Boutique/Edit', compact('products', 'categories', 'sizes'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $product)
     {
         $store_id = auth()->user()->store_id;
-        $sizeCount = count($request->input('sizes', []));
 
+        // obtener el nombre original de los productos que fueron editados
+        $productName = Product::findOrFail($product)?->name;
+        
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $sizeCount)],
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $productName)],
             'public_price' => 'required|numeric|min:0|max:999999',
             'cost' => 'nullable|numeric|min:0|max:999999',
             'currency' => 'required|string',
@@ -176,14 +177,21 @@ class ProductBoutiqueController extends Controller
         $updatedSizes = collect($request->input('sizes', []))->pluck('id')->toArray();
 
         // Obtener los productos actuales por nombre
-        $productName = Product::whereIn('id', $updatedSizes)
-            ->where('store_id', $store_id)
-            ->first()?->name;
-
         $existingProducts = Product::where('name', $productName)
             ->where('store_id', $store_id)
             ->get();
-            
+
+        $lastConsecutive = 0;
+        if ($existingProducts->isNotEmpty()) {
+            // Obtener el código del último registro
+            $lastCode = $existingProducts->last()->code;
+
+            // Usar preg_match para obtener el consecutivo
+            if (preg_match('/-(\d+)$/', $lastCode, $matches)) {
+                $lastConsecutive = (int)$matches[1];
+            }
+        }
+
         // Eliminar productos que no están en la solicitud
         $existingProducts->whereNotIn('id', $updatedSizes)->each(function ($product) {
             $product->delete();
@@ -199,12 +207,14 @@ class ProductBoutiqueController extends Controller
 
             $size = Size::where('id', $productData['size_id'])->first()->toArray();
 
-            if ($validated['code']) {
-                // Crear código único para talla actual
-                $validated['code'] = $validated['code'] . "-$key";
-            }
-
             $existingProduct = $existingProducts->where('id', $productData['id'])->first();
+
+            if ($validated['code']) {
+                // Crear código único para talla actual desde el utimo consecutivo
+                $validated['code'] = $validated['code'] . "-$lastConsecutive";
+                // aumentar consecutivo
+                $lastConsecutive++;
+            }
 
             if ($existingProduct) {
                 // Actualizar producto existente
@@ -239,14 +249,16 @@ class ProductBoutiqueController extends Controller
         return to_route('boutique-products.show', $encoded_product_id);
     }
 
-    public function updateWithMedia(Request $request, Product $product)
+    public function updateWithMedia(Request $request, $product)
     {
         $store_id = auth()->user()->store_id;
-        $sizeCount = count($request->input('sizes', []));
+
+        // obtener el nombre original de los productos que fueron editados
+        $productName = Product::findOrFail($product)?->name;
 
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:products,name,' . $product->id . ',id,store_id,' . $store_id,
-            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $sizeCount)],
+            'name' => 'required|string|max:100',
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $productName)],
             'public_price' => 'required|numeric|min:0|max:999999',
             'cost' => 'nullable|numeric|min:0|max:999999',
             'currency' => 'required|string',
@@ -276,14 +288,21 @@ class ProductBoutiqueController extends Controller
         $updatedSizes = collect($request->input('sizes', []))->pluck('id')->toArray();
 
         // Obtener los productos actuales por nombre
-        $productName = Product::whereIn('id', $updatedSizes)
-            ->where('store_id', $store_id)
-            ->first()?->name;
-
         $existingProducts = Product::where('name', $productName)
             ->where('store_id', $store_id)
             ->get();
-            
+
+        $lastConsecutive = 0;
+        if ($existingProducts->isNotEmpty()) {
+            // Obtener el código del último registro
+            $lastCode = $existingProducts->last()->code;
+
+            // Usar preg_match para obtener el consecutivo
+            if (preg_match('/-(\d+)$/', $lastCode, $matches)) {
+                $lastConsecutive = (int)$matches[1];
+            }
+        }
+
         // Eliminar productos que no están en la solicitud
         $existingProducts->whereNotIn('id', $updatedSizes)->each(function ($product) {
             $product->delete();
@@ -299,12 +318,14 @@ class ProductBoutiqueController extends Controller
 
             $size = Size::where('id', $productData['size_id'])->first()->toArray();
 
-            if ($validated['code']) {
-                // Crear código único para talla actual
-                $validated['code'] = $validated['code'] . "-$key";
-            }
-
             $existingProduct = $existingProducts->where('id', $productData['id'])->first();
+
+            if ($validated['code']) {
+                // Crear código único para talla actual desde el utimo consecutivo
+                $validated['code'] = $validated['code'] . "-$lastConsecutive";
+                // aumentar consecutivo
+                $lastConsecutive++;
+            }
 
             if ($existingProduct) {
                 // Actualizar producto existente
@@ -326,7 +347,7 @@ class ProductBoutiqueController extends Controller
                 ]);
             }
 
-            // resetear a nombre y código base
+            // resetear a código base
             $validated['code'] = $request->code;
 
             // primer producto registrado
@@ -351,9 +372,7 @@ class ProductBoutiqueController extends Controller
             }
         }
 
-        if (!request('stayInView')) {
-            return to_route('boutique-products.show', $encoded_product_id);
-        }
+        return to_route('boutique-products.show', $encoded_product_id);
     }
 
     public function destroy($product)
