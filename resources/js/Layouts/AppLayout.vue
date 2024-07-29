@@ -150,6 +150,9 @@ onUnmounted(() => {
                                             <DropdownLink :href="route('profile.show')">
                                                 Perfil y suscripción
                                             </DropdownLink>
+                                            <!-- <DropdownLink :href="route('internal-invoices.index')">
+                                                Facturación
+                                            </DropdownLink> -->
                                             <DropdownLink :href="route('supports.index')">
                                                 Soporte
                                             </DropdownLink>

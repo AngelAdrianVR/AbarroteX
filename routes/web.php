@@ -14,6 +14,7 @@ use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
 use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\InternalInvoiceController;
 use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
@@ -448,6 +449,11 @@ Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'r
 Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
 Route::get('online-sales-show-service/{service}', [OnlineSaleController::class, 'showService'])->name('online-sales.show-service');
 Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class, 'quoteService'])->name('online-sales.quote-service');
+
+
+//Internal invoices routes----------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
+Route::resource('internal-invoices', InternalInvoiceController::class);
 
 
 // comandos Artisan
