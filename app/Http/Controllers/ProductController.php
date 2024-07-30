@@ -11,10 +11,9 @@ use App\Models\Expense;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
-use App\Models\Size;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -189,14 +188,12 @@ class ProductController extends Controller
         return to_route('products.show', ['product' => $encoded_product_id]);
     }
 
-
     public function destroy(Product $product)
     {
         // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
         // eliminar producto
         $product->delete();
     }
-
 
     public function searchProduct(Request $request)
     {
@@ -214,7 +211,7 @@ class ProductController extends Controller
         $global_products = GlobalProductStore::with(['globalProduct.media'])
             ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
                 $queryBuilder->where('name', 'like', "%$query%")
-                    ->orWhere('code', $query);
+                    ->orWhere('code', 'like', "%$query%");
             })
             ->where('store_id', auth()->user()->store_id)
             ->get();

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductHistoryResource;
-use App\Http\Resources\ProductResource;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\GlobalProductStore;
@@ -423,35 +425,36 @@ class ProductBoutiqueController extends Controller
         $products->each(fn ($prd) =>  $prd->delete());
     }
 
-    // public function searchProduct(Request $request)
-    // {
-    //     $query = $request->input('query');
+    public function searchProduct(Request $request)
+    {
+        $query = $request->input('query');
 
-    //     // Realiza la búsqueda en la base de datos local
-    //     $local_products = Product::with(['category', 'brand', 'media'])
-    //         ->where('store_id', auth()->user()->store_id)
-    //         ->where(function ($q) use ($query) {
-    //             $q->where('name', 'like', "%$query%")
-    //                 ->orWhere('code', 'like', "%$query%");
-    //         })
-    //         ->get();
+        // Realiza la búsqueda en la base de datos local
+        $local_products = Product::with(['category:id,name', 'media'])
+            ->where('store_id', auth()->user()->store_id)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%$query%")
+                    ->orWhere('code', 'like', "%$query%");
+            })
+            ->latest('id')
+            ->get(['id', 'name', 'public_price', 'cost', 'code', 'store_id', 'category_id', 'min_stock', 'max_stock', 'current_stock']);
 
-    //     $global_products = GlobalProductStore::with(['globalProduct.media'])
-    //         ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
-    //             $queryBuilder->where('name', 'like', "%$query%")
-    //                 ->orWhere('code', $query);
-    //         })
-    //         ->where('store_id', auth()->user()->store_id)
-    //         ->get();
+        $global_products = GlobalProductStore::with(['globalProduct.media', 'globalProduct.category:id,name'])
+            ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
+                $queryBuilder->where('name', 'like', "%$query%")
+                    ->orWhere('code', 'like', "%$query%");
+            })
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
 
-    //     // Combinar los resultados en una colección
-    //     $combined_products = $local_products->merge($global_products);
+        // Combinar los resultados en una colección
+        $combined_products = $local_products->merge($global_products);
 
-    //     // Tomar solo los primeros 20 elementos del arreglo combinado
-    //     $products = $combined_products;
+        // Tomar solo los primeros 20 elementos del arreglo combinado
+        $products = $combined_products->groupBy('name');
 
-    //     return response()->json(['items' => $products]);
-    // }
+        return response()->json(['items' => $products]);
+    }
 
     public function entryStock(Request $request)
     {
@@ -469,13 +472,13 @@ class ProductBoutiqueController extends Controller
 
         foreach ($validated['sizes'] as $entry) {
             $product = Product::find($entry['product_id']);
-    
+
             // Asegurar convertir la cantidad a un número antes de sumar
             $product->current_stock += floatval($entry['quantity']);
-    
+
             // Guarda el producto
             $product->save();
-    
+
             // Crear entrada
             ProductHistory::create([
                 'description' => 'Entrada de producto. ' . $entry['quantity'] . ' unidad(es) de talla ' . $entry['size_name'],
@@ -483,10 +486,10 @@ class ProductBoutiqueController extends Controller
                 'historicable_id' => $entry['product_id'],
                 'historicable_type' => Product::class
             ]);
-    
+
             // Crear gasto
             Expense::create([
-                'concept' => 'Compra de producto: ' . $product->name,
+                'concept' => 'Compra de producto: ' . $product->name . ' talla ' . $entry['size_name'],
                 'current_price' => $product->cost ?? 0,
                 'quantity' => $entry['quantity'],
                 'store_id' => auth()->user()->store_id,
@@ -563,45 +566,45 @@ class ProductBoutiqueController extends Controller
         return $products;
     }
 
-    // public function import(Request $request)
-    // {
-    //     // Validar el archivo Excel
-    //     $request->validate([
-    //         // 'file' => 'required|mimes:xlsx,xls',
-    //         'file' => 'required',
-    //     ]);
+    public function import(Request $request)
+    {
+        // Validar el archivo Excel
+        $request->validate([
+            // 'file' => 'required|mimes:xlsx,xls',
+            'file' => 'required',
+        ]);
 
-    //     // Obtener el archivo Excel
-    //     $file = $request->file('file');
+        // Obtener el archivo Excel
+        $file = $request->file('file');
 
-    //     if (is_array($file)) {
-    //         // Si se enviaron múltiples archivos, toma el primero
-    //         $file = reset($file);
-    //     }
+        if (is_array($file)) {
+            // Si se enviaron múltiples archivos, toma el primero
+            $file = reset($file);
+        }
 
-    //     // Guardar el archivo en el almacenamiento temporal de Laravel
-    //     $path = $file->store('temp');
+        // Guardar el archivo en el almacenamiento temporal de Laravel
+        $path = $file->store('temp');
 
-    //     // Obtener la ruta completa del archivo
-    //     $filePath = Storage::path($path);
+        // Obtener la ruta completa del archivo
+        $filePath = Storage::path($path);
 
-    //     // Cargar el archivo Excel
-    //     $spreadsheet = IOFactory::load($filePath);
+        // Cargar el archivo Excel
+        $spreadsheet = IOFactory::load($filePath);
 
-    //     // Obtener la primera hoja de trabajo
-    //     $worksheet = $spreadsheet->getActiveSheet();
+        // Obtener la primera hoja de trabajo
+        $worksheet = $spreadsheet->getActiveSheet();
 
-    //     // validar informacion
-    //     $errorsBag = $this->validateProductsFromFile($worksheet);
+        // validar informacion
+        $errorsBag = $this->validateProductsFromFile($worksheet);
 
-    //     // Si hay errores, devolverlos al cliente
-    //     if ($errorsBag) {
-    //         return response()->json(['errors' => $errorsBag], 400);
-    //     } else {
-    //         // Si no hay errores, proceder a guardar en la base de datos
-    //         $this->storeProductsFromFile($worksheet);
-    //     }
-    // }
+        // Si hay errores, devolverlos al cliente
+        if ($errorsBag) {
+            return response()->json(['errors' => $errorsBag], 400);
+        } else {
+            // Si no hay errores, proceder a guardar en la base de datos
+            $this->storeProductsFromFile($worksheet);
+        }
+    }
 
     // public function export()
     // {
@@ -663,45 +666,6 @@ class ProductBoutiqueController extends Controller
     //     ]);
     // }
 
-    // public function getAllForIndexedDB()
-    // {
-    //     // productos creados localmente en la tienda que no están en el catálogo base o global
-    //     $local_products = Product::where('store_id', auth()->user()->store_id)
-    //         ->latest()
-    //         ->get()
-    //         ->map(function ($product) {
-    //             return [
-    //                 'id' => 'local_' . $product->id,
-    //                 'name' => $product->name,
-    //                 'code' => $product->code,
-    //                 'public_price' => $product->public_price,
-    //                 'current_stock' => $product->current_stock,
-    //                 'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
-    //             ];
-    //         })->toArray();
-
-    //     // productos transferidos desde el catálogo base
-    //     $transfered_products = GlobalProductStore::query()
-    //         ->where('store_id', auth()->user()->store_id)
-    //         ->get()
-    //         ->map(function ($tp) {
-    //             return [
-    //                 'id' => 'global_' . $tp->id,
-    //                 'name' => $tp->globalProduct->name,
-    //                 'code' => $tp->globalProduct->code,
-    //                 'public_price' => $tp->public_price,
-    //                 'current_stock' => $tp->current_stock,
-    //                 'image_url' => $tp->globalProduct->getFirstMediaUrl('imageCover'),
-    //             ];
-    //         })->toArray();
-
-
-    //     // Creamos un nuevo arreglo combinando los dos conjuntos de datos
-    //     $products = collect(array_merge($local_products, $transfered_products));
-
-    //     return response()->json(compact('products', 'local_products', 'transfered_products'));
-    // }
-
     public function getDataForProductsView()
     {
         $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
@@ -715,98 +679,155 @@ class ProductBoutiqueController extends Controller
         return response()->json(compact('products', 'total_products', 'total_local_products'));
     }
 
-    // private function validateProductsFromFile($worksheet)
-    // {
-    //     // Almacenar los errores de validación
-    //     $errorsBag = [];
+    private function validateProductsFromFile($worksheet)
+    {
+        // Almacenar los errores de validación
+        $errorsBag = [];
 
-    //     $columnNames = [];
-    //     // Obtener datos y guardar en la base de datos
-    //     foreach ($worksheet->getRowIterator() as $row) {
-    //         if ($row->getRowIndex() < 4) {
-    //             continue; // Saltar las primeras 3 filas
-    //         }
+        $columnNames = [];
+        // Obtener datos y guardar en la base de datos
+        foreach ($worksheet->getRowIterator() as $row) {
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
+            }
 
-    //         $cellIterator = $row->getCellIterator();
-    //         $cellIterator->setIterateOnlyExistingCells(false);
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
 
-    //         if ($row->getRowIndex() == 4) {
-    //             // Obtener los nombres de columna de la fila 4 del archivo Excel
-    //             foreach ($cellIterator as $cell) {
-    //                 $columnNames[] = $cell->getValue();
-    //             }
-    //             continue;
-    //         }
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la fila 4 del archivo Excel
+                foreach ($cellIterator as $cell) {
+                    $columnNames[] = $cell->getValue();
+                }
+                continue;
+            }
 
-    //         $data = [];
-    //         $currentColumn = 0;
-    //         foreach ($cellIterator as $cell) {
-    //             $columnName = $columnNames[$currentColumn++]; // Obtener el nombre de columna
-    //             $data[$columnName] = $cell->getValue(); // Asignar el valor al array asociativo usando el nombre de columna
-    //         }
+            $data = [];
+            $currentColumn = 0;
+            foreach ($cellIterator as $cell) {
+                $columnName = $columnNames[$currentColumn++]; // Obtener el nombre de columna
+                $data[$columnName] = $cell->getValue(); // Asignar el valor al array asociativo usando el nombre de columna
+            }
 
-    //         // Validar los datos
-    //         $validator = Validator::make($data, [
-    //             $columnNames[0] => 'required|string|max:120|unique:products,name',
-    //             $columnNames[1] => 'required|numeric|min:0|max:999999',
-    //             $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:999999' : '',
-    //             $columnNames[3] => $data[$columnNames[3]]
-    //                 ?  ['max:100', new \App\Rules\UniqueProductCode()]
-    //                 : '',
-    //             $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999' : '',
-    //             $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999' : '',
-    //             $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '',
-    //         ]);
+            // Validar los datos
+            $validator = Validator::make($data, [
+                $columnNames[0] => 'required|string|max:120', //name
+                $columnNames[1] => 'required|string|max:255', //category
+                $columnNames[2] => 'required|string|max:255', // size
+                $columnNames[3] => 'required|numeric|min:0|max:999999.99', // public_price
+                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999.99' : '', //cost
+                $columnNames[5] => $data[$columnNames[5]]
+                    ?  ['max:100', new \App\Rules\UniqueBoutiqueProductCode($data[$columnNames[5]])]
+                    : '', //code
+                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '', //min stock
+                $columnNames[7] => $data[$columnNames[7]] ? 'numeric|min:0|max:999999' : '', //max stock
+                $columnNames[8] => $data[$columnNames[8]] ? 'numeric|min:0|max:999999' : '', //current stock
+            ]);
 
-    //         // Si la validación falla, almacenar los errores
-    //         if ($validator->fails()) {
-    //             $errorsBag[] = [
-    //                 'row' => $row->getRowIndex(),
-    //                 'errors' => $validator->errors()->all(),
-    //             ];
-    //         }
-    //     }
+            // Si la validación falla, almacenar los errores
+            if ($validator->fails()) {
+                $errorsBag[] = [
+                    'row' => $row->getRowIndex(),
+                    'errors' => $validator->errors()->all(),
+                ];
+            }
+        }
 
-    //     return $errorsBag;
-    // }
+        return $errorsBag;
+    }
 
-    // private function storeProductsFromFile($worksheet)
-    // {
-    //     foreach ($worksheet->getRowIterator() as $row) {
-    //         if ($row->getRowIndex() < 4) {
-    //             continue; // Saltar las primeras 3 filas
-    //         }
+    private function storeProductsFromFile($worksheet)
+    {
+        $base_code = '';
+        $consecutive = 0;
+        foreach ($worksheet->getRowIterator() as $row) {
+            // iniciar codigo en nulo
+            $code = null;
 
-    //         $cellIterator = $row->getCellIterator();
-    //         $cellIterator->setIterateOnlyExistingCells(false);
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
+            }
 
-    //         if ($row->getRowIndex() == 4) {
-    //             // Obtener los nombres de columna de la cuarta fila del archivo Excel
-    //             foreach ($cellIterator as $cell) {
-    //                 $columnNames[] = $cell->getValue();
-    //             }
-    //             continue;
-    //         }
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
 
-    //         $data = [];
-    //         foreach ($cellIterator as $cell) {
-    //             $data[] = $cell->getValue(); // Asignar el valor al array asociativo usando el nombre de columna
-    //         }
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la cuarta fila del archivo Excel
+                foreach ($cellIterator as $cell) {
+                    $columnNames[] = $cell->getValue();
+                }
+                continue;
+            }
 
-    //         Product::create([
-    //             'name' => $data[0],
-    //             'public_price' => $data[1],
-    //             'cost' => $data[2] ?? 1,
-    //             'code' => $data[3],
-    //             'min_stock' => $data[4] ?? 1,
-    //             'max_stock' => $data[5] ?? 1,
-    //             'current_stock' => $data[6] ?? 1,
-    //             'store_id' => auth()->user()->store_id,
-    //             'category_id' => 1, //Abarrotes por defecto
-    //             'brand_id' => 1, //Generico por defecto
-    //         ]);
-    //     }
-    // }
+            $data = [];
+            foreach ($cellIterator as $cell) {
+                $data[] = $cell->getValue(); // Asignar el valor al array asociativo usando el nombre de columna
+            }
+
+            $store_id = auth()->user()->store_id;
+            $category = Category::where(function ($query) use ($store_id){
+                $query->where('business_line_name', $store_id)
+                    ->orWhere('business_line_name', 'Boutique / Tienda de Ropa / Zapatería');
+            })
+            ->where('name', $data[1])
+            ->first();
+
+            // Si la categoria ingresada por el usuario desde excel no existe, crear uno nuevo
+            if (!$category) {
+                $category = Category::create([
+                    'name' => $data[1],
+                    'business_line_name' => auth()->user()->store->id
+                ]);
+            }
+            
+            // buscar talla ingresada en BDD
+            $size_exploted = explode('-', $data[2]);
+            $size_name = $size_exploted[0];
+            $size_short = count($size_exploted) == 2 ? $size_exploted[1] : null;
+            $size = Size::where(['name' => $size_name, 'category' => $category->name])
+            ->when($size_short, function ($query) use ($size_short) {
+                $query->where('short', $size_short);
+            })
+            ->first();
+            
+            // Si la talla ingresada por el usuario desde excel no existe, crear una nueva
+            if (!$size) {
+                $size = Size::create([
+                    'name' => $data[1],
+                    'category' => $category->name,
+                    'short' => $size_short,
+                ]);
+            }
+
+            // Revision de codigos unicos
+            if ($base_code == ':*') { //si es la primera iteracion comenzar el codigo base
+                $base_code = $data[5];
+            }
+
+            if ($data[5]) {
+                if ($base_code == $data[5]) {
+                    $consecutive++;
+                } else {
+                    $consecutive = 0;
+                    $base_code = $data[5];
+                }
+                $code = $base_code . "-$consecutive";
+            }
+
+            Product::create([
+                'name' => $data[0],
+                'category_id' => $category->id,
+                'additional' => ['id' => $size->id, 'name' => $size->name, 'short' => $size->short],
+                'public_price' => $data[3],
+                'cost' => $data[4],
+                'code' => $code,
+                'min_stock' => $data[6],
+                'max_stock' => $data[7],
+                'current_stock' => $data[8] ?? 1,
+                'store_id' => $store_id,
+            ]);
+        }
+    }
 
     // public function changePrice(Request $request)
     // {

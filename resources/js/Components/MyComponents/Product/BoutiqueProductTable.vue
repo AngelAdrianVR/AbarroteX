@@ -184,10 +184,11 @@ export default {
                 routePage = 'global-product-store.destroy';
             } else {
                 routePage = 'boutique-products.destroy';
+                console.log(this.itemToDelete[0].id);
             }
             try {
                 this.deleting = true;
-                const response = await axios.delete(route(routePage, this.itemToDelete.id));
+                const response = await axios.delete(route(routePage, this.itemToDelete[0].id));
                 if (response.status === 200) {
                     let productName;
                     if (this.itemToDelete.global_product_id) {

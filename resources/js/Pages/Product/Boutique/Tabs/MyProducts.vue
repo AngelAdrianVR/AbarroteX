@@ -120,9 +120,8 @@
                     <p class="mt-5 mb-1">
                         Primero, descarga la plantilla de importación haciendo click en el siguiente enlace:
                     </p>
-                    <a href="@/../../files/tabla_productos.xlsx" target="_blank" class="underline text-primary">Descarga
-                        la
-                        plantilla</a>
+                    <a href="@/../../files/tabla_productos_boutique.xlsx" target="_blank" class="underline text-primary">
+                        Descarga la plantilla</a>
                     <p class="mt-5 mb-1">
                         Una vez que hayas agregado todos los productos a la plantilla, guarda los cambios y adjunta el
                         archivo.
@@ -461,7 +460,7 @@ export default {
 
                 if (response.status === 200) {
                     // Obtener productos
-                    const response = await axios.get(route('boutique-products.get-all-for-indexedDB'));
+                    const response = await axios.get(route('products.get-all-for-indexedDB'));
                     const products = response.data.products;
                     // actualizar indexedDB
                     await addOrUpdateBatchOfItems('products', products);
@@ -504,7 +503,7 @@ export default {
             if (this.searchQuery != '') {
                 try {
                     const response = await axios.get(route('boutique-products.search'), { params: { query: this.searchQuery } });
-                    if (response.status == 200) {
+                    if (response.status === 200) {
                         // this.products = this.localProducts;
                         this.localProducts = response.data.items;
                         this.searchedWord = this.searchQuery;
