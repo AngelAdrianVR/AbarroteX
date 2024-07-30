@@ -8,7 +8,7 @@
                     <ThirthButton @click="openEntryModal">Entrada de producto</ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('global-product-store.edit', encodedId))"
                         class="!rounded-full">Editar</PrimaryButton>
-                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
+                    <PrimaryButton @click="goToCreate()" class="!rounded-full">
                         <i class="fa-solid fa-plus"></i> Nuevo
                     </PrimaryButton>
                 </div>
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="mt-5">
-                <Back :to="route('products.index')" />
+                <Back :to="getRoute()" />
             </div>
 
             <!-- Info de producto -->
@@ -177,6 +177,20 @@ export default {
         cash_register: Object,
     },
     methods: {
+        getRoute() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                return route('boutique-products.index');
+            } else {
+                return route('products.index');
+            }
+        },
+        goToCreate() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                this.$inertia.get(route('boutique-products.create'));
+            } else {
+                this.$inertia.get(route('products.create'));
+            }
+        },
         updateURL(tab) {
             const params = new URLSearchParams(window.location.search);
             params.set('tab', tab.props.name);

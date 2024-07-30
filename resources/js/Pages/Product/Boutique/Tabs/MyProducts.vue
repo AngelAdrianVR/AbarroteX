@@ -34,10 +34,10 @@
             </div>
         </section>
         <section class="text-center mt-3">
-            <p>Total invertido en almacén: ${{ getTotalInvestInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+            <p>Total invertido en almacén: ${{ inventoryCost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                 ",") }}</p>
-            <p>Total para venta en almacén: ${{ getTotalSaleInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }}</p>
+            <p>Total para venta en almacén: ${{ inventoryPrice?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                ",") }}</p>
         </section>
         <div class="mt-8">
             <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px]">{{
@@ -174,8 +174,9 @@
                         serán exportados.</span>
                 </p>
                 <p v-if="totalLocalProductsWithSizes" class="mt-2">
-                    Tienes un total de {{ totalLocalProducts }} productos. Al tomar en cuenta todas las tallas disponibles de cada producto,
-                    el número total de registros a exportar es de 
+                    Tienes un total de {{ totalLocalProducts }} productos. Al tomar en cuenta todas las tallas
+                    disponibles de cada producto,
+                    el número total de registros a exportar es de
                     <b class="text-primary">
                         {{ totalLocalProductsWithSizes }}
                     </b>.
@@ -316,6 +317,8 @@ export default {
             totalProducts: null,
             totalLocalProducts: null,
             totalLocalProductsWithSizes: null,
+            inventoryCost: 0,
+            inventoryPrice: 0,
             searchedWord: null, //palabra con la que se hizo la última busqueda.
             // carga
             loading: false,
@@ -336,22 +339,22 @@ export default {
     props: {
     },
     methods: {
-        getTotalSaleInventory() {
-            return Object.values(this.products).reduce((accum, set) => {
-                return accum += set.reduce((sub, element) => {
-                    const price = element.public_price ?? 0;
-                    return sub += element.current_stock * price;
-                }, 0);
-            }, 0);
-        },
-        getTotalInvestInventory() {
-            return Object.values(this.products).reduce((accum, set) => {
-                return accum += set.reduce((sub, element) => {
-                    const cost = element.cost ?? 0;
-                    return sub += element.current_stock * cost;
-                }, 0);
-            }, 0);
-        },
+        // getTotalSaleInventory() {
+        //     return Object.values(this.products).reduce((accum, set) => {
+        //         return accum += set.reduce((sub, element) => {
+        //             const price = element.public_price ?? 0;
+        //             return sub += element.current_stock * price;
+        //         }, 0);
+        //     }, 0);
+        // },
+        // getTotalInvestInventory() {
+        //     return Object.values(this.products).reduce((accum, set) => {
+        //         return accum += set.reduce((sub, element) => {
+        //             const cost = element.cost ?? 0;
+        //             return sub += element.current_stock * cost;
+        //         }, 0);
+        //     }, 0);
+        // },
         handleCommand(command) {
             if (command == 'import') {
                 this.showImportModal = true;
@@ -448,6 +451,8 @@ export default {
                     this.totalProducts = response.data.total_products;
                     this.totalLocalProducts = response.data.total_local_products;
                     this.totalLocalProductsWithSizes = response.data.total_local_products_with_sizes;
+                    this.inventoryCost = response.data.inventory_cost;
+                    this.inventoryPrice = response.data.inventory_price;
                     this.localProducts = this.products;
                 }
             } catch (error) {
@@ -490,7 +495,7 @@ export default {
                 const response = await axios.get(route('boutique-products.get-by-page', this.currentPage));
 
                 if (response.status === 200) {
-                    this.localProducts = [...this.localProducts, ...response.data.items];
+                    this.localProducts = { ...this.localProducts, ...response.data.items };
                     this.currentPage++;
 
                     // Actualiza la URL con la pagina

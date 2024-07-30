@@ -2,6 +2,7 @@
     <AppLayout title="Productos">
         <div ref="scrollContainer" style="height: 93vh; overflow-y: scroll;" @scroll="handleScroll"
             class="px-2 lg:px-10 py-7">
+            <div id="start"></div>
             <section>
                 <i v-show="showScrollButton" @click="scrollToTop"
                     class="fa-solid animate-bounce fa-arrow-up rounded-full bg-[#F2F2F2] text-gray9A py-3 px-[14px] fixed bottom-8 right-8 cursor-pointer transition-opacity duration-300"></i>

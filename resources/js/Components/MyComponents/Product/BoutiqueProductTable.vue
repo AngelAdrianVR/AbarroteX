@@ -180,7 +180,7 @@ export default {
         },
         async deleteItem() {
             let routePage;
-            if (this.itemToDelete.global_product_id) {
+            if (this.itemToDelete[0].global_product_id) {
                 routePage = 'global-product-store.destroy';
             } else {
                 routePage = 'boutique-products.destroy';
@@ -190,7 +190,7 @@ export default {
                 const response = await axios.delete(route(routePage, this.itemToDelete[0].id));
                 if (response.status === 200) {
                     let productName;
-                    if (this.itemToDelete.global_product_id) {
+                    if (this.itemToDelete[0].global_product_id) {
                         productName = this.itemToDelete[0].global_product.name;
                     } else {
                         productName = this.itemToDelete[0].name;

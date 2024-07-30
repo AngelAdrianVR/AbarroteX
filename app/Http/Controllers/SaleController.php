@@ -255,6 +255,10 @@ class SaleController extends Controller
             $product_id = explode('_', $product['product']['id'])[1];
 
             $product_name = $product['product']['name'];
+            if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
+                // agregar talla al nombre
+                $product_name .= " ({$product['product']['additional']['name']})";
+            }
 
             //regiatra cada producto vendido
             Sale::create([

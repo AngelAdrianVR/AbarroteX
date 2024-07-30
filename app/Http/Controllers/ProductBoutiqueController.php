@@ -529,27 +529,27 @@ class ProductBoutiqueController extends Controller
         return response()->json(['items' => $groupedHistoryArray]);
     }
 
-    // public function getItemsByPage($currentPage)
-    // {
-    //     $offset = $currentPage * 30;
+    public function getItemsByPage($currentPage)
+    {
+        $offset = $currentPage * 30;
 
-    //     // obtener todo los productos
-    //     $all_products = $this->getAllProducts();
-    //     $products = $all_products->splice($offset)->take(30);
+        // obtener todo los productos
+        $all_products = $this->getAllProducts();
+        $products = $all_products->groupBy('name')->splice($offset)->take(30);
 
-    //     return response()->json(['items' => $products]);
-    // }
+        return response()->json(['items' => $products]);
+    }
 
-    // public function getAllUntilPage($currentPage)
-    // {
-    //     $items = $currentPage * 30;
+    public function getAllUntilPage($currentPage)
+    {
+        $items = $currentPage * 30;
 
-    //     // obtener todo los productos
-    //     $all_products = $this->getAllProducts();
-    //     $products = $all_products->take($items);
+        // obtener todo los productos
+        $all_products = $this->getAllProducts();
+        $products = $all_products->take($items);
 
-    //     return response()->json(['items' => $products]);
-    // }
+        return response()->json(['items' => $products]);
+    }
 
     public function getAllProducts()
     {
@@ -641,7 +641,7 @@ class ProductBoutiqueController extends Controller
         foreach ($products as $product) {
             $size_short = isset($product->additional['short']) ? "-{$product->additional['short']}" : '';
             $size_name = isset($product->additional['name']) ? "{$product->additional['name']}" : '';
-            $size = $size_name . $size_short; 
+            $size = $size_name . $size_short;
             $base_code = substr($product->code, 0, strrpos($product->code, '-'));
 
             $sheet->setCellValue('A' . $row, $product->name);
@@ -680,11 +680,18 @@ class ProductBoutiqueController extends Controller
         $total_products = $all_products->unique('name')->count();
         $total_local_products = $all_products->whereNull('global_product_id')->unique('name')->count();
         $total_local_products_with_sizes = $all_products->whereNull('global_product_id')->count();
+        $inventory_cost = $all_products->sum(function ($prd) {
+            $cost = $prd['cost'] ?? 0;
+            return $cost * $prd['current_stock'];
+        });
+        $inventory_price = $all_products->sum(function ($prd) {
+            return $prd['public_price'] * $prd['current_stock'];
+        });
 
         //tomar solo primeros 30 productos
         $products = $all_products->groupBy('name')->take($page);
 
-        return response()->json(compact('products', 'total_products', 'total_local_products', 'total_local_products_with_sizes'));
+        return response()->json(compact('products', 'total_products', 'total_local_products', 'total_local_products_with_sizes', 'inventory_cost', 'inventory_price'));
     }
 
     private function validateProductsFromFile($worksheet)
@@ -773,12 +780,12 @@ class ProductBoutiqueController extends Controller
             }
 
             $store_id = auth()->user()->store_id;
-            $category = Category::where(function ($query) use ($store_id){
+            $category = Category::where(function ($query) use ($store_id) {
                 $query->where('business_line_name', $store_id)
                     ->orWhere('business_line_name', 'Boutique / Tienda de Ropa / Zapatería');
             })
-            ->where('name', $data[1])
-            ->first();
+                ->where('name', $data[1])
+                ->first();
 
             // Si la categoria ingresada por el usuario desde excel no existe, crear uno nuevo
             if (!$category) {
@@ -787,17 +794,17 @@ class ProductBoutiqueController extends Controller
                     'business_line_name' => auth()->user()->store->id
                 ]);
             }
-            
+
             // buscar talla ingresada en BDD
             $size_exploted = explode('-', $data[2]);
             $size_name = $size_exploted[0];
             $size_short = count($size_exploted) == 2 ? $size_exploted[1] : null;
             $size = Size::where(['name' => $size_name, 'category' => $category->name])
-            ->when($size_short, function ($query) use ($size_short) {
-                $query->where('short', $size_short);
-            })
-            ->first();
-            
+                ->when($size_short, function ($query) use ($size_short) {
+                    $query->where('short', $size_short);
+                })
+                ->first();
+
             // Si la talla ingresada por el usuario desde excel no existe, crear una nueva
             if (!$size) {
                 $size = Size::create([
@@ -836,11 +843,4 @@ class ProductBoutiqueController extends Controller
             ]);
         }
     }
-
-    // public function changePrice(Request $request)
-    // {
-    //     $product = Product::where('store_id', auth()->user()->store_id)->where('name', $request->product['name'])->first();
-    //     $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
-    //     $product->save();
-    // }
 }

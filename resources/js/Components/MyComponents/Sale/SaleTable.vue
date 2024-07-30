@@ -184,13 +184,13 @@
       </div>
     </template>
   </ConfirmationModal>
-  <!-- Modal para preguntar si se quiere cambiar el precio definitivamente o solo en esa venta -->
 </template>
 
 <script>
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import { syncIDBProducts } from "@/dbService.js";
 
 export default {
   data() {
@@ -243,7 +243,6 @@ export default {
         this.showChangePriceConfirmation = false;
 
       } else { //se cambia el precio definitivo al producto.
-
         //si es local manda al controlador de locales 
         if (this.saleProductToEdit.product.id.split('_')[0] === 'local') {
           axios.post(route('products.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
@@ -256,6 +255,9 @@ export default {
           this.saleProductToEdit.originalPrice = null; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
         }
+
+        // guardar el nuevo precio en indexedDB
+        syncIDBProducts();
       }
     },
   },

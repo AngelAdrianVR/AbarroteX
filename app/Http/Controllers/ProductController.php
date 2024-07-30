@@ -598,7 +598,7 @@ class ProductController extends Controller
 
     public function changePrice(Request $request)
     {
-        $product = Product::where('store_id', auth()->user()->store_id)->where('name', $request->product['name'])->first();
+        $product = Product::where('store_id', auth()->user()->store_id)->where('code', $request->product['code'])->first();
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
     }

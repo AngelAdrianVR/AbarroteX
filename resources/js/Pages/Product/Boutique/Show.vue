@@ -24,10 +24,10 @@
                 <div v-if="searchFocus && searchQuery"
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
                     <Loading2 v-if="searchLoading" class="my-3" />
-                    <ul v-else-if="productsFound?.length > 0">
-                        <li @click.stop="handleProductSelected(product)" v-for="(product, index) in productsFound"
+                    <ul v-else-if="Object.keys(productsFound)?.length > 0">
+                        <li @click.stop="handleProductSelected(set)" v-for="(set, index) in Object.values(productsFound)"
                             :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
-                                product.global_product_id ? product.global_product?.name : product.name }}</li>
+                                set[0]?.global_product_id ? set[0]?.global_product?.name : set[0]?.name }}</li>
                     </ul>
                     <p v-else class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias</p>
                 </div>
@@ -153,7 +153,7 @@ export default {
             encodedId: null, //id codificado
             searchQuery: this.products[0].name,
             searchFocus: false,
-            productsFound: [this.products],
+            productsFound: [this.products[0]],
             entryProductModal: false,
             // loading
             entryLoading: false,
@@ -259,12 +259,12 @@ export default {
                 onFinish: () => this.entryLoading = false,
             });
         },
-        handleProductSelected(product) {
-            const encodedId = btoa(product.id.toString());
-            if (product.global_product_id) {
+        handleProductSelected(set) {
+            const encodedId = btoa(set[0].id.toString());
+            if (set[0].global_product_id) {
                 this.$inertia.get(route('global-product-store.show', encodedId))
             } else {
-                this.$inertia.get(route('products.show', encodedId))
+                this.$inertia.get(route('boutique-products.show', encodedId))
             }
         },
         encodeId(id) {
@@ -274,7 +274,7 @@ export default {
         async searchProducts() {
             this.searchLoading = true;
             try {
-                const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
+                const response = await axios.get(route('boutique-products.search'), { params: { query: this.searchQuery } });
                 if (response.status == 200) {
                     this.productsFound = response.data.items;
                 }
@@ -289,6 +289,7 @@ export default {
     mounted() {
         this.setActiveTabFromURL();
         this.encodeId(this.products[0].id);
+        this.searchProducts();
     },
 }
 </script>
