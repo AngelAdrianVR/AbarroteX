@@ -13,6 +13,8 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Size;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductBoutiqueController extends Controller
 {
@@ -561,7 +563,7 @@ class ProductBoutiqueController extends Controller
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
-        $products = collect($merged)->groupBy('name');
+        $products = collect($merged);
 
         return $products;
     }
@@ -606,77 +608,83 @@ class ProductBoutiqueController extends Controller
         }
     }
 
-    // public function export()
-    // {
-    //     $userCanSeeCost = in_array(auth()->user()->rol, ['Administrador', 'Almacenista']);
-    //     $products = Product::where('store_id', auth()->user()->store_id)->get();
+    public function export()
+    {
+        $userCanSeeCost = in_array(auth()->user()->rol, ['Administrador', 'Almacenista']);
+        $products = Product::where('store_id', auth()->user()->store_id)->get();
 
-    //     $spreadsheet = new Spreadsheet();
-    //     $sheet = $spreadsheet->getActiveSheet();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    //     // Add headers
-    //     $headers = [
-    //         'A3' => 'Nombre',
-    //         'B3' => 'Precio a publico',
-    //         'C3' => 'Precio de compra',
-    //         'D3' => 'Codigo',
-    //         'E3' => 'Stock minimo',
-    //         'F3' => 'Stock maximo',
-    //         'G3' => 'Stock actual',
-    //         'H3' => 'Categoria',
-    //         'I3' => 'Proveedor',
-    //         'J3' => 'Creado el'
-    //     ];
+        // Add headers
+        $headers = [
+            'A3' => 'Nombre del producto',
+            'B3' => 'Categoría',
+            'C3' => 'Talla',
+            'D3' => 'Precio a público',
+            'E3' => 'Precio de compra',
+            'F3' => 'Código de producto',
+            'G3' => 'Stock mínimo',
+            'H3' => 'Stock máximo',
+            'I3' => 'Stock actual',
+            'J3' => 'Creado el'
+        ];
 
-    //     foreach ($headers as $cell => $header) {
-    //         $sheet->setCellValue($cell, $header);
-    //         // Apply bold style to the header cells
-    //         $sheet->getStyle($cell)->getFont()->setBold(true);
-    //     }
+        foreach ($headers as $cell => $header) {
+            $sheet->setCellValue($cell, $header);
+            // Apply bold style to the header cells
+            $sheet->getStyle($cell)->getFont()->setBold(true);
+        }
 
-    //     // Add data rows
-    //     $row = 4;
-    //     foreach ($products as $product) {
-    //         $sheet->setCellValue('A' . $row, $product->name);
-    //         $sheet->setCellValue('B' . $row, $product->public_price);
-    //         if ($userCanSeeCost) $sheet->setCellValue('C' . $row, $product->cost);
-    //         $sheet->setCellValue('D' . $row, $product->code);
-    //         $sheet->setCellValue('E' . $row, $product->min_stock);
-    //         $sheet->setCellValue('F' . $row, $product->max_stock);
-    //         $sheet->setCellValue('G' . $row, $product->current_stock);
-    //         $sheet->setCellValue('H' . $row, $product->category->name);
-    //         $sheet->setCellValue('I' . $row, $product->brand->name);
-    //         $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY'));
-    //         $row++;
-    //     }
+        // Add data rows
+        $row = 4;
+        foreach ($products as $product) {
+            $size_short = isset($product->additional['short']) ? "-{$product->additional['short']}" : '';
+            $size_name = isset($product->additional['name']) ? "{$product->additional['name']}" : '';
+            $size = $size_name . $size_short; 
+            $base_code = substr($product->code, 0, strrpos($product->code, '-'));
 
-    //     $writer = new Xlsx($spreadsheet);
+            $sheet->setCellValue('A' . $row, $product->name);
+            $sheet->setCellValue('B' . $row, $product->category->name);
+            $sheet->setCellValue('C' . $row, $size);
+            $sheet->setCellValue('D' . $row, $product->public_price);
+            if ($userCanSeeCost) $sheet->setCellValue('E' . $row, $product->cost);
+            $sheet->setCellValue('F' . $row, $base_code);
+            $sheet->setCellValue('G' . $row, $product->min_stock);
+            $sheet->setCellValue('H' . $row, $product->max_stock);
+            $sheet->setCellValue('I' . $row, $product->current_stock);
+            $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY, h:mm a'));
+            $row++;
+        }
 
-    //     // Prepare the response as a streamed response
-    //     return response()->streamDownload(function () use ($writer) {
-    //         $writer->save('php://output');
-    //     }, 'EZY_productos.xlsx', [
-    //         'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    //         'Cache-Control' => 'max-age=0',
-    //         'Cache-Control' => 'max-age=1',
-    //         'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-    //         'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
-    //         'Cache-Control' => 'cache, must-revalidate',
-    //         'Pragma' => 'public',
-    //     ]);
-    // }
+        $writer = new Xlsx($spreadsheet);
+
+        // Prepare the response as a streamed response
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, 'EZY_productos.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+            'Cache-Control' => 'max-age=1',
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'cache, must-revalidate',
+            'Pragma' => 'public',
+        ]);
+    }
 
     public function getDataForProductsView()
     {
         $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
         $all_products = $this->getAllProducts();
-        $total_products = $all_products->count();
-        $total_local_products = $all_products->whereNull('global_product_id')->count();
+        $total_products = $all_products->unique('name')->count();
+        $total_local_products = $all_products->whereNull('global_product_id')->unique('name')->count();
+        $total_local_products_with_sizes = $all_products->whereNull('global_product_id')->count();
 
         //tomar solo primeros 30 productos
-        $products = $all_products->take($page);
+        $products = $all_products->groupBy('name')->take($page);
 
-        return response()->json(compact('products', 'total_products', 'total_local_products'));
+        return response()->json(compact('products', 'total_products', 'total_local_products', 'total_local_products_with_sizes'));
     }
 
     private function validateProductsFromFile($worksheet)
@@ -793,7 +801,7 @@ class ProductBoutiqueController extends Controller
             // Si la talla ingresada por el usuario desde excel no existe, crear una nueva
             if (!$size) {
                 $size = Size::create([
-                    'name' => $data[1],
+                    'name' => $size_name,
                     'category' => $category->name,
                     'short' => $size_short,
                 ]);

@@ -34,21 +34,27 @@
             </div>
         </section>
         <section class="text-center mt-3">
-            <p>Total invertido en almacén: ${{ getTotalInvestInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-            <p>Total para venta en almacén: ${{ getTotalSaleInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+            <p>Total invertido en almacén: ${{ getTotalInvestInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                ",") }}</p>
+            <p>Total para venta en almacén: ${{ getTotalSaleInventory().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }}</p>
         </section>
         <div class="mt-8">
-            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px]">{{ Object.keys(localProducts).length }} de {{
-                totalProducts }} elementos
+            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px]">{{
+                Object.keys(localProducts).length }}
+                de {{
+                    totalProducts }} elementos
             </p>
             <BoutiqueProductTable :products="localProducts" />
-            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px] mt-3">{{ Object.keys(localProducts).length }} de {{
-                totalProducts }} elementos
+            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px] mt-3">{{
+                Object.keys(localProducts).length }} de {{
+                    totalProducts }} elementos
             </p>
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <button v-else-if="totalProducts > 30 && Object.keys(localProducts).length < totalProducts && Object.keys(localProducts).length"
+            <button
+                v-else-if="totalProducts > 30 && Object.keys(localProducts).length < totalProducts && Object.keys(localProducts).length"
                 @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
                 elementos</button>
         </div>
@@ -120,7 +126,8 @@
                     <p class="mt-5 mb-1">
                         Primero, descarga la plantilla de importación haciendo click en el siguiente enlace:
                     </p>
-                    <a href="@/../../files/tabla_productos_boutique.xlsx" target="_blank" class="underline text-primary">
+                    <a href="@/../../files/tabla_productos_boutique.xlsx" target="_blank"
+                        class="underline text-primary">
                         Descarga la plantilla</a>
                     <p class="mt-5 mb-1">
                         Una vez que hayas agregado todos los productos a la plantilla, guarda los cambios y adjunta el
@@ -166,12 +173,12 @@
                     <span class="text-gray99">Nota: Los productos que Ezy ventas te facilita como catálogo base, no
                         serán exportados.</span>
                 </p>
-                <p v-if="totalLocalProducts" class="mt-2">
-                    Hay
+                <p v-if="totalLocalProductsWithSizes" class="mt-2">
+                    Tienes un total de {{ totalLocalProducts }} productos. Al tomar en cuenta todas las tallas disponibles de cada producto,
+                    el número total de registros a exportar es de 
                     <b class="text-primary">
-                        {{ totalLocalProducts }}
-                    </b>
-                    producto(s) disponible(s) para exportar
+                        {{ totalLocalProductsWithSizes }}
+                    </b>.
                 </p>
                 <p v-else class="mt-2 text-redDanger">No hay productos para exportar</p>
             </template>
@@ -180,7 +187,7 @@
                     <CancelButton @click="showExportModal = false">
                         Cancelar
                     </CancelButton>
-                    <a v-if="totalLocalProducts" :href="route('products.export')"
+                    <a v-if="totalLocalProductsWithSizes" :href="route('boutique-products.export')"
                         class="cursor-pointer text-center px-4 py-2 bg-primary border border-transparent rounded-full text-xs text-white tracking-widest active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:text-white disabled:bg-[#999999] focus:outline-none focus:ring-0 transition ease-in-out duration-100">
                         Exportar
                     </a>
@@ -308,6 +315,7 @@ export default {
             localProducts: [],
             totalProducts: null,
             totalLocalProducts: null,
+            totalLocalProductsWithSizes: null,
             searchedWord: null, //palabra con la que se hizo la última busqueda.
             // carga
             loading: false,
@@ -439,6 +447,7 @@ export default {
                     this.products = response.data.products;
                     this.totalProducts = response.data.total_products;
                     this.totalLocalProducts = response.data.total_local_products;
+                    this.totalLocalProductsWithSizes = response.data.total_local_products_with_sizes;
                     this.localProducts = this.products;
                 }
             } catch (error) {
