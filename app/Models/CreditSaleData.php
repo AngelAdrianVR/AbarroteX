@@ -11,6 +11,7 @@ class CreditSaleData extends Model
 
     protected $fillable = [
         'folio',
+        'store_id',
         'expired_date',
         'status',
     ];
@@ -24,10 +25,9 @@ class CreditSaleData extends Model
     {
         return $this->hasMany(Installment::class);
     }
-
-    // public function sales()
-    // {
-    //     return $this->hasMany(Sale::class, 'folio', 'folio');
-    // }
     
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
 }

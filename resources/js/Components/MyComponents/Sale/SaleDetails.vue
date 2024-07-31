@@ -249,10 +249,13 @@ export default {
         formatDateHour(dateString) {
             return format(parseISO(dateString), 'h:mm a', { locale: es });
         },
-        viewProduct(product) {
-            const encodedId = btoa(product.id.toString());
-            if (product.is_global_product) {
+        viewProduct(sale) {
+            const productId = sale.product_id.split('_')[1];
+            const encodedId = btoa(productId);
+            if (sale.is_global_product) {
                 window.open(route('global-product-store.show', encodedId), '_blank');
+            } else if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                window.open(route('boutique-products.show', encodedId), '_blank');
             } else {
                 window.open(route('products.show', encodedId), '_blank');
             }

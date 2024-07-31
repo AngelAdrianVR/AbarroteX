@@ -207,7 +207,10 @@
               <ul v-if="productsFound?.length > 0 && !loading">
                 <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
                   class="hover:bg-gray-200 cursor-pointer text-xs px-3 py-2 flex space-x-2">
-                  <span class="w-4/5">{{ product.name }}</span>
+                  <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'" class="w-4/5">
+                    {{ product.name }} <span class="text-gray99">({{ product.additional?.name }})</span>
+                  </p>
+                  <span v-else class="w-4/5">{{ product.name }}</span>
                   <span v-if="product.code" class="w-1/5 text-[10px] text-gray99">
                     {{ product.code }}
                   </span>
@@ -234,7 +237,13 @@
                 </p>
               </figure>
               <div class="flex justify-between items-center mt-2 mb-4 text-lg">
-                <p class="font-bold">{{ productFoundSelected.name }}</p>
+                <p class="font-bold">
+                  {{ productFoundSelected.name }}
+                  <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                    class="text-gray99">
+                    ({{ productFoundSelected.additional?.name }})
+                  </span>
+                </p>
                 <p class="text-[#5FCB1F]">${{ productFoundSelected.public_price }}</p>
               </div>
               <div class="flex justify-between items-center">
@@ -259,12 +268,14 @@
                 Busca el producto
                 <i class="fa-regular fa-hand-point-up ml-3"></i>
               </p>
-              <p>ó</p>
-              <button @click="showCreateProductModal = true" type="button"
-                class="text-primary w-full flex items-center justify-center space-x-1">
-                <i class="fa-solid fa-circle-plus text-xs mb-px"></i>
-                <span>Crea uno nuevo</span>
-              </button>
+              <div v-if="$page.props.auth.user.store.type != 'Boutique / Tienda de Ropa / Zapatería'">
+                <p>ó</p>
+                <button @click="showCreateProductModal = true" type="button"
+                  class="text-primary w-full flex items-center justify-center space-x-1">
+                  <i class="fa-solid fa-circle-plus text-xs mb-px"></i>
+                  <span>Crea uno nuevo</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -446,7 +457,8 @@
 
         <div class="flex justify-between space-x-1 pt-2 pb-1 py-2 mt-5 col-span-full">
 
-          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan == 'Plan Avanzado'" class="text-gray99">
+          <p v-if="cash_registers.length == 1 && $page.props.auth.user.store.plan == 'Plan Avanzado'"
+            class="text-gray99">
             Por ahora solo tienes una caja. <span @click="$inertia.get(route('cash-registers.create'))"
               class="text-primary cursor-pointer hover:underline ml-1">Crear caja</span></p>
 
@@ -455,7 +467,6 @@
         </div>
       </div>
     </Modal>
-    <!-- --------------------------- Modal selección de caja ends ------------------------------------ -->
 
     <!-- -------------- Modal Ingreso o retiro de dinero en caja starts----------------------- -->
     <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
@@ -504,7 +515,6 @@
         </form>
       </div>
     </Modal>
-    <!-- --------------------------- Modal Ingreso o retiro de dinero en caja ends ------------------------------------ -->
 
     <!-- -------------- Modal corte de caja starts----------------------- -->
     <Modal :show="cashCutModal" @close="cashCutModal = false; form.reset">
@@ -593,9 +603,7 @@
         </form>
       </div>
     </Modal>
-    <!-- --------------------------- Modal corte de caja ends ------------------------------------ -->
 
-    <!-- new product form -->
     <DialogModal :show="showCreateProductModal" @close="showCreateProductModal = false">
       <template #title> Creación rápida de nuevo producto </template>
       <template #content>
@@ -711,7 +719,6 @@
         </div>
       </template>
     </ConfirmationModal>
-    <!-- Modal para advertir que se ha excedido del dinero permitido en caja -->
 
     <!-- Modal de venta a credito sin cliente -->
     <ConfirmationModal :show="showClientConfirmModal" @close="showClientConfirmModal = false">
@@ -723,7 +730,6 @@
         </div>
       </template>
     </ConfirmationModal>
-    <!-- Modal de venta a credito sin cliente -->
   </AppLayout>
 </template>
 

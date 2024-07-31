@@ -17,7 +17,7 @@
                     <p class="mt-1 ml-4 text-sm flex items-center space-x-2" v-for="activity in history"
                         :key="activity">
                         <span v-html="getIcon(activity.type)"></span>
-                        <span>{{ activity.description + ' ' + activity.created_at }}</span>
+                        <span>{{ activity.description + ' • ' + activity.created_at }}</span>
                     </p>
                 </div>
             </div>
@@ -44,7 +44,7 @@ export default {
         Loading2,
     },
     props: {
-        product: Object,
+        products: Array,
     },
     computed: {
 
@@ -130,8 +130,8 @@ export default {
         async fetchHistory() {
             this.loading = true;
             try {
-                const response = await axios.get(route("products.fetch-history", {
-                    product_id: this.product.id,
+                const response = await axios.get(route("boutique-products.fetch-history", {
+                    product_name: this.products[0].name,
                     month: this.currentMonth,
                     year: this.currentYear,
                 }));

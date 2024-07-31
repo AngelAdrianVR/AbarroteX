@@ -209,10 +209,10 @@ Route::post('products-change-price', [ProductController::class, 'changePrice'])-
 //-------------------------------------------------------------------------------------------------
 Route::resource('boutique-products', ProductBoutiqueController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('boutique-products/update-with-media/{product}', [ProductBoutiqueController::class, 'updateWithMedia'])->name('boutique-products.update-with-media')->middleware('auth');
-Route::put('boutique-products-entry/{product_id}', [ProductBoutiqueController::class, 'entryStock'])->name('boutique-products.entry')->middleware('auth');
+Route::put('boutique-products-entry', [ProductBoutiqueController::class, 'entryStock'])->name('boutique-products.entry')->middleware('auth');
 Route::get('boutique-products-search', [ProductBoutiqueController::class, 'searchProduct'])->name('boutique-products.search')->middleware('auth');
 Route::get('boutique-products-get-product-scaned/{product_id}', [ProductBoutiqueController::class, 'getProductScaned'])->name('boutique-products.get-product-scaned')->middleware('auth');
-Route::get('boutique-products-fetch-history/{product_id}/{month}/{year}', [ProductBoutiqueController::class, 'fetchHistory'])->name('boutique-products.fetch-history')->middleware('auth');
+Route::get('boutique-products-fetch-history/{product_name}/{month}/{year}', [ProductBoutiqueController::class, 'fetchHistory'])->name('boutique-products.fetch-history')->middleware('auth');
 Route::get('boutique-products-get-by-page/{currentPage}', [ProductBoutiqueController::class, 'getItemsByPage'])->name('boutique-products.get-by-page')->middleware('auth');
 Route::get('boutique-products-get-all-until-page/{currentPage}', [ProductBoutiqueController::class, 'getAllUntilPage'])->name('boutique-products.get-all-until-page')->middleware('auth');
 Route::post('boutique-products/import', [ProductBoutiqueController::class, 'import'])->name('boutique-products.import')->middleware('auth');
