@@ -5,10 +5,10 @@
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
-                    <ThirthButton v-if="isInventoryOn" @click="openEntryModal">Entrada de producto</ThirthButton>
+                    <ThirthButton @click="openEntryModal">Entrada de producto</ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('global-product-store.edit', encodedId))"
                         class="!rounded-full">Editar</PrimaryButton>
-                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
+                    <PrimaryButton @click="goToCreate()" class="!rounded-full">
                         <i class="fa-solid fa-plus"></i> Nuevo
                     </PrimaryButton>
                 </div>
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="mt-5">
-                <Back :to="route('products.index')" />
+                <Back :to="getRoute()" />
             </div>
 
             <!-- Info de producto -->
@@ -177,6 +177,20 @@ export default {
         cash_register: Object,
     },
     methods: {
+        getRoute() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                return route('boutique-products.index');
+            } else {
+                return route('products.index');
+            }
+        },
+        goToCreate() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                this.$inertia.get(route('boutique-products.create'));
+            } else {
+                this.$inertia.get(route('products.create'));
+            }
+        },
         updateURL(tab) {
             const params = new URLSearchParams(window.location.search);
             params.set('tab', tab.props.name);
@@ -212,27 +226,28 @@ export default {
                 this.entryLoading = true;
                 this.form.put(route('global-product-store.entry', this.global_product_store.id), {
                     onSuccess: () => {
+                        // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
+                        // if (this.isInventoryOn) {
+                        const product = {
+                            id: 'global_' + this.global_product_store.id,
+                            name: this.global_product_store.global_product.name,
+                            code: this.global_product_store.global_product.code,
+                            public_price: this.global_product_store.public_price,
+                            current_stock: this.global_product_store.current_stock + this.form.quantity,
+                            image_url: this.global_product_store.global_product.media[0]?.original_url,
+                        };
+                        addOrUpdateItem('products', product);
+                        // }
+
                         this.form.reset();
                         this.entryProductModal = false;
                         this.$notify({
                             title: 'Correcto',
-                            text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
+                            message: '',
                             type: 'success',
                         });
                         this.$refs.historyTab.fetchHistory();
 
-                        // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
-                        if (this.isInventoryOn) {
-                            const product = {
-                                id: 'global_' + this.global_product_store.id,
-                                name: this.global_product_store.global_product.name,
-                                code: this.global_product_store.global_product.code,
-                                public_price: this.global_product_store.public_price,
-                                current_stock: this.global_product_store.current_stock + this.form.quantity,
-                                image_url: this.global_product_store.global_product.media[0]?.original_url,
-                            };
-                            addOrUpdateItem('products', product);
-                        }
                     },
                     onFinish: () => this.entryLoading = false,
                 });

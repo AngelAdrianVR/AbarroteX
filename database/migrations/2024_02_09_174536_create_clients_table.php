@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             //informacion personal -----------------------------------------------
-            $table->string('name');
+            $table->string('name'); //nombre del contacto
+            $table->string('company')->nullable(); //nombre de la empresa (en caso de haber)
             $table->string('phone')->nullable();
             $table->string('email')->nullable()->unique();
             $table->string('notes')->nullable();

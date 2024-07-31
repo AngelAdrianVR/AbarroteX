@@ -11,32 +11,34 @@ use App\Models\Expense;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
+use App\Services\TinifyService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductController extends Controller
 {
+    public function __construct(protected TinifyService $tinifyService)
+    {
+    }
+
     public function index()
     {
         return inertia('Product/Index');
     }
 
-
     public function create()
     {
-        $store_id = auth()->user()->store_id;
-        $products_quantity = Product::where('store_id', $store_id)->get()->count();
         $store = auth()->user()->store;
+        $products_quantity = Product::where('store_id', $store->id)->get()->count();
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
     }
-
 
     public function store(Request $request)
     {
@@ -61,7 +63,16 @@ class ProductController extends Controller
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
-            $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            $mediaItem = $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            // Ruta del archivo guardado
+            $path = $mediaItem->getPath();
+            // Verificar el tamaño del archivo y si estamos en entorno de producción
+            if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                $this->tinifyService->optimizeImage($path);
+            } else {
+                // comprimir de otra forma  
+            }
         }
 
         //codifica el id del producto
@@ -84,7 +95,6 @@ class ProductController extends Controller
 
         return inertia('Product/Show', compact('product', 'cash_register'));
     }
-
 
     public function edit($encoded_product_id)
     {
@@ -176,19 +186,24 @@ class ProductController extends Controller
         // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
         if ($request->hasFile('imageCover')) {
             $product->clearMediaCollection('imageCover');
+            $mediaItem = $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            // Ruta del archivo guardado
+            $path = $mediaItem->getPath();
+    
+            // Verificar el tamaño del archivo y si estamos en entorno de producción
+            if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                $this->tinifyService->optimizeImage($path);
+            } else {
+                // comprimir de otra forma  
+            }
         }
-
-        // Guardar el archivo en la colección 'imageCover'
-        if ($request->hasFile('imageCover')) {
-            $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
-        }
-
+        
         //codifica el id del producto
         $encoded_product_id = base64_encode($product->id);
 
         return to_route('products.show', ['product' => $encoded_product_id]);
     }
-
 
     public function destroy(Product $product)
     {
@@ -196,7 +211,6 @@ class ProductController extends Controller
         // eliminar producto
         $product->delete();
     }
-
 
     public function searchProduct(Request $request)
     {
@@ -214,7 +228,7 @@ class ProductController extends Controller
         $global_products = GlobalProductStore::with(['globalProduct.media'])
             ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
                 $queryBuilder->where('name', 'like', "%$query%")
-                    ->orWhere('code', $query);
+                    ->orWhere('code', 'like', "%$query%");
             })
             ->where('store_id', auth()->user()->store_id)
             ->get();
@@ -241,7 +255,7 @@ class ProductController extends Controller
             'is_paid_by_cash_register' => 'boolean',
             'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
         ], $messages);
-        
+
         $product = Product::find($product_id);
 
         // Asegúrate de convertir la cantidad a un número antes de sumar
@@ -464,6 +478,7 @@ class ProductController extends Controller
                     'id' => 'local_' . $product->id,
                     'name' => $product->name,
                     'code' => $product->code,
+                    'additional' => $product->additional,
                     'public_price' => $product->public_price,
                     'current_stock' => $product->current_stock,
                     'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
@@ -600,7 +615,7 @@ class ProductController extends Controller
 
     public function changePrice(Request $request)
     {
-        $product = Product::where('store_id', auth()->user()->store_id)->where('name', $request->product['name'])->first();
+        $product = Product::where('store_id', auth()->user()->store_id)->where('code', $request->product['code'])->first();
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
     }

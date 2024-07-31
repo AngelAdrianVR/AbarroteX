@@ -5,13 +5,14 @@
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-2 my-2 lg:my-0">
-                    <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
+                    <ThirthButton @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('products.edit', encodedId))" class="!rounded-full">
                         Editar</PrimaryButton>
                     <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
-                        <i class="fa-solid fa-plus"></i> Nuevo</PrimaryButton>
+                        <i class="fa-solid fa-plus"></i> Nuevo
+                    </PrimaryButton>
                 </div>
             </div>
             <div class="lg:w-1/4 relative">
@@ -55,7 +56,7 @@
                             <ProductInfo :product="product.data" />
                         </el-tab-pane>
                         <el-tab-pane label="Historial de movimientos" name="2">
-                            <ProductHistorical :product="product.data" />
+                            <ProductHistorical ref="historyTab" :product="product.data" />
                         </el-tab-pane>
                     </el-tabs>
                 </section>
@@ -217,27 +218,28 @@ export default {
             this.entryLoading = true;
             this.form.put(route('products.entry', this.product.data?.id), {
                 onSuccess: () => {
+                    // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
+                    // if (this.isInventoryOn) {
+                    const product = {
+                        id: 'local_' + this.product.data.id,
+                        name: this.product.data.name,
+                        code: this.product.data.code,
+                        public_price: this.product.data.public_price,
+                        current_stock: this.product.data.current_stock + this.form.quantity,
+                        image_url: this.product.data.imageCover[0]?.original_url,
+                    };
+                    addOrUpdateItem('products', product);
+                    // }
+
                     this.form.reset();
                     this.entryProductModal = false;
                     this.$notify({
                         title: 'Correcto',
-                        text: 'Se ha ingresado ' + this.form.quantity + ' unidades de ',
+                        message: '',
                         type: 'success',
                     });
-                    this.fetchHistory();
+                    this.$refs.historyTab.fetchHistory();
 
-                    // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
-                    if (this.isInventoryOn) {
-                        const product = {
-                            id: 'local_' + this.product.data.id,
-                            name: this.product.data.name,
-                            code: this.product.data.code,
-                            public_price: this.product.data.public_price,
-                            current_stock: this.product.data.current_stock + this.form.quantity,
-                            image_url: this.product.data.imageCover[0]?.original_url,
-                        };
-                        addOrUpdateItem('products', product);
-                    }
                 },
                 onFinish: () => this.entryLoading = false,
             });

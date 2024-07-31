@@ -28,6 +28,7 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'company' => 'nullable|string|max:150',
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
             'notes' => 'nullable|string|max:255',
@@ -73,6 +74,7 @@ class ClientController extends Controller
     public function update(Request $request, Client $client)
     {
         $request->validate([
+            'company' => 'nullable|string|max:150',
             'name' => 'required|string|max:100',
             'phone' => 'required|string|min:10|max:10',
             'notes' => 'nullable|string|max:255',
@@ -170,6 +172,11 @@ class ClientController extends Controller
         return response()->json(['items' => $rentals]);
     }
 
+    public function getClientInfo(Client $client)
+    {
+        return response()->json(compact('client'));
+    }
+
     // private
     private function getGroupedSalesByDate($sales, $returnSales = false)
     {
@@ -229,7 +236,10 @@ class ClientController extends Controller
 
         $folios->each(function ($folio) use ($sales) {
             // Buscar CreditSaleData relacionado usando el folio
-            $creditData = CreditSaleData::where('folio', $folio)->first();
+            $creditData = CreditSaleData::where([
+                'folio' => $folio,
+                'store_id' => auth()->user()->store_id,
+            ])->first();
 
             if ($creditData) {
                 // Obtener los installments relacionados

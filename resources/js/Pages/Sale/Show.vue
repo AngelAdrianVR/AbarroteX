@@ -237,8 +237,21 @@
                         class="flex items-center space-x-2 mb-1">
                         <div class="w-1/3 md:w-1/2">
                             <InputLabel value="Producto" />
-                            <el-select v-model="product.product_id" filterable placeholder="Selecciona el producto"
+                            <el-select
+                                v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                                v-model="product.product_id" filterable placeholder="Selecciona el producto"
                                 no-data-text="No hay opciones registradas"
+                                no-match-text="No se encontraron coincidencias">
+                                <el-option v-for="item in products" :key="item.id"
+                                    :label="item.name + ' (' + item.additional.name + ')'" :value="item.id">
+                                    <p>
+                                        {{ item.name }}
+                                        <span>({{ item.additional.name }})</span>
+                                    </p>
+                                </el-option>
+                            </el-select>
+                            <el-select v-else v-model="product.product_id" filterable
+                                placeholder="Selecciona el producto" no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="item in products" :key="item.id" :label="item.name"
                                     :value="item.id" />
@@ -275,15 +288,11 @@
                 <h1>Reembolsar venta</h1>
             </template>
             <template #content>
-                <p v-if="isInventoryOn">
+                <p>
                     Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
                     correspondiente de la caja.
                     Si en caja no hay suficiente dinero, quedará en $0.00
                     ¿Deseas continuar?
-                </p>
-                <p v-else>
-                    Se retirará el monto correspondiente a esta venta de la caja. Si en caja no hay suficiente dinero,
-                    quedará en $0.00 ¿Deseas continuar?
                 </p>
             </template>
             <template #footer>
@@ -560,9 +569,9 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
-                    if (this.isInventoryOn) {
-                        this.updateIndexedDBproductsStock(response.data.updated_items);
-                    }
+                    // if (this.isInventoryOn) {
+                    this.updateIndexedDBproductsStock(response.data.updated_items);
+                    // }
 
                     this.showRefundConfirm = false;
 

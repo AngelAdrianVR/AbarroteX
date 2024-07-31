@@ -9,7 +9,7 @@
                 </svg>
             </button>
             <span v-if="getUnreadMessages.length"
-                class="size-4 bg-primary text-white text-[9px] rounded-full absolute -top-1 -right-2 flex items-center justify-center border border-white">
+                class="size-4 bg-primary text-white text-[9px] rounded-full absolute top-0 -right-1 flex items-center justify-center border border-white">
                 {{ getUnreadMessages.length }}
             </span>
         </template>
@@ -57,7 +57,7 @@
                                 </p>
                             </section>
                         </div>
-                        <p class="text-right text-gray2 text-[10px]">{{ item.created_at_for_humans }}</p>
+                        <p class="text-right text-gray99 text-[10px]">{{ item.created_at_for_humans }}</p>
                     </div>
                 </DropdownLink>
             </main>

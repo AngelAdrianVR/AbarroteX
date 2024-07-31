@@ -19,7 +19,7 @@ const form = useForm({
 });
 
 const showPassword = ref(false);
-const types = ['Abarrotes / Supermercado', 'Artículos para mascotas', 'Bisutería / Joyería', 'Carnicería',
+const types = ['Abarrotes / Supermercado', 'Artículos para mascotas', 'Bisutería / Joyería', 'Boutique / Tienda de Ropa / Zapatería', 'Carnicería',
     'Cremería', 'Dulcería', 'Farmacia', 'Frutería / Verdulería', 'Ferretería / Tlapalería', 'Juguetería', 'Librería', 'Licorería / Cervecería',
     'Artículos de limpieza', 'Materiales Para Construcción', 'Taquería', 'Agroquímicos / Orgánicos', 'Panadería', 'Papelería',
     'Tienda de plásticos', 'Refaccionaria', 'Tecnología', 'Otro'

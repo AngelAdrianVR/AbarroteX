@@ -112,4 +112,9 @@ class Store extends Model
     {
         return $this->hasMany(Service::class);
     }
+
+    public function internalInvoices() :HasMany
+    {
+        return $this->hasMany(InternalInvoice::class);
+    }
 }

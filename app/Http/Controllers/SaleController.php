@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CashCut;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\Client;
@@ -18,7 +17,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class SaleController extends Controller
 {
@@ -257,6 +255,10 @@ class SaleController extends Controller
             $product_id = explode('_', $product['product']['id'])[1];
 
             $product_name = $product['product']['name'];
+            if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
+                // agregar talla al nombre
+                $product_name .= " ({$product['product']['additional']['name']})";
+            }
 
             //regiatra cada producto vendido
             Sale::create([
@@ -274,27 +276,17 @@ class SaleController extends Controller
                 'created_at' => $created_at ?? now(),
             ]);
 
-            //Registra el historial de venta de cada producto
-            ProductHistory::create([
-                'description' => 'Registro de venta. ' . $product['quantity'] . ' piezas',
-                'type' => 'Venta',
-                'historicable_id' => $product_id,
-                'historicable_type' => $is_global_product
-                    ? GlobalProductStore::class
-                    : Product::class,
-                'created_at' => $created_at ?? now(),
-            ]);
-
             //Desontar cantidades del stock de cada producto vendido (sólo si se configura para tomar en cuenta el inventario).
             $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
-            if ($is_inventory_on) {
-                $current_product = $is_global_product
-                    ? GlobalProductStore::find($product_id)
-                    : Product::find($product_id);
+            // if ($is_inventory_on) {
+            $current_product = $is_global_product
+                ? GlobalProductStore::find($product_id)
+                : Product::find($product_id);
 
-                if ($current_product->current_stock <= $product['quantity']) {
-                    $current_product->update(['current_stock' => 0]);
+            if ($current_product->current_stock <= $product['quantity']) {
+                $current_product->update(['current_stock' => 0]);
 
+                if ($is_inventory_on) {
                     // notificar si no hay existencias
                     $title = "Sin stock!";
                     $description = "Te has quedado sin existencias del producto <span class='text-primary'>$product_name</span>";
@@ -303,20 +295,36 @@ class SaleController extends Controller
                         : route('products.show', base64_encode($current_product->id));
 
                     auth()->user()->notify(new BasicNotification($title, $description, $url));
-                } else {
-                    $current_product->decrement('current_stock', $product['quantity']);
+                }
+            } else {
+                $current_product->decrement('current_stock', $product['quantity']);
 
-                    // notificar si ha llegado al limite de existencias bajas
-                    if ($current_product->current_stock <= $current_product->min_stock) {
-                        $title = "Bajo stock!";
-                        $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
-                        $url =  $is_global_product
-                            ? route('global-product-store.show', base64_encode($current_product->id))
-                            : route('products.show', base64_encode($current_product->id));
-                        auth()->user()->notify(new BasicNotification($title, $description, $url));
-                    }
+                // notificar si ha llegado al limite de existencias bajas
+                if ($current_product->current_stock <= $current_product->min_stock && $is_inventory_on) {
+                    $title = "Bajo stock!";
+                    $description = "Producto <span class='text-primary'>$product_name</span> alcanzó el nivel mínimo establecido";
+                    $url =  $is_global_product
+                        ? route('global-product-store.show', base64_encode($current_product->id))
+                        : route('products.show', base64_encode($current_product->id));
+                    auth()->user()->notify(new BasicNotification($title, $description, $url));
                 }
             }
+            // }
+            //Registra el historial de venta de cada producto
+            $size = '';
+            if ($current_product->additional) {
+                // agregar la talla al historial si es que la tiene
+                $size = ' talla ' . $current_product->additional['name'];
+            }
+            ProductHistory::create([
+                'description' => 'Registro de venta. ' . $product['quantity'] . ' pieza(s)' . $size,
+                'type' => 'Venta',
+                'historicable_id' => $product_id,
+                'historicable_type' => $is_global_product
+                    ? GlobalProductStore::class
+                    : Product::class,
+                'created_at' => $created_at ?? now(),
+            ]);
         }
 
         //Crea registro de venta a crédito si así lo fue
@@ -335,6 +343,15 @@ class SaleController extends Controller
                     'credit_sale_data_id' => $new_credit_sale_data->id,
                     'user_id' => auth()->id(),
                 ]);
+
+                //crea un movimiento de caja para guardar el abono
+                CashRegisterMovement::create([
+                    'amount' => $sale_data['deposit'],
+                    'type' => 'Ingreso',
+                    'notes' => 'Primer abono hecho en la venta con folio ' . $folio,
+                    'cash_register_id' => auth()->user()->cash_register_id,
+                ]);
+
                 //Suma la cantidad abonada
                 $cash_register->current_cash += $sale_data['deposit'];
                 $cash_register->save();
@@ -414,30 +431,30 @@ class SaleController extends Controller
 
         // si el control de inventario esta activado, devolver mercancia disponible para la venta
         $updated_items = [];
-        if ($is_inventory_on) {
-            $saleProducts->each(function ($sale) use ($saleFolio, &$updated_items) {
-                if ($sale->is_global_product) {
-                    $current_product = GlobalProductStore::find($sale->product_id);
-                    $indexedDB_name = $current_product->globalProduct->name;
-                } else {
-                    $current_product = Product::find($sale->product_id);
-                    $indexedDB_name = $current_product->name;
-                }
+        // if ($is_inventory_on) {
+        $saleProducts->each(function ($sale) use ($saleFolio, &$updated_items) {
+            if ($sale->is_global_product) {
+                $current_product = GlobalProductStore::find($sale->product_id);
+                $indexedDB_name = $current_product->globalProduct->name;
+            } else {
+                $current_product = Product::find($sale->product_id);
+                $indexedDB_name = $current_product->name;
+            }
 
-                $current_product->increment('current_stock', $sale->quantity);
+            $current_product->increment('current_stock', $sale->quantity);
 
-                //Registra el historial de venta de cada producto
-                ProductHistory::create([
-                    'description' => "Registro de entrada de producto por reembolso de venta con folio $saleFolio. " . $sale['quantity'] . ' pieza(s)',
-                    'type' => 'Reembolso',
-                    'historicable_id' => $current_product->id,
-                    'historicable_type' => get_class($current_product),
-                ]);
+            //Registra el historial de venta de cada producto
+            ProductHistory::create([
+                'description' => "Registro de entrada de producto por reembolso de venta con folio $saleFolio. " . $sale['quantity'] . ' pieza(s)',
+                'type' => 'Reembolso',
+                'historicable_id' => $current_product->id,
+                'historicable_type' => get_class($current_product),
+            ]);
 
-                // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
-                $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
-            });
-        }
+            // guardar id formateado y stock actual en array para enviarlo al cliente y actualizar indexedDB
+            $updated_items[] = ['name' => $indexedDB_name, 'current_stock' => $current_product->current_stock];
+        });
+        // }
 
         // marcar productos de venta como reembolsados / cancelados
         $saleProducts->each(fn ($sale) => $sale->update(['refunded_at' => now()]));
@@ -496,45 +513,68 @@ class SaleController extends Controller
                     : Product::find($product_id)->name;
 
                 // Calcular diferencia en inventario
-                if ($is_inventory_on) {
-                    $current_product = $sale->is_global_product
-                        ? GlobalProductStore::find($sale->product_id)
-                        : Product::find($sale->product_id);
+                // if ($is_inventory_on) {
+                $current_product = $sale->is_global_product
+                    ? GlobalProductStore::find($sale->product_id)
+                    : Product::find($sale->product_id);
 
-                    if ($old_quantity != $new_quantity || $sale->product_id != $product_id) {
-                        if ($sale->product_id != $product_id) {
-                            $current_product->increment('current_stock', $old_quantity);
-                            $current_product_name = $sale->is_global_product
-                                ? $current_product->globalProduct->name
-                                : $current_product->name;
+                if ($old_quantity != $new_quantity || $sale->product_id != $product_id) {
+                    if ($sale->product_id != $product_id) {
+                        $current_product->increment('current_stock', $old_quantity);
+                        $current_product_name = $sale->is_global_product
+                            ? $current_product->globalProduct->name
+                            : $current_product->name;
 
-                            // registrar regreso de producto a stock de viejo producto
-                            ProductHistory::create([
-                                'description' => "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity . ' pieza(s)',
-                                'type' => 'Edición',
-                                'historicable_id' => $current_product->id,
-                                'historicable_type' => get_class($current_product),
-                            ]);
-                            $new_product = $sale->is_global_product
-                                ? GlobalProductStore::find($product_id)
-                                : Product::find($product_id);
-
-                            $new_stock = $new_product->current_stock - $new_quantity;
-                            $new_product->current_stock = max($new_stock, 0);
-                            $new_product->save();
-                            ProductHistory::create([
-                                'description' => "Registro de venta por reemplazo del producto $current_product_name por este en la venta con folio $request->folio. " . $new_quantity . ' pieza(s)',
-                                'type' => 'Edición',
-                                'historicable_id' => $new_product->id,
-                                'historicable_type' => get_class($new_product),
-                            ]);
+                        // registrar regreso de producto a stock de viejo producto
+                        if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
+                            $refund_description = "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity
+                                . " pieza(s) de talla {$current_product->additional['name']}";
+                            $sale_description = "Registro de venta por reemplazo del producto $current_product_name por este en talla {$current_product->additional['name']} para la venta con folio $request->folio. "
+                                . $new_quantity . ' pieza(s)';
+                            $product_name .= " ({$current_product->additional['name']})";
                         } else {
-                            $current_product->increment('current_stock', $old_quantity);
+                            $refund_description = "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity . ' pieza(s)';
+                            $sale_description = "Registro de venta por reemplazo del producto $current_product_name por este en la venta con folio $request->folio. " . $new_quantity . ' pieza(s)';
+                        }
+                        ProductHistory::create([
+                            'description' => $refund_description,
+                            'type' => 'Edición',
+                            'historicable_id' => $current_product->id,
+                            'historicable_type' => get_class($current_product),
+                        ]);
+                        $new_product = $sale->is_global_product
+                            ? GlobalProductStore::find($product_id)
+                            : Product::find($product_id);
 
-                            $new_stock = $current_product->current_stock - $new_quantity;
-                            $current_product->current_stock = max($new_stock, 0);
-                            $current_product->save();
+                        $new_stock = $new_product->current_stock - $new_quantity;
+                        $new_product->current_stock = max($new_stock, 0);
+                        $new_product->save();
+                        ProductHistory::create([
+                            'description' => $sale_description,
+                            'type' => 'Edición',
+                            'historicable_id' => $new_product->id,
+                            'historicable_type' => get_class($new_product),
+                        ]);
+                    } else {
+                        $current_product->increment('current_stock', $old_quantity);
 
+                        $new_stock = $current_product->current_stock - $new_quantity;
+                        $current_product->current_stock = max($new_stock, 0);
+                        $current_product->save();
+
+                        if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
+                            if ($old_quantity < $new_quantity) {
+                                $abs_quantity = $new_quantity - $old_quantity;
+                                $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. " 
+                                .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['name'];
+                                $type = "Edición";
+                            } else {
+                                $abs_quantity = $old_quantity - $new_quantity;
+                                $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. " 
+                                .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['name'];
+                                $type = "Edición";
+                            }
+                        } else {
                             if ($old_quantity < $new_quantity) {
                                 $abs_quantity = $new_quantity - $old_quantity;
                                 $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
@@ -544,17 +584,18 @@ class SaleController extends Controller
                                 $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
                                 $type = "Edición";
                             }
-
-                            // movimiento de producto por edicion
-                            ProductHistory::create([
-                                'description' => $description,
-                                'type' => $type,
-                                'historicable_id' => $current_product->id,
-                                'historicable_type' => get_class($current_product),
-                            ]);
                         }
+
+                        // movimiento de producto por edicion
+                        ProductHistory::create([
+                            'description' => $description,
+                            'type' => $type,
+                            'historicable_id' => $current_product->id,
+                            'historicable_type' => get_class($current_product),
+                        ]);
                     }
                 }
+                // }
 
                 // Calcular la diferencia en montos para movimientos de caja
                 $old_total = $old_quantity * $old_price;
@@ -689,7 +730,10 @@ class SaleController extends Controller
 
         $folios->each(function ($folio) use ($sales) {
             // Buscar CreditSaleData relacionado usando el folio
-            $creditData = CreditSaleData::where('folio', $folio)->first();
+            $creditData = CreditSaleData::where([
+                'folio' => $folio,
+                'store_id' => auth()->user()->store_id,
+            ])->first();
 
             if ($creditData) {
                 // Obtener los installments relacionados

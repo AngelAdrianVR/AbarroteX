@@ -9,6 +9,7 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import SideNav from '@/Components/MyComponents/SideNav.vue';
 import NotificationsCenter from '@/Components/MyComponents/NotificationsCenter.vue';
+import OnlineSalesNotifications from '@/Components/MyComponents/OnlineSalesNotifications.vue';
 // import NavLink from '@/Components/NavLink.vue';
 import axios from 'axios';
 
@@ -104,7 +105,8 @@ onUnmounted(() => {
                                 </div>
                             </div>
                             <div class="hidden sm:flex sm:items-center sm:ms-6">
-
+                                <!-- notificaciones de tienda en linea -->
+                                <OnlineSalesNotifications v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" />
                                 <!-- notifications -->
                                 <NotificationsCenter />
 
@@ -148,6 +150,9 @@ onUnmounted(() => {
                                             <DropdownLink :href="route('profile.show')">
                                                 Perfil y suscripción
                                             </DropdownLink>
+                                            <!-- <DropdownLink :href="route('internal-invoices.index')">
+                                                Facturación
+                                            </DropdownLink> -->
                                             <DropdownLink :href="route('supports.index')">
                                                 Soporte
                                             </DropdownLink>
@@ -166,6 +171,8 @@ onUnmounted(() => {
 
                             <!-- Hamburger -->
                             <div class="-me-2 flex items-center sm:hidden">
+                                <!-- notificaciones de tienda en linea -->
+                                <OnlineSalesNotifications v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="-mr-4" />
                                 <!-- notifications -->
                                 <NotificationsCenter />
                                 <button

@@ -114,15 +114,11 @@
                 <h1>Reembolsar / Cancelar venta</h1>
             </template>
             <template #content>
-                <p v-if="isInventoryOn">
+                <p>
                     Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
                     correspondiente de la caja.
                     Si en caja no hay suficiente dinero, quedará en $0.00
                     ¿Deseas continuar?
-                </p>
-                <p v-else>
-                    Se retirará el monto correspondiente a esta venta de la caja. Si en caja no hay suficiente dinero,
-                    quedará en $0.00 ¿Deseas continuar?
                 </p>
             </template>
             <template #footer>
@@ -290,9 +286,9 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
-                    if (this.isInventoryOn) {
-                        this.updateIndexedDBproductsStock(response.data.updated_items);
-                    }
+                    // if (this.isInventoryOn) {
+                    this.updateIndexedDBproductsStock(response.data.updated_items);
+                    // }
 
                     this.showRefundConfirm = false;
 

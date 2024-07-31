@@ -14,9 +14,11 @@ use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
 use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\InternalInvoiceController;
 use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductBoutiqueController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\RentalController;
@@ -26,12 +28,15 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
+use App\Http\Controllers\SizeController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\UserController;
+use App\Models\Category;
 use App\Models\Sale;
+use App\Models\Size;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -139,8 +144,38 @@ Route::middleware([
 //     $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
 
 //     return "Email sent to $admin->name successfuly!";
-// });`
+// });
 
+
+// Route::get('add-categories', function () {
+//     $categories = [
+//         'Ropa de mujer' => ['0' => null, '1' => null, '3' => null, '5' => null, '7' => null, '9' => null, '11' => null, '13' => null, '15' => null, 'Extra chica' => 'XS', 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Exta grande' => 'XL', 'Doble exta grande' => '2XL', 'Triple exta grande' => '3XL'],
+//         'Ropa de hombre' => ['28' => null, '29' => null, '30' => null, '31' => null, '32' => null, '33' => null, '34' => null, '36' => null, '38' => null, '40' => null, 'Extra chica' => 'XS', 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Exta grande' => 'XL', 'Doble exta grande' => '2XL', 'Triple exta grande' => '3XL'],
+//         'Ropa de niño(a)' => ['2' => null, '4' => null, '6' => null, '8' => null, '10' => null, '12' => null, '14' => null],
+//         'Calzado de mujer' => ['23' => null, '23.5' => null, '24' => null, '24.5' => null, '25' => null, '25.5' => null, '26' => null, '26.5' => null, '27' => null, '27.5' => null, '28' => null],
+//         'Calzado de hombre' => ['23' => null, '23.5' => null, '24' => null, '24.5' => null, '25' => null, '25.5' => null, '26' => null, '26.5' => null, '27' => null, '27.5' => null, '28' => null, '28.5' => null, '29' => null, '29.5' => null, '30' => null, '30.5' => null, '31' => null],
+//         'Calzado de niño(a)' => ['13' => null, '13.5' => null, '14' => null, '14.5' => null, '15' => null, '15.5' => null, '16' => null, '16.5' => null, '17' => null, '17.5' => null, '18' => null, '18.5' => null, '19' => null, '19.5' => null, '20' => null, '21.5' => null, '22' => null],
+//         'Accesorios' => ['Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L'],
+//         'Lencería' => ['32A' => null, '32B' => null, '34B' => null,'34C' => null, '36C' => null, '36D' => null, '38D' => null, '40E' => null, 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Extra grande' => 'XL', 'Doble extra grande' => '2XL'],
+//     ];
+
+//     foreach ($categories as $category => $sizes) {
+//         Category::create([
+//             'name' => $category,
+//             'business_line_name' => 'Boutique / Tienda de Ropa / Zapatería',
+//         ]);
+
+//         foreach ($sizes as $size => $short) {
+//             Size::create([
+//                 'name' => $size,
+//                 'short' => $short,
+//                 'category' => $category,
+//             ]);
+//         }
+//     }
+
+//     return "Categorias agregadas!";
+// });
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
@@ -170,12 +205,30 @@ Route::post('products-get-data-for-products-view', [ProductController::class, 'g
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
 
 
+// productos de boutique
+//-------------------------------------------------------------------------------------------------
+Route::resource('boutique-products', ProductBoutiqueController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::post('boutique-products/update-with-media/{product}', [ProductBoutiqueController::class, 'updateWithMedia'])->name('boutique-products.update-with-media')->middleware('auth');
+Route::put('boutique-products-entry', [ProductBoutiqueController::class, 'entryStock'])->name('boutique-products.entry')->middleware('auth');
+Route::get('boutique-products-search', [ProductBoutiqueController::class, 'searchProduct'])->name('boutique-products.search')->middleware('auth');
+Route::get('boutique-products-get-product-scaned/{product_id}', [ProductBoutiqueController::class, 'getProductScaned'])->name('boutique-products.get-product-scaned')->middleware('auth');
+Route::get('boutique-products-fetch-history/{product_name}/{month}/{year}', [ProductBoutiqueController::class, 'fetchHistory'])->name('boutique-products.fetch-history')->middleware('auth');
+Route::get('boutique-products-get-by-page/{currentPage}', [ProductBoutiqueController::class, 'getItemsByPage'])->name('boutique-products.get-by-page')->middleware('auth');
+Route::get('boutique-products-get-all-until-page/{currentPage}', [ProductBoutiqueController::class, 'getAllUntilPage'])->name('boutique-products.get-all-until-page')->middleware('auth');
+Route::post('boutique-products/import', [ProductBoutiqueController::class, 'import'])->name('boutique-products.import')->middleware('auth');
+Route::get('boutique-products-export', [ProductBoutiqueController::class, 'export'])->name('boutique-products.export')->middleware('auth');
+Route::get('boutique-products-get-all-for-indexedDB', [ProductBoutiqueController::class, 'getAllForIndexedDB'])->name('boutique-products.get-all-for-indexedDB')->middleware('auth');
+Route::post('boutique-products-get-data-for-products-view', [ProductBoutiqueController::class, 'getDataForProductsView'])->name('boutique-products.get-data-for-products-view')->middleware('auth');
+Route::post('boutique-products-change-price', [ProductBoutiqueController::class, 'changePrice'])->name('boutique-products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
+
+
 //rentals routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 Route::resource('rentals', RentalController::class)->middleware(['auth', 'activeSuscription', 'verified']);
 Route::put('rentals/update-status/{rental}', [RentalController::class, 'updateStatus'])->name('rentals.update-status')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('rentals-search', [RentalController::class, 'searchRent'])->name('rentals.search')->middleware('auth');
 Route::get('rentals-get-by-page/{currentPage}', [RentalController::class, 'getItemsByPage'])->name('rentals.get-by-page')->middleware('auth');
+Route::get('rentals-print-contract/{rental}', [RentalController::class, 'printContract'])->name('rentals.print-contract')->middleware('auth');
 
 
 //rental payments routes----------------------------------------------------------------------------------
@@ -269,6 +322,8 @@ Route::resource('users', UserController::class)->middleware('auth');
 Route::get('users-get-notifications', [UserController::class, 'getNotifications'])->middleware('auth')->name('users.get-notifications');
 Route::post('users-read-notifications', [UserController::class, 'readNotifications'])->middleware('auth')->name('users.read-user-notifications');
 Route::post('users-delete-notifications', [UserController::class, 'deleteNotifications'])->middleware('auth')->name('users.delete-user-notifications');
+Route::get('users-get-online-sales-notifications', [UserController::class, 'getOnlineSalesNotifications'])->middleware('auth')->name('users.get-online-sales-notifications');
+Route::post('users-read-online-sales-notifications', [UserController::class, 'readOnlineSalesNotifications'])->middleware('auth')->name('users.read-user-online-sales-notifications');
 Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword'])->middleware('auth')->name('users.reset-password');
 Route::put('tutorials-completed', [UserController::class, 'tutorialsCompleted'])->name('users.tutorials-completed')->middleware('auth');
 Route::put('users-update-printer-config/{user}', [UserController::class, 'updatePrinterConfig'])->middleware('auth')->name('users.update-printer-config');
@@ -297,6 +352,7 @@ Route::get('clients-print-cash-historial/{client}', [ClientController::class, 'P
 Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getClientSales'])->name('clients.get-client-sales')->middleware('auth');
 Route::get('clients-get-client-quotes/{client}', [ClientController::class, 'getClientQuotes'])->name('clients.get-client-quotes')->middleware('auth');
 Route::get('clients-get-client-rentals/{client}', [ClientController::class, 'getClientRentals'])->name('clients.get-client-rentals')->middleware('auth');
+Route::get('clients-get-client-info/{client}', [ClientController::class, 'getClientInfo'])->name('clients.get-client-info')->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------
@@ -309,6 +365,7 @@ Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'upda
 //----------------------------------------------------------------------------------------------------
 Route::get('support/index', [SupportController::class, 'index'])->middleware('auth')->name('supports.index');
 Route::get('support/faqs', [SupportController::class, 'faqs'])->middleware('auth')->name('supports.faqs');
+Route::get('support/suscription', [SupportController::class, 'suscription'])->middleware('auth')->name('supports.suscription');
 Route::get('support/create-report', [SupportController::class, 'createReport'])->middleware('auth')->name('supports.create-report');
 
 
@@ -355,6 +412,11 @@ Route::resource('tutorials', TutorialController::class)->middleware('auth');
 Route::resource('installments', InstallmentController::class)->middleware('auth');
 
 
+//rutas de tallas-----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('sizes', SizeController::class)->middleware('auth');
+
+
 //Banners online store routes------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('banners', BannerController::class)->middleware('auth');
@@ -387,6 +449,11 @@ Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'r
 Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
 Route::get('online-sales-show-service/{service}', [OnlineSaleController::class, 'showService'])->name('online-sales.show-service');
 Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class, 'quoteService'])->name('online-sales.quote-service');
+
+
+//Internal invoices routes----------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
+Route::resource('internal-invoices', InternalInvoiceController::class);
 
 
 // comandos Artisan

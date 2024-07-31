@@ -175,9 +175,9 @@ export default {
         async deleteItem() {
             let routePage;
             if (this.itemToDelete.global_product_id) {
-                routePage = 'global-product-store.show';
+                routePage = 'global-product-store.destroy';
             } else {
-                routePage = 'products.show';
+                routePage = 'products.destroy';
             }
             try {
                 this.deleting = true;
@@ -193,10 +193,10 @@ export default {
                         const indexToDelete = this.products.findIndex(item => item.id == this.itemToDelete.id);
                         this.products.splice(indexToDelete, 1);
                     }
-
+                    
                     // buscar producto en indexedDB
                     const products = await getItemByAttributes('products', { name: productName });
-
+                    
                     // eliminar de indexedDB
                     await deleteItem('products', products[0].id);
 
