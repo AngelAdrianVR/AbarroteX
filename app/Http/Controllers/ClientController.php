@@ -229,7 +229,10 @@ class ClientController extends Controller
 
         $folios->each(function ($folio) use ($sales) {
             // Buscar CreditSaleData relacionado usando el folio
-            $creditData = CreditSaleData::where('folio', $folio)->first();
+            $creditData = CreditSaleData::where([
+                'folio' => $folio,
+                'store_id' => auth()->user()->store_id,
+            ])->first();
 
             if ($creditData) {
                 // Obtener los installments relacionados

@@ -517,8 +517,18 @@ class SaleController extends Controller
                             : $current_product->name;
 
                         // registrar regreso de producto a stock de viejo producto
+                        if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
+                            $refund_description = "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity
+                                . " pieza(s) de talla {$current_product->additional['name']}";
+                            $sale_description = "Registro de venta por reemplazo del producto $current_product_name por este en talla {$current_product->additional['name']} para la venta con folio $request->folio. "
+                                . $new_quantity . ' pieza(s)';
+                            $product_name .= " ({$current_product->additional['name']})";
+                        } else {
+                            $refund_description = "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity . ' pieza(s)';
+                            $sale_description = "Registro de venta por reemplazo del producto $current_product_name por este en la venta con folio $request->folio. " . $new_quantity . ' pieza(s)';
+                        }
                         ProductHistory::create([
-                            'description' => "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity . ' pieza(s)',
+                            'description' => $refund_description,
                             'type' => 'Edición',
                             'historicable_id' => $current_product->id,
                             'historicable_type' => get_class($current_product),
@@ -531,7 +541,7 @@ class SaleController extends Controller
                         $new_product->current_stock = max($new_stock, 0);
                         $new_product->save();
                         ProductHistory::create([
-                            'description' => "Registro de venta por reemplazo del producto $current_product_name por este en la venta con folio $request->folio. " . $new_quantity . ' pieza(s)',
+                            'description' => $sale_description,
                             'type' => 'Edición',
                             'historicable_id' => $new_product->id,
                             'historicable_type' => get_class($new_product),
@@ -543,14 +553,28 @@ class SaleController extends Controller
                         $current_product->current_stock = max($new_stock, 0);
                         $current_product->save();
 
-                        if ($old_quantity < $new_quantity) {
-                            $abs_quantity = $new_quantity - $old_quantity;
-                            $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
-                            $type = "Edición";
+                        if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
+                            if ($old_quantity < $new_quantity) {
+                                $abs_quantity = $new_quantity - $old_quantity;
+                                $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. " 
+                                .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['name'];
+                                $type = "Edición";
+                            } else {
+                                $abs_quantity = $old_quantity - $new_quantity;
+                                $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. " 
+                                .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['name'];
+                                $type = "Edición";
+                            }
                         } else {
-                            $abs_quantity = $old_quantity - $new_quantity;
-                            $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
-                            $type = "Edición";
+                            if ($old_quantity < $new_quantity) {
+                                $abs_quantity = $new_quantity - $old_quantity;
+                                $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
+                                $type = "Edición";
+                            } else {
+                                $abs_quantity = $old_quantity - $new_quantity;
+                                $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. " .  $abs_quantity . ' pieza(s)';
+                                $type = "Edición";
+                            }
                         }
 
                         // movimiento de producto por edicion
@@ -697,7 +721,10 @@ class SaleController extends Controller
 
         $folios->each(function ($folio) use ($sales) {
             // Buscar CreditSaleData relacionado usando el folio
-            $creditData = CreditSaleData::where('folio', $folio)->first();
+            $creditData = CreditSaleData::where([
+                'folio' => $folio,
+                'store_id' => auth()->user()->store_id,
+            ])->first();
 
             if ($creditData) {
                 // Obtener los installments relacionados

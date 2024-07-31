@@ -102,17 +102,16 @@ class ProductBoutiqueController extends Controller
                 // Guardar el archivo en la colección 'imageCover' solo en el primer producto registrado
                 if ($request->hasFile('imageCover')) {
                     $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
-                }
-
-                // Ruta del archivo guardado
-                $path = $mediaItem->getPath();
-
-                // Verificar el tamaño del archivo y si estamos en entorno de producción
-                if (filesize($path) > 500 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
-                    // Comprimir la imagen directamente en su ubicación original si supera los 600KB
-                    $this->tinifyService->optimizeImage($path);
-                } else {
-                    // comprimir de otra forma
+                    // Ruta del archivo guardado
+                    $path = $mediaItem->getPath();
+    
+                    // Verificar el tamaño del archivo y si estamos en entorno de producción
+                    if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                        // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                        $this->tinifyService->optimizeImage($path);
+                    } else {
+                        // comprimir de otra forma  
+                    }
                 }
             } else {
                 // Copiar el medio al nuevo producto registrado
@@ -411,11 +410,17 @@ class ProductBoutiqueController extends Controller
                 // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
                 if ($request->hasFile('imageCover')) {
                     $new_product->clearMediaCollection('imageCover');
-                }
-
-                // Guardar el archivo en la colección 'imageCover' solo en el primer producto registrado
-                if ($request->hasFile('imageCover')) {
                     $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+                    // Ruta del archivo guardado
+                    $path = $mediaItem->getPath();
+    
+                    // Verificar el tamaño del archivo y si estamos en entorno de producción
+                    if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                        // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                        $this->tinifyService->optimizeImage($path);
+                    } else {
+                        // comprimir de otra forma  
+                    }
                 }
             } else {
                 // Copiar el medio al nuevo producto registrado

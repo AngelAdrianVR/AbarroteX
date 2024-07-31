@@ -11,6 +11,7 @@ use App\Models\Expense;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
+use App\Services\TinifyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -20,11 +21,14 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductController extends Controller
 {
+    public function __construct(protected TinifyService $tinifyService)
+    {
+    }
+
     public function index()
     {
         return inertia('Product/Index');
     }
-
 
     public function create()
     {
@@ -35,7 +39,6 @@ class ProductController extends Controller
 
         return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
     }
-
 
     public function store(Request $request)
     {
@@ -60,7 +63,16 @@ class ProductController extends Controller
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
-            $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            $mediaItem = $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            // Ruta del archivo guardado
+            $path = $mediaItem->getPath();
+            // Verificar el tamaño del archivo y si estamos en entorno de producción
+            if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                $this->tinifyService->optimizeImage($path);
+            } else {
+                // comprimir de otra forma  
+            }
         }
 
         //codifica el id del producto
@@ -83,7 +95,6 @@ class ProductController extends Controller
 
         return inertia('Product/Show', compact('product', 'cash_register'));
     }
-
 
     public function edit($encoded_product_id)
     {
@@ -175,13 +186,19 @@ class ProductController extends Controller
         // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
         if ($request->hasFile('imageCover')) {
             $product->clearMediaCollection('imageCover');
+            $mediaItem = $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            // Ruta del archivo guardado
+            $path = $mediaItem->getPath();
+    
+            // Verificar el tamaño del archivo y si estamos en entorno de producción
+            if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                $this->tinifyService->optimizeImage($path);
+            } else {
+                // comprimir de otra forma  
+            }
         }
-
-        // Guardar el archivo en la colección 'imageCover'
-        if ($request->hasFile('imageCover')) {
-            $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
-        }
-
+        
         //codifica el id del producto
         $encoded_product_id = base64_encode($product->id);
 
