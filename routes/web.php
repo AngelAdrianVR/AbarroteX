@@ -14,6 +14,7 @@ use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
 use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\InternalInvoiceController;
 use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
@@ -227,6 +228,7 @@ Route::resource('rentals', RentalController::class)->middleware(['auth', 'active
 Route::put('rentals/update-status/{rental}', [RentalController::class, 'updateStatus'])->name('rentals.update-status')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('rentals-search', [RentalController::class, 'searchRent'])->name('rentals.search')->middleware('auth');
 Route::get('rentals-get-by-page/{currentPage}', [RentalController::class, 'getItemsByPage'])->name('rentals.get-by-page')->middleware('auth');
+Route::get('rentals-print-contract/{rental}', [RentalController::class, 'printContract'])->name('rentals.print-contract')->middleware('auth');
 
 
 //rental payments routes----------------------------------------------------------------------------------
@@ -350,6 +352,7 @@ Route::get('clients-print-cash-historial/{client}', [ClientController::class, 'P
 Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getClientSales'])->name('clients.get-client-sales')->middleware('auth');
 Route::get('clients-get-client-quotes/{client}', [ClientController::class, 'getClientQuotes'])->name('clients.get-client-quotes')->middleware('auth');
 Route::get('clients-get-client-rentals/{client}', [ClientController::class, 'getClientRentals'])->name('clients.get-client-rentals')->middleware('auth');
+Route::get('clients-get-client-info/{client}', [ClientController::class, 'getClientInfo'])->name('clients.get-client-info')->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------
@@ -362,6 +365,7 @@ Route::put('ezy-profile/update-suscription', [EzyProfileController::class, 'upda
 //----------------------------------------------------------------------------------------------------
 Route::get('support/index', [SupportController::class, 'index'])->middleware('auth')->name('supports.index');
 Route::get('support/faqs', [SupportController::class, 'faqs'])->middleware('auth')->name('supports.faqs');
+Route::get('support/suscription', [SupportController::class, 'suscription'])->middleware('auth')->name('supports.suscription');
 Route::get('support/create-report', [SupportController::class, 'createReport'])->middleware('auth')->name('supports.create-report');
 
 
@@ -445,6 +449,11 @@ Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'r
 Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
 Route::get('online-sales-show-service/{service}', [OnlineSaleController::class, 'showService'])->name('online-sales.show-service');
 Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class, 'quoteService'])->name('online-sales.quote-service');
+
+
+//Internal invoices routes----------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
+Route::resource('internal-invoices', InternalInvoiceController::class);
 
 
 // comandos Artisan

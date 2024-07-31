@@ -8,6 +8,13 @@
                 <h1 class="font-bold ml-2 col-span-full">Editar cliente</h1>
 
                 <div class="mt-3 col-span-full">
+                    <InputLabel value="Nombre de la empresa (opcional)" class="ml-3 mb-1" />
+                    <el-input v-model="form.company" placeholder="Escribe el nombre del cliente" :maxlength="100"
+                        clearable />
+                    <InputError :message="form.errors.company" />
+                </div>
+
+                <div class="mt-3 col-span-full">
                     <InputLabel value="Nombre*" class="ml-3 mb-1" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100"
                         clearable />
@@ -133,7 +140,8 @@ import { useForm } from "@inertiajs/vue3";
 export default {
 data() {
     const form = useForm({
-            name: this.client.name,
+            company: this.client.company, //nombre de la empresa
+            name: this.client.name, //nombre del contacto
             phone: this.client.phone,
             street: this.client.street,
             suburb: this.client.suburb,

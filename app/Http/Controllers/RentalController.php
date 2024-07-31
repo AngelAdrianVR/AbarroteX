@@ -171,4 +171,13 @@ class RentalController extends Controller
 
         return response()->json(['items' => $rentals]);
     }
+
+    public function printContract(Rental $rental)
+    {
+        // Cargar la relación 'client' al objeto $rental
+        $rental->load(['client', 'product']);
+
+        // Pasar el objeto $rental (con la relación 'client' cargada) a la vista
+        return inertia('Rental/PrintContract', compact('rental'));
+    }
 }

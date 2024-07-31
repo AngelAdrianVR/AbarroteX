@@ -343,6 +343,15 @@ class SaleController extends Controller
                     'credit_sale_data_id' => $new_credit_sale_data->id,
                     'user_id' => auth()->id(),
                 ]);
+
+                //crea un movimiento de caja para guardar el abono
+                CashRegisterMovement::create([
+                    'amount' => $sale_data['deposit'],
+                    'type' => 'Ingreso',
+                    'notes' => 'Primer abono hecho en la venta con folio ' . $folio,
+                    'cash_register_id' => auth()->user()->cash_register_id,
+                ]);
+
                 //Suma la cantidad abonada
                 $cash_register->current_cash += $sale_data['deposit'];
                 $cash_register->save();

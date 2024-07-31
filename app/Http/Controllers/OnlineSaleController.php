@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Banner;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
+use App\Models\Client;
 use App\Models\GlobalProductStore;
 use App\Models\Logo;
 use App\Models\OnlineSale;
@@ -27,9 +28,9 @@ class OnlineSaleController extends Controller
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
         $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
         $total_online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->get()->count();
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
 
-        // return $cash_registers;
-        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders', 'cash_registers', 'total_online_orders'));
+        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders', 'cash_registers', 'total_online_orders', 'clients'));
     }
 
     public function clientIndex($encoded_store_id)
