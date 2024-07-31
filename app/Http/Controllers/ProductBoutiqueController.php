@@ -12,12 +12,17 @@ use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Size;
+use App\Services\TinifyService;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductBoutiqueController extends Controller
 {
+    public function __construct(protected TinifyService $tinifyService)
+    {
+    }
+
     public function index()
     {
         return inertia('Product/Boutique/Index');
@@ -36,7 +41,6 @@ class ProductBoutiqueController extends Controller
     public function store(Request $request)
     {
         $store_id = auth()->user()->store_id;
-
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code)],
@@ -98,6 +102,17 @@ class ProductBoutiqueController extends Controller
                 // Guardar el archivo en la colección 'imageCover' solo en el primer producto registrado
                 if ($request->hasFile('imageCover')) {
                     $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+                }
+
+                // Ruta del archivo guardado
+                $path = $mediaItem->getPath();
+
+                // Verificar el tamaño del archivo y si estamos en entorno de producción
+                if (filesize($path) > 500 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                    // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                    $this->tinifyService->optimizeImage($path);
+                } else {
+                    // comprimir de otra forma
                 }
             } else {
                 // Copiar el medio al nuevo producto registrado
