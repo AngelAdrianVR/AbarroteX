@@ -179,7 +179,7 @@ export default {
                     active: route().current('clients.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && (this.$page.props.auth.user.store.plan == 'Plan Intermedio' || ['Otro', 'Boutique / Tienda de Ropa / Zapatería'].includes(this.$page.props.auth.user.store.type))
                 },
                 {
                     label: 'Caja',
