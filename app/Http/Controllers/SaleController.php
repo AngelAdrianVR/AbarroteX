@@ -661,7 +661,7 @@ class SaleController extends Controller
 
             // obtener el total solo de las ventas al contado
             $totalSale = $normalSales->sum(function ($sale) {
-                $credit_data = CreditSaleData::where('folio', $sale->folio)->first();
+                $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
                 if (!$credit_data) {
                     return $sale->quantity * $sale->current_price;
                 }
