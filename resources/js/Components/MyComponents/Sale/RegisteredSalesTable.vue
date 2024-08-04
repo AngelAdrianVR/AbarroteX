@@ -48,6 +48,11 @@
     </div>
     <Loading v-if="loading" class="mt-20" />
     <div class="mt-8" v-else>
+        <section class="text-center mt-3"  v-if="['Administrador'].includes($page.props.auth.user.rol)">
+            <p>
+                Total registrado: ${{ getTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+            </p>
+        </section>
         <p v-if="Object.keys(sales)?.length" class="text-gray66 text-[11px] mb-3">
             {{ Object.keys(sales)?.length }} de {{ totalSales }} elementos
         </p>
@@ -183,7 +188,12 @@ export default {
     computed: {
         isMobile() {
             return window.innerWidth < 768;
-        }
+        },
+        getTotal() {
+            return Object.values(this.sales)?.reduce((accum, item) => {
+                return accum += item.total_sale + item.online_sales_total;
+            }, 0);
+        },
     },
     methods: {
         sortedData() {

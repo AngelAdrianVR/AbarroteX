@@ -33,7 +33,7 @@
                 </el-dropdown>
             </div>
         </section>
-        <section class="text-center mt-3">
+        <section v-if="['Administrador'].includes($page.props.auth.user.rol)" class="text-center mt-3">
             <p>Total invertido en almacén: ${{ inventoryCost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                 ",") }}</p>
             <p>Total para venta en almacén: ${{ inventoryPrice?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
