@@ -3,7 +3,7 @@
         <div class="px-3 md:px-10 py-7">
             <Back />
 
-            <form v-if="total_users < 2" @submit.prevent="store"
+            <form v-if="total_users < 2 || $page.props.auth.user.store_id == 10" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Crear nuevo usuario</h1>
 
