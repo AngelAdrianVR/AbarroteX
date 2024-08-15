@@ -47,7 +47,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode()],
             'public_price' => 'required|numeric|min:0|max:999999',
-            'currency' => 'required|string',
+            'currency' => 'nullable|string',
             'cost' => 'nullable|numeric|min:0|max:999999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'description' => 'nullable|string|max:255',

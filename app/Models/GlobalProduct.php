@@ -22,6 +22,7 @@ class GlobalProduct extends Model implements HasMedia
         'description',
         'category_id',
         'brand_id',
+        'type',
     ];
 
     //relationships
