@@ -272,6 +272,7 @@ export default {
             this.entryLoading = true;
             this.form.put(route('boutique-products.entry'), {
                 onSuccess: () => {
+                    this.fetchProductsByName(false);
                     // actualizar current stock de producto en indexedDB si el seguimiento de inventario esta activo
                     // if (this.isInventoryOn) {
                     syncIDBProducts();
