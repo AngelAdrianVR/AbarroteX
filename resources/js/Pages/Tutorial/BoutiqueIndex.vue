@@ -14,8 +14,8 @@
                 <p class="mb-5 text-center">Completa el siguiente tutorial para poder comenzar a utilizar Ezy Ventas</p>
 
                 <!-- Barra de progreso -->
-                <div class="grid grid-cols-3 gap-x-3 mb-4 mx-12">
-                    <template v-for="index in 3" :key="index">
+                <div class="grid grid-cols-2 gap-x-3 mb-4 mx-12">
+                    <template v-for="index in 2" :key="index">
                         <button @click="step = index"
                             :class="{ 'border-2 border-primary w-full': index <= step, 'border-2 w-full': index > step }"></button>
                     </template>
@@ -29,12 +29,12 @@
                         Tu navegador no soporta la reproducción de video.
                     </video>
 
-                    <video v-if="step === 2" controls>
+                    <!-- <video v-if="step === 2" controls>
                         <source src="@/../../public/Videos/Tutorial_productos_EzyV.mp4" type="video/mp4">
                         Tu navegador no soporta la reproducción de video.
-                    </video>
+                    </video> -->
 
-                    <video v-if="step === 3" controls>
+                    <video v-if="step === 2" controls>
                         <source src="@/../../public/Videos/Tutorial_graficas_EzyV.mp4" type="video/mp4">
                         Tu navegador no soporta la reproducción de video.
                     </video>
@@ -133,7 +133,6 @@ export default {
             step: 1,
             tutorialContent: [
                 { title: 'Video tutorial para realizar tus ventas' },
-                { title: 'Video tutorial para cargar tus productos' },
                 { title: 'Video tutorial de análisis de ventas y gastos' }
             ],
             configModal: false,

@@ -1356,7 +1356,7 @@ export default {
   async mounted() {
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
-      this.$inertia.visit(route('tutorials.index'));
+        this.$inertia.visit(route('tutorials.index'));
     }
 
     //verificar si el usuario tiene una caja asignada
