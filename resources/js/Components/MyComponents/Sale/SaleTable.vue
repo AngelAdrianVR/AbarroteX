@@ -99,12 +99,13 @@
         </div>
       </figure>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
-        <p class="font-bold text-base">
-          {{ sale.product.name }}
+        <div class="text-base">
+          <p class="text-xs">Categoria: {{ sale.product.additional?.category }}</p>
+          <p class="font-bold">{{ sale.product.name }}</p>
           <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'" class="text-gray99">
             ({{ sale.product.additional?.name }})
           </span>
-        </p>
+        </div>
         <div class="flex items-center space-x-2 text-lg">
           <template v-if="editMode !== index">
             ${{ sale.product.public_price }}
