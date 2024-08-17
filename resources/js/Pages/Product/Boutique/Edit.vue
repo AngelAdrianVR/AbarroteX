@@ -14,7 +14,7 @@
                 </div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría" />
+                        <InputLabel value="Categoría *" />
                         <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -80,12 +80,13 @@
                     <article v-for="(item, index) in form.sizes" :key="index" class="flex items-center space-x-3 mb-2">
                         <div class="w-[33%]">
                             <div class="w-full flex items-center justify-between">
-                                <InputLabel value="Talla *" />
-                                <button @click="showSizeFormModal = true" v-if="index == 0" type="button"
+                                <InputLabel v-if="index == 0" value="Talla *" />
+                                <button @click="openSizeModal" v-if="index == 0" type="button"
                                     class="text-primary text-xs">Crear talla</button>
                             </div>
                             <el-select :ref="'size' + index" filterable v-model="item.size_id" clearable
-                                placeholder="Seleccione" no-data-text="Primero seleccione la categoria"
+                                placeholder="Seleccione"
+                                :no-data-text="form.category_id ? 'No hay tallas registradas en la categoria seleccionada' : 'Primero seleccione la categoria'"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="size in getCategorySizes" :key="size.id" :label="size.name"
                                     :value="size.id" :disabled="form.sizes.some(item => item.size_id == size.id)">
@@ -99,27 +100,27 @@
                             <InputError :message="form.errors[`sizes.${index}.size_id`]" />
                         </div>
                         <div class="w-[14%]">
-                            <InputLabel value="Existencias *" />
+                            <InputLabel v-if="index == 0" value="Existencias *" />
                             <el-input v-model="item.current_stock" placeholder="Stock actual"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <InputError :message="form.errors[`sizes.${index}.current_stock`]" />
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel value="Cantidad mínima" />
+                            <InputLabel v-if="index == 0" value="Cantidad mínima" />
                             <el-input v-model="item.min_stock" placeholder="Mínimo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <InputError :message="form.errors[`sizes.${index}.min_stock`]" />
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel value="Cantidad máxima" />
+                            <InputLabel v-if="index == 0" value="Cantidad máxima" />
                             <el-input v-model="item.max_stock" placeholder="Máximo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <InputError :message="form.errors[`sizes.${index}.max_stock`]" />
                         </div>
-                        <div class="w-[4%] flex justify-end mt-5">
+                        <div class="w-[4%] flex justify-end">
                             <el-popconfirm v-if="form.sizes.length > 1" confirm-button-text="Si" cancel-button-text="No"
                                 icon-color="#373737" :title="'¿Desea eliminar la talla seleccionada?'"
                                 @confirm="deleteSize(index)">
@@ -310,6 +311,13 @@ export default {
         },
     },
     methods: {
+        openSizeModal() {
+            if (this.form.category_id) {
+                this.sizeForm.category = this.categories.find(item => item.id == this.form.category_id).name;
+            }
+
+            this.showSizeFormModal = true;
+        },
         handleCategory() {
             this.form.sizes.forEach(item => {
                 item.size_id = null;

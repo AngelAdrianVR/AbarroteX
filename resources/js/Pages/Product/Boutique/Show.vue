@@ -1,6 +1,7 @@
 <template>
-    <AppLayout :title="products[0].name">
-        <div class="px-2 lg:px-10 py-7">
+    <AppLayout :title="title">
+        <Loading v-if="loading" class="mt-14" />
+        <div v-else class="px-2 lg:px-10 py-7">
             <!-- header botones -->
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
@@ -25,8 +26,9 @@
                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
                     <Loading2 v-if="searchLoading" class="my-3" />
                     <ul v-else-if="Object.keys(productsFound)?.length > 0">
-                        <li @click.stop="handleProductSelected(set)" v-for="(set, index) in Object.values(productsFound)"
-                            :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
+                        <li @click.stop="handleProductSelected(set)"
+                            v-for="(set, index) in Object.values(productsFound)" :key="index"
+                            class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
                                 set[0]?.global_product_id ? set[0]?.global_product?.name : set[0]?.name }}</li>
                     </ul>
                     <p v-else class="text-center text-sm text-gray-600 px-5 py-2">No se encontraron coincidencias</p>
@@ -69,13 +71,37 @@
                 <i @click="entryProductModal = false"
                     class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
                 <h1 class="font-bold my-4">Ingresar producto a almacén</h1>
-                <section v-for="(item, index) in form.sizes" :key="index" class="mb-2 mx-2 flex items-center space-x-3">
+                <p class="text-xs">
+                    En caso de requerir agregar una talla nueva, ve a
+                    <a :href="route('boutique-products.edit', encodedId)" target="_blank"
+                        class="text-primary underline">editar el producto</a> y una vez agregada presiona el botón
+                    de refrescar la lista de tallas:
+                </p>
+                <section v-for="(item, index) in form.sizes" :key="index"
+                    class="mb-2 mx-2 flex items-center space-x-3 mt-3">
                     <div class="w-[48%]">
-                        <InputLabel value="Talla *" />
-                        <el-select @change="handleChangeSize(item)" filterable v-model="item.product_id" clearable placeholder="Seleccione"
-                            no-data-text="No hay opciones" no-match-text="No se encontraron coincidencias">
+                        <InputLabel v-if="index == 0">
+                            <div class="flex items-center justify-between">
+                                <span>Talla *</span>
+                                <el-tooltip content="Refrescar lista de tallas" placement="right">
+                                    <button @click="fetchProductsByName()" type="button"
+                                        class="size-5 rounded-full bg-grayD9 text-gray37 flex items-center justify-center disabled:animate-spin disabled:opacity-50"
+                                        :disabled="fetching">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                        </svg>
+                                    </button>
+                                </el-tooltip>
+                            </div>
+                        </InputLabel>
+                        <el-select @change="handleChangeSize(item)" filterable v-model="item.product_id" clearable
+                            placeholder="Seleccione" no-data-text="No hay opciones"
+                            no-match-text="No se encontraron coincidencias">
                             <el-option v-for="size in getAvailableSizes" :key="size.product_id" :label="size.name"
-                                :value="size.product_id" :disabled="form.sizes.some(item => item.product_id == size.product_id)">
+                                :value="size.product_id"
+                                :disabled="form.sizes.some(item => item.product_id == size.product_id)">
                                 <p class="flex items-center justify-between">
                                     <span>{{ size.name }}</span>
                                     <span v-if="size.short" class="text-[10px] text-gray99">
@@ -87,13 +113,13 @@
                         <InputError :message="form.errors[`sizes.${index}.product_id`]" />
                     </div>
                     <div class="w-[48%]">
-                        <InputLabel value="Cantidad *" />
+                        <InputLabel v-if="index == 0" value="Cantidad *" />
                         <el-input v-model="item.quantity" ref="quantityInput"
                             placeholder="Cantidad que ingresa de esta talla">
                         </el-input>
                         <InputError :message="form.errors[`sizes.${index}.quantity`]" />
                     </div>
-                    <div class="w-[4%] flex justify-end mt-5">
+                    <div class="w-[4%] flex justify-end">
                         <el-popconfirm v-if="form.sizes.length > 1" confirm-button-text="Si" cancel-button-text="No"
                             icon-color="#373737" :title="'¿Desea eliminar la talla seleccionada?'"
                             @confirm="deleteSize(index)">
@@ -106,13 +132,13 @@
                     </div>
                 </section>
                 <div class="flex">
-                    <button @click="addSize" type="button" class="text-primary text-sm">+ Añadir talla</button>
+                    <button @click="addSize" type="button" class="text-primary text-sm ml-3">+ Añadir talla</button>
                 </div>
                 <div class="flex justify-end space-x-3 pt-5 py-2">
                     <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
-                    <PrimaryButton :disabled="form.processing || incompleteForm || cashAmountMessage" @click="entryProduct"
-                        class="!rounded-full">
-                        Ingresar producto {{ form.siezes }}
+                    <PrimaryButton :disabled="form.processing || incompleteForm || cashAmountMessage"
+                        @click="entryProduct" class="!rounded-full">
+                        Ingresar producto
                     </PrimaryButton>
                 </div>
             </form>
@@ -128,6 +154,7 @@ import ProductHistorical from './Tabs/ProductHistorical.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import Loading2 from '@/Components/MyComponents/Loading2.vue';
+import Loading from '@/Components/MyComponents/Loading.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
@@ -151,13 +178,16 @@ export default {
         return {
             form,
             encodedId: null, //id codificado
-            searchQuery: this.products[0].name,
             searchFocus: false,
-            productsFound: [this.products[0]],
             entryProductModal: false,
+            products: [],
+            title: '',
+            searchQuery: '',
             // loading
             entryLoading: false,
             searchLoading: false,
+            fetching: false,
+            loading: true,
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // validaciones
@@ -174,6 +204,7 @@ export default {
         InputLabel,
         InputError,
         Loading2,
+        Loading,
         Modal,
         Back,
         ProductInfo,
@@ -181,7 +212,7 @@ export default {
         Link,
     },
     props: {
-        products: Array,
+        product_name: String,
         cash_register: Object,
     },
     computed: {
@@ -285,11 +316,40 @@ export default {
                 this.searchLoading = false;
             }
         },
+        async fetchProductsByName(loadFullPage = false) {
+            if (loadFullPage) {
+                this.loading = true;
+            } else {
+                this.fetching = true;
+            }
+
+            try {
+                const response = await axios.get(route('boutique-products.get-by-name', this.product_name));
+                if (response.status == 200) {
+                    this.products = response.data.items;
+                }
+
+            } catch (error) {
+                console.log(error);
+            } finally {
+                if (loadFullPage) {
+                    this.loading = false;
+                } else {
+                    this.fetching = false;
+                }
+            }
+        },
     },
-    mounted() {
+    async mounted() {
+        await this.fetchProductsByName(true);
         this.setActiveTabFromURL();
         this.encodeId(this.products[0].id);
         this.searchProducts();
+
+        // iniciar variables
+        this.searchQuery = this.products[0].name;
+        this.productsFound = [this.products[0]];
+        this.title = this.products[0].name;
     },
 }
 </script>

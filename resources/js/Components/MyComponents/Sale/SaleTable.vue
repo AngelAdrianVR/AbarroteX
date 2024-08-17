@@ -22,13 +22,14 @@
                 d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
             </svg>
           </div>
-          <p class="font-bold text-sm">
-            {{ sale.product.name }}
+          <div class="text-sm">
+            <p class="text-xs">Categoria: {{ sale.product.additional?.category }}</p>
+            <p class="font-bold">{{ sale.product.name }}</p>
             <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
               class="text-gray99">
               ({{ sale.product.additional?.name }})
             </span>
-          </p>
+          </div>
         </div>
         <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">

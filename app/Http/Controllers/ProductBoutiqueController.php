@@ -19,9 +19,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductBoutiqueController extends Controller
 {
-    public function __construct(protected TinifyService $tinifyService)
-    {
-    }
+    public function __construct(protected TinifyService $tinifyService) {}
 
     public function index()
     {
@@ -49,7 +47,7 @@ class ProductBoutiqueController extends Controller
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
-            'category_id' => 'nullable',
+            'category_id' => 'required|numeric|min:1',
             'brand_id' => 'nullable',
             'sizes' => 'nullable|array|min:1',
             'sizes.*.size_id' => 'required|numeric|min:1',
@@ -104,7 +102,7 @@ class ProductBoutiqueController extends Controller
                     $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
                     // Ruta del archivo guardado
                     $path = $mediaItem->getPath();
-    
+
                     // Verificar el tamaño del archivo y si estamos en entorno de producción
                     if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
                         // Comprimir la imagen directamente en su ubicación original si supera los 600KB
@@ -133,13 +131,8 @@ class ProductBoutiqueController extends Controller
 
         $cash_register = auth()->user()->cashRegister;
         $product_name = Product::findOrFail($decoded_product_id)?->name;
-        $products = Product::with(['category', 'media'])
-            ->where([
-                'store_id' => auth()->user()->store_id,
-                'name' => $product_name
-            ])->get();
 
-        return inertia('Product/Boutique/Show', compact('products', 'cash_register'));
+        return inertia('Product/Boutique/Show', compact('product_name', 'cash_register'));
     }
 
     public function edit($encoded_product_id)
@@ -174,7 +167,7 @@ class ProductBoutiqueController extends Controller
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
-            'category_id' => 'nullable',
+            'category_id' => 'required|numeric|min:1',
             'brand_id' => 'nullable',
             'sizes' => 'nullable|array|min:1',
             'sizes.*.id' => 'nullable',
@@ -242,6 +235,11 @@ class ProductBoutiqueController extends Controller
                         $validated['code'] = $validated['code'] . "-$key";
                     }
                 }
+
+                if (!$validated['has_inventory_control']) {
+                    $productData['min_stock'] = null;
+                    $productData['max_stock'] = null;
+                }
                 // Actualizar producto existente
                 $existingProduct->update($validated + [
                     'additional' => $size,
@@ -299,7 +297,7 @@ class ProductBoutiqueController extends Controller
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
-            'category_id' => 'nullable',
+            'category_id' => 'required|numeric|min:1',
             'brand_id' => 'nullable',
             'sizes' => 'nullable|array|min:1',
             'sizes.*.id' => 'nullable',
@@ -413,7 +411,7 @@ class ProductBoutiqueController extends Controller
                     $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
                     // Ruta del archivo guardado
                     $path = $mediaItem->getPath();
-    
+
                     // Verificar el tamaño del archivo y si estamos en entorno de producción
                     if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
                         // Comprimir la imagen directamente en su ubicación original si supera los 600KB
@@ -444,7 +442,7 @@ class ProductBoutiqueController extends Controller
             'store_id' => auth()->user()->store_id,
         ])->get();
 
-        $products->each(fn ($prd) =>  $prd->delete());
+        $products->each(fn($prd) =>  $prd->delete());
     }
 
     public function searchProduct(Request $request)
@@ -862,5 +860,16 @@ class ProductBoutiqueController extends Controller
                 'store_id' => $store_id,
             ]);
         }
+    }
+
+    public function getByName($product_name)
+    {
+        $products = Product::with(['category', 'media'])
+            ->where([
+                'store_id' => auth()->user()->store_id,
+                'name' => $product_name
+            ])->get();
+
+        return response()->json(['items' => $products]);
     }
 }
