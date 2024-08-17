@@ -142,7 +142,7 @@ export default {
         },
         getBaseCode(set) {
             if (!set[0].code) {
-                return 'N/A';
+                return '-';
             }
             let splited = set[0].code.split('-');
             splited.pop(); // Elimina el último elemento del array

@@ -37,7 +37,7 @@
             <header
                 class="w-80 inline-block mt-7 lg:mx-16 rounded-[5px] border border-grayD9 text-gray99 px-4 py-2 space-y-2">
                 <section>
-                    <div class="flex items-center space-x-3">
+                    <div v-if="hasOnlineSales" class="flex items-center space-x-3">
                         <span class="w-2/3">Total de pedidos en línea: </span>
                         <p class="flex text-gray37 w-1/3 font-bold">
                             <span class="w-1/4"></span>
@@ -126,7 +126,7 @@
                     <el-tab-pane label="Ventas en tienda" name="1">
                         <StoreSales @show-modal="handleShowModal" :sales="getGroupedSales" />
                     </el-tab-pane>
-                    <el-tab-pane label="Pedidos en línea" name="2">
+                    <el-tab-pane v-if="hasOnlineSales" label="Pedidos en línea" name="2">
                         <OnlineSales @show-modal="handleShowModal" :date="Object.keys(day_sales)[0]" />
                     </el-tab-pane>
                 </el-tabs>
@@ -351,8 +351,9 @@ export default {
             refunding: false,
             editing: false,
             changingDay: false,
-            // inventario de codigos activado
+            // perimsos o roles
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            hasOnlineSales: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
             // tabs
             activeTab: '1',
         }

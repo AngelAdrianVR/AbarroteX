@@ -29,7 +29,7 @@
                         </div>
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.code : product.code ?? 'N/A' }}
+                        {{ product.global_product_id ? product.global_product?.code : product.code ?? '-' }}
                     </td>
                     <td>
                         {{ product.global_product_id ? product.global_product?.name : product.name }}

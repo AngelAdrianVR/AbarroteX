@@ -39,8 +39,8 @@
                         <th class="w-44 xl:w-[27%]">Talla</th>
                         <th class="w-44 xl:w-[28%]">Código</th>
                         <th class="w-32 xl:w-[15%]">Existencias</th>
-                        <th class="w-32 xl:w-[15%]">Cantidad mínima</th>
-                        <th class="w-32 xl:w-[15%]">Cantidad máxima</th>
+                        <th v-if="products[0].has_inventory_control" class="w-32 xl:w-[16%]">Cantidad mínima</th>
+                        <th v-if="products[0].has_inventory_control" class="w-32 xl:w-[16%]">Cantidad máxima</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y-[1px]">
@@ -51,7 +51,7 @@
                         </td>
                         <td>
                             <div class="flex items-center">
-                                <span>{{ product.code ?? 'N/A' }}</span>
+                                <span>{{ product.code ?? '-' }}</span>
                                 <el-tooltip v-if="product.code" content="Copiar código" placement="right">
                                     <button @click="copyToClipboard(product)"
                                         class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
@@ -65,8 +65,8 @@
                             </div>
                         </td>
                         <td>{{ product.current_stock }}</td>
-                        <td>{{ product.min_stock ?? 'No especificado' }}</td>
-                        <td>{{ product.max_stock ?? 'No especificado' }}</td>
+                        <td v-if="product.min_stock">{{ product.min_stock ?? '-' }}</td>
+                        <td v-if="product.max_stock">{{ product.max_stock ?? '-' }}</td>
                     </tr>
                 </tbody>
             </table>
