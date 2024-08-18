@@ -24,7 +24,6 @@ import MyProducts from './Tabs/MyProducts.vue';
 import BaseCatalog from './Tabs/BaseCatalog.vue';
 import ToggleButton from "@/Components/MyComponents/ToggleButton.vue";
 
-
 export default {
     data() {
         return {

@@ -193,7 +193,7 @@ export default {
             }
         },
         nextStep() {
-            if (this.step < 3) {
+            if (this.step < 2) {
                 this.step++;
             } else if (!this.$page.props.auth.user.tutorials_seen) {
                 this.tutorialModal = false;
