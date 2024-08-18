@@ -20,8 +20,8 @@
                 <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
                         Entrada de producto
                     </ThirthButton> -->
-                <el-dropdown split-button type="primary" @click="$inertia.get(route('boutique-products.create'))" trigger="click"
-                    @command="handleCommand">
+                <el-dropdown split-button type="primary" @click="$inertia.get(route('boutique-products.create'))"
+                    trigger="click" @command="handleCommand">
                     Nuevo producto
                     <template #dropdown>
                         <el-dropdown-menu>
@@ -33,23 +33,28 @@
                 </el-dropdown>
             </div>
         </section>
-
-        <!-- <section v-if="isInventoryOn">
-            costo de almacén: {{ products }}
-        </section> -->
-
+        <section v-if="['Administrador'].includes($page.props.auth.user.rol)" class="text-center mt-3">
+            <p>Total invertido en almacén: ${{ inventoryCost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                ",") }}</p>
+            <p>Total para venta en almacén: ${{ inventoryPrice?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                ",") }}</p>
+        </section>
         <div class="mt-8">
-            <p v-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
-                totalProducts }} elementos
+            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px]">{{
+                Object.keys(localProducts).length }}
+                de {{
+                    totalProducts }} elementos
             </p>
-            <ProductTable :products="localProducts" />
-            <p v-if="localProducts.length" class="text-gray66 text-[11px] mt-3">{{ localProducts.length }} de {{
-                totalProducts }} elementos
+            <BoutiqueProductTable :products="localProducts" />
+            <p v-if="Object.keys(localProducts).length" class="text-gray66 text-[11px] mt-3">{{
+                Object.keys(localProducts).length }} de {{
+                    totalProducts }} elementos
             </p>
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <button v-else-if="totalProducts > 30 && localProducts.length < totalProducts && localProducts.length"
+            <button
+                v-else-if="totalProducts > 30 && Object.keys(localProducts).length < totalProducts && Object.keys(localProducts).length"
                 @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">Cargar más
                 elementos</button>
         </div>
@@ -121,9 +126,9 @@
                     <p class="mt-5 mb-1">
                         Primero, descarga la plantilla de importación haciendo click en el siguiente enlace:
                     </p>
-                    <a href="@/../../files/tabla_productos.xlsx" target="_blank" class="underline text-primary">Descarga
-                        la
-                        plantilla</a>
+                    <a href="@/../../files/tabla_productos_boutique.xlsx" target="_blank"
+                        class="underline text-primary">
+                        Descarga la plantilla</a>
                     <p class="mt-5 mb-1">
                         Una vez que hayas agregado todos los productos a la plantilla, guarda los cambios y adjunta el
                         archivo.
@@ -168,12 +173,13 @@
                     <span class="text-gray99">Nota: Los productos que Ezy ventas te facilita como catálogo base, no
                         serán exportados.</span>
                 </p>
-                <p v-if="totalLocalProducts" class="mt-2">
-                    Hay
+                <p v-if="totalLocalProductsWithSizes" class="mt-2">
+                    Tienes un total de {{ totalLocalProducts }} productos. Al tomar en cuenta todas las tallas
+                    disponibles de cada producto,
+                    el número total de registros a exportar es de
                     <b class="text-primary">
-                        {{ totalLocalProducts }}
-                    </b>
-                    producto(s) disponible(s) para exportar
+                        {{ totalLocalProductsWithSizes }}
+                    </b>.
                 </p>
                 <p v-else class="mt-2 text-redDanger">No hay productos para exportar</p>
             </template>
@@ -182,7 +188,7 @@
                     <CancelButton @click="showExportModal = false">
                         Cancelar
                     </CancelButton>
-                    <a v-if="totalLocalProducts" :href="route('products.export')"
+                    <a v-if="totalLocalProductsWithSizes" :href="route('boutique-products.export')"
                         class="cursor-pointer text-center px-4 py-2 bg-primary border border-transparent rounded-full text-xs text-white tracking-widest active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:text-white disabled:bg-[#999999] focus:outline-none focus:ring-0 transition ease-in-out duration-100">
                         Exportar
                     </a>
@@ -260,7 +266,7 @@
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
-import ProductTable from '@/Components/MyComponents/Product/ProductTable.vue';
+import BoutiqueProductTable from '@/Components/MyComponents/Product/BoutiqueProductTable.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import FileUploader from '@/Components/MyComponents/FileUploader.vue';
@@ -310,6 +316,9 @@ export default {
             localProducts: [],
             totalProducts: null,
             totalLocalProducts: null,
+            totalLocalProductsWithSizes: null,
+            inventoryCost: 0,
+            inventoryPrice: 0,
             searchedWord: null, //palabra con la que se hizo la última busqueda.
             // carga
             loading: false,
@@ -318,7 +327,7 @@ export default {
     components: {
         PrimaryButton,
         CancelButton,
-        ProductTable,
+        BoutiqueProductTable,
         ThirthButton,
         InputError,
         InputLabel,
@@ -330,6 +339,22 @@ export default {
     props: {
     },
     methods: {
+        // getTotalSaleInventory() {
+        //     return Object.values(this.products).reduce((accum, set) => {
+        //         return accum += set.reduce((sub, element) => {
+        //             const price = element.public_price ?? 0;
+        //             return sub += element.current_stock * price;
+        //         }, 0);
+        //     }, 0);
+        // },
+        // getTotalInvestInventory() {
+        //     return Object.values(this.products).reduce((accum, set) => {
+        //         return accum += set.reduce((sub, element) => {
+        //             const cost = element.cost ?? 0;
+        //             return sub += element.current_stock * cost;
+        //         }, 0);
+        //     }, 0);
+        // },
         handleCommand(command) {
             if (command == 'import') {
                 this.showImportModal = true;
@@ -419,12 +444,15 @@ export default {
         async fetchDataForProductsView() {
             try {
                 this.loading = true;
-                const response = await axios.post(route('boutique-products.get-data-for-products-view'), {page: this.currentPage});
+                const response = await axios.post(route('boutique-products.get-data-for-products-view'), { page: this.currentPage });
 
                 if (response.status === 200) {
                     this.products = response.data.products;
                     this.totalProducts = response.data.total_products;
                     this.totalLocalProducts = response.data.total_local_products;
+                    this.totalLocalProductsWithSizes = response.data.total_local_products_with_sizes;
+                    this.inventoryCost = response.data.inventory_cost;
+                    this.inventoryPrice = response.data.inventory_price;
                     this.localProducts = this.products;
                 }
             } catch (error) {
@@ -446,7 +474,7 @@ export default {
 
                 if (response.status === 200) {
                     // Obtener productos
-                    const response = await axios.get(route('boutique-products.get-all-for-indexedDB'));
+                    const response = await axios.get(route('products.get-all-for-indexedDB'));
                     const products = response.data.products;
                     // actualizar indexedDB
                     await addOrUpdateBatchOfItems('products', products);
@@ -467,7 +495,7 @@ export default {
                 const response = await axios.get(route('boutique-products.get-by-page', this.currentPage));
 
                 if (response.status === 200) {
-                    this.localProducts = [...this.localProducts, ...response.data.items];
+                    this.localProducts = { ...this.localProducts, ...response.data.items };
                     this.currentPage++;
 
                     // Actualiza la URL con la pagina
@@ -489,7 +517,7 @@ export default {
             if (this.searchQuery != '') {
                 try {
                     const response = await axios.get(route('boutique-products.search'), { params: { query: this.searchQuery } });
-                    if (response.status == 200) {
+                    if (response.status === 200) {
                         // this.products = this.localProducts;
                         this.localProducts = response.data.items;
                         this.searchedWord = this.searchQuery;
@@ -502,7 +530,7 @@ export default {
                     this.loading = false;
                     this.inputFocus();
                 }
-            } else {    
+            } else {
                 // Aquí podemos simular una operación asíncrona para mostrar el indicador de carga
                 try {
                     await this.resetLocalProducts();

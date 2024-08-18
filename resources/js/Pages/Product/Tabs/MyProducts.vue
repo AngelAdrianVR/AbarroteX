@@ -270,6 +270,7 @@ import DialogModal from "@/Components/DialogModal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { addOrUpdateBatchOfItems } from '@/dbService.js';
+import emitter from '@/eventBus.js';
 
 export default {
     data() {
@@ -548,6 +549,13 @@ export default {
     mounted() {
         this.getPageFromUrl(); //obtiene la variable page de la url.
         this.fetchDataForProductsView();
+
+        // Escucha el evento personalizado para actualizar carrito
+        emitter.on('product-deleted', this.fetchDataForProductsView);
+    },
+    beforeUnmount() {
+        // Elimina el listener del evento cuando se desmonta el componente
+        emitter.off('product-deleted', this.fetchDataForProductsView);
     }
 }
 </script>

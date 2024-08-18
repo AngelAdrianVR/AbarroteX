@@ -5,7 +5,7 @@
                 <p class="text-gray99">Folio: <span class="text-gray37">{{ groupedSales.folio }}</span></p>
                 <span class="text-gray99">•</span>
                 <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{
-                    formatDateHour(groupedSales.products[0].created_at) }}</span></p>
+                    formatHour(groupedSales.products[0].created_at) }}</span></p>
                 <span class="text-gray99">•</span>
                 <p class="text-gray99">Vendedor: <span class="text-gray37">{{ groupedSales.user_name }}</span>
                 </p>
@@ -132,7 +132,7 @@
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
                     <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
                         <template #content>
-                            <p>El reembolso de realizó a las {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
@@ -148,7 +148,7 @@
                     :class="wasRefunded ? 'text-[#8C3DE4]' : 'text-gray37'">
                     <el-tooltip v-if="wasRefunded" placement="top">
                         <template #content>
-                            <p>El reembolso de realizó a las {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
@@ -246,13 +246,19 @@ export default {
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },
-        formatDateHour(dateString) {
+        formatHour(dateString) {
             return format(parseISO(dateString), 'h:mm a', { locale: es });
         },
-        viewProduct(product) {
-            const encodedId = btoa(product.id.toString());
-            if (product.is_global_product) {
+        formatDateHour(dateString) {
+            return format(parseISO(dateString), 'dd MMMM • h:mm a', { locale: es });
+        },
+        viewProduct(sale) {
+            const productId = sale.product_id.split('_')[1];
+            const encodedId = btoa(productId);
+            if (sale.is_global_product) {
                 window.open(route('global-product-store.show', encodedId), '_blank');
+            } else if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                window.open(route('boutique-products.show', encodedId), '_blank');
             } else {
                 window.open(route('products.show', encodedId), '_blank');
             }

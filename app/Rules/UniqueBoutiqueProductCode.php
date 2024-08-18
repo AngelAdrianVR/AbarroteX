@@ -11,13 +11,13 @@ class UniqueBoutiqueProductCode implements ValidationRule
 {
     protected $storeId;
     protected $codeBase;
-    protected $sizeCount;
+    protected $excludedProductsName;
 
-    public function __construct($codeBase, $sizeCount)
+    public function __construct($codeBase, $excludedProductsName = null)
     {
         $this->storeId = auth()->user()->store_id;
         $this->codeBase = $codeBase;
-        $this->sizeCount = $sizeCount;
+        $this->excludedProductsName = $excludedProductsName;
     }
 
     /**
@@ -27,28 +27,35 @@ class UniqueBoutiqueProductCode implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        for ($i = 0; $i < $this->sizeCount; $i++) {
-            $code = $this->codeBase . "-$i";
+        // Obtener los códigos únicos de productos en la tienda actual
+        $productCodesQuery = DB::table('products')
+            ->where('store_id', $this->storeId)
+            ->select('name', 'code')
+            ->when($this->excludedProductsName, function ($query) {
+                $query->where('name', '<>', $this->excludedProductsName);
+            })
+            ->get()
+            ->unique('name')
+            ->pluck('code');
 
-            // Revisa la existencia del código en la tabla 'products'
-            $productQuery = DB::table('products')
-                ->where('store_id', $this->storeId)
-                ->where('code', $code);
-
-            $productExists = $productQuery->exists();
-
-            // Revisa la existencia del código en la tabla 'global_product_store'
-            $globalProductQuery = GlobalProductStore::where('store_id', $this->storeId)
-                ->whereHas('globalProduct', function ($query) use ($code) {
-                    $query->where('code', $code);
+        // Obtener los códigos únicos de productos en la tabla global_product_store
+        $globalProductCodesQuery = GlobalProductStore::where('store_id', $this->storeId)
+            ->whereHas('globalProduct', function ($query) {
+                $query->when($this->excludedProductsName, function ($query) {
+                    $query->where('name', '<>', $this->excludedProductsName);
                 });
+            })
+            ->get()
+            ->pluck('globalProduct.code');
 
-            $globalProductExists = $globalProductQuery->exists();
+        // Combinar los códigos y procesarlos para obtener solo los códigos base
+        $allCodes = $productCodesQuery->merge($globalProductCodesQuery)->map(function ($code) {
+            return substr($code, 0, strrpos($code, '-'));
+        })->unique();
 
-            // Si existe en alguna de las dos tablas, la validación falla
-            if ($productExists || $globalProductExists) {
-                $fail("El código '{$this->codeBase}' ya ha sido usado por otro producto. Ingresa un código diferente.");
-            }
+        // Si el código base ya existe en la lista, la validación falla
+        if ($allCodes->contains($this->codeBase)) {
+            $fail("El código '{$this->codeBase}' ya ha sido usado por otro producto. Ingresa un código diferente.");
         }
     }
 }

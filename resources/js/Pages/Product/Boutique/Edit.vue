@@ -1,11 +1,11 @@
 <template>
-    <AppLayout title="Nuevo producto">
+    <AppLayout title="Editar producto">
         <div class="px-3 md:px-10 py-7">
-            <Back :to="route('products.index')" />
+            <Back />
 
-            <form v-if="products_quantity < productsLimit" @submit.prevent="store"
+            <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
-                <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
+                <h1 class="font-bold ml-2 col-span-full">Editar producto</h1>
                 <div class="mt-3">
                     <InputLabel value="Nombre del producto*" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100"
@@ -14,14 +14,15 @@
                 </div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría" />
+                        <InputLabel value="Categoría *" />
                         <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" filterable v-model="form.category_id" clearable placeholder="Seleccione"
-                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                    <el-select class="w-1/2" @change="handleCategory" filterable v-model="form.category_id" clearable
+                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                        no-match-text="No se encontraron coincidencias">
                         <el-option v-for="category in localCategories" :key="category" :label="category.name"
                             :value="category.id" />
                     </el-select>
@@ -76,19 +77,19 @@
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
                     </div>
-
                     <article v-for="(item, index) in form.sizes" :key="index" class="flex items-center space-x-3 mb-2">
                         <div class="w-[33%]">
                             <div class="w-full flex items-center justify-between">
-                                <InputLabel value="Talla *" />
-                                <button @click="showSizeFormModal = true" v-if="index == 0" type="button"
+                                <InputLabel v-if="index == 0" value="Talla *" />
+                                <button @click="openSizeModal" v-if="index == 0" type="button"
                                     class="text-primary text-xs">Crear talla</button>
                             </div>
-                            <el-select filterable v-model="form.sizes[index].size_id" clearable placeholder="Seleccione"
-                                no-data-text="Primero seleccione la categoria"
+                            <el-select :ref="'size' + index" filterable v-model="item.size_id" clearable
+                                placeholder="Seleccione"
+                                :no-data-text="form.category_id ? 'No hay tallas registradas en la categoria seleccionada' : 'Primero seleccione la categoria'"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="size in getCategorySizes" :key="size.id" :label="size.name"
-                                    :value="size.id">
+                                    :value="size.id" :disabled="form.sizes.some(item => item.size_id == size.id)">
                                     <p class="flex items-center justify-between">
                                         <span>{{ size.name }}</span>
                                         <span v-if="size.short" class="text-[10px] text-gray99">({{ size.short
@@ -99,27 +100,27 @@
                             <InputError :message="form.errors[`sizes.${index}.size_id`]" />
                         </div>
                         <div class="w-[14%]">
-                            <InputLabel value="Existencias *" />
-                            <el-input v-model="form.sizes[index].current_stock" placeholder="Stock actual"
+                            <InputLabel v-if="index == 0" value="Existencias *" />
+                            <el-input v-model="item.current_stock" placeholder="Stock actual"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
                             <InputError :message="form.errors[`sizes.${index}.current_stock`]" />
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel value="Cantidad mínima" />
-                            <el-input v-model="form.min_stock" placeholder="Mínimo permitido"
+                            <InputLabel v-if="index == 0" value="Cantidad mínima" />
+                            <el-input v-model="item.min_stock" placeholder="Mínimo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <!-- <InputError :message="form.errors.min_stock" /> -->
+                            <InputError :message="form.errors[`sizes.${index}.min_stock`]" />
                         </div>
                         <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel value="Cantidad máxima" />
-                            <el-input v-model="form.max_stock" placeholder="Máximo permitido"
+                            <InputLabel v-if="index == 0" value="Cantidad máxima" />
+                            <el-input v-model="item.max_stock" placeholder="Máximo permitido"
                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                 :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <!-- <InputError :message="form.errors.max_stock" /> -->
+                            <InputError :message="form.errors[`sizes.${index}.max_stock`]" />
                         </div>
-                        <div class="w-[4%] flex justify-end mt-5">
+                        <div class="w-[4%] flex justify-end">
                             <el-popconfirm v-if="form.sizes.length > 1" confirm-button-text="Si" cancel-button-text="No"
                                 icon-color="#373737" :title="'¿Desea eliminar la talla seleccionada?'"
                                 @confirm="deleteSize(index)">
@@ -145,7 +146,9 @@
                 </div> -->
                 <div class="mt-7">
                     <InputLabel value="Agregar imagen" />
-                    <InputFilePreview @imagen="saveImage" @cleared="form.imageCover = null" />
+                    <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
+                        @cleared="form.imageCover = null; form.imageCoverCleared = true"
+                        :imageUrl="products[0].media[0]?.original_url" />
                 </div>
 
                 <div class="mt-3 col-span-2">
@@ -165,20 +168,6 @@
                     </PrimaryButton>
                 </div>
             </form>
-            <div v-else class="text-center text-gray37">
-                <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
-                <p class="text-xl text-center">Has llegado al límite de productos ({{
-                    productsLimit.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}) de tu plan contratado.</p>
-                <p class="text-xl text-center">
-                    Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
-                </p>
-                <div class="flex justify-center mt-5">
-                    <PrimaryButton @click="$inertia.get(route('profile.show'))" :disabled="form.processing">
-                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                        Explorar planes
-                    </PrimaryButton>
-                </div>
-            </div>
         </div>
 
         <!-- category form -->
@@ -259,23 +248,16 @@ import axios from 'axios';
 export default {
     data() {
         const form = useForm({
-            name: null,
+            name: this.products[0]?.name,
             code: null,
-            public_price: null,
+            public_price: this.products[0]?.public_price,
             currency: '$MXN',
-            cost: null,
-            description: null,
-            category_id: null,
+            cost: this.products[0]?.cost,
+            description: this.products[0]?.description,
+            category_id: this.products[0]?.category_id,
             imageCover: null,
-            has_inventory_control: false,
-            sizes: [
-                {
-                    size_id: null,
-                    current_stock: 1,
-                    min_stock: null,
-                    max_stock: null,
-                }
-            ],
+            has_inventory_control: Boolean(this.products[0]?.has_inventory_control),
+            sizes: [],
         });
 
         const categoryForm = useForm({
@@ -318,23 +300,39 @@ export default {
         Back
     },
     props: {
-        products_quantity: Number, // para validar los productos limite
+        products: Array,
         categories: Array,
         sizes: Array,
     },
     computed: {
         getCategorySizes() {
             const selectedCategory = this.localCategories.find(item => item.id == this.form.category_id);
-
             return this.localSizes.filter(item => item.category == selectedCategory?.name) ?? [];
         },
     },
     methods: {
+        openSizeModal() {
+            if (this.form.category_id) {
+                this.sizeForm.category = this.categories.find(item => item.id == this.form.category_id).name;
+            }
+
+            this.showSizeFormModal = true;
+        },
+        handleCategory() {
+            this.form.sizes.forEach(item => {
+                item.size_id = null;
+            });
+
+            this.$nextTick(() => {
+                this.$refs.size0[0].focus();
+            });
+        },
         deleteSize(index) {
             this.form.sizes.splice(index, 1);
         },
         addSize() {
             const newSize = {
+                id: null,
                 size_id: null,
                 current_stock: 1,
                 min_stock: null,
@@ -346,26 +344,73 @@ export default {
         saveImage(image) {
             this.form.imageCover = image;
         },
-        async store() {
+        getBaseCode() {
+            if (!this.products[0].code) {
+                return null;
+            }
+            let splited = this.products[0].code.split('-');
+            splited.pop(); // Elimina el último elemento del array
+            return splited.join('-'); // Une los elementos restantes con guiones medios
+        },
+        initialFormFill() {
+            this.form.code = this.getBaseCode();
+
+            // llenar las tallas
+            this.products.forEach(element => {
+                const size = {
+                    id: element.id,
+                    size_id: element.additional.id,
+                    current_stock: element.current_stock,
+                    min_stock: element.min_stock,
+                    max_stock: element.max_stock,
+                };
+
+                this.form.sizes.push(size);
+            });
+        },
+        async update() {
             try {
-                this.form.post(route("boutique-products.store"), {
-                    onSuccess: async () => {
-                        // guardar nuevo producto a IndexedDB
-                        // Obtener producto mas reciente agregado
-                        const response = await axios.get(route('products.get-all-for-indexedDB'));
-                        const product = response.data.local_products[0];
+                if (this.form.imageCover) {
+                    this.form.post(route("boutique-products.update-with-media", this.products[0].id), {
+                        method: '_put',
+                        onSuccess: async () => {
+                            // guardar nuevo producto a IndexedDB
+                            // Obtener producto mas reciente agregado
+                            const response = await axios.get(route('products.get-all-for-indexedDB'));
+                            const product = response.data.local_products.find(item => item.id.split('_')[1] == this.products[0].id);
+                            // actualizar a indexedDB
+                            if (product) {
+                                addOrUpdateItem('products', product);
+                            }
 
-                        // agregar a indexedDB
-                        await addOrUpdateItem('products', product);
+                            this.$notify({
+                                title: "Correcto",
+                                message: 'Se ha editado el producto ' + this.products[0].name,
+                                type: "success",
+                            });
+                        },
+                    });
+                } else {
+                    this.form.put(route("boutique-products.update", this.products[0].id), {
+                        onSuccess: async () => {
+                            // guardar nuevo producto a IndexedDB
+                            // Obtener producto que coincida con el id editado
+                            const response = await axios.get(route('products.get-all-for-indexedDB'));
+                            const product = response.data.local_products.find(item => item.id.split('_')[1] == this.products[0].id);
 
-                        // toast
-                        this.$notify({
-                            title: "Correcto",
-                            message: "",
-                            type: "success",
-                        });
-                    },
-                });
+                            // actualizar a indexedDB
+                            if (product) {
+                                addOrUpdateItem('products', product);
+                            }
+
+                            this.$notify({
+                                title: "Correcto",
+                                message: 'Se ha editado el producto ' + this.products[0].name,
+                                type: "success",
+                            });
+                        },
+                    });
+                }
             } catch (error) {
                 console.error(error);
             }
@@ -382,7 +427,7 @@ export default {
                         type: "success",
                     });
                     this.form.category_id = response.data.item.id;
-                    this.localCategories.push(response.data.item);
+                    this.localCategories.unshift(response.data.item);
                     this.showCategoryFormModal = false;
                     this.categoryForm.reset();
                 }
@@ -414,6 +459,9 @@ export default {
                 this.sizeLoading = false;
             }
         },
+    },
+    mounted() {
+        this.initialFormFill();
     }
 }
 </script>

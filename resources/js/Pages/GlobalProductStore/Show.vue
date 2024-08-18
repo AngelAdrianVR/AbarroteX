@@ -8,7 +8,7 @@
                     <ThirthButton @click="openEntryModal">Entrada de producto</ThirthButton>
                     <PrimaryButton @click="$inertia.get(route('global-product-store.edit', encodedId))"
                         class="!rounded-full">Editar</PrimaryButton>
-                    <PrimaryButton @click="$inertia.get(route('products.create'))" class="!rounded-full">
+                    <PrimaryButton @click="goToCreate()" class="!rounded-full">
                         <i class="fa-solid fa-plus"></i> Nuevo
                     </PrimaryButton>
                 </div>
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="mt-5">
-                <Back :to="route('products.index')" />
+                <Back :to="getRoute()" />
             </div>
 
             <!-- Info de producto -->
@@ -177,6 +177,20 @@ export default {
         cash_register: Object,
     },
     methods: {
+        getRoute() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                return route('boutique-products.index');
+            } else {
+                return route('products.index');
+            }
+        },
+        goToCreate() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                this.$inertia.get(route('boutique-products.create'));
+            } else {
+                this.$inertia.get(route('products.create'));
+            }
+        },
         updateURL(tab) {
             const params = new URLSearchParams(window.location.search);
             params.set('tab', tab.props.name);
@@ -212,15 +226,6 @@ export default {
                 this.entryLoading = true;
                 this.form.put(route('global-product-store.entry', this.global_product_store.id), {
                     onSuccess: () => {
-                        this.form.reset();
-                        this.entryProductModal = false;
-                        this.$notify({
-                            title: 'Correcto',
-                            text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
-                            type: 'success',
-                        });
-                        this.$refs.historyTab.fetchHistory();
-
                         // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
                         // if (this.isInventoryOn) {
                         const product = {
@@ -233,6 +238,16 @@ export default {
                         };
                         addOrUpdateItem('products', product);
                         // }
+
+                        this.form.reset();
+                        this.entryProductModal = false;
+                        this.$notify({
+                            title: 'Correcto',
+                            message: '',
+                            type: 'success',
+                        });
+                        this.$refs.historyTab.fetchHistory();
+
                     },
                     onFinish: () => this.entryLoading = false,
                 });

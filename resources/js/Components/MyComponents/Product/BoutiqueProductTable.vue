@@ -6,19 +6,19 @@
                     <th class="w-40 md:w-[10%]"></th>
                     <th class="w-36 md:w-[15%]">Código</th>
                     <th class="w-44 md:w-[20%]">Nombre de producto</th>
+                    <th class="w-32 md:w-[15%]">Categoría</th>
                     <th class="w-20 md:w-[15%]">Precio</th>
                     <th class="w-32 md:w-[15%]">Existencias</th>
-                    <th class="w-32 md:w-[15%]">Existencias mínimas</th>
                     <th class="w-16 md:w-[10%]"></th>
                 </tr>
             </thead>
             <tbody>
-                <tr @click="handleShow(product)" v-for="(product, index) in products" :key="product.id"
+                <tr @click="handleShow(set)" v-for="(set, index) in Object.values(products)" :key="set[0].id"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">
-                        <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
+                        <img v-if="set[0].global_product_id ? set[0].global_product?.media[0]?.original_url : set[0].media[0]?.original_url"
                             class="size-10 bg-white object-contain rounded-md"
-                            :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                            :src="set[0].global_product_id ? set[0].global_product?.media[0]?.original_url : set[0].media[0]?.original_url">
                         <div v-else
                             class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -29,26 +29,19 @@
                         </div>
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.code : product.code ?? '-' }}
+                        {{ set[0].global_product_id ? set[0].global_product?.code : getBaseCode(set) }}
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.name : product.name }}
+                        {{ set[0].global_product_id ? set[0].global_product?.name : set[0].name }}
                     </td>
                     <td>
-                        ${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ set[0].global_product_id ? set[0].global_product?.category.name : set[0].category.name }}
                     </td>
                     <td>
-                        <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
-                            {{ product.current_stock ?? '-' }}
-                            <i v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
-                            <span v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                class="text-[11px]">Bajo
-                                stock</span>
-                        </p>
+                        ${{ set[0].public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </td>
                     <td>
-                        {{ product.min_stock ?? '-' }}
+                        {{ getTotalStock(set) }}
                     </td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
@@ -119,16 +112,11 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
-import { deleteItem, getItemByAttributes } from "@/dbService.js";
-import { useForm } from '@inertiajs/vue3';
-import emitter from '@/eventBus.js';
+import { syncIDBProducts } from "@/dbService.js";
 
 export default {
     data() {
-        const form = useForm({});
-
         return {
-            form,
             deleting: false,
             showDeleteConfirm: false,
             itemToDelete: null,
@@ -147,10 +135,23 @@ export default {
         products: Object
     },
     methods: {
+        getTotalStock(set) {
+            return set.reduce((accum, item) => {
+               return accum += item.current_stock; 
+            }, 0);
+        },
+        getBaseCode(set) {
+            if (!set[0].code) {
+                return '-';
+            }
+            let splited = set[0].code.split('-');
+            splited.pop(); // Elimina el último elemento del array
+            return splited.join('-'); // Une los elementos restantes con guiones medios
+        },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const index = command.split('|')[1];
-            const product = this.products[index];
+            const product = Object.values(this.products)[index];
 
             if (commandName == 'see') {
                 this.handleShow(product);
@@ -161,70 +162,62 @@ export default {
                 this.itemToDelete = product;
             }
         },
-        handleEdit(product) {
-            const encodedId = btoa(product.id.toString());
-            if (product.global_product_id) {
+        handleEdit(set) {
+            const encodedId = btoa(set[0].id.toString());
+            if (set[0].global_product_id) {
                 this.$inertia.get(route('global-product-store.edit', encodedId));
             } else {
-                this.$inertia.get(route('products.edit', encodedId))
+                this.$inertia.get(route('boutique-products.edit', encodedId))
             }
         },
-        handleShow(product) {
-            const encodedId = btoa(product.id.toString());
-            if (product.global_product_id) {
+        handleShow(set) {
+            const encodedId = btoa(set[0].id.toString());
+            if (set[0].global_product_id) {
                 this.$inertia.get(route('global-product-store.show', encodedId));
             } else {
-                this.$inertia.get(route('products.show', encodedId))
+                this.$inertia.get(route('boutique-products.show', encodedId))
             }
         },
-        deleteItem() {
+        async deleteItem() {
             let routePage;
-            if (this.itemToDelete.global_product_id) {
+            if (this.itemToDelete[0].global_product_id) {
                 routePage = 'global-product-store.destroy';
             } else {
-                routePage = 'products.destroy';
+                routePage = 'boutique-products.destroy';
             }
-            this.deleting = true;
-            this.form.delete(route(routePage, this.itemToDelete.id), {
-                onSuccess: async () => {
-                    // Emitir el evento personalizado
-                    emitter.emit('product-deleted');
-
+            try {
+                this.deleting = true;
+                const response = await axios.delete(route(routePage, this.itemToDelete[0].id));
+                if (response.status === 200) {
                     let productName;
-                    if (this.itemToDelete.global_product_id) {
-                        productName = this.itemToDelete.global_product.name;
-                        const indexToDelete = this.products.findIndex(item => item.global_product?.name == this.itemToDelete.global_product?.name);
-                        this.products.splice(indexToDelete, 1);
+                    if (this.itemToDelete[0].global_product_id) {
+                        productName = this.itemToDelete[0].global_product.name;
                     } else {
-                        productName = this.itemToDelete.name;
-                        const indexToDelete = this.products.findIndex(item => item.id == this.itemToDelete.id);
-                        this.products.splice(indexToDelete, 1);
+                        productName = this.itemToDelete[0].name;
                     }
-                    // buscar producto en indexedDB
-                    const products = await getItemByAttributes('products', { name: productName });
-                    // eliminar de indexedDB
-                    await deleteItem('products', products[0].id);
+                    delete this.products[productName];
+
+                    // sincronizar indexedDB con BDD servidor 
+                    syncIDBProducts();
+
                     this.showDeleteConfirm = false;
                     this.$notify({
                         title: 'Correcto',
                         message: '',
                         type: 'success',
                     });
-                },
-                onError: () => {
-                    console.log(error);
-                    this.$notify({
-                        title: 'El servidor no pudo procesar la petición',
-                        message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
-                        type: 'error',
-                    });
-                },
-                onFinish: () => {
-                    this.deleting = false;
                 }
-            });
-        },
-    },
-
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'El servidor no pudo procesar la petición',
+                    message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
+                    type: 'error',
+                });
+            } finally {
+                this.deleting = false;
+            }
+        }
+    }
 }
 </script>
