@@ -192,5 +192,7 @@ return [
         'rented_time' => 'hora de entrega',
         'amount' => 'monto',
         'tax_regime' => 'regimen fiscal',
+        'measure_unit' => 'unidad de venta',
+        'days_for_delivery' => 'días hábiles para entrega',
     ],
 ];

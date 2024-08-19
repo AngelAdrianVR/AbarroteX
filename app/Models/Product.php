@@ -24,6 +24,10 @@ class Product extends Model implements HasMedia
         'current_stock',
         'description',
         'has_inventory_control',
+        'product_on_request',
+        'bulk_product',
+        'measure_unit',
+        'days_for_delivery',
         'additional',
         'store_id',
         'category_id',
@@ -71,6 +75,24 @@ class Product extends Model implements HasMedia
             Sale::where('product_id', $product->id)
                 ->where('is_global_product', false)
                 ->update(['product_id' => null]);
+            
+            // modifica tambien las ventas en linea ------------------------------------------
+            // Obtener todas las ventas en línea relacionadas
+            $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)->get();
+
+            foreach ($online_sales as $sale) {
+                // Iterar sobre los productos en cada venta
+                $products = $sale->products;
+                foreach ($products as &$online_product) {
+                    if ($online_product['product_id'] === $product->id) {
+                        // Cambiar el valor del product_id a null para indicar que el producto fue eliminado
+                        $online_product['product_id'] = null;
+                    }
+                }
+                // Guardar los cambios en los productos de la venta
+                $sale->products = $products;
+                $sale->save();
+            }
         });
 
         // Definir el evento de actualización
