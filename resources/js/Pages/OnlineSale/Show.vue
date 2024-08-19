@@ -93,8 +93,8 @@
                                     </figure>
                                 </td>
                                 <td @click="handledShowProduct(product)" class="text-primary underline cursor-pointer">
-                                    {{
-                                        product.name }}</td>
+                                    {{ product.name }}
+                                </td>
                                 <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 <td>{{ product.quantity }}</td>
                                 <td>${{ (product.quantity * product.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,

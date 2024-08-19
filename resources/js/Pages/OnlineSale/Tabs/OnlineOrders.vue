@@ -286,8 +286,7 @@
                         <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{
                             form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                         <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span
-                                class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                    ",") }}</p>
+                                class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
                         <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total +
                             form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     </div>
@@ -710,9 +709,14 @@ export default {
         },
         calculateDeliveryPrice() {
             const storeProperties = this.$page.props.auth.user.store.online_store_properties;
-            this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery
+
+            if ( storeProperties.delivery_price ) {
+                this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery
                 ? 0
                 : parseFloat(storeProperties?.delivery_price);
+            } else {
+                this.form.delivery_price = 0;
+            }
         },
         whatsappMessage(phone) {
             const text = encodeURIComponent('Hola! hemos recibido tu pedido en línea');

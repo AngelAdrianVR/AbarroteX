@@ -50,6 +50,24 @@ class GlobalProductStore extends Model
             Sale::where('product_id', $globalProductStore->id)
                 ->where('is_global_product', true)
                 ->update(['product_id' => null]);
+
+            // modifica tambien las ventas en linea ------------------------------------------
+            // Obtener todas las ventas en línea relacionadas
+            $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)->get();
+
+            foreach ($online_sales as $sale) {
+                // Iterar sobre los productos en cada venta
+                $products = $sale->products;
+                foreach ($products as &$online_product) {
+                    if ($online_product['product_id'] === $globalProductStore->id) {
+                        // Cambiar el valor del product_id a null para indicar que el producto fue eliminado
+                        $online_product['product_id'] = null;
+                    }
+                }
+                // Guardar los cambios en los productos de la venta
+                $sale->products = $products;
+                $sale->save();
+            }
         });
     }
 }
