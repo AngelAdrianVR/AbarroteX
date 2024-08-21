@@ -495,6 +495,8 @@ class ProductController extends Controller
                     'additional' => $product->additional,
                     'public_price' => $product->public_price,
                     'current_stock' => $product->current_stock,
+                    'bulk_product' => $product->bulk_product,
+                    'measure_unit' => $product->measure_unit,
                     'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
                 ];
             })->toArray();

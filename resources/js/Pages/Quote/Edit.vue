@@ -5,7 +5,12 @@
 
             <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
-                <h1 class="font-bold ml-2 col-span-full">Editar cotización</h1>
+                <div class="flex items-center space-x-3 ml-2 col-span-full">
+                    <h1 class="font-bold">Crear cotización</h1>
+                    <div v-if="loadingClient">
+                        <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                    </div>
+                </div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Cliente (en caso de tenerlo registrado)" class="ml-3 mb-1" />
@@ -15,9 +20,9 @@
                             <i class="fa-solid fa-plus text-primary text-[9px] pl-[1px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" filterable v-model="form.client_id" clearable placeholder="Seleccione"
+                    <el-select @change="fillClientInfo()" class="w-1/2" filterable v-model="form.client_id" clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="client in clients" :key="client" :label="client.name"
+                        <el-option v-for="client in clients" :key="client" :label="client.company"
                             :value="client.id" />
                     </el-select>
                     <InputError :message="form.errors.client_id" />
@@ -42,6 +47,22 @@
                     <InputLabel value="Correo electrónico (opcional)" class="ml-3 mb-1" />
                     <el-input v-model="form.email" placeholder="Escribe el correo electrónico del contacto" :maxlength="100" clearable />
                     <InputError :message="form.errors.email" />
+                </div>
+
+                <div class="mt-3">
+                    <InputLabel value="Fecha de expiración de cot." class="ml-3 mb-1" />
+                    <el-date-picker v-model="form.expired_date" type="date" class="!w-full" placeholder="día/mes/año"
+                        :disabled-date="disabledPrevDays" />
+                    <InputError :message="form.errors.expired_date" />
+                </div>
+
+                <div class="mt-3">
+                    <InputLabel value="Condiciones de pago" class="ml-3 mb-1" />
+                    <el-select class="w-1/2" filterable v-model="form.payment_conditions" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="payment_condition in payment_conditions" :key="payment_condition" :label="payment_condition"
+                            :value="payment_condition" />
+                    </el-select>
                 </div>
                 
                 <div class="mt-3 col-span-full">
@@ -200,6 +221,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+import axios from 'axios';
 
 export default {
 data() {
@@ -217,6 +239,8 @@ data() {
         email: this.quote.email,
         address: this.quote.address,
         notes: this.quote.notes,
+        payment_conditions: this.quote.payment_conditions,
+        expired_date: this.quote.expired_date,
         show_iva: !! this.quote.show_iva,
         has_discount: !! this.quote.has_discount, //aplicar descuento
         discount: this.quote.discount, //cantidad de descuento
@@ -229,6 +253,7 @@ data() {
     return {
         form,
         clientForm,
+        loadingClient: false, //carga la informacion del cliente 
         loadingProducts: false, //estado de carga para productos
         loadingServices: false, //estado de carga para servicios
         showClientFormModal: false, //modal para registrar un cliente
@@ -238,6 +263,10 @@ data() {
         next_service_id: 1, //para el index de servicios creados
         totalServicesMoney: null, //total de dinero para los servicios
         totalProductsMoney: null, //total de dinero para los productos
+        payment_conditions: [
+            'Al contado',
+            'Parcialidades',
+        ]
     }
 },
 components:{
@@ -302,6 +331,29 @@ methods:{
     },
     resetClientForm() {
       this.clientForm.reset();
+    },
+    disabledPrevDays(time) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return time.getTime() < today.getTime();
+    },
+    async fillClientInfo() {
+        this.loadingClient = true;
+        try {
+            const response = await axios.get(route('clients.get-client-info', this.form.client_id));
+            if ( response.status === 200 ) {
+                const client = response.data.client;
+                this.form.contact_name = client.name;
+                this.form.phone = client.phone;
+                this.form.email = client.email;
+                this.form.address = client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' 
+                    + client.town + ', ' + client.polity_state;
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.loadingClient = false;
+        }
     },
     totalMoneyOrder() {
         //calcula el total de dinero para los productos 
