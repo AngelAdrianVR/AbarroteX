@@ -23,6 +23,10 @@ return new class extends Migration
             $table->unsignedFloat('current_stock')->nullable()->default(1);
             $table->text('description')->nullable();
             $table->boolean('has_inventory_control')->default(true);
+            $table->boolean('product_on_request')->default(false); //es producto bajo pedido?
+            $table->boolean('bulk_product')->default(false); //es producto a granel?
+            $table->string('measure_unit')->nullable(); //en caso de ser a granel
+            $table->unsignedSmallInteger('days_for_delivery')->nullable(); //dias habiles de entrega de producto bajo pedido
             $table->json('additional')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->nullable()->constrained()->cascadeOnDelete();

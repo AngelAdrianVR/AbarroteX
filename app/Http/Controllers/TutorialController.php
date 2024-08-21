@@ -11,7 +11,11 @@ class TutorialController extends Controller
     
     public function index()
     {   
-        return inertia('Tutorial/Index');
+        if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
+            return inertia('Tutorial/BoutiqueIndex');
+        } else {
+            return inertia('Tutorial/Index');
+        }
     }
 
     

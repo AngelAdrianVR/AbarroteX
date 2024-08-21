@@ -29,7 +29,7 @@
                         </div>
                     </td>
                     <td>
-                        {{ product.global_product_id ? product.global_product?.code : product.code ?? 'N/A' }}
+                        {{ product.global_product_id ? product.global_product?.code : product.code ?? '-' }}
                     </td>
                     <td>
                         {{ product.global_product_id ? product.global_product?.name : product.name }}
@@ -120,10 +120,15 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
 import { deleteItem, getItemByAttributes } from "@/dbService.js";
+import { useForm } from '@inertiajs/vue3';
+import emitter from '@/eventBus.js';
 
 export default {
     data() {
+        const form = useForm({});
+
         return {
+            form,
             deleting: false,
             showDeleteConfirm: false,
             itemToDelete: null,
@@ -172,17 +177,19 @@ export default {
                 this.$inertia.get(route('products.show', encodedId))
             }
         },
-        async deleteItem() {
+        deleteItem() {
             let routePage;
             if (this.itemToDelete.global_product_id) {
                 routePage = 'global-product-store.destroy';
             } else {
                 routePage = 'products.destroy';
             }
-            try {
-                this.deleting = true;
-                const response = await axios.delete(route(routePage, this.itemToDelete.id));
-                if (response.status === 200) {
+            this.deleting = true;
+            this.form.delete(route(routePage, this.itemToDelete.id), {
+                onSuccess: async () => {
+                    // Emitir el evento personalizado
+                    emitter.emit('product-deleted');
+
                     let productName;
                     if (this.itemToDelete.global_product_id) {
                         productName = this.itemToDelete.global_product.name;
@@ -193,31 +200,31 @@ export default {
                         const indexToDelete = this.products.findIndex(item => item.id == this.itemToDelete.id);
                         this.products.splice(indexToDelete, 1);
                     }
-                    
                     // buscar producto en indexedDB
                     const products = await getItemByAttributes('products', { name: productName });
-                    
                     // eliminar de indexedDB
                     await deleteItem('products', products[0].id);
-
                     this.showDeleteConfirm = false;
                     this.$notify({
                         title: 'Correcto',
                         message: '',
                         type: 'success',
                     });
+                },
+                onError: () => {
+                    console.log(error);
+                    this.$notify({
+                        title: 'El servidor no pudo procesar la petición',
+                        message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
+                        type: 'error',
+                    });
+                },
+                onFinish: () => {
+                    this.deleting = false;
                 }
-            } catch (error) {
-                console.log(error);
-                this.$notify({
-                    title: 'El servidor no pudo procesar la petición',
-                    message: 'No se pudo eliminar el producto. Intente más tarde o si el problema persiste, contacte a soporte',
-                    type: 'error',
-                });
-            } finally {
-                this.deleting = false;
-            }
-        }
-    }
+            });
+        },
+    },
+
 }
 </script>

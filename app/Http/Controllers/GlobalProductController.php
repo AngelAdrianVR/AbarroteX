@@ -39,7 +39,7 @@ class GlobalProductController extends Controller
             'brand_id' => 'nullable',
         ]);
 
-        $global_product = GlobalProduct::create($request->except('imageCover'));
+        $global_product = GlobalProduct::create($request->except('imageCover') + ['type' => auth()->user()->store->type]);
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {

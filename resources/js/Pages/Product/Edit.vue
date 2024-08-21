@@ -12,9 +12,78 @@
                         clearable />
                     <InputError :message="form.errors.name" />
                 </div>
+
+                <div class="mt-3">
+                    <div class="flex items-center justify-between">
+                        <InputLabel value="Categoría" class="ml-3 mb-1" />
+                        <button @click="showCategoryFormModal = true" type="button"
+                            class="rounded-full border border-primary size-4 flex items-center justify-center">
+                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
+                        </button>
+                    </div>
+                    <el-select class="w-1/2" filterable v-model="form.category_id" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="category in localCategories" :key="category" :label="category.name"
+                            :value="category.id" />
+                    </el-select>
+                    <InputError :message="form.errors.category_id" />
+                </div>
+
+                <div class="mt-3">
+                    <div class="flex items-center justify-between">
+                        <InputLabel value="Proveedor" class="ml-3 mb-1" />
+                        <button @click="showBrandFormModal = true" type="button"
+                            class="rounded-full border border-primary size-4 flex items-center justify-center">
+                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
+                        </button>
+                    </div>
+                    <el-select class="w-1/2" v-model="form.brand_id" filterable clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
+                    </el-select>
+                    <InputError :message="form.errors.brand_id" />
+                </div>
+
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Moneda*" class="ml-3 mb-1 text-sm" />
+                    <el-select v-model="form.currency" placeholder="Moneda *" :fit-input-width="true" class="!w-1/2">
+                        <el-option v-for="item in currencies" :key="item.value" :label="item.label" :value="item.label">
+                            <span style="float: left">{{ item.label }}</span>
+                            <span style="float: right; color: #cccccc; font-size: 13px">{{ item.value }}</span>
+                        </el-option>
+                    </el-select>
+                    <InputError :message="form.errors.currency" />
+                </div>
+
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
+                    <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                        placeholder="Escribe una descripción o características separadas por renglones" :maxlength="255" show-word-limit
+                        clearable />
+                    <InputError :message="form.errors.description" />
+                </div>
+
+                <div class="col-span-full my-3 flex items-center space-x-7 ml-3">
+                    <div class="flex items-center">
+                        <el-checkbox @change="form.measure_unit = null" v-model="form.bulk_product" label="Producto a granel" />
+                        <el-tooltip content="El producto se vende sin envase predefinido y se pesa según la cantidad deseada por el cliente." placement="top">
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
+                        </el-tooltip>
+                    </div>
+
+                    <div v-if="form.bulk_product" class="flex items-center space-x-4">
+                        <InputLabel value="Unidad de venta*" class="ml-3 mb-1" />
+                        <el-radio-group v-model="form.measure_unit" size="small">
+                            <el-radio-button label="Kilogramo" value="Kilogramo" />
+                            <el-radio-button label="Litro" value="Litro" />
+                        </el-radio-group>
+                        <InputError :message="form.errors.measure_unit" />
+                    </div>
+                </div>
+
                 <div v-if="canSeeCost" class="mt-3">
                     <div class="flex items-center">
-                        <InputLabel value="Precio de compra" />
+                        <InputLabel value="Precio de compra" class="ml-3 mb-1" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
@@ -29,89 +98,56 @@
                     <InputError :message="form.errors.cost" />
                 </div>
                 <div class="mt-3">
-                    <InputLabel value="Precio de venta al público*" />
+                    <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')">
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
                     </el-input>
                     <InputError :message="form.errors.public_price" />
                 </div>
-                <!-- <div class="mt-3 col-span-full">
-                    <InputLabel value="Moneda*" class="ml-3 mb-1 text-sm" />
-                    <el-select v-model="form.currency" placeholder="Moneda *" :fit-input-width="true" class="!w-1/2">
-                        <el-option v-for="item in currencies" :key="item.value" :label="item.label" :value="item.label">
-                            <span style="float: left">{{ item.label }}</span>
-                            <span style="float: right; color: #cccccc; font-size: 13px">{{ item.value }}</span>
-                        </el-option>
-                    </el-select>
-                    <InputError :message="form.errors.currency" />
-                </div> -->
+
+                <div class="flex items-center col-span-full my-3">
+                    <el-checkbox @change="form.days_for_delivery = null" v-if="this.$page.props.auth.user.store.plan === 'Plan Intermedio'" v-model="form.product_on_request" label="Producto bajo pedido" />
+                    <el-tooltip content="Selecciona esta opción si el producto es bajo pedido y requiere un tiempo de entrega adicional" placement="top">
+                        <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
+                    </el-tooltip>
+                </div>
+
                 <div class="mt-3">
-                    <InputLabel value="Existencia actual" />
+                    <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                         :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
-                <div></div>
-                <div class="mt-3">
-                    <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría" />
-                        <button @click="showCategoryFormModal = true" type="button"
-                            class="rounded-full border border-primary size-4 flex items-center justify-center">
-                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
-                        </button>
-                    </div>
-                    <el-select class="w-1/2" v-model="form.category_id" clearable placeholder="Seleccione"
-                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="category in localCategories" :key="category" :label="category.name"
-                            :value="category.id" />
-                    </el-select>
-                    <InputError :message="form.errors.category_id" />
-                </div>
 
-                <div class="mt-3">
-                    <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor" />
-                        <button @click="showBrandFormModal = true" type="button"
-                            class="rounded-full border border-primary size-4 flex items-center justify-center">
-                            <i class="fa-solid fa-plus text-primary text-[9px]"></i>
-                        </button>
-                    </div>
-                    <el-select class="w-1/2" v-model="form.brand_id" clearable placeholder="Seleccione"
-                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="brand in localBrands" :key="brand" :label="brand.name" :value="brand.id" />
-                    </el-select>
-                    <InputError :message="form.errors.brand_id" />
+                <div v-if="form.product_on_request" class="mt-3">
+                    <InputLabel value="Días hábiles para entrega*" class="ml-3 mb-1 text-sm" />
+                    <el-input v-model="form.days_for_delivery" placeholder="ingresa cuanto tardas en entregar el producto"
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                    <InputError :message="form.errors.days_for_delivery" />
                 </div>
 
                 <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
 
                 <div class="mt-3">
-                    <InputLabel value="Cantidad mínima" />
+                    <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.min_stock" />
                 </div>
 
                 <div class="mt-3">
-                    <InputLabel value="Cantidad máxima" />
+                    <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.max_stock" />
-                </div>
-
-                <div class="mt-3 col-span-full">
-                    <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255"
-                        show-word-limit clearable />
-                    <InputError :message="form.errors.description" />
                 </div>
 
                 <div class="mt-3">
@@ -214,7 +250,11 @@ export default {
             min_stock: this.product.data.min_stock,
             max_stock: this.product.data.max_stock,
             imageCover: null,
-            imageCoverCleared: false
+            imageCoverCleared: false,
+            product_on_request: !! this.product.data.product_on_request, //producto bajo pedido
+            bulk_product: !! this.product.data.bulk_product, //producto a granel
+            measure_unit: this.product.data.measure_unit, //en caso de ser a granel
+            days_for_delivery: this.product.data.days_for_delivery, //dias hábiles para entregar producto bajo pedido
         });
 
         const categoryForm = useForm({

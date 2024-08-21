@@ -220,6 +220,7 @@ Route::get('boutique-products-export', [ProductBoutiqueController::class, 'expor
 Route::get('boutique-products-get-all-for-indexedDB', [ProductBoutiqueController::class, 'getAllForIndexedDB'])->name('boutique-products.get-all-for-indexedDB')->middleware('auth');
 Route::post('boutique-products-get-data-for-products-view', [ProductBoutiqueController::class, 'getDataForProductsView'])->name('boutique-products.get-data-for-products-view')->middleware('auth');
 Route::post('boutique-products-change-price', [ProductBoutiqueController::class, 'changePrice'])->name('boutique-products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
+Route::get('boutique-products-get-by-name/{product_name}', [ProductBoutiqueController::class, 'getByName'])->name('boutique-products.get-by-name')->middleware('auth');
 
 
 //rentals routes----------------------------------------------------------------------------------
@@ -304,6 +305,9 @@ Route::resource('product-histories', ProductHistoryController::class)->middlewar
 //setting history routes---------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 Route::resource('setting-histories', SettingHistoryController::class)->middleware('auth');
+Route::put('role-permission/{role}/edit-role', [SettingController::class, 'updateRole'])->middleware('auth')->name('settings.role-permission.update-role');
+Route::post('role-permission/store-role', [SettingController::class, 'storeRole'])->middleware('auth')->name('settings.role-permission.store-role');
+Route::delete('role-permission/{role}/destroy-role', [SettingController::class, 'deleteRole'])->middleware('auth')->name('settings.role-permission.delete-role');
 
 
 //store routes-----------------------------------------------------------------------------------------

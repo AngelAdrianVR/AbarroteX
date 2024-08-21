@@ -27,7 +27,7 @@
                             <td class="rounded-s-full w-[20%]">{{ index + 1 }}</td>
                             <td class="w-[10%]">{{ user.name }}</td>
                             <td class="w-[20%]">{{ user.email }}</td>
-                            <td class="w-[20%]">{{ user.rol ?? '--' }}</td>
+                            <td class="w-[20%]">{{ user.roles[0].name }}</td>
                             <td class="w-[20%]">{{ user.cash_register?.name ?? 'No asignado' }}</td>
                             <td class="rounded-e-full text-end">
                                 <el-dropdown trigger="click" @command="handleCommand">
