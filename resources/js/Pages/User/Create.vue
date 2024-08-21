@@ -3,7 +3,7 @@
         <div class="px-3 md:px-10 py-7">
             <Back />
 
-            <form v-if="total_users < 2 || $page.props.auth.user.store_id == 10" @submit.prevent="store"
+            <form v-if="total_users < 3 || $page.props.auth.user.store_id == 10" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Crear nuevo usuario</h1>
 
@@ -22,7 +22,13 @@
                 </div>
 
                 <div class="mt-5 col-span-2">
-                    <InputLabel value="Rol" class="ml-3 mb-1" />
+                    <InputLabel class="ml-3 mb-1">
+                        <div class="flex items-center space-x-10">
+                            <span>Rol</span>
+                            <button @click="showRoleModal = true" type="button" class="text-primary">+ Crear
+                                rol</button>
+                        </div>
+                    </InputLabel>
                     <el-radio-group v-model="form.rol" class="ml-4">
                         <el-radio value="Cajero" size="small">Cajero</el-radio>
                         <el-radio value="Almacenista" size="small">Almacenista</el-radio>
@@ -50,7 +56,34 @@
                 </div>
             </section>
         </div>
-
+        <!-- modale de creacino de rol -->
+        <DialogModal :show="showRoleModal" @close="showRoleModal = false">
+            <template #title>
+                <h1>Crear rol</h1>
+            </template>
+            <template #content>
+                <p class="text-xs text-gray99 mb-5">
+                    Puedes crear un rol de acuerdo a las necesidades del usuario. Abajo estan los modulos disponibles
+                    para tu suscripción y los permisos relacionados.
+                </p>
+                <form @submit.prevent="storeRole">
+                    <div>
+                        <InputLabel value="Nombre del rol *" class="ml-3 mb-1" />
+                        <el-input v-model="roleForm.name" placeholder="Ej. Cajero" class="!w-1/2"
+                            :maxlength="255" clearable />
+                        <InputError :message="roleForm.errors.name" />
+                    </div>
+                    <h2 class="font-bold my-3">Agregar permisos </h2>
+                    <hr  class="border-grayD9">
+                    
+                </form>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-1">
+                    <PrimaryButton @click="storeRole">Crear rol</PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
         <!-- Confirmación de contraseña de usuario -->
         <ConfirmationModal :show="showPasswordConfirm" @close="showPasswordConfirm = false">
             <template #title>
@@ -68,7 +101,7 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">
-                    <PrimaryButton @click="$inertia.get(route('settings.index', {tab: 2}))">De acuerdo</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('settings.index', { tab: 2 }))">De acuerdo</PrimaryButton>
                 </div>
             </template>
         </ConfirmationModal>
@@ -79,6 +112,7 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DialogModal from '@/Components/DialogModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -92,15 +126,23 @@ export default {
             email: null,
             rol: null,
         });
+        
+        const roleForm = useForm({
+            name: null,
+            permissions: [],
+        });
 
         return {
             form,
+            roleForm,
             showPasswordConfirm: false,
+            showRoleModal: false,
         }
     },
     components: {
         AppLayout,
         ConfirmationModal,
+        DialogModal,
         PrimaryButton,
         InputLabel,
         InputError,
@@ -116,6 +158,18 @@ export default {
                     this.$notify({
                         title: "Correcto",
                         message: "Se ha creado un nuevo usuario. Su contraseña es: ezyventas",
+                        type: "success",
+                    });
+                    this.showPasswordConfirm = true;
+                },
+            });
+        },
+        storeRole() {
+            this.form.post(route("users.store"), {
+                onSuccess: () => {
+                    this.$notify({
+                        title: "Correcto",
+                        message: "",
                         type: "success",
                     });
                     this.showPasswordConfirm = true;
