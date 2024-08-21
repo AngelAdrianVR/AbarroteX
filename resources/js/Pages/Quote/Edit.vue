@@ -5,7 +5,12 @@
 
             <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
-                <h1 class="font-bold ml-2 col-span-full">Editar cotización</h1>
+                <div class="flex items-center space-x-3 ml-2 col-span-full">
+                    <h1 class="font-bold">Crear cotización</h1>
+                    <div v-if="loadingClient">
+                        <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                    </div>
+                </div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Cliente (en caso de tenerlo registrado)" class="ml-3 mb-1" />
@@ -15,9 +20,9 @@
                             <i class="fa-solid fa-plus text-primary text-[9px] pl-[1px]"></i>
                         </button>
                     </div>
-                    <el-select class="w-1/2" filterable v-model="form.client_id" clearable placeholder="Seleccione"
+                    <el-select @change="fillClientInfo()" class="w-1/2" filterable v-model="form.client_id" clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="client in clients" :key="client" :label="client.name"
+                        <el-option v-for="client in clients" :key="client" :label="client.company"
                             :value="client.id" />
                     </el-select>
                     <InputError :message="form.errors.client_id" />
@@ -216,6 +221,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
+import axios from 'axios';
 
 export default {
 data() {
@@ -247,6 +253,7 @@ data() {
     return {
         form,
         clientForm,
+        loadingClient: false, //carga la informacion del cliente 
         loadingProducts: false, //estado de carga para productos
         loadingServices: false, //estado de carga para servicios
         showClientFormModal: false, //modal para registrar un cliente
@@ -329,6 +336,24 @@ methods:{
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       return time.getTime() < today.getTime();
+    },
+    async fillClientInfo() {
+        this.loadingClient = true;
+        try {
+            const response = await axios.get(route('clients.get-client-info', this.form.client_id));
+            if ( response.status === 200 ) {
+                const client = response.data.client;
+                this.form.contact_name = client.name;
+                this.form.phone = client.phone;
+                this.form.email = client.email;
+                this.form.address = client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' 
+                    + client.town + ', ' + client.polity_state;
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.loadingClient = false;
+        }
     },
     totalMoneyOrder() {
         //calcula el total de dinero para los productos 

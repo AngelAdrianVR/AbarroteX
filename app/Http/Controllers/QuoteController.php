@@ -20,7 +20,7 @@ class QuoteController extends Controller
     
     public function create()
     {   
-        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'company']);
 
         return inertia('Quote/Create', compact('clients'));
     }
@@ -79,7 +79,7 @@ class QuoteController extends Controller
     
     public function edit($encoded_quote_id)
     {
-        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'company']);
 
         // Decodificar el ID
         $decoded_quote_id = base64_decode($encoded_quote_id);
