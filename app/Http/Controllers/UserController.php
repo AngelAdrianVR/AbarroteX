@@ -7,21 +7,29 @@ use App\Models\CashRegister;
 use App\Models\User;
 use App\Notifications\OnlineSaleNotification;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function create()
     {
         $total_users = User::where('store_id', auth()->user()->store_id)->get(['id'])->count();
+        $permissions = Permission::all()->groupBy(function ($data) {
+            return $data->category;
+        });
+        $roles = Role::where('id', '<>', 1) //todos los roles menos 'Administrador'
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
 
-        return inertia('User/Create', compact('total_users'));
+        return inertia('User/Create', compact('total_users', 'permissions', 'roles'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'rol' => 'required|string|max:255',
+            'rol' => 'required|numeric|min:1',
             'email' => 'required|email|unique:users',
         ]);
 
@@ -30,21 +38,29 @@ class UserController extends Controller
         // primer caja registradora para asignar a empleado (paquete basico)
         $cash_register = CashRegister::where('store_id', $store_id)->first();
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'rol' => $request->rol,
             'store_id' => $store_id,
             'password' => bcrypt('ezyventas'),
             'cash_register_id' => $cash_register->id,
         ]);
 
-        // return to_route('settings.index', ['tab' => 2]);
+        $user->syncRoles($request->rol);
     }
 
     public function edit(User $user)
     {
-        return inertia('User/Edit', compact('user'));
+        $permissions = Permission::all()->groupBy(function ($data) {
+            return $data->category;
+        });
+        $roles = Role::where('id', '<>', 1) //todos los roles menos 'Administrador'
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+            
+        $user_rol = $user->roles->pluck('id')[0];
+
+        return inertia('User/Edit', compact('user', 'permissions', 'roles', 'user_rol'));
     }
 
     public function update(Request $request, User $user)
@@ -52,10 +68,11 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'rol' => 'required|string|max:255',
+            'rol' => 'required|numeric|min:1',
         ]);
 
         $user->update($request->all());
+        $user->syncRoles($request->rol);
 
         return to_route('settings.index', ['tab' => 2]);
     }

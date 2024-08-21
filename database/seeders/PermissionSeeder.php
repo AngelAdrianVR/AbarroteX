@@ -19,31 +19,37 @@ class PermissionSeeder extends Seeder
 
         $permissions = [
             'Punto de venta' => [
+                'Punto de venta',
                 'Editar precios',
                 'Ver dinero en caja',
                 'Registrar movimientos de caja',
                 'Crear productos',
             ],
             'Reportes' => [
+                'Reportes',
                 'Filtrar por periodo',
             ],
             'Ventas registradas' => [
+                'Ventas registradas',
                 'Editar ventas',
                 'Reembolsar ventas',
                 'Cancelar ventas en linea',
             ],
             'Gastos' => [
+                'Gastos',
                 'Crear gastos',
                 'Editar gastos',
                 'Eliminar gastos',
             ],
             'Cotizaciones' => [
+                'Cotizaciones',
                 'Crear cotizaciones',
                 'Editar cotizaciones',
                 'Eliminar cotizaciones',
                 'Cambiar status cotizaciones',
             ],
             'Renta de productos' => [
+                'Renta de productos',
                 'Crear rentas',
                 'Editar rentas',
                 'Eliminar rentas',
@@ -52,16 +58,19 @@ class PermissionSeeder extends Seeder
                 'Eliminar pagos',
             ],
             'Servicios' => [
+                'Servicios',
                 'Crear servicios',
                 'Editar servicios',
                 'Eliminar servicios',
             ],
             'Clientes' => [
+                'Clientes',
                 'Crear clientes',
                 'Editar clientes',
                 'Eliminar clientes',
             ],
             'Caja' => [
+                'Caja',
                 'Crear cajas',
                 'Editar cajas',
                 'Eliminar cajas',
@@ -69,6 +78,7 @@ class PermissionSeeder extends Seeder
                 'Ver historial de cortes',
             ],
             'Tienda en línea' => [
+                'Tienda en línea',
                 'Crear pedidos',
                 'Editar pedidos',
                 'Eliminar pedidos',
@@ -76,6 +86,7 @@ class PermissionSeeder extends Seeder
                 'Mandar whatsapp',
             ],
             'Configuraciones' => [
+                'Configuraciones',
                 'Ver configuraciones de punto de venta',
                 'Ver usuarios',
                 'Editar usuarios',
