@@ -43,6 +43,22 @@
                     <el-input v-model="form.email" placeholder="Escribe el correo electrónico del contacto" :maxlength="100" clearable />
                     <InputError :message="form.errors.email" />
                 </div>
+
+                <div class="mt-3">
+                    <InputLabel value="Fecha de expiración de cot." class="ml-3 mb-1" />
+                    <el-date-picker v-model="form.expired_date" type="date" class="!w-full" placeholder="día/mes/año"
+                        :disabled-date="disabledPrevDays" />
+                    <InputError :message="form.errors.expired_date" />
+                </div>
+
+                <div class="mt-3">
+                    <InputLabel value="Condiciones de pago" class="ml-3 mb-1" />
+                    <el-select class="w-1/2" filterable v-model="form.payment_conditions" clearable placeholder="Seleccione"
+                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                        <el-option v-for="payment_condition in payment_conditions" :key="payment_condition" :label="payment_condition"
+                            :value="payment_condition" />
+                    </el-select>
+                </div>
                 
                 <div class="mt-3 col-span-full">
                     <InputLabel value="Dirección (opcional)" class="ml-3 mb-1" />
@@ -207,10 +223,12 @@ data() {
     const form = useForm({
         client_id: null,
         contact_name: null,
+        payment_conditions: null,
         phone: null,
         email: null,
         address: null,
         notes: null,
+        expired_date: null,
         show_iva: true,
         has_discount: false, //aplicar descuento
         discount: null, //cantidad de descuento
@@ -230,6 +248,10 @@ data() {
         next_service_id: 1, //para el index de servicios creados
         totalServicesMoney: null, //total de dinero para los servicios
         totalProductsMoney: null, //total de dinero para los productos
+        payment_conditions: [
+            'Al contado',
+            'Parcialidades',
+        ]
     }
 },
 components:{
@@ -293,6 +315,11 @@ methods:{
     },
     resetClientForm() {
       this.clientForm.reset();
+    },
+    disabledPrevDays(time) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return time.getTime() < today.getTime();
     },
     totalMoneyOrder() {
         //calcula el total de dinero para los productos 

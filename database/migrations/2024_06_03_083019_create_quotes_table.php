@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->string('address')->nullable();
+            $table->string('payment_conditions')->nullable();
             $table->boolean('show_iva')->default(false);
             $table->boolean('has_discount')->default(false);
             $table->string('status')->default('Esperando respuesta');

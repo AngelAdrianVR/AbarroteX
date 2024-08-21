@@ -1,5 +1,5 @@
 <template>
-    <Head :title="'COT-' + quote.id" />
+    <Head :title="'COT-' + quote.folio" />
     <main class="w-full mx-auto h-screen flex flex-col justify-between overflow-hidden">
         <div>   
             <!-- Header --------------------------- -->
@@ -14,7 +14,7 @@
                     Imprimir o guardar PDF 
                 </PrimaryButton>                
                 <div class="flex flex-col space-y-1 mr-16 text-right">
-                    <p>{{ 'COT-' + (quote.id < 10 ? '0' + quote.id : quote.id) }}</p>
+                    <p>{{ 'COT-' + (quote.folio < 10 ? '0' + quote.folio : quote.folio) }}</p>
                     <p class="font-bold">Fecha: <span class="font-light">{{ formatDate(quote.created_at) }}</span></p>
                 </div>
             </section>
@@ -50,7 +50,7 @@
                         <td>-</td>
                         <td>${{ (product.price / 1.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                         <td>{{ product.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                        <td>${{ (product.price / 1.16).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }} + IVA</td>
+                        <td>${{ ((product.price / 1.16) * product.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }} + IVA</td>
                     </tr>
                     <!-- servicios -->
                     <tr v-for="(service, index) in quote.services" :key="index"
