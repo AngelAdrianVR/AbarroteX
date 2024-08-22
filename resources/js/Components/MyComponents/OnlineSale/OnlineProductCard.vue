@@ -31,7 +31,7 @@
                 <p class="text-2xl font-bold my-3">
                     ${{ product.global_product_id ? product.global_product.public_price 
                         :product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    {{ product.bulk_product ? '/ ' + product.measure_unit : '' }}
+                    <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
                 </p>
             </div>
             <!-- Si es bajo pedido -->
