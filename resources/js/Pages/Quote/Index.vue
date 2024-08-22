@@ -14,7 +14,7 @@
             {{ searchedWord }}
           </el-tag>
         </article>
-        <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
+        <div v-if="this.$page.props.auth.user.permissions.includes('Crear cotizaciones')" class="my-4 md:my-0 flex items-center justify-end space-x-3">
           <PrimaryButton @click="$inertia.get(route('quotes.create'))">Crear cotización</PrimaryButton>
         </div>
       </div>

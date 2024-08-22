@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            <PrimaryButton @click="createOnlineOrderModal = true" class="!py-1">Registrar pedido</PrimaryButton>
+            <PrimaryButton v-if="canCreate" @click="createOnlineOrderModal = true" class="!py-1">Registrar pedido</PrimaryButton>
         </div>
     </div>
     <p class="my-4 mx-3 text-gray99 text-sm">En esta sección solo se muestran los pedidos que se encuentran pendientes,
@@ -71,7 +71,8 @@
                         <td>{{ formatDate(online_order.created_at) }}</td>
                         <td>{{ formatDate(online_order.delivered_at) ?? '--' }}</td>
                         <td>{{ online_order.name }}</td>
-                        <td>${{ (online_order.total + online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                        <td>${{ (online_order.total +
+                            online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         <td>
                             <div class="flex items-center space-x-2">
                                 <span v-html="getStatusIcon(online_order.status)"></span>
@@ -87,7 +88,7 @@
                                 <template #dropdown>
                                     <el-dropdown-menu>
                                         <el-dropdown-item
-                                            v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado' && online_order.status != 'Procesando'"
+                                            v-if="canChangeStatus && online_order.status != 'Entregado' && online_order.status != 'Cancelado' && online_order.status != 'Procesando'"
                                             :command="'processing|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
@@ -98,7 +99,7 @@
                                             <span class="text-xs">Procesando</span>
                                         </el-dropdown-item>
                                         <el-dropdown-item
-                                            v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado'"
+                                            v-if="canChangeStatus && online_order.status != 'Entregado' && online_order.status != 'Cancelado'"
                                             :command="'delivered|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
@@ -109,7 +110,7 @@
                                             <span class="text-xs">Entregado</span>
                                         </el-dropdown-item>
                                         <el-dropdown-item
-                                            v-if="online_order.status != 'Entregado' && online_order.status != 'Cancelado'"
+                                            v-if="canChangeStatus && online_order.status != 'Entregado' && online_order.status != 'Cancelado'"
                                             :command="'cancel|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
@@ -129,12 +130,12 @@
                                             </svg>
                                             <span class="text-xs">Ver</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item v-if="online_order.phone"
+                                        <el-dropdown-item v-if="online_order.phone && canWhatsapp"
                                             :command="'whatsapp|' + online_order.phone">
                                             <i class="fa-brands fa-whatsapp text-green-500"></i>
                                             <span class="text-xs">Mandar whatapp</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'delete|' + online_order.id">
+                                        <el-dropdown-item v-if="canDelete" :command="'delete|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
                                                 class="size-[14px] mr-2 text-red-600">
@@ -181,10 +182,12 @@
                         <div class="lg:w-1/2 lg:pr-3">
                             <InputLabel class="mb-1 ml-2" value="Selecciona un cliente (opcional)" />
                             <div class="flex items-center space-x-3">
-                                <el-select :disabled="loadingClientInfo" @change="getClientInfo" v-model="client_id" clearable filterable
-                                    placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                                <el-select :disabled="loadingClientInfo" @change="getClientInfo" v-model="client_id"
+                                    clearable filterable placeholder="Seleccione"
+                                    no-data-text="No hay opciones registradas"
                                     no-match-text="No se encontraron coincidencias">
-                                    <el-option v-for="client in clients" :key="client" :label="client.name" :value="client.id" />
+                                    <el-option v-for="client in clients" :key="client" :label="client.name"
+                                        :value="client.id" />
                                 </el-select>
                                 <button @click="openClientCreationForm" type="button"
                                     class="rounded-full border-primary size-5 flex items-center justify-center text-primary text-lg">
@@ -286,7 +289,9 @@
                         <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{
                             form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                         <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span
-                                class="mx-2">$</span>{{ form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                                class="mx-2">$</span>{{
+                                    form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")
+                            }}</p>
                         <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total +
                             form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     </div>
@@ -424,6 +429,10 @@ export default {
             orderId: null, //id de la orden para usar en modal de confirmacion 
             // inventario de codigos activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
+            canCreate: this.$page.props.auth.user.permissions.includes('Crear pedidos'),
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar pedidos'),
+            canChangeStatus: this.$page.props.auth.user.permissions.includes('Cambiar status de pedidos'),
+            canWhatsapp: this.$page.props.auth.user.permissions.includes('Mandar whatsapp'),
         }
     },
     components: {
@@ -589,10 +598,10 @@ export default {
             } catch (error) {
                 console.log(error);
                 this.$notify({
-                        title: 'No se completó la petición',
-                        message: 'No se pudo recuperar la nformación del cliente',
-                        type: 'success',
-                    });
+                    title: 'No se completó la petición',
+                    message: 'No se pudo recuperar la nformación del cliente',
+                    type: 'success',
+                });
             } finally {
                 this.loadingClientInfo = false;
             }
@@ -710,10 +719,10 @@ export default {
         calculateDeliveryPrice() {
             const storeProperties = this.$page.props.auth.user.store.online_store_properties;
 
-            if ( storeProperties.delivery_price ) {
+            if (storeProperties.delivery_price) {
                 this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery
-                ? 0
-                : parseFloat(storeProperties?.delivery_price);
+                    ? 0
+                    : parseFloat(storeProperties?.delivery_price);
             } else {
                 this.form.delivery_price = 0;
             }

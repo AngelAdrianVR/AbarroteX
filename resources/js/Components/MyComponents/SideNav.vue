@@ -107,7 +107,7 @@ export default {
                     active: route().current('sales.point'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero', 'Almacenista'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.permissions.includes('Punto de venta')
                 },
                 {
                     label: 'Reportes',
@@ -116,7 +116,7 @@ export default {
                     active: route().current('dashboard'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.permissions.includes('Reportes')
                 },
                 {
                     label: 'Ventas registradas',
@@ -125,7 +125,7 @@ export default {
                     active: route().current('sales.index') || route().current('sales.show'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.permissions.includes('Ventas registradas')
                 },
                 {
                     label: 'Gastos',
@@ -134,7 +134,7 @@ export default {
                     active: route().current('expenses.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.permissions.includes('Gastos')
                 },
                 {
                     label: 'Cotizaciones',
@@ -143,7 +143,7 @@ export default {
                     active: route().current('quotes.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.permissions.includes('Cotizaciones')
                 },
                 {
                     label: 'Renta de productos',
@@ -152,7 +152,7 @@ export default {
                     active: route().current('rentals.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.permissions.includes('Renta de productos')
                 },
                 {
                     label: 'Productos',
@@ -161,7 +161,7 @@ export default {
                     active: route().current('products.*') || route().current('boutique-products.*') || route().current('global-product-store.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero', 'Almacenista'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.permissions.includes('Productos')
                 },
                 {
                     label: 'Servicios',
@@ -170,7 +170,7 @@ export default {
                     active: route().current('services.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.permissions.includes('Servicios')
                 },
                 {
                     label: 'Clientes',
@@ -179,7 +179,7 @@ export default {
                     active: route().current('clients.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && (this.$page.props.auth.user.store.plan == 'Plan Intermedio' || ['Otro', 'Boutique / Tienda de Ropa / Zapatería'].includes(this.$page.props.auth.user.store.type))
+                    show: this.$page.props.auth.user.permissions.includes('Clientes')
                 },
                 {
                     label: 'Caja',
@@ -188,7 +188,7 @@ export default {
                     active: route().current('cash-registers.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.permissions.includes('Caja')
                 },
                 {
                     label: 'Tienda en línea',
@@ -197,7 +197,7 @@ export default {
                     active: route().current('online-sales.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.permissions.includes('Tienda en línea')
                 },
                 {
                     label: 'Configuraciones',
@@ -206,7 +206,7 @@ export default {
                     active: route().current('settings.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.permissions.includes('Configuraciones')
                 },
 
                 //ejemplo para usar submenues

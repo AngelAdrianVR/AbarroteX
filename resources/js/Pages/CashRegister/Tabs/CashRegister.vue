@@ -36,7 +36,8 @@
               class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-[#F2F2F2] rounded-full py-1 px-[7px] cursor-pointer"></i>
           </template>
         </el-popconfirm>
-        <el-dropdown :disabled="!cash_register.is_active" split-button type="primary" @click="handleCashCut">
+        <el-dropdown v-if="canRegisterMovements" :disabled="!cash_register.is_active" split-button type="primary"
+          @click="handleCashCut">
           Hacer cortre de caja
           <template #dropdown>
             <el-dropdown-menu>
@@ -112,7 +113,7 @@
       </div>
 
       <!-- Lado derecho -->
-      <div
+      <div v-if="canEdit"
         class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 my-4 lg:mt-0 self-start">
         <p class="font-bold text-center">Ajustes generales</p>
         <!-- Editar cantidad maxima permitida en caja -->
@@ -367,7 +368,9 @@ export default {
       // monto maximo en caja activado
       isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
       // Permisos de rol
-      canDelete: ['Administrador'].includes(this.$page.props.auth.user.rol),
+      canDelete: this.$page.props.auth.user.permissions.includes('Eliminar cajas'),
+      canEdit: this.$page.props.auth.user.permissions.includes('Editar cajas'),
+      canRegisterMovements: this.$page.props.auth.user.permissions.includes('Registrar movimientos'),
     }
   },
   components: {

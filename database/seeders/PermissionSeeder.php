@@ -33,6 +33,7 @@ class PermissionSeeder extends Seeder
                 'Ventas registradas',
                 'Editar ventas',
                 'Reembolsar ventas',
+                'Registrar abonos',
                 'Cancelar ventas en linea',
             ],
             'Gastos' => [
@@ -89,6 +90,7 @@ class PermissionSeeder extends Seeder
                 'Configuraciones',
                 'Ver configuraciones de punto de venta',
                 'Ver usuarios',
+                'Crear usuarios',
                 'Editar usuarios',
                 'Eliminar usuarios',
                 'Resetear contraseña de usuarios',

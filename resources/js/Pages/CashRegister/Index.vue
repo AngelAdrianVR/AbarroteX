@@ -10,7 +10,7 @@
                 </el-tab-pane>
 
                 <!-- Historial de cortes -->
-                <el-tab-pane label="Historial de cortes" :name="String(cash_registers.length + 1)">
+                <el-tab-pane v-if="canSeeHistorical" label="Historial de cortes" :name="String(cash_registers.length + 1)">
                     <section class="flex justify-between">
                         <div></div>
                         <div class="relative">
@@ -90,7 +90,8 @@ export default {
             currentPage: 1, //para paginación
             filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
             // Permisos de rol
-            canCreate: ['Administrador'].includes(this.$page.props.auth.user.rol),
+            canCreate: this.$page.props.auth.user.permissions.includes('Crear cajas'),
+            canSeeHistorical: this.$page.props.auth.user.permissions.includes('Ver historial de cortes'),
         }
     },
     components: {

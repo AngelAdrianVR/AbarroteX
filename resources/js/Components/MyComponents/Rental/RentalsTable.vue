@@ -48,7 +48,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'edit|' + encodeId(rent.id)">
+                                    <el-dropdown-item v-if="canEdit" :command="'edit|' + encodeId(rent.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -56,7 +56,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'pay|' + rent.id">
+                                    <el-dropdown-item v-if="canCreatePayment" :command="'pay|' + rent.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -64,7 +64,7 @@
                                         </svg>
                                         <span class="text-xs">Registrar pago</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'delete|' + rent.id">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + rent.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -132,6 +132,9 @@ export default {
         return {
             showDeleteConfirm: false,
             itemIdToDelete: null,
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar rentas'),
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar rentas'),
+            canCreatePayment: this.$page.props.auth.user.permissions.includes('Crear pagos'),
         }
     },
     components: {
@@ -187,7 +190,7 @@ export default {
                 this.showDeleteConfirm = true;
                 this.itemIdToDelete = data;
             } else if (commandName == 'pay') {
-                this.$inertia.get(route('rental-payments.create', {rentalId: data}));
+                this.$inertia.get(route('rental-payments.create', { rentalId: data }));
             } else if (commandName == 'complete') {
                 this.updateStatus(data, 'Completado');
             } else if (commandName == 'cancel') {

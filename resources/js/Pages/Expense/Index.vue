@@ -98,7 +98,7 @@ export default {
             currentPage: 1, //para paginación
             filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
             // Permisos de rol actual
-            canCreate: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol),
+            canCreate: this.$page.props.auth.user.permissions.includes('Crear gastos'),
         }
     },
     components: {

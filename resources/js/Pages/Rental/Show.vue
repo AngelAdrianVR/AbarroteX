@@ -4,7 +4,8 @@
             <div class="flex justify-between items-center">
                 <Back :to="route('rentals.index')" />
             </div>
-            <header class="flex flex-col lg:flex-row items-end lg:items-center space-y-2 lg:space-y-0 space-x-3 justify-between mt-5">
+            <header
+                class="flex flex-col lg:flex-row items-end lg:items-center space-y-2 lg:space-y-0 space-x-3 justify-between mt-5">
                 <el-select @change="handleSelect()" class="!w-full md:!w-1/4" filterable v-model="rentId" clearable
                     placeholder="Buscar registro de renta" no-data-text="No hay opciones registradas"
                     no-match-text="No se encontraron coincidencias">
@@ -12,13 +13,15 @@
                 </el-select>
                 <div class="flex items-center space-x-3">
                     <el-dropdown split-button type="primary" @click="$inertia.get(route('rentals.edit', encodedId))">
-                    Editar
-                    <template #dropdown>
-                        <el-dropdown-menu>
-                        <el-dropdown-item @click="printContract()">Imprimir contrato</el-dropdown-item>
-                        <el-dropdown-item @click="$inertia.get(route('rental-payments.create', {rentalId: rental.id}))">Registrar pago</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </template>
+                        Editar
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item @click="printContract()">Imprimir contrato</el-dropdown-item>
+                                <el-dropdown-item
+                                    @click="$inertia.get(route('rental-payments.create', { rentalId: rental.id }))">Registrar
+                                    pago</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
                     </el-dropdown>
                 </div>
             </header>

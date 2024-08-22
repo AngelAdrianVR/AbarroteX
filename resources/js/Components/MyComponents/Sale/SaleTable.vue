@@ -35,7 +35,8 @@
           <template v-if="editMode !== index">
             ${{ sale.product.public_price }}/{{ getPrefix(sale) }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
-            <button v-if="isDiscountOn" @click.stop="startEditing(sale, index)"
+            <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
+              @click.stop="startEditing(sale, index)"
               class="flex items-center justify-center text-primary bg-gray-200 size-5 rounded-full ml-2 mr-1">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-[14px]">

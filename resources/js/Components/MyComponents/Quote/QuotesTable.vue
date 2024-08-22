@@ -38,19 +38,19 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item v-if="quote.status === 'Esperando respuesta' || quote.status === 'Rechazada'" :command="'status|' + quote.id + '|Autorizada'">
+                                    <el-dropdown-item v-if="canChangeStatus && quote.status === 'Esperando respuesta' || quote.status === 'Rechazada'" :command="'status|' + quote.id + '|Autorizada'">
                                         <i class="fa-solid fa-check text-xs size-[14px] mr-2"></i>
                                         <span class="text-xs">Autorizada</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-if="quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Rechazada'">
+                                    <el-dropdown-item v-if="canChangeStatus && quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Rechazada'">
                                         <i class="fa-solid fa-x text-xs size-[14px] mr-2"></i>
                                         <span class="text-xs">Rechazada</span>
                                     </el-dropdown-item>
-                                    <!-- <el-dropdown-item v-if="quote.status !== 'Pagado' && quote.status !== 'Pago parcial' && quote.status !== 'Rechazada'" :command="'status|' + quote.id + '|Pago parcial'">
+                                    <!-- <el-dropdown-item v-if="canChangeStatus && quote.status !== 'Pagado' && quote.status !== 'Pago parcial' && quote.status !== 'Rechazada'" :command="'status|' + quote.id + '|Pago parcial'">
                                         <i class="fa-solid fa-circle-dollar-to-slot text-indigo-500 text-xs"></i>
                                         <span class="text-xs">Pago parcial</span>
                                     </el-dropdown-item> -->
-                                    <el-dropdown-item v-if="quote.status === 'Autorizada' || quote.status === 'Pago parcial' || quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Pagado'">
+                                    <el-dropdown-item v-if="canChangeStatus && quote.status === 'Autorizada' || quote.status === 'Pago parcial' || quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Pagado'">
                                         <i class="fa-solid fa-dollar-sign size-[14px] mr-2"></i>
                                         <span class="text-xs">Pagado</span>
                                     </el-dropdown-item>
@@ -64,7 +64,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'edit|' + encodeId(quote.id)">
+                                    <el-dropdown-item v-if="canEdit" :command="'edit|' + encodeId(quote.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -72,7 +72,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'delete|' + quote.id">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + quote.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -123,6 +123,9 @@ data() {
     return {
         showDeleteConfirm: false,
         itemIdToDelete: null,
+        canEdit: this.$page.props.auth.user.permissions.includes('Editar cotizaciones'),
+        canDelete: this.$page.props.auth.user.permissions.includes('Eliminar cotizaciones'),
+        canChangeStatus: this.$page.props.auth.user.permissions.includes('Cambiar status cotizaciones'),
     }
 },
 components:{
