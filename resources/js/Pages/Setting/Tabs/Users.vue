@@ -5,7 +5,7 @@
 
         <!-- Botones -->
         <div class="text-right mt-3">
-            <PrimaryButton v-if="users.length < 1 || $page.props.auth.user.store_id == 10" @click="$inertia.get(route('users.create'))">Agregar usuario</PrimaryButton>
+            <PrimaryButton v-if="canCreate && users.length < 1 || $page.props.auth.user.store_id == 10" @click="$inertia.get(route('users.create'))">Agregar usuario</PrimaryButton>
         </div>
 
         <div class="mt-3 mx-3">
@@ -37,7 +37,7 @@
                                     </button>
                                     <template #dropdown>
                                         <el-dropdown-menu>
-                                            <el-dropdown-item :command="'reset|' + user.id">
+                                            <el-dropdown-item v-if="canResetPassword" :command="'reset|' + user.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"
                                                     class="text-[#777777] size-[14px] mr-2">
@@ -56,7 +56,7 @@
                                                 </svg>
                                                 <span class="text-xs">Ver</span>
                                             </el-dropdown-item> -->
-                                            <el-dropdown-item :command="'edit|' + user.id">
+                                            <el-dropdown-item v-if="canEdit" :command="'edit|' + user.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"
                                                     class="text-[#777777] size-[14px] mr-2">
@@ -65,7 +65,7 @@
                                                 </svg>
                                                 <span class="text-xs">Editar</span>
                                             </el-dropdown-item>
-                                            <el-dropdown-item :command="'delete|' + user.id">
+                                            <el-dropdown-item v-if="canDelete" :command="'delete|' + user.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"
                                                     class="size-[14px] mr-2 text-red-600">
@@ -124,7 +124,11 @@ export default {
             showDeleteConfirm: false,
             showResetConfirm: false,
             itemIdToDelete: null,
-            itemIdToReset: null
+            itemIdToReset: null,
+            canCreate: this.$page.props.auth.user.permissions.includes('Crear usuarios'),
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar usuarios'),
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar usuarios'),
+            canResetPassword: this.$page.props.auth.user.permissions.includes('Resetear contraseña de usuarios'),
         }
     },
     components: {

@@ -56,7 +56,7 @@
                             </svg>
                             <span class="text-xs">Reembolsar</span>
                         </el-dropdown-item>
-                        <el-dropdown-item v-if="canRefund && !wasCanceled && !wasRefunded" :command="'cancel|' + onlineSale.id">
+                        <el-dropdown-item v-if="canCancel && !wasCanceled && !wasRefunded" :command="'cancel|' + onlineSale.id">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="size-[14px] mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -149,8 +149,9 @@ export default {
     data() {
         return {
             // Permisos de rol actual
-            canSeeDetails: this.$page.props.auth.user.rol == 'Administrador',
-            canRefund: this.$page.props.auth.user.rol == 'Administrador',
+            canSeeDetails: this.$page.props.auth.user.permissions.includes('Ventas registradas'),
+            canRefund: this.$page.props.auth.user.permissions.includes('Reembolsar ventas'),
+            canCancel: this.$page.props.auth.user.permissions.includes('Cancelar ventas en linea'),
         };
     },
     components: {

@@ -14,7 +14,7 @@
                         {{ searchedWord }}
                     </el-tag>
                 </article>
-                <div class="my-4 md:my-0 flex items-center justify-end space-x-3">
+                <div v-if="canCreate" class="my-4 md:my-0 flex items-center justify-end space-x-3">
                     <!-- <ThirthButton>Registrar abono</ThirthButton> -->
                     <PrimaryButton @click="$inertia.get(route('clients.create'))">Nuevo cliente</PrimaryButton>
                 </div>
@@ -56,6 +56,7 @@ data() {
         loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
         loading: false, //estado de carga cuando se busca a un cliente por medio del buscador
         currentPage: 1, //para paginación
+        canCreate: this.$page.props.auth.user.permissions.includes('Crear clientes'),
     }
 },
 components:{

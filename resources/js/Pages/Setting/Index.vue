@@ -8,13 +8,13 @@
 
             <!-- tabs options -->
             <el-tabs v-model="activeTab" @tab-click="updateURL">
-                <el-tab-pane label="Punto de venta" name="1">
+                <el-tab-pane v-if="canSeePointSettings" label="Punto de venta" name="1">
                     <Point />
                 </el-tab-pane>
-                <el-tab-pane label="Usuarios" name="2">
+                <el-tab-pane v-if="canSeeUsers" label="Usuarios" name="2">
                     <Users :users="users" />
                 </el-tab-pane>
-                <el-tab-pane label="Impresora" name="3">
+                <el-tab-pane v-if="canSeePrinterSettings" label="Impresora" name="3">
                     <Printer />
                 </el-tab-pane>
                 <!-- <el-tab-pane label="Productos" name="4">
@@ -39,6 +39,9 @@ export default {
     data() {
         return {
             activeTab: '1',
+            canSeePointSettings: this.$page.props.auth.user.permissions.includes('Ver configuraciones de punto de venta'),
+            canSeeUsers: this.$page.props.auth.user.permissions.includes('Ver usuarios'),
+            canSeePrinterSettings: this.$page.props.auth.user.permissions.includes('Ver configuraciones de impresoras'),
         }
     },
     components: {

@@ -73,7 +73,7 @@
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <!-- Dinero en caja -->
-        <div v-if="isShowCahsOn" class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
+        <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')" class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
             class="size-4 cursor-pointer">
@@ -106,7 +106,7 @@
           <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
         </div>
         <!-- Dropdown -->
-        <div class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
+        <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')" class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
           <el-col :span="3">
             <el-dropdown trigger="click">
               <p class="text-sm text-primary w-44 flex items-center">
@@ -269,7 +269,7 @@
                 Busca el producto
                 <i class="fa-regular fa-hand-point-up ml-3"></i>
               </p>
-              <div v-if="$page.props.auth.user.store.type != 'Boutique / Tienda de Ropa / Zapatería'">
+              <div v-if="$page.props.auth.user.store.type != 'Boutique / Tienda de Ropa / Zapatería' && $page.props.auth.user.permissions.includes('Crear productos')">
                 <p>ó</p>
                 <button @click="showCreateProductModal = true" type="button"
                   class="text-primary w-full flex items-center justify-center space-x-1">

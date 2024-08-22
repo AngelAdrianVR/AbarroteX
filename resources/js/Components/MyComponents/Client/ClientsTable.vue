@@ -22,7 +22,8 @@
                     <td>{{ client.name }}</td>
                     <td>{{ client.phone }}</td>
                     <td>{{ client.rfc ?? '-' }}</td>
-                    <td>{{ client.street ? client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' + client.town + ', ' + client.polity_state : '-' }}</td>
+                    <td>{{ client.street ? client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' +
+                        client.int_number + '. ' + client.town + ', ' + client.polity_state : '-' }}</td>
                     <td>${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
@@ -42,7 +43,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'edit|' + encodeId(client.id)">
+                                    <el-dropdown-item v-if="canEdit" :command="'edit|' + encodeId(client.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -50,7 +51,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'delete|' + client.id">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + client.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -95,63 +96,65 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
 
 export default {
-data() {
-    return {
-        showDeleteConfirm: false,
-        itemIdToDelete: null,
-    }
-},
-components:{
-ConfirmationModal,
-PrimaryButton,
-CancelButton,
-},
-props:{
-clients: Array
-},
-methods:{
-    handleCommand(command) {
-        const commandName = command.split('|')[0];
-        const data = command.split('|')[1];
+    data() {
+        return {
+            showDeleteConfirm: false,
+            itemIdToDelete: null,
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar clientes'),
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar clientes'),
+        }
+    },
+    components: {
+        ConfirmationModal,
+        PrimaryButton,
+        CancelButton,
+    },
+    props: {
+        clients: Array
+    },
+    methods: {
+        handleCommand(command) {
+            const commandName = command.split('|')[0];
+            const data = command.split('|')[1];
 
-        if (commandName == 'see') {
-            this.$inertia.get(route('clients.show', data));
-        } else if (commandName == 'edit') {
-            this.$inertia.get(route('clients.edit', data));
-        } else if (commandName == 'delete') {
-            this.showDeleteConfirm = true;
-            this.itemIdToDelete = data;
-        }
-    },
-    async deleteItem() {
-        try {
-            const response = await axios.delete(route('clients.destroy', this.itemIdToDelete));
-            if (response.status == 200) {
-                this.$notify({
-                    title: 'Correcto',
-                    message: 'Se ha eliminado al cliente',
-                    type: 'success',
-                });
-                //se busca el index del cliente eliminado para removerlo del arreglo
-                const indexClientDeleted = this.clients.findIndex(item => item.id == this.itemIdToDelete);
-                if ( indexClientDeleted != -1 ) {
-                    this.clients.splice(indexClientDeleted, 1);
-                }
-                this.showDeleteConfirm = false;
+            if (commandName == 'see') {
+                this.$inertia.get(route('clients.show', data));
+            } else if (commandName == 'edit') {
+                this.$inertia.get(route('clients.edit', data));
+            } else if (commandName == 'delete') {
+                this.showDeleteConfirm = true;
+                this.itemIdToDelete = data;
             }
-        } catch (error) {
-            console.log(error);
-            this.$notify({
-                title: 'El servidor no pudo procesar la petición',
-                message: 'No se pudo eliminar el cliente. Intente más tarde o si el problema persiste, contacte a soporte',
-                type: 'error',
-            });
-        }
+        },
+        async deleteItem() {
+            try {
+                const response = await axios.delete(route('clients.destroy', this.itemIdToDelete));
+                if (response.status == 200) {
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha eliminado al cliente',
+                        type: 'success',
+                    });
+                    //se busca el index del cliente eliminado para removerlo del arreglo
+                    const indexClientDeleted = this.clients.findIndex(item => item.id == this.itemIdToDelete);
+                    if (indexClientDeleted != -1) {
+                        this.clients.splice(indexClientDeleted, 1);
+                    }
+                    this.showDeleteConfirm = false;
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'El servidor no pudo procesar la petición',
+                    message: 'No se pudo eliminar el cliente. Intente más tarde o si el problema persiste, contacte a soporte',
+                    type: 'error',
+                });
+            }
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
+        },
     },
-    encodeId(id) {
-        const encodedId = btoa(id.toString());
-        return encodedId;
-    },
-},
 }
 </script>

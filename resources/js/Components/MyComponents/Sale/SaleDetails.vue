@@ -186,9 +186,9 @@ export default {
     data() {
         return {
             // Permisos de rol actual
-            canInstallment: this.$page.props.auth.user.rol == 'Administrador',
-            canRefund: this.$page.props.auth.user.rol == 'Administrador',
-            canEdit: this.$page.props.auth.user.rol == 'Administrador',
+            canInstallment: this.$page.props.auth.user.permissions.includes('Registrar abonos'),
+            canRefund: this.$page.props.auth.user.permissions.includes('Reembolsar ventas'),
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar ventas'),
         };
     },
     components: {
