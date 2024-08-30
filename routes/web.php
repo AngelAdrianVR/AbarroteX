@@ -34,9 +34,6 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\UserController;
-use App\Models\Category;
-use App\Models\Sale;
-use App\Models\Size;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -347,7 +344,7 @@ Route::resource('cards', CardController::class)->middleware('auth');
 
 
 //clients routes----------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
 Route::resource('clients', ClientController::class)->middleware('auth');
 Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
 Route::get('clients-search', [ClientController::class, 'searchClient'])->name('clients.search')->middleware('auth');

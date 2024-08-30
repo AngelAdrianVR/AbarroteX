@@ -1,8 +1,13 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import imageCarousel1 from '@/../../public/images/landing-02.png';
+import imageCarousel2 from '@/../../public/images/landing-02-2.png';
+import imageCarousel3 from '@/../../public/images/landing-02-3.png';
+import imageCarousel4 from '@/../../public/images/landing-02-4.png';
 
 defineProps({
     canLogin: Boolean,
@@ -10,317 +15,337 @@ defineProps({
     laravelVersion: String,
     phpVersion: String,
 });
+
+const windowWidth = ref(window.innerWidth);
+
+const carouselHeight = ref('600px');
+
+const updateCarouselHeight = () => {
+  var width = window.innerWidth;
+  if (width < 430) {
+    carouselHeight.value = '400px';
+  } else if (width >= 430 && width < 1024) {
+    carouselHeight.value = '600px';
+  } else if (width >= 1024 && width < 1350) {
+    carouselHeight.value = '500px';
+  } else {
+    carouselHeight.value = '600px';
+  }
+};
+
+onMounted(() => {
+  updateCarouselHeight();
+  window.addEventListener('resize', updateCarouselHeight);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateCarouselHeight);
+});
+
+const imageSets = ref([
+  [
+    imageCarousel1
+  ],
+  [
+    imageCarousel2
+  ],
+  [
+    imageCarousel3
+  ],
+  [
+    imageCarousel4
+  ],
+]);
 </script>
+
+<style>
+/* Estilos personalizados para los botones de navegación del carrusel */
+.el-carousel__arrow {
+  background-color: rgba(99, 98, 98, 0.562); /* Fondo semitransparente */
+  border-radius: 50%; /* Bordes redondeados */
+  color: white; /* Color del icono */
+}
+
+.el-carousel__arrow--left {
+  left: 10px; /* Ajusta la posición de la flecha izquierda */
+}
+
+.el-carousel__arrow--right {
+  right: 10px; /* Ajusta la posición de la flecha derecha */
+}
+
+/* Puedes agregar más estilos personalizados aquí */
+.el-carousel__arrow:hover {
+  background-color: rgba(131, 130, 130, 0.562); /* Cambia el fondo al hacer hover */
+  /* transform: scale(1.1); Efecto de escalado al hacer hover */
+}
+
+/* Cambia el color del indicador activo */
+.el-carousel__indicator--active {
+  color: #F68C0F; /* Color del indicador activo (puedes cambiarlo al que prefieras) */
+}
+
+</style>
 
 <template>
 
     <Head title="Ezy Ventas" />
 
-    <nav class="bg-white border-b border-gray-100 shadow-md">
+    <nav class="bg-black1 shadow-md">
         <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
-            <div class="flex justify-between items-center h-12">
+            <div class="flex justify-between items-center h-12 bg-white rounded-full px-4">
                 <div class="flex">
                     <!-- Logo -->
                     <div class="shrink-0 flex items-center">
-                        <ApplicationMark class="block h-14 w-auto" />
+                        <ApplicationMark class="block h-10 md:h-12 w-auto" />
                     </div>
                 </div>
 
-                <!-- <p class="py-1 px-3 bg-gradient-to-r from-[#dfb464] to-primary text-white font-bold">¡15 días de prueba
-                    gratuitos!</p> -->
-
-                <div class="hidden sm:flex sm:items-center space-x-2 sm:ms-6">
+                <div class="flex sm:items-center space-x-2 sm:ms-6">
                     <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
-                    <PrimaryButton>Ingresar</PrimaryButton>
+                        <PrimaryButton class="!py-[5px] md:!py-2">Ingresar</PrimaryButton>
                     </Link>
                     <Link :href="route('register')">
-                    <ThirthButton>Registrarse</ThirthButton>
+                        <PrimaryButton class="!py-[5px] md:!py-2 !bg-gray37">Registrate</PrimaryButton>
                     </Link>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="relative bg-center selection:bg-primary selection:text-white">
-        <section class="lg:flex">
-            <div class="md:hidden mt-4 mx-5 flex items-center space-x-2 justify-end">
-                <Link :href="route('login')">
-                <PrimaryButton class="!py-[5px]">Iniciar sesión</PrimaryButton>
-                </Link>
-                <Link :href="route('register')">
-                <PrimaryButton class="!py-[5px] !bg-gray37">Registrate</PrimaryButton>
-                </Link>
+    <main class="bg-center bg-black1 selection:bg-primary selection:text-white">
+        <section class="lg:flex justify-center">
+            <div class="pt-8 lg:mt-10 px-3 mx-2 lg:w-4/5">
+                <!-- Carousel -->
+                <div class="block text-center">
+                </div>
+                <figure class="flex flex-col lg:flex-row lg:justify-between lg:space-x-20 lg:w-full">
+                    <img class="lg:w-1/2" src="@/../../public/images/landing-01.png" alt="landing_page">
+                    <div class="lg:w-1/2 mt-5 lg:mt-0 p-4">
+                        <el-carousel trigger="click" height="600px">
+                            <el-carousel-item v-for="(imageSet, index) in imageSets" :key="index">
+                            <img v-for="(image, imgIndex) in imageSet" :key="imgIndex" :src="image" alt="">
+                            </el-carousel-item>
+                        </el-carousel>
+                        <div class="flex justify-end space-x-3 mt-4">
+                            <Link :href="$page.props.auth.user ? route('register') : route('login')">
+                                <PrimaryButton class="!text-sm">Probar ahora</PrimaryButton>
+                            </Link>
+                            <Link :href="route('register')">
+                                <ThirthButton class="!border-white !text-white !text-sm">Contáctanos</ThirthButton>
+                            </Link>
+                        </div>
+                    </div>
+                </figure>
             </div>
-            <div class="self-start mt-8 lg:mt-28 mx-2 md:ml-10">
-                <h1 class="text-center md:text-justify text-3xl lg:text-6xl font-bold"><strong class="text-primary">
-                    Ezy Ventas
-                    </strong>el punto de venta más
-                    accesible y fácil de usar</h1> <br>
-                <p class="text-center md:text-justify text-base md:text-xl mb-16">Potencia tu negocio con nuestro Punto de
-                    Venta, donde
-                    cada transacción es el
-                    comienzo de una historia exitosa.</p>
-                <PrimaryButton @click="$inertia.visit(route('register'))"
-                    class="hidden md:block w-80 !py-[5px] !text-lg">Pruébalo ahora</PrimaryButton>
-            </div>
-            <figure class="flex justify-end lg:w-full">
-                <img src="@/../../public/images/landing-01.png" alt="landing_page">
-            </figure>
         </section>
 
         <!-- funcionalidades -->
         <section class="my-12">
-            <h1 class="text-2xl text-center font-bold">Funcionalidades de los módulos</h1>
+            <h1 class="text-3xl text-center font-bold text-white">FUNCIONALIDAD DE LOS MÓDULOS</h1>
 
-            <article class="lg:grid grid-cols-2 gap-x-5 space-y-7 lg:space-y-0 px-4 lg:px-24 mt-9 relative">
+            <article class="space-y-7">
+                <!-- CONOCE TUS GANANCIAS AL INSTANTE -->
+                <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-xl text-center text-white">CONOCE TUS GANANCIAS AL INSTANTE</h2>
 
-                <!-- Lineas relativas -->
-                <!-- <img class="absolute" src="@/../../public/images/landing_line.png" alt=""> -->
+                        <!-- texto -->
+                        <section>
+                            <div class="mt-7 flex space-x-5 pl-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Representación visual de ingresos, gastos y ganancias lo que facilita la situación financiera del negocio.</p>
+                            </div>
 
-                <!-- Punto de venta -->
-                <div>
-                    <p class="flex items-center space-x-3">
-                        <svg class="bg-[#E9A527] rounded-full text-white p-2" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="-0.855 -0.855 24 24" height="40" width="40"
-                            id="Shopping-Basket-2--Streamline-Core">
-                            <desc>Shopping Basket 2 Streamline Icon: https://streamlinehq.com</desc>
-                            <g id="shopping-basket-2--shopping-basket">
-                                <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.625389714285713 7.932533357142858H2.6646102857142857C2.4237190714285712 7.927597714285714 2.184897642857143 7.976954142857143 1.9656595714285712 8.076940714285715C1.7464214999999998 8.176927285714285 1.5524984999999998 8.32499657142857 1.398219857142857 8.510162785714286C1.2439412142857142 8.695169785714285 1.1332872857142857 8.9126565 1.0745372142857144 9.146223857142857C1.0157871428571428 9.379950428571428 1.0102146428571428 9.623866714285715 1.0584565714285714 9.859822285714285L2.8252574999999998 18.693667714285713C2.900406642857143 19.061771142857143 3.1021311428571425 19.392140785714286 3.3957222857142857 19.626822642857142C3.689154214285714 19.861663714285715 4.0556655 19.986169285714286 4.431411214285714 19.978527H17.858588785714286C18.234493714285712 19.986169285714286 18.601005 19.861663714285715 18.894436928571427 19.626822642857142C19.187868857142856 19.392140785714286 19.38975257142857 19.061771142857143 19.4647425 18.693667714285713L21.231543428571428 9.859822285714285C21.279785357142856 9.623866714285715 21.274212857142857 9.379950428571428 21.215462785714287 9.146223857142857C21.156712714285714 8.9126565 21.046058785714283 8.695169785714285 20.891780142857144 8.510162785714286C20.7375015 8.32499657142857 20.5435785 8.176927285714285 20.32434042857143 8.076940714285715S19.866280928571427 7.927597714285714 19.625389714285713 7.932533357142858Z"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M14.357307428571428 2.3111545714285713L17.569614857142856 7.932533357142858"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M4.720385142857142 7.932533357142858L7.932692571428571 2.3111545714285713"
-                                    stroke-width="1.71"></path>
-                            </g>
-                        </svg>
-                        <strong class="text-xl">Punto de Venta:</strong>
-                    </p>
-                    <ul class="ml-9 mt-3">
-                        <li>• Escanea y busca productos para agregar a la venta.</li>
-                        <li>• Permite hasta 3 registros de venta simultáneos para agilizar el proceso.</li>
-                        <li>• Realiza el corte de caja y gestiona el ingreso o retiro de dinero de la caja.</li>
-                    </ul>
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Comparación en diferentes períodos.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Tendencias de ventas y gastos, ayudando a prever necesidades futuras.</p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- imagen -->
+                    <figure class="lg:w-1/2">
+                        <img class="w-full" src="@/../../public/images/function_1.png" alt="ganancias">
+                    </figure>
+                </div>
+            </article>
+
+            <!-- GESTIONA TU INVENTARIO -->
+            <article class="space-y-7">
+                <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
+                    <!-- imagen -->
+                    <figure class="lg:w-1/2 pl-5">
+                        <img class="w-full" src="@/../../public/images/function_2.png" alt="ganancias">
+                    </figure>
+
+                    <div class="lg:w-1/2">
+                        <h2 class="text-xl text-center text-white">GESTIONA TU INVENTARIO</h2>
+
+                        <!-- texto -->
+                        <section>
+                            <div class="mt-7 flex space-x-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Registra y gestiona tus productos.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Catálogo base para Abarrotes y Papelerías que incluye productos de diversas categorías y marcas reconocidas.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Alertas de bajo stock.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Actualización de inventario en tiempo real.</p>
+                            </div>
+                        </section>
+                    </div>
+
                 </div>
 
-                <!-- divs en blanco para saltar espacios en el grid -->
-                <div></div>
-                <div></div>
+            </article>
 
-                <!-- Registro de ventas -->
-                <div>
-                    <p class="flex items-center space-x-3">
-                        <svg class="bg-[#E9A527] rounded-full p-1 text-white" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="-0.855 -0.855 24 24" height="40" width="40"
-                            id="Task-List--Streamline-Core">
-                            <desc>Task List Streamline Icon: https://streamlinehq.com</desc>
-                            <g id="task-list--task-list-work">
-                                <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.72665 19.72665C19.72665 20.14044792857143 19.56218164285714 20.53736914285714 19.269705 20.830005C18.976909928571427 21.122481642857142 18.580147928571428 21.286949999999997 18.166349999999998 21.286949999999997H4.12365C3.709852071428571 21.286949999999997 3.312930857142857 21.122481642857142 3.020295 20.830005C2.727659142857143 20.53736914285714 2.5633500000000002 20.14044792857143 2.5633500000000002 19.72665V2.5633500000000002C2.5633500000000002 2.1495520714285714 2.727659142857143 1.752630857142857 3.020295 1.459995C3.312930857142857 1.1675183571428571 3.709852071428571 1.00305 4.12365 1.00305H12.839199214285713C13.252997142857142 1.00305 13.649759142857143 1.1675183571428571 13.942395 1.459995L19.269705 6.787305C19.56218164285714 7.079940857142856 19.72665 7.476702857142857 19.72665 7.890500785714285V19.72665Z"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12.016539 10.169812499999999H15.917289" stroke-width="1.71"></path>
-                                <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12.016539 15.582142928571427H15.917289" stroke-width="1.71"></path>
-                                <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M5.982636 15.493779L7.289944500000001 16.8010875L9.468791999999999 13.750541785714285"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M5.982636 9.983850214285713L7.289944500000001 11.291317928571427L9.468791999999999 8.240772214285714"
-                                    stroke-width="1.71"></path>
-                            </g>
-                        </svg>
-                        <strong class="text-xl">Registro de ventas:</strong>
-                    </p>
-                    <ul class="ml-9 mt-3">
-                        <li>• Accede al detalle de todas las ventas realizadas, facilitando el seguimiento y la revisión
-                            de cada transacción.</li>
-                    </ul>
+            <!-- CORTES DE CAJA -->
+            <article class="space-y-7">
+                <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-xl text-center text-white">CORTES DE CAJA</h2>
+
+                        <!-- texto -->
+                        <section>
+                            <div class="mt-7 flex space-x-5 pl-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Realiza cortes de manera rápida y precisa.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Seguimiento de transacciones en tiempo real.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_12910_382)">
+                                        <path d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z" fill="#858488"/>
+                                    </g>
+                                    <defs>
+                                    <clipPath id="clip0_12910_382">
+                                        <rect width="25" height="16" fill="white"/>
+                                    </clipPath>
+                                    </defs>
+                                </svg>
+                                <p class="text-white text-lg">Realiza ingresos y retiros de efectivo desde caja, permitiendo mayor transparencia y control.</p>
+                            </div>
+
+                            <div class="mt-10 ml-20">
+                                <Link :href="$page.props.auth.user ? route('register') : route('login')">
+                                    <PrimaryButton class="!text-sm">Saber más</PrimaryButton>
+                                </Link>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- imagen -->
+                    <figure class="lg:w-1/2 pl-5">
+                        <img class="w-full" src="@/../../public/images/function_3.png" alt="ganancias">
+                    </figure>
+
                 </div>
 
-                <!-- divs en blanco para saltar espacios en el grid -->
-                <div></div>
-                <div></div>
-
-                <!-- Reportes -->
-                <div>
-                    <p class="flex items-center space-x-3">
-                        <svg class="bg-[#E9A527] rounded-full text-white p-1" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="-0.855 -0.855 24 24" height="40" width="40"
-                            id="Graph-Bar-Increase--Streamline-Core">
-                            <desc>Graph Bar Increase Streamline Icon: https://streamlinehq.com</desc>
-                            <g id="graph-bar-increase--up-product-performance-increase-arrow-graph-business-chart">
-                                <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="m1.9742412214285712 10.412709814285714 18.30965877857143 -8.326907142857143"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="m16.860792857142858 0.7960714285714285 3.4231071428571425 1.2896357142857142 -1.2737142857142858 3.4231071428571425"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21.095892857142857 21.49392857142857h-3.9803571428571427v-11.145c0 -0.2111340642857143 0.08390592857142856 -0.4136227928571429 0.2330897142857143 -0.562902107142857C17.49796842857143 9.636731228571428 17.700488999999997 9.552857142857142 17.911607142857143 9.552857142857142h2.3882142857142856c0.21111814285714284 0 0.41363871428571425 0.0838740857142857 0.5629817142857143 0.2331693214285714 0.14918378571428573 0.14927931428571428 0.2330897142857143 0.35176804285714286 0.2330897142857143 0.562902107142857v11.145Z"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M13.135178571428572 21.49392857142857h-3.9803571428571427l0 -8.756785714285714c0 -0.2111340642857143 0.0838740857142857 -0.4136227928571429 0.2331693214285714 -0.562902107142857C9.537270064285714 12.024945514285713 9.739758792857144 11.941071428571428 9.950892857142858 11.941071428571428h2.3882142857142856c0.2111340642857143 0 0.4136227928571429 0.0838740857142857 0.562902107142857 0.2331693214285714 0.1492952357142857 0.14927931428571428 0.2331693214285714 0.35176804285714286 0.2331693214285714 0.562902107142857v8.756785714285714Z"
-                                    stroke-width="1.71"></path>
-                                <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="M5.1744642857142855 21.49392857142857H1.1941071428571428l0 -6.368571428571428c0 -0.2111340642857143 0.08387249357142856 -0.4136227928571429 0.23316454499999997 -0.562902107142857C1.5765637392857141 14.4131598 1.7790445071428573 14.329285714285714 1.9901785714285714 14.329285714285714h2.3882142857142856c0.2111340642857143 0 0.4136227928571429 0.0838740857142857 0.562902107142857 0.2331693214285714 0.1492952357142857 0.14927931428571428 0.2331693214285714 0.35176804285714286 0.2331693214285714 0.562902107142857l0 6.368571428571428Z"
-                                    stroke-width="1.71"></path>
-                            </g>
-                        </svg>
-                        <strong class="text-xl">Reportes:</strong>
-                    </p>
-                    <ul class="ml-9 mt-3">
-                        <li>• Visualiza gráficas sobre las ventas y los productos más vendidos, proporcionando una
-                            visión clara del rendimiento del negocio.</li>
-                    </ul>
-                </div>
-
-                <!-- divs en blanco para saltar espacios en el grid -->
-                <div></div>
-                <div></div>
-
-                <!-- Productos -->
-                <div>
-                    <p class="flex items-center space-x-3">
-                        <svg class="bg-[#E9A527] rounded-full text-white p-1" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="-0.565 -0.565 18 18" height="40" width="40"
-                            id="Warehouse-Cart-Packages-2--Streamline-Ultimate">
-                            <desc>Warehouse Cart Packages 2 Streamline Icon: https://streamlinehq.com</desc>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M0.5313916445833333 11.598125H11.748549166666665c0.25276883333333333 0.0004217499999999999 0.49731354166666664 -0.08997333333333334 0.6890692083333333 -0.254737 0.191685375 -0.16476366666666667 0.31785891666666666 -0.39293041666666667 0.35546495833333336 -0.6428875833333333l1.3102366666666667 -8.748500833333333c0.03753575 -0.24962679583333333 0.1633578333333333 -0.4775123791666666 0.3546214583333333 -0.6422268416666667 0.19133391666666666 -0.16472149166666666 0.4353865833333333 -0.25534150833333336 0.6878039583333333 -0.2553977416666667h1.2012845833333334"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.1129534416666664 5.271875h3.163125s0.5271874999999999 0 0.5271874999999999 0.5271874999999999v3.163125s0 0.5271874999999999 -0.5271874999999999 0.5271874999999999h-3.163125s-0.5271874999999999 0 -0.5271874999999999 -0.5271874999999999v-3.163125s0 -0.5271874999999999 0.5271874999999999 -0.5271874999999999Z"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M6.330453441666666 3.163125H10.5479675s0.5271874999999999 0 0.5271874999999999 0.5271874999999999v5.271875s0 0.5271874999999999 -0.5271874999999999 0.5271874999999999H6.330453441666666s-0.5271874999999999 0 -0.5271874999999999 -0.5271874999999999v-5.271875s0 -0.5271874999999999 0.5271874999999999 -0.5271874999999999Z"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M1.5857659416666667 14.497656249999999c0 0.17305808333333333 0.03409145833333333 0.3444291666666666 0.10032729583333333 0.5043427083333333 0.06622880833333333 0.15991354166666666 0.1633156583333333 0.30520641666666665 0.28570047916666663 0.42758420833333327 0.12238482083333332 0.12237779166666667 0.26767066666666667 0.2194505833333333 0.42757717916666665 0.285735625 0.1599065125 0.06621475 0.331284625 0.10030620833333333 0.5043637958333334 0.10030620833333333s0.3444643125 -0.03409145833333333 0.5043637958333334 -0.10030620833333333c0.1599065125 -0.06628504166666666 0.3051993875 -0.1633578333333333 0.42758420833333327 -0.285735625 0.12238482083333332 -0.12237779166666667 0.21946464166666665 -0.26767066666666667 0.28570047916666663 -0.42758420833333327 0.06622880833333333 -0.15991354166666666 0.10032026666666667 -0.331284625 0.10032026666666667 -0.5043427083333333 0 -0.3495604583333333 -0.1388541583333333 -0.6847814166666666 -0.38602074583333335 -0.9319269166666667 -0.24716658749999998 -0.24721579166666666 -0.5824016041666666 -0.3860418333333333 -0.9319480041666667 -0.3860418333333333 -0.3495464 0 -0.6847743875 0.13882604166666668 -0.931940975 0.3860418333333333 -0.24716658749999998 0.24714550000000002 -0.38602777499999996 0.5823664583333333 -0.38602777499999996 0.9319269166666667Z"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M8.966405 14.497656249999999c0 0.3495604583333333 0.13882604166666668 0.6847814166666666 0.3860418333333333 0.9319269166666667 0.24714550000000002 0.24721579166666666 0.5823664583333333 0.3860418333333333 0.9319269166666667 0.3860418333333333 0.3495604583333333 0 0.6847814166666666 -0.13882604166666668 0.9319269166666667 -0.3860418333333333 0.24714550000000002 -0.24714550000000002 0.3860418333333333 -0.5823664583333333 0.3860418333333333 -0.9319269166666667 0 -0.3495604583333333 -0.13889633333333332 -0.6847814166666666 -0.3860418333333333 -0.9319269166666667 -0.24714550000000002 -0.24721579166666666 -0.5823664583333333 -0.3860418333333333 -0.9319269166666667 -0.3860418333333333 -0.3495604583333333 0 -0.6847814166666666 0.13882604166666668 -0.9319269166666667 0.3860418333333333 -0.24721579166666666 0.24714550000000002 -0.3860418333333333 0.5823664583333333 -0.3860418333333333 0.9319269166666667Z"
-                                stroke-width="1.13"></path>
-                        </svg>
-                        <strong class="text-xl">Productos:</strong>
-                    </p>
-                    <ul class="ml-9 mt-3">
-                        <li>• Registra y gestiona los productos, ya sea agregándolos manualmente o seleccionándolos del
-                            <strong class="text-primary">catálogo base (productos pre-cargados)</strong>, que incluye
-                            productos de diversas categorías y marcas reconocidas.
-                        </li>
-                        <figure class="mt-4">
-                            <img class="mx-auto w-3/4" src="@/../../public/images/landing_brands.png" alt="">
-                        </figure>
-                    </ul>
-                </div>
-
-                <!-- divs en blanco para saltar espacios en el grid -->
-                <div></div>
-                <div></div>
-
-                <!-- Caja -->
-                <div>
-                    <p class="flex items-center space-x-3">
-                        <svg class="bg-[#E9A527] rounded-full text-white p-1" width="40" height="40" viewBox="0 0 15 13"
-                            fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M1 7.5H3.57333C3.85187 7.50007 4.12488 7.57769 4.36178 7.72417C4.59869 7.87065 4.79013 8.08019 4.91467 8.32933L5.08533 8.67067C5.20992 8.91991 5.40147 9.12952 5.6385 9.27601C5.87554 9.42249 6.14869 9.50005 6.42733 9.5H8.57267C8.85131 9.50005 9.12446 9.42249 9.3615 9.27601C9.59853 9.12952 9.79008 8.91991 9.91467 8.67067L10.0853 8.32933C10.2099 8.08009 10.4015 7.87048 10.6385 7.72399C10.8755 7.57751 11.1487 7.49995 11.4273 7.5H14M1 7.72533V10.5C1 10.8978 1.15804 11.2794 1.43934 11.5607C1.72064 11.842 2.10218 12 2.5 12H12.5C12.8978 12 13.2794 11.842 13.5607 11.5607C13.842 11.2794 14 10.8978 14 10.5V7.72533C14 7.576 13.9773 7.42733 13.9333 7.28467L12.3267 2.05867C12.2323 1.75216 12.0422 1.48397 11.7842 1.29343C11.5263 1.1029 11.214 1.00006 10.8933 1H4.10733C3.78663 1.00006 3.47439 1.1029 3.21643 1.29343C2.95847 1.48397 2.76836 1.75216 2.674 2.05867L1.06667 7.28467C1.02262 7.42742 1.00015 7.57594 1 7.72533Z"
-                                stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <strong class="text-xl">Caja:</strong>
-                    </p>
-                    <ul class="ml-9 mt-3">
-                        <li>• Realiza cortes de caja.</li>
-                        <li>• Accede al historial de todos los cortes.</li>
-                        <li>• Gestiona el ingreso o retiro de dinero de la caja, asegurando un control preciso de los
-                            fondos.</li>
-                    </ul>
-                </div>
-
-                <!-- divs en blanco para saltar espacios en el grid -->
-                <div></div>
-                <div></div>
-
-                <!-- Gastos -->
-                <div>
-                    <p class="flex items-center space-x-3">
-                        <svg class="bg-[#E9A527] rounded-full text-white p-2" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="-0.565 -0.565 18 18" height="40" width="40"
-                            id="Cash-Payment-Bills--Streamline-Ultimate">
-                            <desc>Cash Payment Bills Streamline Icon: https://streamlinehq.com</desc>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.2289628083333333 8.990585333333334h1.7572916666666667c0.04804435416666666 -0.0018275833333333332 0.09594109583333332 0.0065371249999999995 0.14051304166666664 0.024531791666666667 0.04457194583333333 0.018064958333333332 0.08479986666666665 0.045338125 0.11802673749999999 0.0801325 0.03322687083333333 0.03472408333333333 0.05869354166666667 0.076125875 0.0747130125 0.121464 0.016019470833333334 0.045338125 0.022226225000000002 0.09355820833333332 0.018205541666666665 0.141497125v6.613742916666667c0.004020683333333334 0.047938916666666664 -0.0021860708333333334 0.096159 -0.018205541666666665 0.141497125 -0.016019470833333334 0.045338125 -0.041486141666666664 0.08673991666666667 -0.0747130125 0.121464 -0.03322687083333333 0.034794375 -0.07345479166666666 0.06206754166666666 -0.11802673749999999 0.0801325 -0.04457194583333333 0.017994666666666666 -0.0924686875 0.026359374999999997 -0.14051304166666664 0.024531791666666667h-1.7572916666666667"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="m7.255505833333332 7.43967 -1.350991775 1.682079583333333c-0.08872917083333333 0.11056879166666665 -0.20030313333333333 0.20068270833333332 -0.3270811833333333 0.2640857916666666 -0.12678507916666668 0.063473375 -0.2657727916666667 0.09875979166666667 -0.4074667333333333 0.10353962499999998h-0.8322533333333333"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M4.337712808333333 14.430808875c1.5070533333333334 1.1422395833333332 2.881944275 1.909051375 3.769728025 1.909051375h4.4093962499999995c0.5342166666666667 0 0.8702108333333333 -0.0379575 1.1021733333333332 -0.7345479166666666 0.3541997083333333 -1.7781682916666666 0.5997285 -3.576229125 0.7352508333333333 -5.384341666666667 0 -0.3669225 -0.36762541666666665 -0.7345479166666666 -1.1021733333333332 -0.7345479166666666h-4.169701666666667"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M7.4185122083333335 8.579097916666667 6.330432354166667 0.9651045833333333c-0.007753170833333333 -0.054391691666666665 -0.0037324874999999993 -0.10981667083333334 0.011787912499999999 -0.1625213625 0.015513370833333331 -0.052704691666666664 0.04216797083333333 -0.10146180333333332 0.07815027499999999 -0.14297887333333334 0.03598933333333333 -0.04151636708333333 0.0804699 -0.0748226675 0.13043321666666666 -0.09766745916666665 0.04997034583333333 -0.022844791666666666 0.1042566 -0.03469456083333333 0.15920359583333332 -0.03474938833333333h5.309797354166666"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="m9.72766375 9.489445291666666 -0.6438716666666666 -6.437999691666666c-0.005271875 -0.049183079166666664 -0.00007029166666666666 -0.09892146249999999 0.015253291666666667 -0.14596064583333332 0.015253291666666667 -0.047039183333333325 0.04034741666666666 -0.0903177625 0.07352508333333332 -0.1270100125 0.03317766666666667 -0.03669225 0.07373595833333332 -0.06596872916666667 0.11900379166666666 -0.08591047499999999 0.045267833333333334 -0.019948775 0.09419083333333333 -0.03011295 0.14367616666666666 -0.02983178333333333h4.850125c0.05110204166666667 -0.0006115375 0.10164175 0.009925183333333334 0.148245125 0.03086507083333333 0.046603374999999995 0.020946916666666666 0.08807545833333333 0.051797929166666666 0.12153429166666666 0.09040211249999999 0.033458833333333333 0.0386112125 0.05813120833333333 0.08404774583333333 0.07218954166666666 0.13315350416666666 0.014128624999999999 0.04909872916666666 0.017362041666666665 0.10068578333333333 0.009489375 0.15116222916666666l-0.9700249999999999 6.466819275"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor"
-                                d="M11.735896666666667 6.5869266458333335c-0.14557404166666665 0 -0.26359374999999996 -0.11801267916666668 -0.26359374999999996 -0.26359374999999996s0.11801970833333332 -0.26359374999999996 0.26359374999999996 -0.26359374999999996"
-                                stroke-width="1.13"></path>
-                            <path stroke="currentColor"
-                                d="M11.735896666666667 6.5869266458333335c0.14564433333333332 0 0.26359374999999996 -0.11801267916666668 0.26359374999999996 -0.26359374999999996s-0.11794941666666667 -0.26359374999999996 -0.26359374999999996 -0.26359374999999996"
-                                stroke-width="1.13"></path>
-                        </svg>
-                        <strong class="text-xl">Gastos:</strong>
-                    </p>
-                    <ul class="ml-9 mt-3">
-                        <li>• Registra los gastos relacionados con las ventas para calcular la ganancia neta,
-                            proporcionando una visión completa de la rentabilidad del negocio.</li>
-                    </ul>
-                </div>
-
-                <!-- divs en blanco para saltar espacios en el grid -->
-                <div></div>
-                <div></div>
-
-                <!-- Configuraciones -->
-                <div>
-                    <p class="flex items-center space-x-3">
-                        <svg class="bg-[#E9A527] rounded-full text-white p-2" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="-0.855 -0.855 24 24" height="40" width="40" id="Cog--Streamline-Core">
-                            <desc>Cog Streamline Icon: https://streamlinehq.com</desc>
-                            <g id="cog--work-loading-cog-gear-settings-machine">
-                                <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    d="m8.326970828571428 3.5823214285714284 0.6846214285714285 -1.7672785714285715c0.1154622 -0.29922096 0.31860370714285713 -0.5565956292857143 0.5828038928571428 -0.7384167514285713C9.858612257142857 0.8948065757142857 10.171563857142857 0.7970187535714286 10.492285114285714 0.7960714285714285h1.3055571428571426c0.32072125714285715 0.0009473250000000001 0.6336887785714285 0.09873514714285714 0.8978889642857142 0.28055467714285715 0.2642161071428571 0.18182112214285712 0.4673416928571429 0.4391957914285714 0.5828038928571428 0.7384167514285713l0.6846214285714285 1.7672785714285715 2.3244648857142853 1.3374 1.8787285714285713 -0.2865857142857143c0.3128560714285714 -0.04246245 0.6312846428571428 0.00902745 0.9148452857142857 0.1479419142857143 0.2834014285714285 0.13891446428571427 0.5191977857142857 0.3589645285714285 0.6772975714285714 0.6322080857142857l0.6368571428571429 1.1144999999999998c0.16319464285714283 0.27759010714285715 0.23850299999999997 0.5981362285714286 0.21573535714285716 0.9193351285714286 -0.022767642857142858 0.3211989 -0.14233757142857142 0.6279570642857142 -0.3431067857142857 0.8797862999999999l-1.1622642857142857 1.4806928571428573v2.6748l1.1941071428571428 1.4806928571428573c0.20076921428571426 0.2518292357142857 0.3203391428571428 0.5585874 0.3431067857142857 0.8797862999999999 0.022767642857142858 0.3211989 -0.05254071428571429 0.6417450214285714 -0.21573535714285716 0.9193351285714286l-0.6368571428571429 1.1144999999999998c-0.1580997857142857 0.2732117142857143 -0.39389614285714286 0.4932458571428572 -0.6772975714285714 0.6322399285714285 -0.2835606428571429 0.13883485714285715 -0.6019892142857143 0.1904202857142857 -0.9148452857142857 0.1479100714285714l-1.8787285714285713 -0.2865857142857143 -2.3244648857142853 1.3374 -0.6846214285714285 1.7672785714285715c-0.1154622 0.29916364285714286 -0.3185877857142857 0.5566131428571429 -0.5828038928571428 0.7384358571428571 -0.2642001857142857 0.18182271428571428 -0.5771677071428571 0.2795802857142857 -0.8978889642857142 0.2805355714285714h-1.3374c-0.32072125714285715 -0.0009552857142857142 -0.6336728571428571 -0.09871285714285714 -0.8978889642857142 -0.2805355714285714 -0.2642001857142857 -0.18182271428571428 -0.4673416928571429 -0.4392722142857142 -0.5828038928571428 -0.7384358571428571l-0.6846214285714285 -1.7672785714285715 -2.3245285714285715 -1.3374 -1.8787285714285713 0.2865857142857143c-0.31282422857142855 0.04251021428571428 -0.6312209571428571 -0.009075214285714285 -0.9147179142857143 -0.1479100714285714 -0.28348103571428573 -0.13899407142857143 -0.5192773928571428 -0.3590282142857143 -0.6774249428571428 -0.6322399285714285l-0.6368571428571429 -1.1144999999999998c-0.16319464285714283 -0.27759010714285715 -0.23837562857142855 -0.5981362285714286 -0.21563982857142858 -0.9193351285714286 0.022735799999999997 -0.3211989 0.14233757142857142 -0.6279570642857142 0.34301125714285713 -0.8797862999999999l1.1622642857142857 -1.4806928571428573V9.807599999999999l-1.1941071428571428 -1.4806928571428573c-0.20067368571428573 -0.2518292357142857 -0.32027545714285716 -0.5585874 -0.34301125714285713 -0.8797862999999999 -0.022735799999999997 -0.3211989 0.052445185714285705 -0.6417450214285714 0.21563982857142858 -0.9193351285714286l0.6368571428571429 -1.1144999999999998c0.15814755 -0.27324355714285714 0.39394390714285715 -0.4932936214285714 0.6774249428571428 -0.6322080857142857 0.2834969571428571 -0.13891446428571427 0.6018936857142857 -0.19040436428571428 0.9147179142857143 -0.1479419142857143l1.8787285714285713 0.2865857142857143 2.3563714285714283 -1.3374Zm-0.36619285714285715 7.562678571428571c0 0.6297880285714286 0.18675835714285713 1.2454378285714287 0.5366476714285715 1.7690936142857143 0.34990523571428567 0.5236557857142857 0.8472110571428572 0.9317856857142857 1.4290596642857143 1.1728042714285716 0.5818645285714286 0.2410026642857143 1.2221129357142857 0.3040674428571429 1.8398006785714287 0.18120177857142855 0.6176877428571429 -0.12286566428571428 1.185079692857143 -0.4261370357142857 1.6304179714285714 -0.8714753142857142 0.4453223571428571 -0.4453223571428571 0.7485937285714285 -1.012714307142857 0.8714593928571428 -1.6304020499999998 0.12286566428571428 -0.6176877428571429 0.05981680714285714 -1.25793615 -0.18120177857142855 -1.8398006785714287 -0.2410026642857143 -0.5818486071428571 -0.6491484857142857 -1.07917035 -1.1728042714285716 -1.4290596642857143C12.390501514285713 8.147472642857142 11.774851714285713 7.960714285714285 11.145063685714286 7.960714285714285c-0.8445203357142856 0 -1.6544593285714284 0.33548042142857143 -2.2516243499999997 0.9326613642857143 -0.5971650214285714 0.5971650214285714 -0.9326613642857143 1.4071040142857143 -0.9326613642857143 2.2516243499999997v0Z"
-                                    stroke-width="1.71"></path>
-                            </g>
-                        </svg>
-                        <strong class="text-xl">Configuraciones:</strong>
-                    </p>
-                    <ul class="ml-9 mt-3">
-                        <li>• Personaliza el sistema habilitando o deshabilitando opciones de los diferentes módulos,
-                            adaptándolo a las necesidades específicas del cliente.</li>
-                    </ul>
-                </div>
             </article>
         </section>
 
-        <section class="my-20">
-            <figure class="mt-4 relative">
-                <img class="mx-auto w-screen" src="@/../../public/images/landing-02.png" alt="">
-                <Link class="hidden md:block" :href="route('register')">
-                <PrimaryButton class="absolute bottom-[14%] right-[37%]">¡Comienza ahora!</PrimaryButton>
-                </Link>
-            </figure>
-        </section>
-
-        <section class="my-20 px-4">
-            <figure class="mt-4">
-                <img class="mx-auto lg:w-[85%]" src="@/../../public/images/landing-03.png" alt="">
-            </figure>
-        </section>
     </main>
 
     <footer class="bg-black p-5">
