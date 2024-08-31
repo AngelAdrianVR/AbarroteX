@@ -21,13 +21,13 @@ const windowWidth = ref(window.innerWidth);
 const carouselHeight = ref('600px');
 
 const updateCarouselHeight = () => {
-  var width = window.innerWidth;
+  const width = window.innerWidth;
   if (width < 430) {
     carouselHeight.value = '400px';
   } else if (width >= 430 && width < 1024) {
     carouselHeight.value = '600px';
   } else if (width >= 1024 && width < 1350) {
-    carouselHeight.value = '500px';
+    carouselHeight.value = '530px';
   } else {
     carouselHeight.value = '600px';
   }
@@ -91,7 +91,7 @@ const imageSets = ref([
 
     <Head title="Ezy Ventas" />
 
-    <nav class="bg-black1 shadow-md">
+    <nav class="bg-black1">
         <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
             <div class="flex justify-between items-center h-12 bg-white rounded-full px-4">
                 <div class="flex">
@@ -105,24 +105,24 @@ const imageSets = ref([
                     <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
                         <PrimaryButton class="!py-[5px] md:!py-2">Ingresar</PrimaryButton>
                     </Link>
-                    <Link :href="route('register')">
+                    <!-- <Link :href="route('register')">
                         <PrimaryButton class="!py-[5px] md:!py-2 !bg-gray37">Registrate</PrimaryButton>
-                    </Link>
+                    </Link> -->
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="bg-center bg-black1 selection:bg-primary selection:text-white">
+    <main class="bg-black1 selection:bg-primary selection:text-white pb-24">
         <section class="lg:flex justify-center">
-            <div class="pt-8 lg:mt-10 px-3 mx-2 lg:w-4/5">
+            <div class="pt-8 lg:mt-10 px-3 mx-2 xl:w-4/5">
                 <!-- Carousel -->
                 <div class="block text-center">
                 </div>
-                <figure class="flex flex-col lg:flex-row lg:justify-between lg:space-x-20 lg:w-full">
-                    <img class="lg:w-1/2" src="@/../../public/images/landing-01.png" alt="landing_page">
+                <figure class="flex flex-col lg:flex-row lg:justify-between xl:space-x-20 lg:w-full">
+                    <img class="lg:w-1/2 object-contain" src="@/../../public/images/landing-01.png" alt="landing_page">
                     <div class="lg:w-1/2 mt-5 lg:mt-0 p-4">
-                        <el-carousel trigger="click" height="600px">
+                        <el-carousel trigger="click" :height="carouselHeight">
                             <el-carousel-item v-for="(imageSet, index) in imageSets" :key="index">
                             <img v-for="(image, imgIndex) in imageSet" :key="imgIndex" :src="image" alt="">
                             </el-carousel-item>
@@ -144,11 +144,11 @@ const imageSets = ref([
         <section class="my-12">
             <h1 class="text-3xl text-center font-bold text-white">FUNCIONALIDAD DE LOS MÓDULOS</h1>
 
-            <article class="space-y-7">
+            <article class="my-7">
                 <!-- CONOCE TUS GANANCIAS AL INSTANTE -->
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
                     <div class="lg:w-1/2">
-                        <h2 class="text-xl text-center text-white">CONOCE TUS GANANCIAS AL INSTANTE</h2>
+                        <h2 class="text-2xl text-center text-white">CONOCE TUS GANANCIAS AL INSTANTE</h2>
 
                         <!-- texto -->
                         <section>
@@ -204,7 +204,7 @@ const imageSets = ref([
             </article>
 
             <!-- GESTIONA TU INVENTARIO -->
-            <article class="space-y-7">
+            <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
                     <!-- imagen -->
                     <figure class="lg:w-1/2 pl-5">
@@ -212,7 +212,7 @@ const imageSets = ref([
                     </figure>
 
                     <div class="lg:w-1/2">
-                        <h2 class="text-xl text-center text-white">GESTIONA TU INVENTARIO</h2>
+                        <h2 class="text-2xl text-center text-white">GESTIONA TU INVENTARIO</h2>
 
                         <!-- texto -->
                         <section>
@@ -279,10 +279,10 @@ const imageSets = ref([
             </article>
 
             <!-- CORTES DE CAJA -->
-            <article class="space-y-7">
+            <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
                     <div class="lg:w-1/2">
-                        <h2 class="text-xl text-center text-white">CORTES DE CAJA</h2>
+                        <h2 class="text-2xl text-center text-white">CORTES DE CAJA</h2>
 
                         <!-- texto -->
                         <section>
@@ -327,12 +327,6 @@ const imageSets = ref([
                                 </svg>
                                 <p class="text-white text-lg">Realiza ingresos y retiros de efectivo desde caja, permitiendo mayor transparencia y control.</p>
                             </div>
-
-                            <div class="mt-10 ml-20">
-                                <Link :href="$page.props.auth.user ? route('register') : route('login')">
-                                    <PrimaryButton class="!text-sm">Saber más</PrimaryButton>
-                                </Link>
-                            </div>
                         </section>
                     </div>
 
@@ -342,13 +336,72 @@ const imageSets = ref([
                     </figure>
 
                 </div>
+            </article>
 
+            <!-- ¿Por qué elegir Ezy Ventas? -->
+            <article class="my-7">
+                <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
+                    <!-- imagen -->
+                    <figure class="lg:w-1/2 pl-12">
+                        <img class="w-2/3 mx-auto" src="@/../../public/images/function_4.png" alt="ganancias">
+                    </figure>
+
+                    <div class="lg:w-1/2 mt-5">
+                        <h2 class="text-2xl text-center text-white">¿POR QUÉ ELEGIR EZY VENTAS?</h2>
+
+                        <!-- texto -->
+                        <section>
+                            <div class="mt-7 flex space-x-5 pl-5">
+                                <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
+                                </svg>
+                                <p class="text-white text-lg">Compatible con cualquier dispositivo.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
+                                </svg>
+                                <p class="text-white text-lg">Ingresa desde cualquier lugar.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
+                                </svg>
+                                <p class="text-white text-lg">No requiere de instalaciones.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
+                                </svg>
+                                <p class="text-white text-lg">Gestión de inventario y seguimiento de ventas en tiempo real.</p>
+                            </div>
+
+                            <div class="mt-4 flex space-x-5 pl-5">
+                                <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
+                                </svg>
+                                <p class="text-white text-lg">Productos pre-cargados para tiendas de abarrotes y papelerías.</p>
+                            </div>
+
+                            <div class="flex justify-start space-x-3 mt-10">
+                                <Link :href="$page.props.auth.user ? route('register') : route('login')">
+                                    <PrimaryButton class="!text-sm">Probar ahora</PrimaryButton>
+                                </Link>
+                                <Link :href="route('register')">
+                                    <ThirthButton class="!border-white !text-white !text-sm">Contáctanos</ThirthButton>
+                                </Link>
+                            </div>
+                        </section>
+                    </div>
+                </div>
             </article>
         </section>
-
     </main>
 
-    <footer class="bg-black p-5">
+    <footer class="bg-black1 p-5 -mt-12">
         <div class="border-b border-[#373737] w-full"></div>
         <div class="flex items-center md:justify-between text-white text-sm my-3">
             <p>Copyright c 2024 | Todos los derechos reservador por Ezy Ventas</p>
@@ -359,12 +412,12 @@ const imageSets = ref([
         </div>
         <div class="flex items-center justify-between">
             <figure class="mt-4">
-                <img class="w-24 lg:w-[40%]" src="@/../../public/images/white_logo.png" alt="">
+                <img class="w-20 lg:w-[40%]" src="@/../../public/images/white_logo.png" alt="">
             </figure>
             <figure class="mt-4 cursor-pointer">
                 <a class="flex justify-end items-center" href="https://app.dtw.com.mx/" target="_blank">
                     <p class="text-white text-xl">BY</p>
-                    <img class="w-24 lg:w-[10%]" src="@/../../public/images/DTW_logo_blanco.png" alt="">
+                    <img class="w-20 lg:w-[10%]" src="@/../../public/images/DTW_logo_blanco.png" alt="">
                 </a>
             </figure>
         </div>
