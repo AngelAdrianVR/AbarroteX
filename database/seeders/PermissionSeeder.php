@@ -23,7 +23,7 @@ class PermissionSeeder extends Seeder
                 'Editar precios',
                 'Ver dinero en caja',
                 'Registrar movimientos de caja',
-                'Crear productos',
+                'Crear productos expres',
             ],
             'Reportes' => [
                 'Reportes',
@@ -41,6 +41,14 @@ class PermissionSeeder extends Seeder
                 'Crear gastos',
                 'Editar gastos',
                 'Eliminar gastos',
+            ],
+            'Productos' => [
+                'Productos',
+                'Crear productos',
+                'Editar productos',
+                'Eliminar productos',
+                'Exportar productos',
+                'Importar productos',
             ],
             'Cotizaciones' => [
                 'Cotizaciones',

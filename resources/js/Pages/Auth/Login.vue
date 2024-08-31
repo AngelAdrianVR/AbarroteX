@@ -61,7 +61,7 @@ const submit = () => {
                             d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                     </svg>
                     <input v-model="form.email" id="email"
-                        class="text-sm w-full placeholder:text-sm placeholder:text-[#D9D9D9] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full bg-transparent"
+                        class="text-[#D9D9D9] text-sm w-full placeholder:text-sm placeholder:text-[#D9D9D9] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full bg-transparent"
                         type="email" placeholder="Correo electrónico" required autofocus autocomplete="username">
                 </div>
                 <InputError :message="form.errors.email" />
@@ -75,7 +75,7 @@ const submit = () => {
                             d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                     </svg>
                     <input v-model="form.password" id="password"
-                        class="text-sm w-full placeholder:text-sm placeholder:text-[#D9D9D9] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full bg-transparent"
+                        class="text-[#D9D9D9] text-sm w-full placeholder:text-sm placeholder:text-[#D9D9D9] border-0 focus:ring-0 focus:border-grayD9 border-grayD9 border-l h-full bg-transparent"
                         :type="showPassword ? 'text' : 'password'" placeholder="Contraseña" required>
                     <button @click="showPassword = !showPassword" type="button" class="z-10">
                         <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
