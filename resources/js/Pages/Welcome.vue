@@ -4,6 +4,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
+import Simulator from '@/Components/MyComponents/Landing/Simulator.vue';
 import imageCarousel1 from '@/../../public/images/landing-02.png';
 import imageCarousel2 from '@/../../public/images/landing-02-2.png';
 import imageCarousel3 from '@/../../public/images/landing-02-3.png';
@@ -163,7 +164,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Representación visual de ingresos, gastos y ganancias lo que facilita la situación financiera del negocio.</p>
+                                <p class="text-white text-lg w-[450px]">Representación visual de ingresos, gastos y ganancias lo que facilita la situación financiera del negocio.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
@@ -177,7 +178,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Comparación en diferentes períodos.</p>
+                                <p class="text-white text-lg w-[450px]">Comparación en diferentes períodos.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
@@ -191,7 +192,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Tendencias de ventas y gastos, ayudando a prever necesidades futuras.</p>
+                                <p class="text-white text-lg w-[450px]">Tendencias de ventas y gastos, ayudando a prever necesidades futuras.</p>
                             </div>
                         </section>
                     </div>
@@ -227,7 +228,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Registra y gestiona tus productos.</p>
+                                <p class="text-white text-lg w-[450px]">Registra y gestiona tus productos.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5">
@@ -241,7 +242,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Catálogo base para Abarrotes y Papelerías que incluye productos de diversas categorías y marcas reconocidas.</p>
+                                <p class="text-white text-lg w-[450px]">Catálogo base para Abarrotes y Papelerías que incluye productos de diversas categorías y marcas reconocidas.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5">
@@ -255,7 +256,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Alertas de bajo stock.</p>
+                                <p class="text-white text-lg w-[450px]">Alertas de bajo stock.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5">
@@ -269,7 +270,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Actualización de inventario en tiempo real.</p>
+                                <p class="text-white text-lg w-[450px]">Actualización de inventario en tiempo real.</p>
                             </div>
                         </section>
                     </div>
@@ -297,7 +298,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Realiza cortes de manera rápida y precisa.</p>
+                                <p class="text-white text-lg w-[450px]">Realiza cortes de manera rápida y precisa.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
@@ -311,7 +312,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Seguimiento de transacciones en tiempo real.</p>
+                                <p class="text-white text-lg w-[450px]">Seguimiento de transacciones en tiempo real.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
@@ -325,7 +326,7 @@ const imageSets = ref([
                                     </clipPath>
                                     </defs>
                                 </svg>
-                                <p class="text-white text-lg">Realiza ingresos y retiros de efectivo desde caja, permitiendo mayor transparencia y control.</p>
+                                <p class="text-white text-lg w-[450px]">Realiza ingresos y retiros de efectivo desde caja, permitiendo mayor transparencia y control.</p>
                             </div>
                         </section>
                     </div>
@@ -355,35 +356,35 @@ const imageSets = ref([
                                 <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
                                 </svg>
-                                <p class="text-white text-lg">Compatible con cualquier dispositivo.</p>
+                                <p class="text-white text-lg w-[450px]">Compatible con cualquier dispositivo.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
                                 <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
                                 </svg>
-                                <p class="text-white text-lg">Ingresa desde cualquier lugar.</p>
+                                <p class="text-white text-lg w-[450px]">Ingresa desde cualquier lugar.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
                                 <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
                                 </svg>
-                                <p class="text-white text-lg">No requiere de instalaciones.</p>
+                                <p class="text-white text-lg w-[450px]">No requiere de instalaciones.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
                                 <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
                                 </svg>
-                                <p class="text-white text-lg">Gestión de inventario y seguimiento de ventas en tiempo real.</p>
+                                <p class="text-white text-lg w-[450px]">Gestión de inventario y seguimiento de ventas en tiempo real.</p>
                             </div>
 
                             <div class="mt-4 flex space-x-5 pl-5">
                                 <svg width="39" height="31" viewBox="0 0 39 31" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z" fill="#99FB77"/>
                                 </svg>
-                                <p class="text-white text-lg">Productos pre-cargados para tiendas de abarrotes y papelerías.</p>
+                                <p class="text-white text-lg w-[450px]">Productos pre-cargados para tiendas de abarrotes y papelerías.</p>
                             </div>
 
                             <div class="flex justify-start space-x-3 mt-10">
@@ -399,8 +400,22 @@ const imageSets = ref([
                 </div>
             </article>
         </section>
+
+        <!-- Simulador -->
+        <section class="mt-56 text-center">
+            <h2 class="text-[#999999] text-lg mb-9">SIMULADOR</h2>
+            
+            <p class="text-[#999999]">Personaliza tu suscripción con los módulos que necesitas.</p>
+            <p class="text-white underline">Paga únicamente por lo que utilizas</p>
+            <p class="text-[#999999] mt-5">Elige el giro y te recomendamos que módulos son importantes para tu negocio</p>
+
+            <div class="mt-14 text-left xl:w-[75%] xl:mx-auto mx-5">
+                <Simulator />
+            </div>
+        </section>
     </main>
 
+    <!-- footer -->
     <footer class="bg-black1 p-5 -mt-12">
         <div class="border-b border-[#373737] w-full"></div>
         <div class="flex items-center md:justify-between text-white text-sm my-3">
