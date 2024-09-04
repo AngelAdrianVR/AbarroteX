@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('contact_name');
             $table->json('online_store_properties')->nullable(); //whatsapp,delivery_price,delivery_conditions,min_free_delivery, metodos de pago
             $table->json('printer_config')->nullable(); //información de configuración de impresora
+            $table->json('activated_modules')->nullable(); //modulos activados para la suscripción
             $table->string('contact_phone')->nullable(); // telefono de contacto
             $table->string('address')->nullable();
             $table->string('plan')->default('Plan Básico');
