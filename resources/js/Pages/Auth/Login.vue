@@ -42,7 +42,7 @@ const submit = () => {
         </template>
 
         <div class="flex items-center justify-around mt-2 mb-8 mx-11 border-b border-gray-600 text-sm">
-            <span class="text-primary px-2 border-b-2 border-primary">Iniciar sesión</span>
+            <span class="text-[#E9A527] px-2 border-b-2 border-[#E9A527]">Iniciar sesión</span>
             <button @click="$inertia.visit(route('register'))" type="button"
                 class="text-[#D9D9D9] px-2">Registrarse</button>
         </div>
@@ -112,7 +112,7 @@ const submit = () => {
 
             <div class="mt-6 mx-9 flex items-center space-x-2 text-sm">
                 <p class="text-[#D9D9D9]">¿No tienes cuenta?</p>
-                <Link :href="route('register')" class="underline text-center text-primary focus:outline-none">
+                <Link :href="route('register')" class="underline text-center text-[#E9A527] focus:outline-none">
                 Crear cuenta
                 </Link>
             </div>

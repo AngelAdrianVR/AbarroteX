@@ -18,7 +18,6 @@ defineProps({
 });
 
 const windowWidth = ref(window.innerWidth);
-
 const carouselHeight = ref('600px');
 
 const updateCarouselHeight = () => {
@@ -33,6 +32,12 @@ const updateCarouselHeight = () => {
         carouselHeight.value = '600px';
     }
 };
+
+// Definir la URL de WhatsApp como una propiedad computada
+const whatsappLink = computed(() => {
+  const text = encodeURIComponent('¡Hola!, quisiera más información sobre el punto de venta');
+  return `https://wa.me/523312155731?text=${text}`;
+});
 
 onMounted(() => {
     updateCarouselHeight();
@@ -138,9 +143,9 @@ const imageSets = ref([
                             <Link :href="$page.props.auth.user ? route('register') : route('login')">
                             <PrimaryButton class="!text-sm">Probar ahora</PrimaryButton>
                             </Link>
-                            <Link :href="route('register')">
-                            <ThirthButton class="!border-white !text-white !text-sm">Contáctanos</ThirthButton>
-                            </Link>
+                            <a :href="whatsappLink" target="_blank">
+                                <ThirthButton class="!border-white !text-white !text-sm">Contáctanos</ThirthButton>
+                            </a>
                         </div>
                     </div>
                 </figure>
@@ -448,9 +453,9 @@ const imageSets = ref([
                                 <Link :href="$page.props.auth.user ? route('register') : route('login')">
                                 <PrimaryButton class="!text-sm">Probar ahora</PrimaryButton>
                                 </Link>
-                                <Link :href="route('register')">
-                                <ThirthButton class="!border-white !text-white !text-sm">Contáctanos</ThirthButton>
-                                </Link>
+                                <a :href="whatsappLink" target="_blank">
+                                    <ThirthButton class="!border-white !text-white !text-sm">Contáctanos</ThirthButton>
+                                </a>
                             </div>
                         </section>
                     </div>
@@ -464,11 +469,10 @@ const imageSets = ref([
 
             <p class="text-[#999999]">Personaliza tu suscripción con los módulos que necesitas.</p>
             <p class="text-white underline">Paga únicamente por lo que utilizas</p>
-            <p class="text-[#999999] mt-5">Elige el giro y te recomendamos que módulos son importantes para tu negocio
-            </p>
+            <!-- <p class="text-[#999999] mt-5">Elige el giro y te recomendamos que módulos son importantes para tu negocio</p> -->
 
             <div class="mt-14 text-left xl:w-[75%] xl:mx-auto mx-5">
-                <Simulator />
+                <Simulator id="simulator" />
             </div>
         </section>
     </main>
