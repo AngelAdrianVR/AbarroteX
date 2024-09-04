@@ -67,7 +67,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'activeSuscription', 'roles:Administrador']);
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'activeSuscription', 'hasModule:Reportes']);
     Route::get('dashboard-get-day-data/{date}', [DashboardController::class, 'getDayData'])->name('dashboard.get-day-data');
     Route::get('dashboard-get-week-data/{date}', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
@@ -222,7 +222,7 @@ Route::get('boutique-products-get-by-name/{product_name}', [ProductBoutiqueContr
 
 //rentals routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('rentals', RentalController::class)->middleware(['auth', 'activeSuscription', 'verified']);
+Route::resource('rentals', RentalController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Renta de productos', 'verified']);
 Route::put('rentals/update-status/{rental}', [RentalController::class, 'updateStatus'])->name('rentals.update-status')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('rentals-search', [RentalController::class, 'searchRent'])->name('rentals.search')->middleware('auth');
 Route::get('rentals-get-by-page/{currentPage}', [RentalController::class, 'getItemsByPage'])->name('rentals.get-by-page')->middleware('auth');
@@ -236,7 +236,7 @@ Route::resource('rental-payments', RentalPaymentController::class)->middleware([
 
 //services routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('services', ServiceController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::resource('services', ServiceController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'hasModule:Servicios', 'verified']);
 Route::get('services-get-by-page/{currentPage}', [ServiceController::class, 'getItemsByPage'])->name('services.get-by-page')->middleware('auth');
 Route::get('services-search', [ServiceController::class, 'searchService'])->name('services.search')->middleware('auth');
 Route::get('services-fetch-all-products', [ServiceController::class, 'fetchAllServices'])->name('services.fetch-all-services');
@@ -265,7 +265,7 @@ Route::resource('brands', BrandController::class)->middleware('auth');
 
 //sales routes-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-Route::resource('sales', SaleController::class)->except('show')->middleware('auth')->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero', 'verified']);
+Route::resource('sales', SaleController::class)->except('show')->middleware('auth')->middleware(['auth', 'activeSuscription', 'hasModule:Ventas registradas', 'verified']);
 Route::get('sales/{date}/{cashRegisterId}', [SaleController::class, 'show'])->name('sales.show')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
@@ -279,7 +279,7 @@ Route::post('sales/update-group-sale', [SaleController::class, 'updateGroupSale'
 
 //expenses routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
+Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Gastos', 'verified']);
 Route::delete('expenses/delete-day/{expense}', [ExpenseController::class, 'deleteDayExpenses'])->name('expenses.delete-day')->middleware('auth');
 Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
 Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
@@ -288,7 +288,7 @@ Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'p
 
 //quotes routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
+Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Cotizaciones', 'verified']);
 Route::get('quotes-search', [QuoteController::class, 'searchQuote'])->name('quotes.search')->middleware('auth');
 Route::get('quotes-get-by-page/{currentPage}', [QuoteController::class, 'getItemsByPage'])->name('quotes.get-by-page')->middleware('auth');
 Route::post('quotes-update-status/{quote}', [QuoteController::class, 'updateStatus'])->name('quotes.update-status')->middleware('auth');
@@ -334,7 +334,7 @@ Route::put('users-save-printer-config/{user}', [UserController::class, 'savePrin
 
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador', 'verified']);
+Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Configuraciones', 'verified']);
 Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
 
 
@@ -345,7 +345,7 @@ Route::resource('cards', CardController::class)->middleware('auth');
 
 //clients routes----------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
-Route::resource('clients', ClientController::class)->middleware('auth');
+Route::resource('clients', ClientController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Clientes', 'verified']);
 Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
 Route::get('clients-search', [ClientController::class, 'searchClient'])->name('clients.search')->middleware('auth');
 Route::get('clients-print-credit-historial/{client}', [ClientController::class, 'PrintCreditHistorical'])->name('clients.print-credit-historial')->middleware('auth');
@@ -382,7 +382,7 @@ Route::resource('payments', PaymentController::class)->middleware('auth');
 
 //Cash register routes--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
-Route::resource('cash-registers', CashRegisterController::class)->middleware(['auth', 'activeSuscription', 'roles:Administrador,Cajero', 'verified']);
+Route::resource('cash-registers', CashRegisterController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Caja', 'verified']);
 Route::get('cash-registers-fetch-cash-register/{cash_register_id}', [CashRegisterController::class, 'fetchCashRegister'])->middleware('auth')->name('cash-registers.fetch-cash-register');
 Route::put('cash-registers-asign/{user}/{cash_register_id}', [CashRegisterController::class, 'asignCashRegister'])->middleware('auth')->name('cash-registers.asign');
 
@@ -432,7 +432,7 @@ Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWit
 
 //online sales routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
-Route::resource('online-sales', OnlineSaleController::class);
+Route::resource('online-sales', OnlineSaleController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified']);
 Route::get('online-sales-client-index/{encoded_store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
 Route::post('online-sales/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
 Route::get('online-sales-show-local-product/{product_id}', [OnlineSaleController::class, 'ShowLocalProduct'])->name('online-sales.show-local-product');

@@ -36,7 +36,7 @@ class CreateNewUser implements CreatesNewUsers
         ])->validate();
 
         // modulos esenciales incluidos
-        $activated_modules = ['Punto de venta', 'Reportes', 'Registro de ventas', 'Productos', 'Configuraciones'];
+        $activated_modules = ['Punto de venta', 'Reportes', 'Ventas registradas', 'Productos', 'Configuraciones', 'Caja'];
 
         // Combina los módulos esenciales con los módulos activados desde el formulario
         $activated_modules = array_merge($activated_modules, $input['activated_modules']);
@@ -79,7 +79,7 @@ class CreateNewUser implements CreatesNewUsers
         ]);
 
         //crea al usuario relacionado a esta tienda con el rol de administrador
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'rol' => 'Administrador',
@@ -87,5 +87,8 @@ class CreateNewUser implements CreatesNewUsers
             'store_id' => $store->id,
             'cash_register_id' => $cash_register->id,
         ]);
+        $user->syncRoles(['Administrador']);
+
+        return $user;
     }
 }
