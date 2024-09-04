@@ -268,35 +268,45 @@ export default {
             form,
             edit: false,
             loading: false,
+            modules: [
+                {
+                    name: 'Registro de gastos',
+                    cost: 30,
+                },
+                {
+                    name: 'Tienda en línea',
+                    cost: 120,
+                },
+                {
+                    name: 'Clientes',
+                    cost: 80,
+                },
+                {
+                    name: 'Cotizaciones',
+                    cost: 80,
+                },
+                {
+                    name: 'Renta de productos',
+                    cost: 30,
+                },
+                {
+                    name: 'Servicios',
+                    cost: 60,
+                },
+            ],
             suscriptions: [
                 {
                     name: "Mensual",
                     title: "Mensual (30 días)",
-                    amount: 199.00,
-                    description: "Pagas $199.00 cada mes",
+                    amount: 199,
+                    description: "",
                     days: 30,
                     daysGifted: 0,
                 },
-                // {
-                //     name: "Trimestral",
-                //     title: "Trimestral (3 meses)",
-                //     amount: 499.00,
-                //     description: "Pagas $166.33 cada mes",
-                //     days: 90,
-                //     daysGifted: 0,
-                // },
-                // {
-                //     name: "Semestral",
-                //     title: "Semestral (6 meses)",
-                //     amount: 899.00,
-                //     description: "Pagas $149.83 cada mes",
-                //     days: 180,
-                //     daysGifted: 0,
-                // },
                 {
                     name: "Anual",
                     title: "Anual (12 meses)",
-                    amount: 1990.00,
+                    amount: 1990,
                     description: "Te regalamos 2 meses",
                     days: 365,
                     daysGifted: 0,
@@ -342,9 +352,30 @@ export default {
         },
         amountToPay() {
             return this.suscriptions.find(item => item.name == this.form.suscription_period)?.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-        }
+        },
     },
     methods: {
+        calculateTotalPeriosPrice() {
+            // Filtra los módulos activados
+            const activatedModules = this.$page.props.auth.user.store.activated_modules;
+
+            // Calcula el costo total de los módulos activados
+            let totalCost = 199;
+            this.modules.forEach(module => {
+                if (activatedModules.includes(module.name)) {
+                    totalCost += module.cost;
+                }
+            });
+
+            // Actualiza el amount de la suscripción mensual
+            this.suscriptions.forEach(suscription => {
+                if (suscription.name === "Mensual") {
+                    suscription.amount = totalCost;
+                } else {
+                    suscription.amount = (totalCost * 10);
+                }
+            });
+        },
         prepareReUpload() {
             const lastPayment = this.$page.props.auth.user.store.last_payment;
             this.form.suscription_period = lastPayment.suscription_period;
@@ -449,6 +480,9 @@ export default {
         saveImage(image) {
             this.form.image = image;
         },
+    },
+    mounted() {
+        this.calculateTotalPeriosPrice();
     }
 }
 </script>
