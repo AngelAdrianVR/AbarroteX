@@ -315,6 +315,7 @@ Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController:
 Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
 // Route::put('stores-update-printer-config/{store}', [StoreController::class, 'updatePrinterConfig'])->middleware('auth')->name('stores.update-printer-config');
 Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
+Route::post('stores-update-modules/{store}', [StoreController::class, 'UpdateModules'])->name('store.update-modules');
 
 
 // User routes-----------------------------------------------------------------------------------------
