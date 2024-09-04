@@ -27,7 +27,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
             <AuthenticationCardLogo />
         </template>
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-grayD9">
             Antes de continuar, debes de verificar tu correo dando click en el link que te enviamos.
             Si no has recibido ningún correo, con gusto te enviaremos otro. 
         </div>
@@ -44,11 +44,11 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
 
                 <div>
                     <Link :href="route('profile.show')"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                        class="underline text-sm text-grayD9 hover:text-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     Editar perfil</Link>
 
                     <Link :href="route('logout')" method="post" as="button"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ms-4">
+                        class="underline text-sm text-grayD9 hover:text-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ms-4">
                     Cerrar sesión
                     </Link>
                 </div>
