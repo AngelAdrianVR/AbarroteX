@@ -142,13 +142,13 @@ export default {
                     title: "Ventas en linea (ingresos)",
                     icon: "fa-solid fa-dollar-sign",
                     value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
-                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
                 },
                 {
                     title: "Unidades vendidas en linea",
                     icon: "fa-solid fa-clipboard-list",
                     value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
-                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
                 },
                 {
                     title: "Compras (Gastos)",
@@ -231,7 +231,7 @@ export default {
                         name: timeline.current.name,
                         data: timeline.current.data.onlineSales,
                     }],
-                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
                 },
                 {
                     title: 'Gastos (compras)',

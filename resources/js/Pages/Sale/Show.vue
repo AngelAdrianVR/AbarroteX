@@ -353,7 +353,7 @@ export default {
             changingDay: false,
             // perimsos o roles
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
-            hasOnlineSales: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+            hasOnlineSales: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
             // tabs
             activeTab: '1',
         }

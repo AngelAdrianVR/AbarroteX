@@ -158,7 +158,7 @@
           <div class="lg:mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
               <div
-                v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' || ['Otro', 'Boutique / Tienda de Ropa / Zapatería'].includes($page.props.auth.user.store.type)"
+                v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
                 class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
@@ -319,7 +319,7 @@
                 <p class="text-sm text-gray-400 text-left mb-3">Opciones de pago</p>
                 <div class="flex items-center justify-end space-x-4">
                   <PrimaryButton
-                    v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' || ['Otro', 'Boutique / Tienda de Ropa / Zapatería'].includes($page.props.auth.user.store.type)"
+                    v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
                     @click="creditPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
                     class="!px-4 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
