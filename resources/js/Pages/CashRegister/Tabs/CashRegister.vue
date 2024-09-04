@@ -71,12 +71,12 @@
           </div>
           <p v-else class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
             cutForm.totalStoreSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-          <p v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99 col-span-3">Ventas en línea
+          <p v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-gray99 col-span-3">Ventas en línea
           </p>
           <div v-if="cutLoading">
             <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
           </div>
-          <p v-else-if="$page.props.auth.user.store.plan == 'Plan Intermedio'" class="text-gray99 pb-5"><span
+          <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-gray99 pb-5"><span
               class="text-gray99 mr-3 ml-[17px]">$</span>{{
                 cutForm.totalOnlineSale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
           <p v-if="currentMovements?.length" @click="showcashRegisterMovements = !showcashRegisterMovements"
