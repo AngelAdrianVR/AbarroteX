@@ -31,8 +31,9 @@
                         </div>
                     </InputLabel>
                     <el-radio-group v-model="form.rol" class="ml-4">
-                        <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">{{ role.name
-                            }}</el-radio>
+                        <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">
+                            {{ role.name }}
+                        </el-radio>
                     </el-radio-group>
                     <InputError :message="form.errors.rol" />
                 </div>
@@ -77,25 +78,27 @@
                     <hr class="border-grayD9">
                     <div class="lg:grid grid-cols-4">
                         <div v-for="(guard, index) in Object.keys(permissions)" :key="index" class="border p-3">
-                            <div class="flex items-center justify-between pb-1 mb-1 border-grayD9 border-b">
-                                <label class="flex space-x-2">
-                                    <input type="checkbox" v-model="roleForm.permissions"
-                                        :value="permissions[guard][0].id"
-                                        class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent" />
-                                    <span class="font-bold">{{ permissions[guard][0].name }}</span>
-                                </label>
-                                <span v-html="modules.find(m => m.name == permissions[guard][0].name)?.icon"></span>
-                            </div>
-                            <template v-for="(permission, index2) in permissions[guard]" :key="permission.id">
-                                <label v-if="index2" class="flex space-x-2">
-                                    <input type="checkbox" v-model="roleForm.permissions" :value="permission.id"
-                                        class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent disabled:text-primarylight disabled:border-gray-300 disabled:cursor-not-allowed"
-                                        :disabled="!roleForm.permissions.some(p => p == permissions[guard][0].id)" />
-                                    <span class="text-sm"
-                                        :class="!roleForm.permissions.some(p => p == permissions[guard][0].id) ? 'text-gray-300 cursor-not-allowed' : null">{{
-                                            permission.name }}</span>
-                                </label>
-                            </template>
+                            <!-- <div v-if=""> -->{{ this.$page.props.auth.user.store.activated_modules }}
+                                <div class="flex items-center justify-between pb-1 mb-1 border-grayD9 border-b">
+                                    <label class="flex space-x-2">
+                                        <input type="checkbox" v-model="roleForm.permissions"
+                                            :value="permissions[guard][0].id"
+                                            class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent" />
+                                        <span class="font-bold">{{ permissions[guard][0].name }}</span>
+                                    </label>
+                                    <span v-html="modules.find(m => m.name == permissions[guard][0].name)?.icon"></span>
+                                </div>
+                                <template v-for="(permission, index2) in permissions[guard]" :key="permission.id">
+                                    <label v-if="index2" class="flex space-x-2">
+                                        <input type="checkbox" v-model="roleForm.permissions" :value="permission.id"
+                                            class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent disabled:text-primarylight disabled:border-gray-300 disabled:cursor-not-allowed"
+                                            :disabled="!roleForm.permissions.some(p => p == permissions[guard][0].id)" />
+                                        <span class="text-sm"
+                                            :class="!roleForm.permissions.some(p => p == permissions[guard][0].id) ? 'text-gray-300 cursor-not-allowed' : null">{{
+                                                permission.name }}</span>
+                                    </label>
+                                </template>
+                            <!-- </div> -->
                         </div>
                     </div>
                 </form>
