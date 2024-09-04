@@ -33,7 +33,7 @@
         </div>
         <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">
-            ${{ sale.product.public_price }}
+            ${{ sale.product.public_price }}/{{ getPrefix(sale) }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
             <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
               @click.stop="startEditing(sale, index)"
@@ -109,7 +109,7 @@
         </div>
         <div class="flex items-center space-x-2 text-lg">
           <template v-if="editMode !== index">
-            ${{ sale.product.public_price }}
+            ${{ sale.product.public_price }}/{{ getPrefix(sale) }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
             <button @click.stop="startEditing(sale, index)"
               class="flex items-center justify-center text-primary bg-gray-200 size-4 rounded-full ml-2 mr-1">
@@ -263,6 +263,16 @@ export default {
         syncIDBProducts();
       }
     },
+    getPrefix(sale) {
+      console.log(sale);
+      if ( sale.product.bulk_product ) { //revisa si es a granel
+        if ( sale.product.measure_unit === 'Kilogramo' ) { //si es a granel revisa que unidad de medida para retornal el prefijo
+            return 'Kg';
+        } else if ( sale.product.measure_unit === 'Litro' ) {
+          return 'L';
+        } 
+      } 
+    }
   },
 };
 </script>

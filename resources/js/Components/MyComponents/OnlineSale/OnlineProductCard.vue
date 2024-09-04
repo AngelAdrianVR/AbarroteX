@@ -22,10 +22,18 @@
 
         <!-- Detalles -->
         <div class="text-center mt-2 flex flex-col justify-center items-center h-1/2">
-            <h1 class="h-12">{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
-            <p class="text-2xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price :
-                product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }} {{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</p>
+        <div class="h-12">
+            <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
+            <span class="text-gray99">{{ product.currency === '$USD' ? 'USD' : 'MXN' }}</span>
+        </div>
             
+            <div class="flex items-center space-x-1">
+                <p class="text-2xl font-bold my-3">
+                    ${{ product.global_product_id ? product.global_product.public_price 
+                        :product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
+                </p>
+            </div>
             <!-- Si es bajo pedido -->
             <div class="flex flex-col items-center" v-if="product.product_on_request">
                 <el-input-number v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />

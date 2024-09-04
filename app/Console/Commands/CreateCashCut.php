@@ -72,12 +72,16 @@ class CreateCashCut extends Command
                 //si hay movimientos y/o ventas pendientes
                 if ($movementsPendentToday->isNotEmpty() || $salesPendentToday->isNotEmpty() || $onlineSalesPendentToday->isNotEmpty()) {
                     // suma algebraica de todo el dinero que ingresó y salió de caja
-                    $expected_cash = $cashRegister->started_cash //dinero inicial en caja
-                        + $movementsPendentToday->where('type', 'Ingreso')->sum('amount') //movimientos de ingreso
-                        - $movementsPendentToday->where('type', 'Retiro')->sum('amount') //movimientos de retiro
-                        + $totalStoreSalesToday
-                        + $totalOnlineSaleToday;
+                    $expected_cash = $cashRegister->started_cash 
+                    + $movementsPendentToday->where('type', 'Ingreso')->sum('amount') 
+                    - $movementsPendentToday->where('type', 'Retiro')->sum('amount') 
+                    + $totalStoreSalesToday 
+                    + $totalOnlineSaleToday;
 
+                    // Asegurarse de que el valor no sea negativo
+                    if ($expected_cash < 0) {
+                        $expected_cash = 0;
+                    }
 
                     // Crea el registro de corte de caja
                     CashCut::create([

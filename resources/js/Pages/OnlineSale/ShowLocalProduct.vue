@@ -18,8 +18,9 @@
                 <div>
                     <h1 class="font-bold text-2xl mt-4">{{ product.name }}</h1>
                     <p class="text-2xl text-primary font-bold mt-4">
-                        ${{ integerPart }}
+                        {{ product.currency === '$USD' ? 'USD' : 'MXN' }} ${{ integerPart }}
                         <span class="decimal-part">{{ decimalPart }}</span>
+                        <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
                     </p>
 
                     <!-- Si no es bajo pedido -->
@@ -74,7 +75,7 @@
                             product.current_stock ?? 0 }} </span>
                     </p>
 
-                    <p class="font-bold text-sm my-2">Este producto se surte bajo pedido. Tiempo estimado de entrega: {{ product.days_for_delivery }} días hábiles.</p>
+                    <p v-if="product.product_on_request" class="font-bold text-sm my-2">*Este producto se surte bajo pedido. Tiempo estimado de entrega: {{ product.days_for_delivery }} días hábiles.</p>
 
                     <p v-if="alreadyInCart" class="text-green-500 text-lg mt-5 text-center"><i class="fa-regular fa-circle-check"></i> Agregado a carrito</p>
 

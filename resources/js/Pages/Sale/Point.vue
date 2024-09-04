@@ -237,7 +237,7 @@
                 <p v-else class="text-center text-xs text-gray99 pt-10 px-8">Este producto no tiene imagen registrada
                 </p>
               </figure>
-              <div class="flex justify-between items-center mt-2 mb-4 text-lg">
+              <div class="flex justify-between items-center mt-2 text-lg">
                 <p class="font-bold">
                   {{ productFoundSelected.name }}
                   <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
@@ -247,7 +247,11 @@
                 </p>
                 <p class="text-[#5FCB1F]">${{ productFoundSelected.public_price }}</p>
               </div>
-              <div class="flex justify-between items-center">
+              <div v-if="productFoundSelected.bulk_product" class="flex justify-between items-center text-base">
+                <p class="text-gray99">Producto a granel</p>
+                <p class="text-gray99">El {{ productFoundSelected.measure_unit }}</p>
+              </div>
+              <div class="flex justify-between items-center mt-4">
                 <p class="text-gray99">Cantidad</p>
                 <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0"
                   :max="productFoundSelected.current_stock" :precision="2" />

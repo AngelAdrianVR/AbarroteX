@@ -19,8 +19,9 @@
                 <div class="h-96">
                     <h1 class="font-bold text-2xl mt-4">{{ global_product.global_product.name }}</h1>
                     <p class="text-2xl text-primary font-bold mt-4">
-                        ${{ integerPart }}
+                        {{ product.currency === '$USD' ? 'USD' : 'MXN' }} ${{ integerPart }}
                         <span class="decimal-part">{{ decimalPart }}</span>
+                        <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
                     </p>
                     <div class="flex items-center space-x-3 mt-5">
                         <p class="text-gray99">Cantidad</p>
