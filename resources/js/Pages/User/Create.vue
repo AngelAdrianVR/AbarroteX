@@ -31,8 +31,9 @@
                         </div>
                     </InputLabel>
                     <el-radio-group v-model="form.rol" class="ml-4">
-                        <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">{{ role.name
-                            }}</el-radio>
+                        <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">
+                            {{ role.name }}
+                        </el-radio>
                     </el-radio-group>
                     <InputError :message="form.errors.rol" />
                 </div>
@@ -74,9 +75,9 @@
                         <InputError :message="roleForm.errors.name" />
                     </div>
                     <h2 class="font-bold my-3">Agregar permisos</h2>
-                    <hr class="border-grayD9">
                     <div class="lg:grid grid-cols-4">
-                        <div v-for="(guard, index) in Object.keys(permissions)" :key="index" class="border p-3">
+                        <div v-for="(guard, index) in Object.keys(permissions).filter(permission => this.$page.props.auth.user.store.activated_modules.includes(permission))"
+                            :key="index" class="border p-3">
                             <div class="flex items-center justify-between pb-1 mb-1 border-grayD9 border-b">
                                 <label class="flex space-x-2">
                                     <input type="checkbox" v-model="roleForm.permissions"
