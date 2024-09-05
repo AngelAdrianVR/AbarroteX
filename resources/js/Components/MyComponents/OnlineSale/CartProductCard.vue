@@ -23,19 +23,23 @@
                 <div v-if="actions" class="flex justify-between">
                     <div class="flex items-center space-x-2">
                         <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
-                        <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product?.current_stock < 1"
+                        <el-input-number v-if="store?.online_store_properties?.inventory && !product?.product_on_request" :disabled="product?.current_stock < 1"
                             v-model="quantity" size="small" :min="0" :max="product?.current_stock" :precision="2" />
 
                         <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
                         <el-input-number v-else v-model="quantity" size="small" :min="0" :max="999" :precision="2" />
-                            <p v-if="store?.online_store_properties?.inventory" class="text-xs text-gray99">disponibles: {{ product?.current_stock }}</p>
+                        <div>
+                            <p v-if="store?.online_store_properties?.inventory" class="text-xs text-gray99">disponibles: {{ product?.current_stock ?? 0 }}</p>
+                        <p v-if="product?.product_on_request" class="text-xs text-gray99">Producto bajo pedido.</p>
+                        <p v-if="product?.product_on_request" class="text-xs text-gray99">Entrega: {{ product.days_for_delivery }} días hábiles</p>
+                        </div>
                     </div>
                     <!-- Eliminar producto de carrito -->
                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                     title="¿Deseas continuar?" @confirm="deleteCartProduct()">
                     <template #reference>
                         <i
-                        class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-[#F2F2F2] rounded-full py-1 px-[7px] cursor-pointer"></i>
+                        class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-[#F2F2F2] rounded-full py-1 px-[7px] cursor-pointer self-start"></i>
                     </template>
                     </el-popconfirm>
                 </div>

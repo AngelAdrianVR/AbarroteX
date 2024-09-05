@@ -20,7 +20,7 @@ class QuoteController extends Controller
     
     public function create()
     {   
-        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'company']);
 
         return inertia('Quote/Create', compact('clients'));
     }
@@ -34,6 +34,8 @@ class QuoteController extends Controller
             'email' => 'nullable|string',
             'address' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:255',
+            'payment_conditions' => 'nullable|string|max:100',
+            'expired_date' => 'nullable|date|after:today',
             'show_iva' => 'boolean',
             'has_discount' => 'boolean',
             'discount' => 'nullable|numeric|min:0|max:99999',
@@ -62,16 +64,22 @@ class QuoteController extends Controller
         // Decodificar el ID
         $decoded_quote_id = base64_decode($encoded_quote_id);
 
-        $quote = Quote::with(['client:id,name'])
+        $quote = Quote::with(['client'])
             ->findOrFail($decoded_quote_id);
 
-        return inertia('Quote/Show', compact('quote'));
+        // return $quote;
+        //si el usuario es dm compresores manda al template personalizado, si no, al general.
+        if ( auth()->user()->store->name === 'DM Compresores' || auth()->user()->store_id === 6 || auth()->user()->store_id === 1 ) {
+            return inertia('Quote/ShowDMCompresores', compact('quote'));
+        } else {
+            return inertia('Quote/Show', compact('quote'));
+        }
     }
 
     
     public function edit($encoded_quote_id)
     {
-        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
+        $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'company']);
 
         // Decodificar el ID
         $decoded_quote_id = base64_decode($encoded_quote_id);
@@ -91,6 +99,8 @@ class QuoteController extends Controller
             'email' => 'nullable|string',
             'address' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:255',
+            'payment_conditions' => 'nullable|string|max:100',
+            'expired_date' => 'nullable|date|after:today',
             'show_iva' => 'boolean',
             'has_discount' => 'boolean',
             'discount' => 'nullable|numeric|min:0|max:99999',

@@ -14,6 +14,7 @@ class Quote extends Model
         'folio',
         'contact_name',
         'phone',
+        'payment_conditions',
         'email',
         'address',
         'show_iva',

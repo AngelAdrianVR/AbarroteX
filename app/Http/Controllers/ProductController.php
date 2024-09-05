@@ -9,6 +9,7 @@ use App\Models\CashRegisterMovement;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\GlobalProductStore;
+use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Services\TinifyService;
@@ -54,6 +55,10 @@ class ProductController extends Controller
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'nullable',
+            'product_on_request' => 'boolean',
+            'bulk_product' => 'boolean',
+            'measure_unit' => $request->bulk_product ? 'required|string' : 'nullable|string',
+            'days_for_delivery' => $request->product_on_request ? 'required|numeric|min:1|max:255' : 'nullable|numeric|min:1|max:255',
             'brand_id' => 'nullable',
         ]);
 
@@ -108,6 +113,7 @@ class ProductController extends Controller
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
+        // return $product;
         return inertia('Product/Edit', compact('product', 'categories', 'brands'));
     }
 
@@ -124,6 +130,10 @@ class ProductController extends Controller
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'nullable',
+            'product_on_request' => 'boolean',
+            'bulk_product' => 'boolean',
+            'measure_unit' => $request->bulk_product ? 'required|string' : 'nullable|string',
+            'days_for_delivery' => $request->product_on_request ? 'required|numeric|min:1|max:255' : 'nullable|numeric|min:1|max:255',
             'brand_id' => 'nullable',
         ]);
 
@@ -166,6 +176,10 @@ class ProductController extends Controller
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'nullable',
+            'product_on_request' => 'boolean',
+            'bulk_product' => 'boolean',
+            'measure_unit' => $request->bulk_product ? 'required|string' : 'nullable|string',
+            'days_for_delivery' => $request->product_on_request ? 'required|numeric|min:1|max:255' : 'nullable|numeric|min:1|max:255',
             'brand_id' => 'nullable',
         ]);
 
@@ -481,6 +495,8 @@ class ProductController extends Controller
                     'additional' => $product->additional,
                     'public_price' => $product->public_price,
                     'current_stock' => $product->current_stock,
+                    'bulk_product' => $product->bulk_product,
+                    'measure_unit' => $product->measure_unit,
                     'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
                 ];
             })->toArray();

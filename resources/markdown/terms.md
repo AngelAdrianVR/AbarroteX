@@ -19,10 +19,10 @@ El uso continuado del sistema después de la entrada en vigor de los cambios se 
 El Proveedor se reserva el derecho de realizar actualizaciones en el Software sin previo aviso al Usuario.
 
 **El Proveedor ofrece los siguientes servicios:**
-* cceso al sistema las 24 horas del día, los 365 días del año.
+* Acceso al sistema las 24 horas del día, los 365 días del año.
 * Actualizaciones remotas del sistema.
 * Soporte técnico y capacitación remota para usuarios con suscripción.
 
 El Proveedor se compromete a mantener el sistema en funcionamiento constante, salvo por causas de fuerza mayor. 
 
-El sistema se ofrece en modalidades de suscripción mensual o anual, con servicios adicionales incluidos según el tipo de suscripción.
+El sistema se ofrece en modalidades de suscripción mensual o anual, con modulos o caracteristicas adicionales incluidos según el tipo de suscripción.

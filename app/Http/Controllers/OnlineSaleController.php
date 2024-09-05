@@ -62,6 +62,7 @@ class OnlineSaleController extends Controller
         // Obtener los banners
         $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
 
+        // return $all_products;
         // Retornar la vista con los datos
         return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id', 'banners'));
     }
@@ -271,7 +272,7 @@ class OnlineSaleController extends Controller
         $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
             ->where('store_id', $store_id)
             ->latest('id')
-            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
+            ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock', 'product_on_request', 'bulk_product', 'measure_unit', 'days_for_delivery', 'currency']);
 
         // productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', $store_id)->get();
@@ -380,12 +381,15 @@ class OnlineSaleController extends Controller
         //     $cash_register->save();
         // }
 
-        // Si se cambia el estado a 'delivered' y existe una caja configurada
-        if ($request->status == 'delivered' && $request->online_sales_cash_register) {
+        // Si se cambia el estado a 'delivered'
+        if ($request->status == 'delivered') {
             $total_sale = $online_sale->total + $online_sale->delivery_price;
-            $cash_register = CashRegister::find($request->online_sales_cash_register);
-            $cash_register->current_cash += $total_sale;
-            $cash_register->save();
+            // si existe una caja configurada
+            if ( $request->online_sales_cash_register ) {
+                $cash_register = CashRegister::find($request->online_sales_cash_register);
+                $cash_register->current_cash += $total_sale;
+                $cash_register->save();
+            }
             $delivered_at = now();
         }
 
@@ -422,7 +426,7 @@ class OnlineSaleController extends Controller
         // Productos creados localmente en la tienda que no están en el catálogo base o global
         $local_products = Product::with('media')->where('store_id', auth()->user()->store_id)
             ->latest('id')
-            ->get(['id', 'name', 'public_price', 'current_stock']);
+            ->get(['id', 'name', 'public_price', 'current_stock', 'product_on_request', 'days_for_delivery']);
 
         // Productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with('globalProduct.media', 'globalProduct:id,name,public_price')
@@ -449,7 +453,9 @@ class OnlineSaleController extends Controller
                     ? ($product['global_product']['media'][0]['original_url'] ?? null)
                     : ($product['media'][0]['original_url'] ?? null),
                 'disabled' => false, //propiedad de deshabilitado para no mostrarlo en la creación de orden cuando ya se seleccionó
-                'relative_id' => $relative_id // Asignamos el relative_id actual
+                'relative_id' => $relative_id, // Asignamos el relative_id actual
+                'product_on_request' => $product['product_on_request'] ?? null, // si es producto bajo pedido
+                'days_for_delivery' => $product['days_for_delivery'] ?? null // si es producto bajo pedido
             ];
             $relative_id++; // Incrementamos el contador
             return $formatted_product;
@@ -582,7 +588,8 @@ class OnlineSaleController extends Controller
         foreach ($products as $product) {
             $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
 
-            if ($temp_product->current_stock < $product['quantity']) {
+            //revisa que no sea producto bajo pedido para no tomar en cuenta el stock
+            if ($temp_product->current_stock < $product['quantity'] && !$product['product_on_request']) { 
                 throw ValidationException::withMessages([
                     'products' => 'No hay suficiente stock disponible de ' . $product['name'],
                 ]);
@@ -595,9 +602,12 @@ class OnlineSaleController extends Controller
     {
         // if ($storeInventory === true) {
         foreach ($products as $product) {
-            $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
-            $temp_product->current_stock -= $product['quantity'];
-            $temp_product->save();
+            //revisa que no sea producto bajo pedido para no rebajarlo del stock
+            if ( !$product['product_on_request'] ) {
+                $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
+                $temp_product->current_stock -= $product['quantity'];
+                $temp_product->save();
+            }
         }
         // }
     }

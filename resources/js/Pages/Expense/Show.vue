@@ -192,8 +192,8 @@ export default {
             itemIdToDelete: null,
             itemIdToEdit: null,
             // Permisos de rol actual
-            canDelete: this.$page.props.auth.user.rol == 'Administrador',
-            canEdit: this.$page.props.auth.user.rol == 'Administrador',
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar gastos'),
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar gastos'),
             // cargas
             deleting: false,
         }

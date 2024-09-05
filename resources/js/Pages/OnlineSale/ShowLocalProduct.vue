@@ -18,40 +18,64 @@
                 <div>
                     <h1 class="font-bold text-2xl mt-4">{{ product.name }}</h1>
                     <p class="text-2xl text-primary font-bold mt-4">
-                        ${{ integerPart }}
+                        {{ product.currency === '$USD' ? 'USD' : 'MXN' }} ${{ integerPart }}
                         <span class="decimal-part">{{ decimalPart }}</span>
+                        <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
                     </p>
-                    <div class="flex items-center space-x-3 mt-5">
-                        <p class="text-gray99">Cantidad</p>
 
-                        <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
-                        <el-input-number v-if="store?.online_store_properties?.inventory" v-model="quantity"
-                            :disabled="product.current_stock < 1" :min="0" :max="product.current_stock"
-                            controls-position="right">
-                            <template #decrease-icon>
-                                <i class="fa-solid fa-angle-down"></i>
-                            </template>
-                            <template #increase-icon>
-                                <i class="fa-solid fa-angle-up"></i>
-                            </template>
-                        </el-input-number>
+                    <!-- Si no es bajo pedido -->
+                    <div v-if="product.product_on_request" class="">
+                        <div class="flex items-center space-x-3 mt-5">
+                            <p class="text-gray99">Cantidad</p>
 
-                        <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
-                        <el-input-number v-else v-model="quantity" :min="0" :max="999" controls-position="right">
-                            <template #decrease-icon>
-                                <i class="fa-solid fa-angle-down"></i>
-                            </template>
-                            <template #increase-icon>
-                                <i class="fa-solid fa-angle-up"></i>
-                            </template>
-                        </el-input-number>
+                            <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
+                            <el-input-number v-model="quantity" :min="0" :max="999" controls-position="right">
+                                <template #decrease-icon>
+                                    <i class="fa-solid fa-angle-down"></i>
+                                </template>
+                                <template #increase-icon>
+                                    <i class="fa-solid fa-angle-up"></i>
+                                </template>
+                            </el-input-number>
+                        </div>
+                    </div>
+
+                    <!-- Si no es bajo pedido -->
+                    <div v-else>
+                        <div class="flex items-center space-x-3 mt-5">
+                            <p class="text-gray99">Cantidad</p>
+                            
+                            <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
+                            <el-input-number v-if="store?.online_store_properties?.inventory" v-model="quantity"
+                                :disabled="product.current_stock < 1" :min="0" :max="product.current_stock"
+                                controls-position="right">
+                                <template #decrease-icon>
+                                    <i class="fa-solid fa-angle-down"></i>
+                                </template>
+                                <template #increase-icon>
+                                    <i class="fa-solid fa-angle-up"></i>
+                                </template>
+                            </el-input-number>
+
+                            <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
+                            <el-input-number v-else v-model="quantity" :min="0" :max="999" controls-position="right">
+                                <template #decrease-icon>
+                                    <i class="fa-solid fa-angle-down"></i>
+                                </template>
+                                <template #increase-icon>
+                                    <i class="fa-solid fa-angle-up"></i>
+                                </template>
+                            </el-input-number>
+                        </div>
                     </div>
 
                     <!-- Se muestran las unidades disponibles si esta activada la configuración de inventario para tienda online -->
                     <p v-if="store?.online_store_properties?.inventory" class="mt-2 text-sm">Unidades disponibles:
                         <span> {{
-                            product.current_stock }} </span>
+                            product.current_stock ?? 0 }} </span>
                     </p>
+
+                    <p v-if="product.product_on_request" class="font-bold text-sm my-2">*Este producto se surte bajo pedido. Tiempo estimado de entrega: {{ product.days_for_delivery }} días hábiles.</p>
 
                     <p v-if="alreadyInCart" class="text-green-500 text-lg mt-5 text-center"><i class="fa-regular fa-circle-check"></i> Agregado a carrito</p>
 

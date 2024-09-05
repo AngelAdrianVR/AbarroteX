@@ -14,7 +14,7 @@
                         no-match-text="No se encontraron coincidencias">
                         <el-option v-for="status in getStatuses" :key="status" :value="status" :label="status" />
                     </el-select>
-                    <PrimaryButton
+                    <PrimaryButton v-if="canEdit"
                         :disabled="loadingProducts || online_sale.status == 'Entregado' || online_sale.status == 'Cancelado' || online_sale.status == 'Reembolsado'"
                         @click="form.reset(); editOnlineOrderModal = true">
                         Editar
@@ -93,8 +93,8 @@
                                     </figure>
                                 </td>
                                 <td @click="handledShowProduct(product)" class="text-primary underline cursor-pointer">
-                                    {{
-                                        product.name }}</td>
+                                    {{ product.name }}
+                                </td>
                                 <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                                 <td>{{ product.quantity }}</td>
                                 <td>${{ (product.quantity * product.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
@@ -332,7 +332,8 @@ export default {
                 'Tarjeta de débito',
                 'Transferencia o depósito',
                 'Mercado pago',
-            ]
+            ],
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar pedidos'),
         }
     },
     components: {

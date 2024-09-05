@@ -26,6 +26,8 @@
         </div>
         <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.created_at
                 }}</strong></p>
+        <p v-if="product.bulk_product" class="text-gray37 font-bold mt-3">Producto de venta a granel / ({{ product.measure_unit }})</p>
+        <p v-if="product.product_on_request" class="text-gray37 font-bold mt-3">Producto de venta bajo pedido / ({{ product.days_for_delivery }} días hábiles)</p>
         <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ product.name }}</h1>
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">

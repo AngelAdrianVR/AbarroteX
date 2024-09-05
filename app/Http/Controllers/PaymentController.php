@@ -12,15 +12,15 @@ class PaymentController extends Controller
 
     public function index()
     {
-        //
-    }
+        $payments = Payment::with('media')->where('store_id', auth()->user()->store_id)->get();
 
+        return inertia('Payment/Index', compact('payments'));
+    }
 
     public function create()
     {
         //
     }
-
 
     public function store(Request $request)
     {
@@ -40,7 +40,7 @@ class PaymentController extends Controller
         $payment = Payment::create($validated + $additional);
 
         // Guardar archivos adjuntos
-        $payment->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+        $payment->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection());
 
         // dias adquiridos
         $days = $request->days + $validated['days_gifted'];
@@ -55,12 +55,12 @@ class PaymentController extends Controller
         $admins = Admin::where('employee_properties->department', 'Dirección')->get();
         $title = "Nuevo pago registrado";
         $description = "La tienda '$store->name' ha pagado una suscripción {$validated['suscription_period']} ($ {$validated['amount']}).";
-        if (app()->environment() === 'production'){
+        if (app()->environment() === 'production') {
             $url = 'https://admin.ezyventas.com/stores';
         } else {
             $url = 'http://localhost:8000/stores';
         }
-        $admins->each(fn ($admin) => $admin->notify(new AdminBasicNotification($title, $description, $url)));
+        $admins->each(fn($admin) => $admin->notify(new AdminBasicNotification($title, $description, $url)));
     }
 
 
@@ -78,7 +78,7 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment)
     {
-        //
+        $payment->update($request->all());
     }
 
 

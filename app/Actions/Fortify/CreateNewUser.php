@@ -35,6 +35,12 @@ class CreateNewUser implements CreatesNewUsers
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
+        // modulos esenciales incluidos
+        $activated_modules = ['Punto de venta', 'Reportes', 'Ventas registradas', 'Productos', 'Configuraciones', 'Caja'];
+
+        // Combina los módulos esenciales con los módulos activados desde el formulario
+        $activated_modules = array_merge($activated_modules, $input['activated_modules']);
+
         //crea la tienda relacionada a este nuevo usuario.
         $store = Store::create([
             'name' => $input['store_name'],
@@ -43,7 +49,8 @@ class CreateNewUser implements CreatesNewUsers
             'type' => $input['type'],
             'contact_phone' => $input['contact_phone'],
             'next_payment' => now()->addDays(2),
-            'online_store_properties' => []
+            'online_store_properties' => [],
+            'activated_modules' => $activated_modules,
         ]);
 
         //Se crea el registro para guardar los banners en él con el id de la tienda. Pra tienda en línea
@@ -72,7 +79,7 @@ class CreateNewUser implements CreatesNewUsers
         ]);
 
         //crea al usuario relacionado a esta tienda con el rol de administrador
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'rol' => 'Administrador',
@@ -80,5 +87,8 @@ class CreateNewUser implements CreatesNewUsers
             'store_id' => $store->id,
             'cash_register_id' => $cash_register->id,
         ]);
+        $user->syncRoles(['Administrador']);
+
+        return $user;
     }
 }

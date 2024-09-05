@@ -37,6 +37,12 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         return array_merge(parent::share($request), [
+            'auth.user.permissions' => function () use ($request) {
+                if ($request->user()) {
+                    return $request->user()->getAllPermissions()->pluck('name');
+                }
+                return [];
+            },
             'auth.user.store' => function () use ($request) {
                 if ($request->user()) {
                     return $request->user()->store;
@@ -46,6 +52,12 @@ class HandleInertiaRequests extends Middleware
             'auth.user.store.last_payment' => function () use ($request) {
                 if ($request->user()) {
                     return $request->user()->store->lastPayment?->load('media');
+                }
+                return null;
+            },
+            'auth.user.store.csf' => function () use ($request) {
+                if ($request->user()) {
+                    return $request->user()->store->getFirstMedia('csf')?->original_url;
                 }
                 return null;
             },

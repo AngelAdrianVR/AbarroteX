@@ -2,8 +2,9 @@
     <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col h-[400px] hover:border-primary relative group">
         <!-- Deatalle de cantidad disponible  -->
         <div v-if="store?.online_store_properties?.inventory"
-            class="absolute top-0 left-0 w-full bg-black opacity-60 rounded-t-lg lg:hidden lg:group-hover:block">
-            <p class="text-white text-center py-1">{{ product.current_stock ?? '0' }} Unidades disponibles</p>
+            class="absolute top-0 left-0 w-full bg-black opacity-70 rounded-t-lg lg:hidden lg:group-hover:block py-1">
+            <p class="text-white text-center opacity-100">{{ product.current_stock ?? '0' }} {{ product.bulk_product ? product.measure_unit + '(s)' : 'unidades' }} disponibles</p>
+            <p v-if="product.product_on_request" class="text-white text-center opacity-100">Este producto se surte bajo pedido ({{ product.days_for_delivery }} días hábiles)</p>
         </div>
         <!-- Imagen -->
         <figure class="h-1/2 text-center">
@@ -21,22 +22,42 @@
 
         <!-- Detalles -->
         <div class="text-center mt-2 flex flex-col justify-center items-center h-1/2">
-            <h1 class="h-12">{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
-            <p class="text-2xl font-bold my-3">${{ product.global_product_id ? product.global_product.public_price :
-                product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                
-            <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
-            <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product.current_stock < 1"
-                v-model="quantity" class="mb-5" size="small" :min="0" :max="product.current_stock" :precision="2" />
+        <div class="h-12">
+            <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
+            <span class="text-gray99">{{ product.currency === '$USD' ? 'USD' : 'MXN' }}</span>
+        </div>
+            
+            <div class="flex items-center space-x-1">
+                <p class="text-2xl font-bold my-3">
+                    ${{ product.global_product_id ? product.global_product.public_price 
+                        :product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
+                </p>
+            </div>
+            <!-- Si es bajo pedido -->
+            <div class="flex flex-col items-center" v-if="product.product_on_request">
+                <el-input-number v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
 
-            <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
-            <el-input-number v-else v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
+                <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
 
-            <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
+                <PrimaryButton v-else @click="addToCart" class="!px-9 !py-1 !active:scale-75">Agregar al carrito</PrimaryButton>
+            </div>
 
-            <PrimaryButton v-else :disabled="store?.online_store_properties?.inventory && product.current_stock < 1"
-                @click="addToCart" class="!px-9 !py-1 !active:scale-75">
-                {{ store?.online_store_properties?.inventory && product.current_stock < 1 ? 'Agotado' : 'Agregar al carrito' }} </PrimaryButton>
+            <!-- Si no es bajo pedido -->
+            <div class="flex flex-col items-center" v-else>
+                <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
+                <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product.current_stock < 1"
+                    v-model="quantity" class="mb-5" size="small" :min="0" :max="product.current_stock" :precision="2" />
+
+                <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
+                <el-input-number v-else v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
+
+                <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
+
+                <PrimaryButton v-else :disabled="store?.online_store_properties?.inventory && product.current_stock < 1"
+                    @click="addToCart" class="!px-9 !py-1 !active:scale-75">
+                    {{ store?.online_store_properties?.inventory && product.current_stock < 1 ? 'Agotado' : 'Agregar al carrito' }} </PrimaryButton>
+            </div>
         </div>
     </div>
 </template>
@@ -83,7 +104,8 @@ export default {
                         isLocal: false,
                         price: this.product.public_price,
                         quantity: this.quantity,
-                        image_url: this.product.global_product.media[0]?.original_url
+                        image_url: this.product.global_product.media[0]?.original_url,
+                        product_on_request: this.product.product_on_request, //si es o no bajo pedido para que no tome en cuenta el stock
                     });
                     this.alreadyInCart = true; //bandera de que ya está agregado en carrito
                 }
@@ -104,7 +126,8 @@ export default {
                         price: this.product.public_price,
                         isLocal: true,
                         quantity: this.quantity,
-                        image_url: this.product.media[0]?.original_url
+                        image_url: this.product.media[0]?.original_url,
+                        product_on_request: this.product.product_on_request, //si es o no bajo pedido para que no tome en cuenta el stock
                     });
                     this.alreadyInCart = true; //bandera de que ya está agregado en carrito
                 }

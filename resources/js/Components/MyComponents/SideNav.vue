@@ -107,7 +107,7 @@ export default {
                     active: route().current('sales.point'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero', 'Almacenista'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Punto de venta')
                 },
                 {
                     label: 'Reportes',
@@ -116,16 +116,16 @@ export default {
                     active: route().current('dashboard'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Reportes')
                 },
                 {
-                    label: 'Ventas registradas',
+                    label: 'Registro de ventas',
                     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="20" width="20" id="Task-List--Streamline-Core"><desc>Task List Streamline Icon: https://streamlinehq.com</desc><g id="task-list--task-list-work"><path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M19.72665 19.72665C19.72665 20.14044792857143 19.56218164285714 20.53736914285714 19.269705 20.830005C18.976909928571427 21.122481642857142 18.580147928571428 21.286949999999997 18.166349999999998 21.286949999999997H4.12365C3.709852071428571 21.286949999999997 3.312930857142857 21.122481642857142 3.020295 20.830005C2.727659142857143 20.53736914285714 2.5633500000000002 20.14044792857143 2.5633500000000002 19.72665V2.5633500000000002C2.5633500000000002 2.1495520714285714 2.727659142857143 1.752630857142857 3.020295 1.459995C3.312930857142857 1.1675183571428571 3.709852071428571 1.00305 4.12365 1.00305H12.839199214285713C13.252997142857142 1.00305 13.649759142857143 1.1675183571428571 13.942395 1.459995L19.269705 6.787305C19.56218164285714 7.079940857142856 19.72665 7.476702857142857 19.72665 7.890500785714285V19.72665Z" stroke-width="1.71"></path><path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M12.016539 10.169812499999999H15.917289" stroke-width="1.71"></path><path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M12.016539 15.582142928571427H15.917289" stroke-width="1.71"></path><path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.982636 15.493779L7.289944500000001 16.8010875L9.468791999999999 13.750541785714285" stroke-width="1.71"></path><path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.982636 9.983850214285713L7.289944500000001 11.291317928571427L9.468791999999999 8.240772214285714" stroke-width="1.71"></path></g></svg>',
                     route: route('sales.index'),
                     active: route().current('sales.index') || route().current('sales.show'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Ventas registradas')
                 },
                 {
                     label: 'Gastos',
@@ -134,7 +134,7 @@ export default {
                     active: route().current('expenses.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Gastos')
                 },
                 {
                     label: 'Cotizaciones',
@@ -143,7 +143,7 @@ export default {
                     active: route().current('quotes.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Cotizaciones')
                 },
                 {
                     label: 'Renta de productos',
@@ -152,7 +152,7 @@ export default {
                     active: route().current('rentals.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Renta de productos')
                 },
                 {
                     label: 'Productos',
@@ -161,7 +161,7 @@ export default {
                     active: route().current('products.*') || route().current('boutique-products.*') || route().current('global-product-store.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero', 'Almacenista'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Productos')
                 },
                 {
                     label: 'Servicios',
@@ -170,7 +170,7 @@ export default {
                     active: route().current('services.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Servicios')
                 },
                 {
                     label: 'Clientes',
@@ -179,7 +179,7 @@ export default {
                     active: route().current('clients.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && (this.$page.props.auth.user.store.plan == 'Plan Intermedio' || ['Otro', 'Boutique / Tienda de Ropa / Zapatería'].includes(this.$page.props.auth.user.store.type))
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Clientes')
                 },
                 {
                     label: 'Caja',
@@ -188,7 +188,7 @@ export default {
                     active: route().current('cash-registers.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Caja')
                 },
                 {
                     label: 'Tienda en línea',
@@ -197,7 +197,7 @@ export default {
                     active: route().current('online-sales.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol) && this.$page.props.auth.user.store.plan == 'Plan Intermedio'
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea')
                 },
                 {
                     label: 'Configuraciones',
@@ -206,7 +206,7 @@ export default {
                     active: route().current('settings.*'),
                     options: [],
                     dropdown: false,
-                    show: ['Administrador'].includes(this.$page.props.auth.user.rol)
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Configuraciones')
                 },
 
                 //ejemplo para usar submenues

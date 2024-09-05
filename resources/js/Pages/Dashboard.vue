@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Reportes">
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Reportes</h1>
-        <section class="flex items-center justify-center">
+        <section v-if="$page.props.auth.user.permissions.includes('Filtrar por periodo')" class="flex items-center justify-center">
             <el-radio-group v-model="period" @change="handleChangePeriod"
                 class="flex flex-col md:flex-row !items-start my-5 lg:mx-14">
                 <el-radio value="Hoy">
@@ -20,6 +20,9 @@
                         format="MM/YYYY" value-format="YYYY-MM-DD" placeholder="Elige un mes" size="small" />
                 </el-radio>
             </el-radio-group>
+        </section>
+        <section v-else>
+            <p class="text-center">Reporte de HOY</p>
         </section>
         <Loading v-if="loading" class="my-16" />
         <main v-else class="mx-2 lg:mx-14 my-6">
@@ -139,13 +142,13 @@ export default {
                     title: "Ventas en linea (ingresos)",
                     icon: "fa-solid fa-dollar-sign",
                     value: "$" + this.calculateTotalOnlineSale?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
-                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
                 },
                 {
                     title: "Unidades vendidas en linea",
                     icon: "fa-solid fa-clipboard-list",
                     value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
-                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
                 },
                 {
                     title: "Compras (Gastos)",
@@ -228,7 +231,7 @@ export default {
                         name: timeline.current.name,
                         data: timeline.current.data.onlineSales,
                     }],
-                    show: this.$page.props.auth.user.store.plan == 'Plan Intermedio',
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
                 },
                 {
                     title: 'Gastos (compras)',

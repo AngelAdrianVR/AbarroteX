@@ -12,7 +12,10 @@
         </figure>
         <div class="!w-56">
             <div class="flex items-center space-x-2">
-                <InputLabel value="Producto*" class="mb-1" />
+                <div class="flex items-center space-x-2">
+                    <InputLabel value="Producto*" class="mb-1" />
+                    <span v-if="product_on_request" class="text-red-600">(Bajo pedido)</span>
+                </div>
                 <p v-if="error_validation" class="text-red-400 text-xs mb-1">Seleccionar un producto</p>
             </div>
             <el-select ref="productSelector" @change="syncItem" v-model="selection" class="!w-full" filterable required
@@ -58,6 +61,7 @@ export default {
         return {
             selection: null, //propiedad requeridas para una venta en linea. (id)
             price: 0, //propiedad requeridas para una venta en linea.
+            product_on_request: false, // es producto bajo pedido?
             isLocal: false, //propiedad requeridas para una venta en linea.
             quantity: 1, //propiedad requeridas para una venta en linea.
             local_image_url: null, //guarda el url de la imagen del producto.
@@ -89,6 +93,7 @@ export default {
             this.price = this.init_state.price;
             this.isLocal = this.init_state.isLocal;
             this.quantity = this.init_state.quantity;
+            this.product_on_request = this.init_state.product_on_request;
         }
         this.$refs.productSelector.focus();
     },
@@ -133,6 +138,7 @@ export default {
 
                     // Emite el evento con la información del producto seleccionado
                     this.price = this.products[productSelectedIndex].price;
+                    this.product_on_request = this.products[productSelectedIndex].product_on_request;
                     this.local_image_url = this.products[productSelectedIndex].image_url;
                     this.$emit('syncItem', {
                         id: this.id,
@@ -141,6 +147,8 @@ export default {
                         price: this.products[productSelectedIndex].price,
                         isLocal: this.products[productSelectedIndex].isLocal,
                         quantity: this.quantity,
+                        product_on_request: this.products[productSelectedIndex].product_on_request,
+                        days_for_delivery: this.products[productSelectedIndex].days_for_delivery,
                         image_url: this.products[productSelectedIndex].image_url,
                     });
                     this.error_validation = false;

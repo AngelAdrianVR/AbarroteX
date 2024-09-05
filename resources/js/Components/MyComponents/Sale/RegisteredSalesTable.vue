@@ -62,7 +62,7 @@
                     <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                         <th>Fecha</th>
                         <th>Ventas en tienda</th>
-                        <th v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'">Ventas en linea</th>
+                        <th v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')">Ventas en linea</th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -76,7 +76,7 @@
                             }}
                             ({{ sale.total_normal_quantity }} productos en total)
                         </td>
-                        <td v-if="$page.props.auth.user.store.plan == 'Plan Intermedio'">
+                        <td v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')">
                             {{ sale.online_folios != 1 ? sale.online_folios + ' ventas' : sale.online_folios + ' venta'
                             }}
                             ({{ sale.total_online_quantity }} productos en total)

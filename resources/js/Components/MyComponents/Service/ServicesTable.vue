@@ -40,7 +40,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'edit|' + encodeId(service.id)">
+                                    <el-dropdown-item v-if="canEdit" :command="'edit|' + encodeId(service.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -48,7 +48,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item :command="'delete|' + service.id">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + service.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -93,63 +93,65 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
 
 export default {
-data() {
-    return {
-        showDeleteConfirm: false,
-        itemIdToDelete: null,
-    }
-},
-components:{
-ConfirmationModal,
-PrimaryButton,
-CancelButton,
-},
-props:{
-services: Array
-},
-methods:{
-    handleCommand(command) {
-        const commandName = command.split('|')[0];
-        const data = command.split('|')[1];
+    data() {
+        return {
+            showDeleteConfirm: false,
+            itemIdToDelete: null,
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar servicios'),
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar servicios'),
+        }
+    },
+    components: {
+        ConfirmationModal,
+        PrimaryButton,
+        CancelButton,
+    },
+    props: {
+        services: Array
+    },
+    methods: {
+        handleCommand(command) {
+            const commandName = command.split('|')[0];
+            const data = command.split('|')[1];
 
-        if (commandName == 'see') {
-            this.$inertia.get(route('services.show', data));
-        } else if (commandName == 'edit') {
-            this.$inertia.get(route('services.edit', data));
-        } else if (commandName == 'delete') {
-            this.showDeleteConfirm = true;
-            this.itemIdToDelete = data;
-        }
-    },
-    async deleteItem() {
-        try {
-            const response = await axios.delete(route('services.destroy', this.itemIdToDelete));
-            if (response.status == 200) {
-                this.$notify({
-                    title: 'Correcto',
-                    message: 'Se ha eliminado el servicio',
-                    type: 'success',
-                });
-                //se busca el index del cliente eliminado para removerlo del arreglo
-                const indexServiceDeleted = this.services.findIndex(item => item.id == this.itemIdToDelete);
-                if ( indexServiceDeleted != -1 ) {
-                    this.services.splice(indexServiceDeleted, 1);
-                }
-                this.showDeleteConfirm = false;
+            if (commandName == 'see') {
+                this.$inertia.get(route('services.show', data));
+            } else if (commandName == 'edit') {
+                this.$inertia.get(route('services.edit', data));
+            } else if (commandName == 'delete') {
+                this.showDeleteConfirm = true;
+                this.itemIdToDelete = data;
             }
-        } catch (error) {
-            console.log(error);
-            this.$notify({
-                title: 'El servidor no pudo procesar la petición',
-                message: 'No se pudo eliminar el servicio. Intente más tarde o si el problema persiste, contacte a soporte',
-                type: 'error',
-            });
-        }
+        },
+        async deleteItem() {
+            try {
+                const response = await axios.delete(route('services.destroy', this.itemIdToDelete));
+                if (response.status == 200) {
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha eliminado el servicio',
+                        type: 'success',
+                    });
+                    //se busca el index del cliente eliminado para removerlo del arreglo
+                    const indexServiceDeleted = this.services.findIndex(item => item.id == this.itemIdToDelete);
+                    if (indexServiceDeleted != -1) {
+                        this.services.splice(indexServiceDeleted, 1);
+                    }
+                    this.showDeleteConfirm = false;
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'El servidor no pudo procesar la petición',
+                    message: 'No se pudo eliminar el servicio. Intente más tarde o si el problema persiste, contacte a soporte',
+                    type: 'error',
+                });
+            }
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
+        },
     },
-    encodeId(id) {
-        const encodedId = btoa(id.toString());
-        return encodedId;
-    },
-},
 }
 </script>

@@ -73,7 +73,7 @@
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <!-- Dinero en caja -->
-        <div v-if="isShowCahsOn" class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
+        <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')" class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
             class="size-4 cursor-pointer">
@@ -106,7 +106,7 @@
           <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
         </div>
         <!-- Dropdown -->
-        <div class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
+        <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')" class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
           <el-col :span="3">
             <el-dropdown trigger="click">
               <p class="text-sm text-primary w-44 flex items-center">
@@ -158,7 +158,7 @@
           <div class="lg:mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
               <div
-                v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' || ['Otro', 'Boutique / Tienda de Ropa / Zapatería'].includes($page.props.auth.user.store.type)"
+                v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
                 class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
@@ -237,7 +237,7 @@
                 <p v-else class="text-center text-xs text-gray99 pt-10 px-8">Este producto no tiene imagen registrada
                 </p>
               </figure>
-              <div class="flex justify-between items-center mt-2 mb-4 text-lg">
+              <div class="flex justify-between items-center mt-2 text-lg">
                 <p class="font-bold">
                   {{ productFoundSelected.name }}
                   <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
@@ -247,7 +247,11 @@
                 </p>
                 <p class="text-[#5FCB1F]">${{ productFoundSelected.public_price }}</p>
               </div>
-              <div class="flex justify-between items-center">
+              <div v-if="productFoundSelected.bulk_product" class="flex justify-between items-center text-base">
+                <p class="text-gray99">Producto a granel</p>
+                <p class="text-gray99">El {{ productFoundSelected.measure_unit }}</p>
+              </div>
+              <div class="flex justify-between items-center mt-4">
                 <p class="text-gray99">Cantidad</p>
                 <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0"
                   :max="productFoundSelected.current_stock" :precision="2" />
@@ -269,7 +273,7 @@
                 Busca el producto
                 <i class="fa-regular fa-hand-point-up ml-3"></i>
               </p>
-              <div v-if="$page.props.auth.user.store.type != 'Boutique / Tienda de Ropa / Zapatería'">
+              <div v-if="$page.props.auth.user.store.type != 'Boutique / Tienda de Ropa / Zapatería' && $page.props.auth.user.permissions.includes('Crear productos')">
                 <p>ó</p>
                 <button @click="showCreateProductModal = true" type="button"
                   class="text-primary w-full flex items-center justify-center space-x-1">
@@ -315,7 +319,7 @@
                 <p class="text-sm text-gray-400 text-left mb-3">Opciones de pago</p>
                 <div class="flex items-center justify-end space-x-4">
                   <PrimaryButton
-                    v-if="$page.props.auth.user.store.plan == 'Plan Intermedio' || ['Otro', 'Boutique / Tienda de Ropa / Zapatería'].includes($page.props.auth.user.store.type)"
+                    v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
                     @click="creditPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
                     class="!px-4 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>

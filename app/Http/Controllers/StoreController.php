@@ -52,14 +52,25 @@ class StoreController extends Controller
         return response()->json(compact('items'));
     }
 
+    public function storeCSF(Request $request)
+    {
+        $store = auth()->user()->store;
+
+        // borrar constancia anterior si es que la hay
+        if ($store->getFirstMedia('csf')) {
+            $store->clearMediaCollection('csf');
+        }
+
+        $store->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('csf'));
+    }
+
     public function toggleSettingValue(Request $request, Store $store, $setting_id)
     {
         $new_value = $request->value ? 1 : null;
         $store->settings()->updateExistingPivot($setting_id, ['value' => $new_value]);
-       
+
         return response()->json([]);
     }
-
 
     public function updateOnlineSalesInfo(Request $request, Store $store)
     {
@@ -79,7 +90,6 @@ class StoreController extends Controller
         return to_route('online-sales.index', ['tab' => 2]);
     }
 
-
     // public function updatePrinterConfig(Request $request, Store $store)
     // {
     //     $request->validate([
@@ -90,9 +100,16 @@ class StoreController extends Controller
     //     $store->update($request->all());
     // }
 
-
     public function fetchStoreInfo(Store $store)
     {
         return response()->json(compact('store'));
+    }
+
+    public function UpdateModules(Request $request, Store $store)
+    {
+        $store->update([
+            'suscription_period' => $request->period,
+            'activated_modules' => $request->activated_modules,
+        ]);
     }
 }
