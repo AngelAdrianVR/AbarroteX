@@ -316,6 +316,7 @@ Route::put('stores-update-online-sales-info/{store}', [StoreController::class, '
 // Route::put('stores-update-printer-config/{store}', [StoreController::class, 'updatePrinterConfig'])->middleware('auth')->name('stores.update-printer-config');
 Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
 Route::post('stores-store-csf', [StoreController::class, 'storeCSF'])->name('stores.store-csf');
+Route::post('stores-update-modules/{store}', [StoreController::class, 'UpdateModules'])->name('store.update-modules');
 
 
 // User routes-----------------------------------------------------------------------------------------

@@ -1,10 +1,9 @@
 <template>
     <AppLayout title="Suscripción">
         <header class="text-center mt-5 mx-4">
-            <h1 class="text-gray37 font-bold text-lg">Suscripción</h1>
-            <!-- <p class="mt-4 text-sm text-gray77">
-                Para comprar o renovar tu suscripción da clic en el plan que más se adapte a ti.
-            </p> -->
+            <h1 class="text-gray37 font-bold text-lg">Modulos de suscripción</h1>
+            <p class="mt-4 text-sm text-gray77">Puedes agregar o quitar cualquier modulo según las necesidades de tu negocio</p>
+            <p class="text-sm text-gray77">¡Paga sólo por lo que utilizas!</p>
         </header>
 
         <main class="w-full  my-5 text-sm mx-auto">
@@ -17,10 +16,10 @@
                 </span>
             </div> -->
 
-            <div class="md:hidden text-center mb-4">
+            <!-- <div class="md:hidden text-center mb-4">
                 <span :class="activeTab == 'Mensual' ? 'text-gray-400 border-grayD9' : 'text-primary border-primary'" 
                     class="border rounded-full px-4 right-4 text-sm">Te regalamos 2 meses</span>
-            </div>
+            </div> -->
 
             <!-- <section class="mx-auto" v-if="activeTab === 'Mensual'">
                 <Month />
@@ -29,8 +28,8 @@
                 <Year />
             </section> -->
 
-            <section class="mt-14 text-left xl:w-2/3 xl:mx-auto">
-                <Simulator />
+            <section class="mt-10 text-left xl:w-2/3 xl:mx-auto p-3">
+                <InternalSimulator />
             </section>
         </main>
     </AppLayout>
@@ -39,7 +38,7 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ToggleButton from "@/Components/MyComponents/ToggleButton.vue";
-import Simulator from '@/Components/MyComponents/Landing/Simulator.vue';
+import InternalSimulator from '@/Components/MyComponents/Landing/InternalSimulator.vue';
 import Month from './Tabs/Month.vue';
 import Year from './Tabs/Year.vue';
 
@@ -52,7 +51,7 @@ data() {
 components:{
     AppLayout,
     ToggleButton,
-    Simulator,
+    InternalSimulator,
     Month,
     Year
 },

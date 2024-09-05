@@ -142,12 +142,14 @@
               <span v-html="item.icon"></span>
               <p>{{ item.name }}</p>
             </div>
+            <p class="text-gray99">{{ item.description }}</p>
+            <p>${{ item.cost }}.00/mes</p>
+          </div>
 
             <div class="w-1/4">
               <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
                 style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #515151" />
             </div>
-          </div>
         </article>
       </div>
     </section>
@@ -245,6 +247,7 @@ export default {
         "Boutique / Tienda de Ropa / Zapatería",
         "Carnicería",
         "Cremería",
+        "Cerrajería",
         "Dulcería",
         "Farmacia",
         "Frutería / Verdulería",
