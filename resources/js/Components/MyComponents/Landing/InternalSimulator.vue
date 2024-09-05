@@ -61,26 +61,47 @@
         <!-- Detalles del pago -->
         <div class="mt-7 px-3">
           <div class="flex">
-            <p class="w-3/4">Módulos esenciales</p>
-            <p class="w-1/4 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+            <p class="w-1/2">Módulos esenciales</p>
+            <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? '199.00' : '1,990.00' }}</span></p>
           </div>
           <p v-if="modules.filter(item => item.activated === true).length" class="text-gray99 my-3">Otros módulos</p>
 
           <!-- Otros modulos -->
           <div v-for="item in modules.filter(item => item.activated === true)" :key="item" class="flex">
-            <p class="w-3/4">{{ item.name }}</p>
-            <p class="w-1/4 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+            <p class="w-1/2">{{ item.name }}</p>
+            <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
                 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
           </div>
 
+          <p class="text-gray99 my-3">Descuentos</p>
+
+          <!-- Descuento por modulos ya pagados -->
+          <div class="flex">
+            <p class="w-1/2">Monto ya pagado</p>
+            <p class="w-1/2 text-right"><span class="mr-1">$</span>
+              <span class="w-20 inline-block">- {{ totalPaid.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+            </p>
+          </div>
+
+          <!-- Descuento por tiempo transcurrido -->
+          <div class="flex">
+            <p class="w-1/2">Desc. por tiempo transcurrido</p>
+            <p class="w-1/2 text-right"><span class="mr-1">$</span>
+              <span class="w-20 inline-block">
+                - {{ calculateDiscountForPastDays(calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+              </span>
+            </p>
+          </div>
+
           <!-- Total -->
           <div class="flex mt-7">
-            <p class="w-3/4">Total</p>
-            <p class="w-1/4 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
-              'Mensual' ? calculateTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (calculateTotal *
-                10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+            <p class="w-1/2">Total</p>
+            <p class="w-1/2 text-right">
+              <span class="mr-1">$</span>
+              <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal) - totalDiscountForPastDays).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+            </p>
           </div>
 
           <div class="text-center mt-8">
@@ -118,7 +139,11 @@ export default {
   data() {
     return {
       loading: false, // estado de carga de peticion de update modules
-      period: 'Mensual', //Periodo de pago seleccionado
+      totalPaid: 199, // El total pagado por los modulos que actualmente tiene.
+      nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
+      daysForNextPayment: 0, // dias para el proximo pago
+      totalDiscountForPastDays: 0, // descuento de modulos nuevos por tiempo transcurrido
+      period: this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
       activated_modules: [],
 
       modules: [
@@ -186,6 +211,18 @@ export default {
         this.loading = false;
       }
     },
+     calculateTotalPayment(calculateTotal) {
+      const total = this.period === 'Mensual' ? (calculateTotal - this.totalPaid) : ((calculateTotal * 10) - this.totalPaid);
+      return Math.max(0, total);
+    },
+    calculateDiscountForPastDays(calculateTotal) {
+      if ( calculateTotal > 0 && this.daysForNextPayment > 0 ) {
+        this.totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
+        return this.totalDiscountForPastDays;
+      } else {
+        return 0
+      }
+    },
     handleSwitchModule(module) {
       if (module.activated) {
         this.activated_modules.push(module.name);
@@ -206,18 +243,28 @@ export default {
     }
   },
   mounted() {
-    localStorage.setItem('EzyExtraModules', JSON.stringify([]));
-
     // Filtra los módulos activados
     const activatedModules = this.$page.props.auth.user.store.activated_modules;
 
+    //se guardan los modulos activados de la tienda en una variable global de la vista
     this.activated_modules = activatedModules;
 
+    //se calcula el total pagado por los modulos actualmente activados y se muestran activados los ya pagados
     this.modules.forEach(module => {
         if (activatedModules.includes(module.name)) {
           module.activated = true;
+          this.totalPaid += module.cost;
         }
     });
+
+    //si el periodo pagado es anual el monto pagado se multiplica por 10
+    if ( this.$page.props.auth.user.store.suscription_period === 'Anual' ) {
+      this.totalPaid *= 10;
+    }
+
+    const today = new Date();
+    const nextPaymentDate = new Date(this.nextPayment);
+    this.daysForNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
   }
 };
 </script>
