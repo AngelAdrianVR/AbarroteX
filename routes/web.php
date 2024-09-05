@@ -315,6 +315,7 @@ Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController:
 Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
 // Route::put('stores-update-printer-config/{store}', [StoreController::class, 'updatePrinterConfig'])->middleware('auth')->name('stores.update-printer-config');
 Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
+Route::post('stores-store-csf', [StoreController::class, 'storeCSF'])->name('stores.store-csf');
 
 
 // User routes-----------------------------------------------------------------------------------------
@@ -454,7 +455,7 @@ Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class,
 
 //Internal invoices routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
-Route::resource('internal-invoices', InternalInvoiceController::class);
+// Route::resource('internal-invoices', InternalInvoiceController::class);
 
 
 // comandos Artisan
