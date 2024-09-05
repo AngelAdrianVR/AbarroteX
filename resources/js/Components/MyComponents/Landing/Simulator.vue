@@ -185,24 +185,24 @@
         <!-- Detalles del pago -->
         <div class="mt-7 text-grayD9 px-3">
           <div class="flex">
-            <p class="w-3/4">Módulos esenciales</p>
-            <p class="w-1/4 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+            <p class="w-1/2">Módulos esenciales</p>
+            <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? '199.00' : '1,990.00' }}</span></p>
           </div>
           <p v-if="modules.filter(item => item.activated === true).length" class="text-gray99 my-3">Otros módulos</p>
 
           <!-- Otros modulos -->
           <div v-for="item in modules.filter(item => item.activated === true)" :key="item" class="flex">
-            <p class="w-3/4">{{ item.name }}</p>
-            <p class="w-1/4 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+            <p class="w-1/2">{{ item.name }}</p>
+            <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
                 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
           </div>
 
           <!-- Total -->
           <div class="flex text-white mt-7">
-            <p class="w-3/4">Total</p>
-            <p class="w-1/4 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+            <p class="w-1/2">Total</p>
+            <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? calculateTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (calculateTotal *
                 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
           </div>
