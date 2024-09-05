@@ -55,6 +55,12 @@ class HandleInertiaRequests extends Middleware
                 }
                 return null;
             },
+            'auth.user.store.csf' => function () use ($request) {
+                if ($request->user()) {
+                    return $request->user()->store->getFirstMedia('csf')?->original_url;
+                }
+                return null;
+            },
             'auth.user.store.settings' => function () use ($request) {
                 if ($request->user()) {
                     return $request->user()->store->settings->map(function ($setting) {

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('suscription_period');
             $table->string('status')->default('En revisión');
+            $table->string('invoice_status')->default('No solicitada');
             $table->text('rejected_reason')->nullable();
             $table->text('notes')->nullable();
             $table->unsignedFloat('amount');

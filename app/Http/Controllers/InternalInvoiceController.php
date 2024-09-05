@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InternalInvoice;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 
 class InternalInvoiceController extends Controller
@@ -10,9 +11,9 @@ class InternalInvoiceController extends Controller
     
     public function index()
     {
-        $internal_invoices = InternalInvoice::where('store_id', auth()->user()->store_id)->get();
+        $payments = Payment::where('store_id', auth()->user()->store_id)->get();
 
-        return inertia('InternalInvoice/Index', compact('internal_invoices'));
+        return inertia('InternalInvoice/Index', compact('payments'));
     }
 
     
