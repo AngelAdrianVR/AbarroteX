@@ -100,7 +100,8 @@
             <p class="w-1/2">Total</p>
             <p class="w-1/2 text-right">
               <span class="mr-1">$</span>
-              <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal) - totalDiscountForPastDays).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+              <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal) 
+                - calculateDiscountForPastDays(calculateTotalPayment(calculateTotal))).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
           </div>
 
@@ -142,7 +143,6 @@ export default {
       totalPaid: 199, // El total pagado por los modulos que actualmente tiene.
       nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
       daysForNextPayment: 0, // dias para el proximo pago
-      totalDiscountForPastDays: 0, // descuento de modulos nuevos por tiempo transcurrido
       period: this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
       activated_modules: [],
 
@@ -217,8 +217,8 @@ export default {
     },
     calculateDiscountForPastDays(calculateTotal) {
       if ( calculateTotal > 0 && this.daysForNextPayment > 0 ) {
-        this.totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
-        return this.totalDiscountForPastDays;
+        const totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
+        return totalDiscountForPastDays;
       } else {
         return 0
       }
