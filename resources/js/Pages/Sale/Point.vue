@@ -1377,11 +1377,11 @@ export default {
     }
 
     // sincronizar productos
-    const productsInIDB = await getAll('products');
-    if (!productsInIDB.length) {
+    // const productsInIDB = await getAll('products');
+    // if (!productsInIDB.length) {
       // mostrar carga solo si recien se estan cargando los productos
       this.syncingIDB = true;
-    }
+    // }
     await syncIDBProducts();
     this.syncingIDB = false;
 
