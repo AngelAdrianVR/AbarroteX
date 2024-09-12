@@ -44,6 +44,7 @@ class UserController extends Controller
             'store_id' => $store_id,
             'password' => bcrypt('ezyventas'),
             'cash_register_id' => $cash_register->id,
+            'email_verified_at' => now(),
         ]);
 
         $user->syncRoles($request->rol);
