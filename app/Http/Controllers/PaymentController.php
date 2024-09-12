@@ -63,6 +63,15 @@ class PaymentController extends Controller
         $admins->each(fn($admin) => $admin->notify(new AdminBasicNotification($title, $description, $url)));
     }
 
+    public function storeInvoice(Request $request, Payment $payment)
+    {
+        // borrar constancia anterior si es que la hay
+        if ($payment->getFirstMedia('invoice')) {
+            $payment->clearMediaCollection('invoice');
+        }
+
+        $payment->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('invoice'));
+    }
 
     public function show(Payment $payment)
     {
