@@ -248,8 +248,8 @@
             </template>
         </DialogModal>
 
-        <!-- sizes form -->
-        <DialogModal :show="name" @close="name = false">
+        <!-- colors form -->
+        <DialogModal :show="showColorFormModal" @close="showColorFormModal = false">
             <template #title> Agregar nuevos colores </template>
             <template #content>
                 <p class="text-gray99 mb-3">En este apartado puedes crear colores que no se encuentren en la lista</p>
@@ -285,7 +285,7 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="name = false" :disabled="colorForm.processing">Cancelar
+                    <CancelButton @click="showColorFormModal = false" :disabled="colorForm.processing">Cancelar
                     </CancelButton>
                     <PrimaryButton @click="storeColor()" :disabled="colorForm.processing">Crear</PrimaryButton>
                 </div>
@@ -393,7 +393,7 @@ export default {
             localColors: this.colors,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showSizeFormModal: false, //muestra formulario para agregar tallas
-            name: false, //muestra formulario para agregar colores
+            showColorFormModal: false, //muestra formulario para agregar colores
             currencies: [
                 { value: "Peso Mexicano", label: "$MXN" },
                 { value: "Dolar Americano", label: "$USD" },
@@ -404,7 +404,6 @@ export default {
             productsLimit: this.$page.props.auth.user.store.plan == 'Plan Básico' ? 1500 : 3000,
             // cargas
             sizeLoading: false,
-            colorLoading: false,
         };
     },
     components: {
@@ -421,7 +420,7 @@ export default {
         products_quantity: Number, // para validar los productos limite
         categories: Array,
         sizes: Array,
-        colors: Array,
+        colors: Array,  
     },
     computed: {
         getCategorySizes() {
@@ -456,7 +455,7 @@ export default {
             this.showSizeFormModal = true;
         },
         openColorModal() {
-            this.name = true;
+            this.showColorFormModal = true;
         },
         handleCategory() {
             this.form.colors.forEach(item => {
@@ -491,7 +490,7 @@ export default {
                         this.localColors.unshift(element);
                     });
                     const oneColorAdded = this.colorForm.list.length == 1;
-                    this.name = false;
+                    this.showColorFormModal = false;
                     this.$notify({
                         title: oneColorAdded ? "Color agregado" : "Colores agregados",
                         type: "success"
