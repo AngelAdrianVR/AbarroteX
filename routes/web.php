@@ -8,6 +8,7 @@ use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\CashRegisterMovementController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
@@ -418,6 +419,11 @@ Route::resource('installments', InstallmentController::class)->middleware('auth'
 //rutas de tallas-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('sizes', SizeController::class)->middleware('auth');
+
+
+//rutas de colores-----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('colors', ColorController::class)->middleware('auth');
 
 
 //Banners online store routes------------------------------------------------------------------------------------------------------

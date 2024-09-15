@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Category;
+use App\Models\Color;
 use App\Models\Expense;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
@@ -32,8 +33,9 @@ class ProductBoutiqueController extends Controller
         $products_quantity = Product::where('store_id', $store->id)->get()->count();
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->latest('id')->get();
         $sizes = Size::whereIn('category', $categories->pluck(['name']))->latest('id')->get();
+        $colors = Color::whereNull('store_id')->orWhere('store_id', $store->id)->latest('id')->get();
 
-        return inertia('Product/Boutique/Create', compact('products_quantity', 'categories', 'sizes'));
+        return inertia('Product/Boutique/Create', compact('products_quantity', 'categories', 'sizes', 'colors'));
     }
 
     public function store(Request $request)
@@ -49,74 +51,85 @@ class ProductBoutiqueController extends Controller
             'has_inventory_control' => 'boolean',
             'category_id' => 'required|numeric|min:1',
             'brand_id' => 'nullable',
-            'sizes' => 'nullable|array|min:1',
-            'sizes.*.size_id' => 'required|numeric|min:1',
-            'sizes.*.current_stock' => 'required|numeric|min:0',
-            'sizes.*.min_stock' => 'nullable|numeric|min:0',
-            'sizes.*.max_stock' => 'nullable|numeric|min:0',
+            'colors' => 'required|array|min:1',
+            'colors.*.sizes' => 'required|array|min:1',
+            'colors.*.color' => 'nullable|string|max:7',
+            'colors.*.sizes.*.size_id' => 'required|numeric|min:1',
+            'colors.*.sizes.*.size_name' => 'required|string|max:100',
+            'colors.*.sizes.*.current_stock' => 'required|numeric|min:0',
+            'colors.*.sizes.*.min_stock' => 'nullable|numeric|min:0',
+            'colors.*.sizes.*.max_stock' => 'nullable|numeric|min:0',
         ], [
-            'sizes.*.size_id.required' => 'obligatorio.',
-            'sizes.*.current_stock.required' => 'obligatorio.',
-            'sizes.*.current_stock.numeric' => 'Este campo debe ser un número.',
-            'sizes.*.current_stock.min' => 'Este campo debe ser positivo.',
-            'sizes.*.current_stock.max' => 'Este campo debe ser máximo 999,999.99',
-            'sizes.*.min_stock.min' => 'Este campo debe ser positivo',
-            'sizes.*.max_stock.min' => 'Este campo debe ser positivo',
+            'colors.*.sizes.required' => 'Debes agregar al menos una talla',
+            'colors.*.sizes.min' => 'Debes agregar al menos una talla',
+            'colors.*.sizes.*.size_id.required' => 'obligatorio.',
+            'colors.*.sizes.*.current_stock.required' => 'obligatorio.',
+            'colors.*.sizes.*.current_stock.numeric' => 'Este campo debe ser un número.',
+            'colors.*.sizes.*.current_stock.min' => 'Este campo debe ser positivo.',
+            'colors.*.sizes.*.current_stock.max' => 'Este campo debe ser máximo 999,999.99',
+            'colors.*.sizes.*.min_stock.min' => 'Este campo debe ser positivo',
+            'colors.*.sizes.*.max_stock.min' => 'Este campo debe ser positivo',
         ]);
 
         $mediaItem = null;
 
         // registrar productos por talla registrada
-        foreach ($validated['sizes'] as $key => $product) {
-            // si el registro de talla esta vacio, saltar
-            if (!$product['size_id']) continue;
+        foreach ($validated['colors'] as $keyColor => $product) {
+            $color = Color::firstWhere('color', $product['color']);
+            foreach ($product['sizes'] as $key => $new_size) {
+                // forzar default de 1 en stock
+                $new_size['current_stock'] = $new_size['current_stock'] ?? 1;
 
-            // forzar default de 1 en stock
-            $product['current_stock'] = $product['current_stock'] ?? 1;
+                $size = Size::where('id', $new_size['size_id'])->get(['id', 'name', 'short', 'category'])->first()->toArray();
 
-            $size = Size::where('id', $product['size_id'])->get(['id', 'name', 'short', 'category'])->first()->toArray();
+                if ($validated['code']) {
+                    // Crear codigo unico para talla actual
+                    // $validated['code'] = $validated['code'] . "-$key-$color->id";
+                    $color_section = strtoupper(substr($color->name, 0, 3));
+                    $validated['code'] = $validated['code'] . "-$color_section-$key";
+                }
 
-            if ($validated['code']) {
-                // Crear codigo unico para talla actual
-                $validated['code'] = $validated['code'] . "-$key";
-            }
+                $additional = ["size" => $size, "color" => $color];
 
-            $new_product = Product::create($validated + [
-                'store_id' => $store_id,
-                'additional' => $size,
-                'current_stock' => $product['current_stock'],
-                'min_stock' => $product['min_stock'],
-                'max_stock' => $product['max_stock'],
-            ]);
+                $new_product = Product::create($validated + [
+                    'store_id' => $store_id,
+                    'additional' => $additional,
+                    'current_stock' => $new_size['current_stock'],
+                    'min_stock' => $new_size['min_stock'],
+                    'max_stock' => $new_size['max_stock'],
+                ]);
 
-            // resetear a nombre y codigo base
-            $validated['code'] = $request->code;
+                // resetear a nombre y codigo base
+                $validated['code'] = $request->code;
 
-            // primer producto registrado
-            if ($key == 0) {
-                //codifica el id del producto
-                $encoded_product_id = base64_encode($new_product->id);
+                // primer producto registrado
+                if ($keyColor == 0 && $key == 0) {
+                    //codifica el id del producto
+                    $encoded_product_id = base64_encode($new_product->id);
 
-                // Guardar el archivo en la colección 'imageCover' solo en el primer producto registrado
-                if ($request->hasFile('imageCover')) {
-                    $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
-                    // Ruta del archivo guardado
-                    $path = $mediaItem->getPath();
+                    // Guardar el archivo en la colección 'imageCover' solo en el primer producto registrado
+                    if ($request->hasFile('imageCover')) {
+                        $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+                        // Ruta del archivo guardado
+                        $path = $mediaItem->getPath();
 
-                    // Verificar el tamaño del archivo y si estamos en entorno de producción
-                    if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
-                        // Comprimir la imagen directamente en su ubicación original si supera los 600KB
-                        $this->tinifyService->optimizeImage($path);
-                    } else {
-                        // comprimir de otra forma  
+                        // Verificar el tamaño del archivo y si estamos en entorno de producción
+                        if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                            // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                            $this->tinifyService->optimizeImage($path);
+                        } else {
+                            // comprimir de otra forma  
+                        }
+                    }
+                } else {
+                    // Copiar el medio al nuevo producto registrado
+                    if ($mediaItem) {
+                        $new_product->copyMedia($mediaItem->getPath())->usingName($mediaItem->name)->toMediaCollection('imageCover');
                     }
                 }
-            } else {
-                // Copiar el medio al nuevo producto registrado
-                if ($mediaItem) {
-                    $new_product->copyMedia($mediaItem->getPath())->usingName($mediaItem->name)->toMediaCollection('imageCover');
-                }
             }
+            // // si el registro de talla esta vacio, saltar
+            // if (!$product['size_id']) continue;
         }
 
         if (!request('stayInView')) {
