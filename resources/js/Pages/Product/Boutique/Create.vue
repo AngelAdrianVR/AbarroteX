@@ -77,51 +77,88 @@
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
                     </div>
-                    <article v-for="(item, index) in form.sizes" :key="index" class="flex items-center space-x-3 mb-2">
-                        <div class="w-[33%]">
-                            <div class="w-full flex items-center justify-between">
-                                <InputLabel v-if="index == 0" value="Talla *" />
-                                <button @click="openSizeModal" v-if="index == 0" type="button"
-                                    class="text-primary text-xs">Crear
-                                    talla</button>
+                    <article v-for="(item, index) in form.colors" :key="index"
+                        class="mb-2 border rounded-[10px] *:px-3 pb-2">
+                        <div v-if="item.color" class="h-2 rounded-t-[10px]" :style="{ backgroundColor: item.color }">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mt-2">
+                            <div>
+                                <div class="w-full flex items-center justify-between">
+                                    <InputLabel value="Color *" />
+                                    <button @click="openSizeModal" v-if="index == 0" type="button"
+                                        class="text-primary text-xs">
+                                        Agregar nuevo color
+                                    </button>
+                                </div>
+                                <el-select v-model="item.color" placeholder="Selecciona un color">
+                                    <el-option v-for="item in colors" :key="item.value" :label="item.label"
+                                        :value="item.value">
+                                        <div class="flex items-center">
+                                            <el-tag :color="item.value" style="margin-right: 8px" size="small" />
+                                            <span :style="{ color: item.value }">{{ item.label }}</span>
+                                        </div>
+                                    </el-option>
+                                </el-select>
+                                <InputError :message="form.errors[`sizes.${index}.size_id`]" />
                             </div>
-                            <el-select :ref="'size' + index" filterable v-model="item.size_id" clearable
-                                placeholder="Seleccione"
-                                :no-data-text="form.category_id ? 'No hay tallas registradas en la categoria seleccionada' : 'Primero seleccione la categoria'"
-                                no-match-text="No se encontraron coincidencias">
-                                <el-option v-for="size in getCategorySizes" :key="size.id" :label="size.name"
-                                    :value="size.id" :disabled="form.sizes.some(item => item.size_id == size.id)">
-                                    <p class="flex items-center justify-between">
-                                        <span>{{ size.name }}</span>
-                                        <span v-if="size.short" class="text-[10px] text-gray99">({{ size.short
-                                            }})</span>
-                                    </p>
-                                </el-option>
-                            </el-select>
-                            <InputError :message="form.errors[`sizes.${index}.size_id`]" />
+                            <div>
+                                <div class="w-full flex items-center justify-between">
+                                    <InputLabel value="Tallas *" />
+                                    <button @click="openSizeModal" v-if="index == 0" type="button"
+                                        class="text-primary text-xs">
+                                        Crear talla
+                                    </button>
+                                </div>
+                                <el-select :ref="'size' + index" multiple filterable
+                                    @change="handleChangeSizes(index, item)" v-model="selectedSizes" clearable
+                                    placeholder="Selecciona las tallas" collapse-tags collapse-tags-tooltip
+                                    :no-data-text="form.category_id ? 'No hay tallas registradas en la categoria seleccionada' : 'Primero seleccione la categoria'"
+                                    no-match-text="No se encontraron coincidencias">
+                                    <el-option v-for="size in getCategorySizes" :key="size.id" :label="size.name"
+                                        :value="size.name">
+                                        <p class="flex items-center justify-between">
+                                            <span>{{ size.name }}</span>
+                                            <span v-if="size.short" class="text-[10px] text-gray99">
+                                                ({{ size.short }})
+                                            </span>
+                                        </p>
+                                    </el-option>
+                                </el-select>
+                                <InputError :message="form.errors[`sizes.${index}.size_id`]" />
+                            </div>
                         </div>
-                        <div class="w-[14%]">
-                            <InputLabel v-if="index == 0" value="Existencias *" />
-                            <el-input v-model="item.current_stock" placeholder="Stock actual"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <InputError :message="form.errors[`sizes.${index}.current_stock`]" />
+                        <div class="grid grid-cols-6 gap-3 mt-3">
+                            <p v-if="item.sizes.length" class="col-span-full text-[13px] text-gray37">
+                                En los campos de abajo ingresa las existencias de cada talla
+                                y el color seleccionado
+                            </p>
+                            <div v-for="size in item.sizes" :key="index">
+                                <div>
+                                    <InputLabel>
+                                        <p class="w-full truncate" :title="size.size_name + ' *'">{{ size.size_name }} *</p>
+                                    </InputLabel>
+                                    <el-input v-model="size.current_stock" placeholder="Stock actual"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                                    <InputError :message="form.errors[`sizes.${index}.current_stock`]" />
+                                </div>
+                                <div v-if="form.has_inventory_control">
+                                    <InputLabel v-if="index == 0" value="Cantidad mínima" />
+                                    <el-input v-model="size.min_stock" placeholder="Mínimo permitido"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                                    <InputError :message="form.errors[`sizes.${index}.min_stock`]" />
+                                </div>
+                                <div v-if="form.has_inventory_control">
+                                    <InputLabel v-if="index == 0" value="Cantidad máxima" />
+                                    <el-input v-model="size.max_stock" placeholder="Máximo permitido"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                                    <InputError :message="form.errors[`sizes.${index}.max_stock`]" />
+                                </div>
+                            </div>
                         </div>
-                        <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel v-if="index == 0" value="Cantidad mínima" />
-                            <el-input v-model="item.min_stock" placeholder="Mínimo permitido"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <InputError :message="form.errors[`sizes.${index}.min_stock`]" />
-                        </div>
-                        <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel v-if="index == 0" value="Cantidad máxima" />
-                            <el-input v-model="item.max_stock" placeholder="Máximo permitido"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <InputError :message="form.errors[`sizes.${index}.max_stock`]" />
-                        </div>
-                        <div class="w-[4%] flex justify-end">
+                        <!-- <div class="w-[4%] flex justify-end">
                             <el-popconfirm v-if="form.sizes.length > 1" confirm-button-text="Si" cancel-button-text="No"
                                 icon-color="#373737" :title="'¿Desea eliminar la talla seleccionada?'"
                                 @confirm="deleteSize(index)">
@@ -131,9 +168,9 @@
                                     </button>
                                 </template>
                             </el-popconfirm>
-                        </div>
+                        </div> -->
                     </article>
-                    <button @click="addSize" type="button" class="text-primary ml-3">+ Añadir talla</button>
+                    <button @click="addColor" type="button" class="text-primary ml-3">+ Añadir color</button>
                 </section>
                 <!-- <div class="mt-3 col-span-full">
                     <InputLabel value="Moneda*" />
@@ -270,12 +307,10 @@ export default {
             category_id: null,
             imageCover: null,
             has_inventory_control: false,
-            sizes: [
+            colors: [
                 {
-                    size_id: null,
-                    current_stock: 1,
-                    min_stock: null,
-                    max_stock: null,
+                    color: null,
+                    sizes: [],
                 }
             ],
         });
@@ -307,6 +342,37 @@ export default {
             productsLimit: this.$page.props.auth.user.store.plan == 'Plan Básico' ? 1500 : 3000,
             // cargas
             sizeLoading: false,
+            selectedSizes: [], // Temporal para el selector de tallas
+            colors: [
+                {
+                    value: '#E63415',
+                    label: 'Rojo',
+                },
+                {
+                    value: '#FF6600',
+                    label: 'Naranja',
+                },
+                {
+                    value: '#FFDE0A',
+                    label: 'Amarillo',
+                },
+                {
+                    value: '#1EC79D',
+                    label: 'Verde',
+                },
+                {
+                    value: '#14CCCC',
+                    label: 'Cyan',
+                },
+                {
+                    value: '#4167F0',
+                    label: 'Azul',
+                },
+                {
+                    value: '#6222C9',
+                    label: 'Morado',
+                },
+            ],
         };
     },
     components: {
@@ -332,6 +398,22 @@ export default {
         },
     },
     methods: {
+        handleChangeSizes(index, item) {
+            // Limpiar las tallas antiguas y agregar las nuevas seleccionadas
+            item.sizes = this.selectedSizes.map(size => {
+                // Verificar si la talla ya existe en item.sizes, si no, crear el objeto
+                const existingSize = item.sizes.find(s => s.size_name === size);
+                if (!existingSize) {
+                    return {
+                        size_name: size,
+                        current_stock: 1,
+                        min_stock: null,
+                        max_stock: null,
+                    };
+                }
+                return existingSize;
+            });
+        },
         openSizeModal() {
             if (this.form.category_id) {
                 this.sizeForm.category = this.categories.find(item => item.id == this.form.category_id).name;
@@ -340,8 +422,8 @@ export default {
             this.showSizeFormModal = true;
         },
         handleCategory() {
-            this.form.sizes.forEach(item => {
-                item.size_id = null;
+            this.form.colors.forEach(item => {
+                item.sizes = [];
             });
 
             this.$nextTick(() => {
@@ -351,15 +433,20 @@ export default {
         deleteSize(index) {
             this.form.sizes.splice(index, 1);
         },
-        addSize() {
-            const newSize = {
-                size_id: null,
-                current_stock: 1,
-                min_stock: null,
-                max_stock: null,
+        addColor() {
+            const newColor = {
+                color: null,
+                sizes: [],
+                stock: [
+                    // {
+                    //     current: 1,
+                    //     min: null,
+                    //     max: null,
+                    // }
+                ]
             }
 
-            this.form.sizes.push(newSize);
+            this.form.colors.push(newColor);
         },
         saveImage(image) {
             this.form.imageCover = image;
@@ -435,3 +522,9 @@ export default {
     }
 }
 </script>
+<style scoped>
+.el-tag {
+    border: none;
+    aspect-ratio: 1;
+}
+</style>
