@@ -378,6 +378,7 @@ export default {
             localColors: this.colors,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showSizeFormModal: false, //muestra formulario para agregar tallas
+            showColorFormModal: false, //muestra formulario para agregar colores
             currencies: [
                 { value: "Peso Mexicano", label: "$MXN" },
                 { value: "Dolar Americano", label: "$USD" },
@@ -484,6 +485,7 @@ export default {
                 const existingColor = this.form.colors.find(c => c.color === element.additional.color.color);
 
                 const size = {
+                    id: element.id,
                     size_id: element.additional.size.id,
                     size_name: element.additional.size.name,
                     current_stock: element.current_stock,
@@ -501,7 +503,6 @@ export default {
                 } else {
                     // Si el color no existe, crea un nuevo objeto color con la talla
                     const newColor = {
-                        id: element.id,
                         color: element.additional.color.color,
                         sizes: [size] // Crea el array con la talla
                     };

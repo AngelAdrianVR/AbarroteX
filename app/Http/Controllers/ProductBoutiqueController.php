@@ -184,6 +184,7 @@ class ProductBoutiqueController extends Controller
             'colors' => 'required|array|min:1',
             'colors.*.sizes' => 'required|array|min:1',
             'colors.*.color' => 'nullable|string|max:7',
+            'colors.*.sizes.*.id' => 'nullable|numeric|min:1',
             'colors.*.sizes.*.size_id' => 'required|numeric|min:1',
             'colors.*.sizes.*.size_name' => 'required|string|max:100',
             'colors.*.sizes.*.current_stock' => 'required|numeric|min:0',
@@ -202,7 +203,7 @@ class ProductBoutiqueController extends Controller
         ]);
 
         // Obtener los IDs de las tallas enviadas en la solicitud
-        $updatedColors = collect($request->input('colors', []))->pluck('id')->toArray();
+        $updatedSizeIds = collect($request->input('colors'))->pluck('sizes.*.id')->flatten()->filter()->toArray();
 
         // Obtener los productos actuales por nombre
         $existingProducts = Product::where('name', $productName)
@@ -225,7 +226,7 @@ class ProductBoutiqueController extends Controller
         }
 
         // Eliminar productos que no están en la solicitud
-        $existingProducts->whereNotIn('id', $updatedColors)->each(function ($product) {
+        $existingProducts->whereNotIn('id', $updatedSizeIds)->each(function ($product) {
             $product->delete();
         });
 
@@ -241,7 +242,11 @@ class ProductBoutiqueController extends Controller
 
                 $size = Size::where('id', $new_size['size_id'])->first()->toArray();
 
-                $existingProduct = $existingProducts->where('id', $new_size['id'])->first();
+                if (isset($new_size['id'])) {
+                    $existingProduct = $existingProducts->where('id', $new_size['id'])->first();
+                } else {
+                    $existingProduct = null;
+                }
 
                 $additional = ["size" => $size, "color" => $color];
                 if ($existingProduct) {
@@ -325,6 +330,7 @@ class ProductBoutiqueController extends Controller
             'colors' => 'required|array|min:1',
             'colors.*.sizes' => 'required|array|min:1',
             'colors.*.color' => 'nullable|string|max:7',
+            'colors.*.sizes.*.id' => 'nullable|numeric|min:1',
             'colors.*.sizes.*.size_id' => 'required|numeric|min:1',
             'colors.*.sizes.*.size_name' => 'required|string|max:100',
             'colors.*.sizes.*.current_stock' => 'required|numeric|min:0',
@@ -345,7 +351,7 @@ class ProductBoutiqueController extends Controller
         $mediaItem = null;
 
         // Obtener los IDs de las tallas enviadas en la solicitud
-        $updatedColors = collect($request->input('colors', []))->pluck('id')->toArray();
+        $updatedSizeIds = collect($request->input('colors'))->pluck('sizes.*.id')->flatten()->filter()->toArray();
 
         // Obtener los productos actuales por nombre
         $existingProducts = Product::where('name', $productName)
@@ -368,7 +374,7 @@ class ProductBoutiqueController extends Controller
         }
 
         // Eliminar productos que no están en la solicitud
-        $existingProducts->whereNotIn('id', $updatedColors)->each(function ($product) {
+        $existingProducts->whereNotIn('id', $updatedSizeIds)->each(function ($product) {
             $product->delete();
         });
 
@@ -385,6 +391,12 @@ class ProductBoutiqueController extends Controller
                 $size = Size::where('id', $new_size['size_id'])->first()->toArray();
 
                 $existingProduct = $existingProducts->where('id', $new_size['id'])->first();
+
+                if (isset($new_size['id'])) {
+                    $existingProduct = $existingProducts->where('id', $new_size['id'])->first();
+                } else {
+                    $existingProduct = null;
+                }
 
                 $additional = ["size" => $size, "color" => $color];
                 if ($existingProduct) {
