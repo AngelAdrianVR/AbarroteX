@@ -333,7 +333,6 @@ Route::put('users-update-printer-config/{user}', [UserController::class, 'update
 Route::put('users-save-printer-config/{user}', [UserController::class, 'savePrinter'])->middleware('auth')->name('users.save-printer-config');
 
 
-
 //settings routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Configuraciones', 'verified']);
@@ -380,6 +379,7 @@ Route::resource('support-reports', SupportReportController::class)->middleware('
 //payments routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
 Route::resource('payments', PaymentController::class)->middleware('auth');
+Route::post('payments/store-invoice/{payment}', [PaymentController::class, 'storeInvoice'])->name('payments.store-invoice');
 
 
 //Cash register routes--------------------------------------------------------------------------------------

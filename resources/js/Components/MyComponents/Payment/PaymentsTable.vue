@@ -58,7 +58,11 @@
                                         class="fa-regular fa-clock mr-2"></i>Solicitada</span>
                             </el-tooltip>
 
-                            <p v-else>listo</p>
+                            <div v-else-if="payment.media.find(m => m.collection_name == 'invoice')">
+                                <FileView :file="payment.media.find(m => m.collection_name == 'invoice')" />
+                            </div>
+                            
+                            <p v-else class="text-gray-400">Hubo problemas al intentar mostrar la factura</p>
                         </div>
                         <p v-else class="text-gray-400">Debe de estar aprobado el pago para solicitar factura</p>
                     </td>
@@ -113,7 +117,8 @@
             <template #footer>
                 <div v-if="$page.props.auth.user.store.csf && !editCSF">
                     <PrimaryButton @click="updateInvoiceStatus" :disabled="requestingInvoice">
-                        <i v-if="requestingInvoice" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        <i v-if="requestingInvoice"
+                            class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Solicitar factura
                     </PrimaryButton>
                 </div>
@@ -121,7 +126,8 @@
                     <CancelButton @click="editCSF = false" :disabled="fiscalForm.processing">
                         Cancelar</CancelButton>
                     <PrimaryButton @click="storeCSF" :disabled="fiscalForm.processing || !fiscalForm.csf.length">
-                        <i v-if="fiscalForm.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        <i v-if="fiscalForm.processing"
+                            class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Guardar Constancia
                     </PrimaryButton>
                 </div>
@@ -140,6 +146,7 @@ import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import CancelButton from '@/Components/MyComponents/CancelButton.vue';
+import FileView from '@/Components/MyComponents/FileView.vue';
 
 export default {
     data() {
@@ -167,6 +174,7 @@ export default {
         InputLabel,
         PrimaryButton,
         CancelButton,
+        FileView,
     },
     props: {
         payments: Array
@@ -195,7 +203,7 @@ export default {
                         message: '',
                         type: 'success',
                     });
-                }, 
+                },
                 onFinish: () => {
                     this.requestingInvoice = false;
                 }

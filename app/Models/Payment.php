@@ -17,8 +17,8 @@ class Payment extends Model implements HasMedia
         'amount',
         'suscription_period',
         'store_id',
-        'status',
-        'invoice_status',
+        'status', //En revisión, Aprobado, Rechazado (status del pago)
+        'invoice_status', //No solicitada, Solicitada, Enviada (status de la factura)
         'rejected_reason',
         'notes',
         'days_gifted',
