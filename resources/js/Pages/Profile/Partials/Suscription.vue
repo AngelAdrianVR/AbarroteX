@@ -52,7 +52,7 @@
                             </el-tooltip>
                         </div>
                         <div v-else class="flex flex-col space-y-3 col-span-full mt-7">
-                            <button @click="edit = false" type="button" class="my-px text-[9px] self-start">
+                            <button @click="edit = false" type="button" class="my-px text-[9px] self-start hover:bg-gray-200 rounded-full flex items-center justify-center size-5">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </button>
                             <h2 class="font-bold my-4">Selecciona la suscripción que deseas obtener</h2>
@@ -129,12 +129,13 @@
                                     confirmada, podrás continuar disfrutando de tu suscripción. Puedes verificar el
                                     estado de tu suscripción en cualquier momento.</p>
 
-                                <div class="flex items-center justify-end space-x-8 mx-4 mt-2">
+                                <form @submit.prevent="checkout" class="flex items-center justify-end space-x-8 mx-4 mt-2">
                                     <button @click="edit = false" type="button" class="text-primary">Ahora no</button>
                                     <PrimaryButton @click="storePayment()" id="btn-bottom"
                                         :disabled="!form.image || form.processing">
                                         Enviar comprobante de pago</PrimaryButton>
-                                </div>
+                                    <PrimaryButton>Paga con tarjeta</PrimaryButton>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -301,6 +302,7 @@ export default {
             days: null,
             days_gifted: null,
             image: null,
+            activeModules: null,
             // default_card_id: this.$page.props.auth.user.store.default_card_id,
         });
 
@@ -401,6 +403,13 @@ export default {
         },
     },
     methods: {
+        checkout() {
+            this.form.activeModules = this.modules.filter(item => this.$page.props.auth.user.store.activated_modules.includes(item.name));
+            this.form.activeModules.unshift({ name: "Módulos básicos", cost: 199 });
+            // console.log(modules);
+            this.form.post(route('stripe.index'));
+            // this.$inertia.post(route('checkout'));
+        },
         calculateTotalPeriosPrice() {
             // Filtra los módulos activados
             const activatedModules = this.$page.props.auth.user.store.activated_modules;

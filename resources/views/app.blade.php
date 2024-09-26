@@ -16,6 +16,13 @@
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    {{-- Formulario embebido de stripe --}}
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="@/Pages/Stripe/checkout.js" defer></script>
+
+    {{-- token para form embebido stripejs --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <!-- Scripts -->
     @routes
     @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])

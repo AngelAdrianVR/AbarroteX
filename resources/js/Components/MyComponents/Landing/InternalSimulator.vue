@@ -90,7 +90,7 @@
             <p class="w-1/2">Desc. por tiempo transcurrido</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span>
               <span class="w-20 inline-block">
-                - {{ calculateDiscountForPastDays(calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                 {{ calculateDiscountForPastDays(calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
               </span>
             </p>
           </div>
@@ -101,7 +101,7 @@
             <p class="w-1/2 text-right">
               <span class="mr-1">$</span>
               <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal) 
-                - calculateDiscountForPastDays(calculateTotalPayment(calculateTotal))).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                + calculateDiscountForPastDays(calculateTotalPayment(calculateTotal))).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
           </div>
 
