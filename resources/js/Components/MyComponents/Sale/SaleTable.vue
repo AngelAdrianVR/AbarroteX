@@ -23,17 +23,21 @@
             </svg>
           </div>
           <div class="text-sm">
-            <p class="text-xs">Categoria: {{ sale.product.additional?.category }}</p>
+            <div v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'">
+              <p class="text-xs">Categoria: {{ sale.product.additional?.size.category }}</p>
+              <p class="text-xs">
+                Color: {{ sale.product.additional?.color.name }}
+                <i v-if="sale.product.additional?.color.color" class="fa-solid fa-shirt ml-1"
+                  :style="{ color: sale.product.additional?.color.color }"></i>
+              </p>
+              <p class="text-xs">Talla: {{ sale.product.additional?.size.name }}</p>
+            </div>
             <p class="font-bold">{{ sale.product.name }}</p>
-            <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
-              class="text-gray99">
-              ({{ sale.product.additional?.name }})
-            </span>
           </div>
         </div>
         <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">
-            ${{ sale.product.public_price }}{{ getPrefix(sale) }}
+            ${{ sale.product.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}{{ getPrefix(sale) }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
             <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
               @click.stop="startEditing(sale, index)"
@@ -264,13 +268,13 @@ export default {
       }
     },
     getPrefix(sale) {
-      if ( sale.product.bulk_product ) { //revisa si es a granel
-        if ( sale.product.measure_unit === 'Kilogramo' ) { //si es a granel revisa que unidad de medida para retornal el prefijo
-            return '/Kg';
-        } else if ( sale.product.measure_unit === 'Litro' ) {
+      if (sale.product.bulk_product) { //revisa si es a granel
+        if (sale.product.measure_unit === 'Kilogramo') { //si es a granel revisa que unidad de medida para retornal el prefijo
+          return '/Kg';
+        } else if (sale.product.measure_unit === 'Litro') {
           return '/L';
-        } 
-      } 
+        }
+      }
     }
   },
 };

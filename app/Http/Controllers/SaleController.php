@@ -241,8 +241,9 @@ class SaleController extends Controller
 
     private function storeEachProductSold($sale_data, $created_at = null)
     {
+        $store_id = auth()->user()->store_id;
         // Generar un id unico para productos vendidos a este cliente
-        $last_sale = Sale::where('store_id', auth()->user()->store_id)->latest('id')->first();
+        $last_sale = Sale::where('store_id', $store_id)->latest('id')->first();
         $folio = $last_sale ? intval($last_sale->folio) + 1 : 1;
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
@@ -256,8 +257,8 @@ class SaleController extends Controller
 
             $product_name = $product['product']['name'];
             if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
-                // agregar talla al nombre
-                $product_name .= " ({$product['product']['additional']['name']})";
+                // agregar color y talla al nombre
+                $product_name .= "({$product['product']['additional']['color']['name']}-{$product['product']['additional']['size']['name']})";
             }
 
             //regiatra cada producto vendido
@@ -270,7 +271,7 @@ class SaleController extends Controller
                 'is_global_product' => $is_global_product,
                 'original_price' => $product['originalPrice'],
                 'client_id' => $sale_data['client_id'] == false ? null : $sale_data['client_id'],
-                'store_id' => auth()->user()->store_id,
+                'store_id' => $store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
                 'user_id' => auth()->id(),
                 'created_at' => $created_at ?? now(),
@@ -313,8 +314,8 @@ class SaleController extends Controller
             //Registra el historial de venta de cada producto
             $size = '';
             if ($current_product->additional) {
-                // agregar la talla al historial si es que la tiene
-                $size = ' talla ' . $current_product->additional['name'];
+                // agregar color y talla al historial si es que la tiene
+                $size = ' talla ' . $current_product->additional['size']['name'] . ' color ' . $current_product->additional['color']['name'];
             }
             ProductHistory::create([
                 'description' => 'Registro de venta. ' . $product['quantity'] . ' pieza(s)' . $size,
@@ -331,6 +332,7 @@ class SaleController extends Controller
         if ($sale_data['has_credit']) {
             $new_credit_sale_data = CreditSaleData::create([
                 'folio' => $folio,
+                'store_id' => $store_id,
                 'expired_date' => $sale_data['limit_date'],
                 'status' => $sale_data['deposit'] ? 'Parcial' : 'Pendiente',
             ]);
@@ -413,7 +415,7 @@ class SaleController extends Controller
             'store_id' => auth()->user()->store_id,
             'folio' => $saleFolio,
         ])->get();
-        $total_amount = $saleProducts->sum(fn ($sale) => $sale->current_price * $sale->quantity);
+        $total_amount = $saleProducts->sum(fn($sale) => $sale->current_price * $sale->quantity);
 
         // Crear movimiento de retiro de caja con el monto de la venta a cancelar
         CashRegisterMovement::create([
@@ -457,7 +459,7 @@ class SaleController extends Controller
         // }
 
         // marcar productos de venta como reembolsados / cancelados
-        $saleProducts->each(fn ($sale) => $sale->update(['refunded_at' => now()]));
+        $saleProducts->each(fn($sale) => $sale->update(['refunded_at' => now()]));
         // marcar status de informacion de credoto a reembolsado (si es que es a credito)
         $credit_sale_data = CreditSaleData::firstWhere('folio', $saleFolio);
         if ($credit_sale_data) {
@@ -528,10 +530,9 @@ class SaleController extends Controller
                         // registrar regreso de producto a stock de viejo producto
                         if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
                             $refund_description = "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity
-                                . " pieza(s) de talla {$current_product->additional['name']}";
-                            $sale_description = "Registro de venta por reemplazo del producto $current_product_name por este en talla {$current_product->additional['name']} para la venta con folio $request->folio. "
+                                . " pieza(s) de talla {$current_product->additional['size']['name']} y color {$current_product->additional['color']['name']}";
+                            $sale_description = "Registro de venta por reemplazo del producto $current_product_name por este en talla {$current_product->additional['size']['name']} y color {$current_product->additional['color']['name']} para la venta con folio $request->folio. "
                                 . $new_quantity . ' pieza(s)';
-                            $product_name .= " ({$current_product->additional['name']})";
                         } else {
                             $refund_description = "Registro de devolución por reemplazo de producto en la venta con folio $request->folio. " . $old_quantity . ' pieza(s)';
                             $sale_description = "Registro de venta por reemplazo del producto $current_product_name por este en la venta con folio $request->folio. " . $new_quantity . ' pieza(s)';
@@ -565,13 +566,13 @@ class SaleController extends Controller
                         if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
                             if ($old_quantity < $new_quantity) {
                                 $abs_quantity = $new_quantity - $old_quantity;
-                                $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. " 
-                                .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['name'];
+                                $description = "Registro de más producto vendido por edición de la venta con folio $request->folio. "
+                                    .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['size']['name'] . ' y color ' . $current_product->additional['color']['name'];
                                 $type = "Edición";
                             } else {
                                 $abs_quantity = $old_quantity - $new_quantity;
-                                $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. " 
-                                .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['name'];
+                                $description = "Registro de devolución de producto por edición de la venta con folio $request->folio. "
+                                    .  $abs_quantity . ' pieza(s) de talla ' . $current_product->additional['size']['name'] . ' y color ' . $current_product->additional['color']['name'];
                                 $type = "Edición";
                             }
                         } else {
@@ -602,6 +603,11 @@ class SaleController extends Controller
                 $new_total = $new_quantity * $new_price;
                 $total_diff_amount += $new_total - $old_total;
 
+                // agregar detalles de prenda a nombre
+                if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
+                    $product_name .= " ({$current_product->additional['color']['name']}-{$current_product->additional['size']['name']})";
+                }
+                
                 // Actualizar la venta
                 $sale->update([
                     'product_id' => $product_id,
@@ -651,8 +657,8 @@ class SaleController extends Controller
             }
         })->map(function ($sales) use ($returnSales, $installments) {
             // Filtrar ventas normales y en línea
-            $normalSales = $sales->filter(fn ($sale) => isset($sale->current_price));
-            $onlineSales = $sales->filter(fn ($sale) => !isset($sale->current_price));
+            $normalSales = $sales->filter(fn($sale) => isset($sale->current_price));
+            $onlineSales = $sales->filter(fn($sale) => !isset($sale->current_price));
 
             $totalQuantityNormalSale = $normalSales->sum('quantity');
             $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
