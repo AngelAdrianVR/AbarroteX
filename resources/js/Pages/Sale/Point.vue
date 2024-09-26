@@ -152,7 +152,7 @@
         <!-- scaner de código  -->
         <section class="lg:w-[70%]">
           <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
-            <input v-model="scannerQuery" :disabled="scanning" @keydown.enter="getProductByCode" ref="scanInput"
+            <input v-model="scannerQuery" :disabled="scanning || syncingIDB" @keydown.enter="getProductByCode" ref="scanInput"
               class="input w-full pl-9" placeholder="Escanea o teclea el código del producto" type="text">
             <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
@@ -201,7 +201,7 @@
           <div class="relative">
             <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
               ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
-              type="search">
+              type="search" :disabled="syncingIDB">
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
             <!-- Resultados de la búsqueda -->
             <div v-if="searchFocus && searchQuery"

@@ -231,7 +231,7 @@ export default {
             saleFolioToRefund: null,
             addInstallment: false,
             // carga
-            loading: false,
+            loading: true,
             addingInstallment: false,
             refunding: false,
             editing: false,

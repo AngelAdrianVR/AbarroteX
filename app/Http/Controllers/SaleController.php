@@ -241,8 +241,9 @@ class SaleController extends Controller
 
     private function storeEachProductSold($sale_data, $created_at = null)
     {
+        $store_id = auth()->user()->store_id;
         // Generar un id unico para productos vendidos a este cliente
-        $last_sale = Sale::where('store_id', auth()->user()->store_id)->latest('id')->first();
+        $last_sale = Sale::where('store_id', $store_id)->latest('id')->first();
         $folio = $last_sale ? intval($last_sale->folio) + 1 : 1;
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
@@ -270,7 +271,7 @@ class SaleController extends Controller
                 'is_global_product' => $is_global_product,
                 'original_price' => $product['originalPrice'],
                 'client_id' => $sale_data['client_id'] == false ? null : $sale_data['client_id'],
-                'store_id' => auth()->user()->store_id,
+                'store_id' => $store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
                 'user_id' => auth()->id(),
                 'created_at' => $created_at ?? now(),
@@ -331,6 +332,7 @@ class SaleController extends Controller
         if ($sale_data['has_credit']) {
             $new_credit_sale_data = CreditSaleData::create([
                 'folio' => $folio,
+                'store_id' => $store_id,
                 'expired_date' => $sale_data['limit_date'],
                 'status' => $sale_data['deposit'] ? 'Parcial' : 'Pendiente',
             ]);
