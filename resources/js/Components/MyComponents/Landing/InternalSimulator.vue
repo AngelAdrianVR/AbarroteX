@@ -75,42 +75,42 @@
                 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
           </div>
 
-          <p class="text-gray99 my-3">Descuentos</p>
+          <!-- <p class="text-gray99 my-3">Descuentos</p> -->
 
           <!-- Descuento por modulos ya pagados -->
-          <div class="flex">
+          <!-- <div class="flex">
             <p class="w-1/2">Monto ya pagado</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span>
               <span class="w-20 inline-block">- {{ totalPaid.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
-          </div>
+          </div> -->
 
           <!-- Descuento por tiempo transcurrido -->
-          <div class="flex">
+          <!-- <div class="flex">
             <p class="w-1/2">Desc. por tiempo transcurrido</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span>
               <span class="w-20 inline-block">
                  {{ calculateDiscountForPastDays(calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
               </span>
             </p>
-          </div>
+          </div> -->
 
           <!-- Total -->
           <div class="flex mt-7">
             <p class="w-1/2">Total</p>
             <p class="w-1/2 text-right">
               <span class="mr-1">$</span>
-              <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal) 
-                + calculateDiscountForPastDays(calculateTotalPayment(calculateTotal))).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+              <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
           </div>
 
-          <div class="text-center mt-8">
-            <PrimaryButton @click="updateStoreModules" :disabled="loading" class="!px-28">
+          <form @submit.prevent="checkout" class="text-center mt-8">
+            <PrimaryButton :disabled="loading || $page.props.auth.user.store.is_active" class="!px-28">
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
               Confirmar y pagar
             </PrimaryButton>
-          </div>
+            <p v-if="$page.props.auth.user.store.is_active" class="text-xs text-red-600 mt-2">*No puedes pagar si aún no ha vencido tu plan actual</p>
+          </form>
 
           <p class="text-gray99 text-xs mt-3">
             Tu suscripción se renovará automáticamente cada año por
@@ -134,15 +134,24 @@
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 
 export default {
   data() {
+    const form = useForm({
+        amount: null,
+        suscription_period: null,
+        activeModules: null,
+        // default_card_id: this.$page.props.auth.user.store.default_card_id,
+    });
+
     return {
+      form,
       loading: false, // estado de carga de peticion de update modules
-      totalPaid: 199, // El total pagado por los modulos que actualmente tiene.
       nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
-      daysForNextPayment: 0, // dias para el proximo pago
+      // totalPaid: 199, // El total pagado por los modulos que actualmente tiene.
+      // daysForNextPayment: 0, // dias para el proximo pago
       period: this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
       activated_modules: [],
 
@@ -197,6 +206,13 @@ export default {
   },
   props: {},
   methods: {
+    checkout() {
+      this.form.amount = this.calculateTotalPayment(this.calculateTotal);
+      this.form.suscription_period = this.period;
+      this.form.activeModules = this.modules.filter(item => item.activated === true);
+      this.form.activeModules.unshift({ name: "Módulos básicos", cost: 199 });
+      this.form.post(route('stripe.index'));
+    },
     async updateStoreModules() {
       this.loading = true;
       try {
@@ -212,17 +228,17 @@ export default {
       }
     },
      calculateTotalPayment(calculateTotal) {
-      const total = this.period === 'Mensual' ? (calculateTotal - this.totalPaid) : ((calculateTotal * 10) - this.totalPaid);
+      const total = this.period === 'Mensual' ? (calculateTotal) : (calculateTotal * 10);
       return Math.max(0, total);
     },
-    calculateDiscountForPastDays(calculateTotal) {
-      if ( calculateTotal > 0 && this.daysForNextPayment > 0 ) {
-        const totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
-        return totalDiscountForPastDays;
-      } else {
-        return 0
-      }
-    },
+    // calculateDiscountForPastDays(calculateTotal) {
+    //   if ( calculateTotal > 0 && this.daysForNextPayment > 0 ) {
+    //     const totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
+    //     return totalDiscountForPastDays;
+    //   } else {
+    //     return 0
+    //   }
+    // },
     handleSwitchModule(module) {
       if (module.activated) {
         this.activated_modules.push(module.name);
