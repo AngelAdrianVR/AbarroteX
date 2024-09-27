@@ -19,12 +19,12 @@ class StripeController extends Controller
 
         $modules = $request->activeModules;
 
-        return view('product.index', compact('products', 'modules'));
+        return view('Stripe.index', compact('products', 'modules'));
     }
 
     public function checkout(Request $request)
     {
-        $products = json_decode($request->input('products'), true);
+        $products = json_decode($request->input('products'), true); //lo hago array pero solo tiene un objeto. Lo dejo asi par ano modificar el ejemplo en caso de muchos elementos
 
         \Stripe\Stripe::setApiKey(config(key:'stripe.sk'));
 
@@ -33,7 +33,7 @@ class StripeController extends Controller
         foreach ($products as $product ) {
             $LineItems[] = [
                 'price_data' => [
-                    'currency' => 'usd',
+                    'currency' => 'mxn',
                     'product_data' => [
                         'name' => $product['name'],
                     ],
@@ -49,33 +49,11 @@ class StripeController extends Controller
             // 'success_url' =>  route('stripe.success', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
             'success_url' =>  route('stripe.success', [], true) . "?products=" . urlencode(json_encode($products)),
             'cancel_url' =>  route('stripe.cancel', [], true),
+            'locale' => 'es',  // Aquí se establece el idioma a español
         ]);
 
         return redirect($session->url);
     }
-
-    // public function checkout()
-    // {
-    //     $stripe = new \Stripe\StripeClient(config('stripe.sk'));
-
-    //     try {
-    //         $checkout_session = $stripe->checkout->sessions->create([
-    //             'ui_mode' => 'embedded',
-    //             'line_items' => [[
-    //                 'price' => 'price_1Q321KKyxepsgPCZeXozTmbW', // Cambia esto por el ID de tu producto real
-    //                 'quantity' => 1,
-    //             ]],
-    //             'mode' => 'payment',
-    //         ]);
-
-    //         return response()->json([
-    //             'id' => $checkout_session->id,
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         // Maneja el error y devuelve una respuesta de error JSON
-    //         return response()->json(['error' => $e->getMessage()], 500);
-    //     }
-    // }
 
     public function success(Request $request)
     {

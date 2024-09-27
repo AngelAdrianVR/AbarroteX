@@ -26,7 +26,8 @@
                                 <b>$ {{ getSuscriptionAmount().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
                             </p>
                             <button v-if="!$page.props.auth.user.store.last_payment" @click="edit = true"
-                                class="text-primary text-xs justify-self-end">
+                                class="text-xs justify-self-end"
+                                :class="$page.props.auth.user.store.is_active ? 'text-gray-500 cursor-not-allowed' : 'text-primary'">
                                 Pagar suscripción
                             </button>
                             <el-tooltip v-else placement="top">
@@ -52,9 +53,16 @@
                             </el-tooltip>
                         </div>
                         <div v-else class="flex flex-col space-y-3 col-span-full mt-7">
-                            <button @click="edit = false" type="button" class="my-px text-[9px] self-start hover:bg-gray-200 rounded-full flex items-center justify-center size-5">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
+                            <div class="flex justify-between">
+                                <button @click="edit = false" type="button" class="my-px text-[9px] self-start hover:bg-gray-200 rounded-full flex items-center justify-center size-5">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+
+                                <button v-if="edit" @click="$inertia.get('/support/suscription')"
+                                    class="text-primary text-xs justify-self-end">
+                                    Editar módulos de suscripción
+                                </button>       
+                            </div>
                             <h2 class="font-bold my-4">Selecciona la suscripción que deseas obtener</h2>
                             <div v-for="(item, index) in suscriptions" :key="index"
                                 class="relative pb-2 border-b border-grayD9">
@@ -276,10 +284,10 @@
                         <span v-if="$page.props.auth.user.store.activated_modules.includes(item.name)">${{ item.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}/ mes</span>
                     </div>
                 </section>
-                <button @click="$inertia.get('/support/suscription')"
+                <!-- <button v-if="edit" @click="$inertia.get('/support/suscription')"
                     class="text-primary text-xs justify-self-end">
                     Editar módulos de suscripción
-                </button>
+                </button> -->
             </article>
         </div>
     </section>
@@ -406,9 +414,7 @@ export default {
         checkout() {
             this.form.activeModules = this.modules.filter(item => this.$page.props.auth.user.store.activated_modules.includes(item.name));
             this.form.activeModules.unshift({ name: "Módulos básicos", cost: 199 });
-            // console.log(modules);
             this.form.post(route('stripe.index'));
-            // this.$inertia.post(route('checkout'));
         },
         calculateTotalPeriosPrice() {
             // Filtra los módulos activados

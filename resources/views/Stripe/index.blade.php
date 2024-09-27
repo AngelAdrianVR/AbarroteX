@@ -25,7 +25,7 @@
                 @foreach ($modules as $module)
                 <div class="flex justify-between">
                     <p>{{ $module['name'] }}</p>
-                    <p>${{ number_format($module['cost'], 2) . ' * 10 meses' }}</p> <!-- Multiplicación se realiza aquí -->
+                    <p>${{ number_format($module['cost'] * 10, 2) }}</p> <!-- Multiplicación se realiza aquí -->
                 </div>
                 @endforeach
             @endif
