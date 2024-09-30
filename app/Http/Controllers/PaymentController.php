@@ -78,18 +78,27 @@ class PaymentController extends Controller
         //
     }
 
-
     public function edit(Payment $payment)
     {
         //
     }
 
-
     public function update(Request $request, Payment $payment)
     {
         $payment->update($request->all());
-    }
 
+        $store = auth()->user()->store;
+        // Notificar a dirección
+        $admins = Admin::where('employee_properties->department', 'Dirección')->get();
+        $title = "Factura solicitada";
+        $description = "La tienda \"$store->name\" ha solicitado factura del pago #{$payment->id}.";
+        if (app()->environment() === 'production') {
+            $url = "https://admin.ezyventas.com/stores/$store->id";
+        } else {
+            $url = "http://localhost:8000/stores/$store->id";
+        }
+        $admins->each(fn($admin) => $admin->notify(new AdminBasicNotification($title, $description, $url)));
+    }
 
     public function destroy(Payment $payment)
     {
