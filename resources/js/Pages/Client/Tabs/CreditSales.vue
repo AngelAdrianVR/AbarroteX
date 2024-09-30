@@ -11,51 +11,6 @@
                 </svg>
                 <p class="text-sm ml-2">Imprimir historial</p>
             </button>
-
-            <!-- filtro -->
-            <!-- <div class="relative">
-                <button @click.stop="showFilter = !showFilter"
-                    class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="16" width="16"
-                        id="Filter-Sort-Lines-Descending--Streamline-Ultimate">
-                        <desc>Filter Sort Lines Descending Streamline Icon: https://streamlinehq.com</desc>
-                        <defs></defs>
-                        <title>filter</title>
-                        <path d="M0.73 4.2791H23.27" fill="none" stroke="currentColor" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="1"></path>
-                        <path d="M3.131 9.426H20.869" fill="none" stroke="currentColor" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="1"></path>
-                        <path d="M8.7141 19.7209H15.2859" fill="none" stroke="currentColor" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="1"></path>
-                        <path d="M5.531 14.573H18.469" fill="none" stroke="currentColor" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="1"></path>
-                    </svg>
-                    <p class="text-sm ml-2">Filtrar</p>
-                </button>
-                <div v-if="showFilter"
-                    class="absolute top-9 right-0 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-10 w-80">
-                    <div class="mb-3">
-                        <InputLabel value="Rango de fechas" class="ml-3 mb-1" />
-                        <div v-if="isMobile" class="flex items-center space-x-2">
-                            <el-date-picker @change="handleStartDateChange" :disabled-date="disabledPrevDays"
-                                v-model="startDate" type="date" class="!w-1/2" placeholder="Inicio" size="small" />
-                            <el-date-picker @change="handleFinishDateChange" :disabled-date="disabledNextDays"
-                                v-model="finishDate" type="date" class="!w-1/2" placeholder="Final" size="small" />
-                        </div>
-                        <div v-else>
-                            <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
-                                start-placeholder="Fecha de inicio" end-placeholder="Fecha de fin" class="!w-full" />
-                        </div>
-                    </div>
-                    <div class="flex space-x-2">
-                        <PrimaryButton @click="searchSales" class="!py-1"
-                            :disabled="isMobile ? !(startDate && finishDate) : !searchDate">
-                            Aplicar
-                        </PrimaryButton>
-                        <ThirthButton @click="cleanFilter" class="!py-1">Limpiar</ThirthButton>
-                    </div>
-                </div>
-            </div> -->
         </header>
 
         <!-- Ventas -->
@@ -165,7 +120,20 @@
                         class="flex items-center space-x-2 mb-1">
                         <div class="w-1/3 md:w-1/2">
                             <InputLabel value="Producto" />
-                            <el-select v-model="product.product_id" filterable placeholder="Selecciona el producto"
+                            <el-select
+                                v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                                v-model="product.product_id" filterable placeholder="Selecciona el producto"
+                                no-data-text="No hay opciones registradas"
+                                no-match-text="No se encontraron coincidencias">
+                                <el-option v-for="item in products" :key="item.id"
+                                    :label="item.name + ` (${item.additional?.color.name}-${item.additional?.size.name})`" :value="item.id">
+                                    <p>
+                                        {{ item.name }}
+                                        <span>({{ item.additional?.color.name }}-{{ item.additional?.size.name }})</span>
+                                    </p>
+                                </el-option>
+                            </el-select>
+                            <el-select v-else v-model="product.product_id" filterable placeholder="Selecciona el producto"
                                 no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="item in products" :key="item.id" :label="item.name"
@@ -263,7 +231,7 @@ export default {
             saleFolioToRefund: null,
             addInstallment: false,
             // carga
-            loading: false,
+            loading: true,
             addingInstallment: false,
             refunding: false,
             editing: false,

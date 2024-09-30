@@ -13,7 +13,7 @@
             </thead>
             <tbody class="divide-y-[1px]">
                 <tr v-for="(payment, index) in payments" :key="index" class="*:text-xs *:py-2 *:px-4 border-grayD9">
-                    <td class="rounded-s-full">{{ String(payment.id).padStart(4, '0') }}</td>
+                    <td class="rounded-s-full">#{{ String(payment.id).padStart(4, '0') }}</td>
                     <td>{{ payment.suscription_period }}</td>
                     <td>
                         <div class="flex items-center space-x-1">
@@ -58,10 +58,25 @@
                                         class="fa-regular fa-clock mr-2"></i>Solicitada</span>
                             </el-tooltip>
 
-                            <div v-else-if="payment.media.find(m => m.collection_name == 'invoice')">
-                                <FileView :file="payment.media.find(m => m.collection_name == 'invoice')" />
+                            <div
+                                v-else-if="payment.invoice_status === 'Enviada' && payment.media.find(m => m.collection_name == 'invoice')">
+                                <FileView :file="payment.media.find(m => m.collection_name == 'invoice')"
+                                    :url="changeDomain(payment.media.find(m => m.collection_name == 'invoice').original_url)" />
                             </div>
-                            
+                            <el-tooltip v-else-if="payment.invoice_status === 'Error en datos fiscales'"
+                                placement="top">
+                                <template #content>
+                                    <p>
+                                        Clic para actualizar constancia de situación fiscal.<br>
+                                        Una vez actualizada, vuelve a solicitar la factura
+                                    </p>
+                                </template>
+                                <button @click="openInvoiceModal(payment.id)" type="button"
+                                    class="bg-red-100 text-red-500 py-1 px-2 rounded-full">
+                                    <i class="fa-regular fa-exclamation mr-2"></i>
+                                    Error en datos fiscales
+                                </button>
+                            </el-tooltip>
                             <p v-else class="text-gray-400">Hubo problemas al intentar mostrar la factura</p>
                         </div>
                         <p v-else class="text-gray-400">Debe de estar aprobado el pago para solicitar factura</p>
@@ -180,6 +195,19 @@ export default {
         payments: Array
     },
     methods: {
+        changeDomain(url) {
+            // en local no se hace ningun cambio de dominio
+            if (import.meta.env.VITE_APP_ENV == 'local') return url;
+
+            const oldDomain = 'https://ezyventas.com';
+            const newDomain = 'https://admin.ezyventas.com';
+
+            // Reemplaza el dominio antiguo con el nuevo
+            if (url.startsWith(oldDomain)) {
+                return url.replace(oldDomain, newDomain);
+            }
+            return url; // Si no coincide, devuelve la URL sin cambios
+        },
         openInvoiceModal(paymentId) {
             this.showInvoiceRequestModal = true;
             this.paymentUpdateId = paymentId

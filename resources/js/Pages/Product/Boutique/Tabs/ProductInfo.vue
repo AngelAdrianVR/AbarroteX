@@ -7,7 +7,7 @@
             </div>
         </div>
         <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">
-            {{ formatDateTime(products[0].created_at) }}</strong></p>
+                {{ formatDateTime(products[0].created_at) }}</strong></p>
         <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ products[0].name }}</h1>
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
@@ -20,7 +20,7 @@
                 <p class="text-gray37">Precio de venta: </p>
                 <p class="text-right font-bold">${{
                     products[0].public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                    ",") }}</p>
+                        ",") }}</p>
             </div>
             <div v-if="products[0].description">
                 <h2 class="mt-3 ml-5 font-bold text-lg">Sobre el producto</h2>
@@ -36,18 +36,26 @@
             <table class="table-fixed w-full border border-grayD9">
                 <thead>
                     <tr class="*:text-start *:px-3 bg-grayF2 text-gray37">
-                        <th class="w-44 xl:w-[27%]">Talla</th>
-                        <th class="w-44 xl:w-[28%]">Código</th>
+                        <th class="w-44 xl:w-[27%]">Colores</th>
+                        <th class="w-44 xl:w-[27%]">Tallas</th>
+                        <th class="w-44 xl:w-[28%]">Códigos</th>
                         <th class="w-32 xl:w-[15%]">Existencias</th>
                         <th v-if="products[0].has_inventory_control" class="w-32 xl:w-[16%]">Cantidad mínima</th>
                         <th v-if="products[0].has_inventory_control" class="w-32 xl:w-[16%]">Cantidad máxima</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y-[1px]">
-                    <tr v-for="(product, index) in products" :key="index" class="*:px-3 *:py-1">
-                        <td class="flex items-center justify-between">
-                            <span>{{ product.additional.name }}</span>
-                            <span class="text-gray99 text-xs">{{ product.additional?.short }}</span>
+                    <tr v-for="(product, colorIndex) in groupedProductsByColor" :key="colorIndex"
+                        class="*:px-3 *:py-1">
+                        <!-- Render the color name and first size for each color group -->
+                        <td>
+                            {{ product.additional.color.name }}
+                        </td>
+                        <td>
+                            <div class="flex space-x-2 items-center">
+                                <span>{{ product.additional.size.name }}</span>
+                                <span v-if="product.additional.size.short" class="text-gray99 text-xs">({{ product.additional.size.short }})</span>
+                            </div>
                         </td>
                         <td>
                             <div class="flex items-center">
@@ -64,9 +72,11 @@
                                 </el-tooltip>
                             </div>
                         </td>
-                        <td>{{ product.current_stock }}</td>
-                        <td v-if="product.min_stock">{{ product.min_stock ?? '-' }}</td>
-                        <td v-if="product.max_stock">{{ product.max_stock ?? '-' }}</td>
+                        <td>
+                            {{ product.current_stock }}
+                        </td>
+                        <td v-if="product.min_stock">{{ product.min_stock }}</td>
+                        <td v-if="product.max_stock">{{ product.max_stock }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -95,7 +105,35 @@ export default {
         products: Array,
     },
     computed: {
+        groupedProductsByColor() {
+            const grouped = {};
+            this.products.forEach(product => {
+                const color = product.additional.color.name;
+                if (!grouped[color]) {
+                    grouped[color] = [];
+                }
+                grouped[color].push(product);
+            });
 
+            // console.log(Object.values(grouped).flat());
+            return Object.values(grouped).flat();
+        },
+        // groupedProductsByColor() {
+        //     const grouped = {};
+        //     this.products.forEach(product => {
+        //         const color = product.additional.color.name;
+        //         if (!grouped[color]) {
+        //             grouped[color] = {
+        //                 color: product.additional.color,
+        //                 products: []
+        //             };
+        //         }
+        //         grouped[color].products.push(product);
+        //     });
+
+        //     console.log(Object.values(grouped))
+        //     return Object.values(grouped);
+        // }
     },
     methods: {
         formatDateTime(dateString) {

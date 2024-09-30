@@ -243,10 +243,10 @@
                                 no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="item in products" :key="item.id"
-                                    :label="item.name + ' (' + item.additional.name + ')'" :value="item.id">
+                                    :label="item.name + ` (${item.additional?.color.name}-${item.additional?.size.name})`" :value="item.id">
                                     <p>
                                         {{ item.name }}
-                                        <span>({{ item.additional.name }})</span>
+                                        <span>({{ item.additional?.color.name }}-{{ item.additional?.size.name }})</span>
                                     </p>
                                 </el-option>
                             </el-select>
@@ -274,7 +274,6 @@
                         </div>
                     </section>
                 </form>
-
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">

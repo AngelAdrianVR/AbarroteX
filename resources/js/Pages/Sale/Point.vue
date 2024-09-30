@@ -73,7 +73,8 @@
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <!-- Dinero en caja -->
-        <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')" class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
+        <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
+          class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
             class="size-4 cursor-pointer">
@@ -106,7 +107,8 @@
           <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
         </div>
         <!-- Dropdown -->
-        <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')" class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
+        <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')"
+          class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
           <el-col :span="3">
             <el-dropdown trigger="click">
               <p class="text-sm text-primary w-44 flex items-center">
@@ -150,15 +152,14 @@
         <!-- scaner de código  -->
         <section class="lg:w-[70%]">
           <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
-            <input v-model="scannerQuery" :disabled="scanning" @keydown.enter="getProductByCode" ref="scanInput"
+            <input v-model="scannerQuery" :disabled="scanning || syncingIDB" @keydown.enter="getProductByCode" ref="scanInput"
               class="input w-full pl-9" placeholder="Escanea o teclea el código del producto" type="text">
             <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <!-- Pestañas -->
           <div class="lg:mx-7">
             <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
-              <div
-                v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
+              <div v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
                 class="m-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3 w-full md:w-1/2">
                   <p class="font-bold">Cliente</p>
@@ -200,7 +201,7 @@
           <div class="relative">
             <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
               ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
-              type="search">
+              type="search" :disabled="syncingIDB">
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
             <!-- Resultados de la búsqueda -->
             <div v-if="searchFocus && searchQuery"
@@ -208,8 +209,13 @@
               <ul v-if="productsFound?.length > 0 && !loading">
                 <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
                   class="hover:bg-gray-200 cursor-pointer text-xs px-3 py-2 flex space-x-2">
-                  <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'" class="w-4/5">
-                    {{ product.name }} <span class="text-gray99">({{ product.additional?.name }})</span>
+                  <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'" class="w-4/5 flex items-center space-x-2">
+                    <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
+                      :style="{ color: product.additional?.color.color }"></i>
+                    <span>{{ product.name }}</span>
+                    <span class="text-gray99">
+                      ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
+                    </span>
                   </p>
                   <span v-else class="w-4/5">{{ product.name }}</span>
                   <span v-if="product.code" class="w-1/5 text-[10px] text-gray99">
@@ -242,10 +248,12 @@
                   {{ productFoundSelected.name }}
                   <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
                     class="text-gray99">
-                    ({{ productFoundSelected.additional?.name }})
+                    ({{ productFoundSelected.additional?.color.name }}-{{ productFoundSelected.additional?.size.name }})
                   </span>
                 </p>
-                <p class="text-[#5FCB1F]">${{ productFoundSelected.public_price }}</p>
+                <p class="text-[#5FCB1F]">${{
+                  productFoundSelected.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                  ",") }}</p>
               </div>
               <div v-if="productFoundSelected.bulk_product" class="flex justify-between items-center text-base">
                 <p class="text-gray99">Producto a granel</p>
@@ -273,7 +281,8 @@
                 Busca el producto
                 <i class="fa-regular fa-hand-point-up ml-3"></i>
               </p>
-              <div v-if="$page.props.auth.user.store.type != 'Boutique / Tienda de Ropa / Zapatería' && $page.props.auth.user.permissions.includes('Crear productos')">
+              <div
+                v-if="$page.props.auth.user.store.type != 'Boutique / Tienda de Ropa / Zapatería' && $page.props.auth.user.permissions.includes('Crear productos')">
                 <p>ó</p>
                 <button @click="showCreateProductModal = true" type="button"
                   class="text-primary w-full flex items-center justify-center space-x-1">
@@ -318,8 +327,7 @@
               <div class="text-center mt-7">
                 <p class="text-sm text-gray-400 text-left mb-3">Opciones de pago</p>
                 <div class="flex items-center justify-end space-x-4">
-                  <PrimaryButton
-                    v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
+                  <PrimaryButton v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
                     @click="creditPayment()"
                     :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
                     class="!px-4 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
@@ -1360,7 +1368,7 @@ export default {
   async mounted() {
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
-        this.$inertia.visit(route('tutorials.index'));
+      this.$inertia.visit(route('tutorials.index'));
     }
 
     //verificar si el usuario tiene una caja asignada
@@ -1379,8 +1387,8 @@ export default {
     // sincronizar productos
     // const productsInIDB = await getAll('products');
     // if (!productsInIDB.length) {
-      // mostrar carga solo si recien se estan cargando los productos
-      this.syncingIDB = true;
+    // mostrar carga solo si recien se estan cargando los productos
+    this.syncingIDB = true;
     // }
     await syncIDBProducts();
     this.syncingIDB = false;

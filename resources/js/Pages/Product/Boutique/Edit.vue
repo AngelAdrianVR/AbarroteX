@@ -77,62 +77,107 @@
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
                     </div>
-                    <article v-for="(item, index) in form.sizes" :key="index" class="flex items-center space-x-3 mb-2">
-                        <div class="w-[33%]">
-                            <div class="w-full flex items-center justify-between">
-                                <InputLabel v-if="index == 0" value="Talla *" />
-                                <button @click="openSizeModal" v-if="index == 0" type="button"
-                                    class="text-primary text-xs">Crear talla</button>
+                    <article v-for="(item, index) in form.colors" :key="index"
+                        class="mb-2 border rounded-[10px] *:px-3 pb-2">
+                        <!-- <div v-if="item.color" class="h-2 rounded-t-[10px]" :style="{ backgroundColor: item.color }">
+                        </div> -->
+                        <header class="relative">
+                            <i v-if="item.color" class="fa-solid fa-shirt text-lg" :style="{ color: item.color }"></i>
+                            <div class="absolute -top-2 -right-2">
+                                <el-popconfirm v-if="form.colors.length > 1" confirm-button-text="Si"
+                                    cancel-button-text="No" icon-color="#373737" :title="'¿Desea eliminar?'"
+                                    @confirm="deleteColor(index)">
+                                    <template #reference>
+                                        <button type="button"
+                                            class="size-6 bg-grayF2 flex items-center justify-center rounded-full">
+                                            <i class="fa-regular fa-trash-can text-sm text-primary"></i>
+                                        </button>
+                                    </template>
+                                </el-popconfirm>
                             </div>
-                            <el-select :ref="'size' + index" filterable v-model="item.size_id" clearable
-                                placeholder="Seleccione"
-                                :no-data-text="form.category_id ? 'No hay tallas registradas en la categoria seleccionada' : 'Primero seleccione la categoria'"
-                                no-match-text="No se encontraron coincidencias">
-                                <el-option v-for="size in getCategorySizes" :key="size.id" :label="size.name"
-                                    :value="size.id" :disabled="form.sizes.some(item => item.size_id == size.id)">
-                                    <p class="flex items-center justify-between">
-                                        <span>{{ size.name }}</span>
-                                        <span v-if="size.short" class="text-[10px] text-gray99">({{ size.short
-                                            }})</span>
-                                    </p>
-                                </el-option>
-                            </el-select>
-                            <InputError :message="form.errors[`sizes.${index}.size_id`]" />
-                        </div>
-                        <div class="w-[14%]">
-                            <InputLabel v-if="index == 0" value="Existencias *" />
-                            <el-input v-model="item.current_stock" placeholder="Stock actual"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <InputError :message="form.errors[`sizes.${index}.current_stock`]" />
-                        </div>
-                        <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel v-if="index == 0" value="Cantidad mínima" />
-                            <el-input v-model="item.min_stock" placeholder="Mínimo permitido"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <InputError :message="form.errors[`sizes.${index}.min_stock`]" />
-                        </div>
-                        <div v-if="form.has_inventory_control" class="w-[21%]">
-                            <InputLabel v-if="index == 0" value="Cantidad máxima" />
-                            <el-input v-model="item.max_stock" placeholder="Máximo permitido"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                            <InputError :message="form.errors[`sizes.${index}.max_stock`]" />
-                        </div>
-                        <div class="w-[4%] flex justify-end">
-                            <el-popconfirm v-if="form.sizes.length > 1" confirm-button-text="Si" cancel-button-text="No"
-                                icon-color="#373737" :title="'¿Desea eliminar la talla seleccionada?'"
-                                @confirm="deleteSize(index)">
-                                <template #reference>
-                                    <button type="button">
-                                        <i class="fa-regular fa-trash-can text-sm text-primary"></i>
+                        </header>
+                        <div class="grid grid-cols-2 gap-3 mt-2">
+                            <div>
+                                <div class="w-full flex items-center justify-between">
+                                    <InputLabel value="Color *" />
+                                    <button @click="openColorModal" v-if="index == 0" type="button"
+                                        class="text-primary text-xs">
+                                        Agregar nuevo color
                                     </button>
-                                </template>
-                            </el-popconfirm>
+                                </div>
+                                <el-select v-model="item.color" placeholder="Selecciona un color">
+                                    <el-option v-for="(localColor, indexColor) in localColors" :key="indexColor"
+                                        :label="localColor.name" :value="localColor.color">
+                                        <div class="flex items-center">
+                                            <el-tag :color="localColor.color" style="margin-right: 8px" size="small" />
+                                            <span class="text-gray37">{{ localColor.name }}</span>
+                                        </div>
+                                    </el-option>
+                                </el-select>
+                                <InputError :message="form.errors[`${index}.color`]" />
+                            </div>
+                            <div>
+                                <div class="w-full flex items-center justify-between">
+                                    <InputLabel value="Tallas *" />
+                                    <button @click="openSizeModal" v-if="index == 0" type="button"
+                                        class="text-primary text-xs">
+                                        Crear talla
+                                    </button>
+                                </div>
+                                <el-select :ref="'size' + index" multiple filterable
+                                    @change="handleChangeSizes(index, item)" v-model="selectedSizes[index]" clearable
+                                    placeholder="Selecciona las tallas" collapse-tags collapse-tags-tooltip
+                                    :no-data-text="form.category_id ? 'No hay tallas registradas en la categoria seleccionada' : 'Primero seleccione la categoria'"
+                                    no-match-text="No se encontraron coincidencias">
+                                    <el-option v-for="size in getCategorySizes" :key="size.id" :label="size.name"
+                                        :value="size.name">
+                                        <p class="flex items-center justify-between">
+                                            <span>{{ size.name }}</span>
+                                            <span v-if="size.short" class="text-[10px] text-gray99">
+                                                ({{ size.short }})
+                                            </span>
+                                        </p>
+                                    </el-option>
+                                </el-select>
+                                <!-- <InputError :message="form.errors[`colors.${index}.sizes.${index}.size_id`]" /> -->
+                            </div>
                         </div>
+                        <div class="grid grid-cols-6 gap-3 mt-3">
+                            <p v-if="item.sizes.length" class="col-span-full text-[13px] text-gray37">
+                                En los campos de abajo ingresa las existencias de cada talla
+                                y el color seleccionado
+                            </p>
+                            <div v-for="(size, index2) in item.sizes" :key="index2">
+                                <div>
+                                    <InputLabel>
+                                        <p class="w-full truncate" :title="size.size_name + ' *'">{{ size.size_name }} *
+                                        </p>
+                                    </InputLabel>
+                                    <el-input v-model="size.current_stock" placeholder="Stock actual"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                                    <InputError
+                                        :message="form.errors[`colors.${index}.sizes.${index2}.current_stock`]" />
+                                </div>
+                                <div v-if="form.has_inventory_control">
+                                    <InputLabel value="Cantidad mínima" />
+                                    <el-input v-model="size.min_stock" placeholder="Mínimo permitido"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                                    <InputError :message="form.errors[`colors.${index}.sizes.${index2}.min_stock`]" />
+                                </div>
+                                <div v-if="form.has_inventory_control">
+                                    <InputLabel value="Cantidad máxima" />
+                                    <el-input v-model="size.max_stock" placeholder="Máximo permitido"
+                                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                                    <InputError :message="form.errors[`colors.${index}.sizes.${index2}.max_stock`]" />
+                                </div>
+                            </div>
+                        </div>
+                        <InputError :message="form.errors[`colors.${index}.sizes`]" />
                     </article>
-                    <button @click="addSize" type="button" class="text-primary ml-3">+ Añadir talla</button>
+                    <button @click="addColor" type="button" class="text-primary ml-3">+ Añadir color</button>
                 </section>
                 <!-- <div class="mt-3 col-span-full">
                     <InputLabel value="Moneda*" />
@@ -192,12 +237,56 @@
             </template>
         </DialogModal>
 
+        <!-- colors form -->
+        <DialogModal :show="showColorFormModal" @close="showColorFormModal = false">
+            <template #title> Agregar nuevos colores </template>
+            <template #content>
+                <p class="text-gray99 mb-3">En este apartado puedes crear colores que no se encuentren en la lista</p>
+                <form @submit.prevent="storeColor" class="space-y-1">
+                    <section v-for="(item, index) in colorForm.list" :key="index" class="flex space-x-3">
+                        <div class="w-[50%]">
+                            <InputLabel v-if="index == 0" value="Nombre del color *" />
+                            <el-input v-model="item.name" placeholder="Ej. Beige" :maxlength="100" required clearable />
+                            <InputError :message="colorForm.errors[`list.${index}.name`]" />
+                        </div>
+                        <div class="w-[25%]">
+                            <InputLabel v-if="index == 0" value="Color *" />
+                            <el-color-picker v-model="item.color" />
+                            <InputError :message="colorForm.errors[`list.${index}.color`]" />
+                        </div>
+                        <div class="w-[20%]" :class="index == 0 ? 'mt-6' : 'mt-1'">
+                            <el-popconfirm v-if="colorForm.list.length > 1" confirm-button-text="Si"
+                                cancel-button-text="No" icon-color="#373737"
+                                :title="'¿Desea eliminar este color de la lista?'"
+                                @confirm="colorForm.list.splice(index, 1)">
+                                <template #reference>
+                                    <button type="button">
+                                        <i class="fa-regular fa-trash-can text-sm text-primary"></i>
+                                    </button>
+                                </template>
+                            </el-popconfirm>
+                        </div>
+                    </section>
+                    <button @click="colorForm.list.push({ name: null, color: null })" type="button"
+                        class="text-primary ml-3 mt-5">
+                        + Añadir otro color
+                    </button>
+                </form>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-2">
+                    <CancelButton @click="showColorFormModal = false" :disabled="colorForm.processing">Cancelar
+                    </CancelButton>
+                    <PrimaryButton @click="storeColor()" :disabled="colorForm.processing">Crear</PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
+
         <!-- sizes form -->
         <DialogModal :show="showSizeFormModal" @close="showSizeFormModal = false">
             <template #title> Agregar talla </template>
             <template #content>
-                <p class="text-gray99 mb-3">En este apartado puedes crear tallas que no se encuentren en la lista de
-                    tallas</p>
+                <p class="text-gray99 mb-3">En este apartado puedes crear tallas que no se encuentren en la lista</p>
                 <form @submit.prevent="storeSize" class="grid grid-cols-2 gap-3">
                     <div>
                         <InputLabel value="Categoria *" />
@@ -257,7 +346,7 @@ export default {
             category_id: this.products[0]?.category_id,
             imageCover: null,
             has_inventory_control: Boolean(this.products[0]?.has_inventory_control),
-            sizes: [],
+            colors: [],
         });
 
         const categoryForm = useForm({
@@ -270,18 +359,31 @@ export default {
             category: null,
         });
 
+        const colorForm = useForm({
+            list: [
+                {
+                    name: null,
+                    color: null,
+                }
+            ]
+        });
+
         return {
             form,
             sizeForm,
+            colorForm,
             categoryForm,
             localCategories: this.categories,
             localSizes: this.sizes,
+            localColors: this.colors,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
             showSizeFormModal: false, //muestra formulario para agregar tallas
+            showColorFormModal: false, //muestra formulario para agregar colores
             currencies: [
                 { value: "Peso Mexicano", label: "$MXN" },
                 { value: "Dolar Americano", label: "$USD" },
             ],
+            selectedSizes: [[]], // Temporal para el selector de tallas
             // Permisos de rol actual
             canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
             productsLimit: this.$page.props.auth.user.store.plan == 'Plan Básico' ? 1500 : 3000,
@@ -303,6 +405,7 @@ export default {
         products: Array,
         categories: Array,
         sizes: Array,
+        colors: Array,
     },
     computed: {
         getCategorySizes() {
@@ -311,6 +414,23 @@ export default {
         },
     },
     methods: {
+        handleChangeSizes(index, item) {
+            // Limpiar las tallas antiguas y agregar las nuevas seleccionadas
+            item.sizes = this.selectedSizes[index].map(size => {
+                // Verificar si la talla ya existe en item.sizes, si no, crear el objeto
+                const existingSize = item.sizes.find(s => s.size_name === size);
+                if (!existingSize) {
+                    return {
+                        size_id: this.localSizes.find(i => i.name === size)?.id,
+                        size_name: size,
+                        current_stock: 1,
+                        min_stock: null,
+                        max_stock: null,
+                    };
+                }
+                return existingSize;
+            });
+        },
         openSizeModal() {
             if (this.form.category_id) {
                 this.sizeForm.category = this.categories.find(item => item.id == this.form.category_id).name;
@@ -318,28 +438,31 @@ export default {
 
             this.showSizeFormModal = true;
         },
+        openColorModal() {
+            this.showColorFormModal = true;
+        },
         handleCategory() {
-            this.form.sizes.forEach(item => {
-                item.size_id = null;
+            this.form.colors.forEach(item => {
+                item.sizes = [];
             });
+
+            this.selectedSizes = Array(this.form.colors.length).fill([]);
 
             this.$nextTick(() => {
                 this.$refs.size0[0].focus();
             });
         },
-        deleteSize(index) {
-            this.form.sizes.splice(index, 1);
+        deleteColor(index) {
+            this.form.colors.splice(index, 1);
         },
-        addSize() {
-            const newSize = {
-                id: null,
-                size_id: null,
-                current_stock: 1,
-                min_stock: null,
-                max_stock: null,
+        addColor() {
+            const newColor = {
+                color: null,
+                sizes: [],
             }
 
-            this.form.sizes.push(newSize);
+            this.selectedSizes.push([]);
+            this.form.colors.push(newColor);
         },
         saveImage(image) {
             this.form.imageCover = image;
@@ -350,22 +473,61 @@ export default {
             }
             let splited = this.products[0].code.split('-');
             splited.pop(); // Elimina el último elemento del array
+            splited.pop(); // Elimina el último elemento del array
             return splited.join('-'); // Une los elementos restantes con guiones medios
         },
         initialFormFill() {
             this.form.code = this.getBaseCode();
+            this.selectedSizes = []; // Inicializar el array de selectedSizes
 
-            // llenar las tallas
             this.products.forEach(element => {
+                // Busca si ya existe un color en form.colors
+                const existingColor = this.form.colors.find(c => c.color === element.additional.color.color);
+
                 const size = {
                     id: element.id,
-                    size_id: element.additional.id,
+                    size_id: element.additional.size.id,
+                    size_name: element.additional.size.name,
                     current_stock: element.current_stock,
                     min_stock: element.min_stock,
                     max_stock: element.max_stock,
                 };
 
-                this.form.sizes.push(size);
+                if (existingColor) {
+                    // Si el color ya existe, solo añade la talla al array de sizes
+                    existingColor.sizes.push(size);
+
+                    // Añadir el nombre de la talla al array de selectedSizes correspondiente al color
+                    const colorIndex = this.form.colors.indexOf(existingColor);
+                    this.selectedSizes[colorIndex].push(element.additional.size.name);
+                } else {
+                    // Si el color no existe, crea un nuevo objeto color con la talla
+                    const newColor = {
+                        color: element.additional.color.color,
+                        sizes: [size] // Crea el array con la talla
+                    };
+
+                    this.form.colors.push(newColor);
+
+                    // Añadir un nuevo array de tallas para este color en selectedSizes
+                    this.selectedSizes.push([element.additional.size.name]);
+                }
+            });
+        },
+        storeColor() {
+            this.colorForm.post(route('colors.store'), {
+                onSuccess: () => {
+                    this.colorForm.list.forEach(element => {
+                        this.localColors.unshift(element);
+                    });
+                    const oneColorAdded = this.colorForm.list.length == 1;
+                    this.showColorFormModal = false;
+                    this.$notify({
+                        title: oneColorAdded ? "Color agregado" : "Colores agregados",
+                        type: "success"
+                    });
+                    this.colorForm.reset();
+                }
             });
         },
         async update() {
@@ -465,3 +627,9 @@ export default {
     }
 }
 </script>
+<style scoped>
+.el-tag {
+    border: none;
+    aspect-ratio: 1;
+}
+</style>

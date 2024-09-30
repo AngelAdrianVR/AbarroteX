@@ -8,6 +8,7 @@ use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\CashRegisterMovementController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
 use App\Http\Controllers\SizeController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\TutorialController;
@@ -420,6 +422,11 @@ Route::resource('installments', InstallmentController::class)->middleware('auth'
 Route::resource('sizes', SizeController::class)->middleware('auth');
 
 
+//rutas de colores-----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('colors', ColorController::class)->middleware('auth');
+
+
 //Banners online store routes------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('banners', BannerController::class)->middleware('auth');
@@ -457,6 +464,14 @@ Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class,
 //Internal invoices routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
 // Route::resource('internal-invoices', InternalInvoiceController::class);
+
+
+//rutas de stripe-----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::post('/stripe', [StripeController::class, 'index'])->name('stripe.index');
+Route::post('/checkout', [StripeController::class, 'checkout'])->name('checkout');
+Route::get('/success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
 
 
 // comandos Artisan
