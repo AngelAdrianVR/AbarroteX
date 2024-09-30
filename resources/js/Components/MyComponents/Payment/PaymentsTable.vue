@@ -58,11 +58,25 @@
                                         class="fa-regular fa-clock mr-2"></i>Solicitada</span>
                             </el-tooltip>
 
-                            <div v-else-if="payment.media.find(m => m.collection_name == 'invoice')">
+                            <div
+                                v-else-if="payment.invoice_status === 'Enviada' && payment.media.find(m => m.collection_name == 'invoice')">
                                 <FileView :file="payment.media.find(m => m.collection_name == 'invoice')"
                                     :url="changeDomain(payment.media.find(m => m.collection_name == 'invoice').original_url)" />
                             </div>
-
+                            <el-tooltip v-else-if="payment.invoice_status === 'Error en datos fiscales'"
+                                placement="top">
+                                <template #content>
+                                    <p>
+                                        Clic para actualizar constancia de situación fiscal.<br>
+                                        Una vez actualizada, vuelve a solicitar la factura
+                                    </p>
+                                </template>
+                                <button @click="openInvoiceModal(payment.id)" type="button"
+                                    class="bg-red-100 text-red-500 py-1 px-2 rounded-full">
+                                    <i class="fa-regular fa-exclamation mr-2"></i>
+                                    Error en datos fiscales
+                                </button>
+                            </el-tooltip>
                             <p v-else class="text-gray-400">Hubo problemas al intentar mostrar la factura</p>
                         </div>
                         <p v-else class="text-gray-400">Debe de estar aprobado el pago para solicitar factura</p>
