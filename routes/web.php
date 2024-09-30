@@ -31,6 +31,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
 use App\Http\Controllers\SizeController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SupportReportController;
 use App\Http\Controllers\TutorialController;
@@ -463,6 +464,14 @@ Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class,
 //Internal invoices routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
 // Route::resource('internal-invoices', InternalInvoiceController::class);
+
+
+//rutas de stripe-----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::post('/stripe', [StripeController::class, 'index'])->name('stripe.index');
+Route::post('/checkout', [StripeController::class, 'checkout'])->name('checkout');
+Route::get('/success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
 
 
 // comandos Artisan
