@@ -197,7 +197,7 @@ export default {
     methods: {
         changeDomain(url) {
             // en local no se hace ningun cambio de dominio
-            if (import.meta.env.VITE_APP_ENV == 'local') return url;
+            // if (import.meta.env.VITE_APP_ENV == 'local') return url;
 
             const oldDomain = 'https://ezyventas.com';
             const newDomain = 'https://admin.ezyventas.com';
