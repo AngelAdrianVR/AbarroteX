@@ -469,6 +469,7 @@ const imageSets = ref([
 
             <p class="text-[#999999]">Personaliza tu suscripción con los módulos que necesitas.</p>
             <p class="text-white underline">Paga únicamente por lo que utilizas</p>
+            <p class="text-primary uppercase">Con días de regalo para que lo pruebes</p>
             <!-- <p class="text-[#999999] mt-5">Elige el giro y te recomendamos que módulos son importantes para tu negocio</p> -->
 
             <div class="mt-14 text-left xl:w-[75%] xl:mx-auto mx-5">

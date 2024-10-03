@@ -105,11 +105,4 @@ class StoreController extends Controller
         return response()->json(compact('store'));
     }
 
-    public function UpdateModules(Request $request, Store $store)
-    {
-        $store->update([
-            'suscription_period' => $request->period,
-            'activated_modules' => $request->activated_modules,
-        ]);
-    }
 }
