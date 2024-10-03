@@ -25,43 +25,23 @@
                             <p class="flex flex-col">
                                 <b>$ {{ getSuscriptionAmount().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
                             </p>
-                            <button v-if="!$page.props.auth.user.store.last_payment" @click="edit = true"
+                            <button v-if="!$page.props.auth.user.store.is_active" @click="edit = true"
                                 class="text-xs justify-self-end"
+                                :disabled="$page.props.auth.user.store.is_active"
                                 :class="$page.props.auth.user.store.is_active ? 'text-gray-500 cursor-not-allowed' : 'text-primary'">
                                 Pagar suscripción
                             </button>
-                            <el-tooltip v-else placement="top">
-                                <template #content>
-                                    <p v-if="$page.props.auth.user.store.last_payment.status === 'En revisión'">Tu
-                                        comprobante de pago está siendo validado y se <br>
-                                        completará dentro de un plazo máximo de 24 horas.</p>
-                                    <p v-else-if="$page.props.auth.user.store.last_payment.status === 'Aprobado'">Tu
-                                        pago ha sido aprobado. Disfruta de tu
-                                        suscripción</p>
-                                    <p v-else style="white-space: pre-line;">
-                                        <b>Tu pago ha sido rechazado por el siguiente motivo:</b>
-                                        <br> {{ $page.props.auth.user.store.last_payment.rejected_reason }}
-                                        <br> <button @click="prepareReUpload()" class="text-primary underline">
-                                            Click aqui para subir otro comprobante</button>
-                                    </p>
-                                </template>
-                                <p class="flex items-center space-x-2 text-xs justify-self-end rounded-full px-3"
-                                    :class="getStatusStyles()">
-                                    <span v-html="getStatusIcon()"></span>
-                                    {{ $page.props.auth.user.store.last_payment.status }}
-                                </p>
-                            </el-tooltip>
+                            <p v-else class="flex items-center space-x-2 text-xs justify-self-end rounded-full px-3"
+                                :class="getStatusStyles()">
+                                <span v-html="getStatusIcon()"></span>
+                                Periodo pagado
+                            </p>
                         </div>
                         <div v-else class="flex flex-col space-y-3 col-span-full mt-7">
                             <div class="flex justify-between">
                                 <button @click="edit = false" type="button" class="my-px text-[9px] self-start hover:bg-gray-200 rounded-full flex items-center justify-center size-5">
                                     <i class="fa-solid fa-chevron-left"></i>
-                                </button>
-
-                                <button v-if="edit" @click="$inertia.get('/support/suscription')"
-                                    class="text-primary text-xs justify-self-end">
-                                    Editar módulos de suscripción
-                                </button>       
+                                </button>      
                             </div>
                             <h2 class="font-bold my-4">Selecciona la suscripción que deseas obtener</h2>
                             <div v-for="(item, index) in suscriptions" :key="index"
@@ -95,15 +75,25 @@
                                         </p>
                                     </div>
                                     <p v-if="$page.props.auth.user.store.suscription_period == item.title.split(' ')[0]"
-                                        class="text-xs text-green-600 bg-green-50 p-1">
+                                        class="text-xs text-green-600 bg-green-50 p-1 self-start">
                                         Actual
                                     </p>
                                 </div>
                             </div>
 
-                            <div v-if="form.suscription_period" class="col-span-full pl-5 pt-7 pb-3 rounded-lg">
-                                <p>Para completar el pago de tu suscripción, por favor, deposita o transfiere el dinero
-                                    a los siguientes datos bancarios:</p>
+                            <div v-if="form.suscription_period" class="col-span-full md:pl-5 pt-7 pb-3 rounded-lg">
+                                <div class="flex justify-between items-center relative">
+                                    <p>Para completar el pago de tu suscripción, por favor, deposita o transfiere el dinero
+                                        a los siguientes datos bancarios:</p>
+                                    
+                                    <el-tooltip class="" content="Contactar con soporte" placement="left">
+                                        <a href="https://api.whatsapp.com/send?phone=523322268824" target="_blank" class="absolute top-0 right-0 flex items-center justify-center rounded-full size-7 bg-primary text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                                            </svg>
+                                        </a>
+                                    </el-tooltip>
+                                </div>
 
                                 <div class="flex">
                                     <div class="w-44 pt-5 space-y-1">
@@ -137,7 +127,7 @@
                                     confirmada, podrás continuar disfrutando de tu suscripción. Puedes verificar el
                                     estado de tu suscripción en cualquier momento.</p>
 
-                                <form @submit.prevent="checkout" class="flex items-center justify-end space-x-8 mx-4 mt-2">
+                                <form @submit.prevent="checkout" class="flex items-center justify-end space-x-2 md:space-x-8 mx-4 mt-4">
                                     <button @click="edit = false" type="button" class="text-primary">Ahora no</button>
                                     <PrimaryButton @click="storePayment()" id="btn-bottom"
                                         :disabled="!form.image || form.processing">
@@ -257,7 +247,7 @@
         <div class="mt-7">
             <h2 class="ml-3">Modulos activos</h2>
 
-            <article class="flex items-center justify-between rounded-[5px] border border-grayD9 px-4 pt-4 mt-3">
+            <article class="md:flex items-center justify-between rounded-[5px] border border-grayD9 px-4 pt-4 mt-3">
                 <section>
                     <div class="flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="16" width="16"
@@ -276,7 +266,7 @@
                             </g>
                         </svg>
                         <p class="w-36 text-gray-500">Módulos esenciales</p>
-                        <span>$199.00/ mes</span>
+                        <span>$229.00/ mes</span>
                     </div>
                     <div class="my-1 flex items-center space-x-2" v-for="item in modules" :key="item">
                         <span v-if="$page.props.auth.user.store.activated_modules.includes(item.name)" v-html="item.icon"></span>
@@ -284,10 +274,10 @@
                         <span v-if="$page.props.auth.user.store.activated_modules.includes(item.name)">${{ item.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}/ mes</span>
                     </div>
                 </section>
-                <!-- <button v-if="edit" @click="$inertia.get('/support/suscription')"
-                    class="text-primary text-xs justify-self-end">
+                <button @click="$inertia.get('/support/suscription')"
+                    class="text-xs text-primary justify-self-end my-2 md:my-0">
                     Editar módulos de suscripción
-                </button> -->
+                </button>
             </article>
         </div>
     </section>
@@ -354,7 +344,7 @@ export default {
                 {
                     name: "Mensual",
                     title: "Mensual (30 días)",
-                    amount: 199,
+                    amount: 229,
                     description: "",
                     days: 30,
                     daysGifted: 0,
@@ -362,7 +352,7 @@ export default {
                 {
                     name: "Anual",
                     title: "Anual (12 meses)",
-                    amount: 1990,
+                    amount: 2290,
                     description: "Te regalamos 2 meses",
                     days: 365,
                     daysGifted: 0,
@@ -413,7 +403,7 @@ export default {
     methods: {
         checkout() {
             this.form.activeModules = this.modules.filter(item => this.$page.props.auth.user.store.activated_modules.includes(item.name));
-            this.form.activeModules.unshift({ name: "Módulos básicos", cost: 199 });
+            this.form.activeModules.unshift({ name: "Módulos básicos", cost: 229 });
             this.form.post(route('stripe.index'));
         },
         calculateTotalPeriosPrice() {
@@ -421,7 +411,7 @@ export default {
             const activatedModules = this.$page.props.auth.user.store.activated_modules;
 
             // Calcula el costo total de los módulos activados
-            let totalCost = 199;
+            let totalCost = 229;
             this.modules.forEach(module => {
                 if (activatedModules.includes(module.name)) {
                     totalCost += module.cost;
@@ -450,33 +440,18 @@ export default {
             });
         },
         getStatusStyles() {
-            const paymentStatus = this.$page.props.auth.user.store.last_payment.status;
+            const storeStatus = this.$page.props.auth.user.store.is_active;
 
-            if (paymentStatus == 'En revisión') {
-                return 'text-amber-600';
-            } else if (paymentStatus == 'Aprobado') {
+            if (storeStatus) {
                 return 'text-green-600';
-            } else {
-                return 'text-red-600';
             }
         },
         getStatusIcon() {
-            const paymentStatus = this.$page.props.auth.user.store.last_payment.status;
+            const storeStatus = this.$page.props.auth.user.store.is_active;
 
-            if (paymentStatus == 'En revisión') {
-                return `
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-                `;
-            } else if (paymentStatus == 'Aprobado') {
+            if (storeStatus) {
                 return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-1">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                </svg>
-                `;
-            } else {
-                return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
                 `;
             }
@@ -494,15 +469,17 @@ export default {
             btnBottom.scrollIntoView({ behavior: 'smooth' });
         },
         getSuscriptionAmount() {
-            const currentSuscription = this.$page.props.auth.user.store.suscription_period;
-            if (currentSuscription == 'Periodo de prueba') {
-                return 0.00;
-            } else {
-                if (this.$page.props.auth.user.store.plan == 'Plan Intermedio') {
-                    return 569;
+            // Filtra los módulos activados
+            const activatedModules = this.$page.props.auth.user.store.activated_modules;
+
+            // Calcula el costo total de los módulos activados
+            let totalCost = 229;
+            this.modules.forEach(module => {
+                if (activatedModules.includes(module.name)) {
+                    totalCost += module.cost;
                 }
-                return this.suscriptions.find(item => item.name == currentSuscription).amount;
-            }
+            });
+            return this.$page.props.auth.user.store.suscription_period === 'Mensual' ? totalCost : totalCost * 10;
         },
         getInstitutionImage(institution) {
             return this.images[institution];

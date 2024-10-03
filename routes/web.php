@@ -469,9 +469,10 @@ Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class,
 //rutas de stripe-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::post('/stripe', [StripeController::class, 'index'])->name('stripe.index');
-Route::post('/checkout', [StripeController::class, 'checkout'])->name('checkout');
-Route::get('/success', [StripeController::class, 'success'])->name('stripe.success');
-Route::get('/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+Route::post('/stripe-checkout', [StripeController::class, 'checkout'])->name('checkout');
+Route::get('/stripe-success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/stripe-cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.error');
 
 
 // comandos Artisan
