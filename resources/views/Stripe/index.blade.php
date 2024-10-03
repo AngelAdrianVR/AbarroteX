@@ -43,6 +43,7 @@
             <form id="checkout-form" action="{{ route('checkout') }}" method="POST" target="_blank">
                 @csrf
                 <input type="hidden" name="products" value="{{ json_encode($products) }}">
+                <input type="hidden" name="modules_updated" value="{{ json_encode($modules_updated) }}">
                 {{-- <button type="button" onclick="location.reload()" class="bg-gray-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-700">
                     Cancelar
                 </button> --}}
