@@ -785,6 +785,27 @@ class ProductBoutiqueController extends Controller
         return $products;
     }
 
+    public function getDataForProductsView()
+    {
+        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
+        $all_products = $this->getAllProducts();
+        $total_products = $all_products->unique('name')->count();
+        $total_local_products = $all_products->whereNull('global_product_id')->unique('name')->count();
+        $total_local_products_with_sizes = $all_products->whereNull('global_product_id')->count();
+        $inventory_cost = $all_products->sum(function ($prd) {
+            $cost = $prd['cost'] ?? 0;
+            return $cost * $prd['current_stock'];
+        });
+        $inventory_price = $all_products->sum(function ($prd) {
+            return $prd['public_price'] * $prd['current_stock'];
+        });
+
+        //tomar solo primeros 30 productos
+        $products = $all_products->groupBy('name')->take($page);
+
+        return response()->json(compact('products', 'total_products', 'total_local_products', 'total_local_products_with_sizes', 'inventory_cost', 'inventory_price'));
+    }
+
     public function import(Request $request)
     {
         // Validar el archivo Excel
@@ -837,14 +858,15 @@ class ProductBoutiqueController extends Controller
         $headers = [
             'A3' => 'Nombre del producto',
             'B3' => 'Categoría',
-            'C3' => 'Talla',
-            'D3' => 'Precio a público',
-            'E3' => 'Precio de compra',
-            'F3' => 'Código de producto',
-            'G3' => 'Stock mínimo',
-            'H3' => 'Stock máximo',
-            'I3' => 'Stock actual',
-            'J3' => 'Creado el'
+            'C3' => 'Color',
+            'D3' => 'Talla',
+            'E3' => 'Precio a público',
+            'F3' => 'Precio de compra',
+            'G3' => 'Código de producto',
+            'H3' => 'Stock mínimo',
+            'I3' => 'Stock máximo',
+            'J3' => 'Stock actual',
+            'K3' => 'Creado el'
         ];
 
         foreach ($headers as $cell => $header) {
@@ -856,21 +878,22 @@ class ProductBoutiqueController extends Controller
         // Add data rows
         $row = 4;
         foreach ($products as $product) {
-            $size_short = isset($product->additional['short']) ? "-{$product->additional['short']}" : '';
-            $size_name = isset($product->additional['name']) ? "{$product->additional['name']}" : '';
+            $size_short = isset($product->additional['size']['short']) ? "-{$product->additional['size']['short']}" : '';
+            $size_name = isset($product->additional['size']['name']) ? "{$product->additional['size']['name']}" : '';
             $size = $size_name . $size_short;
             $base_code = substr($product->code, 0, strrpos($product->code, '-'));
 
             $sheet->setCellValue('A' . $row, $product->name);
             $sheet->setCellValue('B' . $row, $product->category->name);
-            $sheet->setCellValue('C' . $row, $size);
-            $sheet->setCellValue('D' . $row, $product->public_price);
-            if ($userCanSeeCost) $sheet->setCellValue('E' . $row, $product->cost);
-            $sheet->setCellValue('F' . $row, $base_code);
-            $sheet->setCellValue('G' . $row, $product->min_stock);
-            $sheet->setCellValue('H' . $row, $product->max_stock);
-            $sheet->setCellValue('I' . $row, $product->current_stock);
-            $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY, h:mm a'));
+            $sheet->setCellValue('C' . $row, $product->additional['color']['name']);
+            $sheet->setCellValue('D' . $row, $size);
+            $sheet->setCellValue('E' . $row, $product->public_price);
+            if ($userCanSeeCost) $sheet->setCellValue('F' . $row, $product->cost);
+            $sheet->setCellValue('G' . $row, $base_code);
+            $sheet->setCellValue('H' . $row, $product->min_stock);
+            $sheet->setCellValue('I' . $row, $product->max_stock);
+            $sheet->setCellValue('J' . $row, $product->current_stock);
+            $sheet->setCellValue('K' . $row, $product->created_at->isoFormat('DD MMMM YYYY, h:mm a'));
             $row++;
         }
 
@@ -888,27 +911,6 @@ class ProductBoutiqueController extends Controller
             'Cache-Control' => 'cache, must-revalidate',
             'Pragma' => 'public',
         ]);
-    }
-
-    public function getDataForProductsView()
-    {
-        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
-        $all_products = $this->getAllProducts();
-        $total_products = $all_products->unique('name')->count();
-        $total_local_products = $all_products->whereNull('global_product_id')->unique('name')->count();
-        $total_local_products_with_sizes = $all_products->whereNull('global_product_id')->count();
-        $inventory_cost = $all_products->sum(function ($prd) {
-            $cost = $prd['cost'] ?? 0;
-            return $cost * $prd['current_stock'];
-        });
-        $inventory_price = $all_products->sum(function ($prd) {
-            return $prd['public_price'] * $prd['current_stock'];
-        });
-
-        //tomar solo primeros 30 productos
-        $products = $all_products->groupBy('name')->take($page);
-
-        return response()->json(compact('products', 'total_products', 'total_local_products', 'total_local_products_with_sizes', 'inventory_cost', 'inventory_price'));
     }
 
     private function validateProductsFromFile($worksheet)
@@ -945,15 +947,16 @@ class ProductBoutiqueController extends Controller
             $validator = Validator::make($data, [
                 $columnNames[0] => 'required|string|max:120', //name
                 $columnNames[1] => 'required|string|max:255', //category
-                $columnNames[2] => 'required|string|max:255', // size
-                $columnNames[3] => 'required|numeric|min:0|max:999999.99', // public_price
-                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999.99' : '', //cost
-                $columnNames[5] => $data[$columnNames[5]]
-                    ?  ['max:100', new \App\Rules\UniqueBoutiqueProductCode($data[$columnNames[5]])]
+                $columnNames[2] => 'required|string|max:255', //color
+                $columnNames[3] => 'required|string|max:255', // size
+                $columnNames[4] => 'required|numeric|min:0|max:999999.99', // public_price
+                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999.99' : '', //cost
+                $columnNames[6] => $data[$columnNames[6]]
+                    ?  ['max:100', new \App\Rules\UniqueBoutiqueProductCode($data[$columnNames[6]])]
                     : '', //code
-                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '', //min stock
-                $columnNames[7] => $data[$columnNames[7]] ? 'numeric|min:0|max:999999' : '', //max stock
-                $columnNames[8] => $data[$columnNames[8]] ? 'numeric|min:0|max:999999' : '', //current stock
+                $columnNames[7] => $data[$columnNames[7]] ? 'numeric|min:0|max:999999' : '', //min stock
+                $columnNames[8] => $data[$columnNames[8]] ? 'numeric|min:0|max:999999' : '', //max stock
+                $columnNames[9] => $data[$columnNames[9]] ? 'numeric|min:0|max:999999' : '', //current stock
             ]);
 
             // Si la validación falla, almacenar los errores
@@ -972,6 +975,7 @@ class ProductBoutiqueController extends Controller
     {
         $base_code = '';
         $consecutive = 0;
+
         foreach ($worksheet->getRowIterator() as $row) {
             // iniciar codigo en nulo
             $code = null;
@@ -995,6 +999,7 @@ class ProductBoutiqueController extends Controller
             foreach ($cellIterator as $cell) {
                 $data[] = $cell->getValue(); // Asignar el valor al array asociativo usando el nombre de columna
             }
+            if (!$data[1]) return; //si no hay categoria retorna
 
             $store_id = auth()->user()->store_id;
             $category = Category::where(function ($query) use ($store_id) {
@@ -1005,7 +1010,7 @@ class ProductBoutiqueController extends Controller
                 ->first();
 
             // Si la categoria ingresada por el usuario desde excel no existe, crear uno nuevo
-            if (!$category) {
+            if (!$category && $data[1]) {
                 $category = Category::create([
                     'name' => $data[1],
                     'business_line_name' => auth()->user()->store->id
@@ -1013,17 +1018,17 @@ class ProductBoutiqueController extends Controller
             }
 
             // buscar talla ingresada en BDD
-            $size_exploted = explode('-', $data[2]);
+            $size_exploted = explode('-', $data[3]);
             $size_name = $size_exploted[0];
             $size_short = count($size_exploted) == 2 ? $size_exploted[1] : null;
-            $size = Size::where(['name' => $size_name, 'category' => $category->name])
+            $size = Size::where(['name' => $size_name, 'category' => $category?->name])
                 ->when($size_short, function ($query) use ($size_short) {
                     $query->where('short', $size_short);
                 })
                 ->first();
 
             // Si la talla ingresada por el usuario desde excel no existe, crear una nueva
-            if (!$size) {
+            if (!$size && $data[2] && $data[3]) {
                 $size = Size::create([
                     'name' => $size_name,
                     'category' => $category->name,
@@ -1031,31 +1036,37 @@ class ProductBoutiqueController extends Controller
                 ]);
             }
 
+            // buscar color en la base de datos
+            $color = Color::firstWhere('name', $data[2]);
+
             // Revision de codigos unicos
             if ($base_code == ':*') { //si es la primera iteracion comenzar el codigo base
-                $base_code = $data[5];
+                $base_code = $data[6];
             }
 
-            if ($data[5]) {
-                if ($base_code == $data[5]) {
+            if ($data[6]) {
+                if ($base_code == $data[6]) {
                     $consecutive++;
                 } else {
                     $consecutive = 0;
-                    $base_code = $data[5];
+                    $base_code = $data[6];
                 }
-                $code = $base_code . "-$consecutive";
+                $color_section = strtoupper(substr($color->name, 0, 3));
+                $code = $base_code . "-$color_section-$consecutive";
             }
+
+            $additional = ["size" => $size, "color" => $color];
 
             Product::create([
                 'name' => $data[0],
                 'category_id' => $category->id,
-                'additional' => ['id' => $size->id, 'name' => $size->name, 'short' => $size->short],
-                'public_price' => $data[3],
-                'cost' => $data[4],
+                'additional' => $additional,
+                'public_price' => $data[4],
+                'cost' => $data[5],
                 'code' => $code,
-                'min_stock' => $data[6],
-                'max_stock' => $data[7],
-                'current_stock' => $data[8] ?? 1,
+                'min_stock' => $data[7],
+                'max_stock' => $data[8],
+                'current_stock' => $data[9] ?? 1,
                 'store_id' => $store_id,
             ]);
         }
