@@ -74,9 +74,9 @@ onUnmounted(() => {
                         <div class="flex justify-between h-12">
                             <div class="flex">
                                 <!-- Dias de prueba escritorio y tablet -->
-                                <section v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
+                                <section v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba' || !$page.props.auth.user.store.is_active"
                                     class="hidden xl:flex space-x-4 bg-[#ededed] text-gray37 px-6 py-2 rounded-[5px] text-xs">
-                                    <div v-if="calculateRemainigFreeDays($page.props.auth.user.store.created_at) > 0">
+                                    <div v-if="calculateRemainigFreeDays($page.props.auth.user.store.created_at) > 0 && $page.props.auth.user.store.suscription_period == 'Periodo de prueba'">
                                         <p class="font-bold">Te quedan {{
                                             calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
                                             días de tu prueba gratuita</p>
@@ -86,7 +86,8 @@ onUnmounted(() => {
                                             prueba.</p>
                                     </div>
                                     <div v-else>
-                                        <p class="font-bold">Tus días de prueba han expirado</p>
+                                        <p v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba'" class="font-bold">Tus días de prueba han expirado</p>
+                                        <p v-else class="font-bold">Tu plan ha expirado</p>
                                         <p>Para continuar disfrutando de los beneficios, te invitamos a realizar el pago
                                             de
                                             tu suscripción.</p>

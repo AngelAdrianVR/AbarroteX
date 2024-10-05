@@ -187,7 +187,7 @@
           <div class="flex">
             <p class="w-1/2">Módulos esenciales</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
-              'Mensual' ? '199.00' : '1,990.00' }}</span></p>
+              'Mensual' ? '229.00' : '2,290.00' }}</span></p>
           </div>
           <p v-if="modules.filter(item => item.activated === true).length" class="text-gray99 my-3">Otros módulos</p>
 
@@ -340,7 +340,7 @@ export default {
     calculateTotal() {
       return this.modules
         .filter(item => item.activated === true)
-        .reduce((sum, item) => sum + item.cost, 0) + 199;
+        .reduce((sum, item) => sum + item.cost, 0) + 229;
     }
   },
   mounted() {
