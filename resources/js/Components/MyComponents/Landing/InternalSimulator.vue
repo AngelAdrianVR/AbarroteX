@@ -63,7 +63,7 @@
           <div class="flex">
             <p class="w-1/2">Módulos esenciales</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
-              'Mensual' ? '199.00' : '1,990.00' }}</span></p>
+              'Mensual' ? '229.00' : '2,290.00' }}</span></p>
           </div>
           <p v-if="modules.filter(item => item.activated === true).length" class="text-gray99 my-3">Otros módulos</p>
 
@@ -143,6 +143,7 @@ export default {
         amount: null,
         suscription_period: null,
         activeModules: null,
+        modulesUpdated: [],
         // default_card_id: this.$page.props.auth.user.store.default_card_id,
     });
 
@@ -207,10 +208,11 @@ export default {
   props: {},
   methods: {
     checkout() {
-      this.form.amount = this.calculateTotalPayment(this.calculateTotal);
-      this.form.suscription_period = this.period;
-      this.form.activeModules = this.modules.filter(item => item.activated === true);
-      this.form.activeModules.unshift({ name: "Módulos básicos", cost: 199 });
+      this.form.amount = this.calculateTotalPayment(this.calculateTotal); //monto total a pagar
+      this.form.suscription_period = this.period; //periodo de tiempo a pagar (mes, año)
+      this.form.activeModules = this.modules.filter(item => item.activated === true); //detalle de modulos a pagar
+      this.form.activeModules.unshift({ name: "Módulos básicos", cost: 199 }); //se agregan los modulos escenciales o basicos para mostrarlo en detalles de pago
+      this.form.modulesUpdated = this.activated_modules; //modulos pagados para agregarlos en base de datos en caso de agregados o quitados
       this.form.post(route('stripe.index'));
     },
     async updateStoreModules() {
@@ -255,7 +257,7 @@ export default {
     calculateTotal() {
       return this.modules
         .filter(item => item.activated === true)
-        .reduce((sum, item) => sum + item.cost, 0) + 199;
+        .reduce((sum, item) => sum + item.cost, 0) + 229;
     }
   },
   mounted() {
