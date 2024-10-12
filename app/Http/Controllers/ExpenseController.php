@@ -130,6 +130,8 @@ class ExpenseController extends Controller
 
     public function destroy(Expense $expense)
     {
+        // eliminar movimiento de caja si es que lo tiene
+        $expense->cashRegisterMovement?->delete();
         // Eliminar el registro de gasto enviado como referencia
         $expense->delete();
     }

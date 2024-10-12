@@ -210,7 +210,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-else-if="saleToSeeInstallments.credit_data.status !== 'Pagado'">
+                            <tr v-else-if="!['Pagado', 'Reembolsado'].includes(saleToSeeInstallments.credit_data.status)">
                                 <td colspan="4">
                                     <button @click="addInstallment = true" type="button" class="text-primary mt-2">
                                         + Agregar abono
@@ -243,10 +243,12 @@
                                 no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
                                 <el-option v-for="item in products" :key="item.id"
-                                    :label="item.name + ` (${item.additional?.color.name}-${item.additional?.size.name})`" :value="item.id">
+                                    :label="item.name + ` (${item.additional?.color.name}-${item.additional?.size.name})`"
+                                    :value="item.id">
                                     <p>
                                         {{ item.name }}
-                                        <span>({{ item.additional?.color.name }}-{{ item.additional?.size.name }})</span>
+                                        <span>({{ item.additional?.color.name }}-{{ item.additional?.size.name
+                                            }})</span>
                                     </p>
                                 </el-option>
                             </el-select>
@@ -408,12 +410,34 @@ export default {
                 ?.filter(item => item.status == 'Reembolsado')
                 ?.reduce((accum, onlineSale) => accum += onlineSale.total, 0)
         },
-        getRefundedSales() {
+        getCreditRefundedSales() {
             return this.getGroupedSales.reduce((accum1, sale) => {
-                return accum1 += sale.products
-                    ?.filter(item => item.refunded_at)
-                    ?.reduce((accum, sale) => accum += sale.current_price * sale.quantity, 0)
-            }, 0)
+                // Filtrar las ventas que tengan "credit_data" y que su status sea "Reembolsado"
+                if (sale.credit_data?.status === "Reembolsado") {
+                    // Sumar el total de los abonos realizados (installments) para esa venta
+                    return accum1 += sale.credit_data.installments
+                        ?.reduce((accum, installment) => accum += installment.amount, 0);
+                }
+                return accum1;
+            }, 0);
+        },
+        getCashRefundedSales() {
+            return this.getGroupedSales.reduce((accum1, sale) => {
+                // Verifica si la venta no tiene datos de crédito antes de sumarla
+                if (!sale.credit_data) {
+                    return accum1 += sale.products
+                        ?.filter(item => item.refunded_at)
+                        ?.reduce((accum, product) => accum += product.current_price * product.quantity, 0);
+                }
+                return accum1;
+            }, 0);
+        },
+        getRefundedSales() {
+            const refundedCreditSales = this.getCreditRefundedSales;
+            const refundedCashSales = this.getCashRefundedSales;
+
+            // Sumar las ventas al contado con las ventas a crédito
+            return refundedCashSales + refundedCreditSales;
         },
     },
     methods: {

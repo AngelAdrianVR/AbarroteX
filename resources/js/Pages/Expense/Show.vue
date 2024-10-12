@@ -56,7 +56,7 @@
                             </td>
                             <td class="text-end">
                                 ${{ expense.amount_from_cash_register?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                ?? 0.00
+                                    ?? 0.00
                                 }}
                             </td>
                             <td class="text-end">
@@ -75,7 +75,7 @@
                                                 </svg>
                                                 <span class="text-xs">Editar</span>
                                             </el-dropdown-item>
-                                            <el-dropdown-item v-if="canDelete" :command="'delete|' + expense.id">
+                                            <el-dropdown-item v-if="canDelete && expenses.length > 1" :command="'delete|' + expense.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"
                                                     class="size-[14px] mr-2 text-red-600">
@@ -258,7 +258,7 @@ export default {
         async deleteItem() {
             this.deleting = true;
             try {
-                const response = await axios.delete(route('expenses.destroy', this.itemIdToDelete));
+                const response = await axios.delete(route('expenses.destroy', {expense: this.itemIdToDelete, dayExpenses: this.expenses.length}));
                 if (response.status == 200) {
                     this.showDeleteConfirm = false;
 
