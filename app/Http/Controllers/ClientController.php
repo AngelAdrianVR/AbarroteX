@@ -18,12 +18,10 @@ class ClientController extends Controller
         return inertia('Client/Index', compact('clients', 'total_clients'));
     }
 
-
     public function create()
     {
         return inertia('Client/Create');
     }
-
 
     public function store(Request $request)
     {
@@ -47,7 +45,6 @@ class ClientController extends Controller
         Client::create($request->all() + ['store_id' => auth()->user()->store_id]);
     }
 
-
     public function show($encoded_client_id)
     {
         // Decodificar el ID
@@ -55,10 +52,10 @@ class ClientController extends Controller
 
         $client = Client::find($decoded_client_id);
         $clients = Client::where('store_id', auth()->user()->store_id)->latest()->get(['id', 'name']);
+        $client_debt = $client->calcTotalDebt();
 
-        return inertia('Client/Show', compact('client', 'clients'));
+        return inertia('Client/Show', compact('client', 'clients', 'client_debt'));
     }
-
 
     public function edit($encoded_client_id)
     {
@@ -69,7 +66,6 @@ class ClientController extends Controller
 
         return inertia('Client/Edit', compact('client'));
     }
-
 
     public function update(Request $request, Client $client)
     {
