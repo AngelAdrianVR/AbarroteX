@@ -333,6 +333,7 @@ class SaleController extends Controller
             $new_credit_sale_data = CreditSaleData::create([
                 'folio' => $folio,
                 'store_id' => $store_id,
+                'client_id' => $sale_data['client_id'],
                 'expired_date' => $sale_data['limit_date'],
                 'status' => $sale_data['deposit'] ? 'Parcial' : 'Pendiente',
             ]);

@@ -33,7 +33,7 @@
             <div class="text-center text-sm lg:text-base my-5">
                 <h2>Saldo total pendiente de ventas a crédito</h2>
                 <h3 class="font-bold">
-                    ${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
+                    ${{ client_debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
                 </h3>
             </div>
 
@@ -86,7 +86,8 @@ export default {
     },
     props: {
         client: Object,
-        clients: Array
+        clients: Array,
+        client_debt: Number,
     },
     methods: {
         updateURL(tab) {

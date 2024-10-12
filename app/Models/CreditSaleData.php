@@ -12,6 +12,7 @@ class CreditSaleData extends Model
     protected $fillable = [
         'folio',
         'store_id',
+        'client_id',
         'expired_date',
         'status',
     ];
@@ -29,5 +30,10 @@ class CreditSaleData extends Model
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 }
