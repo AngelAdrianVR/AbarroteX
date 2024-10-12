@@ -73,7 +73,7 @@
       <div class="lg:flex justify-between items-center mx-3">
         <h1 class="font-bold text-lg">Registrar venta</h1>
         <!-- Dinero en caja -->
-        <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
+        <!-- <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
           class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
           <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
@@ -105,7 +105,7 @@
             </el-tooltip>
           </p>
           <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
-        </div>
+        </div> -->
         <!-- Dropdown -->
         <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')"
           class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
