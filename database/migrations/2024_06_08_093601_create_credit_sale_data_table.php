@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('folio');
             $table->date('expired_date')->nullable();
             $table->string('status'); //Pendiente cuando no hay abono, Parcial cuando tiene, Pagado
+            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
