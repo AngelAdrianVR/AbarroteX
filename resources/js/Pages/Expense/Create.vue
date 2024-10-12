@@ -159,7 +159,7 @@ export default {
                 },
             ],
             // mostrar dinero en caja activado
-            isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
+            // isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
         };
     },
     components: {
