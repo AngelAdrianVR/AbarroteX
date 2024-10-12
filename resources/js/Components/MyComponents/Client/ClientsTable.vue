@@ -110,7 +110,7 @@ export default {
         CancelButton,
     },
     props: {
-        clients: Array
+        clients: Array,
     },
     methods: {
         handleCommand(command) {

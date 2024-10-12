@@ -465,6 +465,8 @@ class SaleController extends Controller
         $credit_sale_data = CreditSaleData::firstWhere('folio', $saleFolio);
         if ($credit_sale_data) {
             $credit_sale_data->update(['status' => 'Reembolsado']);
+            $credit_sale_data->client->debt = $credit_sale_data->client->calcTotalDebt();
+            $credit_sale_data->client->save();
         }
 
         return response()->json(compact('updated_items'));

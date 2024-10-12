@@ -25,9 +25,9 @@
                 <p v-if="localClients.length" class="text-gray66 text-[11px]">{{ localClients.length }} de {{
                     total_clients }} elementos
                 </p>
-                <ClientsTable :clients="localClients" />
-                 <p v-if="localClients.length" class="text-gray66 text-[11px] mt-3">{{ localClients.length }} de {{
-                    total_clients }} elementos
+                <ClientsTable :clients="localClients" :client_debt="client_debt" />
+                <p v-if="localClients.length" class="text-gray66 text-[11px] mt-3">
+                    {{ localClients.length }} de {{ total_clients }} elementos
                 </p>
                 <p v-if="loadingItems" class="text-xs my-4 text-center">
                     Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
@@ -48,74 +48,74 @@ import ClientsTable from '@/Components/MyComponents/Client/ClientsTable.vue';
 import axios from 'axios';
 
 export default {
-data() {
-    return {
-        searchQuery: null, //buscador de cliente.
-        searchedWord: null, //palabra con la que se hizo la última busqueda.
-        localClients: this.clients, //arreglo local de clientes
-        loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
-        loading: false, //estado de carga cuando se busca a un cliente por medio del buscador
-        currentPage: 1, //para paginación
-        canCreate: this.$page.props.auth.user.permissions.includes('Crear clientes'),
-    }
-},
-components:{
-AppLayout,
-PrimaryButton,
-ThirthButton,
-ClientsTable,
-},
-props:{
-clients: Array,
-total_clients: Number
-},
-methods:{
-    async searchClients() {
-        this.loading = true;
-        if (this.searchQuery != '') {
+    data() {
+        return {
+            searchQuery: null, //buscador de cliente.
+            searchedWord: null, //palabra con la que se hizo la última busqueda.
+            localClients: this.clients, //arreglo local de clientes
+            loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
+            loading: false, //estado de carga cuando se busca a un cliente por medio del buscador
+            currentPage: 1, //para paginación
+            canCreate: this.$page.props.auth.user.permissions.includes('Crear clientes'),
+        }
+    },
+    components: {
+        AppLayout,
+        PrimaryButton,
+        ThirthButton,
+        ClientsTable,
+    },
+    props: {
+        clients: Array,
+        total_clients: Number,
+    },
+    methods: {
+        async searchClients() {
+            this.loading = true;
+            if (this.searchQuery != '') {
+                try {
+                    const response = await axios.get(route('clients.search'), { params: { query: this.searchQuery } });
+                    if (response.status == 200) {
+                        this.localClients = response.data.items;
+                        this.searchedWord = this.searchQuery;
+                        this.searchQuery = null;
+                    }
+
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    this.loading = false;
+                }
+            } else {
+                this.localClients = this.clients;
+            }
+        },
+        async fetchItemsByPage() {
             try {
-                const response = await axios.get(route('clients.search'), { params: { query: this.searchQuery } });
-                if (response.status == 200) {
-                    this.localClients = response.data.items;
-                    this.searchedWord = this.searchQuery;
-                    this.searchQuery = null;
-                }
+                this.loadingItems = true;
+                const response = await axios.get(route('clients.get-by-page', this.currentPage));
 
+                if (response.status === 200) {
+                    this.localClients = [...this.localClients, ...response.data.items];
+                    this.currentPage++;
+
+                    // Actualiza la URL con la pagina
+                    if (this.currentPage > 1) {
+                        const currentURL = new URL(window.location.href);
+                        currentURL.searchParams.set('page', this.currentPage);
+                        window.history.replaceState({}, document.title, currentURL.href);
+                    }
+                }
             } catch (error) {
-                console.log(error);
+                console.log(error)
             } finally {
-                this.loading = false;
+                this.loadingItems = false;
             }
-        } else {
+        },
+        closedTag() {
             this.localClients = this.clients;
+            this.searchedWord = null;
         }
-    },
-    async fetchItemsByPage() {
-        try {
-            this.loadingItems = true;
-            const response = await axios.get(route('clients.get-by-page', this.currentPage));
-
-            if (response.status === 200) {
-                this.localClients = [...this.localClients, ...response.data.items];
-                this.currentPage++;
-
-                // Actualiza la URL con la pagina
-                if (this.currentPage > 1) {
-                    const currentURL = new URL(window.location.href);
-                    currentURL.searchParams.set('page', this.currentPage);
-                    window.history.replaceState({}, document.title, currentURL.href);
-                }
-            }
-        } catch (error) {
-            console.log(error)
-        } finally {
-            this.loadingItems = false;
-        }
-    },
-    closedTag() {
-        this.localClients = this.clients;
-        this.searchedWord = null;
     }
-}
 }
 </script>
