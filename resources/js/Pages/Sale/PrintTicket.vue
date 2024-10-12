@@ -30,7 +30,7 @@
         </table>
 
         <div class="flex justify-end mt-5 mr-11">
-            <p class="font-bold text-xs">Total <span class="px-2">$</span> <span>{{ totalSale() }}</span></p>
+            <p class="font-bold text-xs">Total <span class="px-2">$</span> <span>{{ totalSale().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
         </div>
 
         <p class="h-2 border-b-2 border-[#D9D9D9] mt-5"></p>
