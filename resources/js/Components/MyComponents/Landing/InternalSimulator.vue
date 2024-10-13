@@ -113,10 +113,7 @@
           </form>
 
           <p class="text-gray99 text-xs mt-3">
-            Tu suscripción se renovará automáticamente cada año por
-            ${{ period === 'Mensual' ? calculateTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              : (calculateTotal * 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }} MXN.
-            Puedes cancelarla cuando quieras desde la página de ajustes de la suscripción.
+            Puedes cancelar tu suscripción cuando quieras desde la página de ajustes de la suscripción.
             Al realizar el pago aceptas nuestros
             <a target="_blank" :href="route('terms.show')" class="underline focus:outline-none text-primary font-thin">
               Términos y Condiciones
