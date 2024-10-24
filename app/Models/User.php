@@ -30,12 +30,14 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'rol',
         'password',
         'employee_properties',
         'printer_config', //JSON
         'store_id',
         'cash_register_id',
+        'email_verified_at',
         'tutorials_seen',
     ];
 

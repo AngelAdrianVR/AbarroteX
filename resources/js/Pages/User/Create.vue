@@ -3,50 +3,56 @@
         <div class="px-3 md:px-10 py-7">
             <Back />
 
-            <form v-if="total_users < 3 || $page.props.auth.user.store_id == 10" @submit.prevent="store"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
+            <form v-if="usersNotExceededYet" @submit.prevent="store"
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 grid grid-cols-2 gap-3 mx-auto mt-7">
                 <h1 class="font-bold ml-2 col-span-full">Crear nuevo usuario</h1>
 
-                <div class="mt-3 col-span-2">
-                    <InputLabel value="Nombre de usuario*" class="ml-3 mb-1" />
+                <div>
+                    <InputLabel value="Nombre de usuario*" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del usuario" :maxlength="100"
                         clearable />
                     <InputError :message="form.errors.name" />
                 </div>
-
-                <div class="mt-3 col-span-2">
-                    <InputLabel value="Correo electrónico*" class="ml-3 mb-1" />
+                <div>
+                    <InputLabel value="Correo electrónico*" />
                     <el-input v-model="form.email" placeholder="Ingresa el corre electrónico del usuario"
                         :maxlength="100" clearable />
                     <InputError :message="form.errors.email" />
                 </div>
-
-                <div class="mt-5 col-span-2">
-                    <InputLabel class="ml-3 mb-1">
-                        <div class="flex items-center space-x-10">
-                            <span>Rol</span>
-                            <button @click="showRoleModal = true" type="button" class="text-primary">
-                                + Crear rol
-                            </button>
-                        </div>
-                    </InputLabel>
-                    <el-radio-group v-model="form.rol" class="ml-4">
-                        <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">
-                            {{ role.name }}
-                        </el-radio>
-                    </el-radio-group>
-                    <InputError :message="form.errors.rol" />
+                <div>
+                    <InputLabel value="Teléfono*" />
+                    <el-input v-model="form.phone"
+                        :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                        :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+                        placeholder="Ingresa el número de teléfono" />
+                    <InputError :message="form.errors.phone" />
                 </div>
-
+                <div class="col-span-full">
+                    <div class="flex items-center space-x-5">
+                        <InputLabel value="Rol" />
+                        <button @click="showRoleModal = true" type="button" class="text-primary text-sm">
+                            + Crear rol
+                        </button>
+                    </div>
+                    <div v-if="roles.length">
+                        <el-radio-group v-model="form.rol" class="ml-4">
+                            <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">
+                                {{ role.name }}
+                            </el-radio>
+                        </el-radio-group>
+                        <InputError :message="form.errors.rol" />
+                    </div>
+                    <p v-else class="text-xs text-gray9A mt-3">No tienes ningún rol registrado. Agrega al menos uno en
+                        el botón de arriba (+ Crear rol)</p>
+                </div>
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="form.processing">Crear usuario</PrimaryButton>
                 </div>
             </form>
-
             <!-- Mensaje de limite alcanzado -->
             <section class="mt-10" v-else>
                 <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
-                <p class="text-xl text-center">Has llegado al límite de usuarios (2) de tu plan contratado.</p>
+                <p class="text-xl text-center">Has llegado al límite de usuarios de tu plan contratado.</p>
                 <p class="text-xl text-center">
                     Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
                 </p>
@@ -69,12 +75,16 @@
                 </p>
                 <form @submit.prevent="storeRole">
                     <div>
-                        <InputLabel value="Nombre del rol *" class="ml-3 mb-1" />
+                        <InputLabel value="Nombre del rol *" />
                         <el-input v-model="roleForm.name" placeholder="Ej. Cajero" class="!w-1/2" :maxlength="255"
                             clearable />
                         <InputError :message="roleForm.errors.name" />
                     </div>
-                    <h2 class="font-bold my-3">Agregar permisos</h2>
+                    <h2 class="flex items-center space-x-5 my-3">
+                        <span class="font-bold">Agregar permisos</span>
+                        <button type="button" @click="grantAllPermissions" class="text-primary underline">Dar acceso
+                            total</button>
+                    </h2>
                     <div class="lg:grid grid-cols-4">
                         <div v-for="(guard, index) in Object.keys(permissions).filter(permission => this.$page.props.auth.user.store.activated_modules.includes(permission))"
                             :key="index" class="border p-3">
@@ -147,6 +157,7 @@ export default {
         const form = useForm({
             name: null,
             email: null,
+            phone: null,
             rol: null,
         });
 
@@ -226,7 +237,26 @@ export default {
         permissions: Object,
         roles: Array,
     },
+    computed: {
+        usersNotExceededYet() {
+            const hasMoreUsers = ['Cotizaciones', 'Renta de productos', 'Tienda en línea']
+                .some(module => this.$page.props.auth.user.store.activated_modules?.includes(module));
+
+            if (hasMoreUsers && this.total_users <= 5) {
+                return true;
+            } else if (!hasMoreUsers && this.total_users <= 2) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    },
     methods: {
+        grantAllPermissions() {
+            this.roleForm.permissions = Object.values(this.permissions)
+                .flat() // Aplanar los arrays de permisos por guard
+                .map(permission => permission.id); // Obtener solo los IDs de los permisos
+        },
         store() {
             this.form.post(route("users.store"), {
                 onSuccess: () => {
