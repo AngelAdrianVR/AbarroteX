@@ -37,7 +37,7 @@
 
             <div class="bg-[#EDEDED] px-2 py-1 font-bold flex items-center justify-between">
                 <p class="text-[#8F8E8E]">Teléfono de contacto:</p>
-                <p class="text-[#8F8E8E]">3319075562 {{ !$page.props.auth.user.phone === '3319075562' ? '' : 'y ' + $page.props.auth.user.phone }}</p>
+                <p class="text-[#8F8E8E]">3319075562 {{ $page.props.auth.user.phone === '3319075562' ? '' : 'y ' + $page.props.auth.user.phone ?? '-' }}</p>
                 <p class="text-[#8F8E8E]">WhatsApp:</p>
                 <p class="text-[#8F8E8E]">3319075562</p>
             </div>
