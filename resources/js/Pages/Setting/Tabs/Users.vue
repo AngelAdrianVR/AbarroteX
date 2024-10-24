@@ -1,11 +1,14 @@
 <template>
     <section>
         <h1 class="rounded-full pl-10 bg-[#F2F2F2] py-1 text-sm">Usuarios</h1>
-        <p class="px-9 text-sm md:text-base mt-4">Los usuarios pueden iniciar sesión con el correo electrónico registrado y la contraseña: <span class="bg-primarylight">ezyventas</span> , la cual pueden cambiar luego en su perfil</P>
+        <p class="px-9 text-sm md:text-base mt-4">Los usuarios pueden iniciar sesión con el correo electrónico
+            registrado y la contraseña: <span class="bg-primarylight">ezyventas</span> , la cual pueden cambiar luego en
+            su perfil</P>
 
         <!-- Botones -->
         <div class="text-right mt-3">
-            <PrimaryButton v-if="canCreate && users.length < 1 || $page.props.auth.user.store_id == 10" @click="$inertia.get(route('users.create'))">Agregar usuario</PrimaryButton>
+            <PrimaryButton v-if="canCreate && usersNotExceededYet"
+                @click="$inertia.get(route('users.create'))">Agregar usuario</PrimaryButton>
         </div>
 
         <div class="mt-3 mx-3">
@@ -139,6 +142,20 @@ export default {
     },
     props: {
         users: Array
+    },
+    computed: {
+        usersNotExceededYet() {
+            const hasMoreUsers = ['Cotizaciones', 'Renta de productos', 'Tienda en línea']
+                .some(module => this.$page.props.auth.user.store.activated_modules?.includes(module));
+
+            if (hasMoreUsers && this.users.length < 5) {
+                return true;
+            } else if (!hasMoreUsers && this.users.length < 2) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     },
     methods: {
         handleCommand(command) {

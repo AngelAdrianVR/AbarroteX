@@ -20,7 +20,7 @@
                             <span v-else>{{ form.store_address ?? '-' }}</span>
                             <InputError :message="form.errors.store_address" />
                         </p>
-                        <h2 class="col-span-full">Información del contacto</h2>
+                        <el-divider content-position="left" class="col-span-full">Información del usuario</el-divider>
                         <p class="flex flex-col">
                             <b> Nombre</b>
                             <el-input v-if="edit" v-model="form.name" placeholder="Nombre *" :disabled="form.processing"
@@ -80,7 +80,7 @@ export default {
             store_name: this.$page.props.auth.user.store.name,
             store_address: this.$page.props.auth.user.store.address,
             name: this.$page.props.auth.user.name,
-            contact_phone: this.$page.props.auth.user.store.contact_phone,
+            contact_phone: this.$page.props.auth.user.phone,
             email: this.$page.props.auth.user.email,
         });
 

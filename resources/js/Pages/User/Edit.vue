@@ -4,39 +4,45 @@
             <Back />
 
             <form @submit.prevent="update"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
-                <h1 class="font-bold ml-2 col-span-full">Editar usuario</h1>
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 grid grid-cols-2 gap-3 mx-auto mt-7">
+                <h1 class="font-bold ml-2 col-span-full">Crear nuevo usuario</h1>
 
-                <div class="mt-3 col-span-2">
-                    <InputLabel value="Nombre de usuario*" class="ml-3 mb-1" />
+                <div>
+                    <InputLabel value="Nombre de usuario*" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del usuario" :maxlength="100"
                         clearable />
                     <InputError :message="form.errors.name" />
                 </div>
-
-                <div class="mt-3 col-span-2">
-                    <InputLabel value="Correo electrónico*" class="ml-3 mb-1" />
+                <div>
+                    <InputLabel value="Correo electrónico*" />
                     <el-input v-model="form.email" placeholder="Ingresa el corre electrónico del usuario"
                         :maxlength="100" clearable />
                     <InputError :message="form.errors.email" />
                 </div>
-
-                <div class="mt-5 col-span-2">
-                    <InputLabel class="ml-3 mb-1">
-                        <div class="flex items-center space-x-10">
-                            <span>Rol</span>
-                            <button @click="showRoleModal = true" type="button" class="text-primary">
-                                + Crear rol
-                            </button>
-                        </div>
-                    </InputLabel>
-                    <el-radio-group v-model="form.rol" class="ml-4">
-                        <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">{{ role.name
-                            }}</el-radio>
-                    </el-radio-group>
-                    <InputError :message="form.errors.rol" />
+                <div>
+                    <InputLabel value="Teléfono*" />
+                    <el-input v-model="form.phone"
+                        :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                        :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
+                        placeholder="Ingresa el número de teléfono" />
+                    <InputError :message="form.errors.phone" />
                 </div>
-
+                <div class="col-span-full">
+                    <div class="flex items-center space-x-5">
+                        <InputLabel value="Rol" />
+                        <button @click="showRoleModal = true" type="button" class="text-primary text-sm">
+                            + Crear rol
+                        </button>
+                    </div>
+                    <div>
+                        <el-radio-group v-model="form.rol" class="ml-4">
+                            <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">
+                                {{ role.name }}
+                            </el-radio>
+                        </el-radio-group>
+                        <InputError :message="form.errors.rol" />
+                    </div>
+                </div>
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="form.processing">Guardar cambios</PrimaryButton>
                 </div>
@@ -59,7 +65,12 @@
                             clearable />
                         <InputError :message="roleForm.errors.name" />
                     </div>
-                    <h2 class="font-bold my-3">Agregar permisos</h2>
+                    <h2 class="flex items-center space-x-5 my-3">
+                        <span class="font-bold">Agregar permisos</span>
+                        <button type="button" @click="grantAllPermissions" class="text-primary underline">
+                            Dar acceso total
+                        </button>
+                    </h2>
                     <hr class="border-grayD9">
                     <div class="lg:grid grid-cols-4">
                         <div v-for="(guard, index) in Object.keys(permissions)" :key="index" class="border p-3">
@@ -109,6 +120,7 @@ export default {
         const form = useForm({
             name: this.user.name,
             email: this.user.email,
+            phone: this.user.phone,
             rol: this.user_rol,
         });
 
@@ -188,6 +200,11 @@ export default {
         user_rol: Number,
     },
     methods: {
+        grantAllPermissions() {
+            this.roleForm.permissions = Object.values(this.permissions)
+                .flat() // Aplanar los arrays de permisos por guard
+                .map(permission => permission.id); // Obtener solo los IDs de los permisos
+        },
         update() {
             this.form.put(route("users.update", this.user.id), {
                 onSuccess: () => {
