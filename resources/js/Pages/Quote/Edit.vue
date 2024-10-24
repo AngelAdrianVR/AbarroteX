@@ -22,7 +22,7 @@
                     </div>
                     <el-select @change="fillClientInfo()" class="w-1/2" filterable v-model="form.client_id" clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="client in clients" :key="client" :label="client.company"
+                        <el-option v-for="client in clients" :key="client" :label="client.company ?? client.name"
                             :value="client.id" />
                     </el-select>
                     <InputError :message="form.errors.client_id" />
@@ -233,7 +233,7 @@ data() {
     });
 
     const form = useForm({
-        client_id: this.quote.client.id ?? null,
+        client_id: parseInt(this.quote.client?.id) ?? null,
         contact_name: this.quote.contact_name,
         phone: this.quote.phone,
         email: this.quote.email,
