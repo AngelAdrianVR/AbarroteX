@@ -20,11 +20,12 @@ class EzyProfileController extends Controller
         $user->update([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
+            'phone' => $request->input('contact_phone'),
         ]);
         $user->store->update([
             'name' => $request->input('store_name'),
             'address' => $request->input('store_address'),
-            'contact_phone' => $request->input('contact_phone'),
+            // 'contact_phone' => $request->input('contact_phone'),
             'contact_name' => $request->input('name'),
         ]);
     }

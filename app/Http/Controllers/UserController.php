@@ -31,6 +31,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'rol' => 'required|numeric|min:1',
             'email' => 'required|email|unique:users',
+            'phone' => 'required',
         ]);
 
         $store_id = auth()->user()->store_id;
@@ -41,6 +42,7 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
             'store_id' => $store_id,
             'password' => bcrypt('ezyventas'),
             'cash_register_id' => $cash_register->id,
@@ -70,6 +72,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'rol' => 'required|numeric|min:1',
+            'phone' => 'required',
         ]);
 
         $user->update($request->all());
