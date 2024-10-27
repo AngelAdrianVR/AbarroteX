@@ -391,6 +391,48 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Servicios</span>
                             </ResponsiveNavLink>
+                            <!-- solo para DM compresores por el momento -->
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.id == 6"
+                                :href="route('service-reports.index')" :active="route().current('service-reports.*')">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.5 -0.5 22 22"
+                                    id="Website-Build--Streamline-Ultimate" height="19" width="19">
+                                    <desc>Website Build Streamline Icon: https://streamlinehq.com</desc>
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        d="M20.125 10.5c0.11602499999999999 0 0.22732499999999997 0.0461125 0.3094 0.1281 0.0819875 0.082075 0.1281 0.193375 0.1281 0.3094V17.5c0 0.46409999999999996 -0.18436249999999998 0.9092125 -0.512575 1.237425S19.276600000000002 19.25 18.8125 19.25h-16.625c-0.46412624999999996 0 -0.9092475 -0.18436249999999998 -1.2374337499999999 -0.512575C0.6218747499999999 18.409212500000002 0.4375 17.964100000000002 0.4375 17.5V3.5c0 -0.46412624999999996 0.18437475 -0.9092475 0.51256625 -1.2374337499999999C1.2782525 1.93437125 1.72337375 1.75 2.1875 1.75H11.375c0.11602499999999999 0 0.22732499999999997 0.046095 0.3094 0.12814375 0.0819875 0.08204 0.1281 0.1933225 0.1281 0.30935625V9.625c0 0.23204999999999998 0.092225 0.45464999999999994 0.2562875 0.6187125S12.455449999999999 10.5 12.6875 10.5H20.125Z"
+                                        stroke-width="1.5"></path>
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        d="M0.4375 6.125h11.375" stroke-width="1.5"></path>
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        d="M11.8125 7h8.75" stroke-width="1.5"></path>
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        d="M11.8125 3.5h8.75" stroke-width="1.5"></path>
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        d="M18.8125 1.75v8.75" stroke-width="1.5"></path>
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.3125 1.75v8.75" stroke-width="1.5"></path>
+                                    <path stroke="currentColor"
+                                        d="M3.5 4.15625c-0.12081125 0 -0.21875 -0.09793875 -0.21875 -0.21875s0.09793875 -0.21875 0.21875 -0.21875"
+                                        stroke-width="1.5"></path>
+                                    <path stroke="currentColor"
+                                        d="M3.5 4.15625c0.12081125 0 0.21875 -0.09793875 0.21875 -0.21875s-0.09793875 -0.21875 -0.21875 -0.21875"
+                                        stroke-width="1.5"></path>
+                                    <path stroke="currentColor"
+                                        d="M6.125 4.15625c-0.12081125 0 -0.21875 -0.09793875 -0.21875 -0.21875s0.09793875 -0.21875 0.21875 -0.21875"
+                                        stroke-width="1.5"></path>
+                                    <path stroke="currentColor"
+                                        d="M6.125 4.15625c0.12081125 0 0.21875 -0.09793875 0.21875 -0.21875s-0.09793875 -0.21875 -0.21875 -0.21875"
+                                        stroke-width="1.5"></path>
+                                    <g>
+                                        <path stroke="currentColor"
+                                            d="M8.75 4.15625c-0.12081125 0 -0.21875 -0.09793875 -0.21875 -0.21875s0.09793875 -0.21875 0.21875 -0.21875"
+                                            stroke-width="1.5"></path>
+                                        <path stroke="currentColor"
+                                            d="M8.75 4.15625c0.1208375 0 0.21875 -0.09793875 0.21875 -0.21875s-0.0979125 -0.21875 -0.21875 -0.21875"
+                                            stroke-width="1.5"></path>
+                                    </g>
+                                </svg>
+                                <span>Reportes de servicio</span>
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 v-if="$page.props.auth.user.store.activated_modules?.includes('Clientes')"
                                 :href="route('clients.index')" :active="route().current('clients.*')">
