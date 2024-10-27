@@ -25,7 +25,7 @@
         <p v-if="localReports.length" class="text-gray66 text-[11px]">
           {{ localReports.length }} de {{ total_reports }} elementos
         </p>
-        <ServiceReportsTable :services="localReports" />
+        <ServiceReportsTable :reports="localReports" />
         <p v-if="localReports.length" class="text-gray66 text-[11px] mt-3">
           {{ localReports.length }} de {{ total_reports }} elementos
         </p>

@@ -111,10 +111,10 @@
                 <h1 class="font-semibold text-gray37 ml-2 col-span-full">Servicio</h1>
                 <div class="col-span-full">
                     <InputLabel value="Servicio realizado" />
-                    <el-input v-model="form.desciption" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
+                    <el-input v-model="form.description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
                         placeholder="Describe lo que se realizo en el servicio" :maxlength="1000" show-word-limit
                         clearable />
-                    <InputError :message="form.errors.desciption" />
+                    <InputError :message="form.errors.description" />
                 </div>
                 <h1 class="font-semibold text-gray37 ml-2 col-span-full">Refacciones referencias</h1>
                 <article v-for="(item, index) in form.spare_parts" :key="index" class="col-span-full">
@@ -310,7 +310,7 @@ export default {
             },
             technician_name: this.$page.props.auth.user.name,
             receiver_name: null,
-            desciption: null,
+            description: null,
         });
 
         return {
@@ -330,11 +330,11 @@ export default {
     },
     methods: {
         store() {
-            this.form.post(route("services.store"), {
+            this.form.post(route("service-reports.store"), {
                 onSuccess: () => {
                     this.$notify({
                         title: "Correcto",
-                        message: "Se ha creado un nuevo servicio",
+                        message: "",
                         type: "success",
                     });
                 },
@@ -357,15 +357,6 @@ export default {
 
             this.form.spare_parts.push(newSparePart);
         },
-        saveImage(image) {
-            const currentIndex = this.form.media.length - 1;
-            this.form.media[currentIndex] = image;
-            this.form.media.push(null);
-        },
-        handleCleared(index) {
-            // Eliminar el componente y su informacion correspondiente cuando se borra la imagen
-            this.form.media.splice(index, 1);
-        }
     }
 }
 </script>

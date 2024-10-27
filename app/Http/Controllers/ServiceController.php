@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
+use App\Models\User;
+use App\Notifications\AdminBasicNotification;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
@@ -16,12 +18,10 @@ class ServiceController extends Controller
         return inertia('Service/Index', compact('services', 'total_services'));
     }
 
-
     public function create()
     {
         return inertia('Service/Create');
     }
-
 
     public function store(Request $request)
     {
@@ -46,7 +46,6 @@ class ServiceController extends Controller
 
         return to_route('services.index');
     }
-
 
     public function show($encoded_service_id)
     {

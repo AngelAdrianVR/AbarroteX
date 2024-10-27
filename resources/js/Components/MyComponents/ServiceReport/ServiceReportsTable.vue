@@ -1,10 +1,10 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="services?.length" class="w-full table-fixed">
+        <table v-if="reports?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th class="w-20 md:w-[15%]">Folio</th>
-                    <th class="w-32 md:w-[15%]">Creado el</th>
+                    <th class="w-32 md:w-[15%]">Fecha del servicio</th>
                     <th class="w-32 md:w-[15%]">Responsable</th>
                     <th class="w-32 md:w-[15%]">Solicitante</th>
                     <th class="w-12 md:w-[5%]"></th>
@@ -12,10 +12,10 @@
             </thead>
             <tbody>
                 <tr @click="$inertia.visit(route('service-reports.show', encodeId(report.id)))"
-                    v-for="(report, index) in service_reports" :key="index"
+                    v-for="(report, index) in reports" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ 'RS-' + report.folio }}</td>
-                    <td>{{ report.created_at }}</td>
+                    <td>{{ formatDate(report.service_date) }}</td>
                     <td>{{ report.technician_name ?? 'No especificado' }}</td>
                     <td>{{ report.client_name ?? 'No especificado' }}</td>
                     <td class="rounded-e-full text-end">
@@ -87,6 +87,8 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
     data() {
@@ -103,9 +105,12 @@ export default {
         CancelButton,
     },
     props: {
-        service_reports: Array
+        reports: Array
     },
     methods: {
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMM yyyy', { locale: es });
+        },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const data = command.split('|')[1];
@@ -119,6 +124,10 @@ export default {
                 this.itemIdToDelete = data;
             }
         },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
+        },
         async deleteItem() {
             try {
                 const response = await axios.delete(route('service-reports.destroy', this.itemIdToDelete));
@@ -129,9 +138,9 @@ export default {
                         type: 'success',
                     });
                     //se busca el index del cliente eliminado para removerlo del arreglo
-                    const indexServiceDeleted = this.service_reports.findIndex(item => item.id == this.itemIdToDelete);
+                    const indexServiceDeleted = this.reports.findIndex(item => item.id == this.itemIdToDelete);
                     if (indexServiceDeleted != -1) {
-                        this.service_reports.splice(indexServiceDeleted, 1);
+                        this.reports.splice(indexServiceDeleted, 1);
                     }
                     this.showDeleteConfirm = false;
                 }
@@ -143,10 +152,6 @@ export default {
                     type: 'error',
                 });
             }
-        },
-        encodeId(id) {
-            const encodedId = btoa(id.toString());
-            return encodedId;
         },
     },
 }

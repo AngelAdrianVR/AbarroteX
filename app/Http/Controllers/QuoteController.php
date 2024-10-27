@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class QuoteController extends Controller
 {
-    
     public function index()
     {
         $quotes = Quote::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
@@ -17,7 +16,6 @@ class QuoteController extends Controller
         return inertia('Quote/Index', compact('quotes', 'total_quotes'));
     }
 
-    
     public function create()
     {   
         $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'company']);
@@ -25,7 +23,6 @@ class QuoteController extends Controller
         return inertia('Quote/Create', compact('clients'));
     }
 
-    
     public function store(Request $request)
     {
         $request->validate([
@@ -57,7 +54,6 @@ class QuoteController extends Controller
 
         return to_route('quotes.index');
     }
-
     
     public function show($encoded_quote_id)
     {
@@ -75,7 +71,6 @@ class QuoteController extends Controller
             return inertia('Quote/Show', compact('quote'));
         }
     }
-
     
     public function edit($encoded_quote_id)
     {
