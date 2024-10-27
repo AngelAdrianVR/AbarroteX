@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
-    
+
     public function index()
     {
         $services = Service::where('store_id', auth()->user()->store_id)->get()->take(30);
@@ -16,7 +16,7 @@ class ServiceController extends Controller
         return inertia('Service/Index', compact('services', 'total_services'));
     }
 
-    
+
     public function create()
     {
         return inertia('Service/Create');
@@ -42,12 +42,12 @@ class ServiceController extends Controller
         ]);
 
         // Subir y asociar las imagenes
-        $service->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+        $service->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection());
 
         return to_route('services.index');
     }
 
-    
+
     public function show($encoded_service_id)
     {
         // Decodificar el ID
@@ -58,7 +58,7 @@ class ServiceController extends Controller
         return inertia('Service/Show', compact('service', 'services'));
     }
 
-    
+
     public function edit($encoded_service_id)
     {
         // Decodificar el ID
@@ -68,7 +68,7 @@ class ServiceController extends Controller
         return inertia('Service/Edit', compact('service'));
     }
 
-    
+
     public function update(Request $request, Service $service)
     {
         $request->validate([
@@ -97,7 +97,7 @@ class ServiceController extends Controller
 
         // update image
         $service->clearMediaCollection();
-        $service->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+        $service->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection());
 
         return to_route('services.index');
     }
@@ -140,7 +140,4 @@ class ServiceController extends Controller
 
         return response()->json(compact('services'));
     }
-
-
-    
 }

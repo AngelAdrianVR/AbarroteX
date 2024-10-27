@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\ServiceReport;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,9 @@ class ServiceReportController extends Controller
 
     public function create()
     {
-        //
+        $products = Product::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'code', 'description']);
+
+        return inertia('ServiceReport/Create', compact('products'));
     }
 
     public function store(Request $request)

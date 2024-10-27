@@ -7,7 +7,7 @@
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3 col-span-2">
-                    <InputLabel value="Nombre del producto*" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre del producto*" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del producto" :maxlength="100"
                         clearable />
                     <InputError :message="form.errors.name" />
@@ -15,7 +15,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría" class="ml-3 mb-1" />
+                        <InputLabel value="Categoría" />
                         <button @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -31,7 +31,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor" class="ml-3 mb-1" />
+                        <InputLabel value="Proveedor" />
                         <button @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
                             <i class="fa-solid fa-plus text-primary text-[9px]"></i>
@@ -72,7 +72,7 @@
                     </div>
 
                     <div v-if="form.bulk_product" class="flex items-center space-x-4">
-                        <InputLabel value="Unidad de venta*" class="ml-3 mb-1" />
+                        <InputLabel value="Unidad de venta*" />
                         <el-radio-group v-model="form.measure_unit" size="small">
                             <el-radio-button label="Kilogramo" value="Kilogramo" />
                             <el-radio-button label="Litro" value="Litro" />
@@ -83,7 +83,7 @@
 
                 <div v-if="canSeeCost" class="mt-3">
                     <div class="flex items-center">
-                        <InputLabel value="Precio de compra" class="ml-3 mb-1" />
+                        <InputLabel value="Precio de compra" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
@@ -151,12 +151,12 @@
                 </div>
 
                 <div class="mt-7">
-                    <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
+                    <InputLabel value="Agregar imagen" />
                     <InputFilePreview @imagen="saveImage" @cleared="form.imageCover = null" />
                 </div>
 
                 <div class="mt-3 col-span-2">
-                    <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
+                    <InputLabel value="Código del producto (en caso de tener)" />
                     <el-input v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100"
                         clearable>
                         <template #prefix>

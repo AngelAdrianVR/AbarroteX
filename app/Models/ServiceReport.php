@@ -12,6 +12,7 @@ class ServiceReport extends Model
 
     protected $fillable = [
         'folio',
+        'service_date',
         'client_name',
         'client_department',
         'product_details',
@@ -24,6 +25,7 @@ class ServiceReport extends Model
     ];
 
     protected $casts = [
+        'service_date' => 'date',
         'product_details' => 'array',
         'spare_parts' => 'array',
         'observations' => 'array',

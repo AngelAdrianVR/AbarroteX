@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('service_reports', function (Blueprint $table) {
             $table->id();
             $table->string('folio')->nullable();
+            $table->date('service_date');
             $table->string('client_name')->nullable();
             $table->string('client_department')->nullable();
             $table->json('product_details')->nullable();
