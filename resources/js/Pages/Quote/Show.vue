@@ -17,9 +17,10 @@
                     Imprimir o guardar PDF
                 </PrimaryButton>
                 <div class="flex flex-col space-y-1 mr-16 text-right">
-                    <p>{{ 'COT-' + (quote.folio < 10 ? '0' + quote.folio : quote.folio) }}</p>
-                            <p class="font-bold">Fecha: <span class="font-light">{{ formatDate(quote.created_at)
-                                    }}</span></p>
+                    <p>{{ 'COT-' + String(report.folio).padStart(4, '0') }}</p>
+                    <p class="font-bold">Fecha: <span class="font-light">
+                        {{ formatDate(report.created_at) }}</span>
+                    </p>
                 </div>
             </section>
 
@@ -244,9 +245,9 @@ export default {
         },
         print() {
             this.showEditIcon = false;
-            setTimeout(() => {
+            this.$nextTick(() => {
                 window.print();
-            }, 100);
+            });
         },
         handleAfterPrint() {
             this.showEditIcon = true;

@@ -1,27 +1,23 @@
 <template>
     <div class="overflow-auto">
-        <table v-if="services?.length" class="w-full table-fixed">
+        <table v-if="reports?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th class="w-20 md:w-[15%]">Folio</th>
-                    <th class="w-32 md:w-[15%]">Nombre</th>
-                    <th class="w-32 md:w-[15%]">Categoría</th>
-                    <th class="w-32 md:w-[15%]">Precio</th>
-                    <th class="w-96 md:w-[30]">Descripción</th>
+                    <th class="w-32 md:w-[15%]">Fecha del servicio</th>
+                    <th class="w-32 md:w-[15%]">Responsable</th>
+                    <th class="w-32 md:w-[15%]">Solicitante</th>
                     <th class="w-12 md:w-[5%]"></th>
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('services.show', encodeId(service.id)))"
-                    v-for="(service, index) in services" :key="index"
+                <tr @click="$inertia.visit(route('service-reports.show', encodeId(report.id)))"
+                    v-for="(report, index) in reports" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td class="rounded-s-full">{{ 'S-' + service.folio }}</td>
-                    <td>{{ service.name }}</td>
-                    <td>{{ service.category ?? '-' }}</td>
-                    <td>${{ service.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
-                    <td>
-                        <p class="w-96 truncate">{{ service.description ?? '-' }}</p>
-                    </td>
+                    <td class="rounded-s-full">{{ 'RS-' + report.folio }}</td>
+                    <td>{{ formatDate(report.service_date) }}</td>
+                    <td>{{ report.technician_name ?? 'No especificado' }}</td>
+                    <td>{{ report.client_name ?? 'No especificado' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
@@ -30,7 +26,7 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item :command="'see|' + encodeId(service.id)">
+                                    <el-dropdown-item :command="'see|' + encodeId(report.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -40,7 +36,7 @@
                                         </svg>
                                         <span class="text-xs">Ver</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-if="canEdit" :command="'edit|' + encodeId(service.id)">
+                                    <el-dropdown-item v-if="canEdit" :command="'edit|' + encodeId(report.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -48,7 +44,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + service.id">
+                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + report.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -64,7 +60,7 @@
                 </tr>
             </tbody>
         </table>
-        <el-empty v-else description="No hay servicios registrados" />
+        <el-empty v-else description="No hay reportes de servicios registrados" />
 
         <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
             <template #title>
@@ -91,14 +87,16 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import axios from 'axios';
+import { format, parseISO } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 export default {
     data() {
         return {
             showDeleteConfirm: false,
             itemIdToDelete: null,
-            canEdit: this.$page.props.auth.user.permissions.includes('Editar servicios'),
-            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar servicios'),
+            canEdit: true,
+            canDelete: true,
         }
     },
     components: {
@@ -107,35 +105,42 @@ export default {
         CancelButton,
     },
     props: {
-        services: Array
+        reports: Array
     },
     methods: {
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMM yyyy', { locale: es });
+        },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const data = command.split('|')[1];
 
             if (commandName == 'see') {
-                this.$inertia.get(route('services.show', data));
+                this.$inertia.get(route('service-reports.show', data));
             } else if (commandName == 'edit') {
-                this.$inertia.get(route('services.edit', data));
+                this.$inertia.get(route('service-reports.edit', data));
             } else if (commandName == 'delete') {
                 this.showDeleteConfirm = true;
                 this.itemIdToDelete = data;
             }
         },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
+        },
         async deleteItem() {
             try {
-                const response = await axios.delete(route('services.destroy', this.itemIdToDelete));
+                const response = await axios.delete(route('service-reports.destroy', this.itemIdToDelete));
                 if (response.status == 200) {
                     this.$notify({
                         title: 'Correcto',
-                        message: 'Se ha eliminado el servicio',
+                        message: 'Se ha eliminado el reporte',
                         type: 'success',
                     });
                     //se busca el index del cliente eliminado para removerlo del arreglo
-                    const indexServiceDeleted = this.services.findIndex(item => item.id == this.itemIdToDelete);
+                    const indexServiceDeleted = this.reports.findIndex(item => item.id == this.itemIdToDelete);
                     if (indexServiceDeleted != -1) {
-                        this.services.splice(indexServiceDeleted, 1);
+                        this.reports.splice(indexServiceDeleted, 1);
                     }
                     this.showDeleteConfirm = false;
                 }
@@ -143,14 +148,10 @@ export default {
                 console.log(error);
                 this.$notify({
                     title: 'El servidor no pudo procesar la petición',
-                    message: 'No se pudo eliminar el servicio. Intente más tarde o si el problema persiste, contacte a soporte',
+                    message: 'No se pudo eliminar el reporte. Intente más tarde o si el problema persiste, contacte a soporte',
                     type: 'error',
                 });
             }
-        },
-        encodeId(id) {
-            const encodedId = btoa(id.toString());
-            return encodedId;
         },
     },
 }

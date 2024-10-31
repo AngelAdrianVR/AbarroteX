@@ -27,6 +27,7 @@ use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\RentalPaymentController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingHistoryController;
 use App\Http\Controllers\SizeController;
@@ -473,6 +474,13 @@ Route::post('/stripe-checkout', [StripeController::class, 'checkout'])->name('ch
 Route::get('/stripe-success', [StripeController::class, 'success'])->name('stripe.success');
 Route::get('/stripe-cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
 Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.error');
+
+
+//rutas de reportes de servicio --------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('service-reports', ServiceReportController::class);
+Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
+Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
 
 
 // comandos Artisan
