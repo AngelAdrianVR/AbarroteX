@@ -245,9 +245,9 @@ export default {
         },
         print() {
             this.showEditIcon = false;
-            setTimeout(() => {
+            this.$nextTick(() => {
                 window.print();
-            }, 100);
+            });
         },
         handleAfterPrint() {
             this.showEditIcon = true;

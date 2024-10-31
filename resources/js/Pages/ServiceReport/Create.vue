@@ -78,9 +78,9 @@
                 </div>
                 <div>
                     <InputLabel value="Sistema de enfriamiento" />
-                    <el-input v-model="form.product_details.chiler_type" placeholder="Ej. Enfriamiento por aire"
+                    <el-input v-model="form.product_details.chiller_type" placeholder="Ej. Enfriamiento por aire"
                         clearable />
-                    <InputError :message="form.errors['product_details.chiler_type']" />
+                    <InputError :message="form.errors['product_details.chiller_type']" />
                 </div>
                 <div>
                     <InputLabel value="Voltaje" />
@@ -132,7 +132,6 @@
                                     </div>
                                 </el-option>
                             </el-select>
-                            <!-- <InputError :message="form.errors[`${index}.color`]" /> -->
                         </div>
                         <div class="w-[47%]">
                             <InputLabel v-if="index == 0" value="Descripción *" />
@@ -286,7 +285,7 @@ export default {
                 maintenance_type: null,
                 charge_hours: null,
                 oil_type: null,
-                chiler_type: null,
+                chiller_type: null,
                 voltage: null,
                 motor_brand: null,
                 fan_brand: null,
@@ -295,6 +294,8 @@ export default {
             spare_parts: [
                 {
                     product_id: null,
+                    code: null,
+                    name: null,
                     description: null,
                     quantity: null,
                 },
@@ -342,8 +343,12 @@ export default {
         },
         handleChangeProduct(index) {
             const productId = this.form.spare_parts[index].product_id;
-            const description = this.products.find(i => i.id == productId)?.description ?? 'Sin descripción';
+            const product = this.products.find(i => i.id == productId);
+            const description = product?.description ?? 'Sin descripción';
+
             this.form.spare_parts[index].description = description;
+            this.form.spare_parts[index].code = product.code;
+            this.form.spare_parts[index].name = product.name;
         },
         deleteSparePart(index) {
             this.form.spare_parts.splice(index, 1);
@@ -351,6 +356,8 @@ export default {
         addSparePart() {
             const newSparePart = {
                 product_id: null,
+                code: null,
+                name: null,
                 description: null,
                 quantity: null,
             }
