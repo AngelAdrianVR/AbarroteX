@@ -26,6 +26,7 @@ class ProductResource extends JsonResource
             'current_stock' => $this->current_stock,
             'description' => $this->description,
             'product_on_request' => $this->product_on_request,
+            'show_in_online_store' => $this->show_in_online_store,
             'bulk_product' => $this->bulk_product,
             'measure_unit' => $this->measure_unit,
             'days_for_delivery' => $this->days_for_delivery,

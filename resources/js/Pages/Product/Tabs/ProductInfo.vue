@@ -26,23 +26,34 @@
         </div>
         <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.created_at
                 }}</strong></p>
-        <p v-if="product.bulk_product" class="text-gray37 font-bold mt-3">Producto de venta a granel / ({{ product.measure_unit }})</p>
-        <p v-if="product.product_on_request" class="text-gray37 font-bold mt-3">Producto de venta bajo pedido / ({{ product.days_for_delivery }} días hábiles)</p>
+        <p v-if="product.bulk_product" class="text-gray37 font-bold mt-3">Producto de venta a granel / ({{
+            product.measure_unit }})</p>
+        <p v-if="product.product_on_request" class="text-gray37 font-bold mt-3">Producto de venta bajo pedido / ({{
+            product.days_for_delivery }} días hábiles)</p>
+        <p v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+            class="text-gray37 font-bold mt-3">
+            {{ product.show_in_online_store
+                ? 'Este producto está visible en la tienda en línea'
+                : 'Este producto no está visible en la tienda en línea' }}
+        </p>
         <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ product.name }}</h1>
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
             <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de compra:</p>
-                <p class="text-right font-bold">{{ product.cost ? '$' + product.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '-' }}
+                <p class="text-right font-bold">{{ product.cost ? '$' +
+                    product.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '-' }}
                 </p>
             </div>
             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Precio de venta: </p>
-                <p class="text-right font-bold">${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                <p class="text-right font-bold">${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                    ",") }}</p>
             </div>
             <div v-if="product.current_stock >= product.min_stock || !isInventoryOn"
                 class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                 <p class="text-gray37">Existencias: </p>
-                <p class="text-right font-bold text-[#5FCB1F]">{{ product.current_stock?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}
+                <p class="text-right font-bold text-[#5FCB1F]">{{
+                    product.current_stock?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}
                 </p>
             </div>
             <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">

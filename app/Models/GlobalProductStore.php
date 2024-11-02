@@ -19,6 +19,7 @@ class GlobalProductStore extends Model
         'current_stock',
         'description',
         'has_inventory_control',
+        'show_in_online_store',
         'global_product_id',
         'store_id',
     ];
