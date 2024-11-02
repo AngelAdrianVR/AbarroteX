@@ -25,6 +25,7 @@ class Product extends Model implements HasMedia
         'description',
         'has_inventory_control',
         'product_on_request',
+        'show_in_online_store',
         'bulk_product',
         'measure_unit',
         'days_for_delivery',

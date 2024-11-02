@@ -56,14 +56,31 @@ class ServiceReportController extends Controller
         return inertia('ServiceReport/Show', compact('report'));
     }
 
-    public function edit(ServiceReport $serviceReport)
+    public function edit($encoded_report_id)
     {
-        //
+        // Decodificar el ID
+        $decoded_report = base64_decode($encoded_report_id);
+        $report = ServiceReport::findOrFail($decoded_report);
+        $products = Product::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'code', 'description']);
+
+        return inertia('ServiceReport/Edit', compact('report', 'products'));
     }
 
     public function update(Request $request, ServiceReport $serviceReport)
     {
-        //
+        $request->validate([
+            'service_date' => 'required',
+            'client_name' => 'required|string|max:255',
+            'client_department' => 'required|string|max:255',
+            'spare_parts' => 'nullable|array|min:1',
+            'technician_name' => 'required|string|max:255',
+            'receiver_name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+        ]);
+
+        $serviceReport->update($request->all());
+
+        return to_route('service-reports.index');
     }
 
     public function destroy(ServiceReport $serviceReport)

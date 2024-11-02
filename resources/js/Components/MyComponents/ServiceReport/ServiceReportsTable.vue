@@ -11,7 +11,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr @click="$inertia.visit(route('service-reports.show', encodeId(report.id)))"
+                <tr @click="openTemplate(report.id)"
                     v-for="(report, index) in reports" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">{{ 'RS-' + report.folio }}</td>
@@ -108,6 +108,10 @@ export default {
         reports: Array
     },
     methods: {
+        openTemplate(reportId) {
+            const url = route('service-reports.show', this.encodeId(reportId));
+            window.open(url, '_blank');
+        },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMM yyyy', { locale: es });
         },

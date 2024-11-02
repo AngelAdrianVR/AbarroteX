@@ -11,10 +11,10 @@
             <figure>
                 <img src="@/../../public/images/DMCompresoresLogo.png" alt="Logo de DM compresores">
             </figure>
-            <div class="self-center">
+            <div class="self-center text-sm">
                 <p class="flex items-center justify-between w-72">
                     <span>Orden de servicio:</span>
-                    <span>{{ String(report.folio).padStart(4, '0') }}</span>
+                    <span>No. {{ String(report.folio).padStart(4, '0') }}</span>
                 </p>
                 <p class="flex items-center justify-between">
                     <span>Fecha del servicio:</span>
@@ -24,7 +24,7 @@
         </div>
     </header>
     <main class="mt-3 mx-14 text-sm">
-        <section class="grid grid-cols-4 gap-x-3 gap-y-1">
+        <section class="grid grid-cols-4 gap-x-3 gap-y-px">
             <p class="text-[#373737]">Persona que solicito el servicio</p>
             <p class="col-span-3">{{ report.client_name }}</p>
             <p class="text-[#373737]">Departamento</p>
@@ -64,10 +64,10 @@
         </section>
         <h1 class="text-[#373737] font-bold col-span-full mt-6">Rreferencias de refacciones</h1>
         <section>
-            <table class="w-full table-fixed mt-2">
+            <table class="w-full table-fixed mt-2 text-xs">
                 <thead>
                     <tr
-                        class="*:px-3 *:py-1 *:text-start *:text-gray37 *:font-normal *:border *:border-grayD9 rounded-t-[10px] *:bg-grayF2">
+                        class="*:px-1 *:py-px *:text-start *:text-gray37 *:font-normal *:border *:border-grayD9 rounded-t-[10px] *:bg-grayF2">
                         <th class="w-[30%]">No. De Parte</th>
                         <th class="w-[50%]">Descripción</th>
                         <th class="w-[10%]">Cantidad</th>
@@ -75,7 +75,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="(item, index) in report.spare_parts" :key="index"
-                        class="*:px-3 *:py-1 *:text-start *:border *:border-grayD9">
+                        class="*:px-1 *:py-px *:text-start *:border *:border-grayD9">
                         <td class="w-[30%]">{{ item.name }} ({{ item.code ?? 'Sin No. de parte' }})</td>
                         <td class="w-[50%]">{{ item.description }}</td>
                         <td class="w-[10%]">{{ item.quantity }}</td>
@@ -84,7 +84,7 @@
             </table>
         </section>
         <h1 class="text-[#373737] font-bold col-span-full mt-6">Observaciones</h1>
-        <section class="grid grid-cols-4 gap-x-3 gap-y-1 mb-5">
+        <section class="grid grid-cols-4 gap-x-3 gap-y-px mb-5">
             <p class="text-[#373737]">Voltaje de placa</p>
             <p>{{ report.observations.plate_voltage }} {{ report.observations.plate_voltage ? 'V' : '' }}</p>
             <p class="text-[#373737]">Temperatura</p>
@@ -102,7 +102,7 @@
             <h1 class="text-[#373737] font-bold col-span-full mt-2">Registro del servicio</h1>
             <p class="text-[#373737]">Responsable del servicio</p>
             <p class="col-span-3">{{ report.technician_name ?? '-' }}</p>
-            <p class="text-[#373737]">Persona que recibio el servicio</p>
+            <p class="text-[#373737]">Servicio recibio por</p>
             <p class="col-span-3">{{ report.receiver_name ?? '-' }}</p>
         </section>
     </main>
