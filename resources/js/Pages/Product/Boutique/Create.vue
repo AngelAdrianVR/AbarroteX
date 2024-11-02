@@ -106,8 +106,8 @@
                                     </button>
                                 </div>
                                 <el-select v-model="item.color" placeholder="Selecciona un color">
-                                    <el-option v-for="(localColor, indexColor) in localColors" :key="indexColor" :label="localColor.name"
-                                        :value="localColor.color">
+                                    <el-option v-for="(localColor, indexColor) in localColors" :key="indexColor"
+                                        :label="localColor.name" :value="localColor.color">
                                         <div class="flex items-center">
                                             <el-tag :color="localColor.color" style="margin-right: 8px" size="small" />
                                             <span class="text-gray37">{{ localColor.name }}</span>
@@ -156,7 +156,8 @@
                                     <el-input v-model="size.current_stock" placeholder="Stock actual"
                                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                         :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                                    <InputError :message="form.errors[`colors.${index}.sizes.${index2}.current_stock`]" />
+                                    <InputError
+                                        :message="form.errors[`colors.${index}.sizes.${index2}.current_stock`]" />
                                 </div>
                                 <div v-if="form.has_inventory_control">
                                     <InputLabel value="Cantidad mínima" />
@@ -201,6 +202,24 @@
                         </template>
                     </el-input>
                     <InputError :message="form.errors.code" />
+                </div>
+                <div v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+                    class="mt-3">
+                    <div class="flex items-center w-[50%] lg:w-[30%]">
+                        <el-checkbox v-model="form.show_in_online_store" label="Mostrar en tienda en línea" />
+                        <el-tooltip placement="top">
+                            <template #content>
+                                <div>
+                                    <p>
+                                        Desactivar esta opción si no quieres que <br>
+                                        este produco se muestre en tu tienda en <br>
+                                        linea.
+                                    </p>
+                                </div>
+                            </template>
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
+                        </el-tooltip>
+                    </div>
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
@@ -267,7 +286,8 @@
                         </div>
                         <div class="w-[20%]" :class="index == 0 ? 'mt-6' : 'mt-1'">
                             <el-popconfirm v-if="colorForm.list.length > 1" confirm-button-text="Si"
-                                cancel-button-text="No" icon-color="#373737" :title="'¿Desea eliminar este color de la lista?'"
+                                cancel-button-text="No" icon-color="#373737"
+                                :title="'¿Desea eliminar este color de la lista?'"
                                 @confirm="colorForm.list.splice(index, 1)">
                                 <template #reference>
                                     <button type="button">
@@ -356,6 +376,7 @@ export default {
             category_id: null,
             imageCover: null,
             has_inventory_control: false,
+            show_in_online_store: true,
             colors: [
                 {
                     color: null,
@@ -420,7 +441,7 @@ export default {
         products_quantity: Number, // para validar los productos limite
         categories: Array,
         sizes: Array,
-        colors: Array,  
+        colors: Array,
     },
     computed: {
         getCategorySizes() {

@@ -4,7 +4,7 @@
             <Back :to="route('products.index')" />
 
             <form v-if="products_quantity < productsLimit" @submit.prevent="store"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-x-3">
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-3">
                 <h1 class="font-bold ml-2 col-span-full">Agregar producto</h1>
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Nombre del producto*" />
@@ -13,7 +13,7 @@
                     <InputError :message="form.errors.name" />
                 </div>
 
-                <div class="mt-3">
+                <div>
                     <div class="flex items-center justify-between">
                         <InputLabel value="Categoría" />
                         <button @click="showCategoryFormModal = true" type="button"
@@ -29,7 +29,7 @@
                     <InputError :message="form.errors.category_id" />
                 </div>
 
-                <div class="mt-3">
+                <div>
                     <div class="flex items-center justify-between">
                         <InputLabel value="Proveedor" />
                         <button @click="showBrandFormModal = true" type="button"
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="mt-3 col-span-full">
-                    <InputLabel value="Moneda*" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Moneda*" />
                     <el-select v-model="form.currency" placeholder="Moneda *" :fit-input-width="true" class="!w-1/2">
                         <el-option v-for="item in currencies" :key="item.value" :label="item.label" :value="item.label">
                             <span style="float: left">{{ item.label }}</span>
@@ -56,21 +56,23 @@
                 </div>
 
                 <div class="mt-3 col-span-full">
-                    <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Descripción del producto (opcional)" />
                     <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-                        placeholder="Escribe una descripción o características separadas por renglones" :maxlength="255" show-word-limit
-                        clearable />
+                        placeholder="Escribe una descripción o características separadas por renglones" :maxlength="255"
+                        show-word-limit clearable />
                     <InputError :message="form.errors.description" />
                 </div>
 
-                <div class="col-span-full my-3 flex items-center space-x-7 ml-3">
-                    <div class="flex items-center">
-                        <el-checkbox @change="form.measure_unit = null" v-model="form.bulk_product" label="Producto a granel" />
-                        <el-tooltip content="El producto se vende sin envase predefinido y se pesa según la cantidad deseada por el cliente." placement="top">
+                <div class="col-span-full flex items-center space-x-3">
+                    <div class="flex items-center w-[50%] lg:w-[30%]">
+                        <el-checkbox @change="form.measure_unit = null" v-model="form.bulk_product"
+                            label="Producto a granel" />
+                        <el-tooltip
+                            content="El producto se vende sin envase predefinido y se pesa según la cantidad deseada por el cliente."
+                            placement="top">
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
                         </el-tooltip>
                     </div>
-
                     <div v-if="form.bulk_product" class="flex items-center space-x-4">
                         <InputLabel value="Unidad de venta*" />
                         <el-radio-group v-model="form.measure_unit" size="small">
@@ -80,8 +82,46 @@
                         <InputError :message="form.errors.measure_unit" />
                     </div>
                 </div>
+                <div v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+                    class="col-span-full flex items-center space-x-3">
+                    <div class="flex items-center w-[50%] lg:w-[30%]">
+                        <el-checkbox @change="form.days_for_delivery = null" v-model="form.product_on_request"
+                            label="Producto bajo pedido" />
+                        <el-tooltip
+                            content="Selecciona esta opción si el producto es bajo pedido y requiere un tiempo de entrega adicional"
+                            placement="top">
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
+                        </el-tooltip>
+                    </div>
+                    <div v-if="form.product_on_request">
+                        <InputLabel value="Días hábiles para entrega*" />
+                        <el-input v-model="form.days_for_delivery"
+                            placeholder="ingresa cuanto tardas en entregar el producto"
+                            :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                            :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                        <InputError :message="form.errors.days_for_delivery" />
+                    </div>
+                </div>
+                <div v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+                    class="col-span-full">
+                    <div class="flex items-center w-[50%] lg:w-[30%]">
+                        <el-checkbox v-model="form.show_in_online_store" label="Mostrar en tienda en línea" />
+                        <el-tooltip placement="top">
+                            <template #content>
+                                <div>
+                                    <p>
+                                        Desactivar esta opción si no quieres que <br>
+                                        este produco se muestre en tu tienda en <br>
+                                        linea.
+                                    </p>
+                                </div>
+                            </template>
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
+                        </el-tooltip>
+                    </div>
+                </div>
 
-                <div v-if="canSeeCost" class="mt-3">
+                <div v-if="canSeeCost">
                     <div class="flex items-center">
                         <InputLabel value="Precio de compra" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
@@ -97,8 +137,8 @@
                     </el-input>
                     <InputError :message="form.errors.cost" />
                 </div>
-                <div class="mt-3">
-                    <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
+                <div>
+                    <InputLabel value="Precio de venta al público*" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                         :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
@@ -108,45 +148,27 @@
                     </el-input>
                     <InputError :message="form.errors.public_price" />
                 </div>
-
-                <div class="flex items-center col-span-full my-3">
-                    <el-checkbox @change="form.days_for_delivery = null" v-if="this.$page.props.auth.user.store.plan === 'Plan Intermedio'" v-model="form.product_on_request" label="Producto bajo pedido" />
-                    <el-tooltip content="Selecciona esta opción si el producto es bajo pedido y requiere un tiempo de entrega adicional" placement="top">
-                        <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
-                    </el-tooltip>
-                </div>
-
-                <div class="mt-3">
-                    <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
+                <div>
+                    <InputLabel value="Existencia actual" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                         :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
-
-                <div v-if="form.product_on_request" class="mt-3">
-                    <InputLabel value="Días hábiles para entrega*" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.days_for_delivery" placeholder="ingresa cuanto tardas en entregar el producto"
+                <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
+                <div>
+                    <InputLabel value="Cantidad mínima" />
+                    <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                         :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                    <InputError :message="form.errors.days_for_delivery" />
-                </div>
-
-                <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
-
-                <div class="mt-3">
-                    <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
-                    <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
-                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.min_stock" />
                 </div>
 
-                <div class="mt-3">
-                    <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
+                <div>
+                    <InputLabel value="Cantidad máxima" />
                     <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
-                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.max_stock" />
                 </div>
 
@@ -175,7 +197,8 @@
             </form>
             <div v-else class="text-center text-gray37">
                 <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
-                <p class="text-xl text-center">Has llegado al límite de productos ({{ productsLimit.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}) de tu plan contratado.</p>
+                <p class="text-xl text-center">Has llegado al límite de productos ({{
+                    productsLimit.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}) de tu plan contratado.</p>
                 <p class="text-xl text-center">
                     Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
                 </p>
@@ -263,6 +286,7 @@ export default {
             max_stock: null,
             imageCover: null,
             product_on_request: false, //producto bajo pedido
+            show_in_online_store: true,
             bulk_product: false, //producto a granel
             measure_unit: null, //en caso de ser a granel
             days_for_delivery: null, //dias hábiles para entregar producto bajo pedido

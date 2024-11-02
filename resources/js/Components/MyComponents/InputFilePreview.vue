@@ -1,7 +1,6 @@
 <template>
   <div class="inline">
-    <figure @click="triggerImageInput"
-      class="flex items-center justify-center rounded-md border border-grayD9 relative"
+    <figure @click="triggerImageInput" class="flex items-center justify-center rounded-md border border-grayD9 relative"
       :class="{
         'cursor-not-allowed': disabled,
         'cursor-pointer': !disabled,
@@ -11,7 +10,8 @@
       <i v-if="image && canDelete && !disabled" @click.stop="clearImage"
         class="fa-solid fa-xmark absolute p-1 top-1 right-1 z-10 text-sm"></i>
       <i v-if="!image" class="fa-solid fa-plus text-gray-400 text-xl"></i>
-      <img v-if="image" :src="image" :alt="alt" class="w-full h-full object-contain bg-no-repeat rounded-md opacity-50" />
+      <img v-if="image" :src="image" :alt="alt"
+        class="w-full h-full object-contain bg-no-repeat rounded-md opacity-50" />
       <input :disabled="disabled" ref="fileInput" type="file" @change="handleImageUpload" class="hidden" />
     </figure>
   </div>
@@ -68,7 +68,6 @@ export default {
         // Emitir evento al componente padre con la imagen
         this.$emit("imagen", file);
       }
-
     },
     clearImage() {
       this.image = null;
@@ -78,4 +77,3 @@ export default {
   },
 };
 </script>
-

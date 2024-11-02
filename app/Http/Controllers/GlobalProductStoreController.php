@@ -11,7 +11,6 @@ use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\ProductHistory;
-use App\Models\Sale;
 use Illuminate\Http\Request;
 
 class GlobalProductStoreController extends Controller
@@ -74,6 +73,7 @@ class GlobalProductStoreController extends Controller
             'cost' => 'nullable|numeric|min:0|max:9999',
             'description' => 'nullable|string|max:255',
             'current_stock' => 'required|numeric|min:0|max:9999',
+            'show_in_online_store' => 'boolean',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'nullable',
