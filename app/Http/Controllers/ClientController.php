@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-
     public function index()
     {
         $clients = Client::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);

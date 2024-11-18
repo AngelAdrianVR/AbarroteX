@@ -1,16 +1,16 @@
 <template>
     <Head :title="'COT-' + quote.folio" />
     
-    <div :class="printing ? 'w-full' : 'w-[900px]'" class="mx-auto h-screen overflow-hidden p-2 relative">
+    <div :class="printing ? 'w-full' : 'w-[900px]'" class="mx-auto min-h-screen p-2">
 
         <!-- Decoraciones -->
-        <section class="*:z-0">
-            <img class="absolute top-3 right-3" src="@/../../public/images/decoration_DM_quote_top.png" alt="">
-            <img class="absolute bottom-3 left-3" src="@/../../public/images/decoration_DM_quote_bottom.png" alt="">
+        <section v-if="!showEditIcon" class="print-decorations opacity-90">
+            <img class="decoration-top w-2" src="@/../../public/images/decoration_DM_quote_top.png" alt="">
+            <img class="decoration-bottom w-2" src="@/../../public/images/decoration_DM_quote_bottom.png" alt="">
         </section>
 
         <!-- Documento -->
-        <main class="mx-auto h-screen overflow-hidden p-2 z-10 absolute">
+        <main class="mx-auto min-h-screen p-2 z-10">
             <figure class="border-b border-grayD9 pb-2 flex justify-between">
                 <img class="w-64 self-start" src="@/../../public/images/DMcompresores_logo.png" alt="">
                 <PrimaryButton class="self-start !rounded-md" v-if="showEditIcon" @click="print">
@@ -37,9 +37,11 @@
 
             <div class="bg-[#EDEDED] px-2 py-1 font-bold flex items-center justify-between">
                 <p class="text-[#8F8E8E]">Teléfono de contacto:</p>
-                <p class="text-[#8F8E8E]">3337052368 Y 3319075562</p>
+                <p class="text-[#8F8E8E]">3319075562 {{ $page.props.auth.user.phone === '3319075562' ? '' 
+                    : $page.props.auth.user.phone != null ? 'y ' + $page.props.auth.user.phone 
+                    : '-' }}</p>
                 <p class="text-[#8F8E8E]">WhatsApp:</p>
-                <p class="text-[#8F8E8E]">3330581886</p>
+                <p class="text-[#8F8E8E]">{{ $page.props.auth.user.phone ?? '-' }}</p>
             </div>
 
             <p class="text-[#8F8E8E] font-bold mx-4">Dirección:</p>
@@ -60,7 +62,7 @@
                                 quote.client?.int_number + '. ' + quote.client?.town + ', ' + quote.client?.polity_state : '-' }}</span></p>
 
             <div class="bg-[#EDEDED] px-2 py-1">
-                <p class="text-[#8F8E8E] font-bold">Correo electrónico: <span class="ml-4">{{ quote.client.email ?? '-' }}</span></p>
+                <p class="text-[#8F8E8E] font-bold">Correo electrónico: <span class="ml-4">{{ quote.client?.email ?? '-' }}</span></p>
             </div>
 
             <!-- Tabla de productos -->
@@ -115,7 +117,7 @@
             <!-- SUBTOTAL -->
             <div class="*:px-4">
                 <p class="font-bold bg-[#AEAAAA] text-[#52433F]">Términos y condiciones</p>
-                <p class="font-bold bg-[#EDEDED] text-[#8C8489]">Fecha de expiración de cotización: <span class="ml-4">{{ formatShortDate(quote.expired_date) }}</span></p>
+                <p class="font-bold bg-[#EDEDED] text-[#8C8489]">Fecha de expiración de cotización: <span class="ml-4">{{ formatShortDate(quote.expired_date) ?? '-' }}</span></p>
                 <div class="font-bold  text-[#8C8489] flex">
                     <p class="flex w-[65%]">
                         <span>Condiciones de pago:</span> 
@@ -195,7 +197,9 @@ props:{
 },
 methods:{
     formatShortDate(dateString) {
-        return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+        if (dateString) {
+            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+        }
     },
     formatLongDate(dateString) {
         const date = parseISO(dateString);
@@ -283,3 +287,46 @@ beforeDestroy() {
 }
 }
 </script>
+
+<style>
+    @media print {
+        /* Asegura que el contenido fluya entre las páginas */
+        main {
+            position: static;
+            overflow: visible;
+            page-break-after: avoid; /* Evita saltos innecesarios */
+            width: 900px; /* Ajusta según el tamaño de tu imagen */
+        }
+
+        /* Repite las decoraciones en cada página */
+        .print-decorations {
+            position: relative;
+            z-index: -1; /* Asegura que las decoraciones estén detrás */
+        }
+
+        .decoration-top {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100px; /* Ajusta según el tamaño de tu imagen */
+            z-index: -1; /* Asegura que las decoraciones estén detrás */
+        }
+
+        .decoration-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100px; /* Ajusta según el tamaño de tu imagen */
+        }
+
+        /* Opcional: Oculta decoraciones o elementos no relevantes fuera del contexto de impresión */
+        @page {
+            size: auto; /* Deja que el navegador ajuste el tamaño de página según el contenido */
+            margin: 10mm; /* Ajusta el margen de impresión */
+        }
+    }
+
+    /* table, section {
+        page-break-inside: avoid;
+    } */
+</style>

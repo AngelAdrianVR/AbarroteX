@@ -183,7 +183,7 @@
                             </g>
                         </svg>
                     </div>
-                    <p>{{ $page.props.auth.user.email }}</p>
+                    <p>{{ $page.props.auth?.user?.email }}</p>
                 </div>
             </section>
 

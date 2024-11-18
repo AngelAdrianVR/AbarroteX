@@ -39,9 +39,11 @@
             <!-- tabs options -->
             <el-tabs v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane label="Pedidos" name="1">
+                    <!-- Index de pedidos -->
                     <OnlineOrders :orders="online_orders" :totalOnlineOrders="total_online_orders" :clients="clients" />
                 </el-tab-pane>
                 <el-tab-pane label="Ajustes generales" name="2">
+                    <!-- Configuraciones de tienda en linea -->
                     <OnlineStore :banners="banners" :logo="logo" :cash_registers="cash_registers" />
                 </el-tab-pane>
             </el-tabs>

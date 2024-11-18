@@ -9,6 +9,8 @@ import imageCarousel1 from '@/../../public/images/landing-02.png';
 import imageCarousel2 from '@/../../public/images/landing-02-2.png';
 import imageCarousel3 from '@/../../public/images/landing-02-3.png';
 import imageCarousel4 from '@/../../public/images/landing-02-4.png';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 defineProps({
     canLogin: Boolean,
@@ -40,6 +42,7 @@ const whatsappLink = computed(() => {
 });
 
 onMounted(() => {
+    AOS.init();
     updateCarouselHeight();
     window.addEventListener('resize', updateCarouselHeight);
 });
@@ -104,7 +107,7 @@ const imageSets = ref([
     <Head title="Ezy Ventas" />
 
     <nav class="bg-black1">
-        <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
+        <div class="max-w-8xl mx-auto px-4 md:px-7 py-3" data-aos="zoom-in" data-aos-duration="800">
             <div class="flex justify-between items-center h-12 bg-white rounded-full px-4">
                 <div class="flex">
                     <!-- Logo -->
@@ -125,14 +128,14 @@ const imageSets = ref([
         </div>
     </nav>
 
-    <main class="bg-black1 selection:bg-primary selection:text-white pb-24">
+    <main class="bg-black1 selection:bg-primary selection:text-white pb-24 overflow-hidden">
         <section class="lg:flex justify-center">
             <div class="pt-8 lg:mt-10 px-3 mx-2 xl:w-4/5">
                 <!-- Carousel -->
                 <div class="block text-center">
                 </div>
-                <figure class="flex flex-col lg:flex-row lg:justify-between xl:space-x-20 lg:w-full">
-                    <img class="lg:w-1/2 object-contain" src="@/../../public/images/landing-01.png" alt="landing_page">
+                <figure class="flex flex-col lg:flex-row lg:justify-between xl:space-x-20 lg:w-full" data-aos="zoom-in-up" data-aos-duration="800">
+                    <img class="lg:w-1/2 object-contain" src="@/../../public/images/landing-01.png" alt="landing_page" data-aos="zoom-in-down" data-aos-duration="800">
                     <div class="lg:w-1/2 mt-5 lg:mt-0 p-4">
                         <el-carousel trigger="click" :height="carouselHeight">
                             <el-carousel-item v-for="(imageSet, index) in imageSets" :key="index">
@@ -154,14 +157,13 @@ const imageSets = ref([
 
         <!-- funcionalidades -->
         <section class="my-12">
-            <h1 class="text-3xl text-center font-bold text-white">FUNCIONALIDAD DE LOS MÓDULOS</h1>
+            <h1 class="text-3xl text-center font-bold text-white" data-aos="fade-up" data-aos-duration="500" data-aos-offset="100">FUNCIONALIDAD DE LOS MÓDULOS</h1>
 
             <article class="my-7">
                 <!-- CONOCE TUS GANANCIAS AL INSTANTE -->
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
-                    <div class="lg:w-1/2">
+                    <div class="lg:w-1/2" data-aos="fade-right" data-aos-duration="500" data-aos-offset="400">
                         <h2 class="text-2xl text-center text-white">CONOCE TUS GANANCIAS AL INSTANTE</h2>
-
                         <!-- texto -->
                         <section>
                             <div class="mt-7 flex space-x-5 pl-5">
@@ -181,7 +183,6 @@ const imageSets = ref([
                                 <p class="text-white text-lg w-[450px]">Representación visual de ingresos, gastos y
                                     ganancias lo que facilita la situación financiera del negocio.</p>
                             </div>
-
                             <div class="mt-4 flex space-x-5 pl-5">
                                 <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -198,7 +199,6 @@ const imageSets = ref([
                                 </svg>
                                 <p class="text-white text-lg w-[450px]">Comparación en diferentes períodos.</p>
                             </div>
-
                             <div class="mt-4 flex space-x-5 pl-5">
                                 <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -218,9 +218,8 @@ const imageSets = ref([
                             </div>
                         </section>
                     </div>
-
                     <!-- imagen -->
-                    <figure class="lg:w-1/2">
+                    <figure class="lg:w-1/2" data-aos="fade-left" data-aos-duration="800" data-aos-offset="400">
                         <img class="w-full" src="@/../../public/images/function_1.png" alt="ganancias">
                     </figure>
                 </div>
@@ -230,11 +229,11 @@ const imageSets = ref([
             <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
                     <!-- imagen -->
-                    <figure class="lg:w-1/2 pl-5">
+                    <figure class="lg:w-1/2 pl-5" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400" data-aos-offset="400">
                         <img class="w-full" src="@/../../public/images/function_2.png" alt="ganancias">
                     </figure>
 
-                    <div class="lg:w-1/2">
+                    <div class="lg:w-1/2" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400" data-aos-offset="400">
                         <h2 class="text-2xl text-center text-white">GESTIONA TU INVENTARIO</h2>
 
                         <!-- texto -->
@@ -309,17 +308,14 @@ const imageSets = ref([
                             </div>
                         </section>
                     </div>
-
                 </div>
-
             </article>
 
             <!-- CORTES DE CAJA -->
             <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
-                    <div class="lg:w-1/2">
+                    <div class="lg:w-1/2" data-aos="fade-right" data-aos-duration="500" data-aos-delay="400" data-aos-offset="400">
                         <h2 class="text-2xl text-center text-white">CORTES DE CAJA</h2>
-
                         <!-- texto -->
                         <section>
                             <div class="mt-7 flex space-x-5 pl-5">
@@ -375,12 +371,10 @@ const imageSets = ref([
                             </div>
                         </section>
                     </div>
-
                     <!-- imagen -->
-                    <figure class="lg:w-1/2 pl-5">
+                    <figure class="lg:w-1/2 pl-5" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400" data-aos-offset="400">
                         <img class="w-full" src="@/../../public/images/function_3.png" alt="ganancias">
                     </figure>
-
                 </div>
             </article>
 
@@ -388,13 +382,12 @@ const imageSets = ref([
             <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
                     <!-- imagen -->
-                    <figure class="lg:w-1/2 pl-12">
+                    <figure class="lg:w-1/2 pl-12" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400" data-aos-offset="400">
                         <img class="w-2/3 mx-auto" src="@/../../public/images/function_4.png" alt="ganancias">
                     </figure>
 
-                    <div class="lg:w-1/2 mt-5">
+                    <div class="lg:w-1/2 mt-5" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400" data-aos-offset="400">
                         <h2 class="text-2xl text-center text-white">¿POR QUÉ ELEGIR EZY VENTAS?</h2>
-
                         <!-- texto -->
                         <section>
                             <div class="mt-7 flex space-x-5 pl-5">

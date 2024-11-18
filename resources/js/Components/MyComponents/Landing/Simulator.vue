@@ -21,7 +21,7 @@
           <p>Módulos esenciales</p>
           <p class="text-gray99 text-sm mt-1">
             Los siguientes módulos están diseñados para cubrir las necesidades
-            esenciales de cualquier sistema de punto de venta y estan ya incluidos en el pago de $199.00
+            esenciales de cualquier sistema de punto de venta y estan ya incluidos en el pago de $229.00
           </p>
 
           <ul class="mt-5 *:flex *:items-center *:space-x-2 space-y-1">
@@ -212,10 +212,7 @@
           </div>
 
           <p class="text-gray99 text-xs mt-3">
-            Tu suscripción se renovará automáticamente cada año por
-            ${{ period === 'Mensual' ? calculateTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              : (calculateTotal * 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }} MXN.
-            Puedes cancelarla cuando quieras desde la página de ajustes de la suscripción.
+            Puedes cancelar tu suscripción cuando quieras desde la página de ajustes de la suscripción.
             Al realizar el pago aceptas nuestros
             <a target="_blank" :href="route('terms.show')" class="underline focus:outline-none text-primary font-thin">
               Términos y Condiciones
