@@ -289,6 +289,7 @@ import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DangerButton from "@/Components/DangerButton.vue";
 import ProductInput from "@/Components/MyComponents/ProductInput.vue";
+import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
@@ -344,6 +345,7 @@ export default {
         DangerButton,
         ProductInput,
         InputLabel,
+        InputError,
         Modal,
         Back
     },
