@@ -194,5 +194,9 @@ return [
         'tax_regime' => 'regimen fiscal',
         'measure_unit' => 'unidad de venta',
         'days_for_delivery' => 'días hábiles para entrega',
+        'client_name' => 'nombre de cliente',
+        'client_department' => 'departamento',
+        'technician_name' => 'responsable',
+        'receiver_name' => 'persona que recibe',
     ],
 ];

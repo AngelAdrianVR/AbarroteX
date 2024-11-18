@@ -49,6 +49,7 @@ class ProductBoutiqueController extends Controller
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
+            'show_in_online_store' => 'boolean',
             'category_id' => 'required|numeric|min:1',
             'brand_id' => 'nullable',
             'colors' => 'required|array|min:1',
@@ -179,6 +180,7 @@ class ProductBoutiqueController extends Controller
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
+            'show_in_online_store' => 'boolean',
             'category_id' => 'required|numeric|min:1',
             'brand_id' => 'nullable',
             'colors' => 'required|array|min:1',
@@ -266,6 +268,11 @@ class ProductBoutiqueController extends Controller
                         $new_size['max_stock'] = null;
                     }
 
+                    // borrar imagene si se elimino desde el formulario
+                    if ($request->imageCoverCleared) {
+                        $existingProduct->clearMediaCollection('imageCover');
+                    }
+
                     // Actualizar producto existente
                     $existingProduct->update($validated + [
                         'additional' => $additional,
@@ -325,6 +332,7 @@ class ProductBoutiqueController extends Controller
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
+            'show_in_online_store' => 'boolean',
             'category_id' => 'required|numeric|min:1',
             'brand_id' => 'nullable',
             'colors' => 'required|array|min:1',
@@ -480,155 +488,6 @@ class ProductBoutiqueController extends Controller
 
         return to_route('boutique-products.show', $encoded_product_id);
     }
-
-    // public function updateWithMedia(Request $request, $product)
-    // {
-    //     $store_id = auth()->user()->store_id;
-
-    //     // obtener el nombre original de los productos que fueron editados
-    //     $productName = Product::findOrFail($product)?->name;
-
-    //     $validated = $request->validate([
-    //         'name' => 'required|string|max:100',
-    //         'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $productName)],
-    //         'public_price' => 'required|numeric|min:0|max:999999',
-    //         'cost' => 'nullable|numeric|min:0|max:999999',
-    //         'currency' => 'required|string',
-    //         'description' => 'nullable|string|max:255',
-    //         'has_inventory_control' => 'boolean',
-    //         'category_id' => 'required|numeric|min:1',
-    //         'brand_id' => 'nullable',
-    //         'sizes' => 'nullable|array|min:1',
-    //         'sizes.*.id' => 'nullable',
-    //         'sizes.*.size_id' => 'required|numeric|min:1',
-    //         'sizes.*.current_stock' => 'required|numeric|min:0',
-    //         'sizes.*.min_stock' => 'nullable|numeric|min:0',
-    //         'sizes.*.max_stock' => 'nullable|numeric|min:0',
-    //     ], [
-    //         'sizes.*.size_id.required' => 'obligatorio.',
-    //         'sizes.*.current_stock.required' => 'obligatorio.',
-    //         'sizes.*.current_stock.numeric' => 'Este campo debe ser un número.',
-    //         'sizes.*.current_stock.min' => 'Este campo debe ser positivo.',
-    //         'sizes.*.current_stock.max' => 'Este campo debe ser máximo 999,999.99',
-    //         'sizes.*.min_stock.min' => 'Este campo debe ser positivo',
-    //         'sizes.*.max_stock.min' => 'Este campo debe ser positivo',
-    //     ]);
-
-    //     $mediaItem = null;
-
-    //     // Obtener los IDs de las tallas enviadas en la solicitud
-    //     $updatedSizes = collect($request->input('sizes', []))->pluck('id')->toArray();
-
-    //     // Obtener los productos actuales por nombre
-    //     $existingProducts = Product::where('name', $productName)
-    //         ->where('store_id', $store_id)
-    //         ->get();
-
-    //     $lastConsecutive = 0;
-    //     if ($existingProducts->isNotEmpty()) {
-    //         // Obtener el código del último registro
-    //         $lastCode = $existingProducts->last()->code;
-
-    //         // Usar preg_match para obtener el consecutivo
-    //         if (preg_match('/-(\d+)$/', $lastCode, $matches)) {
-    //             $lastConsecutive = (int)$matches[1] + 1;
-    //         }
-
-    //         // obtener el codigo base del codigo existente (antes de la edicion)
-    //         $firstCode = $existingProducts->first()->code;
-    //         $existingBaseCode = substr($firstCode, 0, strrpos($firstCode, '-'));
-    //     }
-
-    //     // Eliminar productos que no están en la solicitud
-    //     $existingProducts->whereNotIn('id', $updatedSizes)->each(function ($product) {
-    //         $product->delete();
-    //     });
-
-    //     // Actualizar o crear productos por talla registrada
-    //     foreach ($validated['sizes'] as $key => $productData) {
-    //         // si el registro de talla está vacío, saltar
-    //         if (!$productData['size_id']) continue;
-
-    //         // forzar default de 1 en stock
-    //         $productData['current_stock'] = $productData['current_stock'] ?? 1;
-
-    //         $size = Size::where('id', $productData['size_id'])->first()->toArray();
-
-    //         $existingProduct = $existingProducts->where('id', $productData['id'])->first();
-
-    //         if ($existingProduct) {
-    //             // cambiar codigo unico
-    //             if ($validated['code']) {
-    //                 if ($existingBaseCode == $validated['code']) {
-    //                     // Crear código único para talla actual desde el utimo consecutivo
-    //                     $validated['code'] = $existingProduct->code;
-    //                 } else {
-    //                     // Crear codigo unico para talla actual
-    //                     $validated['code'] = $validated['code'] . "-$key";
-    //                 }
-    //             }
-    //             // Actualizar producto existente
-    //             $existingProduct->update($validated + [
-    //                 'additional' => $size,
-    //                 'current_stock' => $productData['current_stock'],
-    //                 'min_stock' => $productData['min_stock'],
-    //                 'max_stock' => $productData['max_stock'],
-    //             ]);
-    //             $new_product = $existingProduct;
-    //         } else {
-    //             if ($validated['code']) {
-    //                 if ($existingBaseCode == $validated['code']) {
-    //                     // Crear código único para talla actual desde el utimo consecutivo
-    //                     $validated['code'] = $validated['code'] . "-$lastConsecutive";
-    //                     // aumentar consecutivo
-    //                     $lastConsecutive++;
-    //                 } else {
-    //                     // Crear codigo unico para talla actual
-    //                     $validated['code'] = $validated['code'] . "-$key";
-    //                 }
-    //             }
-    //             // Crear nuevo producto
-    //             $new_product = Product::create($validated + [
-    //                 'store_id' => $store_id,
-    //                 'additional' => $size,
-    //                 'current_stock' => $productData['current_stock'],
-    //                 'min_stock' => $productData['min_stock'],
-    //                 'max_stock' => $productData['max_stock'],
-    //             ]);
-    //         }
-    //         // resetear a código base
-    //         $validated['code'] = $request->code;
-
-    //         // primer producto registrado
-    //         if ($key == 0) {
-    //             // codifica el id del producto
-    //             $encoded_product_id = base64_encode($new_product->id);
-
-    //             // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
-    //             if ($request->hasFile('imageCover')) {
-    //                 $new_product->clearMediaCollection('imageCover');
-    //                 $mediaItem = $new_product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
-    //                 // Ruta del archivo guardado
-    //                 $path = $mediaItem->getPath();
-
-    //                 // Verificar el tamaño del archivo y si estamos en entorno de producción
-    //                 if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
-    //                     // Comprimir la imagen directamente en su ubicación original si supera los 600KB
-    //                     $this->tinifyService->optimizeImage($path);
-    //                 } else {
-    //                     // comprimir de otra forma  
-    //                 }
-    //             }
-    //         } else {
-    //             // Copiar el medio al nuevo producto registrado
-    //             if ($mediaItem) {
-    //                 $new_product->copyMedia($mediaItem->getPath())->usingName($mediaItem->name)->toMediaCollection('imageCover');
-    //             }
-    //         }
-    //     }
-
-    //     return to_route('boutique-products.show', $encoded_product_id);
-    // }
 
     public function destroy($product)
     {

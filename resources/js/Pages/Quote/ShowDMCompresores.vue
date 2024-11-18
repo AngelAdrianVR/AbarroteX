@@ -41,7 +41,7 @@
                     : $page.props.auth.user.phone != null ? 'y ' + $page.props.auth.user.phone 
                     : '-' }}</p>
                 <p class="text-[#8F8E8E]">WhatsApp:</p>
-                <p class="text-[#8F8E8E]">{{ $page.props.auth.user.phone }}</p>
+                <p class="text-[#8F8E8E]">{{ $page.props.auth.user.phone ?? '-' }}</p>
             </div>
 
             <p class="text-[#8F8E8E] font-bold mx-4">Dirección:</p>

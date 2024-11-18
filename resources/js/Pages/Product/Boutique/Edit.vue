@@ -195,7 +195,6 @@
                         @cleared="form.imageCover = null; form.imageCoverCleared = true"
                         :imageUrl="products[0].media[0]?.original_url" />
                 </div>
-
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Código del producto (en caso de tener)" />
                     <el-input v-model="form.code" placeholder="Ej. RM-4332" :maxlength="100" clearable>
@@ -205,7 +204,24 @@
                     </el-input>
                     <InputError :message="form.errors.code" />
                 </div>
-
+                <div v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+                    class="mt-3">
+                    <div class="flex items-center w-[50%] lg:w-[30%]">
+                        <el-checkbox v-model="form.show_in_online_store" label="Mostrar en tienda en línea" />
+                        <el-tooltip placement="top">
+                            <template #content>
+                                <div>
+                                    <p>
+                                        Desactivar esta opción si no quieres que <br>
+                                        este produco se muestre en tu tienda en <br>
+                                        linea.
+                                    </p>
+                                </div>
+                            </template>
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
+                        </el-tooltip>
+                    </div>
+                </div>
                 <div class="col-span-2 text-right mt-3">
                     <PrimaryButton class="!rounded-full" :disabled="form.processing">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -345,6 +361,8 @@ export default {
             description: this.products[0]?.description,
             category_id: this.products[0]?.category_id,
             imageCover: null,
+            imageCoverCleared: false,
+            show_in_online_store: !!this.products[0].show_in_online_store,
             has_inventory_control: Boolean(this.products[0]?.has_inventory_control),
             colors: [],
         });
@@ -466,6 +484,7 @@ export default {
         },
         saveImage(image) {
             this.form.imageCover = image;
+            this.imageChanged = true;
         },
         getBaseCode() {
             if (!this.products[0].code) {
