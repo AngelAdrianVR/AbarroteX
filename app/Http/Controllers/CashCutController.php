@@ -130,7 +130,7 @@ class CashCutController extends Controller
                 ->where('created_at', '>', $last_cash_cut->created_at)
                 ->get();
             //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] == $cash_register_id) {
+            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === $cash_register_id) {
 
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
                     ->whereIn('status', ['Entregado', 'Reembolsado'])
@@ -139,7 +139,7 @@ class CashCutController extends Controller
             }
         } else {
             //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] == $cash_register_id) {
+            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === $cash_register_id) {
 
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
                     ->whereIn('status', ['Entregado', 'Reembolsado'])
