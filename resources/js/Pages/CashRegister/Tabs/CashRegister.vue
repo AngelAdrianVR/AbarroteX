@@ -38,7 +38,7 @@
         </el-popconfirm>
         <el-dropdown v-if="canRegisterMovements" :disabled="!cash_register.is_active" split-button type="primary"
           @click="handleCashCut">
-          Hacer cortre de caja
+          Hacer corte de caja
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
