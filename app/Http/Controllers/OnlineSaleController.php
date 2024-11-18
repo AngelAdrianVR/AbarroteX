@@ -103,19 +103,13 @@ class OnlineSaleController extends Controller
             'store_inventory' => 'boolean',
         ]);
 
-        //si se descomenta no guarda los productos pedidos a la base de datos ------
-        // $validated['products'] = array_filter($request->products, function ($product) {
-        //     foreach ($product as $key => $value) {
-        //         if (is_null($value)) {
-        //             return false;
-        //         }
-        //     }
-        //     return true;
-        // });
+        //eliminar productos vacios de la lista
+        $validated['products'] = array_filter($request->products, function ($product) {
+            return $product['product_id'];
+        });
         
-        //lo comenté porque me daba error, ya que validate['products'] esta vacío.------
-        // $this->checkProductStock($validated['products'], $request->store_inventory);
-        // $this->updateProductStock($validated['products'], $request->store_inventory);
+        $this->checkProductStock($validated['products'], $request->store_inventory);
+        $this->updateProductStock($validated['products'], $request->store_inventory);
 
         $new_online_sale = OnlineSale::create($validated);
         $encoded_store_id = base64_encode($request->store_id);
