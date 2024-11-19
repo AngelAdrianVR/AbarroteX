@@ -601,15 +601,18 @@ class OnlineSaleController extends Controller
 
     private function updateProductStock(array $products, $storeInventory)
     {
-        // if ($storeInventory === true) {
         foreach ($products as $product) {
-            //revisa que no sea producto bajo pedido para no rebajarlo del stock
-            if (!$product['product_on_request']) {
-                $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
-                $temp_product->current_stock -= $product['quantity'];
-                $temp_product->save();
+            // Verifica si 'product_on_request' está definido y su valor es falso
+            if (!($product['product_on_request'] ?? false)) {
+                $temp_product = $product['isLocal'] 
+                    ? Product::find($product['product_id']) 
+                    : GlobalProductStore::find($product['product_id']);
+                    
+                if ($temp_product) {
+                    $temp_product->current_stock -= $product['quantity'];
+                    $temp_product->save();
+                }
             }
         }
-        // }
     }
 }
