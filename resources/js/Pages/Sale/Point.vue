@@ -68,7 +68,7 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="px-1 lg:px-6 py-2 h-[93vh]">
+    <main class="pt-2 h-[94vh]">
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[65%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
@@ -449,12 +449,12 @@
         </div>
         <!-- lista de productos -->
       </section>
-      <section class="border rounded-[10px] border-[#D9D9D9] shadow-md bg-[#FAFAFA]"
+      <section class="border rounded-t-[20px] border-[#D9D9D9] shadow-md bg-[#232323]"
         :class="showNoCodeProducts ? 'h-[35%]' : 'h-[6%]'">
-        <div class="mt-2 mx-4">
+        <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
-            class="flex items-center justify-between text-xs text-primary w-full">
-            <h1 class="text-sm font-bold text-gray37">Selección rápida para productos sin código</h1>
+            class="flex items-center justify-between text-xs text-primary w-full pt-3">
+            <h1 class="text-sm font-bold text-gray9A">Selección rápida para productos sin código</h1>
             <p class="flex items-center space-x-2">
               <span>{{ showNoCodeProducts ? 'Ocultar' : 'Mostrar' }}</span>
               <i class="fa-solid" :class="showNoCodeProducts ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
@@ -471,7 +471,7 @@
           </el-skeleton>
           <div v-show="showNoCodeProducts" class="grid grid-cols-5 md:grid-cols-7 gap-2">
             <button @click="addSaleProduct(item)" type="button" v-for="(item, index) in noCodeProducts" :key="index"
-              class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-gray-300">
+              class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-grayF2 rounded-md">
               <h2 class="text-xs text-center">{{ item.name }}</h2>
               <figure class="flex items-center justify-center h-14">
                 <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="object-contain h-14 mx-auto">
