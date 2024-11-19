@@ -16,7 +16,7 @@
                 <tr @click="handleShow(encodeId(rent.id))" v-for="(rent, index) in rentals" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">
-                        {{ 'R-' + rent.folio }}
+                        {{ 'R-' + String(rent.folio).padStart(4, '0') }}
                     </td>
                     <td>{{ rent.client.name }}</td>
                     <td>{{ rent.product.name }}</td>

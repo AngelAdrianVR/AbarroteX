@@ -4,7 +4,7 @@
             <div class="flex justify-between items-center">
                 <Back :to="route('sales.index')" />
             </div>
-            <section class="flex justify-around mx-auto mt-2 w-1/2 lg:w-1/3 xl:w-1/6">
+            <section class="flex justify-around mx-auto mt-2 w-1/2 lg:w-1/3 xl:w-1/4">
                 <button @click="SeePrevDaySales()" type="button"
                     class="text-primary text-[10px] disabled:text-grayD9 disabled:cursor-not-allowed"
                     :disabled="changingDay || !previous_sale_date">

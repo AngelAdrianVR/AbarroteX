@@ -19,7 +19,7 @@
                             <i class="mr-1"
                             :class="getStatusIcont(quote.status)"></i>
                         </el-tooltip>
-                        {{ 'C-' + quote.folio }}
+                        {{ 'C-' + String(quote.folio).padStart(4, '0') }}
                     </td>
                     <td>{{ formatDate(quote.created_at) }}</td>
                     <td>{{ quote.contact_name }}</td>

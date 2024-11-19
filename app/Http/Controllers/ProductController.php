@@ -462,8 +462,8 @@ class ProductController extends Controller
             $sheet->setCellValue('E' . $row, $product->min_stock);
             $sheet->setCellValue('F' . $row, $product->max_stock);
             $sheet->setCellValue('G' . $row, $product->current_stock);
-            $sheet->setCellValue('H' . $row, $product->category->name);
-            $sheet->setCellValue('I' . $row, $product->brand->name);
+            $sheet->setCellValue('H' . $row, $product->category?->name);
+            $sheet->setCellValue('I' . $row, $product->brand?->name);
             $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY'));
             $row++;
         }
