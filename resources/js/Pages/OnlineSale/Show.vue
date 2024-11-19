@@ -34,22 +34,22 @@
 
             <article class="my-7">
                 <div class="grid grid-cols-2 gap-1 md:w-1/2 text-sm">
-                    <p>Número de pedido:</p>
+                    <p class="text-gray-500">Número de pedido:</p>
                     <p>{{ online_sale.id }}</p>
-                    <p>Fecha:</p>
+                    <p class="text-gray-500">Fecha:</p>
                     <p>{{ formatDate(online_sale.created_at) }}</p>
-                    <p>Cliente:</p>
+                    <p class="text-gray-500">Cliente:</p>
                     <p>{{ online_sale.name }}</p>
-                    <p>Teléfono:</p>
+                    <p class="text-gray-500">Teléfono:</p>
                     <p>{{ online_sale.phone }}</p>
-                    <p>Método de pago:</p>
+                    <p class="text-gray-500">Método de pago:</p>
                     <p>{{ online_sale.payment_method }}</p>
-                    <p>Dirección:</p>
+                    <p class="text-gray-500">Dirección:</p>
                     <p>{{ online_sale.suburb }}, {{ online_sale.street }} {{ online_sale.int_number ? '. Int: ' +
                         online_sale.int_number : null }} {{ online_sale.ext_number ? ', Ext: ' + online_sale.ext_number
                             : null }}
                     </p>
-                    <p>Referencias</p>
+                    <p class="text-gray-500">Referencias</p>
                     <p>{{ online_sale.address_references ?? '--' }}</p>
                     <div class="col-span-full border-t mt-3"></div>
                     <p class="font-bold mt-3">Subtotal:</p>
