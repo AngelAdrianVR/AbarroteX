@@ -24,6 +24,7 @@ import OnlineProductCard from '@/Components/MyComponents/OnlineSale/OnlineProduc
 export default {
 data() {
     return {
+        loading: false,
     };
 },
 components:{

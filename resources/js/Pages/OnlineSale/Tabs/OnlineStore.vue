@@ -273,6 +273,7 @@
 <script>
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputError from "@/Components/InputError.vue";
 import { useForm } from "@inertiajs/vue3";
 
 export default {
@@ -320,7 +321,8 @@ export default {
   },
   components: {
     InputFilePreview,
-    PrimaryButton
+    PrimaryButton,
+    InputError,
   },
   props: {
     cash_registers: Array,
