@@ -14,7 +14,7 @@
                 <tr @click="openTemplate(report.id)"
                     v-for="(report, index) in reports" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
-                    <td class="rounded-s-full">{{ 'RS-' + report.folio }}</td>
+                    <td class="rounded-s-full">{{ 'RS-' + String(report.folio).padStart(4, '0') }}</td>
                     <td>{{ formatDate(report.service_date) }}</td>
                     <td>{{ report.technician_name ?? 'No especificado' }}</td>
                     <td>{{ report.client_name ?? 'No especificado' }}</td>

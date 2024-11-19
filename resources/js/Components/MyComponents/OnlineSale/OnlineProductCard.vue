@@ -1,31 +1,31 @@
 <template>
-    <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col h-[400px] hover:border-primary relative group">
+    <div class="py-3 px-5 rounded-3xl border-2 border-gray-100 flex flex-col h-[400px] hover:shadow-2xl relative group transition-all ease-linear duration-200">
         <!-- Deatalle de cantidad disponible  -->
         <div v-if="store?.online_store_properties?.inventory"
-            class="absolute top-0 left-0 w-full bg-black opacity-70 rounded-t-lg lg:hidden lg:group-hover:block py-1">
+            class="absolute -top-2 left-0 w-full bg-black rounded-t-lg opacity-0 group-hover:opacity-60 group-hover:translate-y-2 transition-all duration-500 ease-out lg:group-hover:block py-1">
             <p class="text-white text-center opacity-100">{{ product.current_stock ?? '0' }} {{ product.bulk_product ? product.measure_unit + '(s)' : 'unidades' }} disponibles</p>
             <p v-if="product.product_on_request" class="text-white text-center opacity-100">Este producto se surte bajo pedido ({{ product.days_for_delivery }} días hábiles)</p>
         </div>
         <!-- Imagen -->
-        <figure class="h-1/2 text-center">
+        <figure class="h-1/2 text-center rounded-xl bg-[#f9f9f9] flex items-center justify-center">
             <Link
                 :href="product.global_product_id ? route('online-sales.show-global-product', product.id) : route('online-sales.show-local-product', product.id)">
             <img v-if="product.global_product_id ? product.global_product.media?.length : product.media?.length"
                 :src="product.global_product_id ? product.global_product.media[0]?.original_url : product.media[0]?.original_url"
                 alt="producto" class="h-full mx-auto">
             <div v-else>
-                <i class="fa-regular fa-image text-9xl text-gray-200"></i>
+                <i class="fa-regular fa-image text-7xl text-gray-200"></i>
                 <p class="text-sm text-gray-300">Imagen no disponible</p>
             </div>
             </Link>
         </figure>
 
         <!-- Detalles -->
-        <div class="text-center mt-2 flex flex-col justify-center items-center h-1/2">
-        <div class="h-12">
-            <h1>{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
-            <span class="text-gray99">{{ product.currency === '$USD' ? 'USD' : 'MXN' }}</span>
-        </div>
+        <div class="text-left ml-3 mt-2 flex flex-col justify-center h-1/2">
+            <div class="h-12">
+                <h1 class="font-bold text-gray-700">{{ product.global_product_id ? product.global_product.name : product.name }}</h1>
+                <span class="text-gray99">{{ product.currency === '$USD' ? 'USD' : 'MXN' }}</span>
+            </div>
             
             <div class="flex items-center space-x-1">
                 <p class="text-2xl font-bold my-3">
@@ -35,28 +35,62 @@
                 </p>
             </div>
             <!-- Si es bajo pedido -->
-            <div class="flex flex-col items-center" v-if="product.product_on_request">
-                <el-input-number v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
+            <div class="flex justify-between items-center" v-if="!product.product_on_request">
+                <el-input-number v-model="quantity" size="small" :min="1" :max="999" :precision="2" />
 
-                <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
+                <div v-if="alreadyInCart" class="text-green-400 size-9 flex items-center justify-center rounded-full border border-green-400 bg-[#D9FECF]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                </div>
 
-                <PrimaryButton v-else @click="addToCart" class="!px-9 !py-1 !active:scale-75">Agregar al carrito</PrimaryButton>
+                <div v-else class="flex items-center space-x-3">
+                    <p v-if="store?.online_store_properties?.inventory && product.current_stock < 1" class="text-sm text-gray-700">Agotado</p>
+                    <button :disabled="store?.online_store_properties?.inventory && product.current_stock < 1"
+                        @click="addToCart"
+                        class="size-10 flex items-center justify-center rounded-full border-2 border-gray-300 hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
+                <PrimaryButton v-else @click="addToCart" class="!active:scale-75">Agregar al carrito</PrimaryButton> -->
             </div>
 
             <!-- Si no es bajo pedido -->
-            <div class="flex flex-col items-center" v-else>
+            <div class="flex justify-between items-center" v-else>
                 <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
                 <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product.current_stock < 1"
-                    v-model="quantity" class="mb-5" size="small" :min="0" :max="product.current_stock" :precision="2" />
+                    v-model="quantity" size="small" :min="0" :max="product.current_stock" :precision="2" />
 
                 <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
-                <el-input-number v-else v-model="quantity" class="mb-5" size="small" :min="1" :max="999" :precision="2" />
+                <el-input-number v-else v-model="quantity" size="small" :min="1" :max="999" :precision="2" />
 
-                <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
+                <div v-if="alreadyInCart" class="text-green-400 size-9 flex items-center justify-center rounded-full border border-green-400 bg-[#D9FECF]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                </div>
 
-                <PrimaryButton v-else :disabled="store?.online_store_properties?.inventory && product.current_stock < 1"
-                    @click="addToCart" class="!px-9 !py-1 !active:scale-75">
-                    {{ store?.online_store_properties?.inventory && product.current_stock < 1 ? 'Agotado' : 'Agregar al carrito' }} </PrimaryButton>
+                <div v-else class="flex items-center space-x-3">
+                    <p v-if="store?.online_store_properties?.inventory && product.current_stock < 1" class="text-sm text-gray-700">Agotado</p>
+                    <button :disabled="store?.online_store_properties?.inventory && product.current_stock < 1"
+                        @click="addToCart"
+                        class="size-10 flex items-center justify-center rounded-full border-2 border-gray-300 hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Botones viejos -->
+                <!-- <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p> -->
+
+                <!-- <PrimaryButton v-else :disabled="store?.online_store_properties?.inventory && product.current_stock < 1"
+                    @click="addToCart" class="!active:scale-75">
+                    {{ store?.online_store_properties?.inventory && product.current_stock < 1 ? 'Agotado' : 'Agregar al carrito' }} </PrimaryButton> -->
             </div>
         </div>
     </div>

@@ -3,7 +3,7 @@
 
         <Head :title="title" />
 
-        <div class="overflow-hidden h-screen bg-white">
+        <div class="bg-white">
             <!-- resto de pagina -->
             <main class="w-full">
                 <nav class="bg-white border-b border-gray-200">
@@ -62,49 +62,49 @@
                     </div>
                 </nav>
 
-                <div class="overflow-y-auto h-[calc(100vh-5rem)] flex flex-col justify-between bg-white">
+                <div class="flex flex-col justify-between bg-white">
                     <slot />
-                    <footer v-if="!loadigLogo && !loadigStore"
-                        class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-20 md:px-7">
-                        <!-- Logo de la tienda -->
-                        <figure class="flex items-center space-x-2">
-                            <img v-if="logo?.media?.length" class="h-10 md:h-12" :src="logo?.media[0]?.original_url"
-                                alt="logotipo de la tienda">
-                            <p v-else class="tex-sm text-gray99">{{ store?.name }}</p>
-                        </figure>
-                        <!-- whatsapp button computed -->
-                        <div v-if="store?.online_store_properties?.whatsapp"
-                            class="hidden md:flex flex-col items-center">
-                            <h2 class="text-white font-bold">Contáctanos</h2>
-                            <div class="flex items-center space-x-3 mt-2">
-                                <i class="fa-brands fa-whatsapp text-[24px] text-gray99"></i>
-                                <p class="text-gray99">{{ store?.online_store_properties?.whatsapp?.replace(/(\d{2})(?=\d)/g, '$1 ') }}
-                                </p>
-                            </div>
-                        </div>
-                        <!-- ubicación de tienda -->
-                        <div v-if="store?.address" class="hidden md:flex flex-col items-center">
-                            <h2 class="text-white font-bold text-sm md:text-base">Encuéntranos en</h2>
-                            <div class="flex items-center space-x-3 mt-2">
-                                <i class="fa-solid fa-location-dot text-xs md:text-[24px] text-gray99"></i>
-                                <p class="text-gray99 text-xs md:text-base">{{ store?.address }}</p>
-                            </div>
-                        </div>
-                        <!-- whatsapp button floating -->
-                        <a v-if="store?.online_store_properties?.whatsapp"
-                            class="z-50 size-12 rounded-full bg-green-500 shadow-md flex items-center justify-center fixed bottom-8 md:bottom-20 right-1 hover:scale-105"
-                            :href="whatsappLink" target="_blank" rel="noopener noreferrer">
-                            <i class="fa-brands fa-beat fa-whatsapp text-xl text-gray-100"></i>
-                        </a>
-                        <!-- Logo de ezy -->
-                        <figure class="text-center text-xs">
-                            <img class="h-10 md:h-12 mx-auto" src="@/../../public/images/white_logo.png" alt="">
-                            <p class="text-gray99">Potencia tu negocio, prueba </p>
-                            <a :href="'/'" target="_blank" class="text-primary">Punto de venta</a>
-                        </figure>
-                    </footer>
                 </div>
             </main>
+            <footer v-if="!loadigLogo && !loadigStore"
+                class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-20 md:px-7">
+                <!-- Logo de la tienda -->
+                <figure class="flex items-center space-x-2">
+                    <img v-if="logo?.media?.length" class="h-10 md:h-12" :src="logo?.media[0]?.original_url"
+                        alt="logotipo de la tienda">
+                    <p v-else class="tex-sm text-gray99">{{ store?.name }}</p>
+                </figure>
+                <!-- whatsapp button computed -->
+                <div v-if="store?.online_store_properties?.whatsapp" class="hidden md:flex flex-col items-center">
+                    <h2 class="text-white font-bold">Contáctanos</h2>
+                    <div class="flex items-center space-x-3 mt-2">
+                        <i class="fa-brands fa-whatsapp text-[24px] text-gray99"></i>
+                        <p class="text-gray99">{{ store?.online_store_properties?.whatsapp?.replace(/(\d{2})(?=\d)/g,
+                            '$1 ') }}
+                        </p>
+                    </div>
+                </div>
+                <!-- ubicación de tienda -->
+                <div v-if="store?.address" class="hidden md:flex flex-col items-center">
+                    <h2 class="text-white font-bold text-sm md:text-base">Encuéntranos en</h2>
+                    <div class="flex items-center space-x-3 mt-2">
+                        <i class="fa-solid fa-location-dot text-xs md:text-[24px] text-gray99"></i>
+                        <p class="text-gray99 text-xs md:text-base">{{ store?.address }}</p>
+                    </div>
+                </div>
+                <!-- whatsapp button floating -->
+                <a v-if="store?.online_store_properties?.whatsapp"
+                    class="z-50 size-12 rounded-full bg-green-500 shadow-md flex items-center justify-center fixed bottom-8 md:bottom-20 right-1 hover:scale-105"
+                    :href="whatsappLink" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-beat fa-whatsapp text-xl text-gray-100"></i>
+                </a>
+                <!-- Logo de ezy -->
+                <figure class="text-center text-xs">
+                    <img class="h-10 md:h-12 mx-auto" src="@/../../public/images/white_logo.png" alt="">
+                    <p class="text-gray99">Potencia tu negocio, prueba </p>
+                    <a :href="'/'" target="_blank" class="text-primary">Punto de venta</a>
+                </figure>
+            </footer>
         </div>
     </div>
 </template>

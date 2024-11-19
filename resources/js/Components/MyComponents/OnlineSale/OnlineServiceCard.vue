@@ -1,7 +1,7 @@
 <template>
-    <div class="py-3 px-5 rounded-lg border-2 border-gayD9 flex flex-col hover:border-primary h-[450px]">
+    <div class="py-3 px-5 rounded-2xl border-2 border-gray-100 flex flex-col h-[450px] hover:shadow-2xl relative group transition-all ease-linear duration-200">
         <!-- Imagen -->
-        <figure class="h-1/2 text-center">
+        <figure class="h-1/2 text-center rounded-xl bg-[#f9f9f9] flex items-center justify-center">
             <Link
                 :href="route('online-sales.show-service', service.id)">
             <img v-if="service.media?.length"
@@ -15,19 +15,21 @@
         </figure>
 
         <!-- Detalles -->
-        <div class="text-center mt-5 flex flex-col justify-between items-center h-1/2">
-            <div class="mb-4">
-                <h1 class="mb-4 mx-auto font-bold w-96 truncate">{{ service.name }}</h1>
+        <div class="mt-5 h-1/2">
+            <div class="mb-4 ml-3 text-left">
+                <h1 class="mb-4 font-bold w-96 truncate">{{ service.name }}</h1>
                 <p class="h-24 overflow-auto" v-if="service.description">{{ service.description }}</p>
                 <p v-else>No hay descripción en este servicio...</p>
             </div>
 
-            <button class="rounded-full bg-primary flex items-center justify-center px-8 py-1 text-white">
-                <a :href="whatsappLink" target="_blank" rel="noopener noreferrer">
-                    <i class="fa-brands fa-whatsapp text-gray-100"></i>
-                    Cotizar
-                </a>
-            </button>
+            <div class="flex items-center justify-end space-x-3">
+                <p class="text-am text-gray-700">Cotizar</p>
+                <button class="rounded-full size-10 border border-gray-300 flex items-center justify-center hover:border-transparent hover:bg-primary text-gray-500 hover:text-white transition-all ease-linear duration-200">
+                    <a :href="whatsappLink" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-brands fa-whatsapp size-5"></i>
+                    </a>
+                </button>
+            </div>
 
             <!-- formulario de solicitud de cotizacion -->
             <!-- <PrimaryButton @click="$inertia.get(route('online-sales.quote-service', service.id))" class="!px-9 !py-1 mb-4">Cotizar</PrimaryButton> -->

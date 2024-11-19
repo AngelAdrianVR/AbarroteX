@@ -20,7 +20,7 @@ class ServiceReport extends Model
         'observations',
         'technician_name',
         'receiver_name',
-        'desciption',
+        'description',
         'store_id',
     ];
 

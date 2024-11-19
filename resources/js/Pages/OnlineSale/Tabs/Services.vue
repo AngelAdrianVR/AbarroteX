@@ -22,7 +22,7 @@ import OnlineServiceCard from '@/Components/MyComponents/OnlineSale/OnlineServic
 export default {
 data() {
     return {
-
+        loading: false,
     }
 },
 components:{

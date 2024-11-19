@@ -1,9 +1,9 @@
 <template>
     <!-- sidebar -->
     <div class="h-screen hidden md:block shadow-lg relative">
-        <i @click="small = false" v-if="small"
+        <i @click="updateSideNavSize(false)" v-if="small"
             class="fa-solid fa-angle-right text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
-        <i @click="small = true" v-else
+        <i @click="updateSideNavSize(true)" v-else
             class="fa-solid fa-angle-left text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
         <div class="bg-[#232323] h-full overflow-auto">
             <!-- Logo -->
@@ -288,9 +288,17 @@ export default {
         },
         logout() {
             this.$inertia.post(route('logout'));
+        },
+        updateSideNavSize(is_small){
+            this.small = is_small;
+            localStorage.setItem('is_sidenav_small', is_small);
         }
     },
     mounted() {
+        const is_small = localStorage.getItem('is_sidenav_small');
+        if (is_small !== null) {
+            this.small = JSON.parse(is_small); // Convertirlo a booleano si es necesario
+        }
     }
 }
 </script>
