@@ -1,6 +1,6 @@
 <template>
     <OnlineStoreLayout :title="store.name">
-        <div ref="scrollContainer" style="height: 90vh; overflow-y: scroll;" @scroll="handleScroll">
+        <div ref="scrollContainer" @scroll="handleScroll">
             <!-- Banners -->
             <section v-if="banners?.media?.length" class="my-4">
                 <figure class="lg:h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
@@ -27,7 +27,7 @@
 
                 <section v-if="activeTab === 'Productos'">
                     <Products :store="store" :visibleProducts="visibleProducts" />
-                    <button v-if="total_products > visibleProducts.length" @click="loadMoreProducts" class="w-full text-primary my-4 text-xs mx-auto underline">
+                    <button v-if="!loading && total_products > visibleProducts.length" @click="loadMoreProducts" class="w-full text-primary my-4 text-xs mx-auto underline">
                         Cargar más elementos
                     </button>
                 </section>
@@ -95,7 +95,7 @@ export default {
         },
         async loadMoreProducts() {
             const offset = this.visibleProducts.length; //de donde empieza a contar la carga de products
-            let limit = 12; // numero de post que carga por petición
+            let limit = 32; // numero de post que carga por petición
 
             // regula el numero de products para cargar segun los que queden por cargar y cuando es 0 no se hace la peticion
             if ((this.total_products - this.visibleProducts.length) < limit) {
@@ -106,7 +106,7 @@ export default {
                 this.loading = true;
                 try {
                     const response = await axios.post(route('online-sales.load-more-products'), {
-                        storeId: this.store_id, offset: offset, limit: limit
+                        storeId: this.store_id, offset, limit
                     });
                     if (response.status === 200) {
                         this.visibleProducts = [...this.visibleProducts, ...response.data.products]; //agrega los products obtenidos al array de products que se muestran 
