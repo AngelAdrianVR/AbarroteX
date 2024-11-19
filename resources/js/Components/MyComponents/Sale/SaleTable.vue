@@ -1,17 +1,17 @@
 <template>
   <!-- vista desktop -->
   <div v-if="saleProducts?.length" class="w-full mx-auto text-[11px] lg:text-sm over hidden md:block">
-    <div class="text-center lg:text-base flex items-center space-x-4 mb-3 border-b border-primary">
-      <div class="font-bold pb-3 pl-2 text-left w-[45%]">Producto</div>
-      <div class="font-bold pb-3 text-left w-[15%]">Precio</div>
-      <div class="font-bold pb-3 text-left w-[20%]">Cantidad</div>
-      <div class="font-bold pb-3 text-left w-[15%]">Importe</div>
-      <div class="font-bold pb-3 text-left w-[5%]"></div>
+    <div class="text-center lg:text-base flex items-center space-x-4 *:font-bold *:text-left *:text-gray37">
+      <div class="pl-2 w-[45%]">Producto</div>
+      <div class="w-[15%]">Precio</div>
+      <div class="w-[20%]">Cantidad</div>
+      <div class="w-[15%]">Importe</div>
+      <div class="w-[5%]"></div>
     </div>
-    <div class="overflow-auto h-[500px]">
+    <div class="overflow-auto border-b border-grayD9" :class="showFull ? 'h-[52vh]' : 'h-[28vh]'">
       <div v-for="(sale, index) in saleProducts" :key="index"
-        class="mb-2 flex items-center space-x-4 border rounded-full relative">
-        <div class="grid grid-cols-2 items-center min-h-14 w-[45%]">
+        class="mb-2 flex items-center space-x-4 border rounded-md relative">
+        <div class="grid grid-cols-2 items-center min-h-12 w-[45%]">
           <img class="mx-auto h-14 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
             :alt="sale.product.name">
           <div v-else
@@ -41,7 +41,7 @@
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
             <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
               @click.stop="startEditing(sale, index)"
-              class="flex items-center justify-center text-primary bg-gray-200 size-5 rounded-full ml-2 mr-1">
+              class="flex items-center justify-center text-primary bg-gray-200 size-5 rounded-md ml-2 mr-1">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-[14px]">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -224,7 +224,11 @@ export default {
     CancelButton
   },
   props: {
-    saleProducts: Array
+    saleProducts: Array,
+    showFull: {
+      type: Boolean,
+      default: true
+    }
   },
   emits: ['delete-product'],
   methods: {
