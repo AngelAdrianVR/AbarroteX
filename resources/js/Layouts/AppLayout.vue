@@ -541,7 +541,7 @@ onUnmounted(() => {
                     </div>
                 </nav>
 
-                <div class="overflow-y-auto h-[calc(100vh-3rem)] bg-white">
+                <div class="overflow-y-auto h-[calc(100vh-3rem)]">
                     <!-- Dias de prueba vista movil -->
                     <section v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
                         class="xl:hidden space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-[10px]">
