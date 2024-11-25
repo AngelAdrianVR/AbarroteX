@@ -68,8 +68,8 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2 h-[94vh]">
-      <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[65%]' : 'h-[94%]'">
+    <main class="pt-2 h-[calc(93vh+1px)]">
+      <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[60%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
           <h1 class="font-bold text-lg">Registrar venta</h1>
@@ -450,7 +450,7 @@
         <!-- lista de productos -->
       </section>
       <section class="border rounded-t-[20px] border-[#D9D9D9] shadow-md bg-[#232323]"
-        :class="showNoCodeProducts ? 'h-[35%]' : 'h-[6%]'">
+        :class="showNoCodeProducts ? 'h-[40%]' : 'h-[6%]'">
         <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
             class="flex items-center justify-between text-xs text-primary w-full pt-3">
@@ -461,15 +461,15 @@
             </p>
           </button>
         </div>
-        <div
-          class="mt-2 px-3 py-1 overflow-auto h-[80%]">
+        <div v-if="showNoCodeProducts"
+          class="mt-2 px-3 py-1 overflow-auto h-[82%]">
           <el-skeleton v-if="syncingIDB"
-            class="col-span-full mt-2 px-3 py-1 grid grid-cols-5 md:grid-cols-7 gap-2" animated>
+            class="col-span-full mt-2 px-3 py-1 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2" animated>
             <template #template>
               <el-skeleton-item v-for="item in 7" :key="item" class="!h-36" />
             </template>
           </el-skeleton>
-          <div v-show="showNoCodeProducts" class="grid grid-cols-5 md:grid-cols-7 gap-2">
+          <div v-show="showNoCodeProducts" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
             <button @click="addSaleProduct(item)" type="button" v-for="(item, index) in noCodeProducts" :key="index"
               class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-grayF2 rounded-md">
               <h2 class="text-xs text-center">{{ item.name }}</h2>
@@ -807,9 +807,9 @@ import { format } from 'date-fns';
 import {
   getItemByPartialAttributes,
   getItemByAttributes,
+  getItemsByNullAttribute,
   addOrUpdateBatchOfItems,
   syncIDBProducts,
-  getAll,
   addOrUpdateItem
 } from '@/dbService.js';
 
@@ -1439,8 +1439,8 @@ export default {
     this.syncingIDB = true;
     // }
     await syncIDBProducts();
-    // obtener productos sin codigo de inexedDB
-    this.noCodeProducts = await getItemByPartialAttributes('products', { code: '' });
+    // obtener productos sin codigo de indexedDB
+    this.noCodeProducts = await getItemsByNullAttribute('products', 'code');
     // ordenar alfabeticamente
     this.noCodeProducts = this.noCodeProducts.sort((a, b) => a.name.localeCompare(b.name));
     this.syncingIDB = false;

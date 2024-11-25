@@ -8,7 +8,7 @@
       <div class="w-[15%]">Importe</div>
       <div class="w-[5%]"></div>
     </div>
-    <div class="overflow-auto border-b border-grayD9" :class="showFull ? 'h-[52vh]' : 'h-[28vh]'">
+    <div class="overflow-auto border-b border-grayD9" :class="showFull ? 'h-[51vh]' : 'h-[28vh]'">
       <div v-for="(sale, index) in saleProducts" :key="index"
         class="mb-2 flex items-center space-x-4 border rounded-md relative">
         <div class="grid grid-cols-2 items-center min-h-12 w-[45%]">

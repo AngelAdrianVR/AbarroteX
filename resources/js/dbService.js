@@ -113,6 +113,24 @@ function getItemByAttributes(storeName, attributes) {
   });
 }
 
+function getItemsByNullAttribute(storeName, attributeName) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const filteredResults = request.result.filter(item => item[attributeName] === null);
+      resolve(filteredResults);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
+
 function getItemByPartialAttributes(storeName, attributes) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readonly');
@@ -378,6 +396,7 @@ export {
   getAll,
   getItemByAttributes,
   getItemByPartialAttributes,
+  getItemsByNullAttribute,
   addOrUpdateItem,
   deleteItem,
   deleteObjectStore,
