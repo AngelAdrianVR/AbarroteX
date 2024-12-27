@@ -59,6 +59,17 @@
                         </button>
                     </div>
                 </section>
+                <div v-if="small" class="bg-[#296A6B] px-2 py-1 absolute w-full bottom-2">
+                    <a href="https://finanzas.dtw.com.mx" target="_blank" class="flex items-center justify-center space-x-2">
+                        <img class="w-5 object-contain" src="@/../../public/images/isologo_finanzas.png">
+                    </a>
+                </div>
+                <div v-else class="bg-[#296A6B] px-2 py-1 absolute bottom-2">
+                    <a href="https://finanzas.dtw.com.mx" target="_blank" class="flex items-center space-x-2">
+                        <img class="w-5 object-contain" src="@/../../public/images/isologo_finanzas.png">
+                        <span class="text-xs">Control de finanzas gratis!</span>
+                    </a>
+                </div>
             </nav>
         </div>
     </div>
@@ -289,7 +300,7 @@ export default {
         logout() {
             this.$inertia.post(route('logout'));
         },
-        updateSideNavSize(is_small){
+        updateSideNavSize(is_small) {
             this.small = is_small;
             localStorage.setItem('is_sidenav_small', is_small);
         }

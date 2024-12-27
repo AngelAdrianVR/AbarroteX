@@ -488,6 +488,13 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Configuraciones</span>
                             </ResponsiveNavLink>
+                            <div class="bg-[#296A6B] px-2 py-1 w-full">
+                                <a href="https://finanzas.dtw.com.mx" target="_blank"
+                                    class="flex items-center justify-center space-x-2">
+                                    <img class="w-4 object-contain" src="@/../../public/images/isologo_finanzas.png">
+                                    <span class="text-xs text-white">¡Control de finanzas gratis!</span>
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Responsive Settings Options -->
