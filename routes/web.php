@@ -26,6 +26,7 @@ use App\Http\Controllers\RentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\RentalPaymentController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ScaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceReportController;
 use App\Http\Controllers\SettingController;
@@ -483,6 +484,13 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 Route::resource('service-reports', ServiceReportController::class);
 Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
+
+
+//rutas de báscula ---------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::put('/scale/configure/{user}', [ScaleController::class, 'configure'])->name('scale.configure');
+Route::get('/scale/read', [ScaleController::class, 'readWeight'])->name('scale.read');
+Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->name('scale.get-ports');
 
 
 // comandos Artisan

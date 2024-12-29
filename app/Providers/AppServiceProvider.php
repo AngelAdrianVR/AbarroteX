@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\SerialService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        //servicio para conexión de báscula con aplicación
+        $this->app->singleton(SerialService::class, function ($app) {
+            return new SerialService();
+        });
     }
 
     /**

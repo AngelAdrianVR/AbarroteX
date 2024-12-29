@@ -1,6 +1,6 @@
 <template>
     <div class="py-3 px-5 rounded-3xl border-2 border-gray-100 flex flex-col h-[400px] hover:shadow-2xl relative group transition-all ease-linear duration-200">
-        <!-- Deatalle de cantidad disponible  -->
+        <!-- Deatalle de cantidad disponible en stock  -->
         <div v-if="store?.online_store_properties?.inventory"
             class="absolute -top-2 left-0 w-full bg-black rounded-t-lg opacity-0 group-hover:opacity-60 group-hover:translate-y-2 transition-all duration-500 ease-out lg:group-hover:block py-1">
             <p class="text-white text-center opacity-100">{{ product.current_stock ?? '0' }} {{ product.bulk_product ? product.measure_unit + '(s)' : 'unidades' }} disponibles</p>
@@ -12,7 +12,7 @@
                 :href="product.global_product_id ? route('online-sales.show-global-product', product.id) : route('online-sales.show-local-product', product.id)">
             <img v-if="product.global_product_id ? product.global_product.media?.length : product.media?.length"
                 :src="product.global_product_id ? product.global_product.media[0]?.original_url : product.media[0]?.original_url"
-                alt="producto" class="h-full mx-auto">
+                alt="producto" class="h-full object-contain mx-auto">
             <div v-else>
                 <i class="fa-regular fa-image text-7xl text-gray-200"></i>
                 <p class="text-sm text-gray-300">Imagen no disponible</p>

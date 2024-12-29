@@ -34,7 +34,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'rol',
         'password',
         'employee_properties',
-        'printer_config', //JSON
+        'printer_config', //JSON configuraciones de la impresora
+        'scale_config', //JSON configuraciones de la báscula
         'store_id',
         'cash_register_id',
         'email_verified_at',
@@ -62,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'employee_properties' => 'array',
         'printer_config' => 'array',
+        'scale_config' => 'array',
     ];
 
     /**
