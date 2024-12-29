@@ -22,6 +22,8 @@ return new class extends Migration
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
+            $table->json('scale_config')->nullable();
+            $table->json('printer_config')->nullable();
             $table->json('employee_properties')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('cash_register_id')->nullable()->constrained();
