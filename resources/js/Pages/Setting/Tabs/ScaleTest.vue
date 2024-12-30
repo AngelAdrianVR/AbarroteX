@@ -3,8 +3,8 @@
     <h1>Peso: {{ weight }} kg</h1>
     <h1>Producto: {{ product.name }}</h1>
     <h1>Precio: {{ product.price }} /kg</h1>
-    <h1>Total: {{ total }}</h1>
-    <button class="px-3 py-1 bg-primary text-white rounded-full" @click="connectScale">Conectar Báscula</button>
+    <h1>Total: ${{ (weight * product.price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</h1>
+    <button class="px-3 py-1 bg-primary text-white rounded-full disabled:cursor-not-allowed disabled:bg-gray-400" @click="connectScale" :disabled="isConnected">Conectar Báscula</button>
     <button class="px-3 py-1 bg-green-500 text-white rounded-full disabled:cursor-not-allowed disabled:bg-gray-400" @click="readWeight" :disabled="!port">Leer Peso</button>
     <button class="px-3 py-1 bg-red-500 text-white rounded-full disabled:cursor-not-allowed disabled:bg-gray-400" @click="disconnectScale" :disabled="!port">Cerrar báscula</button>
   </div>
@@ -14,10 +14,10 @@
 export default {
   data() {
     return {
+      isConnected: false, // Estado de conexión
       port: null, // Puerto serie de la báscula
       reader: null, // Lector de datos del puerto
       weight: "0.00", // Peso leído de la báscula
-      total: null, // Total a pagar 
       product: {
         name: "manzana", // Nombre del producto
         price: 50, // Precio por kg
@@ -30,13 +30,13 @@ export default {
         // Solicitar al usuario seleccionar un dispositivo serie
         this.port = await navigator.serial.requestPort();
 
-        // Configurar la conexión con los parámetros adecuados para tu báscula
+        // Configurar la conexión con los parámetros adecuados para tu báscula tomados de la base de datos
         await this.port.open({
-            baudRate: 9600, // Ajusta el baudRate según tu báscula
-            dataBits: 8,    // Ajusta según las especificaciones de tu báscula
-            stopBits: 1,    // Ajusta según las especificaciones de tu báscula
-            parity: "none", // Ajusta según las especificaciones de tu báscula
-            flowControl: "none", // Ajusta según las especificaciones de tu báscula
+            baudRate: this.$page.props.auth.user.scale_config?.baudRate ?? 9600,
+            dataBits: this.$page.props.auth.user.scale_config?.dataBit ?? 8,
+            stopBits: this.$page.props.auth.user.scale_config?.stopBit ?? 1,   
+            parity: this.$page.props.auth.user.scale_config?.parity ?? "none",
+            flowControl: this.$page.props.auth.user.scale_config?.flowControl ?? "none",
         });
 
         const textDecoder = new TextDecoderStream();
@@ -45,6 +45,14 @@ export default {
 
         console.log("Conexión exitosa a la báscula");
         console.log("Puerto:", this.port);
+
+        this.isConnected = true; // Marca la conexión como activa
+
+        this.$notify({
+            title: "Correcto",
+            message: "Báscula sincronizada",
+            type: "success",
+        });
 
       } catch (error) {
         console.error("Error al conectar la báscula:", error);
@@ -71,16 +79,16 @@ export default {
             }
 
             const { value, done } = await this.reader.read();
+            console.log("Datos leídos:", value);
             if (done) {
-            console.log("Lectura finalizada.");
-            this.reader.releaseLock();
-            this.reader = null;
-            return;
+              console.log("Lectura finalizada.");
+              this.reader.releaseLock();
+              this.reader = null;
+              return;
             }
 
-            //total a pagar
-            this.total = this.weight * this.product.price;
             this.weight = this.parseWeight(value);
+            
         } catch (error) {
             console.error("Error al leer datos:", error);
         }
@@ -99,10 +107,15 @@ export default {
             }
 
             this.isConnected = false; // Actualiza el estado de conexión
+            this.$notify({
+                title: "Correcto",
+                message: "Báscula desconectada",
+                type: "success",
+            });
             console.log("Báscula desconectada.");
         } catch (error) {
             console.error("Error al desconectar la báscula:", error);
-            alert("Error al desconectar la báscula. Intenta de nuevo.");
+            alert("Comunicación con la báscula cerrada. Presiona nuevamente para desconectar");
         }
     },
     parseWeight(data) {
