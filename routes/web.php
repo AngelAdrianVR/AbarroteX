@@ -489,7 +489,6 @@ Route::get('services-search', [ServiceReportController::class, 'searchServiceRep
 //rutas de báscula ---------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::put('/scale/configure/{user}', [ScaleController::class, 'configure'])->name('scale.configure');
-Route::get('/scale/read', [ScaleController::class, 'readWeight'])->name('scale.read');
 Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->name('scale.get-ports');
 
 
