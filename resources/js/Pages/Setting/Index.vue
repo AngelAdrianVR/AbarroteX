@@ -83,7 +83,7 @@ export default {
         Printer,
         Users,
         Point,
-        Scale
+        Scale,
     },
     props: {
         users: Array,
