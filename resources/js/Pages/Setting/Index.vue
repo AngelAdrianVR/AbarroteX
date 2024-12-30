@@ -52,6 +52,9 @@
                     </template>
                     <Scale />
                 </el-tab-pane>
+                <el-tab-pane label="Prueba con Báscula" name="5">
+                    <ScaleTest />
+                </el-tab-pane>
                 <!-- <el-tab-pane label="Notificaciones" name="5">
                     Notificaciones
                 </el-tab-pane> -->
@@ -67,6 +70,7 @@ import Point from '@/Pages/Setting/Tabs/Point.vue';
 import Users from '@/Pages/Setting/Tabs/Users.vue';
 import Printer from '@/Pages/Setting/Tabs/Printer.vue';
 import Scale from '@/Pages/Setting/Tabs/Scale.vue';
+import ScaleTest from '@/Pages/Setting/Tabs/ScaleTest.vue';
 
 export default {
     data() {
@@ -83,7 +87,8 @@ export default {
         Printer,
         Users,
         Point,
-        Scale
+        Scale,
+        ScaleTest
     },
     props: {
         users: Array,

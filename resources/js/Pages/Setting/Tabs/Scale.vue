@@ -46,7 +46,7 @@
         <!-- --------------------------------------------------------- -->
         <article class="border border-grayD9 rounded-md p-4 relative">
         <h2 class="font-bold">Paridad:</h2>
-        <p class="text-sm text-gray99 mb-4">Permite verificar si se han producido errores durante la transmisión. Por defaul "none"</p>
+        <p class="text-sm text-gray99 mb-4">Permite verificar si se han producido errores durante la transmisión. Por defecto "none"</p>
         <div class="flex items-center text-sm">
 
             <p class="mx-7">Paridad:</p>
@@ -125,10 +125,13 @@
             </PrimaryButton>
         </div>
 
-        <h2>Lectura de Báscula</h2>
-        <div class="flex items-center space-x-4">
-            <PrimaryButton @click="connectToScale">Conectar báscula</PrimaryButton>
-            <button class="bg-gray-200 py-1 rounded-full px-4 cursor-pointer" @click="disconnectScale">Desconectar Báscula</button>
+        <!-- Sinconizar báscula -->
+        <div class="col-span-full mt-5">
+            <h2 class="font-bold mb-3">Sincronizar báscula</h2>
+            <div class="flex items-center space-x-4">
+                <PrimaryButton @click="connectToScale">Conectar báscula</PrimaryButton>
+                <button class="bg-gray-200 py-1 rounded-full px-4 cursor-pointer" @click="disconnectScale">Desconectar Báscula</button>
+            </div>
         </div>
 
         <p id="weight-display">Peso: -- kg</p>
@@ -225,7 +228,7 @@ methods:{
                 stopBits: 1,    // Ajusta según las especificaciones de tu báscula
                 parity: "even", // Ajusta según las especificaciones de tu báscula
                 flowControl: "none", // Ajusta según las especificaciones de tu báscula
-                });
+            });
 
             const decoder = new TextDecoderStream();
             const inputDone = this.port.readable.pipeTo(decoder.writable);
