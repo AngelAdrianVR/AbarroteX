@@ -109,11 +109,11 @@
         <!-- ACTIVAR BÁSCULA EN PUNTO DE VENTA-------------->
         <!-- --------------------------------------------------------- -->
         <article class="border border-grayD9 rounded-md p-4 relative">
-        <h2 class="font-bold">Activar báscula</h2>
-        <p class="text-sm text-gray99 mb-4">Imprime el ticket de cada venta realizada automáticamente</p>
+        <h2 class="font-bold">Habilitar báscula</h2>
+        <p class="text-sm text-gray99 mb-4">Habilita el uso de báscula en punto de venta</p>
         <div class="flex items-center text-sm">
 
-            <p class="mx-7">Activar báscula:</p>
+            <p class="mx-7">Habilitar:</p>
             <el-switch v-model="form.scale_config.is_enabled" class="ml-4" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
         </div>
         </article>
