@@ -931,7 +931,7 @@ export default {
       showCreateProductModal: false,
 
       // generales
-      showNoCodeProducts: true,
+      showNoCodeProducts: false,
       noCodeProducts: [],
       localCurrentCash: 0, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
@@ -1517,7 +1517,7 @@ export default {
 
       } catch (error) {
         console.error("Error al conectar la báscula:", error);
-        alert("No se pudo conectar a la báscula. Verifica que esté correctamente conectada.");
+        // alert("No se conectó la báscula.");
       }
     },
     async startReading() {

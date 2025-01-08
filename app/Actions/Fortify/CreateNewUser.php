@@ -87,18 +87,19 @@ class CreateNewUser implements CreatesNewUsers
             'password' => Hash::make($input['password']),
             'store_id' => $store->id,
             'cash_register_id' => $cash_register->id,
-            'printer_config' => json_encode([ //agrega las configuraciones por default de una impresora
+            'printer_config' => [ //agrega las configuraciones por default de una impresora
                 "UUIDService" => "49535343-fe7d-4ae5-8fa9-9fafd205e455",
                 "UUIDCharacteristic" => "49535343-8841-43f4-a8d4-ecbe34729bb3",
                 "automaticPrinting" => false,
-            ]),
-            'scale_config' => json_encode([ //agrega las configuraciones por default de una báscula
+            ],
+            'scale_config' => [ //agrega las configuraciones por default de una báscula
                 "baudRate" => 9600,
                 "parity" => "none",
-                "dataBits" => 8,
-                "stopBits" => 1,
+                "dataBit" => 8,
+                "stopBit" => 1,
                 "flowControl" => "none",
-            ]),
+                "is_enabled" => true,
+            ],
         ]);
         $user->syncRoles(['Administrador']);
 
