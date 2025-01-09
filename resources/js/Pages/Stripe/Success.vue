@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import confetti from "canvas-confetti";
 import { Head } from '@inertiajs/vue3';
 
 export default {
@@ -39,7 +40,19 @@ Head
 },
 props:{
     // customer: Object
-}
+},
+methods: {
+    launchConfetti() {
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+        });
+    },
+},
+mounted() {
+    this.launchConfetti();
+},
 }
 </script>
 

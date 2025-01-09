@@ -68,7 +68,7 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2 h-[calc(93vh+1px)]">
+    <main class="pt-2 h-[calc(93vh+1px)] lg:h-[calc(93vh+16px)]">
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[60%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
@@ -215,12 +215,50 @@
           <div class="lg:w-[30%]">
             <!-- buscador de productos -->
             <div class="relative">
-              <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
+              <el-select
+                v-model="productFoundSelectedName"
+                @change="handleSelectFoundProduct()"
+                ref="searchInput"
+                :disabled="syncingIDB"
+                filterable
+                remote
+                :remote-method="searchProducts"
+                :loading="loading"
+                placeholder="Buscar código o nombre de producto"
+                class="w-full"
+              >
+              <template #prefix>
+                <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+              </template>
+                <el-option
+                  v-for="(product, index) in productsFound"
+                  :key="index"
+                  :label="product.name"
+                  :value="product.name"
+                >
+                  <!-- opciones en tienda de ropa, zapateria y boutique -->
+                  <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                    class="w-4/5 flex items-center space-x-2">
+                    <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
+                      :style="{ color: product.additional?.color.color }"></i>
+                    <span>{{ product.name }}</span>
+                    <span class="text-gray99">
+                      ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
+                    </span>
+                  </p>
+                  <!-- opciones en tienda de abarrotes -->
+                  <div v-else>
+                    <span style="float: left; font-size: 14px">{{ product.name }}</span>
+                    <span style="float: right; color: #8492a6; font-size: 11px">{{ product.code }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <!-- <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
                 ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
                 type="search" :disabled="syncingIDB">
-              <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
+              <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i> -->
               <!-- Resultados de la búsqueda -->
-              <div v-if="searchFocus && searchQuery"
+              <!-- <div v-if="searchFocus && searchQuery"
                 class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
                 <ul v-if="productsFound?.length > 0 && !loading">
                   <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
@@ -242,12 +280,12 @@
                 </ul>
                 <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">
                   No se encontraron coincidencias
-                </p>
+                </p> -->
                 <!-- estado de carga -->
-                <div v-if="loading" class="flex justify-center items-center py-10">
+                <!-- <div v-if="loading" class="flex justify-center items-center py-10">
                   <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-                </div>
-              </div>
+                </div> -->
+              <!-- </div> -->
             </div>
             <!-- Detalle de producto encontrado -->
             <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
@@ -279,9 +317,9 @@
                 </div>
                 <div class="flex justify-between items-center mt-4">
                   <p class="text-gray99">Cantidad</p>
-                  <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0"
+                  <el-input-number ref="quantitySelector" @keydown.enter="focusAddButton()" v-if="isInventoryOn" v-model="quantity" :min="0"
                     :max="productFoundSelected.current_stock" :precision="2" :disabled="isReading" />
-                  <el-input-number v-else v-model="quantity" :min="0" :precision="2" :disabled="isReading" />
+                  <el-input-number ref="quantitySelector" @keydown.enter="focusAddButton()" v-else v-model="quantity" :min="0" :precision="2" :disabled="isReading" />
                 </div>
                 <div class="text-center mt-7">
                   <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">
@@ -289,10 +327,11 @@
                     <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                   </div>
                   <div class="flex items-center justify-center space-x-3">
-                    <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
-                      class="!rounded-full !px-24" :disabled="quantity == 0">
+                    <button ref="addButton" @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
+                      class="rounded-full !px-24 text-white bg-primary text-sm py-1 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white focus:outline-none transition-all ease-linear duration-200"
+                      :disabled="quantity == 0">
                       Agregar
-                    </PrimaryButton>
+                    </button>
                      <el-tooltip
                       content="Pesar con báscula" placement="bottom">
                       <button @click="handleScale()" v-if="productFoundSelected?.bulk_product && $page.props.auth.user.scale_config.is_enabled" :disabled="isReading"
@@ -961,6 +1000,7 @@ export default {
       productsFound: null,
       productSelected: null, //producto escaneado agergado a la lista de compras
       productFoundSelected: null, //producto seleccionado desde barra de busqueda
+      productFoundSelectedName: null, //nombre del producto seleccionado desde barra de busqueda
       quantity: 1, //cantidad para agregar del producto escaneado o buscado
       tabIndex: 1, //index del tab - componente de tabs
       editableTabsValue: "1", //tab seleccionado - componente de tabs
@@ -1024,6 +1064,24 @@ export default {
     clients: Array
   },
   methods: {
+    handleSelectFoundProduct() {
+      this.focusquantitySelector(); //enfoca el selector de cantidad
+      if( this.productsFound.length > 0 ) {
+        this.productFoundSelected = this.productsFound.find(product => product.name === this.productFoundSelectedName);
+      }
+    },
+    // enfoca el input de cantidad cuando se hace la busqueda por nombre de producto
+    focusquantitySelector() {
+      this.$nextTick(() => {
+        this.$refs.quantitySelector.focus();
+      });
+    },
+    // enfoca el boton de agregar producto cuando se hace la busqueda por nombre de producto
+    focusAddButton() {
+      this.$nextTick(() => {
+        this.$refs.addButton.focus();
+      });
+    },
     checkClientExist() { //revisa si hay cliente seleccionado para venta a crédito
       if (this.editableTabs[this.editableTabsValue - 1]?.client_id == null) {
         this.showClientConfirmModal = true;
@@ -1264,13 +1322,25 @@ export default {
         console.log(error);
       }
     },
-    async searchProducts() {
+    async searchProducts(query) {
+      this.searchQuery = query;
       try {
+        if (this.searchQuery.length < 2) {
+          return;
+        }
         this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
       } catch (error) {
         console.log(error);
       }
     },
+    //funciona con el input normal
+    // async searchProducts() {
+    //   try {
+    //     this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // },
     async fetchTotalSaleForCashCut() {
       try {
         const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
@@ -1306,8 +1376,11 @@ export default {
       }, 100);
     },
     async getProductByCode() {
+      // retorna si no hay código de producto escaneado
+      if (!this.scannerQuery) {
+        return;
+      }
       this.scanning = true;
-
       let foundProducts = await getItemByAttributes('products', { code: this.scannerQuery });
       let productScaned = foundProducts[0];
 
@@ -1357,6 +1430,8 @@ export default {
       this.scannerQuery = null;
       this.quantity = 1;
       this.scanning = false;
+      this.productFoundSelectedName = null;
+      this.productFoundSelected = null;
       this.inputFocus();
 
       // indicar al navegador mediante el local storage que hay proceso pendiente
@@ -1615,11 +1690,6 @@ export default {
       this.asignedCashRegister = this.cash_registers.find(item => item.id == this.$page.props.auth?.user?.cash_register_id);
       this.localCurrentCash = this.asignedCashRegister?.current_cash;
     }
-    if (this.isScanOn) {
-      this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
-    } else {
-      this.$refs.searchInput.focus(); // Enfocar el input de buscar producto cuando se abre el modal
-    }
 
     // sincronizar productos
     // const productsInIDB = await getAll('products');
@@ -1640,6 +1710,8 @@ export default {
     // Agregar escuchadores de eventos online/offline
     window.addEventListener('online', this.handleOnline);
     window.addEventListener('offline', this.handleOffline);
+
+    this.inputFocus();
   },
   beforeUnmount() {
     // Eliminar los escuchadores de eventos al desmontar el componente
