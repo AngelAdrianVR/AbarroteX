@@ -68,85 +68,96 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="px-1 lg:px-6 py-2 h-[93vh]">
-      <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[65%]' : 'h-[94%]'">
+    <main class="pt-2 h-[calc(93vh+1px)]">
+      <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[60%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
           <h1 class="font-bold text-lg">Registrar venta</h1>
           <!-- Dinero en caja -->
-          <!-- <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
-            class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
-            <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
-              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-              class="size-4 cursor-pointer">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            </svg>
-            <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
-              fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-            </svg>
-            <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
-              Efectivo en "{{ asignedCashRegister?.name }}":
-              <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
-                class="ml-2">
-                {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
-                  '*****' }}
-              </b>
-              <el-tooltip
-                v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
-                content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                  stroke="currentColor" class="size-4 text-red-600">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                </svg>
-              </el-tooltip>
-            </p>
-            <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
-          </div> -->
-          <!-- Dropdown -->
-          <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')"
-            class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
-            <el-col :span="3">
-              <el-dropdown trigger="click">
-                <p class="text-sm text-primary w-44 flex items-center">
-                  <svg class="mr-2" width="12" height="12" viewBox="0 0 12 12" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <mask id="mask0_9380_424" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12"
-                      height="12">
-                      <rect width="12" height="12" fill="#D9D9D9" />
-                    </mask>
-                    <g mask="url(#mask0_9380_424)">
-                      <path
-                        d="M2.5 10.5C2.225 10.5 1.98958 10.4021 1.79375 10.2063C1.59792 10.0104 1.5 9.775 1.5 9.5V2.5C1.5 2.225 1.59792 1.98958 1.79375 1.79375C1.98958 1.59792 2.225 1.5 2.5 1.5H9.5C9.775 1.5 10.0104 1.59792 10.2063 1.79375C10.4021 1.98958 10.5 2.225 10.5 2.5V9.5C10.5 9.775 10.4021 10.0104 10.2063 10.2063C10.0104 10.4021 9.775 10.5 9.5 10.5H2.5ZM6 8C6.31667 8 6.60417 7.90833 6.8625 7.725C7.12083 7.54167 7.3 7.3 7.4 7H9.5V2.5H2.5V7H4.6C4.7 7.3 4.87917 7.54167 5.1375 7.725C5.39583 7.90833 5.68333 8 6 8Z"
-                        fill="#F68C0F" />
-                    </g>
+            <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
+              class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
+              <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
+                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                class="size-4 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+              <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+              </svg>
+              <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
+                Efectivo en "{{ asignedCashRegister?.name }}":
+                <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
+                  class="ml-2">
+                  {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
+                    '*****' }}
+                </b>
+                <el-tooltip
+                  v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
+                  content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="size-4 text-red-600">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                   </svg>
-                  <span>Movimientos de caja</span>
-                  <i class="fa-solid fa-angle-down text-[10px] ml-2 mt-px"></i>
-                </p>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item v-if="$page.props.auth.user.store.plan == 'Plan Avanzado'"
-                      @click="showCashRegisterSelectionModal = true"><i
-                        class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
-                    <el-dropdown-item :disabled="!asignedCashRegister"
-                      @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
-                        class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
-                    <el-dropdown-item :disabled="!asignedCashRegister"
-                      @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
-                        class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
-                    <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i
-                        class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
-                      corte</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </el-col>
-          </div>
+                </el-tooltip>
+              </p>
+              <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
+            </div>
+            <article class="flex items-center space-x-3">
+              <!-- Indicadores activos como báscula y descuentos -->
+               <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled" :content="isConnectedScale ? 'Báscula sincronizada' : 'Sincronizar báscula'" placement="bottom">
+                  <button @click="!isConnectedScale ? connectScale() : ''" class="rounded-full p-1 flex items-center justify-center cursor-default" :class="isConnectedScale ? 'bg-green-300' : 'bg-red-300'">
+                    <svg width="77" height="73" viewBox="0 0 77 73" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="size-4">
+                      <path d="M5.83797 42.9021L4.29033 64.6428C4.29033 65.6746 4.80621 66.4115 5.46948 66.4115H69.7336C71.2636 66.4232 72.313 65.8956 72.313 64.6428L70.4706 42.9021M5.83797 42.9021H70.4706M5.83797 42.9021C2.0802 42.9021 1.04867 40.6174 2.89008 35.3849L13.871 5.09529C14.3869 3.54765 15.4923 2 17.04 2H58.0894C60.5951 2 62.0691 2.88437 63.0272 5.09529L74.8187 37.7432C75.6294 40.0279 73.6396 42.9021 70.4706 42.9021M52.2685 57.2731L51.7527 57.8626M51.9001 58.3048L52.637 57.4204L52.7107 57.3467L51.8264 58.3785M60.8174 57.2731L61.6281 58.3785M60.8174 50.0507L61.7018 51.1562M51.8264 50.0507L52.8581 51.0825M62.4388 68.6961H68.2609M8.63968 68.7698H14.0933M14.4618 52.2616V56.8309C14.4618 57.2731 14.8303 57.6415 15.2724 57.6415H36.6447C37.6765 57.6415 37.7501 57.2731 37.7501 56.8309V52.2616C37.7501 51.672 37.3817 51.672 36.6447 51.672H15.1987C14.7566 51.672 14.4618 51.7457 14.4618 52.2616ZM69.5874 67.0748C69.5874 69.3541 67.7397 71.2019 65.4604 71.2019C63.1811 71.2019 61.3333 69.3541 61.3333 67.0748H69.5874ZM15.3461 67.0748C15.3461 69.3541 13.4984 71.2019 11.2191 71.2019C8.93978 71.2019 7.09203 69.3541 7.09203 67.0748H15.3461ZM53.0792 57.8626C53.0792 58.3104 52.7163 58.6733 52.2685 58.6733C51.8208 58.6733 51.4579 58.3104 51.4579 57.8626C51.4579 57.4149 51.8208 57.052 52.2685 57.052C52.7163 57.052 53.0792 57.4149 53.0792 57.8626ZM61.9966 57.8626C61.9966 58.3104 61.6336 58.6733 61.1859 58.6733C60.7382 58.6733 60.3753 58.3104 60.3753 57.8626C60.3753 57.4149 60.7382 57.052 61.1859 57.052C61.6336 57.052 61.9966 57.4149 61.9966 57.8626ZM53.0792 50.6403C53.0792 51.088 52.7163 51.451 52.2685 51.451C51.8208 51.451 51.4579 51.088 51.4579 50.6403C51.4579 50.1926 51.8208 49.8296 52.2685 49.8296C52.7163 49.8296 53.0792 50.1926 53.0792 50.6403ZM61.9966 50.6403C61.9966 51.088 61.6336 51.451 61.1859 51.451C60.7382 51.451 60.3753 51.088 60.3753 50.6403C60.3753 50.1926 60.7382 49.8296 61.1859 49.8296C61.6336 49.8296 61.9966 50.1926 61.9966 50.6403ZM16.3042 53.4408V55.6517H35.5392V53.4408H16.3042Z" stroke="black" stroke-width="2.9479"/>
+                    </svg>
+                  </button>
+                </el-tooltip>
+              <!-- Dropdown -->
+              <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')"
+                class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
+                <el-col :span="3">
+                  <el-dropdown trigger="click">
+                    <p class="text-sm text-primary w-44 flex items-center">
+                      <svg class="mr-2" width="12" height="12" viewBox="0 0 12 12" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <mask id="mask0_9380_424" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12"
+                          height="12">
+                          <rect width="12" height="12" fill="#D9D9D9" />
+                        </mask>
+                        <g mask="url(#mask0_9380_424)">
+                          <path
+                            d="M2.5 10.5C2.225 10.5 1.98958 10.4021 1.79375 10.2063C1.59792 10.0104 1.5 9.775 1.5 9.5V2.5C1.5 2.225 1.59792 1.98958 1.79375 1.79375C1.98958 1.59792 2.225 1.5 2.5 1.5H9.5C9.775 1.5 10.0104 1.59792 10.2063 1.79375C10.4021 1.98958 10.5 2.225 10.5 2.5V9.5C10.5 9.775 10.4021 10.0104 10.2063 10.2063C10.0104 10.4021 9.775 10.5 9.5 10.5H2.5ZM6 8C6.31667 8 6.60417 7.90833 6.8625 7.725C7.12083 7.54167 7.3 7.3 7.4 7H9.5V2.5H2.5V7H4.6C4.7 7.3 4.87917 7.54167 5.1375 7.725C5.39583 7.90833 5.68333 8 6 8Z"
+                            fill="#F68C0F" />
+                        </g>
+                      </svg>
+                      <span>Movimientos de caja</span>
+                      <i class="fa-solid fa-angle-down text-[10px] ml-2 mt-px"></i>
+                    </p>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item v-if="$page.props.auth.user.store.plan == 'Plan Avanzado'"
+                          @click="showCashRegisterSelectionModal = true"><i
+                            class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
+                        <el-dropdown-item :disabled="!asignedCashRegister"
+                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
+                            class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                        <el-dropdown-item :disabled="!asignedCashRegister"
+                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
+                            class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
+                        <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i
+                            class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
+                          corte</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
+                </el-col>
+              </div>
+          </article>
+          
         </header>
         <!-- cuerpo de la pagina -->
         <div class="lg:flex lg:space-x-5 my-2">
@@ -269,18 +280,44 @@
                 <div class="flex justify-between items-center mt-4">
                   <p class="text-gray99">Cantidad</p>
                   <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0"
-                    :max="productFoundSelected.current_stock" :precision="2" />
-                  <el-input-number v-else v-model="quantity" :min="0" :precision="2" />
+                    :max="productFoundSelected.current_stock" :precision="2" :disabled="isReading" />
+                  <el-input-number v-else v-model="quantity" :min="0" :precision="2" :disabled="isReading" />
                 </div>
                 <div class="text-center mt-7">
                   <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">
                     No te quedan existencias de este producto.
                     <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                   </div>
-                  <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
-                    class="!rounded-full !px-24" :disabled="quantity == 0">
-                    Agregar
-                  </PrimaryButton>
+                  <div class="flex items-center justify-center space-x-3">
+                    <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
+                      class="!rounded-full !px-24" :disabled="quantity == 0">
+                      Agregar
+                    </PrimaryButton>
+                     <el-tooltip
+                      content="Pesar con báscula" placement="bottom">
+                      <button @click="handleScale()" v-if="productFoundSelected?.bulk_product && $page.props.auth.user.scale_config.is_enabled" :disabled="isReading"
+                        class="flex items-center justify-center rounded-full p-1 bg-green-500 text-white size-10 disabled:cursor-not-allowed disabled:bg-gray-400">
+                        <svg width="77" height="73" viewBox="0 0 77 73" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-6">
+                          <path d="M5.83797 42.9021L4.29033 64.6428C4.29033 65.6746 4.80621 66.4115 5.46948 66.4115H69.7336C71.2636 66.4232 72.313 65.8956 72.313 64.6428L70.4706 42.9021M5.83797 42.9021H70.4706M5.83797 42.9021C2.0802 42.9021 1.04867 40.6174 2.89008 35.3849L13.871 5.09529C14.3869 3.54765 15.4923 2 17.04 2H58.0894C60.5951 2 62.0691 2.88437 63.0272 5.09529L74.8187 37.7432C75.6294 40.0279 73.6396 42.9021 70.4706 42.9021M52.2685 57.2731L51.7527 57.8626M51.9001 58.3048L52.637 57.4204L52.7107 57.3467L51.8264 58.3785M60.8174 57.2731L61.6281 58.3785M60.8174 50.0507L61.7018 51.1562M51.8264 50.0507L52.8581 51.0825M62.4388 68.6961H68.2609M8.63968 68.7698H14.0933M14.4618 52.2616V56.8309C14.4618 57.2731 14.8303 57.6415 15.2724 57.6415H36.6447C37.6765 57.6415 37.7501 57.2731 37.7501 56.8309V52.2616C37.7501 51.672 37.3817 51.672 36.6447 51.672H15.1987C14.7566 51.672 14.4618 51.7457 14.4618 52.2616ZM69.5874 67.0748C69.5874 69.3541 67.7397 71.2019 65.4604 71.2019C63.1811 71.2019 61.3333 69.3541 61.3333 67.0748H69.5874ZM15.3461 67.0748C15.3461 69.3541 13.4984 71.2019 11.2191 71.2019C8.93978 71.2019 7.09203 69.3541 7.09203 67.0748H15.3461ZM53.0792 57.8626C53.0792 58.3104 52.7163 58.6733 52.2685 58.6733C51.8208 58.6733 51.4579 58.3104 51.4579 57.8626C51.4579 57.4149 51.8208 57.052 52.2685 57.052C52.7163 57.052 53.0792 57.4149 53.0792 57.8626ZM61.9966 57.8626C61.9966 58.3104 61.6336 58.6733 61.1859 58.6733C60.7382 58.6733 60.3753 58.3104 60.3753 57.8626C60.3753 57.4149 60.7382 57.052 61.1859 57.052C61.6336 57.052 61.9966 57.4149 61.9966 57.8626ZM53.0792 50.6403C53.0792 51.088 52.7163 51.451 52.2685 51.451C51.8208 51.451 51.4579 51.088 51.4579 50.6403C51.4579 50.1926 51.8208 49.8296 52.2685 49.8296C52.7163 49.8296 53.0792 50.1926 53.0792 50.6403ZM61.9966 50.6403C61.9966 51.088 61.6336 51.451 61.1859 51.451C60.7382 51.451 60.3753 51.088 60.3753 50.6403C60.3753 50.1926 60.7382 49.8296 61.1859 49.8296C61.6336 49.8296 61.9966 50.1926 61.9966 50.6403ZM16.3042 53.4408V55.6517H35.5392V53.4408H16.3042Z" stroke="currentColor" stroke-width="2.9479"/>
+                        </svg>
+                      </button>
+                    </el-tooltip>
+                     <el-tooltip
+                      content="Terminar lectura" placement="bottom">
+                      <button @click="stopReading()" v-if="isReading"
+                        class="flex items-center justify-center rounded-full p-1 border border-gray-300 bg-gray-100 text-red-500 size-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </el-tooltip>
+                  </div>
+
+                  <!-- //Lectura de báscula y costo total -->
+                  <div v-if="isReading" class="mt-5 p-4 rounded-md flex items-center justify-between bg-gray-200">
+                    <p>Peso: {{ weight }}Kg</p>
+                    <p>Total: $ {{ (weight * productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                  </div>
                 </div>
               </div>
               <div v-else class="text-center text-gray99 text-sm">
@@ -449,29 +486,29 @@
         </div>
         <!-- lista de productos -->
       </section>
-      <section class="border rounded-[10px] border-[#D9D9D9] shadow-md bg-[#FAFAFA]"
-        :class="showNoCodeProducts ? 'h-[35%]' : 'h-[6%]'">
-        <div class="mt-2 mx-4">
+      <section class="border rounded-t-[20px] border-[#D9D9D9] shadow-md bg-[#232323]"
+        :class="showNoCodeProducts ? 'h-[40%]' : 'h-[6%]'">
+        <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
-            class="flex items-center justify-between text-xs text-primary w-full">
-            <h1 class="text-sm font-bold text-gray37">Selección rápida para productos sin código</h1>
+            class="flex items-center justify-between text-xs text-primary w-full pt-3">
+            <h1 class="text-sm font-bold text-gray9A">Selección rápida para productos sin código</h1>
             <p class="flex items-center space-x-2">
               <span>{{ showNoCodeProducts ? 'Ocultar' : 'Mostrar' }}</span>
               <i class="fa-solid" :class="showNoCodeProducts ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
             </p>
           </button>
         </div>
-        <div
-          class="mt-2 px-3 py-1 overflow-auto h-[80%]">
+        <div v-if="showNoCodeProducts"
+          class="mt-2 px-3 py-1 overflow-auto h-[82%]">
           <el-skeleton v-if="syncingIDB"
-            class="col-span-full mt-2 px-3 py-1 grid grid-cols-5 md:grid-cols-7 gap-2" animated>
+            class="col-span-full mt-2 px-3 py-1 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2" animated>
             <template #template>
               <el-skeleton-item v-for="item in 7" :key="item" class="!h-36" />
             </template>
           </el-skeleton>
-          <div v-show="showNoCodeProducts" class="grid grid-cols-5 md:grid-cols-7 gap-2">
+          <div v-show="showNoCodeProducts" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
             <button @click="addSaleProduct(item)" type="button" v-for="(item, index) in noCodeProducts" :key="index"
-              class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-gray-300">
+              class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-grayF2 rounded-md">
               <h2 class="text-xs text-center">{{ item.name }}</h2>
               <figure class="flex items-center justify-center h-14">
                 <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="object-contain h-14 mx-auto">
@@ -807,9 +844,9 @@ import { format } from 'date-fns';
 import {
   getItemByPartialAttributes,
   getItemByAttributes,
+  getItemsByNullAttribute,
   addOrUpdateBatchOfItems,
   syncIDBProducts,
-  getAll,
   addOrUpdateItem
 } from '@/dbService.js';
 
@@ -868,6 +905,14 @@ export default {
       productForm,
       categoryForm,
 
+      //báscula
+      isConnectedScale: false, // Estado de conexión
+      port: null, // Puerto serie de la báscula
+      reader: null, // Lector de datos del puerto
+      weight: "0.00", // Peso leído de la báscula
+      intervalId: null, // Para guardar el ID del intervalo
+      isReading: false, // Para controlar el estado de lectura
+
       // caja
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
       asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
@@ -886,7 +931,7 @@ export default {
       showCreateProductModal: false,
 
       // generales
-      showNoCodeProducts: true,
+      showNoCodeProducts: false,
       noCodeProducts: [],
       localCurrentCash: 0, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
@@ -894,7 +939,7 @@ export default {
       // inventario de codigos activado
       isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
       // mostrar dinero en caja activado
-      // isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
+      isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
       // descuentos activados
       isDiscountOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Hacer descuentos')?.value,
       // escaneo de codigos activado
@@ -1294,15 +1339,20 @@ export default {
       if (existingIndex !== -1) {
         this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
           ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
+          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + (this.isReading ? this.weight : this.quantity)
         };
       } else {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
-          quantity: this.quantity,
+          quantity: this.isReading ? this.weight : this.quantity, //si se esta leyendo de la báscula se agrega el peso, si no la cantidad
           originalPrice: null,
         });
+      }
+
+      // si esta leyeendo de la báscula se detiene la lectura
+      if (this.isReading) {
+        this.stopReading();
       }
       this.scannerQuery = null;
       this.quantity = 1;
@@ -1412,6 +1462,145 @@ export default {
         this.syncingData = false;
       }
     },
+    handleScale() {
+        if (this.isConnectedScale) {
+            // Si la báscula está sincronizada, empieza a leer
+            this.startReading();
+        } else {
+            // Si no está sincronizada, muestra la confirmación
+            this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'No',
+                type: 'warning'
+            }).then(() => {
+                // Si el usuario acepta, sincroniza la báscula
+                this.connectScale();
+            }).catch(() => {
+                // Si el usuario cancela, no hace nada
+                console.log('Sincronización cancelada');
+            });
+        }
+    },
+    async connectScale() {
+      try {
+         if (this.port) {
+            await this.port.close(); // Cierra el puerto solo después de liberar el lector
+            this.port = null;
+        }
+
+        // Solicitar al usuario seleccionar un dispositivo serie
+        this.port = await navigator.serial.requestPort();
+
+        // Configurar la conexión con los parámetros adecuados para tu báscula tomados de la base de datos
+        await this.port.open({
+            baudRate: this.$page.props.auth.user.scale_config?.baudRate ?? 9600,
+            dataBits: this.$page.props.auth.user.scale_config?.dataBit ?? 8,
+            stopBits: this.$page.props.auth.user.scale_config?.stopBit ?? 1,   
+            parity: this.$page.props.auth.user.scale_config?.parity ?? "none",
+            flowControl: this.$page.props.auth.user.scale_config?.flowControl ?? "none",
+        });
+
+        const textDecoder = new TextDecoderStream();
+        const readableStreamClosed = this.port.readable.pipeTo(textDecoder.writable);
+        this.reader = textDecoder.readable.getReader();
+
+        console.log("Conexión exitosa a la báscula");
+        console.log("Puerto:", this.port);
+
+        this.isConnectedScale = true; // Marca la conexión como activa
+
+        this.$notify({
+            title: "Correcto",
+            message: "Báscula sincronizada",
+            type: "success",
+        });
+
+      } catch (error) {
+        console.error("Error al conectar la báscula:", error);
+        // alert("No se conectó la báscula.");
+      }
+    },
+    async startReading() {
+        if (!this.port || !this.port.readable || !this.port.writable) {
+            alert("Conecta la báscula primero.");
+            return;
+        }
+
+        if (this.isReading) {
+            alert("La lectura ya está en curso.");
+            return;
+        }
+
+        this.isReading = true;
+
+        this.intervalId = setInterval(async () => {
+            try {
+                // Enviar comando para solicitar datos (si es necesario)
+                const textEncoder = new TextEncoder();
+                const writer = this.port.writable.getWriter();
+                await writer.write(textEncoder.encode("COMANDO_PESO\n")); // Cambia "COMANDO_PESO" al comando requerido por tu báscula
+                writer.releaseLock();
+
+                // Leer datos
+                if (!this.reader) {
+                    const textDecoder = new TextDecoder();
+                    this.reader = this.port.readable.getReader();
+                }
+
+                const { value, done } = await this.reader.read();
+                if (done) {
+                    console.log("Lectura finalizada.");
+                    this.reader.releaseLock();
+                    this.reader = null;
+                    this.stopReading(); // Detiene la lectura si es el final
+                    return;
+                }
+
+                console.log("Datos leídos:", value);
+                this.weight = this.parseWeight(value);
+
+            } catch (error) {
+                console.error("Error al leer datos:", error);
+                this.stopReading(); // Detener lectura en caso de error
+            }
+        }, 200); // Intervalo de 500 ms
+    },
+    stopReading() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId); // Detiene el intervalo
+            this.intervalId = null;
+            console.log("Intervalo detenido.");
+        }
+
+        this.isReading = false;
+        console.log("Lectura detenida.");
+    },
+    async disconnectScale() {
+        try {
+            if (this.reader) {
+                await this.reader.cancel(); // Cancela cualquier lectura activa
+                this.reader.releaseLock(); // Libera el lector
+                this.reader = null;
+            }
+
+            this.isConnectedScale = false; // Actualiza el estado de conexión
+            this.weight = "0.00"; // Reinicia el peso leído
+            this.$notify({
+                title: "Correcto",
+                message: "Báscula desconectada",
+                type: "success",
+            });
+            console.log("Báscula desconectada.");
+        } catch (error) {
+            console.error("Error al desconectar la báscula:", error);
+            alert("Comunicación con la báscula cerrada. Presiona nuevamente para desconectar");
+        }
+    },
+    parseWeight(data) {
+      // Ajustar esta lógica según el formato de los datos enviados por la báscula
+      const weight = data.trim(); // Quitar espacios en blanco
+      return parseFloat(weight) || "0.00";
+    },
   },
   async mounted() {
     // redirigir a los tutoriales si no los ha finalizado
@@ -1439,8 +1628,8 @@ export default {
     this.syncingIDB = true;
     // }
     await syncIDBProducts();
-    // obtener productos sin codigo de inexedDB
-    this.noCodeProducts = await getItemByPartialAttributes('products', { code: '' });
+    // obtener productos sin codigo de indexedDB
+    this.noCodeProducts = await getItemsByNullAttribute('products', 'code');
     // ordenar alfabeticamente
     this.noCodeProducts = this.noCodeProducts.sort((a, b) => a.name.localeCompare(b.name));
     this.syncingIDB = false;

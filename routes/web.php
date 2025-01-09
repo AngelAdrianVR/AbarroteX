@@ -26,6 +26,7 @@ use App\Http\Controllers\RentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\RentalPaymentController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ScaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceReportController;
 use App\Http\Controllers\SettingController;
@@ -443,6 +444,8 @@ Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWit
 //online sales routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
 Route::resource('online-sales', OnlineSaleController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified']);
+Route::get('online-sales/create', [OnlineSaleController::class, 'create'])->name('online-sales.create'); //create para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
+Route::post('online-sales/store', [OnlineSaleController::class, 'store'])->name('online-sales.store'); //store para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
 Route::get('online-sales-client-index/{encoded_store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
 Route::post('online-sales/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
 Route::get('online-sales-show-local-product/{product_id}', [OnlineSaleController::class, 'ShowLocalProduct'])->name('online-sales.show-local-product');
@@ -481,6 +484,12 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 Route::resource('service-reports', ServiceReportController::class);
 Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
+
+
+//rutas de báscula ---------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::put('/scale/configure/{user}', [ScaleController::class, 'configure'])->name('scale.configure');
+Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->name('scale.get-ports');
 
 
 // comandos Artisan

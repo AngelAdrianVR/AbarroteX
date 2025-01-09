@@ -172,7 +172,7 @@
             <i @click="createOnlineOrderModal = false"
                 class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
 
-            <form class="mt-5 mb-2" @submit.prevent="storeOnlineSale">
+            <section class="mt-5 mb-2">
                 <h2 class="font-bold mb-4">Registrar pedido</h2>
                 <p>Datos del cliente</p>
 
@@ -309,9 +309,9 @@
 
                 <div class="flex justify-end space-x-1 pt-5 pb-1 py-3">
                     <CancelButton @click="createOnlineOrderModal = false">Cancelar</CancelButton>
-                    <PrimaryButton :disabled="form.processing || !form.products[0].name">Confirmar</PrimaryButton>
+                    <PrimaryButton @click="storeOnlineSale" :disabled="form.processing || !form.products[0].name">Confirmar</PrimaryButton>
                 </div>
-            </form>
+            </section>
         </div>
     </Modal>
     <!-- --------------------------- Modal creación de orden ends ------------------------------------ -->

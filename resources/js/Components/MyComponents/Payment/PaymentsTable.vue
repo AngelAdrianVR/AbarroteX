@@ -138,7 +138,7 @@
                     </PrimaryButton>
                 </div>
                 <div v-else class="flex items-center space-x-1">
-                    <CancelButton @click="editCSF = false" :disabled="fiscalForm.processing">
+                    <CancelButton @click="editCSF = false; showInvoiceRequestModal = false" :disabled="fiscalForm.processing">
                         Cancelar</CancelButton>
                     <PrimaryButton @click="storeCSF" :disabled="fiscalForm.processing || !fiscalForm.csf.length">
                         <i v-if="fiscalForm.processing"
