@@ -98,7 +98,7 @@ class CreateNewUser implements CreatesNewUsers
                 "dataBit" => 8,
                 "stopBit" => 1,
                 "flowControl" => "none",
-                "is_enabled" => true,
+                "is_enabled" => false,
             ],
         ]);
         $user->syncRoles(['Administrador']);

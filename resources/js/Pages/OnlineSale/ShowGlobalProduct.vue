@@ -1,6 +1,6 @@
 <template>
     <OnlineStoreLayout :title="global_product.global_product.name">
-        <div class="p-4 md:p-9">
+        <div class="p-4 md:p-9 lg:h-[calc(100vh-161px)]">
             <Back :to="route('online-sales.client-index', encodedIdStore ?? 0)" />
 
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
@@ -19,9 +19,9 @@
                 <div class="h-96">
                     <h1 class="font-bold text-2xl mt-4">{{ global_product.global_product.name }}</h1>
                     <p class="text-2xl text-primary font-bold mt-4">
-                        {{ product.currency === '$USD' ? 'USD' : 'MXN' }} ${{ integerPart }}
+                        {{ product?.currency === '$USD' ? 'USD' : 'MXN' }} ${{ integerPart }}
                         <span class="decimal-part">{{ decimalPart }}</span>
-                        <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
+                        <span class="text-lg">{{ product?.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
                     </p>
                     <div class="flex items-center space-x-3 mt-5">
                         <p class="text-gray99">Cantidad</p>

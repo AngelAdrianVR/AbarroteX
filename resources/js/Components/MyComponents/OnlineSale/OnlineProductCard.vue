@@ -8,11 +8,11 @@
         </div>
         <!-- Imagen -->
         <figure class="h-1/2 text-center rounded-xl bg-[#f9f9f9] flex items-center justify-center">
-            <Link
+            <Link class="h-full flex items-center justify-center"
                 :href="product.global_product_id ? route('online-sales.show-global-product', product.id) : route('online-sales.show-local-product', product.id)">
-            <img v-if="product.global_product_id ? product.global_product.media?.length : product.media?.length"
+            <img class="h-full object-contain p-3" v-if="product.global_product_id ? product.global_product.media?.length : product.media?.length"
                 :src="product.global_product_id ? product.global_product.media[0]?.original_url : product.media[0]?.original_url"
-                alt="producto" class="h-full object-contain mx-auto">
+                alt="producto">
             <div v-else>
                 <i class="fa-regular fa-image text-7xl text-gray-200"></i>
                 <p class="text-sm text-gray-300">Imagen no disponible</p>
@@ -37,11 +37,14 @@
             <!-- Si es bajo pedido -->
             <div class="flex justify-between items-center" v-if="!product.product_on_request">
                 <el-input-number v-model="quantity" size="small" :min="1" :max="999" :precision="2" />
-
-                <div v-if="alreadyInCart" class="text-green-400 size-9 flex items-center justify-center rounded-full border border-green-400 bg-[#D9FECF]">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
+                
+                <div v-if="alreadyInCart" class="flex items-center space-x-3">
+                    <span class="text-green-400 text-sm">Agregado</span>
+                    <div class="text-green-400 size-9 flex items-center justify-center rounded-full border border-green-400 bg-[#D9FECF]">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                    </div>
                 </div>
 
                 <div v-else class="flex items-center space-x-3">
