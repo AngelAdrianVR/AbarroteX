@@ -30,7 +30,7 @@ class StripeController extends Controller
         $products = json_decode($request->input('products'), true); //lo hago array pero solo tiene un objeto. Lo dejo asi par ano modificar el ejemplo en caso de muchos elementos
         $modules_updated = json_decode($request->input('modules_updated'), true); //modulos pagados para guardarlos en base de datos y actualizar en caso de agregar nuevos o quitar
 
-        \Stripe\Stripe::setApiKey(config(key:'stripe.sk')); //el helper config toma las llaves desde el directorio config/stripe
+        \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test')); //el helper config toma las llaves desde el directorio config/stripe
 
         $LineItems = [];
 
@@ -129,7 +129,7 @@ class StripeController extends Controller
 
         try {
             // Verificar el estado del pago a través de la API de Stripe usando el session_id
-            \Stripe\Stripe::setApiKey(config(key:'stripe.sk'));
+            \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test'));
             $session = \Stripe\Checkout\Session::retrieve($session_id);
 
             // Comprobar que el pago se haya completado correctamente
