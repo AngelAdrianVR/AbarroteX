@@ -68,7 +68,7 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2 h-[calc(93vh+1px)]">
+    <main class="pt-2 h-[calc(94vh-1px)]"><!--mover altura para productos sin codigo -->
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[60%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
@@ -201,7 +201,7 @@
                       @confirm="clearTab()">
                       <template #reference>
                         <ThirthButton class="!text-[#F80505] !border-[#F80505] !tracking-normal !py-1 !px-4 mb-2"><i
-                            class="fa-regular fa-trash-can mr-1 mt-px text-[10px]"></i> Limpiar registro</ThirthButton>
+                            class="fa-regular fa-trash-can mr-1 mt-px text-[10px]"></i> Limpiar lista</ThirthButton>
                       </template>
                     </el-popconfirm>
                   </div>
@@ -486,7 +486,7 @@
         </div>
         <!-- lista de productos -->
       </section>
-      <section class="border rounded-t-[20px] border-[#D9D9D9] shadow-md bg-[#232323]"
+      <section v-if="isQuickNoCodeSelectionOn && noCodeProducts.length" class="border rounded-t-[20px] border-[#D9D9D9] shadow-md bg-[#232323]"
         :class="showNoCodeProducts ? 'h-[40%]' : 'h-[6%]'">
         <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
@@ -946,6 +946,8 @@ export default {
       isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
       // monto maximo en caja activado
       isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
+      // mostrar seleccion rapida de productos sin codigo activado
+      isQuickNoCodeSelectionOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Selección rápida de productos sin código')?.value,
 
       // cargas
       storeProcessing: false, //cargando store de venta
@@ -966,7 +968,7 @@ export default {
       editableTabsValue: "1", //tab seleccionado - componente de tabs
       editableTabs: [ //Informacion del tab - componente de tabs
         {
-          title: "Registro 1",
+          title: "Lista 1",
           name: "1",
           saleProducts: [],
           has_credit: false,
@@ -978,7 +980,7 @@ export default {
           client_id: null,
         },
         {
-          title: "Registro 2",
+          title: "Lista 2",
           name: "2",
           saleProducts: [],
           has_credit: false,
@@ -990,7 +992,7 @@ export default {
           client_id: null,
         },
         {
-          title: "Registro 3",
+          title: "Lista 3",
           name: "3",
           saleProducts: [],
           has_credit: false,

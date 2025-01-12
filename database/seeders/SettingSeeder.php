@@ -19,5 +19,6 @@ class SettingSeeder extends Seeder
         // Setting::create(['key' => 'Mostrar dinero en caja', 'type' => 'Bool', 'module' => 'Punto de venta', 'description' => 'Se muestra en la vista principal el dinero actual en caja. El dinero en caja se actualiza cada que se realiza una venta o se crea un gasto el cual fue pagado con dinero de caja']);
         Setting::create(['key' => 'Aviso de monto máximo en caja', 'type' => 'Bool', 'module' => 'Punto de venta', 'description' => 'Poder configurar el monto máximo de dinero en caja y avisar a usuario cuando llegue o exceda el limite']);
         Setting::create(['key' => 'Notificaciones por correo', 'type' => 'Bool', 'module' => 'Punto de venta', 'description' => 'Recibir notificaciones al correo electrónico registrado']);
+        Setting::create(['key' => 'Mostrar selección rápida de productos sin código', 'type' => 'Bool', 'module' => 'Punto de venta', 'description' => 'Muestra en la vista principal una lista de productos para seleccionar y agregar a la venta sin necesidad de escanear el código de barras']);
     }
 }

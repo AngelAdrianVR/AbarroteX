@@ -475,7 +475,7 @@ const imageSets = ref([
     <footer class="bg-black1 p-5 -mt-12">
         <div class="border-b border-[#373737] w-full"></div>
         <div class="flex items-center md:justify-between text-white text-sm my-3">
-            <p>Copyright c 2024 | Todos los derechos reservador por Ezy Ventas</p>
+            <p>Copyright &copy; 2024 | Todos los derechos reservador por Ezy Ventas</p>
             <div class="flex space-x-3">
                 <a class="underline" target="_blank" :href="route('terms.show')">Términos y condiciones</a>
                 <a class="underline" target="_blank" :href="route('policy.show')">Política de privacidad</a>
