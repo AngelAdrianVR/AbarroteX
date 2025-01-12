@@ -35,7 +35,7 @@
             <p class="font-bold">{{ sale.product.name }}</p>
           </div>
         </div>
-        <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
+        <div :class="editMode !== null ? 'w-[18%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">
             ${{ sale.product.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}{{ getPrefix(sale) }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
@@ -74,7 +74,7 @@
           sale.quantity).toLocaleString('en-US', {
             minimumFractionDigits: 2
           }) }}</div>
-        <div class="w-[5%] text-right">
+        <div class="w-[5%] text-right pr-14">
           <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
             title="¿Continuar?" @confirm="deleteItem(sale.product.id)">
             <template #reference>
@@ -162,11 +162,13 @@
       </div>
     </div>
   </div>
-  <div class="text-center text-gray-500 text-sm mt-14" v-if="saleProducts.length == 0">
-    <p v-if="isScanOn" class="flex items-center justify-center text-gray99 text-sm">
-      Escanea un producto para comenzar la venta
-      <i class="fa-regular fa-hand-point-up ml-3"></i>
-    </p>
+  <div class="text-center text-gray-500 text-sm md:mt-14" v-if="saleProducts.length == 0">
+    <div v-if="isScanOn" class="flex flex-col items-center justify-center text-gray99 text-sm">
+      <span>Escanea un producto para comenzar la venta</span>
+      <figure class="my-7 flex items-center justify-center select-none">
+          <img draggable="false" class="w-1/3 md:w-1/4 opacity-40" src="@/../../public/images/escaner2.png" alt="scaner">
+      </figure>
+    </div>
     <p v-else class="flex items-center justify-center text-gray99 text-sm">
       Busca un producto para comenzar la venta
       <i class="hidden lg:inline fa-regular fa-hand-point-right ml-3"></i>

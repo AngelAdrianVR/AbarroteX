@@ -143,14 +143,23 @@
                           @click="showCashRegisterSelectionModal = true"><i
                             class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
                         <el-dropdown-item :disabled="!asignedCashRegister"
-                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'"><i
-                            class="fa-solid fa-circle-arrow-up text-xs mr-3"></i>Ingresar efectivo</el-dropdown-item>
+                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" />
+                          </svg>
+                          Ingresar efectivo
+                        </el-dropdown-item>
                         <el-dropdown-item :disabled="!asignedCashRegister"
-                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'"><i
-                            class="fa-solid fa-circle-arrow-down text-xs mr-3"></i>Retirar efectivo</el-dropdown-item>
-                        <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut"><i
-                            class="fa-solid fa-cash-register text-xs mr-3"></i>Hacer
-                          corte</el-dropdown-item>
+                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3 3m3-3 3 3" />
+                          </svg>
+                          Retirar efectivo</el-dropdown-item>
+                        <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut">
+                          <svg width="19" height="20" class="mr-3" viewBox="0 0 120 124" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M118.487 99.2735H2M118.487 99.2735L104.104 56.236M118.487 99.2735V109.594V110.801M2 99.2735L15.5041 56.236M2 99.2735V110.801M15.5041 56.236H104.104M15.5041 56.236V44.9277C15.5041 40.2068 20.2251 37.2424 23.1894 37.2424H27.9103M104.104 56.236V44.9277C104.104 41.0851 101.03 37.2424 96.3092 37.2424H86.9771M2 110.801V111.899M2 110.801L39.6578 110.911C40.4263 110.911 40.5361 111.899 39.6578 111.899H2M118.487 110.801H79.8408C79.1821 110.801 78.9625 111.79 79.8408 111.899H118.487M118.487 110.801V111.021V111.899M24.0677 46.7941C25.4118 46.7941 26.6874 46.7941 27.9103 46.7941M53.7109 46.7941C54.0403 46.7941 51.3199 46.7941 50.1976 46.7941M27.9103 46.7941V16.0531C27.9103 15.2845 28.1299 14.7356 29.4474 14.7356H47.7823C49.4291 14.7356 50.1976 14.9552 50.1976 16.0531V37.2424M27.9103 46.7941C36.1063 46.7941 41.9377 46.7941 50.1976 46.7941M50.1976 46.7941V37.2424M34.0586 22.5306C38.046 22.5306 40.2816 22.5306 44.269 22.5306M34.0586 30.8747C38.046 30.8747 40.2816 30.8747 44.269 30.8747M34.0586 39.3285C38.046 39.3285 40.2816 39.3285 44.269 39.3285M50.1976 37.2424H73.8024M73.8024 37.2424C73.8024 31.9259 73.8024 28.9451 73.8024 23.6285M73.8024 37.2424H86.9771M86.9771 37.2424V23.6285M86.9771 23.6285H64.1409C63.2626 23.6285 62.8387 23.4724 62.9332 22.4209V3.53705C62.9259 2.49762 63.1698 2.14235 64.1409 2H95.9799C97.0778 2 97.53 2.33134 97.6267 2.98811V21.5425C97.6089 22.8782 97.3906 23.4071 96.3092 23.6285H86.9771ZM2 111.899V120.683C2.06415 121.424 2.14221 121.816 3.20769 122H116.291C117.925 122.004 118.487 121.341 118.487 120.134V111.899M14.9552 88.8435C14.7421 89.6661 14.9552 89.9414 15.6139 89.9414H103.116C104.653 89.9414 104.873 89.5023 104.653 88.624C104.653 88.624 97.5169 66.3367 97.5169 66.2269C97.5169 66.1171 97.3705 66.1173 97.2973 66.1171C68.1936 66.0318 51.8083 66.0928 22.6404 66.0073C22.6404 66.0073 22.4209 65.8975 22.3111 66.2269C22.2013 66.5563 14.9552 88.8435 14.9552 88.8435ZM69.85 42.5123H90.161V50.6368H69.85V42.5123ZM71.0576 16.4922H89.0631C90.161 16.4922 90.71 16.4922 90.71 15.2845V10.2342C90.6518 9.36203 90.3806 9.02653 89.2827 9.02653H71.0576C69.9863 8.95894 69.6304 9.24611 69.6304 10.2342V15.2845C69.6304 16.1629 70.0206 16.4298 71.0576 16.4922ZM64.6898 110.911C64.6898 113.579 62.527 115.742 59.8591 115.742C57.1912 115.742 55.0284 113.579 55.0284 110.911C55.0284 108.243 57.1912 106.081 59.8591 106.081C62.527 106.081 64.6898 108.243 64.6898 110.911ZM40.097 85.4401H47.4529C48.3312 85.4401 48.3312 84.452 47.4529 84.3422H40.2068C39.4382 84.452 39.4382 85.3303 40.097 85.4401ZM64.1409 110.801C64.1409 113.166 62.2239 115.083 59.8591 115.083C57.4943 115.083 55.5773 113.166 55.5773 110.801C55.5773 108.437 57.4943 106.52 59.8591 106.52C62.2239 106.52 64.1409 108.437 64.1409 110.801ZM24.0676 85.4401H31.4235C32.3019 85.4401 32.3019 84.452 31.4235 84.3422H24.1774C23.4089 84.452 23.4089 85.3303 24.0676 85.4401ZM25.6047 79.0723H32.9606C33.8389 79.0723 33.8389 78.0842 32.9606 77.9744H25.7145C24.946 78.0842 24.946 78.9625 25.6047 79.0723ZM27.1417 72.4849H34.4976C35.376 72.4849 35.376 71.4968 34.4976 71.387H27.2515C26.483 71.4968 26.483 72.3751 27.1417 72.4849ZM41.8535 72.4849H49.2094C50.0878 72.4849 50.0878 71.4968 49.2094 71.387H41.9633C41.1948 71.4968 41.1948 72.3751 41.8535 72.4849ZM40.9752 79.0723H48.3311C49.2094 79.0723 49.2094 78.0842 48.3311 77.9744H41.085C40.3165 78.0842 40.3165 78.9625 40.9752 79.0723ZM71.936 85.4401H79.2919C80.1702 85.4401 80.1702 84.452 79.2919 84.3422H72.0457C71.2772 84.452 71.2772 85.3303 71.936 85.4401ZM55.9066 85.4401H63.2625C64.1408 85.4401 64.1408 84.452 63.2625 84.3422H56.0164C55.2479 84.452 55.2479 85.3303 55.9066 85.4401ZM55.9066 79.0723H63.2625C64.1408 79.0723 64.1408 78.0842 63.2625 77.9744H56.0164C55.2479 78.0842 55.2479 78.9625 55.9066 79.0723ZM56.1262 72.4849H63.4821C64.3604 72.4849 64.3604 71.4968 63.4821 71.387H56.236C55.4675 71.4968 55.4675 72.3751 56.1262 72.4849ZM69.9597 72.4849H77.3156C78.1939 72.4849 78.1939 71.4968 77.3156 71.387H70.0695C69.3009 71.4968 69.3009 72.3751 69.9597 72.4849ZM71.0576 79.0723H78.4135C79.2918 79.0723 79.2918 78.0842 78.4135 77.9744H71.1674C70.3988 78.0842 70.3988 78.9625 71.0576 79.0723ZM87.9652 85.4401H95.3211C96.1994 85.4401 96.1994 84.452 95.3211 84.3422H88.075C87.3065 84.452 87.3065 85.3303 87.9652 85.4401ZM84.8911 72.4849H92.247C93.1253 72.4849 93.1253 71.4968 92.247 71.387H85.0008C84.2323 71.4968 84.2323 72.3751 84.8911 72.4849ZM85.9889 79.0723H93.3449C94.2232 79.0723 94.2232 78.0842 93.3449 77.9744H86.0987C85.3302 78.0842 85.3302 78.9625 85.9889 79.0723Z" stroke="currentColor" stroke-width="2.19579"/>
+                          </svg>
+                          Hacer corte</el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
                   </el-dropdown>
@@ -163,12 +172,13 @@
         <div class="lg:flex lg:space-x-5 my-2">
           <!-- scaner de código  -->
           <div class="lg:w-[70%]">
-            <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
-              <input v-model="scannerQuery" :disabled="scanning || syncingIDB" @keydown.enter="getProductByCode"
+            <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4" @keydown="handleKeydownScanInput">
+              <input v-model="scannerQuery" :disabled="scanning || syncingIDB"
                 ref="scanInput" class="input w-full pl-9" placeholder="Escanea o teclea el código del producto"
                 type="text">
               <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
             </div>
+
             <!-- Pestañas -->
             <div class="lg:mx-7">
               <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs">
@@ -215,12 +225,51 @@
           <div class="lg:w-[30%]">
             <!-- buscador de productos -->
             <div class="relative">
-              <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
+              <el-select
+                @keydown="handleKeydownInputSearch"
+                v-model="productFoundSelectedName"
+                @change="handleSelectFoundProduct()"
+                ref="searchInput"
+                :disabled="syncingIDB"
+                filterable
+                remote
+                :remote-method="searchProducts"
+                :loading="loading"
+                placeholder="Buscar código o nombre de producto"
+                class="w-full"
+              >
+              <template #prefix>
+                <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+              </template>
+                <el-option
+                  v-for="(product, index) in productsFound"
+                  :key="index"
+                  :label="product.name"
+                  :value="product.name"
+                >
+                  <!-- opciones en tienda de ropa, zapateria y boutique -->
+                  <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                    class="w-4/5 flex items-center space-x-2">
+                    <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
+                      :style="{ color: product.additional?.color.color }"></i>
+                    <span>{{ product.name }}</span>
+                    <span class="text-gray99">
+                      ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
+                    </span>
+                  </p>
+                  <!-- opciones en tienda de abarrotes -->
+                  <div v-else>
+                    <span style="float: left; font-size: 14px">{{ product.name }}</span>
+                    <span style="float: right; color: #8492a6; font-size: 11px">{{ product.code }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <!-- <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
                 ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
                 type="search" :disabled="syncingIDB">
-              <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
+              <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i> -->
               <!-- Resultados de la búsqueda -->
-              <div v-if="searchFocus && searchQuery"
+              <!-- <div v-if="searchFocus && searchQuery"
                 class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
                 <ul v-if="productsFound?.length > 0 && !loading">
                   <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
@@ -242,12 +291,12 @@
                 </ul>
                 <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">
                   No se encontraron coincidencias
-                </p>
+                </p> -->
                 <!-- estado de carga -->
-                <div v-if="loading" class="flex justify-center items-center py-10">
+                <!-- <div v-if="loading" class="flex justify-center items-center py-10">
                   <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-                </div>
-              </div>
+                </div> -->
+              <!-- </div> -->
             </div>
             <!-- Detalle de producto encontrado -->
             <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
@@ -279,9 +328,9 @@
                 </div>
                 <div class="flex justify-between items-center mt-4">
                   <p class="text-gray99">Cantidad</p>
-                  <el-input-number v-if="isInventoryOn" v-model="quantity" :min="0"
+                  <el-input-number ref="quantitySelector" @keydown.enter="focusAddButton()" v-if="isInventoryOn" v-model="quantity" :min="0"
                     :max="productFoundSelected.current_stock" :precision="2" :disabled="isReading" />
-                  <el-input-number v-else v-model="quantity" :min="0" :precision="2" :disabled="isReading" />
+                  <el-input-number ref="quantitySelector" @keydown.enter="focusAddButton()" v-else v-model="quantity" :min="0" :precision="2" :disabled="isReading" />
                 </div>
                 <div class="text-center mt-7">
                   <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">
@@ -289,10 +338,11 @@
                     <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                   </div>
                   <div class="flex items-center justify-center space-x-3">
-                    <PrimaryButton @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
-                      class="!rounded-full !px-24" :disabled="quantity == 0">
+                    <button ref="addButton" @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
+                      class="rounded-full !px-24 text-white bg-primary text-sm py-1 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white focus:outline-none transition-all ease-linear duration-200"
+                      :disabled="quantity == 0">
                       Agregar
-                    </PrimaryButton>
+                    </button>
                      <el-tooltip
                       content="Pesar con báscula" placement="bottom">
                       <button @click="handleScale()" v-if="productFoundSelected?.bulk_product && $page.props.auth.user.scale_config.is_enabled" :disabled="isReading"
@@ -318,6 +368,9 @@
                     <p>Peso: {{ weight }}Kg</p>
                     <p>Total: $ {{ (weight * productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
                   </div>
+                    <figure v-if="isReading" class="my-5 flex items-center justify-center select-none">
+                      <img draggable="false" class="w-2/3 md:w-1/2 opacity-70" src="@/../../public/images/EmptyScale.png" alt="Agregar peso">
+                    </figure>
                 </div>
               </div>
               <div v-else class="text-center text-gray99 text-sm">
@@ -963,6 +1016,7 @@ export default {
       productsFound: null,
       productSelected: null, //producto escaneado agergado a la lista de compras
       productFoundSelected: null, //producto seleccionado desde barra de busqueda
+      productFoundSelectedName: null, //nombre del producto seleccionado desde barra de busqueda
       quantity: 1, //cantidad para agregar del producto escaneado o buscado
       tabIndex: 1, //index del tab - componente de tabs
       editableTabsValue: "1", //tab seleccionado - componente de tabs
@@ -1026,6 +1080,47 @@ export default {
     clients: Array
   },
   methods: {
+    // Ejecuta un metodo depende de la tecla presionada. atajos de teclado
+    handleKeydownScanInput(event) {
+      if (event.key === "ArrowRight") {
+        this.focusSearchInput();
+      } else if (event.key === "Enter") {
+        this.getProductByCode();
+      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
+        this.cashPayment();
+      }
+    },
+    handleKeydownInputSearch(event) {
+      if (event.key === "Control") {
+        this.$refs.scanInput.focus();
+      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
+        this.cashPayment();
+      }
+    },
+    handleSelectFoundProduct() {
+      this.focusQuantitySelector(); //enfoca el selector de cantidad
+      if( this.productsFound.length > 0 ) {
+        this.productFoundSelected = this.productsFound.find(product => product.name === this.productFoundSelectedName);
+      }
+    },
+    // enfoca el input de cantidad cuando se hace la busqueda por nombre de producto
+    focusQuantitySelector() {
+      this.$nextTick(() => {
+        this.$refs.quantitySelector.focus();
+      });
+    },
+    // enfoca el input de busqueda por nombre de producto
+    focusSearchInput() {
+      this.$nextTick(() => {
+        this.$refs.searchInput.focus();
+      });
+    },
+    // enfoca el boton de agregar producto cuando se hace la busqueda por nombre de producto
+    focusAddButton() {
+      this.$nextTick(() => {
+        this.$refs.addButton.focus();
+      });
+    },
     checkClientExist() { //revisa si hay cliente seleccionado para venta a crédito
       if (this.editableTabs[this.editableTabsValue - 1]?.client_id == null) {
         this.showClientConfirmModal = true;
@@ -1266,13 +1361,25 @@ export default {
         console.log(error);
       }
     },
-    async searchProducts() {
+    async searchProducts(query) {
+      this.searchQuery = query;
       try {
+        if (this.searchQuery.length < 2) {
+          return;
+        }
         this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
       } catch (error) {
         console.log(error);
       }
     },
+    //funciona con el input normal
+    // async searchProducts() {
+    //   try {
+    //     this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // },
     async fetchTotalSaleForCashCut() {
       try {
         const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
@@ -1308,8 +1415,11 @@ export default {
       }, 100);
     },
     async getProductByCode() {
+      // retorna si no hay código de producto escaneado
+      if (!this.scannerQuery) {
+        return;
+      }
       this.scanning = true;
-
       let foundProducts = await getItemByAttributes('products', { code: this.scannerQuery });
       let productScaned = foundProducts[0];
 
@@ -1359,6 +1469,8 @@ export default {
       this.scannerQuery = null;
       this.quantity = 1;
       this.scanning = false;
+      this.productFoundSelectedName = null;
+      this.productFoundSelected = null;
       this.inputFocus();
 
       // indicar al navegador mediante el local storage que hay proceso pendiente
@@ -1617,11 +1729,6 @@ export default {
       this.asignedCashRegister = this.cash_registers.find(item => item.id == this.$page.props.auth?.user?.cash_register_id);
       this.localCurrentCash = this.asignedCashRegister?.current_cash;
     }
-    if (this.isScanOn) {
-      this.$refs.scanInput.focus(); // Enfocar el input de código cuando se abre el modal
-    } else {
-      this.$refs.searchInput.focus(); // Enfocar el input de buscar producto cuando se abre el modal
-    }
 
     // sincronizar productos
     // const productsInIDB = await getAll('products');
@@ -1642,6 +1749,8 @@ export default {
     // Agregar escuchadores de eventos online/offline
     window.addEventListener('online', this.handleOnline);
     window.addEventListener('offline', this.handleOffline);
+
+    this.inputFocus();
   },
   beforeUnmount() {
     // Eliminar los escuchadores de eventos al desmontar el componente

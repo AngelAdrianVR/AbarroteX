@@ -116,8 +116,8 @@
                 <p class="text-sm text-center">Te invitamos a seguir explorando sobre las diversas funcionalidades y
                     herramientas del sistema.</p>
 
-                <figure class="my-7 flex items-center justify-center">
-                    <img class="w-1/2" src="@/../../public/images/rocket.jpg" alt="">
+                <figure class="my-7 flex items-center justify-center select-none">
+                    <img draggable="false" class="w-1/2" src="@/../../public/images/rocket.jpg" alt="">
                 </figure>
 
                 <div class="text-center">
