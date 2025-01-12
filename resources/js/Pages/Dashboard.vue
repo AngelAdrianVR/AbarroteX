@@ -1,7 +1,8 @@
 <template>
     <AppLayout title="Reportes">
         <h1 class="font-bold mx-4 lg:mx-32 mt-4">Reportes</h1>
-        <section v-if="$page.props.auth.user.permissions.includes('Filtrar por periodo')" class="flex items-center justify-center">
+        <section v-if="$page.props.auth.user.permissions.includes('Filtrar por periodo')"
+            class="flex items-center justify-center">
             <el-radio-group v-model="period" @change="handleChangePeriod"
                 class="flex flex-col md:flex-row !items-start my-5 lg:mx-14">
                 <el-radio value="Hoy">
@@ -28,15 +29,14 @@
         <main v-else class="mx-2 lg:mx-14 my-6">
             <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
                 <template v-for="(item, index) in getSimpleKpisOptions" :key="index">
-                    <SimpleKPI v-if="item.show" :title="item.title"
-                        :icon="item.icon" class="self-start" :value="item.value" />
+                    <SimpleKPI v-if="item.show" :title="item.title" :icon="item.icon" class="self-start"
+                        :value="item.value" />
                 </template>
                 <Kpi v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
             </section>
             <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
                 <template v-for="(item, index) in getBarChartOptions" :key="index">
-                    <ComparisonBarChart v-if="item.show" :options="item"
-                        :title="getBarChartTitle(item.title)" />
+                    <ComparisonBarChart v-if="item.show" :options="item" :title="getBarChartTitle(item.title)" />
                 </template>
                 <!-- <PieChart v-for="(item, index) in getPieChartOptions" :key="index" :options="item"
                     title="Top 5 productos más vendidos" icon='<i class="fa-solid fa-trophy ml-2"></i>' /> -->
@@ -74,7 +74,7 @@ export default {
             // top products
             topProductsCurrentPeriod: [],
             // Permisos de rol
-            canSeeDashboard: ['Administrador'].includes(this.$page.props.auth.user.rol),
+            canSeeDashboard: this.$page.props.auth.user.store.activated_modules?.includes('Reportes'),
 
             loading: false,
         }
@@ -471,7 +471,7 @@ export default {
         }
     },
     mounted() {
-         // redirigir a punto de venta si no tiene permiso para ver dashboard
+        // redirigir a punto de venta si no tiene permiso para ver dashboard y acaba de iniciar sesion
         if (!this.canSeeDashboard) {
             this.$inertia.visit(route('sales.point'));
         }
