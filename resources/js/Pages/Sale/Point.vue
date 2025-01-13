@@ -109,10 +109,19 @@
             </div>
             <article class="flex items-center space-x-3">
               <!-- Indicadores activos como báscula y descuentos -->
-               <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled" :content="isConnectedScale ? 'Báscula sincronizada' : 'Sincronizar báscula'" placement="bottom">
-                  <button @click="!isConnectedScale ? connectScale() : ''" class="rounded-full p-1 flex items-center justify-center cursor-default" :class="isConnectedScale ? 'bg-green-300' : 'bg-red-300'">
+               <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled" placement="left">
+                  <template #content>
+                    <p v-if="isConnectedScale" class="text-sm">Báscula activada</p>
+                    <div v-else class="text-sm">
+                      <p class="text-[#C5C5C5]">Báscula desctivada</p>
+                      <p class="">Verifique la conexión de la báscula. Si la <br>
+                        conexión es correcta y no se activa, haga <br>
+                        clic en <a class="text-primary underline" href="/settings?tab=4">Ir a configurar</a> </p>
+                    </div>
+                  </template>
+                  <button @click="!isConnectedScale ? connectScale() : ''" class="rounded-full p-1 flex items-center justify-center cursor-default" :class="isConnectedScale ? 'text-[#189203]' : 'text-black'">
                     <svg width="77" height="73" viewBox="0 0 77 73" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="size-4">
-                      <path d="M5.83797 42.9021L4.29033 64.6428C4.29033 65.6746 4.80621 66.4115 5.46948 66.4115H69.7336C71.2636 66.4232 72.313 65.8956 72.313 64.6428L70.4706 42.9021M5.83797 42.9021H70.4706M5.83797 42.9021C2.0802 42.9021 1.04867 40.6174 2.89008 35.3849L13.871 5.09529C14.3869 3.54765 15.4923 2 17.04 2H58.0894C60.5951 2 62.0691 2.88437 63.0272 5.09529L74.8187 37.7432C75.6294 40.0279 73.6396 42.9021 70.4706 42.9021M52.2685 57.2731L51.7527 57.8626M51.9001 58.3048L52.637 57.4204L52.7107 57.3467L51.8264 58.3785M60.8174 57.2731L61.6281 58.3785M60.8174 50.0507L61.7018 51.1562M51.8264 50.0507L52.8581 51.0825M62.4388 68.6961H68.2609M8.63968 68.7698H14.0933M14.4618 52.2616V56.8309C14.4618 57.2731 14.8303 57.6415 15.2724 57.6415H36.6447C37.6765 57.6415 37.7501 57.2731 37.7501 56.8309V52.2616C37.7501 51.672 37.3817 51.672 36.6447 51.672H15.1987C14.7566 51.672 14.4618 51.7457 14.4618 52.2616ZM69.5874 67.0748C69.5874 69.3541 67.7397 71.2019 65.4604 71.2019C63.1811 71.2019 61.3333 69.3541 61.3333 67.0748H69.5874ZM15.3461 67.0748C15.3461 69.3541 13.4984 71.2019 11.2191 71.2019C8.93978 71.2019 7.09203 69.3541 7.09203 67.0748H15.3461ZM53.0792 57.8626C53.0792 58.3104 52.7163 58.6733 52.2685 58.6733C51.8208 58.6733 51.4579 58.3104 51.4579 57.8626C51.4579 57.4149 51.8208 57.052 52.2685 57.052C52.7163 57.052 53.0792 57.4149 53.0792 57.8626ZM61.9966 57.8626C61.9966 58.3104 61.6336 58.6733 61.1859 58.6733C60.7382 58.6733 60.3753 58.3104 60.3753 57.8626C60.3753 57.4149 60.7382 57.052 61.1859 57.052C61.6336 57.052 61.9966 57.4149 61.9966 57.8626ZM53.0792 50.6403C53.0792 51.088 52.7163 51.451 52.2685 51.451C51.8208 51.451 51.4579 51.088 51.4579 50.6403C51.4579 50.1926 51.8208 49.8296 52.2685 49.8296C52.7163 49.8296 53.0792 50.1926 53.0792 50.6403ZM61.9966 50.6403C61.9966 51.088 61.6336 51.451 61.1859 51.451C60.7382 51.451 60.3753 51.088 60.3753 50.6403C60.3753 50.1926 60.7382 49.8296 61.1859 49.8296C61.6336 49.8296 61.9966 50.1926 61.9966 50.6403ZM16.3042 53.4408V55.6517H35.5392V53.4408H16.3042Z" stroke="black" stroke-width="2.9479"/>
+                      <path d="M5.83797 42.9021L4.29033 64.6428C4.29033 65.6746 4.80621 66.4115 5.46948 66.4115H69.7336C71.2636 66.4232 72.313 65.8956 72.313 64.6428L70.4706 42.9021M5.83797 42.9021H70.4706M5.83797 42.9021C2.0802 42.9021 1.04867 40.6174 2.89008 35.3849L13.871 5.09529C14.3869 3.54765 15.4923 2 17.04 2H58.0894C60.5951 2 62.0691 2.88437 63.0272 5.09529L74.8187 37.7432C75.6294 40.0279 73.6396 42.9021 70.4706 42.9021M52.2685 57.2731L51.7527 57.8626M51.9001 58.3048L52.637 57.4204L52.7107 57.3467L51.8264 58.3785M60.8174 57.2731L61.6281 58.3785M60.8174 50.0507L61.7018 51.1562M51.8264 50.0507L52.8581 51.0825M62.4388 68.6961H68.2609M8.63968 68.7698H14.0933M14.4618 52.2616V56.8309C14.4618 57.2731 14.8303 57.6415 15.2724 57.6415H36.6447C37.6765 57.6415 37.7501 57.2731 37.7501 56.8309V52.2616C37.7501 51.672 37.3817 51.672 36.6447 51.672H15.1987C14.7566 51.672 14.4618 51.7457 14.4618 52.2616ZM69.5874 67.0748C69.5874 69.3541 67.7397 71.2019 65.4604 71.2019C63.1811 71.2019 61.3333 69.3541 61.3333 67.0748H69.5874ZM15.3461 67.0748C15.3461 69.3541 13.4984 71.2019 11.2191 71.2019C8.93978 71.2019 7.09203 69.3541 7.09203 67.0748H15.3461ZM53.0792 57.8626C53.0792 58.3104 52.7163 58.6733 52.2685 58.6733C51.8208 58.6733 51.4579 58.3104 51.4579 57.8626C51.4579 57.4149 51.8208 57.052 52.2685 57.052C52.7163 57.052 53.0792 57.4149 53.0792 57.8626ZM61.9966 57.8626C61.9966 58.3104 61.6336 58.6733 61.1859 58.6733C60.7382 58.6733 60.3753 58.3104 60.3753 57.8626C60.3753 57.4149 60.7382 57.052 61.1859 57.052C61.6336 57.052 61.9966 57.4149 61.9966 57.8626ZM53.0792 50.6403C53.0792 51.088 52.7163 51.451 52.2685 51.451C51.8208 51.451 51.4579 51.088 51.4579 50.6403C51.4579 50.1926 51.8208 49.8296 52.2685 49.8296C52.7163 49.8296 53.0792 50.1926 53.0792 50.6403ZM61.9966 50.6403C61.9966 51.088 61.6336 51.451 61.1859 51.451C60.7382 51.451 60.3753 51.088 60.3753 50.6403C60.3753 50.1926 60.7382 49.8296 61.1859 49.8296C61.6336 49.8296 61.9966 50.1926 61.9966 50.6403ZM16.3042 53.4408V55.6517H35.5392V53.4408H16.3042Z" stroke="currentColor" stroke-width="2.9479"/>
                     </svg>
                   </button>
                 </el-tooltip>
@@ -224,79 +233,52 @@
           <!-- seccion de desgloce de montos -->
           <div class="lg:w-[30%]">
             <!-- buscador de productos -->
-            <div class="relative">
-              <el-select
-                @keydown="handleKeydownInputSearch"
+            <div>
+              <el-autocomplete
                 v-model="productFoundSelectedName"
-                @change="handleSelectFoundProduct()"
-                ref="searchInput"
-                :disabled="syncingIDB"
-                filterable
-                remote
-                :remote-method="searchProducts"
-                :loading="loading"
+                :fetch-suggestions="searchProducts"
                 placeholder="Buscar código o nombre de producto"
-                class="w-full"
+                @select="handleSelectFoundProduct()"
+                :value-key="'name'"
+                :loading="loading"
+                :disabled="syncingIDB || scanning"
+                :popper-class="'w-1/4'"
+                ref="searchInput"
+                @keydown="handleKeydownInputSearch"
               >
-              <template #prefix>
-                <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
-              </template>
-                <el-option
-                  v-for="(product, index) in productsFound"
-                  :key="index"
-                  :label="product.name"
-                  :value="product.name"
-                >
-                  <!-- opciones en tienda de ropa, zapateria y boutique -->
-                  <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
-                    class="w-4/5 flex items-center space-x-2">
-                    <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
-                      :style="{ color: product.additional?.color.color }"></i>
-                    <span>{{ product.name }}</span>
-                    <span class="text-gray99">
-                      ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
+                <template #prefix>
+                  <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                </template>
+
+                <template #default="{ item }">
+                  <!-- Opciones en tienda de ropa, zapatería y boutique -->
+                  <p
+                    v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                    class="w-4/5 flex items-center space-x-2"
+                  >
+                    <i
+                      v-if="item.additional?.color.color"
+                      class="fa-solid fa-shirt text-xs"
+                      :style="{ color: item.additional?.color.color }"
+                    ></i>
+                    <span>{{ item.name }}</span>
+                    <span class="text-gray-400">
+                      ({{ item.additional?.color.name }}-{{ item.additional?.size.name }})
                     </span>
                   </p>
-                  <!-- opciones en tienda de abarrotes -->
+                  <!-- Opciones en tienda de abarrotes -->
                   <div v-else>
-                    <span style="float: left; font-size: 14px">{{ product.name }}</span>
-                    <span style="float: right; color: #8492a6; font-size: 11px">{{ product.code }}</span>
+                    <span style="float: left; font-size: 14px">{{ item.name }}</span>
+                    <span style="float: right; color: #8492a6; font-size: 11px">{{ item.code }}</span>
                   </div>
-                </el-option>
-              </el-select>
-              <!-- <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
-                ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
-                type="search" :disabled="syncingIDB">
-              <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i> -->
-              <!-- Resultados de la búsqueda -->
-              <!-- <div v-if="searchFocus && searchQuery"
-                class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
-                <ul v-if="productsFound?.length > 0 && !loading">
-                  <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
-                    class="hover:bg-gray-200 cursor-pointer text-xs px-3 py-2 flex space-x-2">
-                    <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
-                      class="w-4/5 flex items-center space-x-2">
-                      <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
-                        :style="{ color: product.additional?.color.color }"></i>
-                      <span>{{ product.name }}</span>
-                      <span class="text-gray99">
-                        ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
-                      </span>
-                    </p>
-                    <span v-else class="w-4/5">{{ product.name }}</span>
-                    <span v-if="product.code" class="w-1/5 text-[10px] text-gray99">
-                      {{ product.code }}
-                    </span>
-                  </li>
-                </ul>
-                <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">
-                  No se encontraron coincidencias
-                </p> -->
-                <!-- estado de carga -->
-                <!-- <div v-if="loading" class="flex justify-center items-center py-10">
-                  <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-                </div> -->
-              <!-- </div> -->
+                </template>
+
+                <template #loading>
+                  <svg class="circular" viewBox="0 0 50 50">
+                    <circle class="path" cx="25" cy="25" r="20" fill="none" />
+                  </svg>
+                </template>
+              </el-autocomplete>
             </div>
             <!-- Detalle de producto encontrado -->
             <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
@@ -320,57 +302,53 @@
                   </p>
                   <p class="text-[#5FCB1F]">${{
                     productFoundSelected.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                      ",") }}</p>
-                </div>
-                <div v-if="productFoundSelected.bulk_product" class="flex justify-between items-center text-base">
-                  <p class="text-gray99">Producto a granel</p>
-                  <p class="text-gray99">El {{ productFoundSelected.measure_unit }}</p>
+                      ",") }} <span v-if="productFoundSelected.bulk_product" class="text-gray-800"> /{{ productFoundSelected.measure_unit === 'Kilogramo' ? 'Kg' : 'L' }}</span></p>
                 </div>
                 <div class="flex justify-between items-center mt-4">
                   <p class="text-gray99">Cantidad</p>
-                  <el-input-number ref="quantitySelector" @keydown.enter="focusAddButton()" v-if="isInventoryOn" v-model="quantity" :min="0"
-                    :max="productFoundSelected.current_stock" :precision="2" :disabled="isReading" />
-                  <el-input-number ref="quantitySelector" @keydown.enter="focusAddButton()" v-else v-model="quantity" :min="0" :precision="2" :disabled="isReading" />
+                  <el-input-number ref="quantitySelector" @keydown="handleKeydownQuantitySelector" v-if="isInventoryOn" v-model="quantity" :min="0"
+                    :max="productFoundSelected.current_stock" :precision="2" :disabled="isReadingScale">
+                    <template #suffix>
+                      <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">{{ 
+                        productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                        productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                      }}</span>
+                    </template>
+                  </el-input-number>
+                  <el-input-number ref="quantitySelector" @keydown="handleKeydownQuantitySelector" v-else v-model="quantity" :min="0" :precision="2" :disabled="isReadingScale">
+                    <template #suffix>
+                      <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">{{ 
+                        productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                        productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                      }}</span>
+                    </template>
+                  </el-input-number>
+                </div>
+                <!-- instrucciones de bascula -->
+                <div v-if="isConnectedScale && productFoundSelected.bulk_product">
+                  <p class="text-[#7A7A7A] mt-3 text-sm">Agrega la cantidad manual o coloca el producto sobre la bascula</p>
+                  <figure class="my-2 flex items-center justify-center select-none">
+                    <img draggable="false" class="w-2/3 md:w-[40%] opacity-70" src="@/../../public/images/EmptyScale.png" alt="Agregar peso">
+                  </figure>
                 </div>
                 <div class="text-center mt-7">
                   <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">
                     No te quedan existencias de este producto.
                     <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                   </div>
-                  <div class="flex items-center justify-center space-x-3">
+                  <div>
                     <button ref="addButton" @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
                       class="rounded-full !px-24 text-white bg-primary text-sm py-1 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white focus:outline-none transition-all ease-linear duration-200"
                       :disabled="quantity == 0">
                       Agregar
                     </button>
-                     <el-tooltip
-                      content="Pesar con báscula" placement="bottom">
-                      <button @click="handleScale()" v-if="productFoundSelected?.bulk_product && $page.props.auth.user.scale_config.is_enabled" :disabled="isReading"
-                        class="flex items-center justify-center rounded-full p-1 bg-green-500 text-white size-10 disabled:cursor-not-allowed disabled:bg-gray-400">
-                        <svg width="77" height="73" viewBox="0 0 77 73" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-6">
-                          <path d="M5.83797 42.9021L4.29033 64.6428C4.29033 65.6746 4.80621 66.4115 5.46948 66.4115H69.7336C71.2636 66.4232 72.313 65.8956 72.313 64.6428L70.4706 42.9021M5.83797 42.9021H70.4706M5.83797 42.9021C2.0802 42.9021 1.04867 40.6174 2.89008 35.3849L13.871 5.09529C14.3869 3.54765 15.4923 2 17.04 2H58.0894C60.5951 2 62.0691 2.88437 63.0272 5.09529L74.8187 37.7432C75.6294 40.0279 73.6396 42.9021 70.4706 42.9021M52.2685 57.2731L51.7527 57.8626M51.9001 58.3048L52.637 57.4204L52.7107 57.3467L51.8264 58.3785M60.8174 57.2731L61.6281 58.3785M60.8174 50.0507L61.7018 51.1562M51.8264 50.0507L52.8581 51.0825M62.4388 68.6961H68.2609M8.63968 68.7698H14.0933M14.4618 52.2616V56.8309C14.4618 57.2731 14.8303 57.6415 15.2724 57.6415H36.6447C37.6765 57.6415 37.7501 57.2731 37.7501 56.8309V52.2616C37.7501 51.672 37.3817 51.672 36.6447 51.672H15.1987C14.7566 51.672 14.4618 51.7457 14.4618 52.2616ZM69.5874 67.0748C69.5874 69.3541 67.7397 71.2019 65.4604 71.2019C63.1811 71.2019 61.3333 69.3541 61.3333 67.0748H69.5874ZM15.3461 67.0748C15.3461 69.3541 13.4984 71.2019 11.2191 71.2019C8.93978 71.2019 7.09203 69.3541 7.09203 67.0748H15.3461ZM53.0792 57.8626C53.0792 58.3104 52.7163 58.6733 52.2685 58.6733C51.8208 58.6733 51.4579 58.3104 51.4579 57.8626C51.4579 57.4149 51.8208 57.052 52.2685 57.052C52.7163 57.052 53.0792 57.4149 53.0792 57.8626ZM61.9966 57.8626C61.9966 58.3104 61.6336 58.6733 61.1859 58.6733C60.7382 58.6733 60.3753 58.3104 60.3753 57.8626C60.3753 57.4149 60.7382 57.052 61.1859 57.052C61.6336 57.052 61.9966 57.4149 61.9966 57.8626ZM53.0792 50.6403C53.0792 51.088 52.7163 51.451 52.2685 51.451C51.8208 51.451 51.4579 51.088 51.4579 50.6403C51.4579 50.1926 51.8208 49.8296 52.2685 49.8296C52.7163 49.8296 53.0792 50.1926 53.0792 50.6403ZM61.9966 50.6403C61.9966 51.088 61.6336 51.451 61.1859 51.451C60.7382 51.451 60.3753 51.088 60.3753 50.6403C60.3753 50.1926 60.7382 49.8296 61.1859 49.8296C61.6336 49.8296 61.9966 50.1926 61.9966 50.6403ZM16.3042 53.4408V55.6517H35.5392V53.4408H16.3042Z" stroke="currentColor" stroke-width="2.9479"/>
-                        </svg>
-                      </button>
-                    </el-tooltip>
-                     <el-tooltip
-                      content="Terminar lectura" placement="bottom">
-                      <button @click="stopReading()" v-if="isReading"
-                        class="flex items-center justify-center rounded-full p-1 border border-gray-300 bg-gray-100 text-red-500 size-10">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </el-tooltip>
                   </div>
 
                   <!-- //Lectura de báscula y costo total -->
-                  <div v-if="isReading" class="mt-5 p-4 rounded-md flex items-center justify-between bg-gray-200">
+                  <div v-if="isReadingScale" class="mt-5 p-4 rounded-md flex items-center justify-between bg-gray-200">
                     <p>Peso: {{ weight }}Kg</p>
                     <p>Total: $ {{ (weight * productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
                   </div>
-                    <figure v-if="isReading" class="my-5 flex items-center justify-center select-none">
-                      <img draggable="false" class="w-2/3 md:w-1/2 opacity-70" src="@/../../public/images/EmptyScale.png" alt="Agregar peso">
-                    </figure>
                 </div>
               </div>
               <div v-else class="text-center text-gray99 text-sm">
@@ -959,12 +937,12 @@ export default {
       categoryForm,
 
       //báscula
-      isConnectedScale: false, // Estado de conexión
+      isConnectedScale: false, // Estado de conexión de la báscula
       port: null, // Puerto serie de la báscula
       reader: null, // Lector de datos del puerto
       weight: "0.00", // Peso leído de la báscula
       intervalId: null, // Para guardar el ID del intervalo
-      isReading: false, // Para controlar el estado de lectura
+      isReadingScale: false, // Para controlar el estado de lectura
 
       // caja
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
@@ -1093,13 +1071,28 @@ export default {
         this.$refs.scanInput.focus();
       } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
         this.cashPayment();
+      } else if (event.key === "Escape") {
+        this.focusSearchInput();
+      }
+    },
+    handleKeydownQuantitySelector(event) {
+      if (event.key === "Enter") {
+        this.focusAddButton();
+      } else if (event.key === "Escape") {
+        this.focusSearchInput();
       }
     },
     handleSelectFoundProduct() {
-      this.focusQuantitySelector(); //enfoca el selector de cantidad
       if( this.productsFound.length > 0 ) {
         this.productFoundSelected = this.productsFound.find(product => product.name === this.productFoundSelectedName);
       }
+      // si el producto es a granel y en las configuraciones está activada la báscula se ejecuta el manejador de bascula
+      if (this.productFoundSelected.bulk_product && this.$page.props.auth.user.scale_config?.is_enabled) {
+        //se ejecuta el manejador de bascula si el producto es a granel
+        this.handleScale();
+      }
+      this.focusQuantitySelector(); //enfoca el selector de cantidad
+      this.productFoundSelectedName = null; //borra el nombre buscado para que no se muestre la misma opcion
     },
     // enfoca el input de cantidad cuando se hace la busqueda por nombre de producto
     focusQuantitySelector() {
@@ -1359,25 +1352,31 @@ export default {
         console.log(error);
       }
     },
-    async searchProducts(query) {
+    async searchProducts(query, cb) {
       this.searchQuery = query;
+      this.loading = true; // Activa el estado de carga
       try {
-        if (this.searchQuery.length < 2) {
+        // Ajustar con cuántas letras comienza a buscar
+        if (this.searchQuery.length < 1) {
+          cb([]); // Devuelve un arreglo vacío si no hay suficientes caracteres
           return;
         }
+
+        const results = await getItemByPartialAttributes('products', {
+          name: this.searchQuery,
+          code: this.searchQuery,
+        });
+
         this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
+        cb(results); // Llama al callback con los resultados
+
       } catch (error) {
-        console.log(error);
+        console.error(error);
+        cb([]); // En caso de error, también devuelve un arreglo vacío
+      } finally {
+        this.loading = false; // Desactiva el estado de carga
       }
     },
-    //funciona con el input normal
-    // async searchProducts() {
-    //   try {
-    //     this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // },
     async fetchTotalSaleForCashCut() {
       try {
         const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
@@ -1442,6 +1441,10 @@ export default {
       }
     },
     addSaleProduct(product) {
+      // si el producto es a granel y se está utilizando la báscula se guarda el peso en la variable quantity
+      if ( this.isReadingScale && this.weight > 0) {
+        this.quantity = this.weight;
+      }
       //revisa si el producto a agregar ya esta dentro del arreglo
       const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
         return sale.product.id == product.id;
@@ -1449,27 +1452,30 @@ export default {
       if (existingIndex !== -1) {
         this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
           ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + (this.isReading ? this.weight : this.quantity)
+          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
         };
       } else {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
-          quantity: this.isReading ? this.weight : this.quantity, //si se esta leyendo de la báscula se agrega el peso, si no la cantidad
+          quantity: this.quantity,
           originalPrice: null,
         });
       }
 
       // si esta leyeendo de la báscula se detiene la lectura
-      if (this.isReading) {
-        this.stopReading();
+      if (this.isReadingScale) {
+        this.stopReadingScale();
       }
       this.scannerQuery = null;
       this.quantity = 1;
       this.scanning = false;
-      this.productFoundSelectedName = null;
       this.productFoundSelected = null;
       this.inputFocus();
+
+      if ( this.isReadingScale ) {
+        this.stopReadingScale(); //detiene la lectura de la báscula
+      }
 
       // indicar al navegador mediante el local storage que hay proceso pendiente
       const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
@@ -1575,23 +1581,23 @@ export default {
       }
     },
     handleScale() {
-        if (this.isConnectedScale) {
-            // Si la báscula está sincronizada, empieza a leer
-            this.startReading();
-        } else {
-            // Si no está sincronizada, muestra la confirmación
-            this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
-                confirmButtonText: 'Sí',
-                cancelButtonText: 'No',
-                type: 'warning'
-            }).then(() => {
-                // Si el usuario acepta, sincroniza la báscula
-                this.connectScale();
-            }).catch(() => {
-                // Si el usuario cancela, no hace nada
-                console.log('Sincronización cancelada');
-            });
-        }
+      if (this.isConnectedScale) {
+          // Si la báscula está sincronizada, empieza a leer
+          this.startReadingScale();
+      } else {
+          // Si no está sincronizada, muestra la confirmación
+          this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
+              confirmButtonText: 'Sí',
+              cancelButtonText: 'No',
+              type: 'warning'
+          }).then(() => {
+              // Si el usuario acepta, sincroniza la báscula
+              this.connectScale();
+          }).catch(() => {
+              // Si el usuario cancela, no hace nada
+              console.log('Sincronización cancelada');
+          });
+      }
     },
     async connectScale() {
       try {
@@ -1632,18 +1638,18 @@ export default {
         // alert("No se conectó la báscula.");
       }
     },
-    async startReading() {
+    async startReadingScale() {
         if (!this.port || !this.port.readable || !this.port.writable) {
             alert("Conecta la báscula primero.");
             return;
         }
 
-        if (this.isReading) {
+        if (this.isReadingScale) {
             alert("La lectura ya está en curso.");
             return;
         }
 
-        this.isReading = true;
+        this.isReadingScale = true;
 
         this.intervalId = setInterval(async () => {
             try {
@@ -1664,7 +1670,7 @@ export default {
                     console.log("Lectura finalizada.");
                     this.reader.releaseLock();
                     this.reader = null;
-                    this.stopReading(); // Detiene la lectura si es el final
+                    this.stopReadingScale(); // Detiene la lectura si es el final
                     return;
                 }
 
@@ -1673,18 +1679,18 @@ export default {
 
             } catch (error) {
                 console.error("Error al leer datos:", error);
-                this.stopReading(); // Detener lectura en caso de error
+                this.stopReadingScale(); // Detener lectura en caso de error
             }
         }, 200); // Intervalo de 500 ms
     },
-    stopReading() {
+    stopReadingScale() {
         if (this.intervalId) {
             clearInterval(this.intervalId); // Detiene el intervalo
             this.intervalId = null;
             console.log("Intervalo detenido.");
         }
 
-        this.isReading = false;
+        this.isReadingScale = false;
         console.log("Lectura detenida.");
     },
     async disconnectScale() {
@@ -1757,3 +1763,72 @@ export default {
   },
 }
 </script>
+
+# Componente de carga del input de busqueda por nombre o código de producto (no se muestra en local, en produccion no lo sé)
+<style>
+  .circular {
+  display: inline;
+  height: 30px;
+  width: 30px;
+  animation: loading-rotate 2s linear infinite;
+}
+.path {
+  animation: loading-dash 1.5s ease-in-out infinite;
+  stroke-dasharray: 90, 150;
+  stroke-dashoffset: 0;
+  stroke-width: 2;
+  stroke: var(--el-color-primary);
+  stroke-linecap: round;
+}
+.loading-path .dot1 {
+  transform: translate(3.75px, 3.75px);
+  fill: var(--el-color-primary);
+  animation: custom-spin-move 1s infinite linear alternate;
+  opacity: 0.3;
+}
+.loading-path .dot2 {
+  transform: translate(calc(100% - 3.75px), 3.75px);
+  fill: var(--el-color-primary);
+  animation: custom-spin-move 1s infinite linear alternate;
+  opacity: 0.3;
+  animation-delay: 0.4s;
+}
+.loading-path .dot3 {
+  transform: translate(3.75px, calc(100% - 3.75px));
+  fill: var(--el-color-primary);
+  animation: custom-spin-move 1s infinite linear alternate;
+  opacity: 0.3;
+  animation-delay: 1.2s;
+}
+.loading-path .dot4 {
+  transform: translate(calc(100% - 3.75px), calc(100% - 3.75px));
+  fill: var(--el-color-primary);
+  animation: custom-spin-move 1s infinite linear alternate;
+  opacity: 0.3;
+  animation-delay: 0.8s;
+}
+@keyframes loading-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loading-dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -40px;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -120px;
+  }
+}
+@keyframes custom-spin-move {
+  to {
+    opacity: 1;
+  }
+}
+</style>

@@ -67,8 +67,22 @@
         </div>
         <div class="w-[20%]">
           <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small"
-            :max="sale.product.current_stock" :precision="2" />
-          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
+            :max="sale.product.current_stock" :precision="2">
+            <template #suffix>
+                <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{ 
+                  sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                }}</span>
+              </template>
+          </el-input-number>
+          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small">
+            <template #suffix>
+                <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{ 
+                  sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                }}</span>
+              </template>
+          </el-input-number>
         </div>
         <div class="text-[#5FCB1F] font-bold w-[15%] text-lg">${{ (sale.product.public_price *
           sale.quantity).toLocaleString('en-US', {
