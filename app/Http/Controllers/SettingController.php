@@ -10,7 +10,6 @@ use Spatie\Permission\Models\Role;
 
 class SettingController extends Controller
 {
-
     public function index()
     {
         $users = User::with(['cashRegister:id,name', 'roles'])
@@ -20,7 +19,35 @@ class SettingController extends Controller
             })
             ->get();
 
-        return inertia('Setting/Index', compact('users'));
+        $roles = Role::where('id', '<>', 1) //todos los roles menos 'Administrador'
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        return inertia('Setting/Index', compact('users', 'roles'));
+    }
+
+    public function createRole(Request $request)
+    {
+        $permissions = Permission::all()->groupBy(function ($data) {
+            return $data->category;
+        });
+        $roles = Role::where('id', '<>', 1) //todos los roles menos 'Administrador'
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        return inertia('Setting/CreateRole', compact('permissions', 'roles'));
+    }
+    
+    public function editRole(Request $request)
+    {
+        $permissions = Permission::all()->groupBy(function ($data) {
+            return $data->category;
+        });
+        $roles = Role::where('id', '<>', 1) //todos los roles menos 'Administrador'
+            ->where('store_id', auth()->user()->store_id)
+            ->get();
+
+        return inertia('Setting/EditRole', compact('permissions', 'roles'));
     }
 
     public function storeRole(Request $request)

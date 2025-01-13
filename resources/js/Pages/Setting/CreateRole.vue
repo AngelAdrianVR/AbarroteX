@@ -1,149 +1,56 @@
 <template>
-    <AppLayout title="Nuevo usuario">
+    <AppLayout title="Nuevo rol">
         <div class="px-3 md:px-10 py-7">
-            <Back :to="route('settings.index', {tab: '2'})" />
-            <form v-if="usersNotExceededYet" @submit.prevent="store"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 grid grid-cols-2 gap-3 mx-auto mt-7">
-                <h1 class="font-bold ml-2 col-span-full">Crear nuevo usuario</h1>
-
+            <Back :to="route('settings.index', { tab: '2' })" />
+            <form @submit.prevent="store"
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-2/3 mx-auto mt-7">
                 <div>
-                    <InputLabel value="Nombre de usuario*" />
-                    <el-input v-model="form.name" placeholder="Escribe el nombre del usuario" :maxlength="100"
+                    <InputLabel value="Nombre del rol *" />
+                    <el-input v-model="form.name" placeholder="Ej. Cajero" class="!w-1/2" :maxlength="255"
                         clearable />
                     <InputError :message="form.errors.name" />
                 </div>
-                <div>
-                    <InputLabel value="Correo electrónico*" />
-                    <el-input v-model="form.email" placeholder="Ingresa el corre electrónico del usuario"
-                        :maxlength="100" clearable />
-                    <InputError :message="form.errors.email" />
-                </div>
-                <div>
-                    <InputLabel value="Teléfono*" />
-                    <el-input v-model="form.phone"
-                        :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
-                        :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
-                        placeholder="Ingresa el número de teléfono" />
-                    <InputError :message="form.errors.phone" />
-                </div>
-                <div class="col-span-full">
-                    <div class="flex items-center space-x-5">
-                        <InputLabel value="Rol" />
-                        <button @click="showRoleModal = true" type="button" class="text-primary text-sm">
-                            + Crear rol
-                        </button>
+                <h2 class="flex items-center space-x-5 my-3">
+                    <span class="font-bold">Agregar permisos</span>
+                    <button type="button" @click="grantAllPermissions" class="text-primary underline">
+                        Dar acceso total
+                    </button>
+                </h2>
+                <div class="lg:grid grid-cols-4">
+                    <div v-for="(guard, index) in Object.keys(permissions).filter(permission => this.$page.props.auth.user.store.activated_modules.includes(permission))"
+                        :key="index" class="border p-3">
+                        <div class="flex items-center justify-between pb-1 mb-1 border-grayD9 border-b">
+                            <label class="flex space-x-2">
+                                <input type="checkbox" v-model="form.permissions" :value="permissions[guard][0].id"
+                                    class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent" />
+                                <span class="font-bold">{{ permissions[guard][0].name }}</span>
+                            </label>
+                            <span v-html="modules.find(m => m.name == permissions[guard][0].name)?.icon"></span>
+                        </div>
+                        <template v-for="(permission, index2) in permissions[guard]" :key="permission.id">
+                            <label v-if="index2" class="flex space-x-2">
+                                <input type="checkbox" v-model="form.permissions" :value="permission.id"
+                                    class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent disabled:text-primarylight disabled:border-gray-300 disabled:cursor-not-allowed"
+                                    :disabled="!form.permissions.some(p => p == permissions[guard][0].id)" />
+                                <span class="text-sm"
+                                    :class="!form.permissions.some(p => p == permissions[guard][0].id) ? 'text-gray-300 cursor-not-allowed' : null">{{
+                                        permission.name }}</span>
+                            </label>
+                        </template>
                     </div>
-                    <div v-if="roles.length">
-                        <el-radio-group v-model="form.rol" class="ml-4">
-                            <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">
-                                {{ role.name }}
-                            </el-radio>
-                        </el-radio-group>
-                        <InputError :message="form.errors.rol" />
-                    </div>
-                    <p v-else class="text-xs text-gray9A mt-3">No tienes ningún rol registrado. Agrega al menos uno en
-                        el botón de arriba (+ Crear rol)</p>
                 </div>
-                <div class="col-span-2 text-right mt-5">
-                    <PrimaryButton :disabled="form.processing">Crear usuario</PrimaryButton>
-                </div>
-            </form>
-            <!-- Mensaje de limite alcanzado -->
-            <section class="mt-10" v-else>
-                <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
-                <p class="text-xl text-center">Has llegado al límite de usuarios de tu plan contratado.</p>
-                <p class="text-xl text-center">
-                    Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
-                </p>
-                <div class="flex justify-center mt-5">
-                    <PrimaryButton @click="$inertia.get(route('profile.show'))" :disabled="form.processing">
-                        Explorar planes
+                <div class="flex items-center justify-end space-x-1 mt-4">
+                    <PrimaryButton :disabled="form.processing">
+                        Crear rol
                     </PrimaryButton>
                 </div>
-            </section>
+            </form>
         </div>
-        <!-- modale de creacion de rol -->
-        <DialogModal :show="showRoleModal" @close="showRoleModal = false" maxWidth="5xl">
-            <template #title>
-                <h1>Crear rol</h1>
-            </template>
-            <template #content>
-                <p class="text-xs text-gray99 mb-5">
-                    Puedes crear un rol de acuerdo a las necesidades del usuario. Abajo estan los modulos disponibles
-                    para tu suscripción y los permisos relacionados.
-                </p>
-                <form @submit.prevent="storeRole">
-                    <div>
-                        <InputLabel value="Nombre del rol *" />
-                        <el-input v-model="roleForm.name" placeholder="Ej. Cajero" class="!w-1/2" :maxlength="255"
-                            clearable />
-                        <InputError :message="roleForm.errors.name" />
-                    </div>
-                    <h2 class="flex items-center space-x-5 my-3">
-                        <span class="font-bold">Agregar permisos</span>
-                        <button type="button" @click="grantAllPermissions" class="text-primary underline">Dar acceso
-                            total</button>
-                    </h2>
-                    <div class="lg:grid grid-cols-4">
-                        <div v-for="(guard, index) in Object.keys(permissions).filter(permission => this.$page.props.auth.user.store.activated_modules.includes(permission))"
-                            :key="index" class="border p-3">
-                            <div class="flex items-center justify-between pb-1 mb-1 border-grayD9 border-b">
-                                <label class="flex space-x-2">
-                                    <input type="checkbox" v-model="roleForm.permissions"
-                                        :value="permissions[guard][0].id"
-                                        class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent" />
-                                    <span class="font-bold">{{ permissions[guard][0].name }}</span>
-                                </label>
-                                <span v-html="modules.find(m => m.name == permissions[guard][0].name)?.icon"></span>
-                            </div>
-                            <template v-for="(permission, index2) in permissions[guard]" :key="permission.id">
-                                <label v-if="index2" class="flex space-x-2">
-                                    <input type="checkbox" v-model="roleForm.permissions" :value="permission.id"
-                                        class="size-3 mt-1 border-gray-500 text-primary shadow-sm focus:ring-primary bg-transparent disabled:text-primarylight disabled:border-gray-300 disabled:cursor-not-allowed"
-                                        :disabled="!roleForm.permissions.some(p => p == permissions[guard][0].id)" />
-                                    <span class="text-sm"
-                                        :class="!roleForm.permissions.some(p => p == permissions[guard][0].id) ? 'text-gray-300 cursor-not-allowed' : null">{{
-                                            permission.name }}</span>
-                                </label>
-                            </template>
-                        </div>
-                    </div>
-                </form>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-1">
-                    <PrimaryButton @click="storeRole" :disabled="roleForm.processing">Crear rol</PrimaryButton>
-                </div>
-            </template>
-        </DialogModal>
-        <!-- Confirmación de contraseña de usuario -->
-        <ConfirmationModal :show="showPasswordConfirm" @close="showPasswordConfirm = false">
-            <template #title>
-                <h1 class="text-center">¡Se ha creado un nuevo usuario!</h1>
-            </template>
-            <template #content>
-                <h2 class="text-center">IMPORTANTE</h2>
-                <p class="text-center my-5">
-                    El nuevo usuario puede iniciar sesión ingresando el correo registrado y la siguiente
-                    contraseña que podrá cambiar una vez logueado.
-                </p>
-                <p class="text-center font-bold">Contraseña: ezyventas</p>
-                <div class="border-t border-grayD9 w-40 mx-auto"></div>
-                <div class="border-t border-grayD9 w-32 mx-auto mt-1"></div>
-            </template>
-            <template #footer>
-                <div class="flex items-center space-x-1">
-                    <PrimaryButton @click="$inertia.get(route('settings.index', { tab: 2 }))">De acuerdo</PrimaryButton>
-                </div>
-            </template>
-        </ConfirmationModal>
     </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import DialogModal from '@/Components/DialogModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -154,21 +61,11 @@ export default {
     data() {
         const form = useForm({
             name: null,
-            email: null,
-            phone: null,
-            rol: null,
-        });
-
-        const roleForm = useForm({
-            name: null,
             permissions: [],
         });
 
         return {
             form,
-            roleForm,
-            showPasswordConfirm: false,
-            showRoleModal: false,
             modules: [
                 {
                     name: 'Punto de venta',
@@ -223,63 +120,30 @@ export default {
     },
     components: {
         AppLayout,
-        ConfirmationModal,
-        DialogModal,
         PrimaryButton,
         InputLabel,
         InputError,
         Back
     },
     props: {
-        total_users: Number,
         permissions: Object,
         roles: Array,
     },
-    computed: {
-        usersNotExceededYet() {
-            const hasMoreUsers = ['Cotizaciones', 'Renta de productos', 'Tienda en línea']
-                .some(module => this.$page.props.auth.user.store.activated_modules?.includes(module));
-
-            if (hasMoreUsers && this.total_users <= 5) {
-                return true;
-            } else if (!hasMoreUsers && this.total_users <= 2) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    },
     methods: {
         grantAllPermissions() {
-            this.roleForm.permissions = Object.values(this.permissions)
+            this.form.permissions = Object.values(this.permissions)
                 .flat() // Aplanar los arrays de permisos por guard
                 .map(permission => permission.id); // Obtener solo los IDs de los permisos
         },
         store() {
-            this.form.post(route("users.store"), {
+            this.form.post(route("settings.role-permission.store-role"), {
                 onSuccess: () => {
                     this.$notify({
-                        title: "Correcto",
-                        message: "Se ha creado un nuevo usuario. Su contraseña es: ezyventas",
+                        title: "Se ha creado un nuevo rol",
                         type: "success",
                     });
-                    this.showPasswordConfirm = true;
                 },
             });
-        },
-        storeRole() {
-            this.roleForm.post(route('settings.role-permission.store-role'), {
-                onSuccess: () => {
-                    this.$notify({
-                        title: 'Correcto',
-                        message: 'Rol creado',
-                        type: 'success'
-                    });
-
-                    this.roleForm.reset();
-                    this.showRoleModal = false;
-                },
-            })
         },
     }
 }
