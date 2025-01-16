@@ -2,12 +2,10 @@
     <AppLayout title="Nuevo rol">
         <div class="px-3 md:px-10 py-7">
             <Back :to="route('settings.index', { tab: '2' })" />
-            <form @submit.prevent="store"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-2/3 mx-auto mt-7">
+            <form @submit.prevent="store" class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-2/3 mx-auto mt-7">
                 <div>
                     <InputLabel value="Nombre del rol *" />
-                    <el-input v-model="form.name" placeholder="Ej. Cajero" class="!w-1/2" :maxlength="255"
-                        clearable />
+                    <el-input v-model="form.name" placeholder="Ej. Cajero" class="!w-1/2" :maxlength="255" clearable />
                     <InputError :message="form.errors.name" />
                 </div>
                 <h2 class="flex items-center space-x-5 my-3">
@@ -62,6 +60,7 @@ export default {
         const form = useForm({
             name: null,
             permissions: [],
+            redirect: true,
         });
 
         return {
@@ -136,7 +135,10 @@ export default {
                 .map(permission => permission.id); // Obtener solo los IDs de los permisos
         },
         store() {
-            this.form.post(route("settings.role-permission.store-role"), {
+            this.form.transform((data) => ({
+                ...data,
+                name: data.name + '->' + this.$page.props.auth.user.store_id,
+            })).post(route("settings.role-permission.store-role"), {
                 onSuccess: () => {
                     this.$notify({
                         title: "Se ha creado un nuevo rol",

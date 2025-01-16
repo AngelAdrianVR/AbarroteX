@@ -339,8 +339,8 @@ Route::put('users-save-printer-config/{user}', [UserController::class, 'savePrin
 Route::resource('settings', SettingController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Configuraciones', 'verified']);
 Route::get('settings-get-by-module/{module}', [SettingController::class, 'getByModule'])->middleware('auth')->name('settings.get-by-module');
 Route::get('role-permission/create-role', [SettingController::class, 'createRole'])->middleware('auth')->name('settings.role-permission.create-role');
-Route::get('role-permission/edit-role', [SettingController::class, 'editRole'])->middleware('auth')->name('settings.role-permission.edit-role');
-Route::put('role-permission/{role}/edit-role', [SettingController::class, 'updateRole'])->middleware('auth')->name('settings.role-permission.update-role');
+Route::get('role-permission/edit-role/{role}', [SettingController::class, 'editRole'])->middleware('auth')->name('settings.role-permission.edit-role');
+Route::put('role-permission/{role}/update-role', [SettingController::class, 'updateRole'])->middleware('auth')->name('settings.role-permission.update-role');
 Route::post('role-permission/store-role', [SettingController::class, 'storeRole'])->middleware('auth')->name('settings.role-permission.store-role');
 Route::delete('role-permission/{role}/destroy-role', [SettingController::class, 'deleteRole'])->middleware('auth')->name('settings.role-permission.delete-role');
 

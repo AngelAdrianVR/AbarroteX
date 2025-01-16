@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Nuevo usuario">
         <div class="px-3 md:px-10 py-7">
-            <Back :to="route('settings.index', {tab: '2'})" />
+            <Back :to="route('settings.index', { tab: '2' })" />
             <form v-if="usersNotExceededYet" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 grid grid-cols-2 gap-3 mx-auto mt-7">
                 <h1 class="font-bold ml-2 col-span-full">Crear nuevo usuario</h1>
@@ -36,13 +36,13 @@
                     <div v-if="roles.length">
                         <el-radio-group v-model="form.rol" class="ml-4">
                             <el-radio v-for="role in roles" :key="role.id" :value="role.id" size="small">
-                                {{ role.name }}
+                                {{ role.name.split('->')[0] }}
                             </el-radio>
                         </el-radio-group>
-                        <InputError :message="form.errors.rol" />
                     </div>
                     <p v-else class="text-xs text-gray9A mt-3">No tienes ningún rol registrado. Agrega al menos uno en
                         el botón de arriba (+ Crear rol)</p>
+                    <InputError :message="form.errors.rol" />
                 </div>
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="form.processing">Crear usuario</PrimaryButton>
@@ -268,7 +268,10 @@ export default {
             });
         },
         storeRole() {
-            this.roleForm.post(route('settings.role-permission.store-role'), {
+            this.roleForm.transform((data) => ({
+                ...data,
+                name: data.name + '->' + this.$page.props.auth.user.store_id,
+            })).post(route('settings.role-permission.store-role', {preserve_current_page: true}), {
                 onSuccess: () => {
                     this.$notify({
                         title: 'Correcto',

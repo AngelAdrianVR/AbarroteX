@@ -40,7 +40,7 @@
                                 <td class="w-[10%]">{{ user.name }}</td>
                                 <td class="w-[15%]">{{ user.email }}</td>
                                 <td class="w-[15%]">{{ user.phone }}</td>
-                                <td class="w-[15%]">{{ user.roles[0].name }}</td>
+                                <td class="w-[15%]">{{ user.roles[0].name.split('->')[0] }}</td>
                                 <td class="w-[20%]">{{ user.cash_register?.name ?? 'No asignado' }}</td>
                                 <td class="rounded-e-full text-end">
                                     <el-dropdown trigger="click" @command="handleCommand">
@@ -121,7 +121,7 @@
                         <tbody>
                             <tr v-for="role in roles" :key="role.id"
                                 class="*:text-xs *:px-3 *:py-2 hover:bg-primarylight">
-                                <td class="rounded-s-full w-[20%]">{{ role.name }}</td>
+                                <td class="rounded-s-full w-[20%]">{{ role.name.split('->')[0] }}</td>
                                 <td class="rounded-e-full text-end">
                                     <el-dropdown trigger="click" @command="handleRoleCommand">
                                         <button @click.stop
@@ -315,6 +315,8 @@ export default {
                         message: 'Se ha eliminado el rol',
                         type: 'success',
                     });
+
+                    this.showDeleteRoleConfirm = false;
                 },
                 onError: () => {
                     this.$notify({
