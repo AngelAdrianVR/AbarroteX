@@ -24,6 +24,7 @@ class StripeController extends Controller
         return view('Stripe.index', compact('products', 'modules', 'modules_updated'));
     }
 
+    //funcion de checkout para productos
     public function checkout(Request $request)
     {
         $products = json_decode($request->input('products'), true); //lo hago array pero solo tiene un objeto. Lo dejo asi par ano modificar el ejemplo en caso de muchos elementos

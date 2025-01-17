@@ -35,13 +35,13 @@
             <p class="font-bold">{{ sale.product.name }}</p>
           </div>
         </div>
-        <div :class="editMode !== null ? 'w-[35%]' : 'w-[15%]'" class="text-lg flex items-center">
+        <div :class="editMode !== null ? 'w-[18%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== index">
             ${{ sale.product.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}{{ getPrefix(sale) }}
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
             <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
               @click.stop="startEditing(sale, index)"
-              class="flex items-center justify-center text-primary bg-gray-200 size-5 rounded-md ml-2 mr-1">
+              class="flex items-center justify-center text-primary hover:bg-gray-50 hover:shadow-gray-400 hover:shadow-sm size-5 rounded-md ml-2 mr-1">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-[14px]">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -67,19 +67,33 @@
         </div>
         <div class="w-[20%]">
           <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small"
-            :max="sale.product.current_stock" :precision="2" />
-          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
+            :max="sale.product.current_stock" :precision="2">
+            <template #suffix>
+                <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{ 
+                  sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                }}</span>
+              </template>
+          </el-input-number>
+          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small">
+            <template #suffix>
+                <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{ 
+                  sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                }}</span>
+              </template>
+          </el-input-number>
         </div>
         <div class="text-[#5FCB1F] font-bold w-[15%] text-lg">${{ (sale.product.public_price *
           sale.quantity).toLocaleString('en-US', {
             minimumFractionDigits: 2
           }) }}</div>
-        <div class="w-[5%] text-right">
+        <div class="w-[5%] text-right pr-14">
           <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
             title="¿Continuar?" @confirm="deleteItem(sale.product.id)">
             <template #reference>
               <i
-                class="fa-regular fa-trash-can mr-2 text-primary cursor-pointer p-2 hover:bg-gray-100 rounded-full"></i>
+                class="fa-regular fa-trash-can mr-2 text-primary cursor-pointer p-2 hover:bg-gray-50 rounded-md hover:shadow-gray-400 hover:shadow-sm"></i>
             </template>
           </el-popconfirm>
         </div>
@@ -162,11 +176,13 @@
       </div>
     </div>
   </div>
-  <div class="text-center text-gray-500 text-sm mt-14" v-if="saleProducts.length == 0">
-    <p v-if="isScanOn" class="flex items-center justify-center text-gray99 text-sm">
-      Escanea un producto para comenzar la venta
-      <i class="fa-regular fa-hand-point-up ml-3"></i>
-    </p>
+  <div class="text-center text-gray-500 text-sm md:mt-14" v-if="saleProducts.length == 0">
+    <div v-if="isScanOn" class="flex flex-col items-center justify-center text-gray99 text-sm">
+      <span>Escanea un producto para comenzar la venta</span>
+      <figure class="my-7 flex items-center justify-center select-none">
+          <img draggable="false" class="w-1/3 md:w-1/4 opacity-15" src="@/../../public/images/escaner2.png" alt="scaner">
+      </figure>
+    </div>
     <p v-else class="flex items-center justify-center text-gray99 text-sm">
       Busca un producto para comenzar la venta
       <i class="hidden lg:inline fa-regular fa-hand-point-right ml-3"></i>

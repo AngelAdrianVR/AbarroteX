@@ -4,7 +4,7 @@
         <!-- --------------------------------------------------------- -->
         <article class="border border-grayD9 rounded-md p-4 relative">
         <i v-if="!editUUIDService" @click="editUUIDService = true" class="fa-solid fa-pen absolute top-3 right-3 text-xs text-primary cursor-pointer bg-gray-100 rounded-full py-1 px-[5px]"></i>
-        <h2 class="font-bold">Código UUID Service<i class="fa-solid fa-print ml-3"></i></h2>
+        <h2 class="font-bold">Código UUID Service</h2>
         <p class="text-sm text-gray99 mb-4">Puedes encontrarlo en las especificaciones del fabricante. Si no lo encuentras contactar a soporte de Ezy Ventas</p>
         <div class="flex items-center text-sm">
 
@@ -27,7 +27,7 @@
         <!-- --------------------------------------------------------- -->
         <article class="border border-grayD9 rounded-md p-4 relative">
         <i v-if="!editUUIDCharacteristic" @click="editUUIDCharacteristic = true" class="fa-solid fa-pen absolute top-3 right-3 text-xs text-primary cursor-pointer bg-gray-100 rounded-full py-1 px-[5px]"></i>
-        <h2 class="font-bold">Código UUID Characteristic<i class="fa-solid fa-print ml-3"></i></h2>
+        <h2 class="font-bold">Código UUID Characteristic</h2>
         <p class="text-sm text-gray99 mb-4">Puedes encontrarlo en las especificaciones del fabricante. Si no lo encuentras contactar a soporte de Ezy Ventas</p>
         <div class="flex items-center text-sm">
 
