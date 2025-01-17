@@ -235,66 +235,39 @@
           <!-- seccion de desgloce de montos -->
           <div class="lg:w-[30%]">
             <!-- buscador de productos -->
-            <div class="relative">
-              <el-select @keydown="handleKeydownInputSearch" v-model="productFoundSelectedName"
-                @change="handleSelectFoundProduct()" ref="searchInput" :disabled="syncingIDB" filterable remote
-                :remote-method="searchProducts" :loading="loading" placeholder="Buscar código o nombre de producto"
-                class="w-full">
+            <div>
+              <el-autocomplete v-model="productFoundSelectedName" :fetch-suggestions="searchProducts" class="!w-full"
+                placeholder="Buscar código o nombre de producto" @select="handleSelectFoundProduct()"
+                :value-key="'name'" :loading="loading" :disabled="syncingIDB || scanning" ref="searchInput"
+                @keydown="handleKeydownInputSearch">
                 <template #prefix>
                   <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
                 </template>
-                <el-option v-for="(product, index) in productsFound" :key="index" :label="product.name"
-                  :value="product.name">
-                  <!-- opciones en tienda de ropa, zapateria y boutique -->
+
+                <template #default="{ item }">
+                  <!-- Opciones en tienda de ropa, zapatería y boutique -->
                   <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
                     class="w-4/5 flex items-center space-x-2">
-                    <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
-                      :style="{ color: product.additional?.color.color }"></i>
-                    <span>{{ product.name }}</span>
-                    <span class="text-gray99">
-                      ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
+                    <i v-if="item.additional?.color.color" class="fa-solid fa-shirt text-xs"
+                      :style="{ color: item.additional?.color.color }"></i>
+                    <span>{{ item.name }}</span>
+                    <span class="text-gray-400">
+                      ({{ item.additional?.color.name }}-{{ item.additional?.size.name }})
                     </span>
                   </p>
-                  <!-- opciones en tienda de abarrotes -->
+                  <!-- Opciones en tienda de abarrotes -->
                   <div v-else>
-                    <span style="float: left; font-size: 14px">{{ product.name }}</span>
-                    <span style="float: right; color: #8492a6; font-size: 11px">{{ product.code }}</span>
+                    <span style="float: left; font-size: 14px">{{ item.name }}</span>
+                    <span style="float: right; color: #8492a6; font-size: 11px">{{ item.code }}</span>
                   </div>
-                </el-option>
-              </el-select>
-              <!-- <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
-                ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
-                type="search" :disabled="syncingIDB">
-              <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i> -->
-              <!-- Resultados de la búsqueda -->
-              <!-- <div v-if="searchFocus && searchQuery"
-                class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
-                <ul v-if="productsFound?.length > 0 && !loading">
-                  <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
-                    class="hover:bg-gray-200 cursor-pointer text-xs px-3 py-2 flex space-x-2">
-                    <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
-                      class="w-4/5 flex items-center space-x-2">
-                      <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
-                        :style="{ color: product.additional?.color.color }"></i>
-                      <span>{{ product.name }}</span>
-                      <span class="text-gray99">
-                        ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
-                      </span>
-                    </p>
-                    <span v-else class="w-4/5">{{ product.name }}</span>
-                    <span v-if="product.code" class="w-1/5 text-[10px] text-gray99">
-                      {{ product.code }}
-                    </span>
-                  </li>
-                </ul>
-                <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">
-                  No se encontraron coincidencias
-                </p> -->
-              <!-- estado de carga -->
-              <!-- <div v-if="loading" class="flex justify-center items-center py-10">
-                  <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-                </div> -->
-              <!-- </div> -->
+                </template>
+
+                <template #loading>
+                  <svg class="circular" viewBox="0 0 50 50">
+                    <circle class="path" cx="25" cy="25" r="20" fill="none" />
+                  </svg>
+                </template>
+              </el-autocomplete>
             </div>
             <!-- Detalle de producto encontrado -->
             <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
@@ -385,7 +358,7 @@
                     alt="Agregar peso">
                 </figure>
               </div>
-               <div v-else class="text-center text-gray99 text-sm">
+              <div v-else class="text-center text-gray99 text-sm">
                 <p>
                   Busca el producto
                   <i class="fa-regular fa-hand-point-up ml-3"></i>
@@ -1132,10 +1105,16 @@ export default {
       }
     },
     handleSelectFoundProduct() {
-      this.focusQuantitySelector(); //enfoca el selector de cantidad
-      if (this.productsFound.length > 0) {
+      if( this.productsFound.length > 0 ) {
         this.productFoundSelected = this.productsFound.find(product => product.name === this.productFoundSelectedName);
       }
+      // si el producto es a granel y en las configuraciones está activada la báscula se ejecuta el manejador de bascula
+      if (this.productFoundSelected.bulk_product && this.$page.props.auth.user.scale_config?.is_enabled) {
+        //se ejecuta el manejador de bascula si el producto es a granel
+        this.handleScale();
+      }
+      this.focusQuantitySelector(); //enfoca el selector de cantidad
+      this.productFoundSelectedName = null; //borra el nombre buscado para que no se muestre la misma opcion
     },
     // enfoca el input de cantidad cuando se hace la busqueda por nombre de producto
     focusQuantitySelector() {
@@ -1395,15 +1374,29 @@ export default {
         console.log(error);
       }
     },
-    async searchProducts(query) {
+    async searchProducts(query, cb) {
       this.searchQuery = query;
+      this.loading = true; // Activa el estado de carga
       try {
-        if (this.searchQuery.length < 2) {
+        // Ajustar con cuántas letras comienza a buscar
+        if (this.searchQuery.length < 1) {
+          cb([]); // Devuelve un arreglo vacío si no hay suficientes caracteres
           return;
         }
+
+        const results = await getItemByPartialAttributes('products', {
+          name: this.searchQuery,
+          code: this.searchQuery,
+        });
+
         this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
+        cb(results); // Llama al callback con los resultados
+
       } catch (error) {
-        console.log(error);
+        console.error(error);
+        cb([]); // En caso de error, también devuelve un arreglo vacío
+      } finally {
+        this.loading = false; // Desactiva el estado de carga
       }
     },
     //funciona con el input normal
