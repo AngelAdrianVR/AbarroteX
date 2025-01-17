@@ -44,8 +44,8 @@ class ProductBoutiqueController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code)],
-            'public_price' => 'required|numeric|min:0|max:999999',
-            'cost' => 'nullable|numeric|min:0|max:999999',
+            'public_price' => 'required|numeric|min:0|max:9999999',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
@@ -175,8 +175,8 @@ class ProductBoutiqueController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $productName)],
-            'public_price' => 'required|numeric|min:0|max:999999',
-            'cost' => 'nullable|numeric|min:0|max:999999',
+            'public_price' => 'required|numeric|min:0|max:9999999',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
@@ -327,8 +327,8 @@ class ProductBoutiqueController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueBoutiqueProductCode($request->code, $productName)],
-            'public_price' => 'required|numeric|min:0|max:999999',
-            'cost' => 'nullable|numeric|min:0|max:999999',
+            'public_price' => 'required|numeric|min:0|max:9999999',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
             'currency' => 'required|string',
             'description' => 'nullable|string|max:255',
             'has_inventory_control' => 'boolean',
@@ -808,14 +808,14 @@ class ProductBoutiqueController extends Controller
                 $columnNames[1] => 'required|string|max:255', //category
                 $columnNames[2] => 'required|string|max:255', //color
                 $columnNames[3] => 'required|string|max:255', // size
-                $columnNames[4] => 'required|numeric|min:0|max:999999.99', // public_price
-                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999.99' : '', //cost
+                $columnNames[4] => 'required|numeric|min:0|max:9999999.99', // public_price
+                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:9999999.99' : '', //cost
                 $columnNames[6] => $data[$columnNames[6]]
                     ?  ['max:100', new \App\Rules\UniqueBoutiqueProductCode($data[$columnNames[6]])]
                     : '', //code
-                $columnNames[7] => $data[$columnNames[7]] ? 'numeric|min:0|max:999999' : '', //min stock
-                $columnNames[8] => $data[$columnNames[8]] ? 'numeric|min:0|max:999999' : '', //max stock
-                $columnNames[9] => $data[$columnNames[9]] ? 'numeric|min:0|max:999999' : '', //current stock
+                $columnNames[7] => $data[$columnNames[7]] ? 'numeric|min:0|max:9999999' : '', //min stock
+                $columnNames[8] => $data[$columnNames[8]] ? 'numeric|min:0|max:9999999' : '', //max stock
+                $columnNames[9] => $data[$columnNames[9]] ? 'numeric|min:0|max:9999999' : '', //current stock
             ]);
 
             // Si la validación falla, almacenar los errores

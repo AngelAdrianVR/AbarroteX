@@ -47,9 +47,9 @@ class ProductController extends Controller
         $vailidated = $request->validate([
             'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode()],
-            'public_price' => 'required|numeric|min:0|max:999999',
+            'public_price' => 'required|numeric|min:0|max:9999999',
             'currency' => 'nullable|string',
-            'cost' => 'nullable|numeric|min:0|max:999999',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'description' => 'nullable|string|max:255',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
@@ -123,9 +123,9 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
             'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
-            'public_price' => 'required|numeric|min:0|max:999999',
+            'public_price' => 'required|numeric|min:0|max:9999999',
             'currency' => 'required|string',
-            'cost' => 'nullable|numeric|min:0|max:999999',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
             'description' => 'nullable|string|max:255',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
@@ -572,14 +572,14 @@ class ProductController extends Controller
             // Validar los datos
             $validator = Validator::make($data, [
                 $columnNames[0] => 'required|string|max:120|unique:products,name',
-                $columnNames[1] => 'required|numeric|min:0|max:999999',
-                $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:999999' : '',
+                $columnNames[1] => 'required|numeric|min:0|max:9999999',
+                $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:9999999' : '',
                 $columnNames[3] => $data[$columnNames[3]]
                     ?  ['max:100', new \App\Rules\UniqueProductCode()]
                     : '',
-                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '',
+                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:9999999' : '',
+                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:9999999' : '',
+                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:9999999' : '',
             ]);
 
             // Si la validación falla, almacenar los errores
