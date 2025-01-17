@@ -10,17 +10,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
                     </svg>
-                    <span>Categorías</span>
+                    <span>Categoría: {{ currentCategory }}</span>
                 </button>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item command="all">
-                            <span class="text-xs uppercase">Todas</span>
+                        <el-dropdown-item command="Todas">
+                            <span class="text-xs uppercase" :class="currentCategory == 'Todas' ? 'font-bold text-primary' : null">Todas</span>
                         </el-dropdown-item>
                     </el-dropdown-menu>
                     <el-dropdown-menu>
-                        <el-dropdown-item v-for="(category, index) in categories" :key="index" :command="index">
-                            <span class="text-xs uppercase">{{ category }}</span>
+                        <el-dropdown-item v-for="(category, index) in categories" :key="index" :command="category">
+                            <span class="text-xs uppercase" :class="currentCategory == category ? 'font-bold text-primary' : null">{{ category }}</span>
                         </el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
@@ -29,7 +29,7 @@
 
         <div v-if="visibleServices.length"
             class="md:grid md:grid-cols-2 lg:grid-cols-3 gap-5 mx-2 sm:mx-4 md:mx-9 space-y-4 md:space-y-0">
-            <OnlineServiceCard v-for="service in visibleServices" :key="service" :service="service" :store="store" />
+            <OnlineServiceCard v-for="service in filteredServices" :key="service" :service="service" :store="store" />
         </div>
         <el-empty v-else description="No hay Servicios disponibles" />
 
@@ -47,6 +47,7 @@ export default {
     data() {
         return {
             loading: false,
+            currentCategory: 'Todas',
         }
     },
     components: {
@@ -61,9 +62,15 @@ export default {
         categories() {
             return this.visibleServices.map(service => service.category).filter((value, index, self) => self.indexOf(value) === index);
         },
+        //propiedad computada que retorna un arreglo con los servicios filtrados por la categoria seleccionada
+        filteredServices() {
+            return this.visibleServices.filter(service => this.currentCategory === 'Todas' || service.category === this.currentCategory);
+        }
     },
     methods: {
-
-    }
+        handleCommand(command) {
+            this.currentCategory = command;
+        },
+    },
 }
 </script>

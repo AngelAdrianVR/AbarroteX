@@ -10,17 +10,20 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
                     </svg>
-                    <span>Categorías</span>
+                    <span>Categoría: {{ currentCategory }}</span>
                 </button>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item command="all">
-                            <span class="text-xs uppercase">Todas</span>
+                        <el-dropdown-item command="Todas">
+                            <span class="text-xs uppercase"
+                                :class="currentCategory == 'Todas' ? 'font-bold text-primary' : null">Todas</span>
                         </el-dropdown-item>
                     </el-dropdown-menu>
                     <el-dropdown-menu>
-                        <el-dropdown-item v-for="(category, index) in categories" :key="index" :command="index">
-                            <span class="text-xs uppercase">{{ category }}</span>
+                        <el-dropdown-item v-for="(category, index) in categories" :key="index" :command="category">
+                            <span class="text-xs uppercase"
+                                :class="currentCategory == category ? 'font-bold text-primary' : null">{{ category
+                                }}</span>
                         </el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
@@ -31,7 +34,7 @@
             Envío gratis en compra mínima de ${{ store.online_store_properties?.min_free_delivery }}</h1>
         <div v-if="visibleProducts.length"
             class="md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mx-2 sm:mx-4 md:mx-9 space-y-4 md:space-y-0">
-            <OnlineProductCard v-for="product in visibleProducts" :key="product" :product="product" :store="store" />
+            <OnlineProductCard v-for="product in filteredProducts" :key="product" :product="product" :store="store" />
         </div>
         <el-empty v-else description="No hay productos en la tienda" />
 
@@ -49,6 +52,7 @@ export default {
     data() {
         return {
             loading: false,
+            currentCategory: 'Todas',
         };
     },
     components: {
@@ -63,12 +67,13 @@ export default {
         categories() {
             return this.visibleProducts.map(product => product.category.name).filter((value, index, self) => self.indexOf(value) === index);
         },
+        filteredProducts() {
+            return this.visibleProducts.filter(product => this.currentCategory === 'Todas' || product.category.name === this.currentCategory);
+        }
     },
     methods: {
         handleCommand(command) {
-            if (command === '1') {
-                this.$emit('changeTab', 'categories');
-            }
+            this.currentCategory = command;
         },
     },
 };
