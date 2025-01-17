@@ -68,123 +68,127 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2 h-[calc(93vh+1px)] lg:h-[calc(93vh+16px)]">
+    <main class="pt-2 h-[calc(94vh-1px)]"><!--mover altura para productos sin codigo -->
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[60%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
           <h1 class="font-bold text-lg">Registrar venta</h1>
           <!-- Dinero en caja -->
-            <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
-              class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
-              <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
-                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                class="size-4 cursor-pointer">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-              <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
-                fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-              </svg>
-              <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
-                Efectivo en "{{ asignedCashRegister?.name }}":
-                <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
-                  class="ml-2">
-                  {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
-                    '*****' }}
-                </b>
-                <el-tooltip
-                  v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
-                  content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="size-4 text-red-600">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                  </svg>
-                </el-tooltip>
-              </p>
-              <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
-            </div>
-            <article class="flex items-center space-x-3">
-              <!-- Indicadores activos como báscula y descuentos -->
-               <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled" placement="left">
-                  <template #content>
-                    <p v-if="isConnectedScale" class="text-sm">Báscula activada</p>
-                    <div v-else class="text-sm">
-                      <p class="text-[#C5C5C5]">Báscula desctivada</p>
-                      <p class="">Verifique la conexión de la báscula. Si la <br>
-                        conexión es correcta y no se activa, haga <br>
-                        clic en <a class="text-primary underline" href="/settings?tab=4">Ir a configurar</a> </p>
-                    </div>
-                  </template>
-                  <button @click="!isConnectedScale ? connectScale() : ''" class="rounded-full p-1 flex items-center justify-center cursor-default" :class="isConnectedScale ? 'text-[#189203]' : 'text-black'">
-                    <svg width="77" height="73" viewBox="0 0 77 73" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="size-4">
-                      <path d="M5.83797 42.9021L4.29033 64.6428C4.29033 65.6746 4.80621 66.4115 5.46948 66.4115H69.7336C71.2636 66.4232 72.313 65.8956 72.313 64.6428L70.4706 42.9021M5.83797 42.9021H70.4706M5.83797 42.9021C2.0802 42.9021 1.04867 40.6174 2.89008 35.3849L13.871 5.09529C14.3869 3.54765 15.4923 2 17.04 2H58.0894C60.5951 2 62.0691 2.88437 63.0272 5.09529L74.8187 37.7432C75.6294 40.0279 73.6396 42.9021 70.4706 42.9021M52.2685 57.2731L51.7527 57.8626M51.9001 58.3048L52.637 57.4204L52.7107 57.3467L51.8264 58.3785M60.8174 57.2731L61.6281 58.3785M60.8174 50.0507L61.7018 51.1562M51.8264 50.0507L52.8581 51.0825M62.4388 68.6961H68.2609M8.63968 68.7698H14.0933M14.4618 52.2616V56.8309C14.4618 57.2731 14.8303 57.6415 15.2724 57.6415H36.6447C37.6765 57.6415 37.7501 57.2731 37.7501 56.8309V52.2616C37.7501 51.672 37.3817 51.672 36.6447 51.672H15.1987C14.7566 51.672 14.4618 51.7457 14.4618 52.2616ZM69.5874 67.0748C69.5874 69.3541 67.7397 71.2019 65.4604 71.2019C63.1811 71.2019 61.3333 69.3541 61.3333 67.0748H69.5874ZM15.3461 67.0748C15.3461 69.3541 13.4984 71.2019 11.2191 71.2019C8.93978 71.2019 7.09203 69.3541 7.09203 67.0748H15.3461ZM53.0792 57.8626C53.0792 58.3104 52.7163 58.6733 52.2685 58.6733C51.8208 58.6733 51.4579 58.3104 51.4579 57.8626C51.4579 57.4149 51.8208 57.052 52.2685 57.052C52.7163 57.052 53.0792 57.4149 53.0792 57.8626ZM61.9966 57.8626C61.9966 58.3104 61.6336 58.6733 61.1859 58.6733C60.7382 58.6733 60.3753 58.3104 60.3753 57.8626C60.3753 57.4149 60.7382 57.052 61.1859 57.052C61.6336 57.052 61.9966 57.4149 61.9966 57.8626ZM53.0792 50.6403C53.0792 51.088 52.7163 51.451 52.2685 51.451C51.8208 51.451 51.4579 51.088 51.4579 50.6403C51.4579 50.1926 51.8208 49.8296 52.2685 49.8296C52.7163 49.8296 53.0792 50.1926 53.0792 50.6403ZM61.9966 50.6403C61.9966 51.088 61.6336 51.451 61.1859 51.451C60.7382 51.451 60.3753 51.088 60.3753 50.6403C60.3753 50.1926 60.7382 49.8296 61.1859 49.8296C61.6336 49.8296 61.9966 50.1926 61.9966 50.6403ZM16.3042 53.4408V55.6517H35.5392V53.4408H16.3042Z" stroke="currentColor" stroke-width="2.9479"/>
+          <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
+            class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
+            <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+              class="size-4 cursor-pointer">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+            <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
+              fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+            </svg>
+            <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
+              Efectivo en "{{ asignedCashRegister?.name }}":
+              <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
+                class="ml-2">
+                {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
+                  '*****' }}
+              </b>
+              <el-tooltip
+                v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
+                content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte"
+                placement="bottom">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                  stroke="currentColor" class="size-4 text-red-600">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+              </el-tooltip>
+            </p>
+            <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
+          </div>
+          <article class="flex items-center space-x-3">
+            <!-- Indicadores activos como báscula y descuentos -->
+            <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled"
+              :content="isConnectedScale ? 'Báscula sincronizada' : 'Sincronizar báscula'" placement="bottom">
+              <button @click="!isConnectedScale ? connectScale() : ''"
+                class="rounded-full p-1 flex items-center justify-center cursor-default"
+                :class="isConnectedScale ? 'bg-green-300' : 'bg-red-300'">
+                <svg width="77" height="73" viewBox="0 0 77 73" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor" class="size-4">
+                  <path
+                    d="M5.83797 42.9021L4.29033 64.6428C4.29033 65.6746 4.80621 66.4115 5.46948 66.4115H69.7336C71.2636 66.4232 72.313 65.8956 72.313 64.6428L70.4706 42.9021M5.83797 42.9021H70.4706M5.83797 42.9021C2.0802 42.9021 1.04867 40.6174 2.89008 35.3849L13.871 5.09529C14.3869 3.54765 15.4923 2 17.04 2H58.0894C60.5951 2 62.0691 2.88437 63.0272 5.09529L74.8187 37.7432C75.6294 40.0279 73.6396 42.9021 70.4706 42.9021M52.2685 57.2731L51.7527 57.8626M51.9001 58.3048L52.637 57.4204L52.7107 57.3467L51.8264 58.3785M60.8174 57.2731L61.6281 58.3785M60.8174 50.0507L61.7018 51.1562M51.8264 50.0507L52.8581 51.0825M62.4388 68.6961H68.2609M8.63968 68.7698H14.0933M14.4618 52.2616V56.8309C14.4618 57.2731 14.8303 57.6415 15.2724 57.6415H36.6447C37.6765 57.6415 37.7501 57.2731 37.7501 56.8309V52.2616C37.7501 51.672 37.3817 51.672 36.6447 51.672H15.1987C14.7566 51.672 14.4618 51.7457 14.4618 52.2616ZM69.5874 67.0748C69.5874 69.3541 67.7397 71.2019 65.4604 71.2019C63.1811 71.2019 61.3333 69.3541 61.3333 67.0748H69.5874ZM15.3461 67.0748C15.3461 69.3541 13.4984 71.2019 11.2191 71.2019C8.93978 71.2019 7.09203 69.3541 7.09203 67.0748H15.3461ZM53.0792 57.8626C53.0792 58.3104 52.7163 58.6733 52.2685 58.6733C51.8208 58.6733 51.4579 58.3104 51.4579 57.8626C51.4579 57.4149 51.8208 57.052 52.2685 57.052C52.7163 57.052 53.0792 57.4149 53.0792 57.8626ZM61.9966 57.8626C61.9966 58.3104 61.6336 58.6733 61.1859 58.6733C60.7382 58.6733 60.3753 58.3104 60.3753 57.8626C60.3753 57.4149 60.7382 57.052 61.1859 57.052C61.6336 57.052 61.9966 57.4149 61.9966 57.8626ZM53.0792 50.6403C53.0792 51.088 52.7163 51.451 52.2685 51.451C51.8208 51.451 51.4579 51.088 51.4579 50.6403C51.4579 50.1926 51.8208 49.8296 52.2685 49.8296C52.7163 49.8296 53.0792 50.1926 53.0792 50.6403ZM61.9966 50.6403C61.9966 51.088 61.6336 51.451 61.1859 51.451C60.7382 51.451 60.3753 51.088 60.3753 50.6403C60.3753 50.1926 60.7382 49.8296 61.1859 49.8296C61.6336 49.8296 61.9966 50.1926 61.9966 50.6403ZM16.3042 53.4408V55.6517H35.5392V53.4408H16.3042Z"
+                    stroke="black" stroke-width="2.9479" />
+                </svg>
+              </button>
+            </el-tooltip>
+            <!-- Dropdown -->
+            <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')"
+              class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
+              <el-col :span="3">
+                <el-dropdown trigger="click">
+                  <p class="text-sm text-primary w-44 flex items-center">
+                    <svg class="mr-2" width="12" height="12" viewBox="0 0 12 12" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <mask id="mask0_9380_424" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0"
+                        width="12" height="12">
+                        <rect width="12" height="12" fill="#D9D9D9" />
+                      </mask>
+                      <g mask="url(#mask0_9380_424)">
+                        <path
+                          d="M2.5 10.5C2.225 10.5 1.98958 10.4021 1.79375 10.2063C1.59792 10.0104 1.5 9.775 1.5 9.5V2.5C1.5 2.225 1.59792 1.98958 1.79375 1.79375C1.98958 1.59792 2.225 1.5 2.5 1.5H9.5C9.775 1.5 10.0104 1.59792 10.2063 1.79375C10.4021 1.98958 10.5 2.225 10.5 2.5V9.5C10.5 9.775 10.4021 10.0104 10.2063 10.2063C10.0104 10.4021 9.775 10.5 9.5 10.5H2.5ZM6 8C6.31667 8 6.60417 7.90833 6.8625 7.725C7.12083 7.54167 7.3 7.3 7.4 7H9.5V2.5H2.5V7H4.6C4.7 7.3 4.87917 7.54167 5.1375 7.725C5.39583 7.90833 5.68333 8 6 8Z"
+                          fill="#F68C0F" />
+                      </g>
                     </svg>
-                  </button>
-                </el-tooltip>
-              <!-- Dropdown -->
-              <div v-if="$page.props.auth.user.permissions.includes('Registrar movimientos de caja')"
-                class="inline-block border border-primary rounded-full px-4 pt-[3px] mt-3 md:mt-0">
-                <el-col :span="3">
-                  <el-dropdown trigger="click">
-                    <p class="text-sm text-primary w-44 flex items-center">
-                      <svg class="mr-2" width="12" height="12" viewBox="0 0 12 12" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <mask id="mask0_9380_424" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12"
-                          height="12">
-                          <rect width="12" height="12" fill="#D9D9D9" />
-                        </mask>
-                        <g mask="url(#mask0_9380_424)">
+                    <span>Movimientos de caja</span>
+                    <i class="fa-solid fa-angle-down text-[10px] ml-2 mt-px"></i>
+                  </p>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item v-if="$page.props.auth.user.store.plan == 'Plan Avanzado'"
+                        @click="showCashRegisterSelectionModal = true"><i
+                          class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
+                      <el-dropdown-item :disabled="!asignedCashRegister"
+                        @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                          stroke="currentColor" class="size-4 mr-3">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" />
+                        </svg>
+                        Ingresar efectivo
+                      </el-dropdown-item>
+                      <el-dropdown-item :disabled="!asignedCashRegister"
+                        @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                          stroke="currentColor" class="size-4 mr-3">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3 3m3-3 3 3" />
+                        </svg>
+                        Retirar efectivo</el-dropdown-item>
+                      <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut">
+                        <svg width="19" height="20" class="mr-3" viewBox="0 0 120 124" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
                           <path
-                            d="M2.5 10.5C2.225 10.5 1.98958 10.4021 1.79375 10.2063C1.59792 10.0104 1.5 9.775 1.5 9.5V2.5C1.5 2.225 1.59792 1.98958 1.79375 1.79375C1.98958 1.59792 2.225 1.5 2.5 1.5H9.5C9.775 1.5 10.0104 1.59792 10.2063 1.79375C10.4021 1.98958 10.5 2.225 10.5 2.5V9.5C10.5 9.775 10.4021 10.0104 10.2063 10.2063C10.0104 10.4021 9.775 10.5 9.5 10.5H2.5ZM6 8C6.31667 8 6.60417 7.90833 6.8625 7.725C7.12083 7.54167 7.3 7.3 7.4 7H9.5V2.5H2.5V7H4.6C4.7 7.3 4.87917 7.54167 5.1375 7.725C5.39583 7.90833 5.68333 8 6 8Z"
-                            fill="#F68C0F" />
-                        </g>
-                      </svg>
-                      <span>Movimientos de caja</span>
-                      <i class="fa-solid fa-angle-down text-[10px] ml-2 mt-px"></i>
-                    </p>
-                    <template #dropdown>
-                      <el-dropdown-menu>
-                        <el-dropdown-item v-if="$page.props.auth.user.store.plan == 'Plan Avanzado'"
-                          @click="showCashRegisterSelectionModal = true"><i
-                            class="fa-solid fa-arrows-rotate text-xs mr-3"></i>Cambiar de caja</el-dropdown-item>
-                        <el-dropdown-item :disabled="!asignedCashRegister"
-                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Ingreso'">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-3">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" />
-                          </svg>
-                          Ingresar efectivo
-                        </el-dropdown-item>
-                        <el-dropdown-item :disabled="!asignedCashRegister"
-                          @click="cashRegisterModal = true; form.cashRegisterMovementType = 'Retiro'">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-3">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3 3m3-3 3 3" />
-                          </svg>
-                          Retirar efectivo</el-dropdown-item>
-                        <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut">
-                          <svg width="19" height="20" class="mr-3" viewBox="0 0 120 124" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M118.487 99.2735H2M118.487 99.2735L104.104 56.236M118.487 99.2735V109.594V110.801M2 99.2735L15.5041 56.236M2 99.2735V110.801M15.5041 56.236H104.104M15.5041 56.236V44.9277C15.5041 40.2068 20.2251 37.2424 23.1894 37.2424H27.9103M104.104 56.236V44.9277C104.104 41.0851 101.03 37.2424 96.3092 37.2424H86.9771M2 110.801V111.899M2 110.801L39.6578 110.911C40.4263 110.911 40.5361 111.899 39.6578 111.899H2M118.487 110.801H79.8408C79.1821 110.801 78.9625 111.79 79.8408 111.899H118.487M118.487 110.801V111.021V111.899M24.0677 46.7941C25.4118 46.7941 26.6874 46.7941 27.9103 46.7941M53.7109 46.7941C54.0403 46.7941 51.3199 46.7941 50.1976 46.7941M27.9103 46.7941V16.0531C27.9103 15.2845 28.1299 14.7356 29.4474 14.7356H47.7823C49.4291 14.7356 50.1976 14.9552 50.1976 16.0531V37.2424M27.9103 46.7941C36.1063 46.7941 41.9377 46.7941 50.1976 46.7941M50.1976 46.7941V37.2424M34.0586 22.5306C38.046 22.5306 40.2816 22.5306 44.269 22.5306M34.0586 30.8747C38.046 30.8747 40.2816 30.8747 44.269 30.8747M34.0586 39.3285C38.046 39.3285 40.2816 39.3285 44.269 39.3285M50.1976 37.2424H73.8024M73.8024 37.2424C73.8024 31.9259 73.8024 28.9451 73.8024 23.6285M73.8024 37.2424H86.9771M86.9771 37.2424V23.6285M86.9771 23.6285H64.1409C63.2626 23.6285 62.8387 23.4724 62.9332 22.4209V3.53705C62.9259 2.49762 63.1698 2.14235 64.1409 2H95.9799C97.0778 2 97.53 2.33134 97.6267 2.98811V21.5425C97.6089 22.8782 97.3906 23.4071 96.3092 23.6285H86.9771ZM2 111.899V120.683C2.06415 121.424 2.14221 121.816 3.20769 122H116.291C117.925 122.004 118.487 121.341 118.487 120.134V111.899M14.9552 88.8435C14.7421 89.6661 14.9552 89.9414 15.6139 89.9414H103.116C104.653 89.9414 104.873 89.5023 104.653 88.624C104.653 88.624 97.5169 66.3367 97.5169 66.2269C97.5169 66.1171 97.3705 66.1173 97.2973 66.1171C68.1936 66.0318 51.8083 66.0928 22.6404 66.0073C22.6404 66.0073 22.4209 65.8975 22.3111 66.2269C22.2013 66.5563 14.9552 88.8435 14.9552 88.8435ZM69.85 42.5123H90.161V50.6368H69.85V42.5123ZM71.0576 16.4922H89.0631C90.161 16.4922 90.71 16.4922 90.71 15.2845V10.2342C90.6518 9.36203 90.3806 9.02653 89.2827 9.02653H71.0576C69.9863 8.95894 69.6304 9.24611 69.6304 10.2342V15.2845C69.6304 16.1629 70.0206 16.4298 71.0576 16.4922ZM64.6898 110.911C64.6898 113.579 62.527 115.742 59.8591 115.742C57.1912 115.742 55.0284 113.579 55.0284 110.911C55.0284 108.243 57.1912 106.081 59.8591 106.081C62.527 106.081 64.6898 108.243 64.6898 110.911ZM40.097 85.4401H47.4529C48.3312 85.4401 48.3312 84.452 47.4529 84.3422H40.2068C39.4382 84.452 39.4382 85.3303 40.097 85.4401ZM64.1409 110.801C64.1409 113.166 62.2239 115.083 59.8591 115.083C57.4943 115.083 55.5773 113.166 55.5773 110.801C55.5773 108.437 57.4943 106.52 59.8591 106.52C62.2239 106.52 64.1409 108.437 64.1409 110.801ZM24.0676 85.4401H31.4235C32.3019 85.4401 32.3019 84.452 31.4235 84.3422H24.1774C23.4089 84.452 23.4089 85.3303 24.0676 85.4401ZM25.6047 79.0723H32.9606C33.8389 79.0723 33.8389 78.0842 32.9606 77.9744H25.7145C24.946 78.0842 24.946 78.9625 25.6047 79.0723ZM27.1417 72.4849H34.4976C35.376 72.4849 35.376 71.4968 34.4976 71.387H27.2515C26.483 71.4968 26.483 72.3751 27.1417 72.4849ZM41.8535 72.4849H49.2094C50.0878 72.4849 50.0878 71.4968 49.2094 71.387H41.9633C41.1948 71.4968 41.1948 72.3751 41.8535 72.4849ZM40.9752 79.0723H48.3311C49.2094 79.0723 49.2094 78.0842 48.3311 77.9744H41.085C40.3165 78.0842 40.3165 78.9625 40.9752 79.0723ZM71.936 85.4401H79.2919C80.1702 85.4401 80.1702 84.452 79.2919 84.3422H72.0457C71.2772 84.452 71.2772 85.3303 71.936 85.4401ZM55.9066 85.4401H63.2625C64.1408 85.4401 64.1408 84.452 63.2625 84.3422H56.0164C55.2479 84.452 55.2479 85.3303 55.9066 85.4401ZM55.9066 79.0723H63.2625C64.1408 79.0723 64.1408 78.0842 63.2625 77.9744H56.0164C55.2479 78.0842 55.2479 78.9625 55.9066 79.0723ZM56.1262 72.4849H63.4821C64.3604 72.4849 64.3604 71.4968 63.4821 71.387H56.236C55.4675 71.4968 55.4675 72.3751 56.1262 72.4849ZM69.9597 72.4849H77.3156C78.1939 72.4849 78.1939 71.4968 77.3156 71.387H70.0695C69.3009 71.4968 69.3009 72.3751 69.9597 72.4849ZM71.0576 79.0723H78.4135C79.2918 79.0723 79.2918 78.0842 78.4135 77.9744H71.1674C70.3988 78.0842 70.3988 78.9625 71.0576 79.0723ZM87.9652 85.4401H95.3211C96.1994 85.4401 96.1994 84.452 95.3211 84.3422H88.075C87.3065 84.452 87.3065 85.3303 87.9652 85.4401ZM84.8911 72.4849H92.247C93.1253 72.4849 93.1253 71.4968 92.247 71.387H85.0008C84.2323 71.4968 84.2323 72.3751 84.8911 72.4849ZM85.9889 79.0723H93.3449C94.2232 79.0723 94.2232 78.0842 93.3449 77.9744H86.0987C85.3302 78.0842 85.3302 78.9625 85.9889 79.0723Z" stroke="currentColor" stroke-width="2.19579"/>
-                          </svg>
-                          Hacer corte</el-dropdown-item>
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
-                </el-col>
-              </div>
+                            d="M118.487 99.2735H2M118.487 99.2735L104.104 56.236M118.487 99.2735V109.594V110.801M2 99.2735L15.5041 56.236M2 99.2735V110.801M15.5041 56.236H104.104M15.5041 56.236V44.9277C15.5041 40.2068 20.2251 37.2424 23.1894 37.2424H27.9103M104.104 56.236V44.9277C104.104 41.0851 101.03 37.2424 96.3092 37.2424H86.9771M2 110.801V111.899M2 110.801L39.6578 110.911C40.4263 110.911 40.5361 111.899 39.6578 111.899H2M118.487 110.801H79.8408C79.1821 110.801 78.9625 111.79 79.8408 111.899H118.487M118.487 110.801V111.021V111.899M24.0677 46.7941C25.4118 46.7941 26.6874 46.7941 27.9103 46.7941M53.7109 46.7941C54.0403 46.7941 51.3199 46.7941 50.1976 46.7941M27.9103 46.7941V16.0531C27.9103 15.2845 28.1299 14.7356 29.4474 14.7356H47.7823C49.4291 14.7356 50.1976 14.9552 50.1976 16.0531V37.2424M27.9103 46.7941C36.1063 46.7941 41.9377 46.7941 50.1976 46.7941M50.1976 46.7941V37.2424M34.0586 22.5306C38.046 22.5306 40.2816 22.5306 44.269 22.5306M34.0586 30.8747C38.046 30.8747 40.2816 30.8747 44.269 30.8747M34.0586 39.3285C38.046 39.3285 40.2816 39.3285 44.269 39.3285M50.1976 37.2424H73.8024M73.8024 37.2424C73.8024 31.9259 73.8024 28.9451 73.8024 23.6285M73.8024 37.2424H86.9771M86.9771 37.2424V23.6285M86.9771 23.6285H64.1409C63.2626 23.6285 62.8387 23.4724 62.9332 22.4209V3.53705C62.9259 2.49762 63.1698 2.14235 64.1409 2H95.9799C97.0778 2 97.53 2.33134 97.6267 2.98811V21.5425C97.6089 22.8782 97.3906 23.4071 96.3092 23.6285H86.9771ZM2 111.899V120.683C2.06415 121.424 2.14221 121.816 3.20769 122H116.291C117.925 122.004 118.487 121.341 118.487 120.134V111.899M14.9552 88.8435C14.7421 89.6661 14.9552 89.9414 15.6139 89.9414H103.116C104.653 89.9414 104.873 89.5023 104.653 88.624C104.653 88.624 97.5169 66.3367 97.5169 66.2269C97.5169 66.1171 97.3705 66.1173 97.2973 66.1171C68.1936 66.0318 51.8083 66.0928 22.6404 66.0073C22.6404 66.0073 22.4209 65.8975 22.3111 66.2269C22.2013 66.5563 14.9552 88.8435 14.9552 88.8435ZM69.85 42.5123H90.161V50.6368H69.85V42.5123ZM71.0576 16.4922H89.0631C90.161 16.4922 90.71 16.4922 90.71 15.2845V10.2342C90.6518 9.36203 90.3806 9.02653 89.2827 9.02653H71.0576C69.9863 8.95894 69.6304 9.24611 69.6304 10.2342V15.2845C69.6304 16.1629 70.0206 16.4298 71.0576 16.4922ZM64.6898 110.911C64.6898 113.579 62.527 115.742 59.8591 115.742C57.1912 115.742 55.0284 113.579 55.0284 110.911C55.0284 108.243 57.1912 106.081 59.8591 106.081C62.527 106.081 64.6898 108.243 64.6898 110.911ZM40.097 85.4401H47.4529C48.3312 85.4401 48.3312 84.452 47.4529 84.3422H40.2068C39.4382 84.452 39.4382 85.3303 40.097 85.4401ZM64.1409 110.801C64.1409 113.166 62.2239 115.083 59.8591 115.083C57.4943 115.083 55.5773 113.166 55.5773 110.801C55.5773 108.437 57.4943 106.52 59.8591 106.52C62.2239 106.52 64.1409 108.437 64.1409 110.801ZM24.0676 85.4401H31.4235C32.3019 85.4401 32.3019 84.452 31.4235 84.3422H24.1774C23.4089 84.452 23.4089 85.3303 24.0676 85.4401ZM25.6047 79.0723H32.9606C33.8389 79.0723 33.8389 78.0842 32.9606 77.9744H25.7145C24.946 78.0842 24.946 78.9625 25.6047 79.0723ZM27.1417 72.4849H34.4976C35.376 72.4849 35.376 71.4968 34.4976 71.387H27.2515C26.483 71.4968 26.483 72.3751 27.1417 72.4849ZM41.8535 72.4849H49.2094C50.0878 72.4849 50.0878 71.4968 49.2094 71.387H41.9633C41.1948 71.4968 41.1948 72.3751 41.8535 72.4849ZM40.9752 79.0723H48.3311C49.2094 79.0723 49.2094 78.0842 48.3311 77.9744H41.085C40.3165 78.0842 40.3165 78.9625 40.9752 79.0723ZM71.936 85.4401H79.2919C80.1702 85.4401 80.1702 84.452 79.2919 84.3422H72.0457C71.2772 84.452 71.2772 85.3303 71.936 85.4401ZM55.9066 85.4401H63.2625C64.1408 85.4401 64.1408 84.452 63.2625 84.3422H56.0164C55.2479 84.452 55.2479 85.3303 55.9066 85.4401ZM55.9066 79.0723H63.2625C64.1408 79.0723 64.1408 78.0842 63.2625 77.9744H56.0164C55.2479 78.0842 55.2479 78.9625 55.9066 79.0723ZM56.1262 72.4849H63.4821C64.3604 72.4849 64.3604 71.4968 63.4821 71.387H56.236C55.4675 71.4968 55.4675 72.3751 56.1262 72.4849ZM69.9597 72.4849H77.3156C78.1939 72.4849 78.1939 71.4968 77.3156 71.387H70.0695C69.3009 71.4968 69.3009 72.3751 69.9597 72.4849ZM71.0576 79.0723H78.4135C79.2918 79.0723 79.2918 78.0842 78.4135 77.9744H71.1674C70.3988 78.0842 70.3988 78.9625 71.0576 79.0723ZM87.9652 85.4401H95.3211C96.1994 85.4401 96.1994 84.452 95.3211 84.3422H88.075C87.3065 84.452 87.3065 85.3303 87.9652 85.4401ZM84.8911 72.4849H92.247C93.1253 72.4849 93.1253 71.4968 92.247 71.387H85.0008C84.2323 71.4968 84.2323 72.3751 84.8911 72.4849ZM85.9889 79.0723H93.3449C94.2232 79.0723 94.2232 78.0842 93.3449 77.9744H86.0987C85.3302 78.0842 85.3302 78.9625 85.9889 79.0723Z"
+                            stroke="currentColor" stroke-width="2.19579" />
+                        </svg>
+                        Hacer corte</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </el-col>
+            </div>
           </article>
-          
+
         </header>
         <!-- cuerpo de la pagina -->
         <div class="lg:flex lg:space-x-5 my-2">
           <!-- scaner de código  -->
           <div class="lg:w-[70%]">
             <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4" @keydown="handleKeydownScanInput">
-              <input v-model="scannerQuery" :disabled="scanning || syncingIDB"
-                ref="scanInput" class="input w-full pl-9" placeholder="Escanea o teclea el código del producto"
-                type="text">
+              <input v-model="scannerQuery" :disabled="scanning || syncingIDB" ref="scanInput" class="input w-full pl-9"
+                placeholder="Escanea o teclea el código del producto" type="text">
               <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
             </div>
 
@@ -220,7 +224,7 @@
                       @confirm="clearTab()">
                       <template #reference>
                         <ThirthButton class="!text-[#F80505] !border-[#F80505] !tracking-normal !py-1 !px-4 mb-2"><i
-                            class="fa-regular fa-trash-can mr-1 mt-px text-[10px]"></i> Limpiar registro</ThirthButton>
+                            class="fa-regular fa-trash-can mr-1 mt-px text-[10px]"></i> Limpiar lista</ThirthButton>
                       </template>
                     </el-popconfirm>
                   </div>
@@ -233,52 +237,66 @@
           <!-- seccion de desgloce de montos -->
           <div class="lg:w-[30%]">
             <!-- buscador de productos -->
-            <div>
-              <el-autocomplete
-                v-model="productFoundSelectedName"
-                :fetch-suggestions="searchProducts"
-                placeholder="Buscar código o nombre de producto"
-                @select="handleSelectFoundProduct()"
-                :value-key="'name'"
-                :loading="loading"
-                :disabled="syncingIDB || scanning"
-                :popper-class="'w-1/4'"
-                ref="searchInput"
-                @keydown="handleKeydownInputSearch"
-              >
+            <div class="relative">
+              <el-select @keydown="handleKeydownInputSearch" v-model="productFoundSelectedName"
+                @change="handleSelectFoundProduct()" ref="searchInput" :disabled="syncingIDB" filterable remote
+                :remote-method="searchProducts" :loading="loading" placeholder="Buscar código o nombre de producto"
+                class="w-full">
                 <template #prefix>
                   <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
                 </template>
-
-                <template #default="{ item }">
-                  <!-- Opciones en tienda de ropa, zapatería y boutique -->
-                  <p
-                    v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
-                    class="w-4/5 flex items-center space-x-2"
-                  >
-                    <i
-                      v-if="item.additional?.color.color"
-                      class="fa-solid fa-shirt text-xs"
-                      :style="{ color: item.additional?.color.color }"
-                    ></i>
-                    <span>{{ item.name }}</span>
-                    <span class="text-gray-400">
-                      ({{ item.additional?.color.name }}-{{ item.additional?.size.name }})
+                <el-option v-for="(product, index) in productsFound" :key="index" :label="product.name"
+                  :value="product.name">
+                  <!-- opciones en tienda de ropa, zapateria y boutique -->
+                  <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                    class="w-4/5 flex items-center space-x-2">
+                    <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
+                      :style="{ color: product.additional?.color.color }"></i>
+                    <span>{{ product.name }}</span>
+                    <span class="text-gray99">
+                      ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
                     </span>
                   </p>
-                  <!-- Opciones en tienda de abarrotes -->
+                  <!-- opciones en tienda de abarrotes -->
                   <div v-else>
-                    <span style="float: left; font-size: 14px">{{ item.name }}</span>
-                    <span style="float: right; color: #8492a6; font-size: 11px">{{ item.code }}</span>
+                    <span style="float: left; font-size: 14px">{{ product.name }}</span>
+                    <span style="float: right; color: #8492a6; font-size: 11px">{{ product.code }}</span>
                   </div>
-                </template>
-
-                <template #loading>
-                  <svg class="circular" viewBox="0 0 50 50">
-                    <circle class="path" cx="25" cy="25" r="20" fill="none" />
-                  </svg>
-                </template>
-              </el-autocomplete>
+                </el-option>
+              </el-select>
+              <!-- <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur" @input="searchProducts"
+                ref="searchInput" class="input w-full pl-9" placeholder="Buscar código o nombre de producto"
+                type="search" :disabled="syncingIDB">
+              <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i> -->
+              <!-- Resultados de la búsqueda -->
+              <!-- <div v-if="searchFocus && searchQuery"
+                class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
+                <ul v-if="productsFound?.length > 0 && !loading">
+                  <li @click="selectProductFromList(product)" v-for="(product, index) in productsFound" :key="index"
+                    class="hover:bg-gray-200 cursor-pointer text-xs px-3 py-2 flex space-x-2">
+                    <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
+                      class="w-4/5 flex items-center space-x-2">
+                      <i v-if="product.additional?.color.color" class="fa-solid fa-shirt text-xs"
+                        :style="{ color: product.additional?.color.color }"></i>
+                      <span>{{ product.name }}</span>
+                      <span class="text-gray99">
+                        ({{ product.additional?.color.name }}-{{ product.additional?.size.name }})
+                      </span>
+                    </p>
+                    <span v-else class="w-4/5">{{ product.name }}</span>
+                    <span v-if="product.code" class="w-1/5 text-[10px] text-gray99">
+                      {{ product.code }}
+                    </span>
+                  </li>
+                </ul>
+                <p v-else-if="!loading" class="text-center text-sm text-gray-600 px-5 py-2">
+                  No se encontraron coincidencias
+                </p> -->
+              <!-- estado de carga -->
+              <!-- <div v-if="loading" class="flex justify-center items-center py-10">
+                  <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
+                </div> -->
+              <!-- </div> -->
             </div>
             <!-- Detalle de producto encontrado -->
             <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
@@ -302,7 +320,7 @@
                   </p>
                   <p :class="productFoundSelected.bulk_product ? 'text-gray-900' : 'text-[#5FCB1F]'">${{
                     productFoundSelected.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                      ",") }} <span v-if="productFoundSelected.bulk_product" class="text-gray-800"> /{{ productFoundSelected.measure_unit === 'Kilogramo' ? 'Kg' : 'L' }}</span></p>
+                      ",") }}</p>
                 </div>
                 <!-- input de cantidad si el producto es a granel -->
                 <div v-if="productFoundSelected?.bulk_product" class="flex justify-between items-center mt-4 border border-[#D9D9D9] rounded-xl py-3 px-7">
@@ -351,24 +369,18 @@
                     </template>
                   </el-input-number>
                 </div>
-                <!-- instrucciones de bascula -->
-                <div v-if="isConnectedScale && productFoundSelected.bulk_product">
-                  <p class="text-[#7A7A7A] mt-3 text-sm">Agrega la cantidad manual o coloca el producto sobre la bascula</p>
-                  <figure class="my-2 flex items-center justify-center select-none">
-                    <img draggable="false" class="w-2/3 md:w-[40%] opacity-70" src="@/../../public/images/EmptyScale.png" alt="Agregar peso">
-                  </figure>
-                </div>
                 <div class="text-center mt-7">
                   <div v-if="productFoundSelected.current_stock == 0 && isInventoryOn" class="text-sm text-gray99 mb-2">
                     No te quedan existencias de este producto.
                     <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                   </div>
-                  <div class="flex items-center justify-center space-x-4">
+                  <div class="flex items-center justify-center space-x-3">
                     <button ref="addButton" @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
                       class="rounded-full !px-24 text-white bg-primary text-sm py-1 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white disabled:cursor-not-allowed disabled:bg-gray-400 focus:outline-none transition-all ease-linear duration-200"
                       :disabled="quantity == 0">
                       Agregar
                     </button>
+                  </div>
 
                     <el-tooltip v-if="productFoundSelected?.bulk_product" content="Agregar cantidad manualmente" placement="bottom">
                       <button @click="stopReadingScale()" class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
@@ -378,6 +390,10 @@
                       </button>
                     </el-tooltip>
                   </div>
+                  <figure v-if="isReading" class="my-5 flex items-center justify-center select-none">
+                    <img draggable="false" class="w-2/3 md:w-1/2 opacity-70" src="@/../../public/images/EmptyScale.png"
+                      alt="Agregar peso">
+                  </figure>
                 </div>
               </div>
               <div v-else class="text-center text-gray99 text-sm">
@@ -546,7 +562,8 @@
         </div>
         <!-- lista de productos -->
       </section>
-      <section class="border rounded-t-[20px] border-[#D9D9D9] shadow-md bg-[#232323]"
+      <section v-if="isQuickNoCodeSelectionOn && noCodeProducts.length"
+        class="border rounded-t-[20px] border-[#D9D9D9] shadow-md bg-[#232323]"
         :class="showNoCodeProducts ? 'h-[40%]' : 'h-[6%]'">
         <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
@@ -558,8 +575,12 @@
             </p>
           </button>
         </div>
-        <div v-if="showNoCodeProducts"
-          class="mt-2 px-3 py-1 overflow-auto h-[82%]">
+        <div v-if="showNoCodeProducts" class="mt-2 px-3 py-1 overflow-auto h-[82%]">
+          <div class="mb-2 relative">
+            <input v-model="searchNoCodeProducts" @input="filterNoCodeProducts" placeholder="Buscar producto"
+              type="search" class="lg:w-1/3 h-8 pl-8 rounded-md bg-transparent text-gray-400 border border-gray-300 focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
+                <i class="absolute left-2 top-2 fa-solid fa-magnifying-glass text-gray-400"></i>
+          </div>
           <el-skeleton v-if="syncingIDB"
             class="col-span-full mt-2 px-3 py-1 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2" animated>
             <template #template>
@@ -567,7 +588,7 @@
             </template>
           </el-skeleton>
           <div v-show="showNoCodeProducts" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-            <button @click="addSaleProduct(item)" type="button" v-for="(item, index) in noCodeProducts" :key="index"
+            <button @click="addSaleProduct(item)" type="button" v-for="(item, index) in filteredNoCodeProducts" :key="index"
               class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-grayF2 rounded-md">
               <h2 class="text-xs text-center">{{ item.name }}</h2>
               <figure class="flex items-center justify-center h-14">
@@ -966,11 +987,11 @@ export default {
       categoryForm,
 
       //báscula
-      isConnectedScale: false, // Estado de conexión de la báscula
+      isConnectedScale: false, // Estado de conexión
       port: null, // Puerto serie de la báscula
       reader: null, // Lector de datos del puerto
       intervalId: null, // Para guardar el ID del intervalo
-      isReadingScale: false, // Para controlar el estado de lectura
+      isReading: false, // Para controlar el estado de lectura
 
       // caja
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
@@ -991,7 +1012,9 @@ export default {
 
       // generales
       showNoCodeProducts: false,
+      searchNoCodeProducts: null,
       noCodeProducts: [],
+      filteredNoCodeProducts: [],
       localCurrentCash: 0, //dinero de caja local
       cashRegisterModal: false, //muestra el modal para ingresar o retirar dinero de la caja
       cashCutModal: false, //muestra el modal para el corte de caja
@@ -1005,6 +1028,8 @@ export default {
       isScanOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Escanear productos')?.value,
       // monto maximo en caja activado
       isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
+      // mostrar seleccion rapida de productos sin codigo activado
+      isQuickNoCodeSelectionOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Selección rápida de productos sin código')?.value,
 
       // cargas
       storeProcessing: false, //cargando store de venta
@@ -1026,7 +1051,7 @@ export default {
       editableTabsValue: "1", //tab seleccionado - componente de tabs
       editableTabs: [ //Informacion del tab - componente de tabs
         {
-          title: "Registro 1",
+          title: "Lista 1",
           name: "1",
           saleProducts: [],
           has_credit: false,
@@ -1038,7 +1063,7 @@ export default {
           client_id: null,
         },
         {
-          title: "Registro 2",
+          title: "Lista 2",
           name: "2",
           saleProducts: [],
           has_credit: false,
@@ -1050,7 +1075,7 @@ export default {
           client_id: null,
         },
         {
-          title: "Registro 3",
+          title: "Lista 3",
           name: "3",
           saleProducts: [],
           has_credit: false,
@@ -1084,6 +1109,15 @@ export default {
     clients: Array
   },
   methods: {
+    filterNoCodeProducts() {
+      if (this.searchNoCodeProducts) {
+        this.filteredNoCodeProducts = this.noCodeProducts.filter(product =>
+          product.name.toLowerCase().includes(this.searchNoCodeProducts.toLowerCase())
+        );
+      } else {
+        this.filteredNoCodeProducts = this.noCodeProducts;
+      }
+    },
     // Ejecuta un metodo depende de la tecla presionada. atajos de teclado
     handleKeydownScanInput(event) {
       if (event.key === "ArrowRight") {
@@ -1113,16 +1147,10 @@ export default {
       }
     },
     handleSelectFoundProduct() {
-      if( this.productsFound.length > 0 ) {
+      this.focusQuantitySelector(); //enfoca el selector de cantidad
+      if (this.productsFound.length > 0) {
         this.productFoundSelected = this.productsFound.find(product => product.name === this.productFoundSelectedName);
       }
-      // si el producto es a granel y en las configuraciones está activada la báscula se ejecuta el manejador de bascula
-      if (this.productFoundSelected.bulk_product && this.$page.props.auth.user.scale_config?.is_enabled) {
-        //se ejecuta el manejador de bascula si el producto es a granel
-        this.handleScale();
-      }
-      this.focusQuantitySelector(); //enfoca el selector de cantidad
-      this.productFoundSelectedName = null; //borra el nombre buscado para que no se muestre la misma opcion
     },
     // enfoca el input de cantidad cuando se hace la busqueda por nombre de producto
     focusQuantitySelector() {
@@ -1382,31 +1410,25 @@ export default {
         console.log(error);
       }
     },
-    async searchProducts(query, cb) {
+    async searchProducts(query) {
       this.searchQuery = query;
-      this.loading = true; // Activa el estado de carga
       try {
-        // Ajustar con cuántas letras comienza a buscar
-        if (this.searchQuery.length < 1) {
-          cb([]); // Devuelve un arreglo vacío si no hay suficientes caracteres
+        if (this.searchQuery.length < 2) {
           return;
         }
-
-        const results = await getItemByPartialAttributes('products', {
-          name: this.searchQuery,
-          code: this.searchQuery,
-        });
-
         this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
-        cb(results); // Llama al callback con los resultados
-
       } catch (error) {
-        console.error(error);
-        cb([]); // En caso de error, también devuelve un arreglo vacío
-      } finally {
-        this.loading = false; // Desactiva el estado de carga
+        console.log(error);
       }
     },
+    //funciona con el input normal
+    // async searchProducts() {
+    //   try {
+    //     this.productsFound = await getItemByPartialAttributes('products', { name: this.searchQuery, code: this.searchQuery });
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // },
     async fetchTotalSaleForCashCut() {
       try {
         const response = await axios.get(route('cash-cuts.fetch-total-sales-for-cash-cut', this.asignedCashRegister?.id));
@@ -1478,30 +1500,27 @@ export default {
       if (existingIndex !== -1) {
         this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
           ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
+          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + (this.isReading ? this.weight : this.quantity)
         };
       } else {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
-          quantity: this.quantity,
+          quantity: this.isReading ? this.weight : this.quantity, //si se esta leyendo de la báscula se agrega el peso, si no la cantidad
           originalPrice: null,
         });
       }
 
       // si esta leyeendo de la báscula se detiene la lectura
-      if (this.isReadingScale) {
-        this.stopReadingScale();
+      if (this.isReading) {
+        this.stopReading();
       }
       this.scannerQuery = null;
       this.quantity = 1;
       this.scanning = false;
+      this.productFoundSelectedName = null;
       this.productFoundSelected = null;
       this.inputFocus();
-
-      if ( this.isReadingScale ) {
-        this.stopReadingScale(); //detiene la lectura de la báscula
-      }
 
       // indicar al navegador mediante el local storage que hay proceso pendiente
       const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
@@ -1608,8 +1627,8 @@ export default {
     },
     handleScale() {
       if (this.isConnectedScale) {
-          // Si la báscula está sincronizada, empieza a leer
-          this.startReadingScale();
+        // Si la báscula está sincronizada, empieza a leer
+        this.startReading();
       } else {
           // // Si no está sincronizada, muestra la confirmación
           // this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
@@ -1627,9 +1646,9 @@ export default {
     },
     async connectScale() {
       try {
-         if (this.port) {
-            await this.port.close(); // Cierra el puerto solo después de liberar el lector
-            this.port = null;
+        if (this.port) {
+          await this.port.close(); // Cierra el puerto solo después de liberar el lector
+          this.port = null;
         }
 
         // Solicitar al usuario seleccionar un dispositivo serie
@@ -1637,11 +1656,11 @@ export default {
 
         // Configurar la conexión con los parámetros adecuados para tu báscula tomados de la base de datos
         await this.port.open({
-            baudRate: this.$page.props.auth.user.scale_config?.baudRate ?? 9600,
-            dataBits: this.$page.props.auth.user.scale_config?.dataBit ?? 8,
-            stopBits: this.$page.props.auth.user.scale_config?.stopBit ?? 1,   
-            parity: this.$page.props.auth.user.scale_config?.parity ?? "none",
-            flowControl: this.$page.props.auth.user.scale_config?.flowControl ?? "none",
+          baudRate: this.$page.props.auth.user.scale_config?.baudRate ?? 9600,
+          dataBits: this.$page.props.auth.user.scale_config?.dataBit ?? 8,
+          stopBits: this.$page.props.auth.user.scale_config?.stopBit ?? 1,
+          parity: this.$page.props.auth.user.scale_config?.parity ?? "none",
+          flowControl: this.$page.props.auth.user.scale_config?.flowControl ?? "none",
         });
 
         const textDecoder = new TextDecoderStream();
@@ -1654,9 +1673,9 @@ export default {
         this.isConnectedScale = true; // Marca la conexión como activa
 
         this.$notify({
-            title: "Correcto",
-            message: "Báscula sincronizada",
-            type: "success",
+          title: "Correcto",
+          message: "Báscula sincronizada",
+          type: "success",
         });
 
       } catch (error) {
@@ -1669,42 +1688,42 @@ export default {
         }
       }
     },
-    async startReadingScale() {
-        if (!this.port || !this.port.readable || !this.port.writable) {
-            alert("Conecta la báscula primero.");
-            return;
-        }
+    async startReading() {
+      if (!this.port || !this.port.readable || !this.port.writable) {
+        alert("Conecta la báscula primero.");
+        return;
+      }
 
-        if (this.isReadingScale) {
-            alert("La lectura ya está en curso.");
-            return;
-        }
+      if (this.isReading) {
+        alert("La lectura ya está en curso.");
+        return;
+      }
 
         // Marcar la lectura de la báscula como activa
         this.isReadingScale = true;
 
-        this.intervalId = setInterval(async () => {
-            try {
-                // Enviar comando para solicitar datos (si es necesario)
-                const textEncoder = new TextEncoder();
-                const writer = this.port.writable.getWriter();
-                await writer.write(textEncoder.encode("COMANDO_PESO\n")); // Cambia "COMANDO_PESO" al comando requerido por tu báscula
-                writer.releaseLock();
+      this.intervalId = setInterval(async () => {
+        try {
+          // Enviar comando para solicitar datos (si es necesario)
+          const textEncoder = new TextEncoder();
+          const writer = this.port.writable.getWriter();
+          await writer.write(textEncoder.encode("COMANDO_PESO\n")); // Cambia "COMANDO_PESO" al comando requerido por tu báscula
+          writer.releaseLock();
 
-                // Leer datos
-                if (!this.reader) {
-                    const textDecoder = new TextDecoder();
-                    this.reader = this.port.readable.getReader();
-                }
+          // Leer datos
+          if (!this.reader) {
+            const textDecoder = new TextDecoder();
+            this.reader = this.port.readable.getReader();
+          }
 
-                const { value, done } = await this.reader.read();
-                if (done) {
-                    console.log("Lectura finalizada.");
-                    this.reader.releaseLock();
-                    this.reader = null;
-                    this.stopReadingScale(); // Detiene la lectura si es el final
-                    return;
-                }
+          const { value, done } = await this.reader.read();
+          if (done) {
+            console.log("Lectura finalizada.");
+            this.reader.releaseLock();
+            this.reader = null;
+            this.stopReading(); // Detiene la lectura si es el final
+            return;
+          }
 
                 console.log("Datos leídos:", value);
                 this.quantity = this.parseWeight(value);
@@ -1721,9 +1740,17 @@ export default {
             this.intervalId = null;
             console.log("Intervalo detenido.");
         }
+      }, 200); // Intervalo de 500 ms
+    },
+    stopReading() {
+      if (this.intervalId) {
+        clearInterval(this.intervalId); // Detiene el intervalo
+        this.intervalId = null;
+        console.log("Intervalo detenido.");
+      }
 
-        this.isReadingScale = false;
-        console.log("Lectura detenida.");
+      this.isReading = false;
+      console.log("Lectura detenida.");
     },
     async disconnectScale() {
         try {
@@ -1744,6 +1771,19 @@ export default {
             console.error("Error al desconectar la báscula:", error);
             alert("Comunicación con la báscula cerrada. Presiona nuevamente para desconectar");
         }
+
+        this.isConnectedScale = false; // Actualiza el estado de conexión
+        this.weight = "0.00"; // Reinicia el peso leído
+        this.$notify({
+          title: "Correcto",
+          message: "Báscula desconectada",
+          type: "success",
+        });
+        console.log("Báscula desconectada.");
+      } catch (error) {
+        console.error("Error al desconectar la báscula:", error);
+        alert("Comunicación con la báscula cerrada. Presiona nuevamente para desconectar");
+      }
     },
     parseWeight(data) {
       // Ajustar esta lógica según el formato de los datos enviados por la báscula
@@ -1776,6 +1816,7 @@ export default {
     this.noCodeProducts = await getItemsByNullAttribute('products', 'code');
     // ordenar alfabeticamente
     this.noCodeProducts = this.noCodeProducts.sort((a, b) => a.name.localeCompare(b.name));
+    this.filteredNoCodeProducts = this.noCodeProducts;
     this.syncingIDB = false;
 
     // resetear variable de local storage a false
@@ -1794,72 +1835,3 @@ export default {
   },
 }
 </script>
-
-# Componente de carga del input de busqueda por nombre o código de producto (no se muestra en local, en produccion no lo sé)
-<style>
-  .circular {
-  display: inline;
-  height: 30px;
-  width: 30px;
-  animation: loading-rotate 2s linear infinite;
-}
-.path {
-  animation: loading-dash 1.5s ease-in-out infinite;
-  stroke-dasharray: 90, 150;
-  stroke-dashoffset: 0;
-  stroke-width: 2;
-  stroke: var(--el-color-primary);
-  stroke-linecap: round;
-}
-.loading-path .dot1 {
-  transform: translate(3.75px, 3.75px);
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-}
-.loading-path .dot2 {
-  transform: translate(calc(100% - 3.75px), 3.75px);
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 0.4s;
-}
-.loading-path .dot3 {
-  transform: translate(3.75px, calc(100% - 3.75px));
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 1.2s;
-}
-.loading-path .dot4 {
-  transform: translate(calc(100% - 3.75px), calc(100% - 3.75px));
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 0.8s;
-}
-@keyframes loading-rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes loading-dash {
-  0% {
-    stroke-dasharray: 1, 200;
-    stroke-dashoffset: 0;
-  }
-  50% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -40px;
-  }
-  100% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -120px;
-  }
-}
-@keyframes custom-spin-move {
-  to {
-    opacity: 1;
-  }
-}
-</style>

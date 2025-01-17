@@ -36,6 +36,18 @@ const calculateRemainigFreeDays = (date) => {
     return trialDays - calculateDaysSinceStoreCreated(date);
 };
 
+// calcula dias restantes de la suscripcion a fecha de hoy
+const calculateRemainingDays = (nextPayment) => {
+    const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
+    const startDate = new Date(nextPayment);
+    const currentDate = new Date();
+
+    // Calcula la diferencia en días
+    const diffDays = Math.round((startDate - currentDate) / oneDay);
+
+    return diffDays;
+};
+
 const logout = () => {
     router.post(route('logout'));
 };
@@ -567,6 +579,30 @@ onUnmounted(() => {
                             tu suscripción.
                         </p>
                         <div class="flex justify-end mt-1">
+                            <button type="button" @click="$inertia.visit(route('profile.show'))"
+                                class="underline text-primary">
+                                Pagar suscripción
+                                <i class="fa-solid fa-arrow-right-long ml-1 text-[10px]"></i>
+                            </button>
+                        </div>
+                    </section>
+                    <!-- mensaje de suscripcion a punto de expirar-->
+                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 5"
+                        class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-xs lg:px-10">
+                        <div v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) > 0">
+                            Tu suscripción expira en
+                            <strong>
+                                {{ calculateRemainingDays($page.props.auth.user.store.next_payment) }} días.
+                            </strong> <br>
+                            Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
+                            tu suscripción o a activar el pago automático.
+                        </div>
+                        <p v-else>
+                            Tu suscripción <strong>ha expirado.</strong> <br>
+                            Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
+                            tu suscripción o a activar el pago automático.
+                        </p>
+                        <div v-if="$page.props.auth.user.rol == 'Administrador'" class="flex justify-end mt-1">
                             <button type="button" @click="$inertia.visit(route('profile.show'))"
                                 class="underline text-primary">
                                 Pagar suscripción

@@ -28,7 +28,7 @@
                             <p>Usuarios</p>
                         </div>
                     </template>
-                    <Users :users="users" />
+                    <Users :users="users" :roles="roles" />
                 </el-tab-pane>
                 <el-tab-pane v-if="canSeePrinterSettings" label="Impresora" name="3">
                     <template #label>
@@ -87,6 +87,7 @@ export default {
     },
     props: {
         users: Array,
+        roles: Array,
     },
     methods: {
         updateURL(tab) {

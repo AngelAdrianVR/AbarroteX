@@ -70,7 +70,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|unique:users,email,' . $user->id,
             'rol' => 'required|numeric|min:1',
             'phone' => 'required',
         ]);

@@ -180,7 +180,7 @@
     <div v-if="isScanOn" class="flex flex-col items-center justify-center text-gray99 text-sm">
       <span>Escanea un producto para comenzar la venta</span>
       <figure class="my-7 flex items-center justify-center select-none">
-          <img draggable="false" class="w-1/3 md:w-1/4 opacity-40" src="@/../../public/images/escaner2.png" alt="scaner">
+          <img draggable="false" class="w-1/3 md:w-1/4 opacity-15" src="@/../../public/images/escaner2.png" alt="scaner">
       </figure>
     </div>
     <p v-else class="flex items-center justify-center text-gray99 text-sm">
