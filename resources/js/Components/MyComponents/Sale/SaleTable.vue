@@ -41,7 +41,7 @@
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
             <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
               @click.stop="startEditing(sale, index)"
-              class="flex items-center justify-center text-primary bg-gray-200 size-5 rounded-md ml-2 mr-1">
+              class="flex items-center justify-center text-primary hover:bg-gray-50 hover:shadow-gray-400 hover:shadow-sm size-5 rounded-md ml-2 mr-1">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-[14px]">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -93,7 +93,7 @@
             title="¿Continuar?" @confirm="deleteItem(sale.product.id)">
             <template #reference>
               <i
-                class="fa-regular fa-trash-can mr-2 text-primary cursor-pointer p-2 hover:bg-gray-100 rounded-full"></i>
+                class="fa-regular fa-trash-can mr-2 text-primary cursor-pointer p-2 hover:bg-gray-50 rounded-md hover:shadow-gray-400 hover:shadow-sm"></i>
             </template>
           </el-popconfirm>
         </div>
