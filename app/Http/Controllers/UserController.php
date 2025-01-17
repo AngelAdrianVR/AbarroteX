@@ -47,6 +47,7 @@ class UserController extends Controller
             'password' => bcrypt('ezyventas'),
             'cash_register_id' => $cash_register->id,
             'email_verified_at' => now(),
+            'scale_config' => ["port" => null,"baudRate" => 9600,"parity" => "none","dataBit" => 8,"stopBit" => 1,"flowControl" => "none","is_enabled" => false],
         ]);
 
         $user->syncRoles($request->rol);
