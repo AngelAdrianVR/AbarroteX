@@ -300,27 +300,54 @@
                       }})
                     </span>
                   </p>
-                  <p class="text-[#5FCB1F]">${{
+                  <p :class="productFoundSelected.bulk_product ? 'text-gray-900' : 'text-[#5FCB1F]'">${{
                     productFoundSelected.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                       ",") }} <span v-if="productFoundSelected.bulk_product" class="text-gray-800"> /{{ productFoundSelected.measure_unit === 'Kilogramo' ? 'Kg' : 'L' }}</span></p>
                 </div>
-                <div class="flex justify-between items-center mt-4">
-                  <p class="text-gray99">Cantidad</p>
-                  <el-input-number ref="quantitySelector" @keydown="handleKeydownQuantitySelector" v-if="isInventoryOn" v-model="quantity" :min="0"
-                    :max="productFoundSelected.current_stock" :precision="2" :disabled="isReadingScale">
+                <!-- input de cantidad si el producto es a granel -->
+                <div v-if="productFoundSelected?.bulk_product" class="flex justify-between items-center mt-4 border border-[#D9D9D9] rounded-xl py-3 px-7">
+                  <div>
+                    <p class="text-gray-500 mb-1">Cantidad</p>
+                    <el-input-number
+                      ref="quantitySelector"
+                      @keydown="handleKeydownQuantitySelector"
+                      v-model="quantity"
+                      :min="0"
+                      :max="isInventoryOn ? productFoundSelected.current_stock : undefined"
+                      :precision="2"
+                    >
+                      <template #suffix>
+                        <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">
+                          {{ productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                            productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                          }}
+                        </span>
+                      </template>
+                    </el-input-number>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-gray-500">Total</p>
+                    <p class="text-[#5FCB1F] text-lg font-bold">${{ (quantity * productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                  </div>
+                </div>
+                
+                <!-- input de cantidad si el producto no es a granel -->
+                <div v-else class="flex justify-between items-center mt-4">
+                  <p class="text-gray99 mb-1">Cantidad</p>
+                  <el-input-number
+                    ref="quantitySelector"
+                    @keydown="handleKeydownQuantitySelector"
+                    v-model="quantity"
+                    :min="0"
+                    :max="isInventoryOn ? productFoundSelected.current_stock : undefined"
+                    :precision="2"
+                  >
                     <template #suffix>
-                      <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">{{ 
-                        productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
-                        productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
-                      }}</span>
-                    </template>
-                  </el-input-number>
-                  <el-input-number ref="quantitySelector" @keydown="handleKeydownQuantitySelector" v-else v-model="quantity" :min="0" :precision="2" :disabled="isReadingScale">
-                    <template #suffix>
-                      <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">{{ 
-                        productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
-                        productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
-                      }}</span>
+                      <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">
+                        {{ productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
+                          productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                        }}
+                      </span>
                     </template>
                   </el-input-number>
                 </div>
@@ -336,18 +363,20 @@
                     No te quedan existencias de este producto.
                     <!-- <p class="text-primary underline cursor-pointer">Clic para dar entrada del producto</p>  -->
                   </div>
-                  <div>
+                  <div class="flex items-center justify-center space-x-4">
                     <button ref="addButton" @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
-                      class="rounded-full !px-24 text-white bg-primary text-sm py-1 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white focus:outline-none transition-all ease-linear duration-200"
+                      class="rounded-full !px-24 text-white bg-primary text-sm py-1 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white disabled:cursor-not-allowed disabled:bg-gray-400 focus:outline-none transition-all ease-linear duration-200"
                       :disabled="quantity == 0">
                       Agregar
                     </button>
-                  </div>
 
-                  <!-- //Lectura de báscula y costo total -->
-                  <div v-if="isReadingScale" class="mt-5 p-4 rounded-md flex items-center justify-between bg-gray-200">
-                    <p>Peso: {{ weight }}Kg</p>
-                    <p>Total: $ {{ (weight * productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                    <el-tooltip v-if="productFoundSelected?.bulk_product" content="Agregar cantidad manualmente" placement="bottom">
+                      <button @click="stopReadingScale()" class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 1 0-3.15 0v8.175a6.75 6.75 0 0 0 6.75 6.75h2.018a5.25 5.25 0 0 0 3.712-1.538l1.732-1.732a5.25 5.25 0 0 0 1.538-3.712l.003-2.024a.668.668 0 0 1 .198-.471 1.575 1.575 0 1 0-2.228-2.228 3.818 3.818 0 0 0-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0 1 16.35 15m.002 0h-.002" />
+                        </svg>
+                      </button>
+                    </el-tooltip>
                   </div>
                 </div>
               </div>
@@ -940,7 +969,6 @@ export default {
       isConnectedScale: false, // Estado de conexión de la báscula
       port: null, // Puerto serie de la báscula
       reader: null, // Lector de datos del puerto
-      weight: "0.00", // Peso leído de la báscula
       intervalId: null, // Para guardar el ID del intervalo
       isReadingScale: false, // Para controlar el estado de lectura
 
@@ -1071,8 +1099,6 @@ export default {
         this.$refs.scanInput.focus();
       } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
         this.cashPayment();
-      } else if (event.key === "Escape") {
-        this.focusSearchInput();
       }
     },
     handleKeydownQuantitySelector(event) {
@@ -1080,6 +1106,10 @@ export default {
         this.focusAddButton();
       } else if (event.key === "Escape") {
         this.focusSearchInput();
+        this.stopReadingScale(); //detiene la lectura de la bascula en caso de que este activa
+        this.productFoundSelected = null; //borra el producto seleccionado
+      } else if (event.key === "m") {
+        this.stopReadingScale(); //detiene la lectura de la bascula en caso de que este activa
       }
     },
     handleSelectFoundProduct() {
@@ -1441,10 +1471,6 @@ export default {
       }
     },
     addSaleProduct(product) {
-      // si el producto es a granel y se está utilizando la báscula se guarda el peso en la variable quantity
-      if ( this.isReadingScale && this.weight > 0) {
-        this.quantity = this.weight;
-      }
       //revisa si el producto a agregar ya esta dentro del arreglo
       const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
         return sale.product.id == product.id;
@@ -1585,18 +1611,18 @@ export default {
           // Si la báscula está sincronizada, empieza a leer
           this.startReadingScale();
       } else {
-          // Si no está sincronizada, muestra la confirmación
-          this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
-              confirmButtonText: 'Sí',
-              cancelButtonText: 'No',
-              type: 'warning'
-          }).then(() => {
-              // Si el usuario acepta, sincroniza la báscula
-              this.connectScale();
-          }).catch(() => {
-              // Si el usuario cancela, no hace nada
-              console.log('Sincronización cancelada');
-          });
+          // // Si no está sincronizada, muestra la confirmación
+          // this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
+          //     confirmButtonText: 'Sí',
+          //     cancelButtonText: 'No',
+          //     type: 'warning'
+          // }).then(() => {
+          //     // Si el usuario acepta, sincroniza la báscula
+          //     this.connectScale();
+          // }).catch(() => {
+          //     // Si el usuario cancela, no hace nada
+          //     console.log('Sincronización cancelada');
+          // });
       }
     },
     async connectScale() {
@@ -1636,6 +1662,11 @@ export default {
       } catch (error) {
         console.error("Error al conectar la báscula:", error);
         // alert("No se conectó la báscula.");
+      } finally {
+        // si el producto seleccionado es a granel y la báscula está activada se inicia la lectura
+        if ( this.productFoundSelected?.bulk_product ) {
+          this.startReadingScale();
+        }
       }
     },
     async startReadingScale() {
@@ -1649,6 +1680,7 @@ export default {
             return;
         }
 
+        // Marcar la lectura de la báscula como activa
         this.isReadingScale = true;
 
         this.intervalId = setInterval(async () => {
@@ -1675,13 +1707,13 @@ export default {
                 }
 
                 console.log("Datos leídos:", value);
-                this.weight = this.parseWeight(value);
+                this.quantity = this.parseWeight(value);
 
             } catch (error) {
                 console.error("Error al leer datos:", error);
                 this.stopReadingScale(); // Detener lectura en caso de error
             }
-        }, 200); // Intervalo de 500 ms
+        }, 120); // Intervalo de 100 ms
     },
     stopReadingScale() {
         if (this.intervalId) {
@@ -1702,7 +1734,6 @@ export default {
             }
 
             this.isConnectedScale = false; // Actualiza el estado de conexión
-            this.weight = "0.00"; // Reinicia el peso leído
             this.$notify({
                 title: "Correcto",
                 message: "Báscula desconectada",
