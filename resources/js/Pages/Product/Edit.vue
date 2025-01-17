@@ -204,7 +204,7 @@
         </div>
 
         <!-- category form -->
-        <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
+        <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false" max-width="md">
             <template #title> Agregar categoría </template>
             <template #content>
                 <form @submit.prevent="storeCategory" ref="categoryForm">
@@ -224,9 +224,8 @@
                 </div>
             </template>
         </DialogModal>
-
         <!-- brand form -->
-        <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false">
+        <DialogModal :show="showBrandFormModal" @close="showBrandFormModal = false" max-width="md">
             <template #title> Agregar proveedor </template>
             <template #content>
                 <form @submit.prevent="storeBrand">

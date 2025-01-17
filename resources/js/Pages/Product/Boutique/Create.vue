@@ -221,7 +221,6 @@
                         </el-tooltip>
                     </div>
                 </div>
-
                 <div class="col-span-2 text-right mt-3">
                     <PrimaryButton class="!rounded-full" :disabled="form.processing">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -246,7 +245,7 @@
         </div>
 
         <!-- category form -->
-        <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false">
+        <DialogModal :show="showCategoryFormModal" @close="showCategoryFormModal = false" max-width="md">
             <template #title> Agregar categoría </template>
             <template #content>
                 <form @submit.prevent="storeCategory" ref="categoryForm">
@@ -266,9 +265,8 @@
                 </div>
             </template>
         </DialogModal>
-
         <!-- colors form -->
-        <DialogModal :show="showColorFormModal" @close="showColorFormModal = false">
+        <DialogModal :show="showColorFormModal" @close="showColorFormModal = false" max-width="md">
             <template #title> Agregar nuevos colores </template>
             <template #content>
                 <p class="text-gray99 mb-3">En este apartado puedes crear colores que no se encuentren en la lista</p>
@@ -311,9 +309,8 @@
                 </div>
             </template>
         </DialogModal>
-
         <!-- sizes form -->
-        <DialogModal :show="showSizeFormModal" @close="showSizeFormModal = false">
+        <DialogModal :show="showSizeFormModal" @close="showSizeFormModal = false" max-width="md">
             <template #title> Agregar talla </template>
             <template #content>
                 <p class="text-gray99 mb-3">En este apartado puedes crear tallas que no se encuentren en la lista</p>
