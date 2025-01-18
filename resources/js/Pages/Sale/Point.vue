@@ -74,40 +74,41 @@
         <header class="lg:flex justify-between items-center mt-1 mx-3">
           <h1 class="font-bold text-lg">Registrar venta</h1>
           <!-- Dinero en caja -->
-            <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
-              class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
-              <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
-                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                class="size-4 cursor-pointer">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-              <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
-                fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-              </svg>
-              <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
-                Efectivo en "{{ asignedCashRegister?.name }}":
-                <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
-                  class="ml-2">
-                  {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
-                    '*****' }}
-                </b>
-                <el-tooltip
-                  v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
-                  content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte" placement="bottom">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="size-4 text-red-600">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                  </svg>
-                </el-tooltip>
-              </p>
-              <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
-            </div>
-            <article class="flex items-center space-x-3">
+          <div v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja')"
+            class="mt-4 lg:mt-0 flex items-center justify-center space-x-3 text-gray99">
+            <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-if="showCashRegisterMoney"
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+              class="size-4 cursor-pointer">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+            <svg @click="showCashRegisterMoney = !showCashRegisterMoney" v-else xmlns="http://www.w3.org/2000/svg"
+              fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 cursor-pointer">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+            </svg>
+            <p v-if="this.$page.props.auth?.user?.cash_register_id" class="text-sm flex items-center space-x-2">
+              Efectivo en "{{ asignedCashRegister?.name }}":
+              <b :class="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn ? 'text-red-600' : ''"
+                class="ml-2">
+                {{ showCashRegisterMoney ? '$' + localCurrentCash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") :
+                  '*****' }}
+              </b>
+              <el-tooltip
+                v-if="(localCurrentCash >= asignedCashRegister?.max_cash) && isMaxCashOn && showCashRegisterMoney"
+                content="Se llegó al límite de dinero permitido en caja. Es recomendable hacer corte"
+                placement="bottom">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                  stroke="currentColor" class="size-4 text-red-600">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+              </el-tooltip>
+            </p>
+            <p v-else class="text-sm text-red-600">No tienes una caja asignada</p>
+          </div>
+          <article class="flex items-center space-x-3">
               <!-- Indicadores activos como báscula y descuentos -->
                <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled" placement="left">
                   <template #content>
@@ -280,8 +281,8 @@
                 </template>
               </el-autocomplete>
             </div>
-            <!-- Detalle de producto encontrado -->
-            <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
+           <!-- Detalle de producto encontrado -->
+           <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
               <div class="relative" v-if="productFoundSelected">
                 <i @click="productFoundSelected = null"
                   class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
@@ -1113,7 +1114,7 @@ export default {
       }
     },
     handleSelectFoundProduct() {
-      if( this.productsFound.length > 0 ) {
+      if (this.productsFound.length > 0) {
         this.productFoundSelected = this.productsFound.find(product => product.name === this.productFoundSelectedName);
       }
       // si el producto es a granel y en las configuraciones está activada la báscula se ejecuta el manejador de bascula

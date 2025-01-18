@@ -68,13 +68,13 @@ export default {
 }
 
 .button:before {
-  border: 3px solid #505050;
+  border: 2px solid #505050;
   transition: opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
     transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
 }
 
 .button:after {
-  border: 3px solid #F68C0F;
+  border: 2px solid #F68C0F;
   transform: scale(1.3);
   transition: opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
     transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
