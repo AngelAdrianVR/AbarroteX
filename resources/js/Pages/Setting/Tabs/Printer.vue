@@ -30,7 +30,7 @@
             <div v-else class="flex items-center space-x-2 mx-7">
                 <el-input v-model="form.printer_config.UUIDService" maxlength="255" clearable placeholder="Escribe el UUID Service de tu impresora" />
                 <button v-if="editUUIDService">
-                    <i @click="editUUIDService = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+                    <i @click="updatePrinterConfig(); editUUIDService = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
                 </button>
                 <button @click="editUUIDService = false;">
                     <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
@@ -53,7 +53,7 @@
             <div v-else class="flex items-center space-x-2 mx-7">
                 <el-input v-model="form.printer_config.UUIDCharacteristic" maxlength="255" clearable placeholder="Escribe el UUID Characteristic de tu impresora" />
                 <button v-if="editUUIDCharacteristic">
-                    <i @click="editUUIDCharacteristic = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
+                    <i @click="updatePrinterConfig(); editUUIDCharacteristic = false" class="fa-solid fa-check text-xs text-white cursor-pointer bg-primary rounded-full py-1 px-[7px]"></i>
                 </button>
                 <button @click="editUUIDCharacteristic = false;">
                     <i class="fa-solid fa-x text-xs text-gray-600 cursor-pointer bg-gray-100 rounded-full py-1 px-[7px]"></i>
@@ -70,16 +70,16 @@
         <div class="flex items-center text-sm">
 
             <p class="mx-7">Impresión automática:</p>
-            <el-switch v-model="form.printer_config.automaticPrinting" class="ml-4" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
+            <el-switch v-model="form.printer_config.automaticPrinting" @change="updatePrinterConfig();" class="ml-4" size="small" style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9"/>
         </div>
         </article>
 
-        <div class="text-right pt-10 md:mx-7 col-span-full">
+        <!-- <div class="text-right pt-10 md:mx-7 col-span-full">
             <PrimaryButton :disabled="form.processing" @click="updatePrinterConfig">
                 <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                 Guadar cambios
             </PrimaryButton>
-        </div>
+        </div> -->
     </section>
 </template>
 
