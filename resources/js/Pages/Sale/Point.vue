@@ -191,6 +191,40 @@
         </header>
         <!-- cuerpo de la pagina -->
         <div class="lg:flex lg:space-x-5 my-2">
+          <!-- atajos de teclado -->
+          <div class="relative">
+            <el-tooltip content="Atajos de teclado" placement="right">
+              <button @click="showShortCuts = !showShortCuts" class="size-10 border border-primary rounded-full flex items-center justify-center text-primary">
+                <svg width="18" height="18" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3.57457 3.38707L5.38423 4.74432L3.57457 6.10156M6.28906 6.10156H8.09872M2.66974 11.0781H10.8132C11.1732 11.0781 11.5184 10.9351 11.7729 10.6806C12.0275 10.4261 12.1705 10.0808 12.1705 9.72088V2.48224C12.1705 2.12228 12.0275 1.77706 11.7729 1.52253C11.5184 1.268 11.1732 1.125 10.8132 1.125H2.66974C2.30978 1.125 1.96456 1.268 1.71003 1.52253C1.45549 1.77706 1.3125 2.12228 1.3125 2.48224V9.72088C1.3125 10.0808 1.45549 10.4261 1.71003 10.6806C1.96456 10.9351 2.30978 11.0781 2.66974 11.0781Z" stroke="#F68C0F" stroke-width="0.90483" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </el-tooltip>            
+          </div>
+          <!-- ventana de shortcuts -->
+            <div v-if="showShortCuts" class="absolute top-36 left-20 bg-white border border-[#D9D9D9] rounded-xl p-4 z-40">
+              <div class="flex items-center justify-between">
+                <h2 class="font-bold">Atajos de teclado</h2>
+                <i @click="showShortCuts = false" class="fa-solid fa-xmark text-gray-500 cursor-pointer"></i>
+              </div>
+              <p class="text-[#555555] text-sm mt-2">Combina las siguientes teclas para realizar acciones rápidas en punto de venta.</p>
+              <div class="grid grid-cols-3 gap-2 self-start mt-4 text-sm">
+                <p class="col-span-2">Buscar por nombre</p>
+                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i class="fa-solid fa-right-long"></i></button>
+                <p class="col-span-2">Enfocar input de escaner</p>
+                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Crl</button>
+                <p class="col-span-2">Buscar otro producto</p>
+                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Esc</button>
+                <p class="col-span-2">Agregar peso manual (productos a granel utilizando báscula)</p>
+                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">M</button>
+                <p class="col-span-2">Finalizar venta</p>
+                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Shift</button>
+
+                <div class="text-right col-span-full mt-5">
+                  <PrimaryButton @click="showShortCuts = false">Entendido</PrimaryButton>
+                </div>
+              </div>
+            </div>
           <!-- scaner de código  -->
           <div class="lg:w-[70%]">
             <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4" @keydown="handleKeydownScanInput">
@@ -368,7 +402,7 @@
                     </button>
 
                     <el-tooltip v-if="productFoundSelected?.bulk_product" content="Agregar cantidad manualmente" placement="bottom">
-                      <button @click="stopReadingScale()" class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
+                      <button @click="stopReadingScale(); focusQuantitySelector()" class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 1 0-3.15 0v8.175a6.75 6.75 0 0 0 6.75 6.75h2.018a5.25 5.25 0 0 0 3.712-1.538l1.732-1.732a5.25 5.25 0 0 0 1.538-3.712l.003-2.024a.668.668 0 0 1 .198-.471 1.575 1.575 0 1 0-2.228-2.228 3.818 3.818 0 0 0-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0 1 16.35 15m.002 0h-.002" />
                         </svg>
@@ -868,7 +902,7 @@
       </template>
       <template #footer>
         <div class="flex items-center space-x-1">
-          <CancelButton @click="showLimitCashModal = false">Cancelar</CancelButton>
+          <CancelButton @click="showLimitCashModal = false">Ahora no</CancelButton>
           <PrimaryButton @click="showLimitCashModal = false; handleCashCut()">Hacer corte</PrimaryButton>
         </div>
       </template>
@@ -990,6 +1024,7 @@ export default {
       showCreateProductModal: false,
 
       // generales
+      showShortCuts: false,
       showNoCodeProducts: false,
       searchNoCodeProducts: null,
       noCodeProducts: [],
@@ -1491,27 +1526,30 @@ export default {
       if (existingIndex !== -1) {
         this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
           ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + (this.isReading ? this.weight : this.quantity)
+          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
         };
       } else {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
-          quantity: this.isReading ? this.weight : this.quantity, //si se esta leyendo de la báscula se agrega el peso, si no la cantidad
+          quantity: this.quantity,
           originalPrice: null,
         });
       }
 
       // si esta leyeendo de la báscula se detiene la lectura
-      if (this.isReading) {
-        this.stopReading();
+      if (this.isReadingScale) {
+        this.stopReadingScale();
       }
       this.scannerQuery = null;
       this.quantity = 1;
       this.scanning = false;
-      this.productFoundSelectedName = null;
       this.productFoundSelected = null;
       this.inputFocus();
+
+      if ( this.isReadingScale ) {
+        this.stopReadingScale(); //detiene la lectura de la báscula
+      }
 
       // indicar al navegador mediante el local storage que hay proceso pendiente
       const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
@@ -1619,7 +1657,7 @@ export default {
     handleScale() {
       if (this.isConnectedScale) {
         // Si la báscula está sincronizada, empieza a leer
-        this.startReading();
+        this.startReadingScale();
       } else {
         // // Si no está sincronizada, muestra la confirmación
         // this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
