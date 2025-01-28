@@ -211,7 +211,7 @@
               <div class="grid grid-cols-3 gap-2 self-start mt-4 text-sm">
                 <p class="col-span-2">Buscar por nombre</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i class="fa-solid fa-right-long"></i></button>
-                <p class="col-span-2">Enfocar input de escaner</p>
+                <p class="col-span-2">Enfocar campo de escaner</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Crl</button>
                 <p class="col-span-2">Buscar otro producto</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Esc</button>
@@ -219,7 +219,6 @@
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">M</button>
                 <p class="col-span-2">Finalizar venta</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Shift</button>
-
                 <div class="text-right col-span-full mt-5">
                   <PrimaryButton @click="showShortCuts = false">Entendido</PrimaryButton>
                 </div>
