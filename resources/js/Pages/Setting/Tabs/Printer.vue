@@ -1,8 +1,8 @@
 <template>
     <section class="my-5 divide-y-[1px] border border-grayD9 rounded-[5px]">
-        <article class="rounded-t-md p-4">
+        <article class="text-sm rounded-t-md p-4">
             <div class="flex items-center space-x-2">
-                <span class="text-base font-bold">Conexión por bluetooth</span>
+                <span class="font-bold">Conexión por bluetooth</span>
                 <div class="bg-[#CCD8FD] rounded-full py-1 inline-block">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <mask id="mask0_15673_25" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0"
@@ -26,16 +26,16 @@
             </p>
         </article>
         <!-- UUID SERVICE ----------------------------------------->
-        <article class="p-4 lg:flex items-center justify-between">
+        <article class="text-sm p-4 lg:flex items-center justify-between">
             <div class="lg:w-1/2">
                 <h2>Código UUID Service</h2>
-                <p class="text-sm text-[#575757]">
+                <p class="text-[#575757]">
                     Puedes encontrarlo en las especificaciones del fabricante. Si no lo
                     encuentras contactar a soporte de Ezy Ventas
                 </p>
             </div>
             <div>
-                <div class="flex items-center space-x-2 text-sm mt-3 lg:mt-0">
+                <div class="flex items-center space-x-2 mt-3 lg:mt-0">
                     <p class="">UUID Service:</p>
                     <el-input v-model="form.printer_config.UUIDService" @blur="updateUUIDService"
                         @keyup.enter="updateUUIDService" maxlength="255" class="!w-72" clearable
@@ -45,16 +45,16 @@
             </div>
         </article>
         <!-- UUID Characteristic ----------------------------------------->
-        <article class="p-4 lg:flex items-center justify-between">
+        <article class="text-sm p-4 lg:flex items-center justify-between">
             <div class="lg:w-1/2">
                 <h2>Código UUID Characteristic</h2>
-                <p class="text-sm text-[#575757]">
+                <p class="text-[#575757]">
                     Puedes encontrarlo en las especificaciones del fabricante. Si no lo
                     encuentras contactar a soporte de Ezy Ventas
                 </p>
             </div>
             <div>
-                <div class="flex items-center space-x-2 text-sm mt-3 lg:mt-0">
+                <div class="flex items-center space-x-2 mt-3 lg:mt-0">
                     <p class="">UUID Characteristic:</p>
                     <el-input v-model="form.printer_config.UUIDCharacteristic" @blur="updateUUIDCharacteristic"
                         @keyup.enter="updateUUIDCharacteristic" maxlength="255" class="!w-72" clearable
