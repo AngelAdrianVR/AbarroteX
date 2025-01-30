@@ -4,7 +4,7 @@
         <h1 class="font-bold text-center flex items-center justify-center">{{ title }} <span class="ml-3" v-html="icon"></span></h1>
 
         <div v-if="this.options.series.length" id="chart">
-            <apexchart type="donut" width="420" :options="chartOptions" :series="series"></apexchart>
+            <apexchart type="donut" width="500" :options="chartOptions" :series="series"></apexchart>
         </div>
         <p v-else class="flex flex-col items-center space-y-1 text-gray99 text-xs text-center my-5">
             <span>No hay información</span>
@@ -25,7 +25,7 @@ export default {
             series: this.options.series,
             chartOptions: {
                 chart: {
-                    width: 420,
+                    width: 500,
                     type: 'donut',
                 },
                 plotOptions: {

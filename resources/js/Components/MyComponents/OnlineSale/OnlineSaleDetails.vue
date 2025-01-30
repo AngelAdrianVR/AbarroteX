@@ -1,6 +1,6 @@
 <template>
-    <article class="border border-grayD9">
-        <div class="flex items-center space-x-3 border-b border-grayD9 text-end px-1 md:px-5 py-2">
+    <article class="border border-grayD9 rounded-md">
+        <div class="flex items-center space-x-3 border-b border-grayD9 text-end px-1 md:px-5 py-2 text-white bg-gray-200">
             <p class="text-gray99">
                 Pedido el:
                 <span class="text-gray37">{{ formatDateHour(onlineSale.created_at) }}</span>

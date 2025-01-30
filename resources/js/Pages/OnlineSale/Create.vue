@@ -1,5 +1,5 @@
 <template>
-    <OnlineStoreLayout title="Mi carrito">
+    <OnlineStoreLayout title="Terminar pedido">
         <div class="p-3 lg:p-9">
             <Back />
 
