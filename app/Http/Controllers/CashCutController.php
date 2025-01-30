@@ -120,6 +120,7 @@ class CashCutController extends Controller
     {
         //recupera el último corte realizado
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
+
         //recupera las configuraciones de la tienda en linea.
         $online_store_properties = auth()->user()->store->online_store_properties;
         $online_sales = null;
@@ -129,9 +130,9 @@ class CashCutController extends Controller
             $sales = Sale::where('cash_register_id', $cash_register_id)
                 ->where('created_at', '>', $last_cash_cut->created_at)
                 ->get();
+            
             //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === $cash_register_id) {
-
+            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === intval($cash_register_id)) {
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
                     ->whereIn('status', ['Entregado', 'Reembolsado'])
                     ->where('created_at', '>', $last_cash_cut->created_at)
@@ -139,7 +140,7 @@ class CashCutController extends Controller
             }
         } else {
             //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === $cash_register_id) {
+            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === intval($cash_register_id)) {
 
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
                     ->whereIn('status', ['Entregado', 'Reembolsado'])
@@ -159,10 +160,11 @@ class CashCutController extends Controller
             return $sale->quantity * $sale->current_price;
         });
 
-        // Suma todos los totales de las ventas en línea
+        // Suma todos los totales de las ventas en línea más el costo de envío en caso de haber
         $total_online_sales = $online_sales?->sum(function ($online_sale) {
-            return $online_sale->total;
+            return $online_sale->total + $online_sale->delivery_price;
         });
+        
 
         return response()->json([
             'store_sales' => $total_sales ?? 0,

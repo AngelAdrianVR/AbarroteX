@@ -112,6 +112,8 @@ class OnlineSaleController extends Controller
         $this->updateProductStock($validated['products'], $request->store_inventory);
 
         $new_online_sale = OnlineSale::create($validated);
+
+        //codifica el id de la venta
         $encoded_store_id = base64_encode($request->store_id);
 
         if ($request->created_from_app === true) {

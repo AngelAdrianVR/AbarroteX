@@ -58,6 +58,7 @@
                         <th>Fecha de pedido</th>
                         <th>Entregado</th>
                         <th>Cliente</th>
+                        <th>Costo de envío</th>
                         <th>Total</th>
                         <th>Estatus</th>
                         <th></th>
@@ -71,8 +72,8 @@
                         <td>{{ formatDate(online_order.created_at) }}</td>
                         <td>{{ formatDate(online_order.delivered_at) ?? '--' }}</td>
                         <td>{{ online_order.name }}</td>
-                        <td>${{ (online_order.total +
-                            online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                        <td>${{ (online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                        <td>${{ (online_order.total + online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         <td>
                             <div class="flex items-center space-x-2">
                                 <span v-html="getStatusIcon(online_order.status)"></span>
