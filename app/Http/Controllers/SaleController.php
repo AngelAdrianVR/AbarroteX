@@ -679,7 +679,7 @@ class SaleController extends Controller
             // total de ventas en línea entregados
             $totalOnlineSale = $onlineSales->sum(function ($online_sale) {
                 if ($online_sale->status == 'Entregado') {
-                    return $online_sale->total;
+                    return $online_sale->total + $online_sale->delivery_price;
                 }
             });
 
