@@ -193,7 +193,7 @@
         <div class="lg:flex lg:space-x-5 my-2">
           <!-- atajos de teclado -->
           <div class="relative">
-            <el-tooltip content="Atajos de teclado" placement="right">
+            <el-tooltip content="Atajos de teclado" placement="top">
               <button @click="showShortCuts = !showShortCuts" class="size-10 border border-primary rounded-full flex items-center justify-center text-primary">
                 <svg width="18" height="18" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M3.57457 3.38707L5.38423 4.74432L3.57457 6.10156M6.28906 6.10156H8.09872M2.66974 11.0781H10.8132C11.1732 11.0781 11.5184 10.9351 11.7729 10.6806C12.0275 10.4261 12.1705 10.0808 12.1705 9.72088V2.48224C12.1705 2.12228 12.0275 1.77706 11.7729 1.52253C11.5184 1.268 11.1732 1.125 10.8132 1.125H2.66974C2.30978 1.125 1.96456 1.268 1.71003 1.52253C1.45549 1.77706 1.3125 2.12228 1.3125 2.48224V9.72088C1.3125 10.0808 1.45549 10.4261 1.71003 10.6806C1.96456 10.9351 2.30978 11.0781 2.66974 11.0781Z" stroke="#F68C0F" stroke-width="0.90483" stroke-linecap="round" stroke-linejoin="round"/>
@@ -211,9 +211,11 @@
               <div class="grid grid-cols-3 gap-2 self-start mt-4 text-sm">
                 <p class="col-span-2">Buscar por nombre</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i class="fa-solid fa-right-long"></i></button>
-                <p class="col-span-2">Enfocar campo de escaner</p>
+                <p class="col-span-2">Búsqueda de productos sin código</p>
+                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i class="fa-solid fa-up-long"></i></button>
+                <p class="col-span-2">Comenzar a escanear</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Crl</button>
-                <p class="col-span-2">Buscar otro producto</p>
+                <p class="col-span-2">Limpiar búsqueda de producto / Cerrar Búsqueda de productos sin código</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Esc</button>
                 <p class="col-span-2">Agregar peso manual (productos a granel utilizando báscula)</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">M</button>
@@ -226,7 +228,7 @@
             </div>
           <!-- scaner de código  -->
           <div class="lg:w-[70%]">
-            <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4" @keydown="handleKeydownScanInput">
+            <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
               <input v-model="scannerQuery" :disabled="scanning || syncingIDB" ref="scanInput" class="input w-full pl-9"
                 placeholder="Escanea o teclea el código del producto" type="text">
               <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
@@ -279,8 +281,7 @@
             <div>
               <el-autocomplete v-model="productFoundSelectedName" :fetch-suggestions="searchProducts" class="!w-full"
                 placeholder="Buscar código o nombre de producto" @select="handleSelectFoundProduct()"
-                :value-key="'name'" :loading="loading" :disabled="syncingIDB || scanning" ref="searchInput"
-                @keydown="handleKeydownInputSearch">
+                :value-key="'name'" :loading="loading" :disabled="syncingIDB || scanning" ref="searchInput">
                 <template #prefix>
                   <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
                 </template>
@@ -588,7 +589,7 @@
         </div>
         <div v-if="showNoCodeProducts" class="mt-2 px-3 py-1 overflow-auto h-[82%]">
           <div class="mb-2 relative">
-            <input v-model="searchNoCodeProducts" @input="filterNoCodeProducts" placeholder="Buscar producto"
+            <input v-model="searchNoCodeProducts" @input="filterNoCodeProducts" placeholder="Buscar producto" ref="noCodeProductsInput"
               type="search"
               class="lg:w-1/3 h-8 pl-8 rounded-md bg-transparent text-gray-400 border border-gray-300 focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
             <i class="absolute left-2 top-2 fa-solid fa-magnifying-glass text-gray-400"></i>
@@ -1131,23 +1132,6 @@ export default {
         this.filteredNoCodeProducts = this.noCodeProducts;
       }
     },
-    // Ejecuta un metodo depende de la tecla presionada. atajos de teclado
-    handleKeydownScanInput(event) {
-      if (event.key === "ArrowRight") {
-        this.focusSearchInput();
-      } else if (event.key === "Enter") {
-        this.getProductByCode();
-      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
-        this.cashPayment();
-      }
-    },
-    handleKeydownInputSearch(event) {
-      if (event.key === "Control") {
-        this.$refs.scanInput.focus();
-      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
-        this.cashPayment();
-      }
-    },
     handleKeydownQuantitySelector(event) {
       if (event.key === "Enter") {
         this.focusAddButton();
@@ -1536,7 +1520,7 @@ export default {
         });
       }
 
-      // si esta leyeendo de la báscula se detiene la lectura
+      // si esta leyendo de la báscula se detiene la lectura
       if (this.isReadingScale) {
         this.stopReadingScale();
       }
@@ -1797,8 +1781,30 @@ export default {
       const weight = data.trim(); // Quitar espacios en blanco
       return parseFloat(weight) || "0.00";
     },
+    handleKeydownGlobal(event) {
+      if (event.key === "ArrowRight") {
+        this.focusSearchInput();
+      } else if (event.key === "Enter") {
+        this.getProductByCode();
+      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
+        this.cashPayment();
+      } else if (event.key === "Control") {
+        this.$refs.scanInput.focus();
+      } else if (event.key === "Escape") {
+        this.showNoCodeProducts = false; //cierra el buscador de productos sin código
+        this.editableTabs[this.editableTabsValue - 1].cash = false;
+      } else if (event.key === "ArrowUp") {
+        this.showNoCodeProducts = true;
+        this.$nextTick(() => {
+          this.$refs.noCodeProductsInput.focus(); // Enfocar el input de código cuando se abre el modal
+        });
+      }
+    },
   },
   async mounted() {
+    //ejecuta un listener para atajos de teclado
+    window.addEventListener("keydown", this.handleKeydownGlobal);
+
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
       this.$inertia.visit(route('tutorials.index'));
@@ -1839,86 +1845,7 @@ export default {
     // Eliminar los escuchadores de eventos al desmontar el componente
     window.removeEventListener('online', this.handleOnline);
     window.removeEventListener('offline', this.handleOffline);
+    window.removeEventListener("keydown", this.handleKeydownGlobal);
   },
 }
 </script>
-
-# Componente de carga del input de busqueda por nombre o código de producto (no se muestra en local, en produccion no lo
-sé)
-<style>
-.circular {
-  display: inline;
-  height: 30px;
-  width: 30px;
-  animation: loading-rotate 2s linear infinite;
-}
-
-.path {
-  animation: loading-dash 1.5s ease-in-out infinite;
-  stroke-dasharray: 90, 150;
-  stroke-dashoffset: 0;
-  stroke-width: 2;
-  stroke: var(--el-color-primary);
-  stroke-linecap: round;
-}
-
-.loading-path .dot1 {
-  transform: translate(3.75px, 3.75px);
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-}
-
-.loading-path .dot2 {
-  transform: translate(calc(100% - 3.75px), 3.75px);
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 0.4s;
-}
-
-.loading-path .dot3 {
-  transform: translate(3.75px, calc(100% - 3.75px));
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 1.2s;
-}
-
-.loading-path .dot4 {
-  transform: translate(calc(100% - 3.75px), calc(100% - 3.75px));
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 0.8s;
-}
-
-@keyframes loading-rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes loading-dash {
-  0% {
-    stroke-dasharray: 1, 200;
-    stroke-dashoffset: 0;
-  }
-
-  50% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -40px;
-  }
-
-  100% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -120px;
-  }
-}
-
-@keyframes custom-spin-move {
-  to {
-    opacity: 1;
-  }
-}
-</style>

@@ -85,7 +85,7 @@
                                 active-text=" Habilitado " inactive-text=" Deshabilitado " v-model="values[index]"
                                 :loading="settingLoading[index]" size="small" class="ml-2" />
                         </div>
-                        <p class="text-gray99 text-sm w-5/6 text-justify">{{ item.description }}</p>
+                        <p v-html="item.description" class="text-gray99 text-sm w-5/6 text-justify"></p>
                     </div>
                 </section>
 

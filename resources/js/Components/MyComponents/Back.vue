@@ -4,7 +4,7 @@
     <i class="fa-solid fa-angle-left text-white text-xs"></i>
   </button> -->
 
-  <button @click="handleRedirection()" class="button">
+  <button @click="handleRedirection()" class="back-button">
     <div class="button-box">
       <span class="button-elem">
         <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
@@ -46,7 +46,7 @@ export default {
 </script>
 
 <style>
-.button {
+.back-button {
   display: block;
   position: relative;
   width: 48px;
@@ -59,21 +59,21 @@ export default {
   border: 0;
 }
 
-.button:before,
-.button:after {
+.back-button:before,
+.back-button:after {
   content: "";
   position: absolute;
   border-radius: 50%;
   inset: 7px;
 }
 
-.button:before {
+.back-button:before {
   border: 2px solid #505050;
   transition: opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
     transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
 }
 
-.button:after {
+.back-button:after {
   border: 2px solid #F68C0F;
   transform: scale(1.3);
   transition: opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
@@ -81,16 +81,16 @@ export default {
   opacity: 0;
 }
 
-.button:hover:before,
-.button:focus:before {
+.back-button:hover:before,
+.back-button:focus:before {
   opacity: 0;
   transform: scale(0.7);
   transition: opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
     transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.button:hover:after,
-.button:focus:after {
+.back-button:hover:after,
+.back-button:focus:after {
   opacity: 1;
   transform: scale(1);
   transition: opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
@@ -113,8 +113,8 @@ export default {
   fill: #505050;
 }
 
-.button:hover .button-box,
-.button:focus .button-box {
+.back-button:hover .button-box,
+.back-button:focus .button-box {
   transition: 0.4s;
   transform: translateX(-49px);
 }
