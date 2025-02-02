@@ -128,10 +128,24 @@
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
                             Cancelado</p>
                     </el-tooltip>
-                    <span class="text-start w-32">Total de la venta:</span>
+                    <span class="text-start w-32">Subtotal de venta:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
                         {{ onlineSale.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-end" :class="wasRefunded || wasCanceled ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <span class="text-start w-32">Costo de envío:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ onlineSale.delivery_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-end" :class="wasRefunded || wasCanceled ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <span class="text-start w-32">Total:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ (onlineSale.delivery_price + onlineSale.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
             </div>

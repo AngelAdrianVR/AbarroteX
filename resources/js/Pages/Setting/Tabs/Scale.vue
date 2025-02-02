@@ -170,7 +170,7 @@
                 Haz clic para verificar si la báscula esta correctamente conectada y sincronizada con el sistema
             </p>
             <div class="inline-flex items-center space-x-12 border border-grayD9 rounded-xl p-4 mt-4">
-                <p class="text-[#3F9E03] text-xs flex items-center space-x-2 justify-center">
+                <p v-if="isConnected" class="text-[#3F9E03] text-xs flex items-center space-x-2 justify-center">
                     <span>Sincronización exitosa</span>
                     <svg width="14" height="11" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -178,7 +178,7 @@
                             fill="#189203" />
                     </svg>
                 </p>
-                <p class="text-[#9E0303] text-xs flex items-center space-x-2 justify-center">
+                <p v-if="conexionError" class="text-[#9E0303] text-xs flex items-center space-x-2 justify-center">
                     <i class="fa-solid fa-x text-[11px]"></i>
                     <span>No se detectó la báscula.</span>
                 </p>
@@ -231,7 +231,7 @@
                     <span>Peso:</span>
                     <span class="text-center border-b border-grayD9 w-32">{{ weight }}</span>
                 </div>
-                <p class="text-[#3F9E03] text-sm flex items-center space-x-2 justify-center mt-4">
+                <p v-if="isConnected" class="text-[#3F9E03] text-sm flex items-center space-x-2 justify-center mt-4">
                     <span>Sincronización exitosa</span>
                     <svg width="11" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -239,11 +239,11 @@
                             fill="#189203" />
                     </svg>
                 </p>
-                <p class="text-[#9E0303] text-sm flex items-center space-x-2 justify-center mt-4">
+                <p v-if="conexionError" class="text-[#9E0303] text-sm flex items-center space-x-2 justify-center mt-4">
                     <i class="fa-solid fa-x text-[11px]"></i>
                     <span>No se detectó la báscula.</span>
                 </p>
-                <p class="text-[#9E0303] text-sm text-center mt-1">
+                <p v-if="conexionError" class="text-[#9E0303] text-sm text-center mt-1">
                     Asegúrate de que este conectada, con las configuraciones correctas y coloca un objeto para la
                     prueba.
                 </p>
@@ -284,6 +284,7 @@ export default {
             //báscula
             showScaleModal: false, // Para mostrar/ocultar el modal de báscula
             isConnected: false, // Estado de conexión
+            conexionError: false, // Estado de conexión de error
             port: null, // Puerto serie de la báscula
             reader: null, // Lector de datos del puerto
             weight: "0.00", // Peso leído de la báscula
@@ -346,8 +347,8 @@ export default {
             });
         },
         async connectScale() {
-            this.showScaleModal = true;
             try {
+                this.showScaleModal = true;
                 if (this.port) {
                     await this.port.close(); // Cierra el puerto solo después de liberar el lector
                     this.port = null;
@@ -373,6 +374,8 @@ export default {
                 console.log("Puerto:", this.port);
 
                 this.isConnected = true; // Marca la conexión como activa
+                this.conexionError = false; // marca en falso el estado de error de conexión
+                this.showScaleModal = true; // abrir modal para probar báscula
 
                 this.$notify({
                     title: "Correcto",
@@ -381,8 +384,10 @@ export default {
                 });
 
             } catch (error) {
+                this.conexionError = true; //bandera de errode conexion
+                this.isConnected = false; //pone en false el estado de conectado si hub un error 
                 console.error("Error al conectar la báscula:", error);
-                alert("No se pudo conectar a la báscula. Verifica que esté correctamente conectada.");
+                alert("Antes de hacer la conexión verifica que esté correctamente conectada.");
             }
         },
         async startReading() {
