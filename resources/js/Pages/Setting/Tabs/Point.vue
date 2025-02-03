@@ -11,7 +11,7 @@
             <div v-for="(item, index) in settings" :key="item.id" class="border border-[#D9D9D9] rounded-sm p-4 flex items-center justify-between space-x-2">
                 <figure class="w-20 h-auto flex justify-center items-center">
                     <!-- Busca la imagen que coincida con el key de la configracion -->
-                    <img class="object-contain" :src="configImages.find(img => img.key === item.key)?.path" alt="">
+                    <img class="object-contain select-none" :draggable="false" :src="configImages.find(img => img.key === item.key)?.path">
                 </figure>
                 <div class="w-full">
                     <p>{{ item.key }}</p>

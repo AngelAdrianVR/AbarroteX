@@ -6,7 +6,8 @@
       <article class="flex space-x-3">
         <!-- Suscripción actual -->
         <div class="border border-grayD9 rounded-[30px] w-1/2 pb-7">
-          <header class="font-bold py-2 bg-[#F5E6FF] rounded-t-[30px] border-b border-grayD9 text-center uppercase">Suscripción actual</header>
+          <header class="font-bold py-2 bg-[#F5E6FF] rounded-t-[30px] border-b border-grayD9 text-center uppercase">
+            Suscripción actual</header>
           <div class="p-2">
             <p class="text-center">Tu suscripción actual cuenta con las siguientes funciones</p>
             <h2 class="relative ml-10 mt-4 inline-block">
@@ -40,23 +41,26 @@
 
               <p class="text-gray99 ml-7">{{ item.description }}</p>
             </div>
-
-              <div class="w-1/5">
-                <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
-                  style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #D4D4D4" />
-              </div>
+            <div class="w-1/5">
+              <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
+                style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #D4D4D4" />
+            </div>
           </article>
         </div>
 
         <!-- Módulos adicionales -->
         <div class="border border-grayD9 rounded-[30px] w-1/2 pb-7 self-start">
-          <header class="font-bold py-2 bg-[#CCFFF6] rounded-t-[30px] border-b border-grayD9 text-center text-[#00BD9B] uppercase">Adicionales</header>
+          <header
+            class="font-bold py-2 bg-[#CCFFF6] rounded-t-[30px] border-b border-grayD9 text-center text-[#00BD9B] uppercase">
+            Adicionales</header>
           <div class="p-2 border-b border-grayD9">
             <p class="text-center">Activa funciones completas para crecer</p>
             <h2 class="relative ml-10 mt-4 inline-block">
               <span class="font-bold text-xl text-[#00BD9B] absolute -top-1 -left-5">$</span>
-              <span class="text-5xl font-bold">{{ calculateTotalPayment(calculateTotal)?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-              <span class="text-md absolute -top-1 -rigth-5">00</span>
+              <span class="text-5xl font-bold">
+                {{ formattedTotalPaymentInteger }}
+              </span>
+              <span class="text-md absolute -top-1 -rigth-5">{{ formattedTotalPaymentDecimals }}</span>
               <span class="text-md absolute bottom-0 -rigth-5"> /{{ period === 'Anual' ? 'año' : 'mes' }}</span>
             </h2>
           </div>
@@ -68,14 +72,12 @@
                 <span v-html="item.icon"></span>
                 <p>{{ item.name }}</p>
               </div>
-
               <p class="text-gray99 ml-7">{{ item.description }}</p>
             </div>
-
-              <div class="w-1/5">
-                <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
-                  style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #D4D4D4" />
-              </div>
+            <div class="w-1/5">
+              <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
+                style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #D4D4D4" />
+            </div>
           </article>
         </div>
       </article>
@@ -102,8 +104,8 @@
               <i class="fa-solid fa-star"></i>
               <p>Popular</p>
             </div>
-            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''"
-                class="text-xs ml-2 font-thin">2 meses de regalo</span></p>
+            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-xs ml-2 font-thin">2 meses de
+                regalo</span></p>
           </button>
         </div>
 
@@ -116,24 +118,26 @@
             </div>
             <div class="flex justify-between">
               <span class="font-bold"></span>
-              <p class="font-bold text-[#373737]">Vence {{ formattedNextPayment  }}</p>
+              <p class="font-bold text-[#373737]">Vence {{ formattedNextPayment }}</p>
             </div>
             <div class="flex justify-between mt-1">
               <p>Módulos esenciales</p>
-              <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period === 'Mensual' ? '229.00' : '2,290.00' }}</span></p>
+              <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+                'Mensual' ? '229.00' : '2,290.00' }}</span></p>
             </div>
 
             <div>
               <p class="text-[#686767] mt-3">Adicionales</p>
               <!-- modulos actuales -->
-              <div v-for="item in modules.filter(item => currentActivatedModules.includes(item.name))" :key="item" class="flex">
+              <div v-for="item in modules.filter(item => currentActivatedModules.includes(item.name))" :key="item"
+                class="flex">
                 <p class="w-1/2">{{ item.name }}</p>
                 <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
                   'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
                     10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
               </div>
             </div>
-            
+
             <!-- Total -->
             <div class="flex font-bold mt-3">
               <p class="w-1/2">Total</p>
@@ -144,15 +148,22 @@
             </div>
           </section>
 
-            <p class="font-bold mt-2">Detalles del Pago</p>
-            <p class="text-[#373737]">Adicionales</p>
+          <p class="font-bold mt-2">Detalles del Pago</p>
+          <p class="text-[#373737]">Adicionales</p>
           <div v-if="modules.filter(item => item.activated === true).length">
             <!-- modulos adicionales -->
-            <div v-for="item in modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name))" :key="item" class="flex">
+            <div
+              v-for="item in modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name))"
+              :key="item" class="flex">
               <p class="w-1/2">{{ item.name }}</p>
-              <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
-                'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
-                  10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+              <p class="w-1/2 text-right">
+                <span class="mr-1">$</span>
+                <span class="w-20 inline-block">
+                  {{ period === 'Mensual'
+                    ? (item.cost * adjustmentFactor).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    : (item.cost * 10 * adjustmentFactor).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                </span>
+              </p>
             </div>
           </div>
 
@@ -162,10 +173,13 @@
           </div>
 
           <!-- Cupon de descuento -->
-          <button :disabled="!modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length" 
+          <button
+            :disabled="!modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length"
             class="text-primary flex items-center space-x-2 mt-3 disabled:text-gray-400 disabled:cursor-not-allowed">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-4">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
             </svg>
             <span>Agregar código promocional</span>
           </button>
@@ -195,17 +209,21 @@
             <p class="w-1/2">Total</p>
             <p class="w-1/2 text-right">
               <span class="mr-1">$</span>
-              <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+              <span class="w-20 inline-block">{{
+                (calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
           </div>
-          
+
 
           <form @submit.prevent="checkout" class="text-center mt-8">
-            <PrimaryButton :disabled="loading || !modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length" class="!px-28">
+            <PrimaryButton
+              :disabled="loading || !modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length"
+              class="!px-28">
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
               Confirmar y pagar
             </PrimaryButton>
-            <p v-if="$page.props.auth.user.store.is_active" class="text-xs text-red-600 mt-2">*No puedes pagar si aún no ha vencido tu plan actual</p>
+            <p v-if="$page.props.auth.user.store.is_active" class="text-xs text-red-600 mt-2">*No puedes pagar si aún no
+              ha vencido tu plan actual</p>
           </form>
 
           <p class="text-gray99 text-xs mt-3">
@@ -303,11 +321,11 @@ import axios from 'axios';
 export default {
   data() {
     const form = useForm({
-        amount: null,
-        suscription_period: null,
-        activeModules: null,
-        modulesUpdated: [],
-        // default_card_id: this.$page.props.auth.user.store.default_card_id,
+      amount: null,
+      suscription_period: null,
+      activeModules: null,
+      modulesUpdated: [],
+      // default_card_id: this.$page.props.auth.user.store.default_card_id,
     });
 
     return {
@@ -418,8 +436,8 @@ export default {
       this.loading = true;
       try {
         const response = await axios.post(route('store.update-modules', this.$page.props.auth.user.store.id), { period: this.period, activated_modules: this.activated_modules });
-        if ( response.status === 200 ) {
-          location.reload();          
+        if (response.status === 200) {
+          location.reload();
         }
 
       } catch (error) {
@@ -428,8 +446,18 @@ export default {
         this.loading = false;
       }
     },
-     calculateTotalPayment(calculateTotal) {
-      const total = this.period === 'Mensual' ? (calculateTotal) : (calculateTotal * 10);
+    calculateTotalPayment(calculateTotal) {
+      let total;
+
+      if (this.period === 'Mensual') {
+        // Si el periodo es mensual, el total es el cálculo multiplicado por el factor de ajuste
+        total = calculateTotal * this.adjustmentFactor;
+      } else {
+        // Si el periodo no es mensual (asumimos que es anual), el total es el cálculo multiplicado por 10 y luego por el factor de ajuste
+        total = calculateTotal * 10 * this.adjustmentFactor;
+      }
+
+      // Asegurarse de que el total no sea negativo
       return Math.max(0, total);
     },
     // calculateDiscountForPastDays(calculateTotal) {
@@ -453,6 +481,29 @@ export default {
     }
   },
   computed: {
+    formattedTotalPaymentInteger() {
+      const totalPayment = this.calculateTotalPayment(this.calculateTotal);
+      return totalPayment ? Math.floor(totalPayment).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0';
+    },
+    formattedTotalPaymentDecimals() {
+      const totalPayment = this.calculateTotalPayment(this.calculateTotal);
+      return totalPayment ? totalPayment.toFixed(2).split('.')[1] : '00';
+    },
+    adjustmentFactor() {
+      const store = this.$page.props.auth.user.store;
+      const today = new Date();
+      const nextPaymentDate = new Date(store.next_payment);
+      const timeDiff = nextPaymentDate - today;
+      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+      if (store.suscription_period === 'Mensual') {
+        return daysRemaining / 30;
+      } else if (store.suscription_period === 'Anual') {
+        return daysRemaining / 365;
+      } else {
+        return 1;
+      }
+    },
     calculateTotal() {
       return this.modules
         .filter(item => item.activated === true && !this.currentActivatedModules.includes(item.name))
@@ -474,7 +525,7 @@ export default {
       if (nextPaymentDate < today) {
         return false;
       } else {
-        if ( this.period === 'Mensual' ) {
+        if (this.period === 'Mensual') {
           return false;
         } else {
           return true;
@@ -496,17 +547,17 @@ export default {
 
     //se calcula el total pagado por los modulos actualmente activados y se muestran activados los ya pagados
     this.modules.forEach(module => {
-        if (activatedModules.includes(module.name)) {
-          module.activated = true;
-          this.totalPaid += module.cost;
-        }
+      if (activatedModules.includes(module.name)) {
+        module.activated = true;
+        this.totalPaid += module.cost;
+      }
     });
 
     //se clona el arreglo de módulos activados para separar la lógica
     this.currentActivatedModules = this.activated_modules;
 
     //si el periodo pagado es anual el monto pagado se multiplica por 10
-    if ( this.$page.props.auth.user.store.suscription_period === 'Anual' ) {
+    if (this.$page.props.auth.user.store.suscription_period === 'Anual') {
       this.totalPaid *= 10;
     }
 
