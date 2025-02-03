@@ -12,7 +12,7 @@
                 <template #content>
                     <p>
                         Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
-                        correspondiente de la caja.
+                        correspondiente de la caja (sin tomar en cuenta el costo de envío en caso de venta en línea).
                         Si en caja no hay suficiente dinero, quedará en $0.00
                         ¿Deseas continuar?
                     </p>

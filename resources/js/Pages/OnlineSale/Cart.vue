@@ -1,6 +1,6 @@
 <template>
     <OnlineStoreLayout title="Mi carrito">
-        <div class="md:p-2 lg:p-9">
+        <main class="md:p-2 lg:p-9 min-h-[calc(100vh-161px)]">
             <div class="pl-4 mt-3">
                 <Back />
             </div>
@@ -59,7 +59,7 @@
                     </div>
                 </div>
             </section>
-        </div>
+        </main>
     </OnlineStoreLayout>
 </template>
 

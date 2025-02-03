@@ -1,8 +1,8 @@
 <template>
     <AppLayout title="Suscripción">
         <header class="text-center mt-5 mx-4">
-            <h1 class="text-gray37 font-bold text-lg">Modulos de suscripción</h1>
-            <p class="mt-4 text-sm text-gray77">Puedes agregar o quitar cualquier modulo según las necesidades de tu negocio</p>
+            <h1 class="text-gray37 font-bold text-lg">Mejorar suscripción</h1>
+            <p class="mt-4 text-sm text-gray77">Más funciones y recursos para potenciar en funcionamiento de tu negocio</p>
             <p class="text-sm text-gray77">¡Paga sólo por lo que utilizas!</p>
         </header>
 
@@ -28,7 +28,7 @@
                 <Year />
             </section> -->
 
-            <section class="mt-10 text-left xl:w-2/3 xl:mx-auto p-3">
+            <section class="mt-10 text-left xl:w-[95%] xl:mx-auto p-3">
                 <InternalSimulator />
             </section>
         </main>
