@@ -94,34 +94,6 @@ onUnmounted(() => {
                                     </svg>
                                     <span>{{ $page.props.auth.user.store.name }}</span>
                                 </div>
-                                <!-- Dias de prueba escritorio y tablet -->
-                                <section
-                                    v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba' || !$page.props.auth.user.store.is_active"
-                                    class="hidden xl:flex space-x-4 bg-[#ededed] text-gray37 px-6 py-2 rounded-[5px] text-xs">
-                                    <div
-                                        v-if="calculateRemainigFreeDays($page.props.auth.user.store.created_at) > 0 && $page.props.auth.user.store.suscription_period == 'Periodo de prueba'">
-                                        <p class="font-bold">Te quedan {{
-                                            calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
-                                            días de tu prueba gratuita</p>
-                                        <p>¡Paga tu suscripción en cualquier momento! Tu pago
-                                            comenzará a contar al finalizar el
-                                            periodo de
-                                            prueba.</p>
-                                    </div>
-                                    <div v-else>
-                                        <p v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
-                                            class="font-bold">Tus días de prueba han expirado</p>
-                                        <p v-else class="font-bold">Tu plan ha expirado</p>
-                                        <p>Para continuar disfrutando de los beneficios, te invitamos a realizar el pago
-                                            de
-                                            tu suscripción.</p>
-                                    </div>
-                                    <button type="button" @click="$inertia.visit(route('profile.show'))"
-                                        class="underline text-primary">
-                                        Pagar suscripción
-                                        <i class="fa-solid fa-arrow-right-long ml-1 text-[10px]"></i>
-                                    </button>
-                                </section>
                                 <!-- Logo en movil -->
                                 <div class="md:hidden shrink-0 flex items-center">
                                     <Link :href="route('dashboard')">
