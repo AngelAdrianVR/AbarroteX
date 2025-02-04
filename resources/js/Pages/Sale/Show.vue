@@ -439,7 +439,7 @@ export default {
         getRefundedOnlineSales() {
             return Object.values(this.day_sales)[0]?.online_sales
                 ?.filter(item => item.status == 'Reembolsado')
-                ?.reduce((accum, onlineSale) => accum += onlineSale.total, 0)
+                ?.reduce((accum, onlineSale) => accum += onlineSale.total + onlineSale.delivery_price, 0)
         },
         getCreditRefundedSales() {
             return this.getGroupedSales.reduce((accum1, sale) => {

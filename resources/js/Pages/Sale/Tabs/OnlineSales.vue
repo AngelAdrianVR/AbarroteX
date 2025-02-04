@@ -4,7 +4,6 @@
         <div v-if="sales.length" class="space-y-4">
             <OnlineSaleDetails v-for="(item, index) in sales" :key="index" :onlineSale="item" @show-modal="showModal"
                 :ref="'osd' + item.id" />
-
             <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
                 <template #title>
                     <h1>Reembolsar venta</h1>
@@ -24,7 +23,6 @@
                     </div>
                 </template>
             </ConfirmationModal>
-
             <ConfirmationModal :show="showCancelConfirm" @close="showCancelConfirm = false">
                 <template #title>
                     <h1>Cancelar venta</h1>
