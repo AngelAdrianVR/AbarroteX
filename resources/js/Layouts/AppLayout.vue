@@ -570,7 +570,7 @@ onUnmounted(() => {
                         </div>
                     </section>
                     <!-- mensaje de suscripcion a punto de expirar-->
-                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 5"
+                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7"
                         class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-xs lg:px-10">
                         <div v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) > 0">
                             Tu suscripción expira en
@@ -578,12 +578,12 @@ onUnmounted(() => {
                                 {{ calculateRemainingDays($page.props.auth.user.store.next_payment) }} días.
                             </strong> <br>
                             Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción o a activar el pago automático.
+                            tu suscripción.
                         </div>
                         <p v-else>
                             Tu suscripción <strong>ha expirado.</strong> <br>
                             Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción o a activar el pago automático.
+                            tu suscripción.
                         </p>
                         <div v-if="$page.props.auth.user.rol == 'Administrador'" class="flex justify-end mt-1">
                             <button type="button" @click="$inertia.visit(route('profile.show'))"
