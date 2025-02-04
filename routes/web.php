@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiscountTicketController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
@@ -493,6 +494,11 @@ Route::get('services-search', [ServiceReportController::class, 'searchServiceRep
 Route::put('/scale/configure/{user}', [ScaleController::class, 'configure'])->name('scale.configure');
 Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->name('scale.get-ports');
 
+
+// cupones de descuento routes ------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
+// Route::resource('discount-sticket', DiscountTicketController::class)->middleware('auth');
+Route::get('discount-tickets/fetch-active-tickets', [DiscountTicketController::class, 'fetchActiveTickets'])->name('discount-tickets.fetch-active-tickets')->middleware('auth');
 
 // comandos Artisan
 Route::get('/backup', function () {

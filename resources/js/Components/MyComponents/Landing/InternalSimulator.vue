@@ -104,8 +104,7 @@
               <i class="fa-solid fa-star"></i>
               <p>Popular</p>
             </div>
-            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-xs ml-2 font-thin">2 meses de
-                regalo</span></p>
+            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-xs ml-2 font-thin">2 meses de regalo</span></p>
           </button>
         </div>
 
@@ -173,8 +172,8 @@
           </div>
 
           <!-- Cupon de descuento -->
-          <button
-            :disabled="!modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length"
+          <button @click="showDiscountModal = true"
+            :disabled="!modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length || verifiedTicket"
             class="text-primary flex items-center space-x-2 mt-3 disabled:text-gray-400 disabled:cursor-not-allowed">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="size-4">
@@ -184,36 +183,30 @@
             <span>Agregar código promocional</span>
           </button>
 
-          <!-- <p class="text-gray99 my-3">Descuentos</p> -->
-
-          <!-- Descuento por modulos ya pagados -->
-          <!-- <div class="flex">
-            <p class="w-1/2">Monto ya pagado</p>
-            <p class="w-1/2 text-right"><span class="mr-1">$</span>
-              <span class="w-20 inline-block">- {{ totalPaid.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-            </p>
-          </div> -->
-
-          <!-- Descuento por tiempo transcurrido -->
-          <!-- <div class="flex">
-            <p class="w-1/2">Desc. por tiempo transcurrido</p>
-            <p class="w-1/2 text-right"><span class="mr-1">$</span>
-              <span class="w-20 inline-block">
-                 {{ calculateDiscountForPastDays(calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-              </span>
-            </p>
-          </div> -->
-
           <!-- Total -->
           <div class="flex font-bold mt-3">
-            <p class="w-1/2">Total</p>
+            <div class="flex items-center space-x-2 w-1/2">
+              <span>Total</span>
+              <el-tooltip placement="right">
+              <template #content>
+                <div>
+                  <p class="text-cyan-500">Cupón de descuento utilizado</p>
+                  <p>Descuento: {{ verifiedTicket.is_percentage_discount ? '%' : '$' }}{{ verifiedTicket.discount_amount }}</p>
+                </div>
+              </template>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="size-4 text-primary">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+                </svg>
+              </el-tooltip>
+            </div>
             <p class="w-1/2 text-right">
               <span class="mr-1">$</span>
               <span class="w-20 inline-block">{{
                 (calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
           </div>
-
 
           <form @submit.prevent="checkout" class="text-center mt-8">
             <PrimaryButton
@@ -222,8 +215,6 @@
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
               Confirmar y pagar
             </PrimaryButton>
-            <p v-if="$page.props.auth.user.store.is_active" class="text-xs text-red-600 mt-2">*No puedes pagar si aún no
-              ha vencido tu plan actual</p>
           </form>
 
           <p class="text-gray99 text-xs mt-3">
@@ -242,50 +233,51 @@
     </section>
 
     <!-- -------------- Modal de código promocional ----------------------- -->
-    <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
+    <Modal :show="showDiscountModal" @close="showDiscountModal = false" maxWidth="lg">
       <div class="p-4 relative">
-        <i @click="cashRegisterModal = false"
-          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+        <i @click="showDiscountModal = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
 
-        <form class="mt-5 mb-2 md:grid grid-cols-2 gap-3" @submit.prevent="storeCashRegisterMovement">
-          <h2 v-if="form.cashRegisterMovementType === 'Ingreso'" class="font-bold col-span-full">Ingresar efectivo a
-            caja
-          </h2>
-          <h2 v-if="form.cashRegisterMovementType === 'Retiro'" class="font-bold col-span-full">Retirar efectivo a caja
-          </h2>
+        <h2 class="font-bold">Agrega el código promocional</h2>
 
-          <div class="mt-2">
-            <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar *"
-              class="ml-3 mb-1 text-sm" />
-            <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar *"
-              class="ml-3 mb-1 text-sm" />
-            <el-input v-model="form.registerAmount" type="text" placeholder="ingresa el monto"
-              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-              :parser="(value) => value.replace(/[^\d.]/g, '')">
-              <template #prefix>
-                <i class="fa-solid fa-dollar-sign"></i>
-              </template>
-            </el-input>
-            <p class="text-red-500 text-xs"
-              v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > localCurrentCash">
-              *El monto no debe exceder el dinero actual de tu caja (${{ localCurrentCash }})
-            </p>
-            <InputError :message="form.errors.registerAmount" />
+        <div class="mt-3 col-span-full mx-10">
+            <InputLabel value="Código" class="ml-3 mb-1" />
+            <el-input v-model="ticketCode" placeholder="Escribe el código de promoción" :maxlength="100" clearable />
+            <span v-if="ticketCodeError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> El cupón no es válido. Verifica nuevamente</span>
+        </div>
+
+        <div class="flex justify-end mt-5">
+          <PrimaryButton @click="VerifyTicket()">Verificar</PrimaryButton>
+        </div>
+      
+      </div>
+    </Modal>
+
+    <!-- -------------- Modal de código aplicado correctamente ----------------------- -->
+    <Modal :show="showApliedDiscountTicket" @close="showApliedDiscountTicket = false" maxWidth="sm">
+      <div class="p-4 relative">
+        <i @click="showApliedDiscountTicket = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+
+        <h2 class="font-bold text-center">Descuento aplicado con éxito</h2>
+
+        <section class="mt-4 text-center">
+          <p class="flex items-center space-x-2 rounded-full border border-dashed border-primary text-primary bg-primarylight py-1 px-3 w-1/2 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+            </svg>
+            <span>{{ verifiedTicket.discount_amount }}{{ verifiedTicket.is_percentage_discount ? '%' : '$' }} descuento</span>
+          </p>
+
+          <div class="mt-5 flex flex-col items-center justify-center">
+            <svg width="26" height="20" viewBox="0 0 26 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.91758 19.8418C4.12647 14.7142 0.232709 10.6358 0.0124311 10.3936C-0.207847 10.1514 2.52212 9.69147 6.39 13.7005C13.7218 5.3998 20.8295 -0.0222255 24.8141 0.000509436C24.9676 -0.0151292 25.2031 0.333452 25.0503 0.472922C16.2283 4.67346 11.3447 12.1369 7.09861 19.8418C7.07299 20.0753 5.90745 20.0289 5.91758 19.8418Z" fill="#189203"/>
+            </svg>
+            <p class="text-[#189203]">¡Disfruta de tu descuento!</p>
           </div>
-
-          <div class="col-span-full mt-2">
-            <InputLabel value="Motivo (opcional)" class="text-sm ml-2" />
-            <el-input v-model="form.registerNotes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-              placeholder="Escribe tus notas" :maxlength="255" show-word-limit clearable />
-          </div>
-
-          <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
-            <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
-            <PrimaryButton
-              :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && (form.registerAmount > localCurrentCash))">
-              Confirmar</PrimaryButton>
-          </div>
-        </form>
+        </section>
       </div>
     </Modal>
   </main>
@@ -312,6 +304,7 @@
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from '@inertiajs/vue3';
 import { format } from 'date-fns';
@@ -331,7 +324,12 @@ export default {
     return {
       form,
       loading: false, // estado de carga de peticion de update modules
-      cashRegisterModal: false,
+      showDiscountModal: false, 
+      showApliedDiscountTicket: false,
+      discountTickets: null, //cupones de descuento activos
+      ticketCode: null, //codigo del ticket ingresado
+      verifiedTicket: null, //codigo del ticket correctamente verificado
+      ticketCodeError: false, //codigo del ticket no encontrado, bandera de error
       nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
       totalPaid: 229, // El total pagado por los modulos que actualmente tiene.
       // daysForNextPayment: 0, // dias para el proximo pago
@@ -420,6 +418,7 @@ export default {
   },
   components: {
     PrimaryButton,
+    InputLabel,
     Modal
   },
   props: {},
@@ -446,18 +445,48 @@ export default {
         this.loading = false;
       }
     },
+    async fetchActiveDiscountTickets() {
+      try {
+        const response = await axios.get(route('discount-tickets.fetch-active-tickets'))
+        if (response.status === 200) {
+          this.discountTickets = response.data.discount_tickets;
+        }
+
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    VerifyTicket() {
+      if ( this.discountTickets.some(ticket => ticket.code === this.ticketCode )) {
+        this.verifiedTicket = this.discountTickets.find(ticket => ticket.code === this.ticketCode);
+        this.showDiscountModal = false;
+        this.showApliedDiscountTicket = true;
+        this.ticketCodeError = false;
+      } else {
+        this.ticketCodeError = true;
+      }
+    },
     calculateTotalPayment(calculateTotal) {
       let total;
 
       if (this.period === 'Mensual') {
-        // Si el periodo es mensual, el total es el cálculo multiplicado por el factor de ajuste
         total = calculateTotal * this.adjustmentFactor;
       } else {
-        // Si el periodo no es mensual (asumimos que es anual), el total es el cálculo multiplicado por 10 y luego por el factor de ajuste
         total = calculateTotal * 10 * this.adjustmentFactor;
       }
 
-      // Asegurarse de que el total no sea negativo
+      // Aplicar descuento si existe un cupón verificado
+      if (this.verifiedTicket) {
+        if (this.verifiedTicket.is_percentage_discount) {
+          // Aplicar descuento porcentual
+          total -= (total * this.verifiedTicket.discount_amount) / 100;
+        } else {
+          // Aplicar descuento fijo
+          total -= this.verifiedTicket.discount_amount;
+        }
+      }
+
+      // Asegurar que el total no sea negativo
       return Math.max(0, total);
     },
     // calculateDiscountForPastDays(calculateTotal) {
@@ -539,6 +568,9 @@ export default {
     }
   },
   mounted() {
+    //carga los cupones de descuento disponibles
+    this.fetchActiveDiscountTickets();
+
     // Filtra los módulos activados
     const activatedModules = this.$page.props.auth.user.store.activated_modules;
 
@@ -563,7 +595,7 @@ export default {
 
     const today = new Date();
     const nextPaymentDate = new Date(this.nextPayment);
-    this.daysForNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
+    this.daysForNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));    
   }
 };
 </script>
