@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'activeSuscription' => \App\Http\Middleware\CheckStoreSubscription::class,
         'hasModule' => \App\Http\Middleware\CheckModules::class,
+        'isOwnResource' => \App\Http\Middleware\IsOwnResource::class,
     ];
 }

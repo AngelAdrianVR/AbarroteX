@@ -113,7 +113,7 @@
                     <el-tooltip v-if="wasRefunded" placement="top">
                         <template #content>
                             <p>
-                                El reembolso se realizó a las {{ formatDateHour(onlineSale.refunded_at) }}
+                                El reembolso se realizó el {{ formatDateHour(onlineSale.refunded_at) }}
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
@@ -122,7 +122,7 @@
                     <el-tooltip v-else-if="wasCanceled" placement="top">
                         <template #content>
                             <p>
-                                Se canceló a las {{ formatDateHour(onlineSale.refunded_at) }}
+                                Se canceló el {{ formatDateHour(onlineSale.refunded_at) }}
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">

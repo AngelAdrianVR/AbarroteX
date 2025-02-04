@@ -35,7 +35,8 @@
                     </div>
                 </div>
             </div>
-            <PrimaryButton v-if="canCreate" @click="createOnlineOrderModal = true" class="!py-1">Registrar pedido</PrimaryButton>
+            <PrimaryButton v-if="canCreate" @click="createOnlineOrderModal = true" class="!py-1">Registrar pedido
+            </PrimaryButton>
         </div>
     </div>
     <p class="my-4 mx-3 text-gray99 text-sm">En esta sección solo se muestran los pedidos que se encuentran pendientes,
@@ -73,7 +74,8 @@
                         <td>{{ formatDate(online_order.delivered_at) ?? '--' }}</td>
                         <td>{{ online_order.name }}</td>
                         <td>${{ (online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                        <td>${{ (online_order.total + online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                        <td>${{ (online_order.total +
+                            online_order.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                         <td>
                             <div class="flex items-center space-x-2">
                                 <span v-html="getStatusIcon(online_order.status)"></span>
@@ -172,19 +174,16 @@
         <div class="py-4 px-7 relative text-sm">
             <i @click="createOnlineOrderModal = false"
                 class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
-
             <section class="mt-5 mb-2">
                 <h2 class="font-bold mb-4">Registrar pedido</h2>
                 <p>Datos del cliente</p>
-
                 <div class="md:grid grid-cols-2 gap-y-2 gap-x-7 space-y-2 md:space-y-0 mt-3">
-
                     <div class="col-span-full flex items-center space-x-3">
-                        <div class="lg:w-1/2 lg:pr-3">
+                        <div v-if="$page.props.auth.user.store?.activated_modules?.includes('Clientes')" class="lg:w-1/2 lg:pr-3">
                             <InputLabel class="mb-1 ml-2" value="Selecciona un cliente (opcional)" />
                             <div class="flex items-center space-x-3">
                                 <el-select :disabled="loadingClientInfo" @change="getClientInfo" v-model="client_id"
-                                    clearable filterable placeholder="Seleccione"
+                                    clearable filterable placeholder="Selecciona"
                                     no-data-text="No hay opciones registradas"
                                     no-match-text="No se encontraron coincidencias">
                                     <el-option v-for="client in clients" :key="client" :label="client.name"
@@ -206,7 +205,6 @@
                             clearable />
                         <InputError :message="form.errors.name" />
                     </div>
-
                     <div>
                         <InputLabel class="mb-1 ml-2" value="Teléfono*" />
                         <el-input v-model="form.phone"
@@ -215,21 +213,17 @@
                             placeholder="Escribe el número de teléfono del cliente" />
                         <InputError :message="form.errors.phone" />
                     </div>
-
                     <h1 class="font-bold my-1 ml-3 col-span-full">Dirección</h1>
-
                     <div>
                         <InputLabel value="Calle*" class="ml-3 mb-1" />
                         <el-input v-model="form.street" placeholder="Escribe tu calle" :maxlength="255" clearable />
                         <InputError :message="form.errors.street" />
                     </div>
-
                     <div>
                         <InputLabel value="Colonia*" class="ml-3 mb-1" />
                         <el-input v-model="form.suburb" placeholder="Escribe tu colonia" :maxlength="255" clearable />
                         <InputError :message="form.errors.suburb" />
                     </div>
-
                     <div>
                         <InputLabel class="mb-1 ml-2" value="Código postal" />
                         <el-input v-model="form.postal_code"
@@ -238,28 +232,28 @@
                             placeholder="Escribe el código postal" />
                         <InputError :message="form.errors.postal_code" />
                     </div>
-
                     <div>
                         <InputLabel value="Estado*" class="ml-3 mb-1" />
-                        <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan"
-                            :maxlength="255" clearable />
+                        <el-select v-model="form.polity_state" class="!w-full" filterable required clearable
+                            placeholder="Selecciona" no-data-text="No hay opciones registradas"
+                            no-match-text="No se encontraron coincidencias">
+                            <el-option v-for="(state, index) in polityStates" :key="index" :value="state"
+                                :label="state" />
+                        </el-select>
                         <InputError :message="form.errors.polity_state" />
                     </div>
-
                     <div>
                         <InputLabel value="Número exterior*" class="ml-3 mb-1" />
                         <el-input v-model="form.ext_number" placeholder="Número de tu casa" :maxlength="255"
                             clearable />
                         <InputError :message="form.errors.ext_number" />
                     </div>
-
                     <div>
                         <InputLabel value="Número Interior" class="ml-3 mb-1" />
                         <el-input v-model="form.int_number" placeholder="Número de edificio, coto, fraccionamiento"
                             :maxlength="255" clearable />
                         <InputError :message="form.errors.int_number" />
                     </div>
-
                     <div class="mt-3 col-span-full">
                         <InputLabel value="Referencias (opcional)" class="ml-3 mb-1" />
                         <el-input v-model="form.address_references"
@@ -268,9 +262,7 @@
                         <InputError :message="form.errors.address_references" />
                     </div>
                 </div>
-
                 <p class="font-bold my-5">Detalles del pedido</p>
-
                 <section class="max-h-72 overflow-auto">
                     <div class="space-y-3">
                         <InputError :message="form.errors.products" />
@@ -291,32 +283,30 @@
                             form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                         <p v-if="form.delivery_price !== null" class="font-bold ">Costo de envío: <span
                                 class="mx-2">$</span>{{
-                                    form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")
-                            }}</p>
+                                    form.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}</p>
                         <p class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total +
                             form.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     </div>
                 </div>
-
                 <div class="mt-3">
                     <InputLabel value="Método de pago" class="ml-3 mb-1" />
                     <el-select v-model="form.payment_method" class="!w-full" filterable required clearable
-                        placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                        placeholder="Selecciona" no-data-text="No hay opciones registradas"
                         no-match-text="No se encontraron coincidencias">
                         <el-option v-for="payment_method in payment_methods" :key="payment_method"
                             :value="payment_method" :label="payment_method" />
                     </el-select>
                 </div>
-
                 <div class="flex justify-end space-x-1 pt-5 pb-1 py-3">
                     <CancelButton @click="createOnlineOrderModal = false">Cancelar</CancelButton>
-                    <PrimaryButton @click="storeOnlineSale" :disabled="form.processing || !form.products[0].name">Confirmar</PrimaryButton>
+                    <PrimaryButton @click="storeOnlineSale" :disabled="form.processing || !form.products[0].name">
+                        Confirmar
+                    </PrimaryButton>
                 </div>
             </section>
         </div>
     </Modal>
-    <!-- --------------------------- Modal creación de orden ends ------------------------------------ -->
-
     <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
         <template #title>
             <h1>Eliminar pedido</h1>
@@ -334,7 +324,6 @@
             </div>
         </template>
     </ConfirmationModal>
-
     <!-- Confirmación de Actualización de estatus -->
     <ConfirmationModal :show="showUpdateStatusConfirm" @close="showUpdateStatusConfirm = false">
         <template #title>
@@ -353,7 +342,6 @@
             </div>
         </template>
     </ConfirmationModal>
-    <!-- Confirmación de Actualización de estatus -->
 </template>
 
 <script>
@@ -425,6 +413,40 @@ export default {
                 'Tarjeta de débito',
                 'Transferencia o depósito',
                 'Mercado pago',
+            ],
+            polityStates: [
+                'Aguascalientes',
+                'Baja California',
+                'Baja California Sur',
+                'Campeche',
+                'Chiapas',
+                'Chihuahua',
+                'Ciudad de México',
+                'Coahuila',
+                'Colima',
+                'Durango',
+                'Estado de México',
+                'Guanajuato',
+                'Guerrero',
+                'Hidalgo',
+                'Jalisco',
+                'Michoacán',
+                'Morelos',
+                'Nayarit',
+                'Nuevo León',
+                'Oaxaca',
+                'Puebla',
+                'Querétaro',
+                'Quintana Roo',
+                'San Luis Potosí',
+                'Sinaloa',
+                'Sonora',
+                'Tabasco',
+                'Tamaulipas',
+                'Tlaxcala',
+                'Veracruz',
+                'Yucatán',
+                'Zacatecas',
             ],
             tempStatus: null, //estatus temporal para usar en modal de confirmacion 
             orderId: null, //id de la orden para usar en modal de confirmacion 

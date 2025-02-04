@@ -445,7 +445,8 @@ Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWit
 
 //online sales routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
-Route::resource('online-sales', OnlineSaleController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified']);
+Route::resource('online-sales', OnlineSaleController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified'])->except('show');
+Route::get('/online-sales/{online_sale}', [OnlineSaleController::class, 'show'])->name('online-sales.show')->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified', 'isOwnResource']);
 Route::get('online-sales/create', [OnlineSaleController::class, 'create'])->name('online-sales.create'); //create para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
 Route::post('online-sales/store', [OnlineSaleController::class, 'store'])->name('online-sales.store'); //store para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
 Route::get('online-sales-client-index/{encoded_store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes

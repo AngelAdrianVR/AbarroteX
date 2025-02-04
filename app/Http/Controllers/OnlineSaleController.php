@@ -107,9 +107,12 @@ class OnlineSaleController extends Controller
         $validated['products'] = array_filter($request->products, function ($product) {
             return $product['product_id'];
         });
-        
-        $this->checkProductStock($validated['products'], $request->store_inventory);
-        $this->updateProductStock($validated['products'], $request->store_inventory);
+
+        $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+        if ($is_inventory_on) {
+            $this->checkProductStock($validated['products']);
+        }
+        $this->updateProductStock($validated['products']);
 
         $new_online_sale = OnlineSale::create($validated);
 
@@ -585,9 +588,8 @@ class OnlineSaleController extends Controller
     }
 
     // PRIVATE
-    private function checkProductStock(array $products, $storeInventory)
+    private function checkProductStock(array $products)
     {
-        // if ($storeInventory === true) {
         foreach ($products as $product) {
             $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
 
@@ -598,20 +600,23 @@ class OnlineSaleController extends Controller
                 ]);
             }
         }
-        // }
     }
 
-    private function updateProductStock(array $products, $storeInventory)
+    private function updateProductStock(array $products)
     {
         foreach ($products as $product) {
             // Verifica si 'product_on_request' está definido y su valor es falso
             if (!($product['product_on_request'] ?? false)) {
-                $temp_product = $product['isLocal'] 
-                    ? Product::find($product['product_id']) 
+                $temp_product = $product['isLocal']
+                    ? Product::find($product['product_id'])
                     : GlobalProductStore::find($product['product_id']);
-                    
+
                 if ($temp_product) {
-                    $temp_product->current_stock -= $product['quantity'];
+                    if ($temp_product->current_stock < $product['quantity']) {
+                        $temp_product->current_stock = 0;
+                    } else {
+                        $temp_product->current_stock -= $product['quantity'];
+                    }
                     $temp_product->save();
                 }
             }
