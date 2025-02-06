@@ -100,6 +100,15 @@ class StoreController extends Controller
     //     $store->update($request->all());
     // }
 
+    //modifica los módulos activados para la suscripción cuando no se ha realizado el pago
+    //para despues pagar los activos.
+    public function updateModules(Request $request, Store $store)
+    {   
+        $store->update([
+            'activated_modules' => $request->activated_modules
+        ]);        
+    }
+    
     public function fetchStoreInfo(Store $store)
     {
         return response()->json(compact('store'));

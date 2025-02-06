@@ -75,7 +75,7 @@
               <p class="text-gray99 ml-7">{{ item.description }}</p>
             </div>
             <div class="w-1/5">
-              <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
+              <el-switch v-model="item.activated" class="ml-2"
                 style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #D4D4D4" />
             </div>
           </article>
@@ -211,15 +211,18 @@
             </p>
           </div>
 
-          <small v-if="this.calculateTotalPayment(this.calculateTotal) < 10">*Si el costo total es menor a $10.00 no se paga por la modificación</small>
-          <!-- <form @submit.prevent="checkout" class="text-center mt-8"> -->
-            <PrimaryButton @click="this.calculateTotalPayment(this.calculateTotal) > 10 ? checkout() : updateStoreModules()"
-              :disabled="loading"
+          <button class="my-2 border" @click="updateStoreModules">
+            actualizar modulos
+          </button>
+
+          <form @submit.prevent="checkout" class="text-center mt-8">
+            <PrimaryButton
+              :disabled="loading || !modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length"
               class="!px-28">
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-              {{ this.calculateTotalPayment(this.calculateTotal) > 10 ? 'Confirmar y pagar' : 'Confirmar modificación' }}
+              Confirmar y pagar
             </PrimaryButton>
-          <!-- </form> -->
+          </form>
 
           <p class="text-gray99 text-xs mt-3">
             Puedes cancelar tu suscripción cuando quieras desde la página de ajustes de la suscripción.
@@ -246,7 +249,7 @@
 
         <div class="mt-3 col-span-full mx-10">
             <InputLabel value="Código" class="ml-3 mb-1" />
-            <el-input @keydown.enter="VerifyTicket()" v-model="ticketCode" placeholder="Escribe el código de promoción" :maxlength="100" clearable />
+            <el-input v-model="ticketCode" placeholder="Escribe el código de promoción" :maxlength="100" clearable />
             <span v-if="ticketCodeError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> El cupón no es válido. Verifica nuevamente</span>
         </div>
 
@@ -285,6 +288,25 @@
       </div>
     </Modal>
   </main>
+  <!-- Desgloce de costo para el primer pago de plan -->
+  <!-- <div class="flex border-b border-grayD9 pb-2">
+    <p class="w-1/2">Módulos esenciales</p>
+    <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+      'Mensual' ? '229.00' : '2,290.00' }}</span></p>
+  </div>
+
+  <div class="border-b border-grayD9 pb-2">
+    <p v-if="modules.filter(item => item.activated === true).length" class="text-[#686767] mt-3">Adicionales</p>
+
+    Otros modulos
+    <div v-for="item in modules.filter(item => item.activated === true)" :key="item" 
+      class="flex">
+      <p class="w-1/2">{{ item.name }}</p>
+      <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+        'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
+          10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+    </div>
+  </div> -->
 </template>
 
 <script>
@@ -299,12 +321,10 @@ import axios from 'axios';
 export default {
   data() {
     const form = useForm({
-      amount: null, //monto total a pagar
-      suscription_period: null, //periodo de suscripción (anual o mensual) 
-      remainingPlanDays: null, //días restantes para que expire el plan actual
-      modulesUpdated: [], //módulos adicionales agregados al plan actual (para desglose de pago)
-      activeModules: [], //modulos activos en la tienda (todos, para guardarlo en la base de datos)
-      discountTicketUsed: null, //cupón de descuento utilizado
+      amount: null,
+      suscription_period: null,
+      activeModules: null,
+      modulesUpdated: [],
       // default_card_id: this.$page.props.auth.user.store.default_card_id,
     });
 
@@ -319,8 +339,8 @@ export default {
       ticketCodeError: false, //codigo del ticket no encontrado, bandera de error
       nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
       totalPaid: 229, // El total pagado por los modulos que actualmente tiene.
+      // daysForNextPayment: 0, // dias para el proximo pago
       period: this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
-      remainingPlanDays: 0, //dias restantes para que expire el plan pagado
       activated_modules: [],
       currentActivatedModules: [],
 
@@ -411,29 +431,29 @@ export default {
   props: {},
   methods: {
     checkout() {
-      this.form.amount = parseFloat(this.calculateTotalPayment(this.calculateTotal).toFixed(2)); //monto total a pagar
+      this.form.amount = this.calculateTotalPayment(this.calculateTotal); //monto total a pagar
       this.form.suscription_period = this.period; //periodo de tiempo a pagar (mes, año)
-      this.form.remainingPlanDays = this.remainingPlanDays; //días restantes para que expire el plan pagado
-      this.form.modulesUpdated = this.activated_modules.filter(item => !this.currentActivatedModules.includes(item)); //modulos adicionales agregados al plan actual
-      this.form.activeModules = this.activated_modules; //modulos pagados para agregarlos en base de datos en caso de agregados o quitados
-      this.form.discountTicketUsed = this.verifiedTicket //cupón de descuento utilizado
+      this.form.activeModules = this.modules.filter(item => item.activated === true); //detalle de modulos a pagar
+      this.form.activeModules.unshift({ name: "Módulos básicos", cost: 229 }); //se agregan los modulos escenciales o basicos para mostrarlo en detalles de pago
+      this.form.modulesUpdated = this.activated_modules; //modulos pagados para agregarlos en base de datos en caso de agregados o quitados
+      // this.form.post(route('stripe.index')); //Desgloce de pago cuando la suscripción ya venció
       this.form.post(route('stripe.upgrade-subscription')); //Desgloce de pago cuando la suscripción no ha vencido. Agregar o quitar módulos
     },
     // modifica los módulos activos en la tienda cuando no se ha pagado la suscripción y esta vencido el pago.
-    async updateStoreModules() {
-      this.loading = true;
-      try {
-        const response = await axios.post(route('store.update-modules', this.$page.props.auth.user.store.id), { period: this.period, activated_modules: this.activated_modules });
-        if (response.status === 200) {
-          location.reload();
-        }
+    // async updateStoreModules() {
+    //   this.loading = true;
+    //   try {
+    //     const response = await axios.post(route('store.update-modules', this.$page.props.auth.user.store.id), { period: this.period, activated_modules: this.activated_modules });
+    //     if (response.status === 200) {
+    //       location.reload();
+    //     }
 
-      } catch (error) {
-        console.log(error);
-      } finally {
-        this.loading = false;
-      }
-    },
+    //   } catch (error) {
+    //     console.log(error);
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
     async fetchActiveDiscountTickets() {
       try {
         const response = await axios.get(route('discount-tickets.fetch-active-tickets'))
@@ -478,14 +498,14 @@ export default {
       // Asegurar que el total no sea negativo
       return Math.max(0, total);
     },
-    calculateRemainingPlanDays() {
-      const store = this.$page.props.auth.user.store;
-      const today = new Date();
-      const nextPaymentDate = new Date(store.next_payment);
-      const timeDiff = nextPaymentDate - today;
-      const remainingPlanDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-      this.remainingPlanDays = remainingPlanDays; //guarda los dias 
-    },
+    // calculateDiscountForPastDays(calculateTotal) {
+    //   if ( calculateTotal > 0 && this.daysForNextPayment > 0 ) {
+    //     const totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
+    //     return totalDiscountForPastDays;
+    //   } else {
+    //     return 0
+    //   }
+    // },
     handleSwitchModule(module) {
       if (module.activated) {
         this.activated_modules.push(module.name);
@@ -493,6 +513,10 @@ export default {
         this.activated_modules = this.activated_modules.filter(name => name !== module.name);
       }
     },
+    saveExtraModules() {
+      localStorage.setItem('EzyExtraModules', JSON.stringify(this.activated_modules));
+      this.$inertia.get(route('register'));
+    }
   },
   computed: {
     formattedTotalPaymentInteger() {
@@ -505,10 +529,15 @@ export default {
     },
     adjustmentFactor() {
       const store = this.$page.props.auth.user.store;
+      const today = new Date();
+      const nextPaymentDate = new Date(store.next_payment);
+      const timeDiff = nextPaymentDate - today;
+      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
       if (store.suscription_period === 'Mensual') {
-        return this.remainingPlanDays / 30;
+        return daysRemaining / 30;
       } else if (store.suscription_period === 'Anual') {
-        return this.remainingPlanDays / 365;
+        return daysRemaining / 365;
       } else {
         return 1;
       }
@@ -530,7 +559,7 @@ export default {
       const today = new Date();
       const nextPaymentDate = new Date(this.nextPayment);
 
-      // si la fecha de pago no ha expirado se muestra la opción de mensual
+      // si la fecha de pago ya expiró retorna true
       if (nextPaymentDate < today) {
         return false;
       } else {
@@ -566,15 +595,16 @@ export default {
     });
 
     //se clona el arreglo de módulos activados para separar la lógica
-    // Se crea una copia independiente
-    this.currentActivatedModules = [...activatedModules];
+    this.currentActivatedModules = this.activated_modules;
 
     //si el periodo pagado es anual el monto pagado se multiplica por 10
     if (this.$page.props.auth.user.store.suscription_period === 'Anual') {
       this.totalPaid *= 10;
     }
-    
-    this.calculateRemainingPlanDays();
+
+    const today = new Date();
+    const nextPaymentDate = new Date(this.nextPayment);
+    this.daysForNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));    
   }
 };
 </script>
