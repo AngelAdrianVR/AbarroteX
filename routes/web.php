@@ -477,8 +477,11 @@ Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class,
 //rutas de stripe-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::post('/stripe', [StripeController::class, 'index'])->name('stripe.index');
+Route::post('/stripe-upgrade-subscription', [StripeController::class, 'upgradeSubscription'])->name('stripe.upgrade-subscription');
 Route::post('/stripe-checkout', [StripeController::class, 'checkout'])->name('checkout');
+Route::post('/stripe-update-plan-modules-checkout', [StripeController::class, 'updatePlanModulesCheckout'])->name('update-plan-modules-checkout');
 Route::get('/stripe-success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/stripe-update-plan-modules-success', [StripeController::class, 'updatePlanModulesSuccess'])->name('stripe.update-plan-modules-success');
 Route::get('/stripe-cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
 Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.error');
 
