@@ -58,7 +58,7 @@
                 <div class="mt-3 col-span-full">
                     <InputLabel value="Descripción del producto (opcional)" />
                     <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-                        placeholder="Escribe una descripción o características separadas por renglones" :maxlength="255"
+                        placeholder="Escribe una descripción o características separadas por renglones" :maxlength="500"
                         show-word-limit clearable />
                     <InputError :message="form.errors.description" />
                 </div>
