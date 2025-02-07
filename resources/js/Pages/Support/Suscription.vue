@@ -2,14 +2,15 @@
     <AppLayout title="Suscripción">
         <Back :to="route('profile.show')" />
         <header class="text-center mx-4">
-            <h1 class="text-gray37 font-bold text-lg">Mejorar suscripción</h1>
+            <h1 class="text-gray37 font-bold text-lg">{{ isExpiredPlan ? 'Modificar módulos de plan' : 'Mejorar suscripción' }}</h1>
             <p class="mt-4 text-sm text-gray77">Más funciones y recursos para potenciar en funcionamiento de tu negocio</p>
             <p class="text-sm text-gray77">¡Paga sólo por lo que utilizas!</p>
         </header>
 
         <main class="w-full text-sm mx-auto">
             <section class="mt-5 text-left xl:w-[95%] xl:mx-auto p-3">
-                <InternalSimulator />
+                <PaymentExpiredPlan v-if="isExpiredPlan" />
+                <UpdatePlanModules v-else />
             </section>
         </main>
     </AppLayout>
@@ -18,7 +19,8 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ToggleButton from "@/Components/MyComponents/ToggleButton.vue";
-import InternalSimulator from '@/Components/MyComponents/Landing/InternalSimulator.vue';
+import UpdatePlanModules from '@/Components/MyComponents/Landing/UpdatePlanModules.vue';
+import PaymentExpiredPlan from '@/Components/MyComponents/Landing/PaymentExpiredPlan.vue';
 import Month from './Tabs/Month.vue';
 import Year from './Tabs/Year.vue';
 import Back from "@/Components/MyComponents/Back.vue";
@@ -27,12 +29,15 @@ export default {
 data() {
     return {
         activeTab: 'Mensual',
+        nextPayment: this.$page.props.auth.user.store.next_payment, //próximo pago de la tienda
+        isExpiredPlan: false, //bandera que indica si el plan de la tienda ya expiró
     }
 },
 components:{
-    AppLayout,
+    PaymentExpiredPlan,
+    UpdatePlanModules,
     ToggleButton,
-    InternalSimulator,
+    AppLayout,
     Month,
     Year,
     Back
@@ -54,6 +59,12 @@ methods:{
     },
 },
 mounted() {
+    //evaluar si ya expiró el plan de la tienda
+    const today = new Date();
+    const nextPaymentDate = new Date(this.nextPayment);
+    // Si la fecha de nextPayment ya pasó, marcar isExpiredPlan como true
+    this.isExpiredPlan = nextPaymentDate < today;
+
     // Obtener la URL actual
     const currentURL = new URL(window.location.href);
     // Extraer el valor de 'activeTab' de los parámetros de búsqueda

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Store;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -20,8 +21,9 @@ class StripeController extends Controller
 
         $modules = $request->activeModules; //modulos pagados para mostrarlos en el desgloce del pago
         $modules_updated = $request->modulesUpdated; //modulos pagados para guardarlos en base de datos y actualizar en caso de agregar nuevos o quitar
+        $discount_ticket = $request->discountTicketUsed; //cupón de descuento utiizado
 
-        return view('Stripe.index', compact('products', 'modules', 'modules_updated'));
+        return view('Stripe.index', compact('products', 'modules', 'modules_updated', 'discount_ticket'));
     }
 
     /*
@@ -91,7 +93,7 @@ class StripeController extends Controller
         // $modules_updated = json_decode($request->input('modules_updated'), true); //modulo adicionales agregados al plan actual
         $activated_modules = json_decode($request->input('activated_modules'), true); //modulos pagados para guardarlos en base de datos y actualizar en caso de agregar nuevos o quitar
 
-        \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test')); //el helper config toma las llaves desde el directorio config/stripe
+        \Stripe\Stripe::setApiKey(config(key:'stripe.sk')); //el helper config toma las llaves desde el directorio config/stripe
 
         
         $LineItems = [];
@@ -205,20 +207,35 @@ class StripeController extends Controller
             $products = json_decode($request->input('products'), true);
             $modules_updated = json_decode($request->input('modules_updated'), true);
 
-            // Encontrar la tienda del usuario autenticado
+            // Recuperar tienda logueada
             $store = Store::find(auth()->user()->store_id);
-            
-            // Asignar el periodo de suscripción basado en el nombre del producto
-            if ($products[0]['name'] === "Periodo de suscripción: Mensual") {
-                $store->suscription_period = 'Mensual';
-                $proximoPago = now()->addDays(30);
-            } else {
-                $store->suscription_period = 'Anual';
-                $proximoPago = now()->addDays(365);
+            $daysToAdd = ($products[0]['name'] === "Periodo de suscripción: Mensual") ? 30 : 365;
+            $now = now();
+            $nextPayment = $store->next_payment ? Carbon::parse($store->next_payment) : $now;
+
+            // Si el pago está vencido, partir de hoy, si no, sumar a la fecha actual de next_payment
+            $store->next_payment = ($nextPayment->isPast() ? $now : $nextPayment)->addDays($daysToAdd)->toDateTimeString();
+
+            if ($nextPayment->isPast()) {
+                $store->suscription_period = $daysToAdd === 30 ? 'Mensual' : 'Anual';
             }
+            $store->save();
+
+
+            // // Encontrar la tienda del usuario autenticado
+            // $store = Store::find(auth()->user()->store_id);
             
-            // Actualizar la fecha del próximo pago
-            $store->next_payment = $proximoPago->toDateTimeString();
+            // // Asignar el periodo de suscripción basado en el nombre del producto
+            // if ($products[0]['name'] === "Periodo de suscripción: Mensual") {
+            //     $store->suscription_period = 'Mensual';
+            //     $proximoPago = now()->addDays(30);
+            // } else {
+            //     $store->suscription_period = 'Anual';
+            //     $proximoPago = now()->addDays(365);
+            // }
+            
+            // // Actualizar la fecha del próximo pago
+            // $store->next_payment = $proximoPago->toDateTimeString();
 
             // Si se han actualizado los módulos, guardarlos en la base de datos
             if ($modules_updated) {
@@ -248,7 +265,7 @@ class StripeController extends Controller
 
         try {
             // Verificar el estado del pago a través de la API de Stripe usando el session_id
-            \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test'));
+            \Stripe\Stripe::setApiKey(config(key:'stripe.sk'));
             $session = \Stripe\Checkout\Session::retrieve($session_id);
 
             // Comprobar que el pago se haya completado correctamente
