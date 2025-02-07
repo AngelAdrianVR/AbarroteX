@@ -25,15 +25,15 @@
                             <p class="flex flex-col">
                                 <b>$ {{ getSuscriptionAmount().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
                             </p>
-                            <button v-if="enablePayment" @click="edit = true"
+                            <button @click="edit = true"
                                 class="text-xs justify-self-end text-primary">
-                                Pagar suscripción
+                                Pagar suscripción/ Agregar más tiempo
                             </button>
-                            <p v-else class="flex items-center space-x-2 text-xs justify-self-end rounded-full px-3"
+                            <!-- <p v-else class="flex items-center space-x-2 text-xs justify-self-end rounded-full px-3"
                                 :class="getStatusStyles()">
                                 <span v-html="getStatusIcon()"></span>
                                 Periodo pagado
-                            </p>
+                            </p> -->
                         </div>
                         <div v-else class="flex flex-col space-y-3 col-span-full mt-7">
                             <div class="flex justify-between">
@@ -401,13 +401,14 @@ export default {
         amountToPay() {
             return this.suscriptions.find(item => item.name == this.form.suscription_period)?.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         },
-        enablePayment() {
-            const today = new Date();
-            const nextPaymentDate = new Date(this.$page.props.auth.user.store.next_payment);
-            const diffDays = (nextPaymentDate - today) / (1000 * 60 * 60 * 24);
+        //habilita el pago segun los días que se desee para la expiración del plan actual
+        // enablePayment() {
+        //     const today = new Date();
+        //     const nextPaymentDate = new Date(this.$page.props.auth.user.store.next_payment);
+        //     const diffDays = (nextPaymentDate - today) / (1000 * 60 * 60 * 24);
 
-            return diffDays <= 7;
-        }
+        //     return diffDays <= 7;
+        // }
     },
     methods: {
         checkout() {

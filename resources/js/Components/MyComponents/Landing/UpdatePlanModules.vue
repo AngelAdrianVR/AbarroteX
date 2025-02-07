@@ -104,7 +104,7 @@
               <i class="fa-solid fa-star"></i>
               <p>Popular</p>
             </div>
-            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-xs ml-2 font-thin">2 meses de regalo</span></p>
+            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-[11px] text-[#626262] ml-2 font-thin">2 meses de regalo</span></p>
           </button>
         </div>
 
@@ -184,13 +184,14 @@
           </button>
 
           <!-- Total -->
-          <div class="flex font-bold mt-3">
+          <div class="flex font-bold my-3">
             <div class="flex items-center space-x-2 w-1/2">
-              <span>Total</span>
+              <span>Total a pagar</span>
               <el-tooltip v-if="verifiedTicket" placement="right">
                 <template #content>
                   <div>
                     <p class="text-cyan-500">Cupón de descuento utilizado</p>
+                    <p>Subtotal: {{ verifiedTicket?.is_percentage_discount ? (calculateTotalPayment(calculateTotal) / (1 - verifiedTicket.discount_amount / 100)).toFixed(2) : (calculateTotalPayment(calculateTotal) + verifiedTicket.discount_amount).toFixed(2) }}</p>
                     <p>Descuento: {{ verifiedTicket?.is_percentage_discount ? '%' : '$' }}{{ verifiedTicket?.discount_amount }}</p>
                     <button class="text-white rounded-md px-3 bg-red-500 mt-3 mr-auto" @click="verifiedTicket = null">
                       Quitar cupón
@@ -451,6 +452,7 @@ export default {
         this.showDiscountModal = false;
         this.showApliedDiscountTicket = true;
         this.ticketCodeError = false;
+        this.ticketCode = null;
       } else {
         this.ticketCodeError = true;
       }
