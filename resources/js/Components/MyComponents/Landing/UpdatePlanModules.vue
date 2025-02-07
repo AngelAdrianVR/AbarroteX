@@ -214,7 +214,7 @@
 
           <small v-if="this.calculateTotalPayment(this.calculateTotal) < 10">*Si el costo total es menor a $10.00 no se paga por la modificación</small>
           <!-- <form @submit.prevent="checkout" class="text-center mt-8"> -->
-            <PrimaryButton @click="this.calculateTotalPayment(this.calculateTotal) > 10 ? checkout() : updateStoreModules()"
+            <PrimaryButton @click="this.calculateTotalPayment(this.calculateTotal) > 10 ? checkout() : showUpdateModulesConfirmModal = true"
               :disabled="loading"
               class="!px-28">
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -285,11 +285,25 @@
         </section>
       </div>
     </Modal>
+
+    <!-- Modal de confirmación de modificación de módulos -->
+    <ConfirmationModal :show="showUpdateModulesConfirmModal" @close="showUpdateModulesConfirmModal = false">
+      <template #title> Atención </template>
+      <template #content>Si estas quitando módulos de tu plan actual y quieres volverlos a agregar tendrás que pagar. ¿Deseas continuar?</template>
+      <template #footer>
+        <div class="space-x-2">
+          <CancelButton @click="showUpdateModulesConfirmModal = false">Cancelar</CancelButton>
+          <PrimaryButton @click="updateStoreModules()">Confirmar</PrimaryButton>
+        </div>
+      </template>
+    </ConfirmationModal>
   </main>
 </template>
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ConfirmationModal from "@/Components/ConfirmationModal.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from '@inertiajs/vue3';
@@ -312,6 +326,7 @@ export default {
     return {
       form,
       loading: false, // estado de carga de peticion de update modules
+      showUpdateModulesConfirmModal: false, //modal de confirmacion para modificar modulos al plab actual
       showDiscountModal: false, 
       showApliedDiscountTicket: false,
       discountTickets: null, //cupones de descuento activos
@@ -405,7 +420,9 @@ export default {
     };
   },
   components: {
+    ConfirmationModal,
     PrimaryButton,
+    CancelButton,
     InputLabel,
     Modal
   },
