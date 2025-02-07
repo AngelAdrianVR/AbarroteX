@@ -212,7 +212,7 @@
                 <p class="col-span-2">Buscar por nombre</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i class="fa-solid fa-right-long"></i></button>
                 <p class="col-span-2">Búsqueda de productos sin código</p>
-                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i class="fa-solid fa-up-long"></i></button>
+                <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i class="fa-solid fa-plus"></i></button>
                 <p class="col-span-2">Comenzar a escanear</p>
                 <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Crl</button>
                 <p class="col-span-2">Limpiar búsqueda de producto / Cerrar Búsqueda de productos sin código</p>
@@ -1692,7 +1692,7 @@ export default {
 
       } catch (error) {
         console.error("Error al conectar la báscula:", error);
-        // alert("No se conectó la báscula.");
+        alert("No se pudo conectar la báscula porque el puerto ya estaba abierto. Intenta nuevamente");
       } finally {
         // si el producto seleccionado es a granel y la báscula está activada se inicia la lectura
         if (this.productFoundSelected?.bulk_product) {
@@ -1784,6 +1784,7 @@ export default {
     handleKeydownGlobal(event) {
       if (event.key === "ArrowRight") {
         this.focusSearchInput();
+        this.scannerQuery = null; //borra el simbolo que se escribe en el input de escaner
       } else if (event.key === "Enter") {
         this.getProductByCode();
       } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
@@ -1793,11 +1794,14 @@ export default {
       } else if (event.key === "Escape") {
         this.showNoCodeProducts = false; //cierra el buscador de productos sin código
         this.editableTabs[this.editableTabsValue - 1].cash = false;
-      } else if (event.key === "ArrowUp") {
+      } else if (event.key === "+") {
         this.showNoCodeProducts = true;
-        this.$nextTick(() => {
-          this.$refs.noCodeProductsInput.focus(); // Enfocar el input de código cuando se abre el modal
-        });
+        setTimeout(() => {
+          this.$nextTick(() => {
+            this.$refs.noCodeProductsInput.focus(); // Enfocar el input de código cuando se abre el modal
+          });
+          this.scannerQuery = null; //borra el simbolo que se escribe en el input de escaner
+        }, 100);
       }
     },
   },
