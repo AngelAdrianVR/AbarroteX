@@ -100,9 +100,6 @@
                     </template>
                     <OnlineSale />
                 </el-tab-pane>
-                <!-- <el-tab-pane label="Notificaciones" name="6">
-                    Notificaciones
-                </el-tab-pane> -->
             </el-tabs>
         </div>
     </AppLayout>

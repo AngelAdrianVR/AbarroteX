@@ -187,40 +187,6 @@
                 </button>
             </div>
         </article>
-        <!-- <article class="p-4 relative">
-            <h2 class="font-bold">Habilitar báscula</h2>
-            <p class="text-sm text-gray99 mb-4">Habilita el uso de báscula en punto de venta</p>
-            <div class="flex items-center text-sm">
-
-                <p class="mx-7">Habilitar:</p>
-                <el-switch v-model="form.scale_config.is_enabled" class="ml-4" size="small"
-                    style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #D9D9D9" />
-            </div>
-        </article> -->
-
-        <!-- <div class="text-right pt-10 md:mx-7 col-span-full">
-            <PrimaryButton :disabled="form.processing" @click="updateScaleConfig">
-                <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                Guadar cambios
-            </PrimaryButton>
-        </div> -->
-        <!-- Sinconizar báscula -->
-        <!-- <div class="col-span-full mt-5">
-            <h2 class="font-bold mb-2">Prueba de sincronización</h2>
-            <h1 v-if="isConnected" class="mb-2">Lectura de peso: {{ weight }} kg</h1>
-            <div class="flex items-center space-x-4">
-                <PrimaryButton v-if="!isConnected" @click="connectScale">Sincronizar báscula</PrimaryButton>
-                <button
-                    class="px-3 py-2 bg-green-500 text-white rounded-full text-sm disabled:cursor-not-allowed disabled:bg-gray-400"
-                    v-if="isConnected" :disabled="isReading" @click="startReading">Iniciar Lectura</button>
-                <button
-                    class="px-3 py-2 bg-orange-700 text-white rounded-full text-sm disabled:cursor-not-allowed disabled:bg-gray-400"
-                    v-if="isConnected" :disabled="!isReading" @click="stopReading">Detener Lectura</button>
-                <button
-                    class="px-3 py-2 bg-red-500 text-white rounded-full text-sm disabled:cursor-not-allowed disabled:bg-gray-400"
-                    @click="disconnectScale" :disabled="!port">Finalizar prueba</button>
-            </div>
-        </div> -->
         <DialogModal :show="showScaleModal" @close="showScaleModal = false" max-width="md">
             <template #title>
                 <h1>Sincronizar</h1>

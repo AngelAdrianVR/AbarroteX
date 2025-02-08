@@ -63,6 +63,64 @@ class StoreController extends Controller
 
         $store->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('csf'));
     }
+    
+    public function storeLogo(Request $request)
+    {
+        $store = auth()->user()->store;
+
+        // borrar logo anterior
+        $store->clearMediaCollection('logo');
+
+        // guardar nuevo logo
+        $store->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('logo'));
+    }
+    
+    public function storeBanner(Request $request)
+    {
+        $store = auth()->user()->store;
+
+        // borrar banner anterior
+        $store->clearMediaCollection('banner');
+
+        if ($request->has('img')) {
+            // guardar nuevo banner
+            $store->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('banner'));
+        }
+
+        // guardar banner por defecto seleccionado o 0 si elige imagen personalizada
+        $osp = $store->online_store_properties;
+        $osp['banner'] = $request->selected;
+        $store->update(['online_store_properties' => $osp]);
+    }
+    
+    public function storeOnlineProperties(Request $request)
+    {
+        $store = auth()->user()->store;
+
+        $validated = $request->validate([
+            'whatsapp' => 'nullable|string|min:10|max:10',
+            'delivery_price' => 'nullable|numeric|min:0|max:9999999',
+            'delivery_conditions' => 'nullable|string|max:500',
+            'min_free_delivery' => 'nullable|numeric|min:0|max:9999999',
+            'inventory' => 'boolean',
+            'sold_out_active' => 'boolean',
+        ]);
+
+        // guardar otros datos de la tienda en linea para que no se borren
+        $validated['banner'] = $store->online_store_properties['banner'];
+        $validated['cash_payment'] = key_exists('cash_payment', $store->online_store_properties)
+        ? $store->online_store_properties['cash_payment']
+        : true;
+        $validated['card_payment'] = key_exists('card_payment', $store->online_store_properties)
+        ? $store->online_store_properties['card_payment']
+        : false;
+        $validated['mercado_pago'] = key_exists('mercado_pago', $store->online_store_properties)
+        ? $store->online_store_properties['mercado_pago']
+        : false;
+
+        // guardar datos
+        $store->update(['online_store_properties' => $validated]);
+    }
 
     public function toggleSettingValue(Request $request, Store $store, $setting_id)
     {
@@ -72,23 +130,23 @@ class StoreController extends Controller
         return response()->json([]);
     }
 
-    public function updateOnlineSalesInfo(Request $request, Store $store)
-    {
-        $request->validate([
-            'online_store_properties.whatsapp' => 'nullable|string|min:10|max:10',
-            'online_store_properties.cash_payment' => 'nullable|boolean',
-            'online_store_properties.credit_payment' => 'nullable|boolean',
-            'online_store_properties.debit_payment' => 'nullable|boolean',
-            'online_store_properties.mercado_pago' => 'nullable|boolean',
-            'online_store_properties.delivery_price' => 'nullable|numeric|min:0|max:9999',
-            'online_store_properties.delivery_conditions' => 'nullable|string|max:500',
-            'online_store_properties.min_free_delivery' => 'nullable|numeric|min:0|max:9999',
-        ]);
+    // public function updateOnlineSalesInfo(Request $request, Store $store)
+    // {
+    //     $request->validate([
+    //         'online_store_properties.whatsapp' => 'nullable|string|min:10|max:10',
+    //         'online_store_properties.cash_payment' => 'nullable|boolean',
+    //         'online_store_properties.credit_payment' => 'nullable|boolean',
+    //         'online_store_properties.debit_payment' => 'nullable|boolean',
+    //         'online_store_properties.mercado_pago' => 'nullable|boolean',
+    //         'online_store_properties.delivery_price' => 'nullable|numeric|min:0|max:9999',
+    //         'online_store_properties.delivery_conditions' => 'nullable|string|max:500',
+    //         'online_store_properties.min_free_delivery' => 'nullable|numeric|min:0|max:9999',
+    //     ]);
 
-        $store->update($request->all());
+    //     $store->update($request->all());
 
-        return to_route('online-sales.index', ['tab' => 2]);
-    }
+    //     return to_route('online-sales.index', ['tab' => 2]);
+    // }
 
     // public function updatePrinterConfig(Request $request, Store $store)
     // {
@@ -100,9 +158,9 @@ class StoreController extends Controller
     //     $store->update($request->all());
     // }
 
-    public function fetchStoreInfo(Store $store)
-    {
-        return response()->json(compact('store'));
-    }
+    // public function fetchStoreInfo(Store $store)
+    // {
+    //     return response()->json(compact('store'));
+    // }
 
 }
