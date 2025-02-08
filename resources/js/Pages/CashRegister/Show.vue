@@ -37,11 +37,10 @@
                                 <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                                 <p class="text-gray99">Efectivo inicial</p>
                                 <p class="text-gray99">Ventas en tienda</p>
-                                <p v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-gray99">Ventas en línea</p>
+                                <p v-if="this.$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" class="text-gray99">Ventas en línea</p>
 
                                 <p  v-if="cashCutMovements[index]?.length"
                                     class="text-primary flex items-center">Movimientos de caja 
-                                    <!-- <i :class="showcashRegisterMovements ? 'fa-angle-down' : 'fa-angle-up'" class="fa-solid ml-4"></i> -->
                                 </p>
 
                                 <div v-if="loadingMovements">
@@ -60,22 +59,24 @@
                                     cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
                                 <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                                <p class="text-gray99 pb-5 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
+                                <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.store_sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
-                                <p v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-gray99 pb-5"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
+                                <p v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                                     cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
                                 <div v-if="loadingMovements">
                                     <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                                 </div>
+                                
+                                <div v-if="showcashRegisterMovements" :class="cashCutMovements[index]?.length ? 'pt-5 space-y-1' : ''">
+                                    <p v-for="cashRegisterMovement in cashCutMovements[index]"
 
-                                <p v-if="showcashRegisterMovements" v-for="cashRegisterMovement in cashCutMovements[index]"
-
-                                    :key="cashRegisterMovement" class="text-gray99">
-                                    <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"
-                                        class="fa-solid text-xs px-1"></i>
-                                    <span class="text-gray99 mr-3">$</span>{{
-                                        cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
-                                </p>
+                                        :key="cashRegisterMovement" class="text-gray99">
+                                        <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"
+                                            class="fa-solid text-xs px-1"></i>
+                                        <span class="text-gray99 mr-3">$</span>{{
+                                            cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <footer class="bg-[#F2F2F2] text-black font-bold py-2 flex px-2">

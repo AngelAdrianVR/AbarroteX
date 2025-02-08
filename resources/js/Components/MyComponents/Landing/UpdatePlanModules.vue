@@ -104,8 +104,7 @@
               <i class="fa-solid fa-star"></i>
               <p>Popular</p>
             </div>
-            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-xs ml-2 font-thin">2 meses de
-                regalo</span></p>
+            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-[11px] text-[#626262] ml-2 font-thin">2 meses de regalo</span></p>
           </button>
         </div>
 
@@ -173,8 +172,8 @@
           </div>
 
           <!-- Cupon de descuento -->
-          <button
-            :disabled="!modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length"
+          <button @click="showDiscountModal = true"
+            :disabled="!modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length || verifiedTicket"
             class="text-primary flex items-center space-x-2 mt-3 disabled:text-gray-400 disabled:cursor-not-allowed">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="size-4">
@@ -184,29 +183,28 @@
             <span>Agregar código promocional</span>
           </button>
 
-          <!-- <p class="text-gray99 my-3">Descuentos</p> -->
-
-          <!-- Descuento por modulos ya pagados -->
-          <!-- <div class="flex">
-            <p class="w-1/2">Monto ya pagado</p>
-            <p class="w-1/2 text-right"><span class="mr-1">$</span>
-              <span class="w-20 inline-block">- {{ totalPaid.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-            </p>
-          </div> -->
-
-          <!-- Descuento por tiempo transcurrido -->
-          <!-- <div class="flex">
-            <p class="w-1/2">Desc. por tiempo transcurrido</p>
-            <p class="w-1/2 text-right"><span class="mr-1">$</span>
-              <span class="w-20 inline-block">
-                 {{ calculateDiscountForPastDays(calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-              </span>
-            </p>
-          </div> -->
-
           <!-- Total -->
-          <div class="flex font-bold mt-3">
-            <p class="w-1/2">Total</p>
+          <div class="flex font-bold my-3">
+            <div class="flex items-center space-x-2 w-1/2">
+              <span>Total a pagar</span>
+              <el-tooltip v-if="verifiedTicket" placement="right">
+                <template #content>
+                  <div>
+                    <p class="text-cyan-500">Cupón de descuento utilizado</p>
+                    <p>Subtotal: {{ verifiedTicket?.is_percentage_discount ? (calculateTotalPayment(calculateTotal) / (1 - verifiedTicket.discount_amount / 100)).toFixed(2) : (calculateTotalPayment(calculateTotal) + verifiedTicket.discount_amount).toFixed(2) }}</p>
+                    <p>Descuento: {{ verifiedTicket?.is_percentage_discount ? '%' : '$' }}{{ verifiedTicket?.discount_amount }}</p>
+                    <button class="text-white rounded-md px-3 bg-red-500 mt-3 mr-auto" @click="verifiedTicket = null">
+                      Quitar cupón
+                    </button>
+                  </div>
+                </template>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="size-4 text-primary">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+                </svg>
+              </el-tooltip>
+            </div>
             <p class="w-1/2 text-right">
               <span class="mr-1">$</span>
               <span class="w-20 inline-block">{{
@@ -214,17 +212,15 @@
             </p>
           </div>
 
-
-          <form @submit.prevent="checkout" class="text-center mt-8">
-            <PrimaryButton
-              :disabled="loading || !modules.filter(item => item.activated === true && !currentActivatedModules.includes(item.name)).length"
+          <small v-if="this.calculateTotalPayment(this.calculateTotal) < 10">*Si el costo total es menor a $10.00 no se paga por la modificación</small>
+          <!-- <form @submit.prevent="checkout" class="text-center mt-8"> -->
+            <PrimaryButton @click="this.calculateTotalPayment(this.calculateTotal) > 10 ? checkout() : showUpdateModulesConfirmModal = true"
+              :disabled="loading"
               class="!px-28">
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-              Confirmar y pagar
+              {{ this.calculateTotalPayment(this.calculateTotal) > 10 ? 'Confirmar y pagar' : 'Confirmar modificación' }}
             </PrimaryButton>
-            <p v-if="$page.props.auth.user.store.is_active" class="text-xs text-red-600 mt-2">*No puedes pagar si aún no
-              ha vencido tu plan actual</p>
-          </form>
+          <!-- </form> -->
 
           <p class="text-gray99 text-xs mt-3">
             Puedes cancelar tu suscripción cuando quieras desde la página de ajustes de la suscripción.
@@ -242,76 +238,73 @@
     </section>
 
     <!-- -------------- Modal de código promocional ----------------------- -->
-    <Modal :show="cashRegisterModal" @close="cashRegisterModal = false; form.reset">
+    <Modal :show="showDiscountModal" @close="showDiscountModal = false" maxWidth="lg">
       <div class="p-4 relative">
-        <i @click="cashRegisterModal = false"
-          class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
+        <i @click="showDiscountModal = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
 
-        <form class="mt-5 mb-2 md:grid grid-cols-2 gap-3" @submit.prevent="storeCashRegisterMovement">
-          <h2 v-if="form.cashRegisterMovementType === 'Ingreso'" class="font-bold col-span-full">Ingresar efectivo a
-            caja
-          </h2>
-          <h2 v-if="form.cashRegisterMovementType === 'Retiro'" class="font-bold col-span-full">Retirar efectivo a caja
-          </h2>
+        <h2 class="font-bold">Agrega el código promocional</h2>
 
-          <div class="mt-2">
-            <InputLabel v-if="form.cashRegisterMovementType === 'Ingreso'" value="Monto a ingresar *"
-              class="ml-3 mb-1 text-sm" />
-            <InputLabel v-if="form.cashRegisterMovementType === 'Retiro'" value="Monto a retirar *"
-              class="ml-3 mb-1 text-sm" />
-            <el-input v-model="form.registerAmount" type="text" placeholder="ingresa el monto"
-              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-              :parser="(value) => value.replace(/[^\d.]/g, '')">
-              <template #prefix>
-                <i class="fa-solid fa-dollar-sign"></i>
-              </template>
-            </el-input>
-            <p class="text-red-500 text-xs"
-              v-if="form.cashRegisterMovementType === 'Retiro' && form.registerAmount > localCurrentCash">
-              *El monto no debe exceder el dinero actual de tu caja (${{ localCurrentCash }})
-            </p>
-            <InputError :message="form.errors.registerAmount" />
-          </div>
+        <div class="mt-3 col-span-full mx-10">
+            <InputLabel value="Código" class="ml-3 mb-1" />
+            <el-input @keydown.enter="VerifyTicket()" v-model="ticketCode" placeholder="Escribe el código de promoción" :maxlength="100" clearable />
+            <span v-if="ticketCodeError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> El cupón no es válido. Verifica nuevamente</span>
+        </div>
 
-          <div class="col-span-full mt-2">
-            <InputLabel value="Motivo (opcional)" class="text-sm ml-2" />
-            <el-input v-model="form.registerNotes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-              placeholder="Escribe tus notas" :maxlength="255" show-word-limit clearable />
-          </div>
-
-          <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
-            <CancelButton @click="cashRegisterModal = false">Cancelar</CancelButton>
-            <PrimaryButton
-              :disabled="!form.registerAmount || form.processing || (form.cashRegisterMovementType === 'Retiro' && (form.registerAmount > localCurrentCash))">
-              Confirmar</PrimaryButton>
-          </div>
-        </form>
+        <div class="flex justify-end mt-5">
+          <PrimaryButton @click="VerifyTicket()">Verificar</PrimaryButton>
+        </div>
+      
       </div>
     </Modal>
+
+    <!-- -------------- Modal de código aplicado correctamente ----------------------- -->
+    <Modal :show="showApliedDiscountTicket" @close="showApliedDiscountTicket = false" maxWidth="sm">
+      <div class="p-4 relative">
+        <i @click="showApliedDiscountTicket = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+
+        <h2 class="font-bold text-center">Descuento aplicado con éxito</h2>
+
+        <section class="mt-4 text-center">
+          <p class="flex items-center space-x-2 rounded-full border border-dashed border-primary text-primary bg-primarylight py-1 px-3 w-1/2 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+            </svg>
+            <span>{{ verifiedTicket.discount_amount }}{{ verifiedTicket.is_percentage_discount ? '%' : '$' }} descuento</span>
+          </p>
+
+          <div class="mt-5 flex flex-col items-center justify-center">
+            <svg width="26" height="20" viewBox="0 0 26 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.91758 19.8418C4.12647 14.7142 0.232709 10.6358 0.0124311 10.3936C-0.207847 10.1514 2.52212 9.69147 6.39 13.7005C13.7218 5.3998 20.8295 -0.0222255 24.8141 0.000509436C24.9676 -0.0151292 25.2031 0.333452 25.0503 0.472922C16.2283 4.67346 11.3447 12.1369 7.09861 19.8418C7.07299 20.0753 5.90745 20.0289 5.91758 19.8418Z" fill="#189203"/>
+            </svg>
+            <p class="text-[#189203]">¡Disfruta de tu descuento!</p>
+          </div>
+        </section>
+      </div>
+    </Modal>
+
+    <!-- Modal de confirmación de modificación de módulos -->
+    <ConfirmationModal :show="showUpdateModulesConfirmModal" @close="showUpdateModulesConfirmModal = false">
+      <template #title> Atención </template>
+      <template #content>Si estas quitando módulos de tu plan actual y quieres volverlos a agregar tendrás que pagar. ¿Deseas continuar?</template>
+      <template #footer>
+        <div class="space-x-2">
+          <CancelButton @click="showUpdateModulesConfirmModal = false">Cancelar</CancelButton>
+          <PrimaryButton @click="updateStoreModules()">Confirmar</PrimaryButton>
+        </div>
+      </template>
+    </ConfirmationModal>
   </main>
-  <!-- Desgloce de costo para el primer pago de plan -->
-  <!-- <div class="flex border-b border-grayD9 pb-2">
-    <p class="w-1/2">Módulos esenciales</p>
-    <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
-      'Mensual' ? '229.00' : '2,290.00' }}</span></p>
-  </div>
-
-  <div class="border-b border-grayD9 pb-2">
-    <p v-if="modules.filter(item => item.activated === true).length" class="text-[#686767] mt-3">Adicionales</p>
-
-    Otros modulos
-    <div v-for="item in modules.filter(item => item.activated === true)" :key="item" 
-      class="flex">
-      <p class="w-1/2">{{ item.name }}</p>
-      <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
-        'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
-          10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-    </div>
-  </div> -->
 </template>
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ConfirmationModal from "@/Components/ConfirmationModal.vue";
+import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
 import { useForm } from '@inertiajs/vue3';
 import { format } from 'date-fns';
@@ -321,21 +314,29 @@ import axios from 'axios';
 export default {
   data() {
     const form = useForm({
-      amount: null,
-      suscription_period: null,
-      activeModules: null,
-      modulesUpdated: [],
+      amount: null, //monto total a pagar
+      suscription_period: null, //periodo de suscripción (anual o mensual) 
+      remainingPlanDays: null, //días restantes para que expire el plan actual
+      modulesUpdated: [], //módulos adicionales agregados al plan actual (para desglose de pago)
+      activeModules: [], //modulos activos en la tienda (todos, para guardarlo en la base de datos)
+      discountTicketUsed: null, //cupón de descuento utilizado
       // default_card_id: this.$page.props.auth.user.store.default_card_id,
     });
 
     return {
       form,
       loading: false, // estado de carga de peticion de update modules
-      cashRegisterModal: false,
+      showUpdateModulesConfirmModal: false, //modal de confirmacion para modificar modulos al plab actual
+      showDiscountModal: false, 
+      showApliedDiscountTicket: false,
+      discountTickets: null, //cupones de descuento activos
+      ticketCode: null, //codigo del ticket ingresado
+      verifiedTicket: null, //codigo del ticket correctamente verificado
+      ticketCodeError: false, //codigo del ticket no encontrado, bandera de error
       nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
       totalPaid: 229, // El total pagado por los modulos que actualmente tiene.
-      // daysForNextPayment: 0, // dias para el proximo pago
       period: this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
+      remainingPlanDays: 0, //dias restantes para que expire el plan pagado
       activated_modules: [],
       currentActivatedModules: [],
 
@@ -419,19 +420,24 @@ export default {
     };
   },
   components: {
+    ConfirmationModal,
     PrimaryButton,
+    CancelButton,
+    InputLabel,
     Modal
   },
   props: {},
   methods: {
     checkout() {
-      this.form.amount = this.calculateTotalPayment(this.calculateTotal); //monto total a pagar
+      this.form.amount = parseFloat(this.calculateTotalPayment(this.calculateTotal).toFixed(2)); //monto total a pagar
       this.form.suscription_period = this.period; //periodo de tiempo a pagar (mes, año)
-      this.form.activeModules = this.modules.filter(item => item.activated === true); //detalle de modulos a pagar
-      this.form.activeModules.unshift({ name: "Módulos básicos", cost: 229 }); //se agregan los modulos escenciales o basicos para mostrarlo en detalles de pago
-      this.form.modulesUpdated = this.activated_modules; //modulos pagados para agregarlos en base de datos en caso de agregados o quitados
-      this.form.post(route('stripe.index'));
+      this.form.remainingPlanDays = this.remainingPlanDays; //días restantes para que expire el plan pagado
+      this.form.modulesUpdated = this.activated_modules.filter(item => !this.currentActivatedModules.includes(item)); //modulos adicionales agregados al plan actual
+      this.form.activeModules = this.activated_modules; //modulos pagados para agregarlos en base de datos en caso de agregados o quitados
+      this.form.discountTicketUsed = this.verifiedTicket //cupón de descuento utilizado
+      this.form.post(route('stripe.upgrade-subscription')); //Desgloce de pago cuando la suscripción no ha vencido. Agregar o quitar módulos
     },
+    // modifica los módulos activos en la tienda cuando no se ha pagado la suscripción y esta vencido el pago.
     async updateStoreModules() {
       this.loading = true;
       try {
@@ -446,28 +452,59 @@ export default {
         this.loading = false;
       }
     },
+    async fetchActiveDiscountTickets() {
+      try {
+        const response = await axios.get(route('discount-tickets.fetch-active-tickets'))
+        if (response.status === 200) {
+          this.discountTickets = response.data.discount_tickets;
+        }
+
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    VerifyTicket() {
+      if ( this.discountTickets.some(ticket => ticket.code === this.ticketCode )) {
+        this.verifiedTicket = this.discountTickets.find(ticket => ticket.code === this.ticketCode);
+        this.showDiscountModal = false;
+        this.showApliedDiscountTicket = true;
+        this.ticketCodeError = false;
+        this.ticketCode = null;
+      } else {
+        this.ticketCodeError = true;
+      }
+    },
     calculateTotalPayment(calculateTotal) {
       let total;
 
       if (this.period === 'Mensual') {
-        // Si el periodo es mensual, el total es el cálculo multiplicado por el factor de ajuste
         total = calculateTotal * this.adjustmentFactor;
       } else {
-        // Si el periodo no es mensual (asumimos que es anual), el total es el cálculo multiplicado por 10 y luego por el factor de ajuste
         total = calculateTotal * 10 * this.adjustmentFactor;
       }
 
-      // Asegurarse de que el total no sea negativo
+      // Aplicar descuento si existe un cupón verificado
+      if (this.verifiedTicket) {
+        if (this.verifiedTicket.is_percentage_discount) {
+          // Aplicar descuento porcentual
+          total -= (total * this.verifiedTicket.discount_amount) / 100;
+        } else {
+          // Aplicar descuento fijo
+          total -= this.verifiedTicket.discount_amount;
+        }
+      }
+
+      // Asegurar que el total no sea negativo
       return Math.max(0, total);
     },
-    // calculateDiscountForPastDays(calculateTotal) {
-    //   if ( calculateTotal > 0 && this.daysForNextPayment > 0 ) {
-    //     const totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
-    //     return totalDiscountForPastDays;
-    //   } else {
-    //     return 0
-    //   }
-    // },
+    calculateRemainingPlanDays() {
+      const store = this.$page.props.auth.user.store;
+      const today = new Date();
+      const nextPaymentDate = new Date(store.next_payment);
+      const timeDiff = nextPaymentDate - today;
+      const remainingPlanDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      this.remainingPlanDays = remainingPlanDays; //guarda los dias 
+    },
     handleSwitchModule(module) {
       if (module.activated) {
         this.activated_modules.push(module.name);
@@ -475,10 +512,6 @@ export default {
         this.activated_modules = this.activated_modules.filter(name => name !== module.name);
       }
     },
-    saveExtraModules() {
-      localStorage.setItem('EzyExtraModules', JSON.stringify(this.activated_modules));
-      this.$inertia.get(route('register'));
-    }
   },
   computed: {
     formattedTotalPaymentInteger() {
@@ -491,15 +524,10 @@ export default {
     },
     adjustmentFactor() {
       const store = this.$page.props.auth.user.store;
-      const today = new Date();
-      const nextPaymentDate = new Date(store.next_payment);
-      const timeDiff = nextPaymentDate - today;
-      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
       if (store.suscription_period === 'Mensual') {
-        return daysRemaining / 30;
+        return this.remainingPlanDays / 30;
       } else if (store.suscription_period === 'Anual') {
-        return daysRemaining / 365;
+        return this.remainingPlanDays / 365;
       } else {
         return 1;
       }
@@ -521,7 +549,7 @@ export default {
       const today = new Date();
       const nextPaymentDate = new Date(this.nextPayment);
 
-      // si la fecha de pago ya expiró retorna true
+      // si la fecha de pago no ha expirado se muestra la opción de mensual
       if (nextPaymentDate < today) {
         return false;
       } else {
@@ -539,6 +567,9 @@ export default {
     }
   },
   mounted() {
+    //carga los cupones de descuento disponibles
+    this.fetchActiveDiscountTickets();
+
     // Filtra los módulos activados
     const activatedModules = this.$page.props.auth.user.store.activated_modules;
 
@@ -554,16 +585,15 @@ export default {
     });
 
     //se clona el arreglo de módulos activados para separar la lógica
-    this.currentActivatedModules = this.activated_modules;
+    // Se crea una copia independiente
+    this.currentActivatedModules = [...activatedModules];
 
     //si el periodo pagado es anual el monto pagado se multiplica por 10
     if (this.$page.props.auth.user.store.suscription_period === 'Anual') {
       this.totalPaid *= 10;
     }
-
-    const today = new Date();
-    const nextPaymentDate = new Date(this.nextPayment);
-    this.daysForNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
+    
+    this.calculateRemainingPlanDays();
   }
 };
 </script>

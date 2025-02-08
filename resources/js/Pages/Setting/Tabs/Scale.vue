@@ -215,7 +215,7 @@
                 </p>
             </template>
             <template #footer>
-                <PrimaryButton @click="showScaleModal = false">Finalizar sincronización</PrimaryButton>
+                <PrimaryButton @click="showScaleModal = false; stopReading(); disconnectScale()">Finalizar sincronización</PrimaryButton>
             </template>
         </DialogModal>
     </section>
@@ -314,7 +314,6 @@ export default {
         },
         async connectScale() {
             try {
-                this.showScaleModal = true;
                 if (this.port) {
                     await this.port.close(); // Cierra el puerto solo después de liberar el lector
                     this.port = null;
@@ -342,6 +341,7 @@ export default {
                 this.isConnected = true; // Marca la conexión como activa
                 this.conexionError = false; // marca en falso el estado de error de conexión
                 this.showScaleModal = true; // abrir modal para probar báscula
+                this.startReading(); //comienza a leer el peso
 
                 this.$notify({
                     title: "Correcto",
