@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
             },
             'auth.user.store' => function () use ($request) {
                 if ($request->user()) {
-                    return $request->user()->store;
+                    return $request->user()->store->load('media');
                 }
                 return null;
             },

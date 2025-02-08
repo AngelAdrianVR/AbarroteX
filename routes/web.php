@@ -319,6 +319,9 @@ Route::put('stores-update-online-sales-info/{store}', [StoreController::class, '
 Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
 Route::post('stores-store-csf', [StoreController::class, 'storeCSF'])->name('stores.store-csf');
 Route::post('stores-update-modules/{store}', [StoreController::class, 'UpdateModules'])->name('store.update-modules');
+Route::post('stores/store-logo', [StoreController::class, 'storeLogo'])->name('stores.store-logo');
+Route::post('stores/store-banner', [StoreController::class, 'storeBanner'])->name('stores.store-banner');
+Route::post('stores/store-online-properties', [StoreController::class, 'storeOnlineProperties'])->name('stores.store-online-properties');
 
 
 // User routes-----------------------------------------------------------------------------------------

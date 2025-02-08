@@ -187,8 +187,6 @@
                 </button>
             </div>
         </article>
-
-        <!-- Probar sincronización de báscula -->
         <DialogModal :show="showScaleModal" @close="showScaleModal = false" max-width="md">
             <template #title>
                 <h1>Sincronizar</h1>

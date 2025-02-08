@@ -23,13 +23,13 @@
                 </p>
             </div>
             <div>
-                <InputFilePreview @imagen="logoForm.logo = $event; logoForm.cleared = false" width="w-44" height="h-28"
-                    :imageUrl="logo?.media[0]?.original_url" @cleared="logoForm.cleared = true" />
-                <p v-if="loadingLogo" class="text-gray-400 text-end text-xs">Guardando...</p>
+                <InputFilePreview @imagen="storeLogo($event)" width="w-44" height="h-28" :imageUrl="storeLogoUrl"
+                    @cleared="storeLogo()" />
+                <p v-if="logoForm.processing" class="text-gray-400 text-end text-xs col-span-full">Guardando...</p>
             </div>
         </article>
         <!-- portada ----------------------------------------->
-        <article class="p-4 lg:flex items-center justify-between text-sm">
+        <article class="p-4 lg:flex justify-between text-sm">
             <div class="lg:w-1/2">
                 <h2 class="flex items-center space-x-1">
                     <span>Portada / Banner</span>
@@ -58,17 +58,19 @@
                     importante que desees comunicar a tus clientes.
                 </p>
             </div>
-            <div class="flex items-center space-x-1">
-                <button v-for="(banner, index) in banners" :key="index" class="rounded-xl">
-                    <img :src="banner.src"
-                        class="select-none object-cover rounded-xl h-28 border-2 transition-all duration-300 ease-in-out"
-                        @click="bannerSelected = index + 1"
-                        :class="bannerSelected == index + 1 ? 'w-40 border-primary' : 'w-7 border-transparent'"
-                        :draggable="false" :alt="banner.alt">
-                </button>
-                <InputFilePreview @imagen="bannerForm.selection = $event; bannerForm.cleared = false; bannerSelected=0;" width="w-44" height="h-28"
-                    :imageUrl="banner?.media[0]?.original_url" @cleared="bannerForm.cleared = true" />
-                <p v-if="loadingLogo" class="text-gray-400 text-end text-xs">Guardando...</p>
+            <div>
+                <div class="flex items-center space-x-1">
+                    <button v-for="(banner, index) in banners" :key="index" class="rounded-xl">
+                        <img :src="banner.src"
+                            class="select-none object-cover rounded-xl h-28 border-2 transition-all duration-300 ease-in-out"
+                            @click="bannerForm.selected = index + 1; storeBanner()"
+                            :class="bannerForm.selected == index + 1 ? 'w-40 border-primary' : 'w-7 border-transparent'"
+                            :draggable="false" :alt="banner.alt">
+                    </button>
+                    <InputFilePreview @imagen="storeBanner($event)" width="w-44" height="h-28"
+                        :imageUrl="storeBannerUrl" @cleared="storeBanner()" />
+                </div>
+                <p v-if="bannerForm.processing" class="text-gray-400 text-end text-xs col-span-full">Guardando...</p>
             </div>
         </article>
         <!-- contacto ----------------------------------------->
@@ -87,20 +89,19 @@
                     Este número se mostrará en tu tienda en línea.
                 </p>
             </div>
-            <div>
-                <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                    <p class="w-48">Número de teléfono:</p>
-                    <el-input v-model="contactForm.telephone" placeholder="Ej. 3333123456"
-                        :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
-                        :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable>
-                        <template #prepend>
-                            <img src="@/../../public/images/mxFlag.png" alt="Bandera de mexico en miniatura"
-                                :draggable="false" class="select-none" />
-                            <span class="ml-1">+52</span>
-                        </template>
-                    </el-input>
-                </div>
-                <p v-if="loadingStopBits" class="text-gray-400 text-end text-xs">Guardando...</p>
+            <div class="lg:w-1/2 grid grid-cols-2 gap-3 items-center *:text-end mt-5 lg:mt-0">
+                <p>Número de teléfono:</p>
+                <el-input v-model="onlinePropertiesForm.whatsapp" @blur="storeOnlineProperties('contact')"
+                    @keyup.enter="storeOnlineProperties('contact')" placeholder="Ej. 3333123456"
+                    :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
+                    :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable>
+                    <template #prepend>
+                        <img src="@/../../public/images/mxFlag.png" alt="Bandera de mexico en miniatura"
+                            :draggable="false" class="select-none" />
+                        <span class="ml-1">+52</span>
+                    </template>
+                </el-input>
+                <p v-if="contactLoading" class="text-gray-400 text-end text-xs col-span-full">Guardando...</p>
             </div>
         </article>
         <!-- envio ----------------------------------------->
@@ -116,67 +117,36 @@
                 </h2>
                 <p class="text-[#575757] text-justify">
                     Agrega el costo y las condiciones de envío a domicilio. Los clientes verán esta información al
-                    realizar su pedido.
-                </p>
-            </div>
-            <div>
-                <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                    <p class="w-60">Costo de envío:</p>
-                    <el-input v-model="shippingForm.cost" placeholder="Ej. 99"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
-                        <template #prefix>
-                            <i class="fa-solid fa-dollar-sign"></i>
-                        </template>
-                    </el-input>
-                </div>
-                <div class="flex items-center space-x-2 mt-3">
-                    <p class="w-60">Condiciones de envío:</p>
-                    <el-input v-model="shippingForm.conditions" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
-                        placeholder="Ej. Dentro de la zona metropolitana de Guadalajara." :maxlength="350"
-                        show-word-limit clearable />
-                </div>
-                <p v-if="loadingDataBits" class="text-gray-400 text-end text-xs">Guardando...</p>
-            </div>
-        </article>
-        <!-- minimo compra envio ----------------------------------------->
-        <article class="p-4 lg:flex items-center justify-between text-sm">
-            <div class="lg:w-1/2">
-                <h2 class="flex items-center space-x-1">
-                    <span>Mínimo de compra para envío gratis</span>
-                    <svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M15.485 14.993H7.09802C6.67141 14.968 6.56268 14.8741 6.38423 14.5172L3.70753 6.54654H1.80409C0.730485 6.54654 0.733457 5 1.80409 5H4.42131C5.07562 5 5.31355 6.54654 5.61096 6.54654H17.21C17.8643 6.54654 18.149 7.15723 17.9238 7.79567L16.3178 11.662C16.0799 12.1379 15.9014 12.3163 15.1876 12.3163H7.33595L7.81458 13.5182H15.485C16.6152 13.5182 16.5557 14.993 15.485 14.993Z"
-                            stroke="currentColor" stroke-width="0.908611" stroke-linecap="round" />
-                        <path
-                            d="M9.59201 16.2472C9.59201 16.9371 9.03276 17.4963 8.34288 17.4963C7.65301 17.4963 7.09375 16.9371 7.09375 16.2472C7.09375 15.5573 7.65301 14.998 8.34288 14.998C9.03276 14.998 9.59201 15.5573 9.59201 16.2472Z"
-                            fill="black" />
-                        <path
-                            d="M15.67 16.2472C15.67 16.9371 15.1107 17.4963 14.4208 17.4963C13.731 17.4963 13.1717 16.9371 13.1717 16.2472C13.1717 15.5573 13.731 14.998 14.4208 14.998C15.1107 14.998 15.67 15.5573 15.67 16.2472Z"
-                            fill="black" />
-                        <path
-                            d="M14.9771 1.07986C14.9868 1.05624 15.0033 1.03603 15.0245 1.02181C15.0457 1.00759 15.0707 1 15.0962 1C15.1217 1 15.1467 1.00759 15.1679 1.02181C15.1891 1.03603 15.2056 1.05624 15.2152 1.07986L15.7017 2.24992C15.7108 2.27182 15.7258 2.29078 15.745 2.30471C15.7642 2.31865 15.7868 2.32702 15.8105 2.32891L17.0737 2.43009C17.1879 2.43925 17.2342 2.58188 17.1472 2.65628L16.1848 3.48089C16.1668 3.49627 16.1534 3.51631 16.146 3.5388C16.1387 3.56129 16.1377 3.58537 16.1431 3.6084L16.4373 4.8412C16.4432 4.86593 16.4416 4.89186 16.4328 4.91572C16.424 4.93957 16.4083 4.96027 16.3877 4.97522C16.3672 4.99016 16.3426 4.99867 16.3172 4.99967C16.2918 5.00067 16.2667 4.99412 16.245 4.98085L15.1633 4.32038C15.1431 4.30804 15.1199 4.30151 15.0962 4.30151C15.0725 4.30151 15.0493 4.30804 15.0291 4.32038L13.9474 4.98108C13.9257 4.99435 13.9006 5.0009 13.8752 4.9999C13.8498 4.9989 13.8252 4.99039 13.8046 4.97545C13.7841 4.9605 13.7684 4.9398 13.7596 4.91594C13.7507 4.89209 13.7492 4.86616 13.7551 4.84143L14.0493 3.6084C14.0547 3.58537 14.0537 3.56128 14.0464 3.53879C14.039 3.51629 14.0256 3.49625 14.0076 3.48089L13.0452 2.65628C13.0258 2.63976 13.0118 2.61786 13.0048 2.59335C12.9979 2.56884 12.9984 2.54283 13.0063 2.51861C13.0142 2.49439 13.029 2.47305 13.0491 2.45729C13.0691 2.44153 13.0933 2.43207 13.1187 2.43009L14.3819 2.32891C14.4056 2.32702 14.4282 2.31865 14.4474 2.30471C14.4666 2.29078 14.4816 2.27182 14.4907 2.24992L14.9771 1.07986Z"
-                            fill="currentColor" stroke="currentColor" stroke-width="0.343397" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                </h2>
-                <p class="text-[#575757] text-justify">
+                    realizar su pedido. <br>
                     Puedes establecer un monto mínimo de compra para que tus clientes obtengan envío gratis. ¡Una
                     excelente manera de incentivar compras mayores!
                 </p>
             </div>
-            <div>
-                <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                    <p class="w-60">Compra mínimo para envió gratis:</p>
-                    <el-input v-model="shippingForm.freeShippingMin" placeholder="Ej. 99"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/[^\d.]/g, '')" class="!self-end !justify-self-end">
-                        <template #prefix>
-                            <i class="fa-solid fa-dollar-sign"></i>
-                        </template>
-                    </el-input>
-                </div>
-                <p v-if="loadingBaud" class="text-gray-400 text-end text-xs">Guardando...</p>
+            <div class="lg:w-1/2 grid grid-cols-2 gap-3 items-center *:text-end mt-5 lg:mt-0">
+                <p>Costo de envío:</p>
+                <el-input v-model="onlinePropertiesForm.delivery_price" placeholder="Ej. 99"
+                    @blur="storeOnlineProperties('delivery')" @keyup.enter="storeOnlineProperties('delivery')"
+                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                    :parser="(value) => value.replace(/[^\d.]/g, '')">
+                    <template #prefix>
+                        <i class="fa-solid fa-dollar-sign"></i>
+                    </template>
+                </el-input>
+                <p>Condiciones de envío:</p>
+                <el-input v-model="onlinePropertiesForm.delivery_conditions" :autosize="{ minRows: 3, maxRows: 5 }"
+                    @blur="storeOnlineProperties('delivery')" @keyup.enter="storeOnlineProperties('delivery')"
+                    type="textarea" placeholder="Ej. Dentro de la zona metropolitana de Guadalajara." :maxlength="350"
+                    show-word-limit clearable />
+                <p>Compra mínimo para envió gratis:</p>
+                <el-input v-model="onlinePropertiesForm.min_free_delivery" placeholder="Ej. 99"
+                    @blur="storeOnlineProperties('delivery')" @keyup.enter="storeOnlineProperties('delivery')"
+                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                    :parser="(value) => value.replace(/[^\d.]/g, '')">
+                    <template #prefix>
+                        <i class="fa-solid fa-dollar-sign"></i>
+                    </template>
+                </el-input>
+                <p v-if="deliveryLoading" class="text-gray-400 text-end text-xs col-span-full">Guardando...</p>
             </div>
         </article>
         <!-- inventario ----------------------------------------->
@@ -201,10 +171,9 @@
                     descontará automáticamente los productos vendidos de tu inventario.
                 </p>
             </div>
-            <div>
-                <el-switch @change="" v-model="inventoryForm.active" :loading="inventoryForm.processing" size="small"
-                    class="w-[12%] md:w-[6%] justify-center" />
-                <p v-if="loadingFlowControl" class="text-gray-400 text-end text-xs">Guardando...</p>
+            <div class="mt-3 lg:mt-0 w-24">
+                <el-switch @change="storeOnlineProperties('inventory')" v-model="onlinePropertiesForm.inventory"
+                    :loading="inventoryLoading" size="small" />
             </div>
         </article>
         <!-- produtos agotados -------------->
@@ -224,21 +193,18 @@
                     no permitirá pedidos de productos sin stock disponible.
                 </p>
             </div>
-            <div>
-                <el-switch @change="" v-model="inventoryForm.soldOutActive" :loading="inventoryForm.processing"
-                    size="small" class="w-[12%] md:w-[6%] justify-center" />
-                <p v-if="loadingFlowControl" class="text-gray-400 text-end text-xs">Guardando...</p>
+            <div class="mt-3 lg:mt-0 w-24">
+                <el-switch @change="storeOnlineProperties('soldout')" v-model="onlinePropertiesForm.sold_out_active"
+                    :loading="soldOutLoading" size="small" />
             </div>
         </article>
     </section>
 </template>
 
 <script>
-import DialogModal from '@/Components/DialogModal.vue';
 import InputFilePreview from '@/Components/MyComponents/InputFilePreview.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useForm } from "@inertiajs/vue3";
-import axios from 'axios';
 import banner1 from '@/../../public/images/banners/banner1.png';
 import banner2 from '@/../../public/images/banners/banner2.png';
 import banner3 from '@/../../public/images/banners/banner3.png';
@@ -247,286 +213,99 @@ import banner4 from '@/../../public/images/banners/banner4.png';
 export default {
     data() {
         const logoForm = useForm({
-            logo: null,
-            cleared: false,
+            img: null,
         });
-        
+
         const bannerForm = useForm({
-            selection: null,
-            cleared: false,
+            img: null,
+            selected: this.$page.props.auth.user.store.online_store_properties.banner ?? 1, //banner por defecto
         });
 
-        const contactForm = useForm({
-            telephone: null,
-        });
-
-        const shippingForm = useForm({
-            cost: null,
-            conditions: null,
-            freeShippingMin: null,
-        });
-
-        const inventoryForm = useForm({
-            active: true,
-            soldOutActive: true,
-        });
-
-        const form = useForm({
-            scale_config: {
-                port: this.$page.props.auth.user.scale_config?.port,
-                baudRate: this.$page.props.auth.user.scale_config?.baudRate,
-                parity: this.$page.props.auth.user.scale_config?.parity,
-                dataBit: this.$page.props.auth.user.scale_config?.dataBit,
-                stopBit: this.$page.props.auth.user.scale_config?.stopBit,
-                flowControl: this.$page.props.auth.user.scale_config?.flowControl,
-                is_enabled: !!this.$page.props.auth.user.scale_config?.is_enabled ?? true,
-            }
+        const onlinePropertiesForm = useForm({
+            whatsapp: this.$page.props.auth.user.store.online_store_properties.whatsapp,
+            delivery_price: this.$page.props.auth.user.store.online_store_properties.delivery_price,
+            delivery_conditions: this.$page.props.auth.user.store.online_store_properties.delivery_conditions,
+            min_free_delivery: this.$page.props.auth.user.store.online_store_properties.min_free_delivery,
+            inventory: !!this.$page.props.auth.user.store.online_store_properties.inventory,
+            sold_out_active: !!this.$page.props.auth.user.store.online_store_properties.sold_out_active,
         });
 
         return {
             //General
             logoForm,
-            contactForm,
-            shippingForm,
-            inventoryForm,
             bannerForm,
-            form,
-            loadingPorts: false, // Para indicar si se están cargando los puertos
+            onlinePropertiesForm,
             //banners
-            bannerSelected: 1,
             banners: [
                 { src: banner1, alt: 'Banner por defecto #1' },
                 { src: banner2, alt: 'Banner por defecto #2' },
                 { src: banner3, alt: 'Banner por defecto #3' },
                 { src: banner4, alt: 'Banner por defecto #4' }
             ],
-            //báscula
-            showScaleModal: false, // Para mostrar/ocultar el modal de báscula
-            isConnected: false, // Estado de conexión
-            conexionError: false, // Estado de conexión de error
-            port: null, // Puerto serie de la báscula
-            reader: null, // Lector de datos del puerto
-            weight: "0.00", // Peso leído de la báscula
-            intervalId: null, // Para guardar el ID del intervalo
-            isReading: false, // Para controlar el estado de lectura
-            isPaused: false,   // Para indicar si la lectura fue pausada
-
             //cargas
-            loadingLogo: false,
-            loadingBaud: false,
-            loadingDataBits: false,
-            loadingStopBits: false,
-            loadingFlowControl: false,
-            loadingParity: false,
-
-            //options
-            availablePorts: [], //puertos disponibles recuperados de la API
-            baudRates: [4800, 9600, 19200, 38400, 57600, 115200], //velocidades de transmision
-            parities: ['none', 'odd', 'even'], //velocidades de transmision
-            dataBits: [5, 6, 7, 8], //bits de datos
-            stopBits: [1, 2, 3, 4], //bits de parada
-            flowControls: ['none', 'xon/xoff', 'rts/cts'], //flujo de control
+            contactLoading: false,
+            deliveryLoading: false,
+            inventoryLoading: false,
+            soldOutLoading: false,
         }
     },
     components: {
         PrimaryButton,
-        DialogModal,
         InputFilePreview,
     },
     props: {
-        store: Object,
-        logo: Object,
-        banner: Object,
+    },
+    computed: {
+        storeLogoUrl() {
+            return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'logo')?.original_url;
+        },
+        storeBannerUrl() {
+            return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'banner')?.original_url;
+        },
     },
     methods: {
-        updateLogo() {
-            this.logoForm.post(route("logos.update-with-media", this.logo.id), {
-                method: '_put',
-                onSuccess: () => {
-                    this.$notify({
-                        title: "Correcto",
-                        message: "¡Banners y Logo actualizados!",
-                        type: "success",
-                    });
-                }
-            });
+        storeLogo(img = null) {
+            this.logoForm.img = img;
+            this.logoForm.post(route("stores.store-logo"));
         },
-        updateScaleConfig(configName) {
-            if (configName == 'port') {
-                this.loadingLogo = true;
-            } else if (configName == 'baudRate') {
-                this.loadingBaud = true;
-            } else if (configName == 'dataBit') {
-                this.loadingDataBits = true;
-            } else if (configName == 'stopBit') {
-                this.loadingStopBits = true;
-            } else if (configName == 'flowControl') {
-                this.loadingFlowControl = true;
-            } else if (configName == 'parity') {
-                this.loadingParity = true;
+        storeBanner(img = null) {
+            this.bannerForm.img = img;
+            if (img) {
+                this.bannerForm.selected = 0;
             }
-
-            // this.loadingPorts = true;
-            this.form.put(route('scale.configure', this.$page.props.auth.user.id), {
-                onSuccess: () => {
-                },
-                onFinish: () => {
-                    this.loadingLogo = false;
-                    this.loadingBaud = false;
-                    this.loadingDataBits = false;
-                    this.loadingStopBits = false;
-                    this.loadingFlowControl = false;
-                    this.loadingParity = false;
-                },
-            });
+            this.bannerForm.post(route("stores.store-banner"));
         },
-        async connectScale() {
-            try {
-                this.showScaleModal = true;
-                if (this.port) {
-                    await this.port.close(); // Cierra el puerto solo después de liberar el lector
-                    this.port = null;
+        storeOnlineProperties(configName) {
+            const onlineProperties = this.$page.props.auth.user.store.online_store_properties;
+
+            let formEdited = this.onlinePropertiesForm.delivery_price != onlineProperties.delivery_price ||
+                this.onlinePropertiesForm.delivery_conditions != onlineProperties.delivery_conditions ||
+                this.onlinePropertiesForm.min_free_delivery != onlineProperties.min_free_delivery ||
+                this.onlinePropertiesForm.whatsapp != onlineProperties.whatsapp ||
+                this.onlinePropertiesForm.inventory != onlineProperties.inventory ||
+                this.onlinePropertiesForm.sold_out_active != onlineProperties.sold_out_active;
+
+            if (formEdited) {
+                if (configName == 'contact') {
+                    this.contactLoading = true;
+                } else if (configName == 'delivery') {
+                    this.deliveryLoading = true;
+                } else if (configName == 'inventory') {
+                    this.inventoryLoading = true;
+                } else if (configName == 'soldout') {
+                    this.soldOutLoading = true;
                 }
 
-                // Solicitar al usuario seleccionar un dispositivo serie
-                this.port = await navigator.serial.requestPort();
-
-                // Configurar la conexión con los parámetros adecuados para tu báscula tomados de la base de datos
-                await this.port.open({
-                    baudRate: this.$page.props.auth.user.scale_config?.baudRate ?? 9600,
-                    dataBits: this.$page.props.auth.user.scale_config?.dataBit ?? 8,
-                    stopBits: this.$page.props.auth.user.scale_config?.stopBit ?? 1,
-                    parity: this.$page.props.auth.user.scale_config?.parity ?? "none",
-                    flowControl: this.$page.props.auth.user.scale_config?.flowControl ?? "none",
-                });
-
-                const textDecoder = new TextDecoderStream();
-                const readableStreamClosed = this.port.readable.pipeTo(textDecoder.writable);
-                this.reader = textDecoder.readable.getReader();
-
-                console.log("Conexión exitosa a la báscula");
-                console.log("Puerto:", this.port);
-
-                this.isConnected = true; // Marca la conexión como activa
-                this.conexionError = false; // marca en falso el estado de error de conexión
-                this.showScaleModal = true; // abrir modal para probar báscula
-
-                this.$notify({
-                    title: "Correcto",
-                    message: "Báscula sincronizada",
-                    type: "success",
-                });
-
-            } catch (error) {
-                this.conexionError = true; //bandera de errode conexion
-                this.isConnected = false; //pone en false el estado de conectado si hub un error 
-                console.error("Error al conectar la báscula:", error);
-                alert("Antes de hacer la conexión verifica que esté correctamente conectada.");
-            }
-        },
-        async startReading() {
-            if (!this.port || !this.port.readable || !this.port.writable) {
-                alert("Conecta la báscula primero.");
-                return;
-            }
-
-            if (this.isReading) {
-                alert("La lectura ya está en curso.");
-                return;
-            }
-
-            this.isReading = true;
-
-            this.intervalId = setInterval(async () => {
-                try {
-                    // Enviar comando para solicitar datos (si es necesario)
-                    const textEncoder = new TextEncoder();
-                    const writer = this.port.writable.getWriter();
-                    await writer.write(textEncoder.encode("COMANDO_PESO\n")); // Cambia "COMANDO_PESO" al comando requerido por tu báscula
-                    writer.releaseLock();
-
-                    // Leer datos
-                    if (!this.reader) {
-                        const textDecoder = new TextDecoder();
-                        this.reader = this.port.readable.getReader();
+                this.onlinePropertiesForm.post(route("stores.store-online-properties"), {
+                    onFinish: () => {
+                        this.contactLoading = false;
+                        this.deliveryLoading = false;
+                        this.inventoryLoading = false;
+                        this.soldOutLoading = false;
                     }
-
-                    const { value, done } = await this.reader.read();
-                    if (done) {
-                        console.log("Lectura finalizada.");
-                        this.reader.releaseLock();
-                        this.reader = null;
-                        this.stopReading(); // Detiene la lectura si es el final
-                        return;
-                    }
-
-                    console.log("Datos leídos:", value);
-                    this.weight = this.parseWeight(value);
-
-                } catch (error) {
-                    console.error("Error al leer datos:", error);
-                    this.stopReading(); // Detener lectura en caso de error
-                }
-            }, 200); // Intervalo de 500 ms
-        },
-        stopReading() {
-            if (this.intervalId) {
-                clearInterval(this.intervalId); // Detiene el intervalo
-                this.intervalId = null;
-                console.log("Intervalo detenido.");
-            }
-
-            this.isReading = false;
-            this.isPaused = true; // Marca la lectura como pausada
-            console.log("Lectura detenida.");
-        },
-        async disconnectScale() {
-            try {
-                if (this.reader) {
-                    await this.reader.cancel(); // Cancela cualquier lectura activa
-                    this.reader.releaseLock(); // Libera el lector
-                    this.reader = null;
-                }
-
-                // if (this.port) {
-                //     await this.port.close(); // Cierra el puerto solo después de liberar el lector
-                //     this.port = null;
-                // }
-
-                this.isConnected = false; // Actualiza el estado de conexión
-                this.weight = "0.00"; // Reinicia el peso leído
-                this.$notify({
-                    title: "Correcto",
-                    message: "Báscula desconectada",
-                    type: "success",
                 });
-                console.log("Báscula desconectada.");
-            } catch (error) {
-                console.error("Error al desconectar la báscula:", error);
-                alert("Comunicación con la báscula cerrada. Presiona nuevamente para desconectar");
             }
         },
-        parseWeight(data) {
-            // Ajustar esta lógica según el formato de los datos enviados por la báscula
-            const weight = data.trim(); // Quitar espacios en blanco
-            return parseFloat(weight) || "0.00";
-        },
-        async fetchAvailablePorts() {
-            this.loadingPorts = true;
-            try {
-                const response = await axios.get(route('scale.get-ports'));
-                if (response.status === 200) {
-                    this.availablePorts = response.data;
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loadingPorts = false;
-            }
-        },
-    },
-    mounted() {
-        this.fetchAvailablePorts();
-    },
+    }
 }
 </script>
