@@ -63,12 +63,12 @@
                     <button v-for="(banner, index) in banners" :key="index" class="rounded-xl">
                         <img :src="banner.src"
                             class="select-none object-cover rounded-xl h-28 border-2 transition-all duration-300 ease-in-out"
-                            @click="bannerForm.selected = index + 1; storeBanner()"
+                            @click="handleSelectionBanner(index + 1)"
                             :class="bannerForm.selected == index + 1 ? 'w-40 border-primary' : 'w-7 border-transparent'"
                             :draggable="false" :alt="banner.alt">
                     </button>
                     <InputFilePreview @imagen="storeBanner($event)" width="w-44" height="h-28"
-                        :imageUrl="storeBannerUrl" @cleared="storeBanner()" />
+                        :imageUrl="storeBannerUrl" @cleared="deleteBanner()" ref="bannerInput" />
                 </div>
                 <p v-if="bannerForm.processing" class="text-gray-400 text-end text-xs col-span-full">Guardando...</p>
             </div>
@@ -199,12 +199,26 @@
             </div>
         </article>
     </section>
+    <div class="flex items-center space-x-2 text-sm mx-6 mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="size-4 mb-px">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+        </svg>
+        <p>
+            Da click en el siguiente enlace para ver tu tienda en línea:
+            <a :href="route('online-sales.client-index', encodeUrlStore ?? 0)" target="_blank"
+                class="text-primary underline">
+                Ver tienda
+            </a>
+        </p>
+    </div>
 </template>
 
 <script>
 import InputFilePreview from '@/Components/MyComponents/InputFilePreview.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { useForm } from "@inertiajs/vue3";
+import { Link, useForm } from "@inertiajs/vue3";
 import banner1 from '@/../../public/images/banners/banner1.png';
 import banner2 from '@/../../public/images/banners/banner2.png';
 import banner3 from '@/../../public/images/banners/banner3.png';
@@ -252,6 +266,7 @@ export default {
     components: {
         PrimaryButton,
         InputFilePreview,
+        Link,
     },
     props: {
     },
@@ -262,18 +277,43 @@ export default {
         storeBannerUrl() {
             return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'banner')?.original_url;
         },
+        encodeUrlStore() {
+            const encodedId = btoa(this.$page.props.auth.user.store_id.toString());
+            return encodedId;
+        },
     },
     methods: {
         storeLogo(img = null) {
             this.logoForm.img = img;
             this.logoForm.post(route("stores.store-logo"));
         },
-        storeBanner(img = null) {
+        storeBanner(img) {
             this.bannerForm.img = img;
-            if (img) {
-                this.bannerForm.selected = 0;
-            }
+            this.bannerForm.selected = 0;
+            
             this.bannerForm.post(route("stores.store-banner"));
+        },
+        deleteBanner() {
+            // eliminar banner 
+            this.bannerForm.img = null;
+
+            // si no hay banner por defecto seleccionado, seleccionar el primero
+            if (this.bannerForm.selected == 0) {
+                this.bannerForm.selected = 1;
+            }
+
+            // guardar configuración de banner
+            this.bannerForm.post(route("stores.store-banner"));
+        },
+        handleSelectionBanner(bannerId) {
+            // si se selecciona el mismo banner no hacer nada
+            if (this.bannerForm.selected == bannerId) {
+                return;
+            }
+            this.bannerForm.selected = bannerId;
+            this.deleteBanner();
+            // limpiar imagen del input
+            this.$refs.bannerInput.clearImage();
         },
         storeOnlineProperties(configName) {
             const onlineProperties = this.$page.props.auth.user.store.online_store_properties;

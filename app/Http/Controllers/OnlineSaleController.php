@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Banner;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\Client;
 use App\Models\GlobalProductStore;
-use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -22,14 +20,12 @@ class OnlineSaleController extends Controller
 {
     public function index()
     {
-        $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
-        $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
         $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
         $total_online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->get()->count();
         $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
 
-        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders', 'cash_registers', 'total_online_orders', 'clients'));
+        return inertia('OnlineSale/Index', compact('online_orders', 'cash_registers', 'total_online_orders', 'clients'));
     }
 
     public function clientIndex($encoded_store_id)
@@ -40,7 +36,7 @@ class OnlineSaleController extends Controller
         $store_id = intval($store_id);
 
         // Buscar la tienda
-        $store = Store::find($store_id);
+        $store = Store::with(['media'])->find($store_id);
 
         if (!$store) {
             return inertia('Error/404'); // Manejar caso de tienda no encontrada
@@ -58,12 +54,9 @@ class OnlineSaleController extends Controller
         $services = Service::with('media')->where('store_id', $store_id)->get();
         $total_services = Service::where('store_id', $store_id)->get()->count();
 
-        // Obtener los banners
-        $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
-
         // return $all_products;
         // Retornar la vista con los datos
-        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id', 'banners'));
+        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id'));
     }
 
     public function cartIndex()
@@ -339,13 +332,6 @@ class OnlineSaleController extends Controller
         $products = $combined_products;
 
         return response()->json(['items' => $products]);
-    }
-
-    public function getLogo($store_id)
-    {
-        $logo = Logo::with(['media'])->where('store_id', $store_id)->first();
-
-        return response()->json(['item' => $logo]);
     }
 
     public function filterOnlineSales(Request $request)

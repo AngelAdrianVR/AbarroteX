@@ -2,15 +2,13 @@
     <OnlineStoreLayout :title="store.name">
         <div ref="scrollContainer" @scroll="handleScroll">
             <!-- Banners -->
-            <section v-if="banners?.media?.length" class="my-4">
+            <section class="my-4">
                 <figure class="lg:h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
-                    <img class="!rounded-md h-full object-contain" :src="banners?.media[currentBanner]?.original_url"
-                        alt="">
-                    <div class="flex items-center justify-center space-x-3 mt-4">
-                        <i @click="currentBanner = index" v-for="(dot, index) in banners?.media?.length" :key="dot"
-                            :class="index == currentBanner ? 'text-primary' : 'cursor-pointer text-xs'"
-                            class="fa-solid fa-circle text-grayD9 transition-all duration-300"></i>
-                    </div>
+                    <img v-if="store.media?.find(m => m.collection_name === 'banner')?.original_url" class="h-full object-cover select-none" :draggable="false"
+                        :src="store.media?.find(m => m.collection_name === 'banner')?.original_url"
+                        alt="Banner promocional escogido" />
+                    <img v-else class="h-full object-cover select-none" :draggable="false"
+                        :src="defaultBanners[store.online_store_properties?.banner - 1]" alt="Banner promocional" />
                 </figure>
             </section>
 
@@ -21,13 +19,15 @@
             <section class="pb-16">
                 <!-- tabs -->
                 <div class="flex justify-center pb-5">
-                    <ToggleButton v-if="services.length && products.length" id="start" ref="togglebutton" @update="handleToggle" :labels="['Productos', 'Servicios']"
+                    <ToggleButton v-if="services.length && products.length" id="start" ref="togglebutton"
+                        @update="handleToggle" :labels="['Productos', 'Servicios']"
                         class="w-3/4 md:w-[45%] lg:w-[35%] xl:w-[20%]" />
                 </div>
 
                 <section v-if="activeTab === 'Productos'">
                     <Products :store="store" :visibleProducts="visibleProducts" />
-                    <button v-if="!loading && total_products > visibleProducts.length" @click="loadMoreProducts" class="w-full text-primary my-4 text-xs mx-auto underline">
+                    <button v-if="!loading && total_products > visibleProducts.length" @click="loadMoreProducts"
+                        class="w-full text-primary my-4 text-xs mx-auto underline">
                         Cargar más elementos
                     </button>
                 </section>
@@ -42,7 +42,6 @@
             </section>
         </div>
     </OnlineStoreLayout>
-
 </template>
 
 <script>
@@ -52,6 +51,11 @@ import Products from './Tabs/Products.vue';
 import Services from './Tabs/Services.vue';
 import axios from 'axios';
 
+import bannerDefault1 from '@/../../public/images/banners/banner1.png';
+import bannerDefault2 from '@/../../public/images/banners/banner2.png';
+import bannerDefault3 from '@/../../public/images/banners/banner3.png';
+import bannerDefault4 from '@/../../public/images/banners/banner4.png';
+
 export default {
     data() {
         return {
@@ -60,6 +64,7 @@ export default {
             visibleServices: this.services, //variable local de servicios visibles
             currentBanner: 0, //index de banners
             activeTab: 'Productos',
+            defaultBanners: [bannerDefault1, bannerDefault2, bannerDefault3, bannerDefault4],
         }
     },
     components: {
@@ -75,7 +80,6 @@ export default {
         services: Array,
         total_services: Number,
         store_id: Number, //id de la tienda para guardarla en el localStorage
-        banners: Object, //banners
     },
     methods: {
         handleScroll() {
@@ -157,7 +161,7 @@ export default {
         //iniciar contador para cambiar banners automaticamente.
         this.startTimer();
 
-         // Obtener la URL actual
+        // Obtener la URL actual
         const currentURL = new URL(window.location.href);
         // Extraer el valor de 'activeTab' de los parámetros de búsqueda
         const activeTabFromURL = currentURL.searchParams.get('tab');

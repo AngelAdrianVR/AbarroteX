@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
-use App\Models\SettingHistory;
 use App\Models\Store;
 use Illuminate\Http\Request;
 
@@ -107,7 +105,9 @@ class StoreController extends Controller
         ]);
 
         // guardar otros datos de la tienda en linea para que no se borren
-        $validated['banner'] = $store->online_store_properties['banner'];
+        $validated['banner'] = key_exists('banner', $store->online_store_properties)
+        ? $store->online_store_properties['banner']
+        : 1;
         $validated['cash_payment'] = key_exists('cash_payment', $store->online_store_properties)
         ? $store->online_store_properties['cash_payment']
         : true;
@@ -130,38 +130,6 @@ class StoreController extends Controller
         return response()->json([]);
     }
 
-    // public function updateOnlineSalesInfo(Request $request, Store $store)
-    // {
-    //     $request->validate([
-    //         'online_store_properties.whatsapp' => 'nullable|string|min:10|max:10',
-    //         'online_store_properties.cash_payment' => 'nullable|boolean',
-    //         'online_store_properties.credit_payment' => 'nullable|boolean',
-    //         'online_store_properties.debit_payment' => 'nullable|boolean',
-    //         'online_store_properties.mercado_pago' => 'nullable|boolean',
-    //         'online_store_properties.delivery_price' => 'nullable|numeric|min:0|max:9999',
-    //         'online_store_properties.delivery_conditions' => 'nullable|string|max:500',
-    //         'online_store_properties.min_free_delivery' => 'nullable|numeric|min:0|max:9999',
-    //     ]);
-
-    //     $store->update($request->all());
-
-    //     return to_route('online-sales.index', ['tab' => 2]);
-    // }
-
-    // public function updatePrinterConfig(Request $request, Store $store)
-    // {
-    //     $request->validate([
-    //         'printer_config.UUIDService' => 'nullable|string|min:1|max:255',
-    //         'printer_config.UUIDCharacteristic' => 'nullable|string|min:1|max:255',
-    //     ]);
-
-    //     $store->update($request->all());
-    // }
-
-    // public function fetchStoreInfo(Store $store)
-    // {
-    //     return response()->json(compact('store'));
-    // }
     //modifica los módulos activados para la suscripción cuando no se ha realizado el pago
     //para despues pagar los activos.
     public function updateModules(Request $request, Store $store)
@@ -173,6 +141,7 @@ class StoreController extends Controller
     
     public function fetchStoreInfo(Store $store)
     {
+        $store->load('media');
         return response()->json(compact('store'));
     }
 
