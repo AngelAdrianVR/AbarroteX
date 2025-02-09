@@ -1,6 +1,6 @@
 <template>
-    <article class="border border-grayD9">
-        <header class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1">
+    <article class="border border-grayD9 rounded-md">
+        <header class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1 text-white bg-gray-200">
             <div class="flex items-center space-x-3">
                 <p class="text-gray99">Folio: <span class="text-gray37">{{ groupedSales.folio }}</span></p>
                 <span class="text-gray99">•</span>

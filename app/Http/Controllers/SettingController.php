@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
+use App\Models\Logo;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;

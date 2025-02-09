@@ -4,7 +4,6 @@
         <div v-if="sales.length" class="space-y-4">
             <OnlineSaleDetails v-for="(item, index) in sales" :key="index" :onlineSale="item" @show-modal="showModal"
                 :ref="'osd' + item.id" />
-
             <ConfirmationModal :show="showRefundConfirm" @close="showRefundConfirm = false">
                 <template #title>
                     <h1>Reembolsar venta</h1>
@@ -12,7 +11,7 @@
                 <template #content>
                     <p>
                         Se devolverán los productos de la venta al inventario y se retirará el monto de dinero
-                        correspondiente de la caja.
+                        correspondiente de la caja (sin tomar en cuenta el costo de envío en caso de venta en línea).
                         Si en caja no hay suficiente dinero, quedará en $0.00
                         ¿Deseas continuar?
                     </p>
@@ -24,7 +23,6 @@
                     </div>
                 </template>
             </ConfirmationModal>
-
             <ConfirmationModal :show="showCancelConfirm" @close="showCancelConfirm = false">
                 <template #title>
                     <h1>Cancelar venta</h1>

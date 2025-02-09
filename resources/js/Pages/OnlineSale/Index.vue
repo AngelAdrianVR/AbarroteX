@@ -36,17 +36,7 @@
                 <p class="px-2 text-gray77 truncate">{{ encodedUrlStore }}</p>
             </div>
 
-            <!-- tabs options -->
-            <el-tabs v-model="activeTab" @tab-click="updateURL">
-                <el-tab-pane label="Pedidos" name="1">
-                    <!-- Index de pedidos -->
-                    <OnlineOrders :orders="online_orders" :totalOnlineOrders="total_online_orders" :clients="clients" />
-                </el-tab-pane>
-                <el-tab-pane label="Ajustes generales" name="2">
-                    <!-- Configuraciones de tienda en linea -->
-                    <OnlineStore :banners="banners" :logo="logo" :cash_registers="cash_registers" />
-                </el-tab-pane>
-            </el-tabs>
+            <OnlineOrders :orders="online_orders" :totalOnlineOrders="total_online_orders" :clients="clients" />
         </div>
     </AppLayout>
 </template>
@@ -54,7 +44,6 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import OnlineStore from '@/Pages/OnlineSale/Tabs/OnlineStore.vue';
 import OnlineOrders from '@/Pages/OnlineSale/Tabs/OnlineOrders.vue';
 import ThirthButton from "@/Components/MyComponents/ThirthButton.vue";
 import { Link } from "@inertiajs/vue3";
@@ -72,13 +61,10 @@ export default {
         PrimaryButton,
         ThirthButton,
         OnlineOrders,
-        OnlineStore,
-        Link
+        Link,
     },
     props: {
-        banners: Object, //imagenes banners para tienda online
-        online_orders: Array, //imagenes banners para tienda online
-        logo: Object, //imagenes logo para tienda online
+        online_orders: Array,
         total_online_orders: Number, //total de ordenes para paginación
         cash_registers: Array, //cajas registradoras de la tienda
         clients: Array //clientes de la tienda

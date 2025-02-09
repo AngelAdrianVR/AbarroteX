@@ -1,6 +1,6 @@
 <template>
-    <article class="border border-grayD9">
-        <div class="flex items-center space-x-3 border-b border-grayD9 text-end px-1 md:px-5 py-2">
+    <article class="border border-grayD9 rounded-md">
+        <div class="flex items-center space-x-3 border-b border-grayD9 text-end px-1 md:px-5 py-2 text-white bg-gray-200">
             <p class="text-gray99">
                 Pedido el:
                 <span class="text-gray37">{{ formatDateHour(onlineSale.created_at) }}</span>
@@ -113,7 +113,7 @@
                     <el-tooltip v-if="wasRefunded" placement="top">
                         <template #content>
                             <p>
-                                El reembolso se realizó a las {{ formatDateHour(onlineSale.refunded_at) }}
+                                El reembolso se realizó el {{ formatDateHour(onlineSale.refunded_at) }}
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
@@ -122,16 +122,30 @@
                     <el-tooltip v-else-if="wasCanceled" placement="top">
                         <template #content>
                             <p>
-                                Se canceló a las {{ formatDateHour(onlineSale.refunded_at) }}
+                                Se canceló el {{ formatDateHour(onlineSale.refunded_at) }}
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
                             Cancelado</p>
                     </el-tooltip>
-                    <span class="text-start w-32">Total de la venta:</span>
+                    <span class="text-start w-32">Subtotal de venta:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
                         {{ onlineSale.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-end" :class="wasRefunded || wasCanceled ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <span class="text-start w-32">Costo de envío:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ onlineSale.delivery_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-end" :class="wasRefunded || wasCanceled ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <span class="text-start w-32">Total:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ (onlineSale.delivery_price + onlineSale.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
             </div>

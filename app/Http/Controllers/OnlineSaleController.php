@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Banner;
 use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\Client;
 use App\Models\GlobalProductStore;
-use App\Models\Logo;
 use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
@@ -22,14 +20,12 @@ class OnlineSaleController extends Controller
 {
     public function index()
     {
-        $banners = Banner::with(['media'])->where('store_id', auth()->user()->store_id)->first();
-        $logo = Logo::with(['media'])->where('store_id', auth()->user()->store_id)->first();
         $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
         $online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
         $total_online_orders = OnlineSale::where('store_id', auth()->user()->store_id)->get()->count();
         $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name']);
 
-        return inertia('OnlineSale/Index', compact('banners', 'logo', 'online_orders', 'cash_registers', 'total_online_orders', 'clients'));
+        return inertia('OnlineSale/Index', compact('online_orders', 'cash_registers', 'total_online_orders', 'clients'));
     }
 
     public function clientIndex($encoded_store_id)
@@ -40,7 +36,7 @@ class OnlineSaleController extends Controller
         $store_id = intval($store_id);
 
         // Buscar la tienda
-        $store = Store::find($store_id);
+        $store = Store::with(['media'])->find($store_id);
 
         if (!$store) {
             return inertia('Error/404'); // Manejar caso de tienda no encontrada
@@ -58,12 +54,9 @@ class OnlineSaleController extends Controller
         $services = Service::with('media')->where('store_id', $store_id)->get();
         $total_services = Service::where('store_id', $store_id)->get()->count();
 
-        // Obtener los banners
-        $banners = Banner::with(['media'])->where('store_id', $store_id)->first();
-
         // return $all_products;
         // Retornar la vista con los datos
-        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id', 'banners'));
+        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id'));
     }
 
     public function cartIndex()
@@ -107,11 +100,16 @@ class OnlineSaleController extends Controller
         $validated['products'] = array_filter($request->products, function ($product) {
             return $product['product_id'];
         });
-        
-        $this->checkProductStock($validated['products'], $request->store_inventory);
-        $this->updateProductStock($validated['products'], $request->store_inventory);
+
+        $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+        if ($is_inventory_on) {
+            $this->checkProductStock($validated['products']);
+        }
+        $this->updateProductStock($validated['products']);
 
         $new_online_sale = OnlineSale::create($validated);
+
+        //codifica el id de la venta
         $encoded_store_id = base64_encode($request->store_id);
 
         if ($request->created_from_app === true) {
@@ -334,13 +332,6 @@ class OnlineSaleController extends Controller
         $products = $combined_products;
 
         return response()->json(['items' => $products]);
-    }
-
-    public function getLogo($store_id)
-    {
-        $logo = Logo::with(['media'])->where('store_id', $store_id)->first();
-
-        return response()->json(['item' => $logo]);
     }
 
     public function filterOnlineSales(Request $request)
@@ -583,9 +574,8 @@ class OnlineSaleController extends Controller
     }
 
     // PRIVATE
-    private function checkProductStock(array $products, $storeInventory)
+    private function checkProductStock(array $products)
     {
-        // if ($storeInventory === true) {
         foreach ($products as $product) {
             $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
 
@@ -596,20 +586,23 @@ class OnlineSaleController extends Controller
                 ]);
             }
         }
-        // }
     }
 
-    private function updateProductStock(array $products, $storeInventory)
+    private function updateProductStock(array $products)
     {
         foreach ($products as $product) {
             // Verifica si 'product_on_request' está definido y su valor es falso
             if (!($product['product_on_request'] ?? false)) {
-                $temp_product = $product['isLocal'] 
-                    ? Product::find($product['product_id']) 
+                $temp_product = $product['isLocal']
+                    ? Product::find($product['product_id'])
                     : GlobalProductStore::find($product['product_id']);
-                    
+
                 if ($temp_product) {
-                    $temp_product->current_stock -= $product['quantity'];
+                    if ($temp_product->current_stock < $product['quantity']) {
+                        $temp_product->current_stock = 0;
+                    } else {
+                        $temp_product->current_stock -= $product['quantity'];
+                    }
                     $temp_product->save();
                 }
             }

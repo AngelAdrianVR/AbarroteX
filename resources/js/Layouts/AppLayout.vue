@@ -94,34 +94,6 @@ onUnmounted(() => {
                                     </svg>
                                     <span>{{ $page.props.auth.user.store.name }}</span>
                                 </div>
-                                <!-- Dias de prueba escritorio y tablet -->
-                                <section
-                                    v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba' || !$page.props.auth.user.store.is_active"
-                                    class="hidden xl:flex space-x-4 bg-[#ededed] text-gray37 px-6 py-2 rounded-[5px] text-xs">
-                                    <div
-                                        v-if="calculateRemainigFreeDays($page.props.auth.user.store.created_at) > 0 && $page.props.auth.user.store.suscription_period == 'Periodo de prueba'">
-                                        <p class="font-bold">Te quedan {{
-                                            calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
-                                            días de tu prueba gratuita</p>
-                                        <p>¡Paga tu suscripción en cualquier momento! Tu pago
-                                            comenzará a contar al finalizar el
-                                            periodo de
-                                            prueba.</p>
-                                    </div>
-                                    <div v-else>
-                                        <p v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
-                                            class="font-bold">Tus días de prueba han expirado</p>
-                                        <p v-else class="font-bold">Tu plan ha expirado</p>
-                                        <p>Para continuar disfrutando de los beneficios, te invitamos a realizar el pago
-                                            de
-                                            tu suscripción.</p>
-                                    </div>
-                                    <button type="button" @click="$inertia.visit(route('profile.show'))"
-                                        class="underline text-primary">
-                                        Pagar suscripción
-                                        <i class="fa-solid fa-arrow-right-long ml-1 text-[10px]"></i>
-                                    </button>
-                                </section>
                                 <!-- Logo en movil -->
                                 <div class="md:hidden shrink-0 flex items-center">
                                     <Link :href="route('dashboard')">
@@ -339,10 +311,11 @@ onUnmounted(() => {
                             <ResponsiveNavLink
                                 v-if="$page.props.auth.user.store.activated_modules?.includes('Cotizaciones')"
                                 :href="route('quotes.index')" :active="route().current('quotes.*')">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="size-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                <svg width="18" height="15" viewBox="0 0 18 15" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12.5 13C8.3995 13 6.1005 13 2 13C1 13 0.999994 12.5 1 11.5V2C1 1.5 1 1 2 1C2 1 6.35894 1 6.5 1C6.64106 1 7.5 2.5 8 2.5C8.5 2.5 15 2.5 15 2.5C15.5 2.5 16 3 16 3.5C16 4.67157 16 5.32843 16 6.5M14 13.3562L14.5127 13.7406C14.8543 13.997 15.3021 14.1252 15.75 14.1251M15.75 14.1251C16.1977 14.1251 16.6455 13.9969 16.9873 13.7406C17.6709 13.2278 17.6709 12.3972 16.9873 11.8844C16.646 11.6277 16.198 11.5 15.75 11.5C15.3271 11.5 14.9042 11.3717 14.5816 11.1156C13.9364 10.6028 13.9364 9.77217 14.5816 9.25942C14.9042 9.00304 15.3271 8.87485 15.75 8.87485M15.75 14.1251V15M15.75 8.87485C16.1729 8.87485 16.5958 9.00304 16.9184 9.25942M15.75 8.87485V8"
+                                        stroke="currentColor" />
                                 </svg>
                                 <span>Cotizaciones</span>
                             </ResponsiveNavLink>
@@ -407,7 +380,7 @@ onUnmounted(() => {
                             <ResponsiveNavLink v-if="$page.props.auth.user.store.id == 6"
                                 :href="route('service-reports.index')" :active="route().current('service-reports.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.5 -0.5 22 22"
-                                    id="Website-Build--Streamline-Ultimate" height="19" width="19">
+                                    id="Website-Build--Streamline-Ultimate" height="17" width="19">
                                     <desc>Website Build Streamline Icon: https://streamlinehq.com</desc>
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                         d="M20.125 10.5c0.11602499999999999 0 0.22732499999999997 0.0461125 0.3094 0.1281 0.0819875 0.082075 0.1281 0.193375 0.1281 0.3094V17.5c0 0.46409999999999996 -0.18436249999999998 0.9092125 -0.512575 1.237425S19.276600000000002 19.25 18.8125 19.25h-16.625c-0.46412624999999996 0 -0.9092475 -0.18436249999999998 -1.2374337499999999 -0.512575C0.6218747499999999 18.409212500000002 0.4375 17.964100000000002 0.4375 17.5V3.5c0 -0.46412624999999996 0.18437475 -0.9092475 0.51256625 -1.2374337499999999C1.2782525 1.93437125 1.72337375 1.75 2.1875 1.75H11.375c0.11602499999999999 0 0.22732499999999997 0.046095 0.3094 0.12814375 0.0819875 0.08204 0.1281 0.1933225 0.1281 0.30935625V9.625c0 0.23204999999999998 0.092225 0.45464999999999994 0.2562875 0.6187125S12.455449999999999 10.5 12.6875 10.5H20.125Z"
@@ -481,10 +454,20 @@ onUnmounted(() => {
                             <ResponsiveNavLink
                                 v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
                                 :href="route('online-sales.index')" :active="route().current('online-sales.*')">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="size-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                                <svg width="16" height="18" viewBox="0 0 10 16" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M4 1H2.5C2.10218 1 1.72064 1.15804 1.43934 1.43934C1.15804 1.72064 1 2.10218 1 2.5V13.5C1 13.8978 1.15804 14.2794 1.43934 14.5607C1.72064 14.842 2.10218 15 2.5 15H7.5C7.89782 15 8.27936 14.842 8.56066 14.5607C8.84196 14.2794 9 13.8978 9 13.5V2.5C9 2.10218 8.84196 1.72064 8.56066 1.43934C8.27936 1.15804 7.89782 1 7.5 1H6M4 1V2H6V1M4 1H6M4 13.5H6"
+                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path
+                                        d="M6.48168 9.1185H3.93649C3.80702 9.1109 3.77403 9.0824 3.71987 8.9741L2.90758 6.55526H2.32995C2.00414 6.55526 2.00505 6.08594 2.32995 6.08594H3.12419C3.32275 6.08594 3.39496 6.55526 3.48521 6.55526H7.00516C7.20372 6.55526 7.29011 6.74059 7.22177 6.93433L6.73439 8.10765C6.66219 8.25206 6.60803 8.30621 6.39142 8.30621H4.00869L4.13505 8.63113H6.48168C6.82465 8.63113 6.8066 9.1185 6.48168 9.1185Z"
+                                        fill="currentColor" />
+                                    <path
+                                        d="M4.69564 9.49821C4.69564 9.70757 4.52593 9.87728 4.31657 9.87728C4.10722 9.87728 3.9375 9.70757 3.9375 9.49821C3.9375 9.28886 4.10722 9.11914 4.31657 9.11914C4.52593 9.11914 4.69564 9.28886 4.69564 9.49821Z"
+                                        fill="currentColor" />
+                                    <path
+                                        d="M6.5401 9.49821C6.5401 9.70757 6.37039 9.87728 6.16103 9.87728C5.95168 9.87728 5.78196 9.70757 5.78196 9.49821C5.78196 9.28886 5.95168 9.11914 6.16103 9.11914C6.37039 9.11914 6.5401 9.28886 6.5401 9.49821Z"
+                                        fill="currentColor" />
                                 </svg>
                                 <span>Tienda en línea</span>
                             </ResponsiveNavLink>
@@ -587,7 +570,7 @@ onUnmounted(() => {
                         </div>
                     </section>
                     <!-- mensaje de suscripcion a punto de expirar-->
-                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 5"
+                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7"
                         class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-xs lg:px-10">
                         <div v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) > 0">
                             Tu suscripción expira en
@@ -595,12 +578,12 @@ onUnmounted(() => {
                                 {{ calculateRemainingDays($page.props.auth.user.store.next_payment) }} días.
                             </strong> <br>
                             Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción o a activar el pago automático.
+                            tu suscripción.
                         </div>
                         <p v-else>
                             Tu suscripción <strong>ha expirado.</strong> <br>
                             Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción o a activar el pago automático.
+                            tu suscripción.
                         </p>
                         <div v-if="$page.props.auth.user.rol == 'Administrador'" class="flex justify-end mt-1">
                             <button type="button" @click="$inertia.visit(route('profile.show'))"

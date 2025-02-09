@@ -191,9 +191,52 @@
         </header>
         <!-- cuerpo de la pagina -->
         <div class="lg:flex lg:space-x-5 my-2">
+          <!-- atajos de teclado -->
+          <div class="relative">
+            <el-tooltip content="Atajos de teclado" placement="top">
+              <button @click="showShortCuts = !showShortCuts"
+                class="size-10 border border-primary rounded-full flex items-center justify-center text-primary">
+                <svg width="18" height="18" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M3.57457 3.38707L5.38423 4.74432L3.57457 6.10156M6.28906 6.10156H8.09872M2.66974 11.0781H10.8132C11.1732 11.0781 11.5184 10.9351 11.7729 10.6806C12.0275 10.4261 12.1705 10.0808 12.1705 9.72088V2.48224C12.1705 2.12228 12.0275 1.77706 11.7729 1.52253C11.5184 1.268 11.1732 1.125 10.8132 1.125H2.66974C2.30978 1.125 1.96456 1.268 1.71003 1.52253C1.45549 1.77706 1.3125 2.12228 1.3125 2.48224V9.72088C1.3125 10.0808 1.45549 10.4261 1.71003 10.6806C1.96456 10.9351 2.30978 11.0781 2.66974 11.0781Z"
+                    stroke="#F68C0F" stroke-width="0.90483" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </el-tooltip>
+          </div>
+          <!-- ventana de shortcuts -->
+          <div v-if="showShortCuts"
+            class="absolute top-36 left-20 bg-white border border-[#D9D9D9] rounded-xl p-4 z-40">
+            <div class="flex items-center justify-between">
+              <h2 class="font-bold">Atajos de teclado</h2>
+              <i @click="showShortCuts = false" class="fa-solid fa-xmark text-gray-500 cursor-pointer"></i>
+            </div>
+            <p class="text-[#555555] text-sm mt-2">Combina las siguientes teclas para realizar acciones rápidas en punto
+              de
+              venta.</p>
+            <div class="grid grid-cols-3 gap-2 self-start mt-4 text-sm">
+              <p class="col-span-2">Buscar por nombre</p>
+              <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i
+                  class="fa-solid fa-right-long"></i></button>
+              <p class="col-span-2">Búsqueda de productos sin código</p>
+              <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2"><i
+                  class="fa-solid fa-plus"></i></button>
+              <p class="col-span-2">Comenzar a escanear</p>
+              <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Crl</button>
+              <p class="col-span-2">Limpiar búsqueda de producto / Cerrar Búsqueda de productos sin código</p>
+              <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Esc</button>
+              <p class="col-span-2">Agregar peso manual (productos a granel utilizando báscula)</p>
+              <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">M</button>
+              <p class="col-span-2">Finalizar venta</p>
+              <button class="cursor-default border border-[#d9d9d9] rounded-md py-[2px] px-2">Shift</button>
+              <div class="text-right col-span-full mt-5">
+                <PrimaryButton @click="showShortCuts = false">Entendido</PrimaryButton>
+              </div>
+            </div>
+          </div>
           <!-- scaner de código  -->
           <div class="lg:w-[70%]">
-            <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4" @keydown="handleKeydownScanInput">
+            <div v-if="isScanOn" class="relative lg:w-1/2 mx-auto mb-4">
               <input v-model="scannerQuery" :disabled="scanning || syncingIDB" ref="scanInput" class="input w-full pl-9"
                 placeholder="Escanea o teclea el código del producto" type="text">
               <i class="fa-solid fa-barcode text-xs text-gray99 absolute top-[10px] left-4"></i>
@@ -246,12 +289,10 @@
             <div>
               <el-autocomplete v-model="productFoundSelectedName" :fetch-suggestions="searchProducts" class="!w-full"
                 placeholder="Buscar código o nombre de producto" @select="handleSelectFoundProduct()"
-                :value-key="'name'" :loading="loading" :disabled="syncingIDB || scanning" ref="searchInput"
-                @keydown="handleKeydownInputSearch">
+                :value-key="'name'" :loading="loading" :disabled="syncingIDB || scanning" ref="searchInput">
                 <template #prefix>
                   <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
                 </template>
-
                 <template #default="{ item }">
                   <!-- Opciones en tienda de ropa, zapatería y boutique -->
                   <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'"
@@ -269,16 +310,13 @@
                     <span style="float: right; color: #8492a6; font-size: 11px">{{ item.code }}</span>
                   </div>
                 </template>
-
                 <template #loading>
-                  <svg class="circular" viewBox="0 0 50 50">
-                    <circle class="path" cx="25" cy="25" r="20" fill="none" />
-                  </svg>
+                  cargando...
                 </template>
               </el-autocomplete>
             </div>
-           <!-- Detalle de producto encontrado -->
-           <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
+            <!-- Detalle de producto encontrado -->
+            <div class="border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
               <div class="relative" v-if="productFoundSelected">
                 <i @click="productFoundSelected = null"
                   class="fa-solid fa-xmark cursor-pointer size-5 rounded-full flex items-center justify-center absolute right-3"></i>
@@ -299,24 +337,20 @@
                   </p>
                   <p :class="productFoundSelected.bulk_product ? 'text-gray-900' : 'text-[#5FCB1F]'">${{
                     productFoundSelected.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                      ",") }} <span v-if="productFoundSelected.bulk_product" class="text-gray-800"> /{{ productFoundSelected.measure_unit === 'Kilogramo' ? 'Kg' : 'L' }}</span></p>
+                      ",") }} <span v-if="productFoundSelected.bulk_product" class="text-gray-800"> /{{
+                      productFoundSelected.measure_unit === 'Kilogramo' ? 'Kg' : 'L' }}</span></p>
                 </div>
                 <!-- input de cantidad si el producto es a granel -->
-                <div v-if="productFoundSelected?.bulk_product" class="flex justify-between items-center mt-4 border border-[#D9D9D9] rounded-xl py-3 px-7">
+                <div v-if="productFoundSelected?.bulk_product"
+                  class="flex justify-between items-center mt-4 border border-[#D9D9D9] rounded-xl py-3 px-7">
                   <div>
                     <p class="text-gray-500 mb-1">Cantidad</p>
-                    <el-input-number
-                      ref="quantitySelector"
-                      @keydown="handleKeydownQuantitySelector"
-                      v-model="quantity"
-                      :min="0"
-                      :max="isInventoryOn ? productFoundSelected.current_stock : undefined"
-                      :precision="2"
-                    >
+                    <el-input-number ref="quantitySelector" @keydown="handleKeydownQuantitySelector" v-model="quantity"
+                      :min="0" :max="isInventoryOn ? productFoundSelected.current_stock : undefined" :precision="2">
                       <template #suffix>
                         <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">
-                          {{ productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
-                            productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                          {{ productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :
+                            productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : ''
                           }}
                         </span>
                       </template>
@@ -324,25 +358,20 @@
                   </div>
                   <div class="text-center">
                     <p class="text-gray-500">Total</p>
-                    <p class="text-[#5FCB1F] text-lg font-bold">${{ (quantity * productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                    <p class="text-[#5FCB1F] text-lg font-bold">${{ (quantity *
+                      productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
                   </div>
                 </div>
-                
+
                 <!-- input de cantidad si el producto no es a granel -->
                 <div v-else class="flex justify-between items-center mt-4">
                   <p class="text-gray99 mb-1">Cantidad</p>
-                  <el-input-number
-                    ref="quantitySelector"
-                    @keydown="handleKeydownQuantitySelector"
-                    v-model="quantity"
-                    :min="0"
-                    :max="isInventoryOn ? productFoundSelected.current_stock : undefined"
-                    :precision="2"
-                  >
+                  <el-input-number ref="quantitySelector" @keydown="handleKeydownQuantitySelector" v-model="quantity"
+                    :min="0" :max="isInventoryOn ? productFoundSelected.current_stock : undefined" :precision="2">
                     <template #suffix>
                       <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">
-                        {{ productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
-                          productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : '' 
+                        {{ productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :
+                          productFoundSelected.measure_unit?.trim() === 'Litro' ? 'L' : ''
                         }}
                       </span>
                     </template>
@@ -350,9 +379,11 @@
                 </div>
                 <!-- instrucciones de bascula -->
                 <div v-if="isConnectedScale && productFoundSelected.bulk_product">
-                  <p class="text-[#7A7A7A] mt-3 text-sm">Agrega la cantidad manual o coloca el producto sobre la bascula</p>
+                  <p class="text-[#7A7A7A] mt-3 text-sm">Agrega la cantidad manual o coloca el producto sobre la bascula
+                  </p>
                   <figure class="my-2 flex items-center justify-center select-none">
-                    <img draggable="false" class="w-2/3 md:w-[40%] opacity-70" src="@/../../public/images/EmptyScale.png" alt="Agregar peso">
+                    <img draggable="false" class="w-2/3 md:w-[40%] opacity-70"
+                      src="@/../../public/images/EmptyScale.png" alt="Agregar peso">
                   </figure>
                 </div>
                 <div class="text-center mt-7">
@@ -367,10 +398,14 @@
                       Agregar
                     </button>
 
-                    <el-tooltip v-if="productFoundSelected?.bulk_product" content="Agregar cantidad manualmente" placement="bottom">
-                      <button @click="stopReadingScale()" class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 1 0-3.15 0v8.175a6.75 6.75 0 0 0 6.75 6.75h2.018a5.25 5.25 0 0 0 3.712-1.538l1.732-1.732a5.25 5.25 0 0 0 1.538-3.712l.003-2.024a.668.668 0 0 1 .198-.471 1.575 1.575 0 1 0-2.228-2.228 3.818 3.818 0 0 0-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0 1 16.35 15m.002 0h-.002" />
+                    <el-tooltip v-if="productFoundSelected?.bulk_product" content="Agregar cantidad manualmente"
+                      placement="bottom">
+                      <button @click="stopReadingScale(); focusQuantitySelector()"
+                        class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                          stroke="currentColor" class="size-5">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 1 0-3.15 0v8.175a6.75 6.75 0 0 0 6.75 6.75h2.018a5.25 5.25 0 0 0 3.712-1.538l1.732-1.732a5.25 5.25 0 0 0 1.538-3.712l.003-2.024a.668.668 0 0 1 .198-.471 1.575 1.575 0 1 0-2.228-2.228 3.818 3.818 0 0 0-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0 1 16.35 15m.002 0h-.002" />
                         </svg>
                       </button>
                     </el-tooltip>
@@ -556,7 +591,7 @@
         <div v-if="showNoCodeProducts" class="mt-2 px-3 py-1 overflow-auto h-[82%]">
           <div class="mb-2 relative">
             <input v-model="searchNoCodeProducts" @input="filterNoCodeProducts" placeholder="Buscar producto"
-              type="search"
+              ref="noCodeProductsInput" type="search"
               class="lg:w-1/3 h-8 pl-8 rounded-md bg-transparent text-gray-400 border border-gray-300 focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
             <i class="absolute left-2 top-2 fa-solid fa-magnifying-glass text-gray-400"></i>
           </div>
@@ -868,7 +903,7 @@
       </template>
       <template #footer>
         <div class="flex items-center space-x-1">
-          <CancelButton @click="showLimitCashModal = false">Cancelar</CancelButton>
+          <CancelButton @click="showLimitCashModal = false">Ahora no</CancelButton>
           <PrimaryButton @click="showLimitCashModal = false; handleCashCut()">Hacer corte</PrimaryButton>
         </div>
       </template>
@@ -990,6 +1025,7 @@ export default {
       showCreateProductModal: false,
 
       // generales
+      showShortCuts: false,
       showNoCodeProducts: false,
       searchNoCodeProducts: null,
       noCodeProducts: [],
@@ -1097,23 +1133,6 @@ export default {
         this.filteredNoCodeProducts = this.noCodeProducts;
       }
     },
-    // Ejecuta un metodo depende de la tecla presionada. atajos de teclado
-    handleKeydownScanInput(event) {
-      if (event.key === "ArrowRight") {
-        this.focusSearchInput();
-      } else if (event.key === "Enter") {
-        this.getProductByCode();
-      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
-        this.cashPayment();
-      }
-    },
-    handleKeydownInputSearch(event) {
-      if (event.key === "Control") {
-        this.$refs.scanInput.focus();
-      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
-        this.cashPayment();
-      }
-    },
     handleKeydownQuantitySelector(event) {
       if (event.key === "Enter") {
         this.focusAddButton();
@@ -1126,9 +1145,23 @@ export default {
       }
     },
     handleSelectFoundProduct() {
-      if (this.productsFound.length > 0) {
-        this.productFoundSelected = this.productsFound.find(product => product.name === this.productFoundSelectedName);
+      let product = this.productsFound.find(product => product.name === this.productFoundSelectedName);
+
+      // crear link virtual de imagen blob si es que tiene imagen el producto
+      if (product.image && !product.imageUrl) {
+        const imageUrl = URL.createObjectURL(product.image);
+        product = { ...product, imageUrl };
       }
+
+      this.productFoundSelected = product;
+
+      // revisar si hay stock del producto para dejar 1 como default a vender
+      if ((product.current_stock && this.isInventoryOn) || !this.isInventoryOn) {
+        this.quantity = 1;
+      } else {
+        this.quantity = 0;
+      }
+
       // si el producto es a granel y en las configuraciones está activada la báscula se ejecuta el manejador de bascula
       if (this.productFoundSelected.bulk_product && this.$page.props.auth.user.scale_config?.is_enabled) {
         //se ejecuta el manejador de bascula si el producto es a granel
@@ -1491,27 +1524,30 @@ export default {
       if (existingIndex !== -1) {
         this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
           ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + (this.isReading ? this.weight : this.quantity)
+          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
         };
       } else {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
           product: product,
-          quantity: this.isReading ? this.weight : this.quantity, //si se esta leyendo de la báscula se agrega el peso, si no la cantidad
+          quantity: this.quantity,
           originalPrice: null,
         });
       }
 
-      // si esta leyeendo de la báscula se detiene la lectura
-      if (this.isReading) {
-        this.stopReading();
+      // si esta leyendo de la báscula se detiene la lectura
+      if (this.isReadingScale) {
+        this.stopReadingScale();
       }
       this.scannerQuery = null;
       this.quantity = 1;
       this.scanning = false;
-      this.productFoundSelectedName = null;
       this.productFoundSelected = null;
       this.inputFocus();
+
+      if (this.isReadingScale) {
+        this.stopReadingScale(); //detiene la lectura de la báscula
+      }
 
       // indicar al navegador mediante el local storage que hay proceso pendiente
       const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
@@ -1619,7 +1655,7 @@ export default {
     handleScale() {
       if (this.isConnectedScale) {
         // Si la báscula está sincronizada, empieza a leer
-        this.startReading();
+        this.startReadingScale();
       } else {
         // // Si no está sincronizada, muestra la confirmación
         // this.$confirm('No está sincronizada tu báscula. ¿Quieres sincronizarla?', 'Confirmar', {
@@ -1671,7 +1707,7 @@ export default {
 
       } catch (error) {
         console.error("Error al conectar la báscula:", error);
-        // alert("No se conectó la báscula.");
+        alert("No se pudo conectar la báscula porque el puerto ya estaba abierto. Intenta nuevamente");
       } finally {
         // si el producto seleccionado es a granel y la báscula está activada se inicia la lectura
         if (this.productFoundSelected?.bulk_product) {
@@ -1760,8 +1796,34 @@ export default {
       const weight = data.trim(); // Quitar espacios en blanco
       return parseFloat(weight) || "0.00";
     },
+    handleKeydownGlobal(event) {
+      if (event.key === "ArrowRight") {
+        this.focusSearchInput();
+        this.scannerQuery = null; //borra el simbolo que se escribe en el input de escaner
+      } else if (event.key === "Enter") {
+        this.getProductByCode();
+      } else if (event.key === "Shift" && this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length) {
+        this.cashPayment();
+      } else if (event.key === "Control") {
+        this.$refs.scanInput.focus();
+      } else if (event.key === "Escape") {
+        this.showNoCodeProducts = false; //cierra el buscador de productos sin código
+        this.editableTabs[this.editableTabsValue - 1].cash = false;
+      } else if (event.key === "+") {
+        this.showNoCodeProducts = true;
+        setTimeout(() => {
+          this.$nextTick(() => {
+            this.$refs.noCodeProductsInput.focus(); // Enfocar el input de código cuando se abre el modal
+          });
+          this.scannerQuery = null; //borra el simbolo que se escribe en el input de escaner
+        }, 100);
+      }
+    },
   },
   async mounted() {
+    //ejecuta un listener para atajos de teclado
+    window.addEventListener("keydown", this.handleKeydownGlobal);
+
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
       this.$inertia.visit(route('tutorials.index'));
@@ -1802,86 +1864,7 @@ export default {
     // Eliminar los escuchadores de eventos al desmontar el componente
     window.removeEventListener('online', this.handleOnline);
     window.removeEventListener('offline', this.handleOffline);
+    window.removeEventListener("keydown", this.handleKeydownGlobal);
   },
 }
 </script>
-
-# Componente de carga del input de busqueda por nombre o código de producto (no se muestra en local, en produccion no lo
-sé)
-<style>
-.circular {
-  display: inline;
-  height: 30px;
-  width: 30px;
-  animation: loading-rotate 2s linear infinite;
-}
-
-.path {
-  animation: loading-dash 1.5s ease-in-out infinite;
-  stroke-dasharray: 90, 150;
-  stroke-dashoffset: 0;
-  stroke-width: 2;
-  stroke: var(--el-color-primary);
-  stroke-linecap: round;
-}
-
-.loading-path .dot1 {
-  transform: translate(3.75px, 3.75px);
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-}
-
-.loading-path .dot2 {
-  transform: translate(calc(100% - 3.75px), 3.75px);
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 0.4s;
-}
-
-.loading-path .dot3 {
-  transform: translate(3.75px, calc(100% - 3.75px));
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 1.2s;
-}
-
-.loading-path .dot4 {
-  transform: translate(calc(100% - 3.75px), calc(100% - 3.75px));
-  fill: var(--el-color-primary);
-  animation: custom-spin-move 1s infinite linear alternate;
-  opacity: 0.3;
-  animation-delay: 0.8s;
-}
-
-@keyframes loading-rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes loading-dash {
-  0% {
-    stroke-dasharray: 1, 200;
-    stroke-dashoffset: 0;
-  }
-
-  50% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -40px;
-  }
-
-  100% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -120px;
-  }
-}
-
-@keyframes custom-spin-move {
-  to {
-    opacity: 1;
-  }
-}
-</style>

@@ -65,10 +65,10 @@ export default {
     computed: {
         //propiedad computada que retorna un arreglo con los nombres de categorias disponibles y sin repetir de los productos basandose en visibleProduct.category.name
         categories() {
-            return this.visibleProducts.map(product => product.category.name).filter((value, index, self) => self.indexOf(value) === index);
+            return this.visibleProducts.map(product => product.category?.name).filter((value, index, self) => self.indexOf(value) === index);
         },
         filteredProducts() {
-            return this.visibleProducts.filter(product => this.currentCategory === 'Todas' || product.category.name === this.currentCategory);
+            return this.visibleProducts.filter(product => this.currentCategory === 'Todas' || product.category?.name === this.currentCategory);
         }
     },
     methods: {

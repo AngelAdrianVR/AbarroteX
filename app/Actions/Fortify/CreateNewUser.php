@@ -2,9 +2,7 @@
 
 namespace App\Actions\Fortify;
 
-use App\Models\Banner;
 use App\Models\CashRegister;
-use App\Models\Logo;
 use App\Models\Setting;
 use App\Models\Store;
 use App\Models\User;
@@ -49,18 +47,19 @@ class CreateNewUser implements CreatesNewUsers
             'type' => $input['type'],
             'contact_phone' => $input['contact_phone'],
             'next_payment' => now()->addDays(2),
-            'online_store_properties' => [],
+            'online_store_properties' => [
+                "whatsapp" => '',
+                "delivery_price" => null,
+                "delivery_conditions" => null,
+                "min_free_delivery" => null,
+                "inventory" => false,
+                "sold_out_active" => false,
+                "banner" => 1,
+                "cash_payment" => true,
+                "card_payment" => false,
+                "mercado_pago" => false,
+            ],
             'activated_modules' => $activated_modules,
-        ]);
-
-        //Se crea el registro para guardar los banners en él con el id de la tienda. Pra tienda en línea
-        Banner::create([
-            'store_id' => $store->id
-        ]);
-
-        //Se crea el registro para guardar el logotipo en él con el id de la tienda. Pra tienda en línea
-        Logo::create([
-            'store_id' => $store->id
         ]);
 
         // agregar las configuraciones iniciales a la tienda

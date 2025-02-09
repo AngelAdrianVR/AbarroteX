@@ -12,8 +12,8 @@
                 Suscrito desde {{ formatDate($page.props.auth.user.store.created_at) }}
             </p>
             <article class="mt-6">
-                <div class="">
-                    <div class="">
+                <div>
+                    <div>
                         <div v-if="!edit" class="grid grid-cols-3 gap-2">
                             <p class="flex flex-col">
                                 <b>Suscripción: <span>{{ $page.props.auth.user.store.suscription_period
@@ -25,17 +25,15 @@
                             <p class="flex flex-col">
                                 <b>$ {{ getSuscriptionAmount().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
                             </p>
-                            <button v-if="!$page.props.auth.user.store.is_active" @click="edit = true"
-                                class="text-xs justify-self-end"
-                                :disabled="$page.props.auth.user.store.is_active"
-                                :class="$page.props.auth.user.store.is_active ? 'text-gray-500 cursor-not-allowed' : 'text-primary'">
-                                Pagar suscripción
+                            <button @click="edit = true"
+                                class="text-xs justify-self-end text-primary">
+                                Pagar suscripción/ Agregar más tiempo
                             </button>
-                            <p v-else class="flex items-center space-x-2 text-xs justify-self-end rounded-full px-3"
+                            <!-- <p v-else class="flex items-center space-x-2 text-xs justify-self-end rounded-full px-3"
                                 :class="getStatusStyles()">
                                 <span v-html="getStatusIcon()"></span>
                                 Periodo pagado
-                            </p>
+                            </p> -->
                         </div>
                         <div v-else class="flex flex-col space-y-3 col-span-full mt-7">
                             <div class="flex justify-between">
@@ -132,8 +130,49 @@
                                     <PrimaryButton @click="storePayment()" id="btn-bottom"
                                         :disabled="!form.image || form.processing">
                                         Enviar comprobante de pago</PrimaryButton>
-                                    <PrimaryButton>Paga con tarjeta</PrimaryButton>
+                                    <PrimaryButton class="flex items-center space-x-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                                        </svg>
+                                        <span>Pagar con tarjeta</span>
+                                    </PrimaryButton>
                                 </form>
+                            </div>
+
+                            <div class="pt-4">
+                                <h2 class="ml-3 font-bold">Modulos activos</h2>
+                                <article class="md:flex items-center justify-between rounded-[5px] px-4 pt-1 mt-3">
+                                    <section>
+                                        <div class="flex items-center space-x-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="16" width="16"
+                                                id="Shopping-Basket-2--Streamline-Core">
+                                                <desc>Shopping Basket 2 Streamline Icon: https://streamlinehq.com</desc>
+                                                <g id="shopping-basket-2--shopping-basket">
+                                                <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M19.625389714285713 7.932533357142858H2.6646102857142857C2.4237190714285712 7.927597714285714 2.184897642857143 7.976954142857143 1.9656595714285712 8.076940714285715C1.7464214999999998 8.176927285714285 1.5524984999999998 8.32499657142857 1.398219857142857 8.510162785714286C1.2439412142857142 8.695169785714285 1.1332872857142857 8.9126565 1.0745372142857144 9.146223857142857C1.0157871428571428 9.379950428571428 1.0102146428571428 9.623866714285715 1.0584565714285714 9.859822285714285L2.8252574999999998 18.693667714285713C2.900406642857143 19.061771142857143 3.1021311428571425 19.392140785714286 3.3957222857142857 19.626822642857142C3.689154214285714 19.861663714285715 4.0556655 19.986169285714286 4.431411214285714 19.978527H17.858588785714286C18.234493714285712 19.986169285714286 18.601005 19.861663714285715 18.894436928571427 19.626822642857142C19.187868857142856 19.392140785714286 19.38975257142857 19.061771142857143 19.4647425 18.693667714285713L21.231543428571428 9.859822285714285C21.279785357142856 9.623866714285715 21.274212857142857 9.379950428571428 21.215462785714287 9.146223857142857C21.156712714285714 8.9126565 21.046058785714283 8.695169785714285 20.891780142857144 8.510162785714286C20.7375015 8.32499657142857 20.5435785 8.176927285714285 20.32434042857143 8.076940714285715S19.866280928571427 7.927597714285714 19.625389714285713 7.932533357142858Z"
+                                                    stroke-width="1.71"></path>
+                                                <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M14.357307428571428 2.3111545714285713L17.569614857142856 7.932533357142858" stroke-width="1.71">
+                                                </path>
+                                                <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M4.720385142857142 7.932533357142858L7.932692571428571 2.3111545714285713" stroke-width="1.71">
+                                                </path>
+                                                </g>
+                                            </svg>
+                                            <p class="w-36 text-gray-500">Módulos esenciales</p>
+                                            <span>$229.00/ mes</span>
+                                        </div>
+                                        <div class="my-1 flex items-center space-x-2" v-for="item in modules" :key="item">
+                                            <span v-if="$page.props.auth.user.store.activated_modules.includes(item.name)" v-html="item.icon"></span>
+                                            <p class="w-36 text-gray-500" v-if="$page.props.auth.user.store.activated_modules.includes(item.name)">{{ item.name }}</p>
+                                            <span v-if="$page.props.auth.user.store.activated_modules.includes(item.name)">${{ item.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}/ mes</span>
+                                        </div>
+                                    </section>
+                                    <button @click="$inertia.get('/support/suscription')"
+                                        class="text-xs text-primary justify-self-end my-2 md:my-0">
+                                        Editar módulos de suscripción
+                                    </button>
+                                </article>
                             </div>
                         </div>
                     </div>
@@ -243,43 +282,6 @@
                 </div> -->
             </article>
         </div>
-
-        <div class="mt-7">
-            <h2 class="ml-3">Modulos activos</h2>
-
-            <article class="md:flex items-center justify-between rounded-[5px] border border-grayD9 px-4 pt-4 mt-3">
-                <section>
-                    <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="16" width="16"
-                            id="Shopping-Basket-2--Streamline-Core">
-                            <desc>Shopping Basket 2 Streamline Icon: https://streamlinehq.com</desc>
-                            <g id="shopping-basket-2--shopping-basket">
-                            <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.625389714285713 7.932533357142858H2.6646102857142857C2.4237190714285712 7.927597714285714 2.184897642857143 7.976954142857143 1.9656595714285712 8.076940714285715C1.7464214999999998 8.176927285714285 1.5524984999999998 8.32499657142857 1.398219857142857 8.510162785714286C1.2439412142857142 8.695169785714285 1.1332872857142857 8.9126565 1.0745372142857144 9.146223857142857C1.0157871428571428 9.379950428571428 1.0102146428571428 9.623866714285715 1.0584565714285714 9.859822285714285L2.8252574999999998 18.693667714285713C2.900406642857143 19.061771142857143 3.1021311428571425 19.392140785714286 3.3957222857142857 19.626822642857142C3.689154214285714 19.861663714285715 4.0556655 19.986169285714286 4.431411214285714 19.978527H17.858588785714286C18.234493714285712 19.986169285714286 18.601005 19.861663714285715 18.894436928571427 19.626822642857142C19.187868857142856 19.392140785714286 19.38975257142857 19.061771142857143 19.4647425 18.693667714285713L21.231543428571428 9.859822285714285C21.279785357142856 9.623866714285715 21.274212857142857 9.379950428571428 21.215462785714287 9.146223857142857C21.156712714285714 8.9126565 21.046058785714283 8.695169785714285 20.891780142857144 8.510162785714286C20.7375015 8.32499657142857 20.5435785 8.176927285714285 20.32434042857143 8.076940714285715S19.866280928571427 7.927597714285714 19.625389714285713 7.932533357142858Z"
-                                stroke-width="1.71"></path>
-                            <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M14.357307428571428 2.3111545714285713L17.569614857142856 7.932533357142858" stroke-width="1.71">
-                            </path>
-                            <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                d="M4.720385142857142 7.932533357142858L7.932692571428571 2.3111545714285713" stroke-width="1.71">
-                            </path>
-                            </g>
-                        </svg>
-                        <p class="w-36 text-gray-500">Módulos esenciales</p>
-                        <span>$229.00/ mes</span>
-                    </div>
-                    <div class="my-1 flex items-center space-x-2" v-for="item in modules" :key="item">
-                        <span v-if="$page.props.auth.user.store.activated_modules.includes(item.name)" v-html="item.icon"></span>
-                        <p class="w-36 text-gray-500" v-if="$page.props.auth.user.store.activated_modules.includes(item.name)">{{ item.name }}</p>
-                        <span v-if="$page.props.auth.user.store.activated_modules.includes(item.name)">${{ item.cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}/ mes</span>
-                    </div>
-                </section>
-                <button @click="$inertia.get('/support/suscription')"
-                    class="text-xs text-primary justify-self-end my-2 md:my-0">
-                    Editar módulos de suscripción
-                </button>
-            </article>
-        </div>
     </section>
 </template>
 <script>
@@ -317,7 +319,7 @@ export default {
                 {
                     name: 'Tienda en línea',
                     cost: 120,
-                    icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" /></svg>',
+                    icon: '<svg width="18" height="20" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 1H2.5C2.10218 1 1.72064 1.15804 1.43934 1.43934C1.15804 1.72064 1 2.10218 1 2.5V13.5C1 13.8978 1.15804 14.2794 1.43934 14.5607C1.72064 14.842 2.10218 15 2.5 15H7.5C7.89782 15 8.27936 14.842 8.56066 14.5607C8.84196 14.2794 9 13.8978 9 13.5V2.5C9 2.10218 8.84196 1.72064 8.56066 1.43934C8.27936 1.15804 7.89782 1 7.5 1H6M4 1V2H6V1M4 1H6M4 13.5H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.48168 9.1185H3.93649C3.80702 9.1109 3.77403 9.0824 3.71987 8.9741L2.90758 6.55526H2.32995C2.00414 6.55526 2.00505 6.08594 2.32995 6.08594H3.12419C3.32275 6.08594 3.39496 6.55526 3.48521 6.55526H7.00516C7.20372 6.55526 7.29011 6.74059 7.22177 6.93433L6.73439 8.10765C6.66219 8.25206 6.60803 8.30621 6.39142 8.30621H4.00869L4.13505 8.63113H6.48168C6.82465 8.63113 6.8066 9.1185 6.48168 9.1185Z" fill="currentColor"/><path d="M4.69564 9.49821C4.69564 9.70757 4.52593 9.87728 4.31657 9.87728C4.10722 9.87728 3.9375 9.70757 3.9375 9.49821C3.9375 9.28886 4.10722 9.11914 4.31657 9.11914C4.52593 9.11914 4.69564 9.28886 4.69564 9.49821Z" fill="currentColor"/><path d="M6.5401 9.49821C6.5401 9.70757 6.37039 9.87728 6.16103 9.87728C5.95168 9.87728 5.78196 9.70757 5.78196 9.49821C5.78196 9.28886 5.95168 9.11914 6.16103 9.11914C6.37039 9.11914 6.5401 9.28886 6.5401 9.49821Z" fill="currentColor"/></svg>',
                 },
                 {
                     name: 'Clientes',
@@ -332,7 +334,7 @@ export default {
                 {
                     name: 'Renta de productos',
                     cost: 30,
-                    icon: '<svg stroke="currentColor" width="20" height="20" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.32656 2.03516H1.67656C1.45776 2.03516 1.24791 2.1406 1.0932 2.32828C0.938482 2.51596 0.851562 2.77052 0.851562 3.03594V15.0453C0.851562 15.3107 0.938482 15.5653 1.0932 15.753C1.24791 15.9407 1.45776 16.0461 1.67656 16.0461H12.4016C12.6204 16.0461 12.8302 15.9407 12.9849 15.753C13.1397 15.5653 13.2266 15.3107 13.2266 15.0453V3.03594C13.2266 2.77052 13.1397 2.51596 12.9849 2.32828C12.8302 2.1406 12.6204 2.03516 12.4016 2.03516H6.62656" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.62813 8.03866L4.97813 6.53816L3.32813 8.03932V1.53426C3.32805 1.46849 3.33867 1.40335 3.35937 1.34256C3.38007 1.28178 3.41044 1.22654 3.44875 1.18C3.48706 1.13346 3.53256 1.09655 3.58264 1.07136C3.63273 1.04617 3.68641 1.0332 3.74063 1.0332H6.21563C6.32502 1.0332 6.42996 1.08592 6.50729 1.17976C6.58468 1.27361 6.62813 1.40088 6.62813 1.53359V8.03866Z" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.32812 13.043H9.10313" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.32812 10.041H10.7531" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.7523 7.03906H8.27734" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                    icon: '<svg stroke="currentColor" width="18" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.32656 2.03516H1.67656C1.45776 2.03516 1.24791 2.1406 1.0932 2.32828C0.938482 2.51596 0.851562 2.77052 0.851562 3.03594V15.0453C0.851562 15.3107 0.938482 15.5653 1.0932 15.753C1.24791 15.9407 1.45776 16.0461 1.67656 16.0461H12.4016C12.6204 16.0461 12.8302 15.9407 12.9849 15.753C13.1397 15.5653 13.2266 15.3107 13.2266 15.0453V3.03594C13.2266 2.77052 13.1397 2.51596 12.9849 2.32828C12.8302 2.1406 12.6204 2.03516 12.4016 2.03516H6.62656" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.62813 8.03866L4.97813 6.53816L3.32813 8.03932V1.53426C3.32805 1.46849 3.33867 1.40335 3.35937 1.34256C3.38007 1.28178 3.41044 1.22654 3.44875 1.18C3.48706 1.13346 3.53256 1.09655 3.58264 1.07136C3.63273 1.04617 3.68641 1.0332 3.74063 1.0332H6.21563C6.32502 1.0332 6.42996 1.08592 6.50729 1.17976C6.58468 1.27361 6.62813 1.40088 6.62813 1.53359V8.03866Z" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.32812 13.043H9.10313" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.32812 10.041H10.7531" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.7523 7.03906H8.27734" stroke="currentColor" stroke-width="0.88" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                 },
                 {
                     name: 'Servicios',
@@ -399,6 +401,14 @@ export default {
         amountToPay() {
             return this.suscriptions.find(item => item.name == this.form.suscription_period)?.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         },
+        //habilita el pago segun los días que se desee para la expiración del plan actual
+        // enablePayment() {
+        //     const today = new Date();
+        //     const nextPaymentDate = new Date(this.$page.props.auth.user.store.next_payment);
+        //     const diffDays = (nextPaymentDate - today) / (1000 * 60 * 60 * 24);
+
+        //     return diffDays <= 7;
+        // }
     },
     methods: {
         checkout() {

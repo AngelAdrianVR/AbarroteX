@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\BannerController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CashCutController;
@@ -10,13 +9,12 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiscountTicketController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EzyProfileController;
 use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
 use App\Http\Controllers\InstallmentController;
-use App\Http\Controllers\InternalInvoiceController;
-use App\Http\Controllers\LogoController;
 use App\Http\Controllers\OnlineSaleController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductBoutiqueController;
@@ -314,10 +312,12 @@ Route::resource('stores', StoreController::class)->middleware(['auth']);
 Route::get('stores-get-settings-by-module/{store}/{module}', [StoreController::class, 'getSettingsByModule'])->middleware('auth')->name('stores.get-settings-by-module');
 Route::put('stores/toggle-setting-value/{store}/{setting_id}', [StoreController::class, 'toggleSettingValue'])->middleware('auth')->name('stores.toggle-setting-value');
 Route::put('stores-update-online-sales-info/{store}', [StoreController::class, 'updateOnlineSalesInfo'])->middleware('auth')->name('stores.update-online-sales-info');
-// Route::put('stores-update-printer-config/{store}', [StoreController::class, 'updatePrinterConfig'])->middleware('auth')->name('stores.update-printer-config');
-Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info');
+Route::get('stores-fetch-store-info/{store}', [StoreController::class, 'fetchStoreInfo'])->name('stores.fetch-store-info'); //se usa en rutas de tienda en linea donde no hay usuario autenticado
 Route::post('stores-store-csf', [StoreController::class, 'storeCSF'])->name('stores.store-csf');
 Route::post('stores-update-modules/{store}', [StoreController::class, 'UpdateModules'])->name('store.update-modules');
+Route::post('stores/store-logo', [StoreController::class, 'storeLogo'])->name('stores.store-logo');
+Route::post('stores/store-banner', [StoreController::class, 'storeBanner'])->name('stores.store-banner');
+Route::post('stores/store-online-properties', [StoreController::class, 'storeOnlineProperties'])->name('stores.store-online-properties');
 
 
 // User routes-----------------------------------------------------------------------------------------
@@ -431,21 +431,10 @@ Route::resource('sizes', SizeController::class)->middleware('auth');
 Route::resource('colors', ColorController::class)->middleware('auth');
 
 
-//Banners online store routes------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------
-Route::resource('banners', BannerController::class)->middleware('auth');
-Route::post('banners/update-with-media/{banner}', [BannerController::class, 'updateWithMedia'])->name('banners.update-with-media');
-
-
-//logos online store routes------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------
-Route::resource('logos', LogoController::class)->middleware('auth');
-Route::post('logos/update-with-media/{logo}', [LogoController::class, 'updateWithMedia'])->name('logos.update-with-media');
-
-
 //online sales routes----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------
-Route::resource('online-sales', OnlineSaleController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified']);
+Route::resource('online-sales', OnlineSaleController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified'])->except('show');
+Route::get('/online-sales/{online_sale}', [OnlineSaleController::class, 'show'])->name('online-sales.show')->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified', 'isOwnResource']);
 Route::get('online-sales/create', [OnlineSaleController::class, 'create'])->name('online-sales.create'); //create para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
 Route::post('online-sales/store', [OnlineSaleController::class, 'store'])->name('online-sales.store'); //store para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
 Route::get('online-sales-client-index/{encoded_store_id}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
@@ -455,7 +444,6 @@ Route::get('online-sales-show-global-product/{global_product_id}', [OnlineSaleCo
 Route::get('online-sales-cart', [OnlineSaleController::class, 'cartIndex'])->name('online-sales.cart');
 Route::get('online-sales-fetch-product/{product_id}/{is_local}', [OnlineSaleController::class, 'fetchProduct'])->name('online-sales.fetch-product');
 Route::get('online-sales-search-products/{store_id}', [OnlineSaleController::class, 'searchProducts'])->name('online-sales.search-products');
-Route::get('online-sales-get-logo/{store_id}', [OnlineSaleController::class, 'getLogo'])->name('online-sales.get-logo');
 Route::get('online-sales-filter', [OnlineSaleController::class, 'filterOnlineSales'])->name('online-sales.filter')->middleware('auth');
 Route::put('online-sales-update-status/{online_sale}', [OnlineSaleController::class, 'updateOnlineSaleStatus'])->name('online-sales.update-status')->middleware('auth');
 Route::get('online-sales-fetch-all-products', [OnlineSaleController::class, 'fetchAllProducts'])->name('online-sales.fetch-all-products');
@@ -475,8 +463,11 @@ Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class,
 //rutas de stripe-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::post('/stripe', [StripeController::class, 'index'])->name('stripe.index');
+Route::post('/stripe-upgrade-subscription', [StripeController::class, 'upgradeSubscription'])->name('stripe.upgrade-subscription');
 Route::post('/stripe-checkout', [StripeController::class, 'checkout'])->name('checkout');
+Route::post('/stripe-update-plan-modules-checkout', [StripeController::class, 'updatePlanModulesCheckout'])->name('update-plan-modules-checkout');
 Route::get('/stripe-success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/stripe-update-plan-modules-success', [StripeController::class, 'updatePlanModulesSuccess'])->name('stripe.update-plan-modules-success');
 Route::get('/stripe-cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
 Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.error');
 
@@ -493,6 +484,11 @@ Route::get('services-search', [ServiceReportController::class, 'searchServiceRep
 Route::put('/scale/configure/{user}', [ScaleController::class, 'configure'])->name('scale.configure');
 Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->name('scale.get-ports');
 
+
+// cupones de descuento routes ------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
+// Route::resource('discount-sticket', DiscountTicketController::class)->middleware('auth');
+Route::get('discount-tickets/fetch-active-tickets', [DiscountTicketController::class, 'fetchActiveTickets'])->name('discount-tickets.fetch-active-tickets')->middleware('auth');
 
 // comandos Artisan
 Route::get('/backup', function () {

@@ -32,75 +32,88 @@
 
     <!-- Lado Derecho -->
     <section class="lg:w-1/2 lg:pl-12 mt-9 lg:mt-0">
-      <p class="font-font">Detalles del Pago</p>
-
-      <article class="rounded-xl border border-grayD9 p-4 mt-2">
-        <!-- botones de periodo -->
+      <article class="rounded-xl border border-grayD9 p-4 mt-2 shadow-md">
+       <!-- botones de periodo -->
         <div class="flex items-center justify-between space-x-4">
           <!-- boton de mensual -->
-          <div @click="period = 'Mensual'"
-            :class="period === 'Mensual' ? 'bg-primarylight text-primary border-primary' : 'bg-transparent border-grayD9'"
-            class="cursor-pointer rounded-lg border-2 p-3 font-bold w-full">
+          <button @click="period = 'Mensual'"
+            :class="period === 'Mensual' ? 'bg-primarylight text-[#373737] border-primary' : 'bg-transparent border-grayD9'"
+            class="cursor-pointer text-left rounded-lg border-2 p-3 font-bold w-full disabled:cursor-not-allowed disabled:bg-grayD9 shadow-md">
             <p>Mensual</p>
-          </div>
+          </button>
           <!-- boton de Anual -->
-          <div @click="period = 'Anual'"
-            :class="period === 'Anual' ? 'bg-primarylight text-primary border-primary' : 'bg-transparent border-grayD9'"
-            class="cursor-pointer rounded-lg border-2 p-3 font-bold w-full relative">
+          <button @click="period = 'Anual'"
+            :class="period === 'Anual' ? 'bg-primarylight text-[#373737] border-primary' : 'bg-transparent border-grayD9'"
+            class="cursor-pointer rounded-lg border-2 p-3 font-bold w-full relative shadow-md">
             <!-- popular -->
             <div
               class="absolute -top-3 right-2 rounded-full bg-[#006847] text-white flex items-center space-x-2 text-[10px] px-2 py-[2px]">
               <i class="fa-solid fa-star"></i>
               <p>Popular</p>
             </div>
-            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''"
-                class="text-xs ml-2 font-thin">2 meses de regalo</span></p>
-          </div>
+            <p>Anual <span :class="period === 'Anual' ? 'text-[#494949]' : ''" class="text-[11px] text-[#626262] ml-2 font-thin">2 meses de regalo</span></p>
+          </button>
         </div>
 
         <!-- Detalles del pago -->
-        <div class="mt-7 px-3">
-          <div class="flex">
+        <div class="mt-4 px-3">
+          <h2 class="font-bold mb-2">Detalles del pago</h2>
+          <div class="flex border-b border-grayD9 pb-2">
             <p class="w-1/2">Módulos esenciales</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? '229.00' : '2,290.00' }}</span></p>
           </div>
-          <p v-if="modules.filter(item => item.activated === true).length" class="text-gray99 my-3">Otros módulos</p>
+          <p v-if="modules.filter(item => item.activated === true).length" class="text-[#929292] font-bold my-3">Adicionales</p>
 
-          <!-- Otros modulos -->
-          <div v-for="item in modules.filter(item => item.activated === true)" :key="item" class="flex">
-            <p class="w-1/2">{{ item.name }}</p>
-            <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
-              'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
-                10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
-          </div>
+          <!-- Módulos adicionales -->
+          <section class="border-b border-grayD9 pb-2">
+            <div class="flex" v-for="item in modules.filter(item => item.activated === true)" :key="item">
+              <p class="w-1/2">{{ item.name }}</p>
+              <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
+                'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
+                  10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+            </div>
+          </section>
 
-          <!-- <p class="text-gray99 my-3">Descuentos</p> -->
-
-          <!-- Descuento por modulos ya pagados -->
-          <!-- <div class="flex">
-            <p class="w-1/2">Monto ya pagado</p>
-            <p class="w-1/2 text-right"><span class="mr-1">$</span>
-              <span class="w-20 inline-block">- {{ totalPaid.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-            </p>
-          </div> -->
-
-          <!-- Descuento por tiempo transcurrido -->
-          <!-- <div class="flex">
-            <p class="w-1/2">Desc. por tiempo transcurrido</p>
-            <p class="w-1/2 text-right"><span class="mr-1">$</span>
-              <span class="w-20 inline-block">
-                 {{ calculateDiscountForPastDays(calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-              </span>
-            </p>
-          </div> -->
+          <!-- Cupon de descuento -->
+          <button @click="showDiscountModal = true"
+            :disabled="calculateTotalPayment(calculateTotal) == 0 || verifiedTicket"
+            class="text-primary flex items-center space-x-2 mt-3 disabled:text-gray-400 disabled:cursor-not-allowed">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-4">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+            </svg>
+            <span>Agregar código promocional</span>
+          </button>
 
           <!-- Total -->
-          <div class="flex mt-7">
-            <p class="w-1/2">Total</p>
+          <div class="flex font-bold mt-3">
+            <div class="flex items-center space-x-2 w-1/2">
+              <span>Total</span>
+              <el-tooltip v-if="verifiedTicket" placement="right">
+                <template #content>
+                  <div>
+                    <p class="text-cyan-500">Cupón de descuento utilizado</p>
+                    <!-- Total sin descuento -->
+                    <p>Subtotal: {{ verifiedTicket?.is_percentage_discount ? (calculateTotalPayment(calculateTotal) / (1 - verifiedTicket.discount_amount / 100)).toFixed(2) : (calculateTotalPayment(calculateTotal) + verifiedTicket.discount_amount).toFixed(2) }}</p>
+                    <p>Descuento: {{ verifiedTicket?.is_percentage_discount ? '%' : '$' }}{{ verifiedTicket?.discount_amount }}</p>
+                    <button class="text-white rounded-md px-3 bg-red-500 mt-3 mr-auto" @click="verifiedTicket = null">
+                      Quitar cupón
+                    </button>
+                  </div>
+                </template>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="size-4 text-primary">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+                </svg>
+              </el-tooltip>
+            </div>
             <p class="w-1/2 text-right">
               <span class="mr-1">$</span>
-              <span class="w-20 inline-block">{{ (calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+              <span class="w-20 inline-block">{{
+                (calculateTotalPayment(calculateTotal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
             </p>
           </div>
 
@@ -109,7 +122,6 @@
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
               Confirmar y pagar
             </PrimaryButton>
-            <p v-if="$page.props.auth.user.store.is_active" class="text-xs text-red-600 mt-2">*No puedes pagar si aún no ha vencido tu plan actual</p>
           </form>
 
           <p class="text-gray99 text-xs mt-3">
@@ -126,13 +138,64 @@
         </div>
       </article>
     </section>
+
+     <!-- -------------- Modal de código promocional ----------------------- -->
+    <Modal :show="showDiscountModal" @close="showDiscountModal = false" maxWidth="lg">
+      <div class="p-4 relative">
+        <i @click="showDiscountModal = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+
+        <h2 class="font-bold">Agrega el código promocional</h2>
+
+        <div class="mt-3 col-span-full mx-10">
+            <InputLabel value="Código" class="ml-3 mb-1" />
+            <el-input @keydown.enter="VerifyTicket()" v-model="ticketCode" placeholder="Escribe el código de promoción" :maxlength="100" clearable />
+            <span v-if="ticketCodeError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> El cupón no es válido. Verifica nuevamente</span>
+        </div>
+
+        <div class="flex justify-end mt-5">
+          <PrimaryButton @click="VerifyTicket()">Verificar</PrimaryButton>
+        </div>
+      
+      </div>
+    </Modal>
+
+    <!-- -------------- Modal de código aplicado correctamente ----------------------- -->
+    <Modal :show="showApliedDiscountTicket" @close="showApliedDiscountTicket = false" maxWidth="sm">
+      <div class="p-4 relative">
+        <i @click="showApliedDiscountTicket = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+
+        <h2 class="font-bold text-center">Descuento aplicado con éxito</h2>
+
+        <section class="mt-4 text-center">
+          <p class="flex items-center space-x-2 rounded-full border border-dashed border-primary text-primary bg-primarylight py-1 px-3 w-1/2 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+            </svg>
+            <span>{{ verifiedTicket.discount_amount }}{{ verifiedTicket.is_percentage_discount ? '%' : '$' }} descuento</span>
+          </p>
+
+          <div class="mt-5 flex flex-col items-center justify-center">
+            <svg width="26" height="20" viewBox="0 0 26 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.91758 19.8418C4.12647 14.7142 0.232709 10.6358 0.0124311 10.3936C-0.207847 10.1514 2.52212 9.69147 6.39 13.7005C13.7218 5.3998 20.8295 -0.0222255 24.8141 0.000509436C24.9676 -0.0151292 25.2031 0.333452 25.0503 0.472922C16.2283 4.67346 11.3447 12.1369 7.09861 19.8418C7.07299 20.0753 5.90745 20.0289 5.91758 19.8418Z" fill="#189203"/>
+            </svg>
+            <p class="text-[#189203]">¡Disfruta de tu descuento!</p>
+          </div>
+        </section>
+      </div>
+    </Modal>
   </main>
 </template>
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputLabel from "@/Components/InputLabel.vue";
+import Modal from "@/Components/Modal.vue";
 import { useForm } from '@inertiajs/vue3';
-import axios from 'axios';
+import axios from 'axios';;
 
 export default {
   data() {
@@ -140,18 +203,24 @@ export default {
         amount: null,
         suscription_period: null,
         activeModules: null,
+        discountTicketUsed: null, //cupon de descuento utilizado
         modulesUpdated: [],
-        // default_card_id: this.$page.props.auth.user.store.default_card_id,
     });
 
     return {
       form,
       loading: false, // estado de carga de peticion de update modules
       nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
-      // totalPaid: 199, // El total pagado por los modulos que actualmente tiene.
-      // daysForNextPayment: 0, // dias para el proximo pago
       period: this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
       activated_modules: [],
+
+      //cupon de descuento
+      showDiscountModal: false, 
+      showApliedDiscountTicket: false,
+      discountTickets: null, //cupones de descuento activos
+      ticketCode: null, //codigo del ticket ingresado
+      verifiedTicket: null, //codigo del ticket correctamente verificado
+      ticketCodeError: false, //codigo del ticket no encontrado, bandera de error
 
       modules: [
         {
@@ -162,7 +231,7 @@ export default {
           activated: false,
         },
         {
-          icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" /></svg>',
+          icon: '<svg width="17" height="24" viewBox="0 0 15 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.71429 1H3.35714C2.73199 1 2.13244 1.24834 1.69039 1.69039C1.24834 2.13244 1 2.73199 1 3.35714V20.6429C1 21.268 1.24834 21.8676 1.69039 22.3096C2.13244 22.7517 2.73199 23 3.35714 23H11.2143C11.8394 23 12.439 22.7517 12.881 22.3096C13.3231 21.8676 13.5714 21.268 13.5714 20.6429V3.35714C13.5714 2.73199 13.3231 2.13244 12.881 1.69039C12.439 1.24834 11.8394 1 11.2143 1H8.85714M5.71429 1V2.57143H8.85714V1M5.71429 1H8.85714M5.71429 20.6429H8.85714" stroke="currentColor" stroke-width="1.57143" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.61072 13.7576H5.61113C5.40769 13.7457 5.35584 13.7009 5.27074 13.5307L3.99428 9.7297H3.08657C2.57459 9.7297 2.57601 8.99219 3.08657 8.99219H4.33467C4.64669 8.99219 4.76016 9.7297 4.90198 9.7297H10.4333C10.7454 9.7297 10.8811 10.0209 10.7737 10.3254L10.0078 12.1692C9.89438 12.3961 9.80928 12.4812 9.46889 12.4812H5.72459L5.92316 12.9918H9.61072C10.1497 12.9918 10.1213 13.7576 9.61072 13.7576Z" fill="currentColor" stroke="currentColor" stroke-width="0.0567317" stroke-linecap="round"/><path d="M6.72314 14.3535C6.72314 14.6396 6.49119 14.8716 6.20506 14.8716C5.91893 14.8716 5.68698 14.6396 5.68698 14.3535C5.68698 14.0674 5.91893 13.8354 6.20506 13.8354C6.49119 13.8354 6.72314 14.0674 6.72314 14.3535ZM9.62158 14.3535C9.62158 14.6396 9.38962 14.8716 9.1035 14.8716C8.81737 14.8716 8.58541 14.6396 8.58541 14.3535C8.58541 14.0674 8.81737 13.8354 9.1035 13.8354C9.38962 13.8354 9.62158 14.0674 9.62158 14.3535Z" fill="currentColor" stroke="currentColor" stroke-width="0.155203"/></svg>',
           name: 'Tienda en línea',
           description: 'Gestiona tus ventas y pedidos en línea.',
           cost: 120,
@@ -176,7 +245,7 @@ export default {
           activated: false,
         },
         {
-          icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>',
+          icon: '<svg width="20" height="18" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.72727 9.72727C1 9.72727 0.999995 9.36363 1 8.63636V1.72727C1 1.36364 1 1 1.72727 1M1.72727 9.72727V1M1.72727 9.72727C1.90647 9.72727 2.08094 9.72727 2.25124 9.72727M1.72727 1C1.72727 1 1.93741 1 2.25124 1M5 1C4.97588 1 4.78219 1 4.5 1M5 1V9.72727M5 1C5.06289 1 5.32199 1.40998 5.59688 1.72727M6.09091 2.09091C5.9502 2.09091 5.77039 1.92756 5.59688 1.72727M6.09091 2.09091V9.72727M6.09091 2.09091C6.16182 2.09091 6.39866 2.09091 6.73402 2.09091M11.1818 2.09091C11.5455 2.09091 11.9091 2.45455 11.9091 2.81818C11.9091 3.67023 11.9091 4.14795 11.9091 5C11.6502 5 11.4076 5.03464 11.1818 5.09863M11.1818 2.09091C11.1818 2.09091 10.9778 2.09091 10.6514 2.09091M11.1818 2.09091V5.09863M10.4545 9.9863L10.8275 10.2659C11.0759 10.4524 11.4016 10.5456 11.7273 10.5456M11.7273 10.5456C12.0529 10.5455 12.3785 10.4523 12.6271 10.2659C13.1243 9.89297 13.1243 9.28885 12.6271 8.91594C12.3789 8.72927 12.0531 8.63636 11.7273 8.63636C11.4197 8.63636 11.1121 8.54303 10.8775 8.35679C10.4083 7.98388 10.4083 7.37976 10.8775 7.00685C11.1121 6.82039 11.4197 6.72717 11.7273 6.72717M11.7273 10.5456V11.1818M11.7273 6.72717C12.0348 6.72717 12.3424 6.82039 12.577 7.00685M11.7273 6.72717V6.09091M2.25124 9.72727V1M2.25124 9.72727C2.37306 9.72727 2.49274 9.72727 2.61051 9.72727M2.25124 1C2.38633 1 2.54064 1 2.70567 1M2.70567 1L2.61051 9.72727M2.70567 1C2.86231 1 3.02862 1 3.19732 1M2.61051 9.72727C2.83929 9.72727 3.06081 9.72727 3.27661 9.72727M3.27661 9.72727L3.19732 1M3.27661 9.72727C3.47674 9.72727 3.67193 9.72727 3.86342 9.72727M3.19732 1C3.42077 1 3.64843 1 3.86342 1M3.86342 1V9.72727M3.86342 1C4.09801 1 4.31751 1 4.5 1M3.86342 9.72727C4.07976 9.72727 4.29137 9.72727 4.5 9.72727M4.5 9.72727V1M4.5 9.72727C4.6683 9.72727 4.83466 9.72727 5 9.72727M5 9.72727C5.20363 9.72727 5.40572 9.72727 5.60798 9.72727M5.60798 9.72727L5.59688 1.72727M5.60798 9.72727C5.76856 9.72727 5.92925 9.72727 6.09091 9.72727M6.09091 9.72727C6.30296 9.72727 6.51668 9.72727 6.73402 9.72727M6.73402 9.72727V2.09091M6.73402 9.72727C6.93653 9.72727 7.14219 9.72727 7.35255 9.72727M6.73402 2.09091C6.91503 2.09091 7.12474 2.09091 7.35255 2.09091M7.35255 2.09091V9.72727M7.35255 2.09091C7.52841 2.09091 7.71507 2.09091 7.90764 2.09091M7.35255 9.72727C7.53375 9.72727 7.71844 9.72727 7.90764 9.72727M7.90764 9.72727V2.09091M7.90764 9.72727C8.10008 9.72727 8.29719 9.72727 8.5 9.72727M7.90764 2.09091C8.10078 2.09091 8.29988 2.09091 8.5 2.09091M8.5 2.09091V9.72727M8.5 2.09091C8.6669 2.09091 8.83452 2.09091 9 2.09091M8.5 9.72727C8.77638 9.72727 9.06337 9.72727 9.36364 9.72727C8.67037 8.34074 9.17798 6.1341 10.6514 5.31744M9 2.09091C9 4.20329 9 5.38762 9 7.5M9 2.09091C9.22933 2.09091 9.45455 2.09091 9.66806 2.09091M9.66806 2.09091C9.66806 3.6175 9.66806 4.47341 9.66806 6M9.66806 2.09091C9.88968 2.09091 10.0987 2.09091 10.2866 2.09091M10.2866 2.09091C10.2866 3.38248 10.2866 4.10661 10.2866 5.39819M10.2866 2.09091C10.4198 2.09091 10.5424 2.09091 10.6514 2.09091M10.6514 2.09091C10.6514 3.35095 10.6514 4.0574 10.6514 5.31744M10.6514 5.31744C10.8162 5.22607 10.9931 5.1521 11.1818 5.09863" stroke="currentColor" stroke-width="0.727273"/></svg>',
           name: 'Cotizaciones',
           description: 'Crea cotizaciones precisas en segundos.',
           cost: 80,
@@ -200,7 +269,9 @@ export default {
     };
   },
   components: {
-    PrimaryButton
+    PrimaryButton,
+    InputLabel,
+    Modal
   },
   props: {},
   methods: {
@@ -208,8 +279,9 @@ export default {
       this.form.amount = this.calculateTotalPayment(this.calculateTotal); //monto total a pagar
       this.form.suscription_period = this.period; //periodo de tiempo a pagar (mes, año)
       this.form.activeModules = this.modules.filter(item => item.activated === true); //detalle de modulos a pagar
-      this.form.activeModules.unshift({ name: "Módulos básicos", cost: 199 }); //se agregan los modulos escenciales o basicos para mostrarlo en detalles de pago
+      this.form.activeModules.unshift({ name: "Módulos básicos", cost: 229 }); //se agregan los modulos escenciales o basicos para mostrarlo en detalles de pago
       this.form.modulesUpdated = this.activated_modules; //modulos pagados para agregarlos en base de datos en caso de agregados o quitados
+      this.form.discountTicketUsed = this.verifiedTicket //cupón de descuento utilizado
       this.form.post(route('stripe.index'));
     },
     async updateStoreModules() {
@@ -226,18 +298,50 @@ export default {
         this.loading = false;
       }
     },
-     calculateTotalPayment(calculateTotal) {
-      const total = this.period === 'Mensual' ? (calculateTotal) : (calculateTotal * 10);
+    async fetchActiveDiscountTickets() {
+      try {
+        const response = await axios.get(route('discount-tickets.fetch-active-tickets'))
+        if (response.status === 200) {
+          this.discountTickets = response.data.discount_tickets;
+        }
+
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    VerifyTicket() {
+      if ( this.discountTickets.some(ticket => ticket.code === this.ticketCode )) {
+        this.verifiedTicket = this.discountTickets.find(ticket => ticket.code === this.ticketCode);
+        this.showDiscountModal = false;
+        this.showApliedDiscountTicket = true;
+        this.ticketCodeError = false;
+      } else {
+        this.ticketCodeError = true;
+      }
+    },
+    calculateTotalPayment(calculateTotal) {
+      let total;
+
+      if (this.period === 'Mensual') {
+        total = calculateTotal;
+      } else {
+        total = calculateTotal * 10;
+      }
+
+      // Aplicar descuento si existe un cupón verificado
+      if (this.verifiedTicket) {
+        if (this.verifiedTicket.is_percentage_discount) {
+          // Aplicar descuento porcentual
+          total -= (total * this.verifiedTicket.discount_amount) / 100;
+        } else {
+          // Aplicar descuento fijo
+          total -= this.verifiedTicket.discount_amount;
+        }
+      }
+
+      // Asegurar que el total no sea negativo
       return Math.max(0, total);
     },
-    // calculateDiscountForPastDays(calculateTotal) {
-    //   if ( calculateTotal > 0 && this.daysForNextPayment > 0 ) {
-    //     const totalDiscountForPastDays = (calculateTotal / 30) * (30 - this.daysForNextPayment);
-    //     return totalDiscountForPastDays;
-    //   } else {
-    //     return 0
-    //   }
-    // },
     handleSwitchModule(module) {
       if (module.activated) {
         this.activated_modules.push(module.name);
@@ -258,6 +362,9 @@ export default {
     }
   },
   mounted() {
+    //carga los cupones de descuento disponibles
+    this.fetchActiveDiscountTickets();
+
     // Filtra los módulos activados
     const activatedModules = this.$page.props.auth.user.store.activated_modules;
 
@@ -276,10 +383,6 @@ export default {
     if ( this.$page.props.auth.user.store.suscription_period === 'Anual' ) {
       this.totalPaid *= 10;
     }
-
-    const today = new Date();
-    const nextPaymentDate = new Date(this.nextPayment);
-    this.daysForNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
   }
 };
 </script>
