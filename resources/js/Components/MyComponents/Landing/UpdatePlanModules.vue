@@ -46,6 +46,7 @@
                 style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #D4D4D4" />
             </div>
           </article>
+          <p class="p-3 text-[#373737] text-md">Si deseas deshabilitar alguna función adicional, tendrás que esperar a que tu suscripción finalice.</p>
         </div>
 
         <!-- Módulos adicionales -->
@@ -119,15 +120,15 @@
               <span class="font-bold"></span>
               <p class="font-bold text-[#373737]">Vence {{ formattedNextPayment }}</p>
             </div>
-            <div class="flex justify-between mt-1">
+            <!-- <div class="flex justify-between mt-1">
               <p>Módulos esenciales</p>
               <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
                 'Mensual' ? '229.00' : '2,290.00' }}</span></p>
-            </div>
+            </div> -->
 
-            <div>
+            <!-- <div>
               <p class="text-[#686767] mt-3">Adicionales</p>
-              <!-- modulos actuales -->
+              modulos actuales
               <div v-for="item in modules.filter(item => currentActivatedModules.includes(item.name))" :key="item"
                 class="flex">
                 <p class="w-1/2">{{ item.name }}</p>
@@ -135,16 +136,16 @@
                   'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
                     10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Total -->
-            <div class="flex font-bold mt-3">
+            <!-- <div class="flex font-bold mt-3">
               <p class="w-1/2">Total</p>
               <p class="w-1/2 text-right">
                 <span class="mr-1">$</span>
                 <span class="w-20 inline-block">{{ totalPaid.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
               </p>
-            </div>
+            </div> -->
           </section>
 
           <p class="font-bold mt-2">Detalles del Pago</p>
