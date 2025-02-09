@@ -36,7 +36,7 @@ class OnlineSaleController extends Controller
         $store_id = intval($store_id);
 
         // Buscar la tienda
-        $store = Store::find($store_id);
+        $store = Store::with(['media'])->find($store_id);
 
         if (!$store) {
             return inertia('Error/404'); // Manejar caso de tienda no encontrada

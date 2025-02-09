@@ -63,12 +63,12 @@
                     <button v-for="(banner, index) in banners" :key="index" class="rounded-xl">
                         <img :src="banner.src"
                             class="select-none object-cover rounded-xl h-28 border-2 transition-all duration-300 ease-in-out"
-                            @click="bannerForm.selected = index + 1; storeBanner()"
+                            @click="handleSelectionBanner(index + 1)"
                             :class="bannerForm.selected == index + 1 ? 'w-40 border-primary' : 'w-7 border-transparent'"
                             :draggable="false" :alt="banner.alt">
                     </button>
                     <InputFilePreview @imagen="storeBanner($event)" width="w-44" height="h-28"
-                        :imageUrl="storeBannerUrl" @cleared="storeBanner()" ref="bannerInput" />
+                        :imageUrl="storeBannerUrl" @cleared="deleteBanner()" ref="bannerInput" />
                 </div>
                 <p v-if="bannerForm.processing" class="text-gray-400 text-end text-xs col-span-full">Guardando...</p>
             </div>
@@ -275,9 +275,7 @@ export default {
             return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'logo')?.original_url;
         },
         storeBannerUrl() {
-            return this.bannerForm.selected == 0
-                ? null
-                : this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'banner')?.original_url;
+            return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'banner')?.original_url;
         },
         encodeUrlStore() {
             const encodedId = btoa(this.$page.props.auth.user.store_id.toString());
@@ -289,19 +287,33 @@ export default {
             this.logoForm.img = img;
             this.logoForm.post(route("stores.store-logo"));
         },
-        storeBanner(img = null) {
+        storeBanner(img) {
             this.bannerForm.img = img;
-            if (img) {
-                this.bannerForm.selected = 0;
+            this.bannerForm.selected = 0;
+            
+            this.bannerForm.post(route("stores.store-banner"));
+        },
+        deleteBanner() {
+            // eliminar banner 
+            this.bannerForm.img = null;
+
+            // si no hay banner por defecto seleccionado, seleccionar el primero
+            if (this.bannerForm.selected == 0) {
+                this.bannerForm.selected = 1;
             }
-            this.bannerForm.post(route("stores.store-banner"), {
-                onFinish: () => {
-                    if (!img && this.bannerForm.selected == 0) {
-                        this.bannerForm.selected = 1;
-                        this.$refs.bannerInput.clearImage();
-                    }
-                }
-            });
+
+            // guardar configuración de banner
+            this.bannerForm.post(route("stores.store-banner"));
+        },
+        handleSelectionBanner(bannerId) {
+            // si se selecciona el mismo banner no hacer nada
+            if (this.bannerForm.selected == bannerId) {
+                return;
+            }
+            this.bannerForm.selected = bannerId;
+            this.deleteBanner();
+            // limpiar imagen del input
+            this.$refs.bannerInput.clearImage();
         },
         storeOnlineProperties(configName) {
             const onlineProperties = this.$page.props.auth.user.store.online_store_properties;

@@ -11,9 +11,10 @@
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
                             <Link v-if="!loadigLogo" :href="route('online-sales.client-index', encodedIdStore ?? 0)">
-                            <img v-if="logo?.media?.length" class="h-12 md:h-16" :src="logo?.media[0]?.original_url"
+                            <img v-if="storeLogoUrl" class="h-12 md:h-16" :src="storeLogoUrl"
                                 alt="logotipo de la tienda">
-                            <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png" alt="">
+                            <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png"
+                                alt="Logo de ezyventas">
                             </Link>
 
                             <!-- buscador de productos -->
@@ -69,7 +70,7 @@
                 class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-20 md:px-7">
                 <!-- Logo de la tienda -->
                 <figure class="flex items-center space-x-2">
-                    <img v-if="logo?.media?.length" class="h-10 md:h-12" :src="logo?.media[0]?.original_url"
+                    <img v-if="storeLogoUrl" class="h-10 md:h-12" :src="storeLogoUrl"
                         alt="logotipo de la tienda">
                     <p v-else class="tex-sm text-gray99">{{ store?.name }}</p>
                 </figure>
@@ -145,35 +146,10 @@ export default {
                 this.searchFocus = false;
             }, 100);
         },
-        async searchProducts() {
-            try {
-                this.loading = true;
-                const response = await axios.get(route('online-sales.search-products', this.storeId), { params: { query: this.searchQuery } });
-                if (response.status === 200) {
-                    this.productsFound = response.data.items;
-                    this.loading = false;
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        },
         loadCart() {
             const cart = localStorage.getItem('Ezycart');
             if (cart) {
                 this.cart = JSON.parse(cart);
-            }
-        },
-        async getLogo() {
-            this.loadigLogo = true;
-            try {
-                const response = await axios.get(route('online-sales.get-logo', this.storeId ?? 1));
-                if (response.status === 200) {
-                    this.logo = response.data.item;
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loadigLogo = false;
             }
         },
         encodeStoreId() {
@@ -192,7 +168,19 @@ export default {
             } finally {
                 this.loadigStore = false;
             }
-        }
+        },
+        async searchProducts() {
+            try {
+                this.loading = true;
+                const response = await axios.get(route('online-sales.search-products', this.storeId), { params: { query: this.searchQuery } });
+                if (response.status === 200) {
+                    this.productsFound = response.data.items;
+                    this.loading = false;
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
     },
     computed: {
         cartCount() {
@@ -201,6 +189,9 @@ export default {
         whatsappLink() {
             const text = encodeURIComponent('Hola! quiero hacer un pedido de tu tienda en línea!');
             return `https://api.whatsapp.com/send?phone=${this.store?.online_store_properties?.whatsapp}&text=${text}`;
+        },
+        storeLogoUrl() {
+            return this.store?.media?.find(m => m.collection_name === 'logo')?.original_url;
         }
     },
     created() {
@@ -208,7 +199,6 @@ export default {
 
         // recupera el store_id del localStorage
         this.storeId = localStorage.getItem('storeId');
-        this.getLogo();
 
         // recupera la información de la tienda para tomar las configuraciones de la tienda en linea.
         this.fetchStoreInfo();

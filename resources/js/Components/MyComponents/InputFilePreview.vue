@@ -69,6 +69,7 @@ export default {
       handler(newImageUrl) {
         if (newImageUrl) {
           this.image = newImageUrl;
+          this.loading = true;
         }
       },
     },
@@ -92,7 +93,6 @@ export default {
     clearImage() {
       this.image = null;
       this.formData.file = null;
-      this.loading = false;
       this.$emit("cleared");
     },
   },
