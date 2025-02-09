@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
 
          // crear las configuraciones
          $this->call([
-            // SettingSeeder::class,
+            SettingSeeder::class,
             PermissionSeeder::class,
         ]);
     }

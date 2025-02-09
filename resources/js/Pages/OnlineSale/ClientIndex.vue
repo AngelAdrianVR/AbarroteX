@@ -4,16 +4,11 @@
             <!-- Banners -->
             <section class="my-4">
                 <figure class="lg:h-96 mx-auto flex flex-col justify-center mt-7 rounded-lg">
-                    <img v-if="store.online_store_properties?.banner" class="!rounded-md h-full object-cover select-none" :draggable="false"
-                        :src="defaultBanners[store.online_store_properties?.banner + 1]" alt="Banner promocional" />
-                    <img v-else class="!rounded-md h-full object-cover select-none" :draggable="false"
+                    <img v-if="store.media?.find(m => m.collection_name === 'banner')?.original_url" class="h-full object-cover select-none" :draggable="false"
                         :src="store.media?.find(m => m.collection_name === 'banner')?.original_url"
                         alt="Banner promocional escogido" />
-                    <!-- <div class="flex items-center justify-center space-x-3 mt-4">
-                        <i @click="currentBanner = index" v-for="(dot, index) in $page.props.auth.user.store.banner" :key="dot"
-                            :class="index == currentBanner ? 'text-primary' : 'cursor-pointer text-xs'"
-                            class="fa-solid fa-circle text-grayD9 transition-all duration-300"></i>
-                    </div> -->
+                    <img v-else class="h-full object-cover select-none" :draggable="false"
+                        :src="defaultBanners[store.online_store_properties?.banner - 1]" alt="Banner promocional" />
                 </figure>
             </section>
 
