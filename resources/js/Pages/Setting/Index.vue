@@ -77,7 +77,7 @@
                     </template>
                     <Scale />
                 </el-tab-pane>
-                <el-tab-pane label="Tienda en línea" name="5">
+                <el-tab-pane v-if="this.$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" label="Tienda en línea" name="5">
                     <template #label>
                         <div class="flex items-center space-x-1">
                             <svg width="16" height="18" viewBox="0 0 10 16" fill="none"
