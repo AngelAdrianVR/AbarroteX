@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
-use App\Models\SettingHistory;
 use App\Models\Store;
 use Illuminate\Http\Request;
 
@@ -107,7 +105,9 @@ class StoreController extends Controller
         ]);
 
         // guardar otros datos de la tienda en linea para que no se borren
-        $validated['banner'] = $store->online_store_properties['banner'];
+        $validated['banner'] = key_exists('banner', $store->online_store_properties)
+        ? $store->online_store_properties['banner']
+        : 1;
         $validated['cash_payment'] = key_exists('cash_payment', $store->online_store_properties)
         ? $store->online_store_properties['cash_payment']
         : true;

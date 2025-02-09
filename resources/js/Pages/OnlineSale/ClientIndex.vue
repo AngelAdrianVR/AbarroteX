@@ -75,7 +75,6 @@ export default {
         services: Array,
         total_services: Number,
         store_id: Number, //id de la tienda para guardarla en el localStorage
-        banners: Object, //banners
     },
     methods: {
         handleScroll() {

@@ -16,8 +16,7 @@
         <path stroke-linecap="round" stroke-linejoin="round"
           d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
       </svg>
-      <div v-if="loading"
-        class="absolute inset-0 rounded-[10px] flex items-center justify-center">
+      <div v-if="loading" class="absolute inset-0 rounded-[10px] flex items-center justify-center">
         <i class="fa-solid fa-circle-notch animate-spin text-xl"></i>
       </div>
       <img v-if="image" :src="image" :alt="alt" @load="loading = false"
@@ -69,7 +68,6 @@ export default {
       immediate: true,
       handler(newImageUrl) {
         if (newImageUrl) {
-          this.loading = true;
           this.image = newImageUrl;
         }
       },
@@ -94,6 +92,7 @@ export default {
     clearImage() {
       this.image = null;
       this.formData.file = null;
+      this.loading = false;
       this.$emit("cleared");
     },
   },
