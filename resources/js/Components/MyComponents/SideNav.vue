@@ -228,6 +228,15 @@ export default {
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Configuraciones')
                 },
+                {
+                    label: 'Tutoriales',
+                    icon: '<i class="fa-brands fa-youtube text-lg"></i>',
+                    route: route('tutorials.index'),
+                    active: route().current('tutorials.*'),
+                    options: [],
+                    dropdown: false,
+                    show: true
+                },
 
                 //ejemplo para usar submenues
                 //     label: 'Comunidad',

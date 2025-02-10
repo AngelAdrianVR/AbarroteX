@@ -110,7 +110,7 @@
           </div>
           <article class="flex items-center space-x-3">
             <!-- Indicadores activos como báscula y descuentos -->
-            <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled" placement="left">
+            <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled || true" placement="left">
               <template #content>
                 <p v-if="isConnectedScale" class="text-sm">Báscula activada</p>
                 <div v-else class="text-sm">
@@ -1826,7 +1826,7 @@ export default {
 
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
-      this.$inertia.visit(route('tutorials.index'));
+      this.$inertia.visit(route('started-tutorial'));
     }
 
     //verificar si el usuario tiene una caja asignada
