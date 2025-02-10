@@ -60,7 +60,7 @@
                     <p>Subtotal:</p>
                     <p>${{ number_format($subtotal, 2) }}</p>
                 </div>
-                <div class="flex justify-between text-lg font-semibold text-red-500">
+                <div class="flex justify-between text-lg font-semibold text-green-500">
                     <p>Descuento:</p>
                     <p>- ${{ number_format($discount, 2) }}</p>
                 </div>
@@ -76,6 +76,7 @@
                 @csrf
                 <input type="hidden" name="products" value="{{ json_encode($products) }}">
                 <input type="hidden" name="modules_updated" value="{{ json_encode($modules_updated) }}">
+                {{-- <input type="hidden" name="discount_ticket_code" value="{{ json_encode($discount_ticket) }}"> --}}
                 <button type="submit" onclick="location.reload()" class="bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700">
                     Completar el pago
                 </button>

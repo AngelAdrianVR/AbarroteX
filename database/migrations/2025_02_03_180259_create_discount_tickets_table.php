@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('code'); //código de descuento
             $table->boolean('is_percentage_discount')->default(true); //bandera que indica si es descuento en porcentage
             $table->float('discount_amount'); //cantidad de descuento
+            $table->unsignedSmallInteger('times_used')->nullable()->default(0); //cantidad de veces que se ha usado.
             $table->boolean('is_active')->default(true); //Bandera que indica si el cupón esta vigente
-            $table->timestamp('expired_date')->nullable(); //Fecha para programar expiracion del cupón
+            $table->timestamp('expired_date')->nullable(); //Fecha para programar expiración del cupón
             $table->timestamps();
         });
     }

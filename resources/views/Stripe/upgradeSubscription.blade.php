@@ -38,7 +38,7 @@
                     <span>Subtotal:</span>
                     <span>${{ number_format($subtotal, 2) }}</span>
                 </div>
-                <div class="flex justify-between text-lg font-semibold text-red-600">
+                <div class="flex justify-between text-lg font-semibold text-green-600">
                     <span>Descuento:</span>
                     <span>{{ $discount }}</span>
                 </div>
