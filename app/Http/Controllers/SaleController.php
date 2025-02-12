@@ -380,7 +380,7 @@ class SaleController extends Controller
 
     public function fetchCashRegisterSales($cash_register_id)
     {
-        // // Obtener todas las ventas registradas y contar el número de agrupaciones por día
+        // Obtener todas las ventas registradas y contar el número de agrupaciones por día
         $total_sales = DB::table('sales')
             ->select(DB::raw('DATE(created_at) as date'))
             ->where('store_id', auth()->user()->store_id)
@@ -388,7 +388,6 @@ class SaleController extends Controller
             ->groupBy(DB::raw('DATE(created_at)'))
             ->get()
             ->count();
-
         // Filtrar las ventas por store_id y cash_register_id
         $sales = Sale::where('store_id', auth()->user()->store_id)
             ->where('cash_register_id', $cash_register_id)
@@ -399,7 +398,6 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
-        // dd($online_sales);
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->take(30);
 
