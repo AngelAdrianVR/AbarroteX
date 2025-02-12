@@ -94,7 +94,7 @@
         <!-- modal de finalización -->
         <Modal :show="finishModal">
             <div class="py-4 px-7 relative">
-                <h1 class="font-bold text-center mb-5">¡Haz terminado la configuración tu tienda!</h1>
+                <h1 class="font-bold text-center mb-5">¡Haz terminado la configuración de tu tienda!</h1>
                 <p class="text-sm text-center">Te invitamos a seguir explorando sobre las diversas funcionalidades y
                     herramientas del sistema.</p>
 
