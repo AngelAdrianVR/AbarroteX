@@ -196,7 +196,6 @@
                 </div>
             </template>
         </DialogModal>
-
         <!-- modal de entrada de producto -->
         <Modal :show="entryProductModal" @close="entryProductModal = false">
             <div class="p-4 relative">

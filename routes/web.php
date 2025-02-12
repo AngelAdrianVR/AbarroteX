@@ -392,6 +392,7 @@ Route::post('payments/store-invoice/{payment}', [PaymentController::class, 'stor
 //----------------------------------------------------------------------------------------------------------
 Route::resource('cash-registers', CashRegisterController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Caja', 'verified']);
 Route::get('cash-registers-fetch-cash-register/{cash_register_id}', [CashRegisterController::class, 'fetchCashRegister'])->middleware('auth')->name('cash-registers.fetch-cash-register');
+Route::get('cash-registers-max-cash-notify', [CashRegisterController::class, 'sendMaxCashNotification'])->middleware('auth')->name('cash-registers.max-cash-notify');
 Route::put('cash-registers-asign/{user}/{cash_register_id}', [CashRegisterController::class, 'asignCashRegister'])->middleware('auth')->name('cash-registers.asign');
 
 
