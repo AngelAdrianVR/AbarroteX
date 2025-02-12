@@ -897,7 +897,7 @@
         <h1>Se ha llegado al límite de dinero permitido en caja</h1>
       </template>
       <template #content>
-        <div v-if="$page.props.auth.user.store.first_user.id != $page.props.auth.user.id || true">
+        <div v-if="$page.props.auth.user.store.first_user.id != $page.props.auth.user.id">
           <p v-if="!maxCashNotificationSent && !maxCashNotifying">
             Puedes
             <button @click="sendMaxCashNotification" class="text-primary underline">
