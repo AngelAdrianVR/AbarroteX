@@ -49,6 +49,20 @@ class HandleInertiaRequests extends Middleware
                 }
                 return null;
             },
+            'auth.user.store.first_user' => function () use ($request) {
+                if ($request->user()) {
+                    $firstUser = $request->user()->store->users()->first();
+                    if ($firstUser) {
+                        return [
+                            'name' => $firstUser->name,
+                            'email' => $firstUser->email,
+                            'id' => $firstUser->id,
+                            'phone' => $firstUser->phone,
+                        ];
+                    }
+                }
+                return null;
+            },
             'auth.user.store.last_payment' => function () use ($request) {
                 if ($request->user()) {
                     return $request->user()->store->lastPayment?->load('media');
