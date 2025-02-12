@@ -51,6 +51,7 @@ class StripeController extends Controller
     {
         $products = json_decode($request->input('products'), true); //lo hago array pero solo tiene un objeto. Lo dejo asi par ano modificar el ejemplo en caso de muchos elementos
         $modules_updated = json_decode($request->input('modules_updated'), true); //modulos pagados para guardarlos en base de datos y actualizar en caso de agregar nuevos o quitar
+        // $discount_ticket_code = json_decode($request->input('discount_ticket_code')); //codigo del cupón de descuento usado. (para aumentar en 1 las veces de uso del cupo y guardarla en bd)
 
         \Stripe\Stripe::setApiKey(config(key:'stripe.sk')); //el helper config toma las llaves desde el directorio config/stripe
 
