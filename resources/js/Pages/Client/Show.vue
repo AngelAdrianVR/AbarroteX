@@ -31,7 +31,7 @@
             </header>
 
             <div class="text-center text-sm lg:text-base my-5">
-                <h2>Saldo total pendiente de ventas a crédito</h2>
+                <el-tag size="large" style="font-size: 16px;">Saldo total pendiente de ventas a crédito</el-tag>
                 <h3 class="font-bold">
                     ${{ client_debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
                 </h3>
