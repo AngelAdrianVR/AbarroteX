@@ -10,8 +10,6 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import SideNav from '@/Components/MyComponents/SideNav.vue';
 import NotificationsCenter from '@/Components/MyComponents/NotificationsCenter.vue';
 import OnlineSalesNotifications from '@/Components/MyComponents/OnlineSalesNotifications.vue';
-// import NavLink from '@/Components/NavLink.vue';
-import axios from 'axios';
 
 defineProps({
     title: String,
@@ -19,22 +17,6 @@ defineProps({
 
 const showingNavigationDropdown = ref(false);
 const syncInterval = ref(null);
-
-const calculateDaysSinceStoreCreated = (date) => {
-    const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
-    const startDate = new Date(date);
-    const currentDate = new Date();
-
-    // Calcula la diferencia en días
-    const diffDays = Math.round(Math.abs((currentDate - startDate) / oneDay));
-
-    return diffDays;
-};
-
-const calculateRemainigFreeDays = (date) => {
-    const trialDays = 2;
-    return trialDays - calculateDaysSinceStoreCreated(date);
-};
 
 // calcula dias restantes de la suscripcion a fecha de hoy
 const calculateRemainingDays = (nextPayment) => {
@@ -544,34 +526,9 @@ onUnmounted(() => {
                 </nav>
 
                 <div class="overflow-y-auto h-[calc(100vh-3rem)]">
-                    <!-- Dias de prueba vista movil -->
-                    <section v-if="$page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
-                        class="xl:hidden space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-[10px]">
-                        <div v-if="calculateRemainigFreeDays($page.props.auth.user.store.created_at) > 0">
-                            <p class="font-bold">
-                                Te quedan {{ calculateRemainigFreeDays($page.props.auth.user.store.created_at) }}
-                                días de tu prueba gratuita. <span class="font-normal">¡Paga tu suscripción en cualquier
-                                    momento! Tu pago
-                                    comenzará a
-                                    contar al finalizar el periodo de prueba.</span>
-                            </p>
-                        </div>
-                        <p v-else>
-                            Tus días de prueba han expirado. <br>
-                            Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción.
-                        </p>
-                        <div class="flex justify-end mt-1">
-                            <button type="button" @click="$inertia.visit(route('profile.show'))"
-                                class="underline text-primary">
-                                Pagar suscripción
-                                <i class="fa-solid fa-arrow-right-long ml-1 text-[10px]"></i>
-                            </button>
-                        </div>
-                    </section>
                     <!-- mensaje de suscripcion a punto de expirar-->
-                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7"
-                        class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-xs lg:px-10">
+                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7 || $page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
+                        class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-[11px] md:text-xs lg:px-10">
                         <div v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) > 0">
                             Tu suscripción expira en
                             <strong>

@@ -42,10 +42,11 @@
               <p class="text-gray99 ml-7">{{ item.description }}</p>
             </div>
             <div class="w-1/5">
-              <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
+              <el-switch @change="handleSwitchModule(item)" v-model="item.activated" disabled class="ml-2"
                 style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #D4D4D4" />
             </div>
           </article>
+          <p class="p-3 text-[#373737] text-md">Si deseas deshabilitar alguna función adicional, tendrás que esperar a que tu suscripción finalice.</p>
         </div>
 
         <!-- Módulos adicionales -->
@@ -119,15 +120,15 @@
               <span class="font-bold"></span>
               <p class="font-bold text-[#373737]">Vence {{ formattedNextPayment }}</p>
             </div>
-            <div class="flex justify-between mt-1">
+            <!-- <div class="flex justify-between mt-1">
               <p>Módulos esenciales</p>
               <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
                 'Mensual' ? '229.00' : '2,290.00' }}</span></p>
-            </div>
+            </div> -->
 
-            <div>
+            <!-- <div>
               <p class="text-[#686767] mt-3">Adicionales</p>
-              <!-- modulos actuales -->
+              modulos actuales
               <div v-for="item in modules.filter(item => currentActivatedModules.includes(item.name))" :key="item"
                 class="flex">
                 <p class="w-1/2">{{ item.name }}</p>
@@ -135,16 +136,16 @@
                   'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
                     10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Total -->
-            <div class="flex font-bold mt-3">
+            <!-- <div class="flex font-bold mt-3">
               <p class="w-1/2">Total</p>
               <p class="w-1/2 text-right">
                 <span class="mr-1">$</span>
                 <span class="w-20 inline-block">{{ totalPaid.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
               </p>
-            </div>
+            </div> -->
           </section>
 
           <p class="font-bold mt-2">Detalles del Pago</p>
@@ -215,7 +216,7 @@
           <small v-if="this.calculateTotalPayment(this.calculateTotal) < 10">*Si el costo total es menor a $10.00 no se paga por la modificación</small>
           <!-- <form @submit.prevent="checkout" class="text-center mt-8"> -->
             <PrimaryButton @click="this.calculateTotalPayment(this.calculateTotal) > 10 ? checkout() : showUpdateModulesConfirmModal = true"
-              :disabled="loading"
+              :disabled="loading || this.calculateTotalPayment(this.calculateTotal) == 0"
               class="!px-28">
               <i v-if="loading" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
               {{ this.calculateTotalPayment(this.calculateTotal) > 10 ? 'Confirmar y pagar' : 'Confirmar modificación' }}
@@ -289,7 +290,8 @@
     <!-- Modal de confirmación de modificación de módulos -->
     <ConfirmationModal :show="showUpdateModulesConfirmModal" @close="showUpdateModulesConfirmModal = false">
       <template #title> Atención </template>
-      <template #content>Si estas quitando módulos de tu plan actual y quieres volverlos a agregar tendrás que pagar. ¿Deseas continuar?</template>
+      <template #content>Vas a agregar nuevos módulos a tu plan actual. ¿Deseas continuar?</template>
+      <!-- <template #content>Si estas quitando módulos de tu plan actual y quieres volverlos a agregar tendrás que pagar. ¿Deseas continuar?</template> -->
       <template #footer>
         <div class="space-x-2">
           <CancelButton @click="showUpdateModulesConfirmModal = false">Cancelar</CancelButton>

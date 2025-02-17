@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Store;
 use App\Models\Tutorial;
 use Illuminate\Http\Request;
 
@@ -11,11 +10,9 @@ class TutorialController extends Controller
     
     public function index()
     {   
-        if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
-            return inertia('Tutorial/BoutiqueIndex');
-        } else {
-            return inertia('Tutorial/Index');
-        }
+        $videos = Tutorial::where('status', true)->orderByDesc('created_at')->get();
+
+        return inertia('Tutorial/Index', compact('videos'));
     }
 
     
@@ -53,5 +50,12 @@ class TutorialController extends Controller
     {
         //
     }
+
+    public function incrementViews(Tutorial $tutorial)
+    {
+        $tutorial->increment('views');
+        return response()->json(['views' => $tutorial->views]);
+    }
+
 
 }

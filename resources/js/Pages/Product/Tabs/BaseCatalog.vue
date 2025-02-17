@@ -84,33 +84,31 @@
                         </div>
                     </transition>
                 </div>
-                <!-- vista previa de producto -->
+                <!-- Vista previa de producto -->
                 <Loading v-if="loadingProduct" class="mt-28" />
-                <div v-else-if="productInfo"
-                    class="rounded-lg border border-[#D9D9D9] w-3/4 mt-5 xl:mt-0 xl:w-1/2 min-h-[400px]">
-                    <p class="border-b border-[#D9D9D9] font-bold px-5 py-2">Vista previa del producto</p>
-                    <div class="py-3 px-7 h-full w-full">
-                        <figure class="h-[200px]">
-                            <img class="h-full mx-auto rounded-md" :src="productInfo?.media[0]?.original_url">
+                <div v-else-if="productInfo" class="rounded-2xl shadow-lg border border-gray-200 w-full sm:w-3/4 xl:w-1/2 mt-5 xl:mt-0 bg-white p-6">
+                    <p class="border-b border-gray-300 font-semibold text-lg pb-3">Vista previa del producto</p>
+                    <div class="py-5 flex flex-col items-center">
+                        <figure class="h-48 w-48 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                            <img v-if="productInfo?.media[0]?.original_url" :src="productInfo.media[0].original_url" 
+                                class="object-cover h-full w-full">
+                            <span v-else class="text-gray-400 text-sm">Sin imagen</span>
                         </figure>
-                        <div class="mt-7 text-sm grid grid-cols-3 gap-x-3 gap-y-1">
-                            <p>Nombre:</p>
-                            <p class="font-bold col-span-2">{{ productInfo?.name ?? '-' }}</p>
-                            <p>Categoría:</p>
-                            <p class="font-bold col-span-2">{{ productInfo?.category?.name ?? '-' }}</p>
-                            <p>Proveedor:</p>
-                            <p class="font-bold col-span-2">{{ productInfo?.brand?.name ?? '-' }}</p>
-                            <p>Precio sugerido:</p>
-                            <p class="font-bold col-span-2">${{
-                                productInfo?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                    ",") ??
-                                '-'
-                            }}</p>
-                            <p>Código:</p>
-                            <p class="font-bold col-span-2">{{ productInfo?.code ?? 'N/A' }}</p>
+                        <div class="mt-6 text-sm grid grid-cols-2 gap-y-2 w-full px-4">
+                            <p class="text-gray-600">Nombre:</p>
+                            <p class="font-medium text-gray-900">{{ productInfo?.name ?? '-' }}</p>
+                            <p class="text-gray-600">Categoría:</p>
+                            <p class="font-medium text-gray-900">{{ productInfo?.category?.name ?? '-' }}</p>
+                            <p class="text-gray-600">Proveedor:</p>
+                            <p class="font-medium text-gray-900">{{ productInfo?.brand?.name ?? '-' }}</p>
+                            <p class="text-gray-600">Precio sugerido:</p>
+                            <p class="font-medium text-green-600">${{ productInfo?.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '-' }}</p>
+                            <p class="text-gray-600">Código:</p>
+                            <p class="font-medium text-gray-900">{{ productInfo?.code ?? 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
+
             </section>
         </div>
 

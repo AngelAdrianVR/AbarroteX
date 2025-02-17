@@ -9,6 +9,11 @@
             <section class="flex items-center justify-center space-x-4">
                 <IconTextButton v-for="(item, index) in categories" :key="index" :icon="item.icon"
                     :routeName="item.routeName" :title="item.title" />
+                
+                <a href="https://api.whatsapp.com/send?phone=523322268824" target="_blank" class="w-28 h-32 bg-white border border-grayD9 hover:border-2 hover:border-primary rounded-[10px] shadow-lg text-gray37 text-lg flex flex-col items-center justify-center space-y-5 p-1">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i>
+                    <b>Chat</b>
+                </a>
             </section>
         </main>
     </AppLayout>

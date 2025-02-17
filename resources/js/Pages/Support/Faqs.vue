@@ -24,9 +24,11 @@
             </div>
             <div class="mt-8">
                 <h2 class="font-bold">¿Cuál es el proceso de renovación de la suscripción?</h2>
-                <p class="mt-3">La suscripción se renueva automáticamente al final del período de facturación
+                <!-- <p class="mt-3">La suscripción se renueva automáticamente al final del período de facturación
                     seleccionado (mensual o anual). Te enviaremos un aviso por correo electrónico antes de la
-                    renovación, y puedes cancelar en cualquier momento desde tu cuenta.</p>
+                    renovación, y puedes cancelar en cualquier momento desde tu cuenta.</p> -->
+                <p class="mt-3">Se te notificará una semana antes de tu siguiente periodo de facturación para que
+                    procedas a realizar el pago. Puedes agregar más tiempo a tu plan en cualquier momento.</p>
             </div>
             <div class="mt-8">
                 <h2 class="font-bold">¿Qué sucede si necesito ayuda adicional o tengo un problema técnico?</h2>
@@ -34,9 +36,18 @@
                     técnico a través del formulario de contacto en nuestra página de soporte. Nos esforzamos por
                     responder a todas las consultas en un plazo de 24 horas hábiles.</p>
             </div>
-            <PrimaryButton @click="$inertia.visit(route('support-reports.create'))" class="mt-20">
-                Contactar con soporte técnico
-            </PrimaryButton>
+
+            <div class="flex items-center space-x-3 mt-20">
+                <PrimaryButton @click="$inertia.visit(route('support-reports.create'))">
+                    Reportar a soporte
+                </PrimaryButton>
+
+                <el-tooltip class="" content="Contactar con soporte" placement="right">
+                    <a href="https://api.whatsapp.com/send?phone=523322268824" target="_blank" class="flex items-center justify-center rounded-full size-9 bg-primary text-white">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                    </a>
+                </el-tooltip>
+            </div>
         </main>
     </AppLayout>
 </template>

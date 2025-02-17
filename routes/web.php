@@ -75,6 +75,7 @@ Route::middleware([
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
+
 // Route::get('update-folio', function () {
 //     // Obtener las ventas de la tienda con id 5 y tomar los primeros 15
 //     $sales = Sale::where('store_id', 5)->get()->skip(5797);
@@ -415,6 +416,7 @@ Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'get
 //Tutorial routes-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('tutorials', TutorialController::class)->middleware('auth');
+Route::get('/tutorials/{tutorial}/increment-views', [TutorialController::class, 'incrementViews'])->name('tutorials.increment-views');
 
 
 //Abonos routes-----------------------------------------------------------------------------------------------------
@@ -490,6 +492,17 @@ Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->n
 //-----------------------------------------------------------------------------------------------------------------------
 // Route::resource('discount-sticket', DiscountTicketController::class)->middleware('auth');
 Route::get('discount-tickets/fetch-active-tickets', [DiscountTicketController::class, 'fetchActiveTickets'])->name('discount-tickets.fetch-active-tickets')->middleware('auth');
+
+
+// ver tutoriales
+Route::get('/started-turtorial', function () {
+    if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
+        return inertia('StartedTutorial/BoutiqueIndex');
+    } else {
+        return inertia('StartedTutorial/Index');
+    }
+})->name('started-tutorial');
+
 
 // comandos Artisan
 Route::get('/backup', function () {
