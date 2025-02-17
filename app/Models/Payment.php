@@ -24,6 +24,7 @@ class Payment extends Model implements HasMedia
         'days_gifted',
         'validated_at',
         'validated_by_id',
+        'created_at',
     ];
 
     protected $casts = ['validated_at' => 'datetime'];

@@ -10,7 +10,7 @@ class TutorialController extends Controller
     
     public function index()
     {   
-        $videos = Tutorial::where('status', true)->orderByDesc('created_at')->get();
+        $videos = Tutorial::where('status', true)->get();
 
         return inertia('Tutorial/Index', compact('videos'));
     }

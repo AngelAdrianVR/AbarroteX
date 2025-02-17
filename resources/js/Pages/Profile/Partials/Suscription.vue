@@ -115,7 +115,7 @@
                                     que se muestren todos los datos.</p>
 
                                 <a v-if="this.$page.props.auth.user.store.last_payment"
-                                    :href="this.$page.props.auth.user.store.last_payment.media[0].original_url"
+                                    :href="this.$page.props.auth.user.store.last_payment?.media[0]?.original_url"
                                     target="_blank" class="underline text-primary">Ver comprobante anterior</a>
                                 <div class="my-2">
                                     <InputFilePreview @imagen="saveImage" @cleared="form.image = null" />
@@ -476,7 +476,9 @@ export default {
         },
         scrollToBottom() {
             const btnBottom = document.getElementById('btn-bottom');
-            btnBottom.scrollIntoView({ behavior: 'smooth' });
+            if (btnBottom) {
+                btnBottom.scrollIntoView({ behavior: 'smooth' });
+            }
         },
         getSuscriptionAmount() {
             // Filtra los módulos activados
