@@ -37,8 +37,8 @@ const updateCarouselHeight = () => {
 
 // Definir la URL de WhatsApp como una propiedad computada
 const whatsappLink = computed(() => {
-  const text = encodeURIComponent('¡Hola!, quisiera más información sobre el punto de venta');
-  return `https://wa.me/523312155731?text=${text}`;
+    const text = encodeURIComponent('¡Hola!, quisiera más información sobre el punto de venta');
+    return `https://wa.me/523312155731?text=${text}`;
 });
 
 onMounted(() => {
@@ -67,7 +67,7 @@ const imageSets = ref([
 ]);
 </script>
 
-<style>
+<style scoped>
 /* Estilos personalizados para los botones de navegación del carrusel */
 .el-carousel__arrow {
     background-color: rgba(99, 98, 98, 0.562);
@@ -100,6 +100,98 @@ const imageSets = ref([
     color: #F68C0F;
     /* Color del indicador activo (puedes cambiarlo al que prefieras) */
 }
+
+/* uiverse estilos */
+/* From Uiverse.io by CritCoder */
+.buttonupgrade {
+    width: fit-content;
+    display: flex;
+    padding: 5px 22px;
+    cursor: pointer;
+    border-radius: 30px;
+    text-shadow: 2px 2px 3px rgba(221, 255, 0, 0.3);
+    background: linear-gradient(15deg,
+            #F68C0F,
+            #e6810e,
+            #bb6707,
+            #905209,
+            #F68C0F,
+            #e6810e,
+            #bb6707,
+            #905209) no-repeat;
+    background-size: 300%;
+    color: white;
+    border: none;
+    background-position: left center;
+    box-shadow: 0 20px 10px -14px rgba(246, 140, 15, 0.5);
+    transition:
+        background 0.3s ease,
+        color 0.3s ease;
+}
+
+.buttonupgrade:hover {
+    background-size: 320%;
+    background-position: right center;
+    color: white;
+}
+
+
+/* From Uiverse.io by rahulgarg99 */
+.button1 {
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #fff;
+    color: #F68C0F;
+    border-radius: 10rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    padding-left: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 0.3s;
+}
+
+.button1__icon-wrapper {
+    flex-shrink: 0;
+    width: 25px;
+    height: 25px;
+    position: relative;
+    color: #fff;
+    background-color: #F68C0F;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.button1:hover {
+    background-color: #F68C0F;
+    color: white;
+}
+
+.button1:hover .button1__icon-wrapper {
+    color: #F68C0F;
+    background-color: #fff;
+}
+
+.button1__icon-svg--copy {
+    position: absolute;
+    transform: translate(-150%, 150%);
+}
+
+.button1:hover .button1__icon-svg:first-child {
+    transition: transform 0.3s ease-in-out;
+    transform: translate(150%, -150%);
+}
+
+.button1:hover .button1__icon-svg--copy {
+    transition: transform 0.3s ease-in-out 0.1s;
+    transform: translate(0);
+}
 </style>
 
 <template>
@@ -108,34 +200,38 @@ const imageSets = ref([
 
     <nav class="bg-black1">
         <div class="max-w-8xl mx-auto px-4 md:px-7 py-3" data-aos="zoom-in" data-aos-duration="800">
-            <div class="flex justify-between items-center h-12 bg-white rounded-full px-4">
+            <div class="flex justify-between items-center h-14 bg-[#404040]/30 rounded-full pl-6 pr-2">
                 <div class="flex">
                     <!-- Logo -->
                     <div class="shrink-0 flex items-center">
                         <ApplicationMark class="block h-10 md:h-12 w-auto" />
                     </div>
                 </div>
-
-                <div class="flex sm:items-center space-x-2 sm:ms-6">
+                <div class="flex sm:items-center space-x-12 sm:ms-6">
+                    <button class="text-white focus:border-none focus:ring-0" type="button">Inicio</button>
+                    <button class="text-white focus:border-none focus:ring-0" type="button">Funcionalidades</button>
+                    <button class="text-white focus:border-none focus:ring-0" type="button">Precios</button>
+                    <button class="text-white focus:border-none focus:ring-0" type="button">Productos</button>
                     <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
-                    <PrimaryButton class="!py-[5px] md:!py-2">Ingresar</PrimaryButton>
+                    <button class="buttonupgrade">
+                        Iniciar sesión
+                    </button>
                     </Link>
-                    <!-- <Link :href="route('register')">
-                        <PrimaryButton class="!py-[5px] md:!py-2 !bg-gray37">Registrate</PrimaryButton>
-                    </Link> -->
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="bg-black1 selection:bg-primary selection:text-white pb-24 overflow-hidden">
-        <section class="lg:flex justify-center">
+        <section class="lg:flex justify-center relative">
             <div class="pt-8 lg:mt-10 px-3 mx-2 xl:w-4/5">
                 <!-- Carousel -->
                 <div class="block text-center">
                 </div>
-                <figure class="flex flex-col lg:flex-row lg:justify-between xl:space-x-20 lg:w-full" data-aos="zoom-in-up" data-aos-duration="800">
-                    <img class="lg:w-1/2 object-contain" src="@/../../public/images/landing-01.png" alt="landing_page" data-aos="zoom-in-down" data-aos-duration="800">
+                <figure class="flex flex-col lg:flex-row lg:justify-between xl:space-x-20 lg:w-full"
+                    data-aos="zoom-in-up" data-aos-duration="800">
+                    <img class="lg:w-1/2 object-contain" src="@/../../public/images/landing-01.png" alt="landing_page"
+                        data-aos="zoom-in-down" data-aos-duration="800">
                     <div class="lg:w-1/2 mt-5 lg:mt-0 p-4">
                         <el-carousel trigger="click" :height="carouselHeight">
                             <el-carousel-item v-for="(imageSet, index) in imageSets" :key="index">
@@ -153,11 +249,30 @@ const imageSets = ref([
                     </div>
                 </figure>
             </div>
+            <a href="#" class="button1 absolute bottom-20 right-14" style="--clr: #7808d0">
+                <span class="button1__icon-wrapper">
+                    <svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="button1__icon-svg"
+                        width="10">
+                        <path
+                            d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+                            fill="currentColor"></path>
+                    </svg>
+
+                    <svg viewBox="0 0 14 15" fill="none" width="10" xmlns="http://www.w3.org/2000/svg"
+                        class="button1__icon-svg button1__icon-svg--copy">
+                        <path
+                            d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+                            fill="currentColor"></path>
+                    </svg>
+                </span>
+                Probar ahora
+            </a>
         </section>
 
         <!-- funcionalidades -->
         <section class="my-12">
-            <h1 class="text-3xl text-center font-bold text-white" data-aos="fade-up" data-aos-duration="500" data-aos-offset="100">FUNCIONALIDAD DE LOS MÓDULOS</h1>
+            <h1 class="text-3xl text-center font-bold text-white" data-aos="fade-up" data-aos-duration="500"
+                data-aos-offset="100">FUNCIONALIDAD DE LOS MÓDULOS</h1>
 
             <article class="my-7">
                 <!-- CONOCE TUS GANANCIAS AL INSTANTE -->
@@ -229,11 +344,13 @@ const imageSets = ref([
             <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
                     <!-- imagen -->
-                    <figure class="lg:w-1/2 pl-5" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400" data-aos-offset="400">
+                    <figure class="lg:w-1/2 pl-5" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400"
+                        data-aos-offset="400">
                         <img class="w-full" src="@/../../public/images/function_2.png" alt="ganancias">
                     </figure>
 
-                    <div class="lg:w-1/2" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400" data-aos-offset="400">
+                    <div class="lg:w-1/2" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400"
+                        data-aos-offset="400">
                         <h2 class="text-2xl text-center text-white">GESTIONA TU INVENTARIO</h2>
 
                         <!-- texto -->
@@ -314,7 +431,8 @@ const imageSets = ref([
             <!-- CORTES DE CAJA -->
             <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
-                    <div class="lg:w-1/2" data-aos="fade-right" data-aos-duration="500" data-aos-delay="400" data-aos-offset="400">
+                    <div class="lg:w-1/2" data-aos="fade-right" data-aos-duration="500" data-aos-delay="400"
+                        data-aos-offset="400">
                         <h2 class="text-2xl text-center text-white">CORTES DE CAJA</h2>
                         <!-- texto -->
                         <section>
@@ -372,7 +490,8 @@ const imageSets = ref([
                         </section>
                     </div>
                     <!-- imagen -->
-                    <figure class="lg:w-1/2 pl-5" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400" data-aos-offset="400">
+                    <figure class="lg:w-1/2 pl-5" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400"
+                        data-aos-offset="400">
                         <img class="w-full" src="@/../../public/images/function_3.png" alt="ganancias">
                     </figure>
                 </div>
@@ -382,11 +501,13 @@ const imageSets = ref([
             <article class="my-7">
                 <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
                     <!-- imagen -->
-                    <figure class="lg:w-1/2 pl-12" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400" data-aos-offset="400">
+                    <figure class="lg:w-1/2 pl-12" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400"
+                        data-aos-offset="400">
                         <img class="w-2/3 mx-auto" src="@/../../public/images/function_4.png" alt="ganancias">
                     </figure>
 
-                    <div class="lg:w-1/2 mt-5" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400" data-aos-offset="400">
+                    <div class="lg:w-1/2 mt-5" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400"
+                        data-aos-offset="400">
                         <h2 class="text-2xl text-center text-white">¿POR QUÉ ELEGIR EZY VENTAS?</h2>
                         <!-- texto -->
                         <section>
