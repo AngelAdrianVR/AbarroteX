@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use App\Models\Store;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -222,22 +223,6 @@ class StripeController extends Controller
             }
             $store->save();
 
-
-            // // Encontrar la tienda del usuario autenticado
-            // $store = Store::find(auth()->user()->store_id);
-            
-            // // Asignar el periodo de suscripción basado en el nombre del producto
-            // if ($products[0]['name'] === "Periodo de suscripción: Mensual") {
-            //     $store->suscription_period = 'Mensual';
-            //     $proximoPago = now()->addDays(30);
-            // } else {
-            //     $store->suscription_period = 'Anual';
-            //     $proximoPago = now()->addDays(365);
-            // }
-            
-            // // Actualizar la fecha del próximo pago
-            // $store->next_payment = $proximoPago->toDateTimeString();
-
             // Si se han actualizado los módulos, guardarlos en la base de datos
             if ($modules_updated) {
                 $store->activated_modules = $modules_updated;
@@ -247,6 +232,18 @@ class StripeController extends Controller
             $store->is_active = true;
             $store->status = 'Pagado';
             $store->save();
+
+            //registrar el pago a la tabla payments de la base de datos para reflejarlo en el dashboard de administrador
+            Payment::create([
+                'payment_method' => 'Tarjeta de crédito o débito',
+                'suscription_period' => $daysToAdd === 30 ? 'Mensual' : 'Anual',
+                'status' => 'Aprobado',
+                'amount' => $products[0]['price'],
+                'store_id' => $store->id,
+                'validated_by_id' => 1,
+                'created_at' => now(),
+                'validated_at' => now(),
+            ]);
 
             // Redirigir a la página de éxito
             return inertia('Stripe/Success');
@@ -263,6 +260,9 @@ class StripeController extends Controller
     public function updatePlanModulesSuccess(Request $request)
     {
         $session_id = $request->input('session_id');
+
+        //procesar informacion recibida en parametros url
+        $products = json_decode($request->input('products'), true);
 
         try {
             // Verificar el estado del pago a través de la API de Stripe usando el session_id
@@ -283,6 +283,18 @@ class StripeController extends Controller
             // Actualizar los módulos, guardarlos en la base de datos
             $store->activated_modules = $modules_updated;
             $store->save();
+
+            //registrar el pago a la tabla payments de la base de datos para reflejarlo en el dashboard de administrador
+            Payment::create([
+                'payment_method' => 'Tarjeta de crédito o débito',
+                'suscription_period' => 'Mejora de módulos',
+                'status' => 'Aprobado',
+                'amount' => $products[0]['price'],
+                'store_id' => $store->id,
+                'validated_by_id' => 1,
+                'created_at' => now(),
+                'validated_at' => now(),
+            ]);
 
             // Redirigir a la página de éxito
             return inertia('Stripe/Success');

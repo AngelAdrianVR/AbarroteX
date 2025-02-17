@@ -1,6 +1,6 @@
 <template>
     <div
-        class="min-h-[100px] self-start border border-gray3 rounded-[10px] lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
+        class="min-h-[100px] self-start rounded-lg shadow-lg text-center lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
         <h1 class="font-bold text-center">{{ title }} <span v-html="icon"></span></h1>
         <main class="flex items-center space-x-4 pt-4">
             <section class="flex flex-col items-center space-y-1 w-2/3">
