@@ -1,8 +1,7 @@
 <template>
-  <main class="w-full lg:flex lg:space-x-5 lg:divide-x-2 divide-[#373737]">
-
+  <main class="w-full lg:flex lg:space-x-5 justify-center lg:divide-x-2 divide-[#373737]">
     <!-- Lado izquierdo -->
-    <section class="lg:w-1/2 lg:pr-7">
+    <section class="lg:w-[40%] lg:pr-7">
       <!-- <p class="text-white font-font">Giro de tu negocio</p> -->
       <div class="mt-1">
         <!-- <el-select
@@ -16,160 +15,175 @@
         >
           <el-option v-for="item in types" :key="item" :label="item" :value="item" />
         </el-select> -->
-
-        <div class="rounded-md border border-grayD9 py-3 px-4 text-white mt-9">
-          <p>Módulos esenciales</p>
-          <p class="text-gray99 text-sm mt-1">
-            Los siguientes módulos están diseñados para cubrir las necesidades
-            esenciales de cualquier sistema de punto de venta y estan ya incluidos en el pago de $229.00
+        <div class="rounded-[26px] border border-grayD9 py-3 px-4 text-white pb-16">
+          <p class="text-center">Módulos esenciales</p>
+          <p class="text-sm mt-2 text-justify">
+            Nuestros módulos predefinidos están diseñados para cubrir las necesidades esenciales de cualquier sistema de
+            punto de venta. Para explorar más opciones.
           </p>
-
-          <ul class="mt-5 *:flex *:items-center *:space-x-2 space-y-1">
+          <ul class="mt-5 *:text-[#D38CFF] space-y-3 text-sm">
             <li>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="17" width="19"
-                id="Shopping-Basket-2--Streamline-Core">
-                <desc>Shopping Basket 2 Streamline Icon: https://streamlinehq.com</desc>
-                <g id="shopping-basket-2--shopping-basket">
-                  <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M19.625389714285713 7.932533357142858H2.6646102857142857C2.4237190714285712 7.927597714285714 2.184897642857143 7.976954142857143 1.9656595714285712 8.076940714285715C1.7464214999999998 8.176927285714285 1.5524984999999998 8.32499657142857 1.398219857142857 8.510162785714286C1.2439412142857142 8.695169785714285 1.1332872857142857 8.9126565 1.0745372142857144 9.146223857142857C1.0157871428571428 9.379950428571428 1.0102146428571428 9.623866714285715 1.0584565714285714 9.859822285714285L2.8252574999999998 18.693667714285713C2.900406642857143 19.061771142857143 3.1021311428571425 19.392140785714286 3.3957222857142857 19.626822642857142C3.689154214285714 19.861663714285715 4.0556655 19.986169285714286 4.431411214285714 19.978527H17.858588785714286C18.234493714285712 19.986169285714286 18.601005 19.861663714285715 18.894436928571427 19.626822642857142C19.187868857142856 19.392140785714286 19.38975257142857 19.061771142857143 19.4647425 18.693667714285713L21.231543428571428 9.859822285714285C21.279785357142856 9.623866714285715 21.274212857142857 9.379950428571428 21.215462785714287 9.146223857142857C21.156712714285714 8.9126565 21.046058785714283 8.695169785714285 20.891780142857144 8.510162785714286C20.7375015 8.32499657142857 20.5435785 8.176927285714285 20.32434042857143 8.076940714285715S19.866280928571427 7.927597714285714 19.625389714285713 7.932533357142858Z"
-                    stroke-width="1.71"></path>
-                  <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M14.357307428571428 2.3111545714285713L17.569614857142856 7.932533357142858" stroke-width="1.71">
-                  </path>
-                  <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M4.720385142857142 7.932533357142858L7.932692571428571 2.3111545714285713" stroke-width="1.71">
-                  </path>
-                </g>
-              </svg>
-              <p class="text-sm">Punto de venta</p>
+              <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="17" width="19"
+                  id="Shopping-Basket-2--Streamline-Core">
+                  <desc>Shopping Basket 2 Streamline Icon: https://streamlinehq.com</desc>
+                  <g id="shopping-basket-2--shopping-basket">
+                    <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M19.625389714285713 7.932533357142858H2.6646102857142857C2.4237190714285712 7.927597714285714 2.184897642857143 7.976954142857143 1.9656595714285712 8.076940714285715C1.7464214999999998 8.176927285714285 1.5524984999999998 8.32499657142857 1.398219857142857 8.510162785714286C1.2439412142857142 8.695169785714285 1.1332872857142857 8.9126565 1.0745372142857144 9.146223857142857C1.0157871428571428 9.379950428571428 1.0102146428571428 9.623866714285715 1.0584565714285714 9.859822285714285L2.8252574999999998 18.693667714285713C2.900406642857143 19.061771142857143 3.1021311428571425 19.392140785714286 3.3957222857142857 19.626822642857142C3.689154214285714 19.861663714285715 4.0556655 19.986169285714286 4.431411214285714 19.978527H17.858588785714286C18.234493714285712 19.986169285714286 18.601005 19.861663714285715 18.894436928571427 19.626822642857142C19.187868857142856 19.392140785714286 19.38975257142857 19.061771142857143 19.4647425 18.693667714285713L21.231543428571428 9.859822285714285C21.279785357142856 9.623866714285715 21.274212857142857 9.379950428571428 21.215462785714287 9.146223857142857C21.156712714285714 8.9126565 21.046058785714283 8.695169785714285 20.891780142857144 8.510162785714286C20.7375015 8.32499657142857 20.5435785 8.176927285714285 20.32434042857143 8.076940714285715S19.866280928571427 7.927597714285714 19.625389714285713 7.932533357142858Z"
+                      stroke-width="1.71"></path>
+                    <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M14.357307428571428 2.3111545714285713L17.569614857142856 7.932533357142858"
+                      stroke-width="1.71">
+                    </path>
+                    <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M4.720385142857142 7.932533357142858L7.932692571428571 2.3111545714285713" stroke-width="1.71">
+                    </path>
+                  </g>
+                </svg>
+                <p class="text-sm">Punto de venta</p>
+              </div>
+              <p class="text-gray99">Registra ventas y genera tickets de manera rápida y sencilla.</p>
             </li>
             <li>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="17" width="19"
-                id="Graph-Bar-Increase--Streamline-Core">
-                <desc>Graph Bar Increase Streamline Icon: https://streamlinehq.com</desc>
-                <g id="graph-bar-increase--up-product-performance-increase-arrow-graph-business-chart">
-                  <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="m1.9742412214285712 10.412709814285714 18.30965877857143 -8.326907142857143" stroke-width="1.71">
-                  </path>
-                  <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="m16.860792857142858 0.7960714285714285 3.4231071428571425 1.2896357142857142 -1.2737142857142858 3.4231071428571425"
-                    stroke-width="1.71"></path>
-                  <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M21.095892857142857 21.49392857142857h-3.9803571428571427v-11.145c0 -0.2111340642857143 0.08390592857142856 -0.4136227928571429 0.2330897142857143 -0.562902107142857C17.49796842857143 9.636731228571428 17.700488999999997 9.552857142857142 17.911607142857143 9.552857142857142h2.3882142857142856c0.21111814285714284 0 0.41363871428571425 0.0838740857142857 0.5629817142857143 0.2331693214285714 0.14918378571428573 0.14927931428571428 0.2330897142857143 0.35176804285714286 0.2330897142857143 0.562902107142857v11.145Z"
-                    stroke-width="1.71"></path>
-                  <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M13.135178571428572 21.49392857142857h-3.9803571428571427l0 -8.756785714285714c0 -0.2111340642857143 0.0838740857142857 -0.4136227928571429 0.2331693214285714 -0.562902107142857C9.537270064285714 12.024945514285713 9.739758792857144 11.941071428571428 9.950892857142858 11.941071428571428h2.3882142857142856c0.2111340642857143 0 0.4136227928571429 0.0838740857142857 0.562902107142857 0.2331693214285714 0.1492952357142857 0.14927931428571428 0.2331693214285714 0.35176804285714286 0.2331693214285714 0.562902107142857v8.756785714285714Z"
-                    stroke-width="1.71"></path>
-                  <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M5.1744642857142855 21.49392857142857H1.1941071428571428l0 -6.368571428571428c0 -0.2111340642857143 0.08387249357142856 -0.4136227928571429 0.23316454499999997 -0.562902107142857C1.5765637392857141 14.4131598 1.7790445071428573 14.329285714285714 1.9901785714285714 14.329285714285714h2.3882142857142856c0.2111340642857143 0 0.4136227928571429 0.0838740857142857 0.562902107142857 0.2331693214285714 0.1492952357142857 0.14927931428571428 0.2331693214285714 0.35176804285714286 0.2331693214285714 0.562902107142857l0 6.368571428571428Z"
-                    stroke-width="1.71"></path>
-                </g>
-              </svg>
-              <p class="text-sm">Reportes</p>
+              <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="17" width="19"
+                  id="Graph-Bar-Increase--Streamline-Core">
+                  <desc>Graph Bar Increase Streamline Icon: https://streamlinehq.com</desc>
+                  <g id="graph-bar-increase--up-product-performance-increase-arrow-graph-business-chart">
+                    <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="m1.9742412214285712 10.412709814285714 18.30965877857143 -8.326907142857143"
+                      stroke-width="1.71">
+                    </path>
+                    <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="m16.860792857142858 0.7960714285714285 3.4231071428571425 1.2896357142857142 -1.2737142857142858 3.4231071428571425"
+                      stroke-width="1.71"></path>
+                    <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M21.095892857142857 21.49392857142857h-3.9803571428571427v-11.145c0 -0.2111340642857143 0.08390592857142856 -0.4136227928571429 0.2330897142857143 -0.562902107142857C17.49796842857143 9.636731228571428 17.700488999999997 9.552857142857142 17.911607142857143 9.552857142857142h2.3882142857142856c0.21111814285714284 0 0.41363871428571425 0.0838740857142857 0.5629817142857143 0.2331693214285714 0.14918378571428573 0.14927931428571428 0.2330897142857143 0.35176804285714286 0.2330897142857143 0.562902107142857v11.145Z"
+                      stroke-width="1.71"></path>
+                    <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M13.135178571428572 21.49392857142857h-3.9803571428571427l0 -8.756785714285714c0 -0.2111340642857143 0.0838740857142857 -0.4136227928571429 0.2331693214285714 -0.562902107142857C9.537270064285714 12.024945514285713 9.739758792857144 11.941071428571428 9.950892857142858 11.941071428571428h2.3882142857142856c0.2111340642857143 0 0.4136227928571429 0.0838740857142857 0.562902107142857 0.2331693214285714 0.1492952357142857 0.14927931428571428 0.2331693214285714 0.35176804285714286 0.2331693214285714 0.562902107142857v8.756785714285714Z"
+                      stroke-width="1.71"></path>
+                    <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M5.1744642857142855 21.49392857142857H1.1941071428571428l0 -6.368571428571428c0 -0.2111340642857143 0.08387249357142856 -0.4136227928571429 0.23316454499999997 -0.562902107142857C1.5765637392857141 14.4131598 1.7790445071428573 14.329285714285714 1.9901785714285714 14.329285714285714h2.3882142857142856c0.2111340642857143 0 0.4136227928571429 0.0838740857142857 0.562902107142857 0.2331693214285714 0.1492952357142857 0.14927931428571428 0.2331693214285714 0.35176804285714286 0.2331693214285714 0.562902107142857l0 6.368571428571428Z"
+                      stroke-width="1.71"></path>
+                  </g>
+                </svg>
+                <p class="text-sm">Reportes</p>
+              </div>
+              <p class="text-gray99">Consulta y analiza las ventas, gastos y desempeño del negocio.</p>
             </li>
             <li>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="17" width="19"
-                id="Task-List--Streamline-Core">
-                <desc>Task List Streamline Icon: https://streamlinehq.com</desc>
-                <g id="task-list--task-list-work">
-                  <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M19.72665 19.72665C19.72665 20.14044792857143 19.56218164285714 20.53736914285714 19.269705 20.830005C18.976909928571427 21.122481642857142 18.580147928571428 21.286949999999997 18.166349999999998 21.286949999999997H4.12365C3.709852071428571 21.286949999999997 3.312930857142857 21.122481642857142 3.020295 20.830005C2.727659142857143 20.53736914285714 2.5633500000000002 20.14044792857143 2.5633500000000002 19.72665V2.5633500000000002C2.5633500000000002 2.1495520714285714 2.727659142857143 1.752630857142857 3.020295 1.459995C3.312930857142857 1.1675183571428571 3.709852071428571 1.00305 4.12365 1.00305H12.839199214285713C13.252997142857142 1.00305 13.649759142857143 1.1675183571428571 13.942395 1.459995L19.269705 6.787305C19.56218164285714 7.079940857142856 19.72665 7.476702857142857 19.72665 7.890500785714285V19.72665Z"
-                    stroke-width="1.71"></path>
-                  <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M12.016539 10.169812499999999H15.917289" stroke-width="1.71"></path>
-                  <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M12.016539 15.582142928571427H15.917289" stroke-width="1.71"></path>
-                  <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M5.982636 15.493779L7.289944500000001 16.8010875L9.468791999999999 13.750541785714285"
-                    stroke-width="1.71"></path>
-                  <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                    d="M5.982636 9.983850214285713L7.289944500000001 11.291317928571427L9.468791999999999 8.240772214285714"
-                    stroke-width="1.71"></path>
-                </g>
-              </svg>
-              <p class="text-sm">Registro de ventas</p>
+              <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24" height="17" width="19"
+                  id="Task-List--Streamline-Core">
+                  <desc>Task List Streamline Icon: https://streamlinehq.com</desc>
+                  <g id="task-list--task-list-work">
+                    <path id="Vector" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M19.72665 19.72665C19.72665 20.14044792857143 19.56218164285714 20.53736914285714 19.269705 20.830005C18.976909928571427 21.122481642857142 18.580147928571428 21.286949999999997 18.166349999999998 21.286949999999997H4.12365C3.709852071428571 21.286949999999997 3.312930857142857 21.122481642857142 3.020295 20.830005C2.727659142857143 20.53736914285714 2.5633500000000002 20.14044792857143 2.5633500000000002 19.72665V2.5633500000000002C2.5633500000000002 2.1495520714285714 2.727659142857143 1.752630857142857 3.020295 1.459995C3.312930857142857 1.1675183571428571 3.709852071428571 1.00305 4.12365 1.00305H12.839199214285713C13.252997142857142 1.00305 13.649759142857143 1.1675183571428571 13.942395 1.459995L19.269705 6.787305C19.56218164285714 7.079940857142856 19.72665 7.476702857142857 19.72665 7.890500785714285V19.72665Z"
+                      stroke-width="1.71"></path>
+                    <path id="Vector_2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M12.016539 10.169812499999999H15.917289" stroke-width="1.71"></path>
+                    <path id="Vector_3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M12.016539 15.582142928571427H15.917289" stroke-width="1.71"></path>
+                    <path id="Vector_4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M5.982636 15.493779L7.289944500000001 16.8010875L9.468791999999999 13.750541785714285"
+                      stroke-width="1.71"></path>
+                    <path id="Vector_5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                      d="M5.982636 9.983850214285713L7.289944500000001 11.291317928571427L9.468791999999999 8.240772214285714"
+                      stroke-width="1.71"></path>
+                  </g>
+                </svg>
+                <p class="text-sm">Registro de ventas</p>
+              </div>
+              <p class="text-gray99">Organiza cada transacción para un mejor control y seguimiento.</p>
             </li>
             <li>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-5">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
-              </svg>
-              <p class="text-sm">Caja</p>
+              <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="size-5">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
+                </svg>
+                <p class="text-sm">Caja</p>
+              </div>
+              <p class="text-gray99">Controla ingresos, ventas y retiros al instante</p>
             </li>
             <li>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.565 -0.565 18 18" height="17" width="19"
-                id="Warehouse-Cart-Packages-2--Streamline-Ultimate">
-                <desc>Warehouse Cart Packages 2 Streamline Icon: https://streamlinehq.com</desc>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                  d="M0.5313916445833333 11.598125H11.748549166666665c0.25276883333333333 0.0004217499999999999 0.49731354166666664 -0.08997333333333334 0.6890692083333333 -0.254737 0.191685375 -0.16476366666666667 0.31785891666666666 -0.39293041666666667 0.35546495833333336 -0.6428875833333333l1.3102366666666667 -8.748500833333333c0.03753575 -0.24962679583333333 0.1633578333333333 -0.4775123791666666 0.3546214583333333 -0.6422268416666667 0.19133391666666666 -0.16472149166666666 0.4353865833333333 -0.25534150833333336 0.6878039583333333 -0.2553977416666667h1.2012845833333334"
-                  stroke-width="1.13"></path>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.1129534416666664 5.271875h3.163125s0.5271874999999999 0 0.5271874999999999 0.5271874999999999v3.163125s0 0.5271874999999999 -0.5271874999999999 0.5271874999999999h-3.163125s-0.5271874999999999 0 -0.5271874999999999 -0.5271874999999999v-3.163125s0 -0.5271874999999999 0.5271874999999999 -0.5271874999999999Z"
-                  stroke-width="1.13"></path>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                  d="M6.330453441666666 3.163125H10.5479675s0.5271874999999999 0 0.5271874999999999 0.5271874999999999v5.271875s0 0.5271874999999999 -0.5271874999999999 0.5271874999999999H6.330453441666666s-0.5271874999999999 0 -0.5271874999999999 -0.5271874999999999v-5.271875s0 -0.5271874999999999 0.5271874999999999 -0.5271874999999999Z"
-                  stroke-width="1.13"></path>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                  d="M1.5857659416666667 14.497656249999999c0 0.17305808333333333 0.03409145833333333 0.3444291666666666 0.10032729583333333 0.5043427083333333 0.06622880833333333 0.15991354166666666 0.1633156583333333 0.30520641666666665 0.28570047916666663 0.42758420833333327 0.12238482083333332 0.12237779166666667 0.26767066666666667 0.2194505833333333 0.42757717916666665 0.285735625 0.1599065125 0.06621475 0.331284625 0.10030620833333333 0.5043637958333334 0.10030620833333333s0.3444643125 -0.03409145833333333 0.5043637958333334 -0.10030620833333333c0.1599065125 -0.06628504166666666 0.3051993875 -0.1633578333333333 0.42758420833333327 -0.285735625 0.12238482083333332 -0.12237779166666667 0.21946464166666665 -0.26767066666666667 0.28570047916666663 -0.42758420833333327 0.06622880833333333 -0.15991354166666666 0.10032026666666667 -0.331284625 0.10032026666666667 -0.5043427083333333 0 -0.3495604583333333 -0.1388541583333333 -0.6847814166666666 -0.38602074583333335 -0.9319269166666667 -0.24716658749999998 -0.24721579166666666 -0.5824016041666666 -0.3860418333333333 -0.9319480041666667 -0.3860418333333333 -0.3495464 0 -0.6847743875 0.13882604166666668 -0.931940975 0.3860418333333333 -0.24716658749999998 0.24714550000000002 -0.38602777499999996 0.5823664583333333 -0.38602777499999996 0.9319269166666667Z"
-                  stroke-width="1.13"></path>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                  d="M8.966405 14.497656249999999c0 0.3495604583333333 0.13882604166666668 0.6847814166666666 0.3860418333333333 0.9319269166666667 0.24714550000000002 0.24721579166666666 0.5823664583333333 0.3860418333333333 0.9319269166666667 0.3860418333333333 0.3495604583333333 0 0.6847814166666666 -0.13882604166666668 0.9319269166666667 -0.3860418333333333 0.24714550000000002 -0.24714550000000002 0.3860418333333333 -0.5823664583333333 0.3860418333333333 -0.9319269166666667 0 -0.3495604583333333 -0.13889633333333332 -0.6847814166666666 -0.3860418333333333 -0.9319269166666667 -0.24714550000000002 -0.24721579166666666 -0.5823664583333333 -0.3860418333333333 -0.9319269166666667 -0.3860418333333333 -0.3495604583333333 0 -0.6847814166666666 0.13882604166666668 -0.9319269166666667 0.3860418333333333 -0.24721579166666666 0.24714550000000002 -0.3860418333333333 0.5823664583333333 -0.3860418333333333 0.9319269166666667Z"
-                  stroke-width="1.13"></path>
-              </svg>
-              <p class="text-sm">Productos</p>
+              <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.565 -0.565 18 18" height="17" width="19"
+                  id="Warehouse-Cart-Packages-2--Streamline-Ultimate">
+                  <desc>Warehouse Cart Packages 2 Streamline Icon: https://streamlinehq.com</desc>
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    d="M0.5313916445833333 11.598125H11.748549166666665c0.25276883333333333 0.0004217499999999999 0.49731354166666664 -0.08997333333333334 0.6890692083333333 -0.254737 0.191685375 -0.16476366666666667 0.31785891666666666 -0.39293041666666667 0.35546495833333336 -0.6428875833333333l1.3102366666666667 -8.748500833333333c0.03753575 -0.24962679583333333 0.1633578333333333 -0.4775123791666666 0.3546214583333333 -0.6422268416666667 0.19133391666666666 -0.16472149166666666 0.4353865833333333 -0.25534150833333336 0.6878039583333333 -0.2553977416666667h1.2012845833333334"
+                    stroke-width="1.13"></path>
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.1129534416666664 5.271875h3.163125s0.5271874999999999 0 0.5271874999999999 0.5271874999999999v3.163125s0 0.5271874999999999 -0.5271874999999999 0.5271874999999999h-3.163125s-0.5271874999999999 0 -0.5271874999999999 -0.5271874999999999v-3.163125s0 -0.5271874999999999 0.5271874999999999 -0.5271874999999999Z"
+                    stroke-width="1.13"></path>
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    d="M6.330453441666666 3.163125H10.5479675s0.5271874999999999 0 0.5271874999999999 0.5271874999999999v5.271875s0 0.5271874999999999 -0.5271874999999999 0.5271874999999999H6.330453441666666s-0.5271874999999999 0 -0.5271874999999999 -0.5271874999999999v-5.271875s0 -0.5271874999999999 0.5271874999999999 -0.5271874999999999Z"
+                    stroke-width="1.13"></path>
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    d="M1.5857659416666667 14.497656249999999c0 0.17305808333333333 0.03409145833333333 0.3444291666666666 0.10032729583333333 0.5043427083333333 0.06622880833333333 0.15991354166666666 0.1633156583333333 0.30520641666666665 0.28570047916666663 0.42758420833333327 0.12238482083333332 0.12237779166666667 0.26767066666666667 0.2194505833333333 0.42757717916666665 0.285735625 0.1599065125 0.06621475 0.331284625 0.10030620833333333 0.5043637958333334 0.10030620833333333s0.3444643125 -0.03409145833333333 0.5043637958333334 -0.10030620833333333c0.1599065125 -0.06628504166666666 0.3051993875 -0.1633578333333333 0.42758420833333327 -0.285735625 0.12238482083333332 -0.12237779166666667 0.21946464166666665 -0.26767066666666667 0.28570047916666663 -0.42758420833333327 0.06622880833333333 -0.15991354166666666 0.10032026666666667 -0.331284625 0.10032026666666667 -0.5043427083333333 0 -0.3495604583333333 -0.1388541583333333 -0.6847814166666666 -0.38602074583333335 -0.9319269166666667 -0.24716658749999998 -0.24721579166666666 -0.5824016041666666 -0.3860418333333333 -0.9319480041666667 -0.3860418333333333 -0.3495464 0 -0.6847743875 0.13882604166666668 -0.931940975 0.3860418333333333 -0.24716658749999998 0.24714550000000002 -0.38602777499999996 0.5823664583333333 -0.38602777499999996 0.9319269166666667Z"
+                    stroke-width="1.13"></path>
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    d="M8.966405 14.497656249999999c0 0.3495604583333333 0.13882604166666668 0.6847814166666666 0.3860418333333333 0.9319269166666667 0.24714550000000002 0.24721579166666666 0.5823664583333333 0.3860418333333333 0.9319269166666667 0.3860418333333333 0.3495604583333333 0 0.6847814166666666 -0.13882604166666668 0.9319269166666667 -0.3860418333333333 0.24714550000000002 -0.24714550000000002 0.3860418333333333 -0.5823664583333333 0.3860418333333333 -0.9319269166666667 0 -0.3495604583333333 -0.13889633333333332 -0.6847814166666666 -0.3860418333333333 -0.9319269166666667 -0.24714550000000002 -0.24721579166666666 -0.5823664583333333 -0.3860418333333333 -0.9319269166666667 -0.3860418333333333 -0.3495604583333333 0 -0.6847814166666666 0.13882604166666668 -0.9319269166666667 0.3860418333333333 -0.24721579166666666 0.24714550000000002 -0.3860418333333333 0.5823664583333333 -0.3860418333333333 0.9319269166666667Z"
+                    stroke-width="1.13"></path>
+                </svg>
+                <p class="text-sm">Productos</p>
+              </div>
+              <p class="text-gray99">Administra tu catálogo, incluyendo precios, detalles y stock disponible.</p>
             </li>
             <li>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-5">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-              <p class="text-sm">Configuraciones</p>
+              <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="size-5">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <p class="text-sm">Configuraciones</p>
+              </div>
+              <p class="text-gray99">Personaliza las opciones del sistema según las necesidades de tu negocio.</p>
             </li>
           </ul>
         </div>
-
-        <p class="my-9 text-white mx-7 text-center">Los siguientes módulos son opcionales. Seleccionalos según tus
-          necesidades </p>
-
+        <p class="my-9 text-white mx-7 text-center">
+          Los siguientes módulos son opcionales. Seleccionalos según tus
+          necesidades
+        </p>
         <!-- componente de modulo -->
         <article v-for="item in modules" :key="item"
-          class="flex items-center space-x-1 border border-grayD9 text-white rounded-md py-3 px-4 mb-2">
+          class="flex items-center justify-between border border-grayD9 text-white rounded-[26px] py-6 px-4 mb-2">
           <div class="w-3/4">
             <div class="flex items-center space-x-3">
-              <span v-html="item.icon"></span>
-              <p>{{ item.name }}</p>
+              <span v-html="item.icon" class="text-[#00BD9B]"></span>
+              <p class="font-bold">{{ item.name }}</p>
             </div>
             <p class="text-gray99">{{ item.description }}</p>
-            <p>${{ item.cost }}.00/mes</p>
+            <!-- <p>${{ item.cost }}.00/mes</p> -->
           </div>
-
-            <div class="w-1/4">
-              <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="ml-2"
-                style="--el-switch-on-color: #F68C0F; --el-switch-off-color: #515151" />
-            </div>
+          <div>
+            <el-switch @change="handleSwitchModule(item)" v-model="item.activated" class="mr-4" size="large"
+              style="--el-switch-on-color: #00BD9B; --el-switch-off-color: #292929" />
+          </div>
         </article>
       </div>
     </section>
-
     <!-- Lado Derecho -->
-    <section class="lg:w-1/2 lg:pl-12 mt-9 lg:mt-0">
+    <section class="lg:w-[40%] lg:pl-12 mt-9 lg:mt-0">
       <p class="text-white font-font">Detalles del Pago</p>
-
-      <article class="rounded-xl border border-grayD9 p-4 mt-2">
+      <article class="rounded-[26px] border border-grayD9 p-4 mt-2">
         <!-- botones de periodo -->
         <div class="flex items-center justify-between space-x-4">
           <!-- boton de mensual -->
           <div @click="period = 'Mensual'"
-            :class="period === 'Mensual' ? 'bg-primarylight text-primary border-primary' : 'bg-transparent text-white border-grayD9'"
+            :class="period === 'Mensual' ? 'bg-primarylight text-[#353535] border-primary' : 'bg-transparent text-white border-grayD9'"
             class="cursor-pointer rounded-lg border-2 p-3 font-bold w-full">
             <p>Mensual</p>
           </div>
           <!-- boton de Anual -->
           <div @click="period = 'Anual'"
-            :class="period === 'Anual' ? 'bg-primarylight text-primary border-primary' : 'bg-transparent text-white border-grayD9'"
+            :class="period === 'Anual' ? 'bg-primarylight text-[#353535] border-primary' : 'bg-transparent text-white border-grayD9'"
             class="cursor-pointer rounded-lg border-2 p-3 font-bold w-full relative">
             <!-- popular -->
             <div
@@ -181,16 +195,15 @@
                 class="text-xs ml-2 font-thin">2 meses de regalo</span></p>
           </div>
         </div>
-
         <!-- Detalles del pago -->
-        <div class="mt-7 text-grayD9 px-3">
-          <div class="flex">
+        <h2 class="text-white font-semibold mt-3">Detalles del Pago</h2>
+        <div class="mt-3 text-white">
+          <div class="flex border-b border-white pb-2">
             <p class="w-1/2">Módulos esenciales</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? '229.00' : '2,290.00' }}</span></p>
           </div>
-          <p v-if="modules.filter(item => item.activated === true).length" class="text-gray99 my-3">Otros módulos</p>
-
+          <p v-if="modules.filter(item => item.activated === true).length" class="text-[#787878] mt-3">Adicionales</p>
           <!-- Otros modulos -->
           <div v-for="item in modules.filter(item => item.activated === true)" :key="item" class="flex">
             <p class="w-1/2">{{ item.name }}</p>
@@ -198,27 +211,29 @@
               'Mensual' ? item.cost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (item.cost *
                 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
           </div>
-
           <!-- Total -->
-          <div class="flex text-white mt-7">
-            <p class="w-1/2">Total</p>
+          <div class="flex text-white font-semibold border-t border-white pt-2 mt-4">
+            <p class="w-1/2">Total a pagar</p>
             <p class="w-1/2 text-right"><span class="mr-1">$</span><span class="w-20 inline-block">{{ period ===
               'Mensual' ? calculateTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : (calculateTotal *
                 10).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
           </div>
 
           <div class="text-center mt-8">
-            <PrimaryButton @click="saveExtraModules()" class="!px-28">Confirmar y probar</PrimaryButton>
+            <button @click="saveExtraModules()" class="buttonupgrade justify-center">
+              Confirmar y probar
+            </button>
           </div>
 
-          <p class="text-gray99 text-xs mt-3">
-            Puedes cancelar tu suscripción cuando quieras desde la página de ajustes de la suscripción.
-            Al realizar el pago aceptas nuestros
-            <a target="_blank" :href="route('terms.show')" class="underline focus:outline-none text-primary font-thin">
+          <p class="text-[#AAAAAA] text-xs mt-3">
+            <!-- Tu suscripción se renovará automáticamente cada año por el monto de <strong>$2,650.00 MXN</strong>. Puedes cancelar los pagos
+            recurrentes en cualquier momento desde la página de ajustes de la suscripción.
+            <br><br> -->
+            Al realizar el pago aceptas nuestros <a target="_blank" :href="route('terms.show')"
+              class="underline focus:outline-none text-primary font-thin">
               Términos y Condiciones
-            </a>
-            y confirmas que has leído nuestra
-            <a target="_blank" :href="route('policy.show')" class="underline focus:outline-none text-primary font-thin">
+            </a> y confirmas que has leído nuestra <a target="_blank" :href="route('policy.show')"
+              class="underline focus:outline-none text-primary font-thin">
               política de privacidad
             </a>.
           </p>
@@ -279,7 +294,7 @@ export default {
           activated: false,
         },
         {
-          icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" /></svg>',
+          icon: '<svg width="20" height="22" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 1H2.5C2.10218 1 1.72064 1.15804 1.43934 1.43934C1.15804 1.72064 1 2.10218 1 2.5V13.5C1 13.8978 1.15804 14.2794 1.43934 14.5607C1.72064 14.842 2.10218 15 2.5 15H7.5C7.89782 15 8.27936 14.842 8.56066 14.5607C8.84196 14.2794 9 13.8978 9 13.5V2.5C9 2.10218 8.84196 1.72064 8.56066 1.43934C8.27936 1.15804 7.89782 1 7.5 1H6M4 1V2H6V1M4 1H6M4 13.5H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.48168 9.1185H3.93649C3.80702 9.1109 3.77403 9.0824 3.71987 8.9741L2.90758 6.55526H2.32995C2.00414 6.55526 2.00505 6.08594 2.32995 6.08594H3.12419C3.32275 6.08594 3.39496 6.55526 3.48521 6.55526H7.00516C7.20372 6.55526 7.29011 6.74059 7.22177 6.93433L6.73439 8.10765C6.66219 8.25206 6.60803 8.30621 6.39142 8.30621H4.00869L4.13505 8.63113H6.48168C6.82465 8.63113 6.8066 9.1185 6.48168 9.1185Z" fill="currentColor"/><path d="M4.69564 9.49821C4.69564 9.70757 4.52593 9.87728 4.31657 9.87728C4.10722 9.87728 3.9375 9.70757 3.9375 9.49821C3.9375 9.28886 4.10722 9.11914 4.31657 9.11914C4.52593 9.11914 4.69564 9.28886 4.69564 9.49821Z" fill="currentColor"/><path d="M6.5401 9.49821C6.5401 9.70757 6.37039 9.87728 6.16103 9.87728C5.95168 9.87728 5.78196 9.70757 5.78196 9.49821C5.78196 9.28886 5.95168 9.11914 6.16103 9.11914C6.37039 9.11914 6.5401 9.28886 6.5401 9.49821Z" fill="currentColor"/></svg>',
           name: 'Tienda en línea',
           description: 'Gestiona tus ventas y pedidos en línea.',
           cost: 120,
@@ -293,7 +308,7 @@ export default {
           activated: false,
         },
         {
-          icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>',
+          icon: '<svg width="20" height="15" viewBox="0 0 18 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.5 13C8.3995 13 6.1005 13 2 13C1 13 0.999994 12.5 1 11.5V2C1 1.5 1 1 2 1C2 1 6.35894 1 6.5 1C6.64106 1 7.5 2.5 8 2.5C8.5 2.5 15 2.5 15 2.5C15.5 2.5 16 3 16 3.5C16 4.67157 16 5.32843 16 6.5M14 13.3562L14.5127 13.7406C14.8543 13.997 15.3021 14.1252 15.75 14.1251M15.75 14.1251C16.1977 14.1251 16.6455 13.9969 16.9873 13.7406C17.6709 13.2278 17.6709 12.3972 16.9873 11.8844C16.646 11.6277 16.198 11.5 15.75 11.5C15.3271 11.5 14.9042 11.3717 14.5816 11.1156C13.9364 10.6028 13.9364 9.77217 14.5816 9.25942C14.9042 9.00304 15.3271 8.87485 15.75 8.87485M15.75 14.1251V15M15.75 8.87485C16.1729 8.87485 16.5958 9.00304 16.9184 9.25942M15.75 8.87485V8" stroke="currentColor" stroke-width="1.5"/></svg>',
           name: 'Cotizaciones',
           description: 'Crea cotizaciones precisas en segundos.',
           cost: 80,
@@ -345,3 +360,38 @@ export default {
   }
 };
 </script>
+<style scoped>
+/* uiverse estilos */
+/* From Uiverse.io by CritCoder */
+.buttonupgrade {
+  width: 100%;
+  display: flex;
+  padding: 5px 22px;
+  cursor: pointer;
+  border-radius: 30px;
+  text-shadow: 2px 2px 3px rgba(221, 255, 0, 0.3);
+  background: linear-gradient(15deg,
+      #F68C0F,
+      #e6810e,
+      #bb6707,
+      #905209,
+      #F68C0F,
+      #e6810e,
+      #bb6707,
+      #905209) no-repeat;
+  background-size: 300%;
+  color: white;
+  border: none;
+  background-position: left center;
+  box-shadow: 0 20px 10px -14px rgba(246, 140, 15, 0.5);
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+.buttonupgrade:hover {
+  background-size: 320%;
+  background-position: right center;
+  color: white;
+}
+</style>
