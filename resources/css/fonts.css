@@ -93,3 +93,11 @@
     font-weight: 600; /* SemiBold */
     font-style: italic;
 }
+
+/* Licorice Regular */
+@font-face {
+    font-family: 'Licorice';
+    src: url('/fonts/Licorice/Licorice-Regular.ttf') format('truetype');
+    font-weight: 400; /* Regular */
+    font-style: normal;
+}

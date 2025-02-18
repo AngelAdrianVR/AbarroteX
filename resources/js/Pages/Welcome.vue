@@ -277,8 +277,24 @@ const imageSets = ref([
                     </figure>
                     <div class="w-1/2 text-white mt-52">
                         <h2 class="font-bold text-4xl">Punto de venta</h2>
-                        <p class="text-justify text-3xl mt-8">Integración con báscula, impresoras de tickets y más para
-                            agilizar tus ventas.</p>
+                        <p class="text-justify text-3xl mt-8">
+                            Integración con básculas, impresoras de tickets, lectores de códigos de barra y más.
+                        </p>
+                        <div class="flex justify-between mt-16">
+                            <figure class="w-[30%] flex flex-col">
+                                <img class="w-[36%] mx-auto object-contain select-none" :draggable="false"
+                                    src="@/../../public/images/wifi.png"
+                                    alt="Simbolo de wifi con diagonal que indica sin conexion a internet">
+                                <p class="text-center text-sm mt-4">No pierdas ventas: opera sin conexión y sincroniza
+                                    después.</p>
+                            </figure>
+                            <img class="w-[24%] object-contain select-none mt-1" :draggable="false"
+                                src="@/../../public/images/printer.png"
+                                alt="Impresora de tikets pequeña con un tiket surgiendo de ella">
+                        </div>
+                        <p class="text-center text-3xl mt-12" style="font-family: 'Licorice';">
+                            ¡Simplifica tus ventas, todo en uno!
+                        </p>
                     </div>
                 </article>
                 <!-- Registro de venta -->
@@ -391,12 +407,10 @@ const imageSets = ref([
                     </div>
                 </article>
                 <!-- Tienda en linea -->
-                <article class="mt-32 flex space-x-32 bg-purple-500 px-40 py-16">
-                    <!-- <img class="object-contain select-none" :draggable="false" data-aos="zoom-in-down"
-                        data-aos-duration="1100" data-aos-offset="150" src="@/../../public/images/features-04.png"
-                        alt="Fondo con nubes y luces de color morado y azul neon"> -->
-                    <div class="w-[45%]">
-                        <div class="w-[66%] text-white" data-aos="fade-down" data-aos-duration="1600"
+                <article
+                    class="mt-32 flex space-x-32 bg-[url('/images/features-04.png')] bg-no-repeat bg-center px-40 pt-80 h-[900px]">
+                    <div class="w-[45%] -mt-24">
+                        <div class="w-[66%] text-white self-start" data-aos="fade-down" data-aos-duration="1600"
                             data-aos-offset="300" data-aos-delay="300">
                             <h2 class="font-bold text-4xl">Tienda en línea</h2>
                             <p class="text-justify text-2xl mt-8">
@@ -414,8 +428,8 @@ const imageSets = ref([
                             alt="Código QR con el logo de EzyVentas en el centro" data-aos="fade-right"
                             data-aos-duration="1600" data-aos-delay="900">
                     </div>
-                    <div class="flex items-end space-x-10">
-                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 relative pt-52 px-6">
+                    <div class="flex space-x-10">
+                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 relative pt-52 px-6 mt-32">
                             <img class="w-[60%] object-contain select-none absolute left-[calc(50%-80px)] -top-10"
                                 :draggable="false" src="@/../../public/images/robot-01.png"
                                 alt="Robot pequeño, blanco con 4 ruedas y 2 ojos grandes">
@@ -461,69 +475,34 @@ const imageSets = ref([
                         </div>
                     </div>
                 </article>
-                <!-- <article class="mt-32 relative">
-                    <img class="object-contain select-none" :draggable="false" data-aos="zoom-in-down"
-                        data-aos-duration="1100" data-aos-offset="150" src="@/../../public/images/features-04.png"
-                        alt="Fondo con nubes y luces de color morado y azul neon">
-                    <img class="w-[8%] object-contain select-none absolute left-[12%] bottom-60" :draggable="false"
-                        src="@/../../public/images/qr-code.png" alt="Código QR con el logo de EzyVentas en el centro"
-                        data-aos="fade-right" data-aos-duration="1600" data-aos-delay="900">
-                    <div class="w-[24%] text-white absolute left-[13%] top-60" data-aos="fade-down"
-                        data-aos-duration="1600" data-aos-offset="300" data-aos-delay="300">
-                        <h2 class="font-bold text-4xl">Tienda en línea</h2>
-                        <p class="text-justify text-2xl mt-8">
-                            Lleva tu negocio al mundo digital con una tienda en línea integrada.
-                        </p>
-                        <p class="text-lg mt-4 text-end">
-                            Sincronización con inventario
-                        </p>
-                        <p class="text-lg text-end">
-                            Seguimiento de pedidos
-                        </p>
+                <!-- Reportes -->
+                <article class="relative mt-32">
+                    <img class="object-contain select-none absolute right-20 -top-80" :draggable="false"
+                        src="@/../../public/images/bg-05.png" alt="Destello neon de adorno en el fondo">
+                    <img class="object-contain select-none absolute left-0 top-20" :draggable="false"
+                        src="@/../../public/images/bg-06.png" alt="Destello neon de adorno en el fondo">
+                    <div class="flex mx-32" data-aos="fade-left" data-aos-duration="700" data-aos-offset="450">
+                        <div class="w-[30%] text-white">
+                            <h2 class="font-bold text-4xl">Reportes</h2>
+                            <p class="text-justify text-3xl mt-8">
+                                Toma decisiones inteligentes con reportes en tiempo real y analisis detallados
+                            </p>
+                            <p class="w-[60%] text-center ml-auto mt-32">
+                                Identifica tendencias y oportunidades de crecimiento
+                            </p>
+                        </div>
+                        <figure class="w-[45%] mt-10 z-10">
+                            <img class="object-contain select-none" :draggable="false"
+                                src="@/../../public/images/features-05.png"
+                                alt="Grafica de barras con colores llamativos neon">
+                        </figure>
+                        <figure class="w-[17%] z-10">
+                            <img class="object-contain select-none" :draggable="false"
+                                src="@/../../public/images/features-06.png"
+                                alt="Graficas circulares y una flecha que indica crecimiento">
+                        </figure>
                     </div>
-                    <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 absolute left-[45%] top-60 pt-52 px-6">
-                        <img class="w-[60%] object-contain select-none absolute left-[calc(50%-80px)] -top-10"
-                            :draggable="false" src="@/../../public/images/robot-01.png"
-                            alt="Robot pequeño, blanco con 4 ruedas y 2 ojos grandes">
-                        <div>
-                            <p class="text-[#1D1D1D] text-sm font-medium">Robot de entrega</p>
-                            <p class="text-[#414141] text-sm font-normal">MXN</p>
-                            <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity1 * 90 }} K</p>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <el-input-number v-model="quantity1" size="small" :min="1" :max="5" />
-                            <button @click=""
-                                class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="size-5 text-[#3e3e3e] group-hover:text-white transition-all ease-linear duration-200">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[28rem] w-72 absolute right-[13%] top-60 pt-[21rem] px-6">
-                        <img class="w-[60%] object-contain select-none absolute left-[calc(50%-90px)] -top-28"
-                            :draggable="false" src="@/../../public/images/robot-02.png"
-                            alt="Robot Alto, blanco con forma humanoide">
-                        <div>
-                            <p class="text-[#1D1D1D] text-sm font-medium">Robot asistente</p>
-                            <p class="text-[#414141] text-sm font-normal">MXN</p>
-                            <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity2 * 180 }} K</p>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <el-input-number v-model="quantity2" size="small" :min="1" :max="5" />
-                            <button @click=""
-                                class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="size-5 text-[#3e3e3e] group-hover:text-white transition-all ease-linear duration-200">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </article> -->
+                </article>
             </section>
 
             <!-- Simulador -->
