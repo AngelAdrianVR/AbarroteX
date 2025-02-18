@@ -1,14 +1,8 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import Simulator from '@/Components/MyComponents/Landing/Simulator.vue';
-import imageCarousel1 from '@/../../public/images/landing-02.png';
-import imageCarousel2 from '@/../../public/images/landing-02-2.png';
-import imageCarousel3 from '@/../../public/images/landing-02-3.png';
-import imageCarousel4 from '@/../../public/images/landing-02-4.png';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -19,90 +13,47 @@ defineProps({
     phpVersion: String,
 });
 
-const windowWidth = ref(window.innerWidth);
-const carouselHeight = ref('600px');
 const quantity1 = ref(1);
 const quantity2 = ref(1);
-
-const updateCarouselHeight = () => {
-    const width = window.innerWidth;
-    if (width < 430) {
-        carouselHeight.value = '400px';
-    } else if (width >= 430 && width < 1024) {
-        carouselHeight.value = '600px';
-    } else if (width >= 1024 && width < 1350) {
-        carouselHeight.value = '530px';
-    } else {
-        carouselHeight.value = '600px';
-    }
-};
+const showScrollButton = ref(false);
 
 // Definir la URL de WhatsApp como una propiedad computada
-const whatsappLink = computed(() => {
-    const text = encodeURIComponent('¡Hola!, quisiera más información sobre el punto de venta');
-    return `https://wa.me/523312155731?text=${text}`;
-});
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+};
+
+const scrollToElement = (id) => {
+    const element = document.getElementById(id);
+    element.scrollIntoView({
+        behavior: 'smooth'
+    });
+};
+
+const handleScroll = () => {
+    showScrollButton.value = window.scrollY > 1000;
+};
+
+const openWhatsapp = () => {
+    const url = 'https://api.whatsapp.com/send?phone=523322268824&text=¡Hola!%20vi%20tu%20página%20y%20me%20interesa%20el%20punto%20de%20venta'
+    window.open(url, '_blank');
+};
 
 onMounted(() => {
     AOS.init();
-    updateCarouselHeight();
-    window.addEventListener('resize', updateCarouselHeight);
+    window.addEventListener('scroll', handleScroll);
 });
 
 onBeforeUnmount(() => {
-    window.removeEventListener('resize', updateCarouselHeight);
+    window.removeEventListener('scroll', handleScroll);
 });
 
-const imageSets = ref([
-    [
-        imageCarousel1
-    ],
-    [
-        imageCarousel2
-    ],
-    [
-        imageCarousel3
-    ],
-    [
-        imageCarousel4
-    ],
-]);
+
 </script>
 
 <style scoped>
-/* Estilos personalizados para los botones de navegación del carrusel */
-.el-carousel__arrow {
-    background-color: rgba(99, 98, 98, 0.562);
-    /* Fondo semitransparente */
-    border-radius: 50%;
-    /* Bordes redondeados */
-    color: white;
-    /* Color del icono */
-}
-
-.el-carousel__arrow--left {
-    left: 10px;
-    /* Ajusta la posición de la flecha izquierda */
-}
-
-.el-carousel__arrow--right {
-    right: 10px;
-    /* Ajusta la posición de la flecha derecha */
-}
-
-/* Puedes agregar más estilos personalizados aquí */
-.el-carousel__arrow:hover {
-    background-color: rgba(131, 130, 130, 0.562);
-    /* Cambia el fondo al hacer hover */
-    /* transform: scale(1.1); Efecto de escalado al hacer hover */
-}
-
-/* Cambia el color del indicador activo */
-.el-carousel__indicator--active {
-    color: #F68C0F;
-    /* Color del indicador activo (puedes cambiarlo al que prefieras) */
-}
-
 /* uiverse estilos */
 /* From Uiverse.io by CritCoder */
 .buttonupgrade {
@@ -193,17 +144,139 @@ const imageSets = ref([
     transition: transform 0.3s ease-in-out 0.1s;
     transform: translate(0);
 }
+
+/* From Uiverse.io by ayman-ashine */
+.card {
+    --dark: #212121;
+    --darker: #111111;
+    --semidark: #2c2c2c;
+    --lightgray: #e8e8e8;
+    --unit: 10px;
+
+    background-color: var(--darker);
+    box-shadow: 0 0 var(--unit) var(--darker);
+    border: calc(var(--unit) / 2) solid var(--darker);
+    border-radius: var(--unit);
+    position: relative;
+    padding: var(--unit);
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    width: 120%;
+    height: 20%;
+    top: 40%;
+    left: -10%;
+    background: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+    animation: keyframes-floating-light 2.5s infinite ease-in-out;
+    filter: blur(20px);
+}
+
+@keyframes keyframes-floating-light {
+    0% {
+        transform: rotate(-5deg) translateY(-5%);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: rotate(5deg) translateY(5%);
+        opacity: 1;
+    }
+
+    100% {
+        transform: rotate(-5deg) translateY(-5%);
+        opacity: 0.5;
+    }
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0%;
+    left: 0%;
+    background: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+    filter: blur(20px);
+    pointer-events: none;
+    animation: keyframes-intro 1s ease-in forwards;
+}
+
+@keyframes keyframes-intro {
+    100% {
+        ransform: translate(-100%);
+        opacity: 0;
+    }
+}
+
+.card .image {
+    width: 600px;
+    animation: keyframes-floating-img 10s ease-in-out infinite;
+}
+
+@keyframes keyframes-floating-img {
+    0% {
+        transform: translate(-2%, 2%) scaleY(0.95) rotate(-5deg);
+    }
+
+    50% {
+        transform: translate(2%, -2%) scaleY(1) rotate(5deg);
+    }
+
+    100% {
+        transform: translate(-2%, 2%) scaleY(0.95) rotate(-5deg);
+    }
+}
+
+.card .heading {
+    font-weight: 400;
+    font-size: 17px;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-block: var(--unit);
+    color: var(--lightgray);
+    animation: keyframes-flash-text 0.5s infinite;
+}
+
+@keyframes keyframes-flash-text {
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.card .icons {
+    display: flex;
+    gap: var(--unit);
+}
+
+.card .icons a {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dark);
+    color: var(--lightgray);
+    padding: calc(var(--unit) / 2);
+    border-radius: calc(var(--unit) / 2);
+}
+
+.card .icons a:hover {
+    transition: 0.2s;
+    background-color: var(--semidark);
+}
 </style>
 
 <template>
 
     <Head title="Ezy Ventas" />
-    <div class="bg-black2 relative overflow-hidden">
+    <div class="bg-black2 relative overflow-x-hidden">
         <img class="object-contain select-none absolute right-0 top-0" :draggable="false"
-            src="@/../../public/images/bg-01.png" alt="Destello neon de adorno en el fondo" data-aos="zoom-in-down"
-            data-aos-duration="800">
-        <nav class="bg-transparent">
-            <div class="max-w-8xl mx-auto px-4 md:px-7 py-3" data-aos="zoom-in" data-aos-duration="800">
+            src="@/../../public/images/bg-01.png" alt="Destello neón de adorno en el fondo">
+        <nav class="bg-transparent" data-aos="zoom-in" data-aos-duration="1200">
+            <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
                 <div class="flex justify-between items-center h-14 bg-[#404040]/30 rounded-full pl-6 pr-2">
                     <div class="flex">
                         <!-- Logo -->
@@ -212,10 +285,12 @@ const imageSets = ref([
                         </div>
                     </div>
                     <div class="flex sm:items-center space-x-12 sm:ms-6">
-                        <button class="text-white focus:border-none focus:ring-0" type="button">Inicio</button>
-                        <button class="text-white focus:border-none focus:ring-0" type="button">Funcionalidades</button>
-                        <button class="text-white focus:border-none focus:ring-0" type="button">Precios</button>
-                        <button class="text-white focus:border-none focus:ring-0" type="button">Productos</button>
+                        <button @click="scrollToElement('features')" class="text-white focus:border-none focus:ring-0"
+                            type="button">Funcionalidades</button>
+                        <button @click="scrollToElement('prices')" class="text-white focus:border-none focus:ring-0"
+                            type="button">Precios</button>
+                        <button @click="scrollToElement('products')" class="text-white focus:border-none focus:ring-0"
+                            type="button">Productos</button>
                         <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
                         <button class="buttonupgrade">
                             Iniciar sesión
@@ -225,96 +300,163 @@ const imageSets = ref([
                 </div>
             </div>
         </nav>
-        <main class="bg-black2 selection:bg-primary selection:text-white pb-24 overflow-hidden">
+        <main class="bg-transparent selection:bg-primary selection:text-white pb-24 relative">
+            <!-- hero -->
             <section class="flex relative">
-                <figure class="w-[24%] mx-12 mt-10" data-aos="zoom-in-up" data-aos-duration="800">
+                <figure class="w-[24%] mx-12 mt-10" data-aos="fade-right" data-aos-duration="1200" data-aos-delay="200">
                     <img class="object-contain select-none" :draggable="false"
-                        src="@/../../public/images/landing-01.png" alt="Punto de venta. 30 dias gratis"
-                        data-aos="zoom-in-down" data-aos-duration="800">
+                        src="@/../../public/images/landing-01.png"
+                        alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
+                    <img class="object-contain select-none mt-4 ml-auto" :draggable="false"
+                        src="@/../../public/images/price.png"
+                        alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
                 </figure>
-                <figure class="w-[27%] ml-20 mt-20 z-10" data-aos="zoom-in-up" data-aos-duration="800">
+                <figure class="w-[27%] ml-20 mt-20 z-10" data-aos="fade-down" data-aos-duration="1200"
+                    data-aos-delay="1000">
                     <img class="object-contain select-none" :draggable="false"
-                        src="@/../../public/images/landing-02.png" alt="Tablet que muestra un carrito de compras"
-                        data-aos="zoom-in-down" data-aos-duration="800">
+                        src="@/../../public/images/landing-02.png" alt="Tablet que muestra un carrito de compras">
                 </figure>
                 <img class="object-contain select-none absolute -right-[3%] top-28" :draggable="false"
                     src="@/../../public/images/landing-03.png" alt="Tablet que muestra un carrito de compras"
-                    data-aos="zoom-in-down" data-aos-duration="800">
-                <button @click="$inertia.visit('register')" class="button1 absolute bottom-4 right-[22%]"
-                    style="--clr: #7808d0">
-                    <span class="button1__icon-wrapper">
-                        <svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg"
-                            class="button1__icon-svg" width="10">
-                            <path
-                                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-                                fill="currentColor"></path>
-                        </svg>
-
-                        <svg viewBox="0 0 14 15" fill="none" width="10" xmlns="http://www.w3.org/2000/svg"
-                            class="button1__icon-svg button1__icon-svg--copy">
-                            <path
-                                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-                                fill="currentColor"></path>
-                        </svg>
-                    </span>
-                    Probar ahora
-                </button>
+                    data-aos="fade-left" data-aos-duration="1200" data-aos-delay="600">
+                <div class="absolute bottom-4 right-[22%]" data-aos="fade-up" data-aos-duration="1200"
+                    data-aos-delay="1500" data-aos-offset="500">
+                    <button @click="$inertia.visit('register')" class="button1" style="--clr: #7808d0">
+                        <span class="button1__icon-wrapper">
+                            <svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                class="button1__icon-svg" width="10">
+                                <path
+                                    d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+                                    fill="currentColor"></path>
+                            </svg>
+                            <svg viewBox="0 0 14 15" fill="none" width="10" xmlns="http://www.w3.org/2000/svg"
+                                class="button1__icon-svg button1__icon-svg--copy">
+                                <path
+                                    d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+                                    fill="currentColor"></path>
+                            </svg>
+                        </span>
+                        Probar ahora
+                    </button>
+                </div>
             </section>
             <!-- funcionalidades -->
-            <section class="mt-48 relative">
+            <section class="mt-56 relative">
                 <img class="object-contain select-none absolute left-0 -top-72" :draggable="false"
-                    src="@/../../public/images/bg-02.png" alt="Destello neon de adorno en el fondo"
-                    data-aos="zoom-in-down" data-aos-duration="800">
-                <h1 class="text-5xl text-center font-extrabold text-white" data-aos="fade-up" data-aos-duration="500"
-                    data-aos-offset="100">FUNCIONALIDAD DE LOS MÓDULOS</h1>
+                    src="@/../../public/images/bg-02.png" alt="Destello neón de adorno en el fondo"
+                    data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
+                <p id="features" class="text-5xl text-center font-extrabold text-white" data-aos="flip-left"
+                    data-aos-duration="700">FUNCIONALIDAD DE LOS MÓDULOS</p>
                 <!-- Punto de venta -->
-                <article class="mx-40 flex space-x-32 relative" data-aos="fade-left" data-aos-duration="700"
-                    data-aos-offset="450">
-                    <figure class="w-[40%]">
+                <article class="mx-40 flex space-x-32 relative">
+                    <figure class="w-[40%]" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
                         <img class="object-contain select-none" :draggable="false"
                             src="@/../../public/images/features-01.png"
                             alt="Carrito de compras con aparatos electronicos entrando y brillando">
                     </figure>
-                    <div class="w-1/2 text-white mt-52">
+                    <div class="w-1/2 text-white mt-52" data-aos="fade-right" data-aos-duration="1200"
+                        data-aos-delay="800">
                         <h2 class="font-bold text-4xl">Punto de venta</h2>
                         <p class="text-justify text-3xl mt-8">
                             Integración con básculas, impresoras de tickets, lectores de códigos de barra y más.
                         </p>
                         <div class="flex justify-between mt-16">
-                            <figure class="w-[30%] flex flex-col">
+                            <figure class="w-[30%] flex flex-col" data-aos="fade-up" data-aos-duration="500"
+                                data-aos-delay="1500">
                                 <img class="w-[36%] mx-auto object-contain select-none" :draggable="false"
                                     src="@/../../public/images/wifi.png"
                                     alt="Simbolo de wifi con diagonal que indica sin conexion a internet">
                                 <p class="text-center text-sm mt-4">No pierdas ventas: opera sin conexión y sincroniza
                                     después.</p>
                             </figure>
-                            <img class="w-[24%] object-contain select-none mt-1" :draggable="false"
-                                src="@/../../public/images/printer.png"
+                            <img class="w-[24%] object-contain select-none mt-1" :draggable="false" data-aos="fade-up"
+                                data-aos-duration="300" data-aos-delay="1900" src="@/../../public/images/printer.png"
                                 alt="Impresora de tikets pequeña con un tiket surgiendo de ella">
                         </div>
-                        <p class="text-center text-3xl mt-12" style="font-family: 'Licorice';">
+                        <p class="text-center text-3xl mt-12" style="font-family: 'Licorice';" data-aos="fade-up"
+                            data-aos-duration="240" data-aos-delay="1950">
                             ¡Simplifica tus ventas, todo en uno!
                         </p>
                     </div>
                 </article>
                 <!-- Registro de venta -->
-                <article class="mt-20 relative" data-aos="fade-left" data-aos-duration="700" data-aos-offset="320">
+                <article class="mt-20 relative">
                     <img class="object-contain select-none absolute right-0 -top-40" :draggable="false"
-                        src="@/../../public/images/bg-03.png" alt="Destello neon de adorno en el fondo"
-                        data-aos="zoom-in-down" data-aos-duration="800">
+                        src="@/../../public/images/bg-03.png" alt="Destello neón de adorno en el fondo"
+                        data-aos="fade-left" data-aos-duration="1200" data-aos-delay="800">
                     <div class="mx-40 flex space-x-32">
-                        <div class="w-1/2 text-white">
+                        <div class="w-1/2 text-white" data-aos="fade-right" data-aos-duration="800">
                             <h2 class="font-bold text-4xl">Registro de ventas</h2>
                             <p class="text-justify text-3xl mt-8">Accede al historial completo de transacciones en
                                 segundos.
                             </p>
-                            <ul class="list-disc text-3xl mt-8 *:mt-3">
-                                <li>Edita ventas</li>
-                                <li>Haz reembolsos</li>
-                                <li>Imprime tickets</li>
+                            <ul class="text-3xl mt-8 *:mt-3 *:flex *:items-center *:space-x-2">
+                                <li>
+                                    <svg width="30" height="30" viewBox="0 0 13 13" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16318_44)">
+                                            <circle cx="6.5" cy="6.5" r="2.5" fill="#410B69" />
+                                        </g>
+                                        <circle cx="6.5" cy="6.5" r="2.5" fill="#7113B5" />
+                                        <circle cx="5.5" cy="5.5" r="2.5" fill="#D9D9D9" />
+                                        <defs>
+                                            <filter id="filter0_f_16318_44" x="0" y="0" width="13" height="13"
+                                                filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="2"
+                                                    result="effect1_foregroundBlur_16318_44" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Edita ventas</span>
+                                </li>
+                                <li>
+                                    <svg width="30" height="30" viewBox="0 0 13 13" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16318_44)">
+                                            <circle cx="6.5" cy="6.5" r="2.5" fill="#410B69" />
+                                        </g>
+                                        <circle cx="6.5" cy="6.5" r="2.5" fill="#7113B5" />
+                                        <circle cx="5.5" cy="5.5" r="2.5" fill="#D9D9D9" />
+                                        <defs>
+                                            <filter id="filter0_f_16318_44" x="0" y="0" width="13" height="13"
+                                                filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="2"
+                                                    result="effect1_foregroundBlur_16318_44" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Haz reembolsos</span>
+                                </li>
+                                <li>
+                                    <svg width="30" height="30" viewBox="0 0 13 13" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16318_44)">
+                                            <circle cx="6.5" cy="6.5" r="2.5" fill="#410B69" />
+                                        </g>
+                                        <circle cx="6.5" cy="6.5" r="2.5" fill="#7113B5" />
+                                        <circle cx="5.5" cy="5.5" r="2.5" fill="#D9D9D9" />
+                                        <defs>
+                                            <filter id="filter0_f_16318_44" x="0" y="0" width="13" height="13"
+                                                filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="2"
+                                                    result="effect1_foregroundBlur_16318_44" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Imprime tickets</span>
+                                </li>
                             </ul>
                         </div>
-                        <figure class="w-[38%] z-10">
+                        <figure class="w-[38%] z-10" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400">
                             <img class="object-contain select-none" :draggable="false"
                                 src="@/../../public/images/features-02.png"
                                 alt="Carrito de compras con aparatos electronicos entrando y brillando">
@@ -322,17 +464,17 @@ const imageSets = ref([
                     </div>
                 </article>
                 <!-- Clientes -->
-                <article class="mt-32 relative" data-aos="fade-left" data-aos-duration="700" data-aos-offset="320">
+                <article class="mt-32 relative">
                     <img class="object-contain select-none absolute left-[5%] -top-40" :draggable="false"
-                        src="@/../../public/images/bg-04.png" alt="Destello neon de adorno en el fondo"
-                        data-aos="zoom-in-down" data-aos-duration="800">
+                        src="@/../../public/images/bg-04.png" alt="Destello neón de adorno en el fondo"
+                        data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
                     <div class="mx-40 flex space-x-32 text-end">
-                        <figure class="w-[65%] z-10">
+                        <figure class="w-[65%] z-10" data-aos="fade-right" data-aos-duration="800" data-aos-delay="300">
                             <img class="object-contain select-none" :draggable="false"
                                 src="@/../../public/images/features-03.png"
                                 alt="Carrito de compras con aparatos electronicos entrando y brillando">
                         </figure>
-                        <div class="w-[36%] text-white mt-36">
+                        <div class="w-[36%] text-white mt-36" data-aos="fade-left" data-aos-duration="800">
                             <h2 class="font-bold text-4xl">Clientes</h2>
                             <p class="text-justify text-3xl mt-8">
                                 Gestiona toda la información de tus clientes en un solo lugar.
@@ -408,10 +550,11 @@ const imageSets = ref([
                 </article>
                 <!-- Tienda en linea -->
                 <article
-                    class="mt-32 flex space-x-32 bg-[url('/images/features-04.png')] bg-no-repeat bg-center px-40 pt-80 h-[900px]">
+                    class="mt-32 flex space-x-32 bg-[url('/images/features-04.png')] bg-no-repeat bg-center px-40 pt-80 h-[900px]"
+                    data-aos="zoom-in" data-aos-duration="1800">
                     <div class="w-[45%] -mt-24">
                         <div class="w-[66%] text-white self-start" data-aos="fade-down" data-aos-duration="1600"
-                            data-aos-offset="300" data-aos-delay="300">
+                            data-aos-delay="900">
                             <h2 class="font-bold text-4xl">Tienda en línea</h2>
                             <p class="text-justify text-2xl mt-8">
                                 Lleva tu negocio al mundo digital con una tienda en línea integrada.
@@ -426,10 +569,11 @@ const imageSets = ref([
                         <img class="w-[20%] object-contain select-none mt-24" :draggable="false"
                             src="@/../../public/images/qr-code.png"
                             alt="Código QR con el logo de EzyVentas en el centro" data-aos="fade-right"
-                            data-aos-duration="1600" data-aos-delay="900">
+                            data-aos-duration="400" data-aos-delay="1900">
                     </div>
                     <div class="flex space-x-10">
-                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 relative pt-52 px-6 mt-32">
+                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 relative pt-52 px-6 mt-32"
+                            data-aos="fade-down" data-aos-duration="600" data-aos-delay="2000">
                             <img class="w-[60%] object-contain select-none absolute left-[calc(50%-80px)] -top-10"
                                 :draggable="false" src="@/../../public/images/robot-01.png"
                                 alt="Robot pequeño, blanco con 4 ruedas y 2 ojos grandes">
@@ -451,7 +595,8 @@ const imageSets = ref([
                                 </button>
                             </div>
                         </div>
-                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[28rem] w-72 relative pt-[21rem] px-6">
+                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[28rem] w-72 relative pt-[21rem] px-6"
+                            data-aos="fade-up" data-aos-duration="600" data-aos-delay="2100">
                             <img class="w-[60%] object-contain select-none absolute left-[calc(50%-90px)] -top-28"
                                 :draggable="false" src="@/../../public/images/robot-02.png"
                                 alt="Robot Alto, blanco con forma humanoide">
@@ -477,10 +622,12 @@ const imageSets = ref([
                 </article>
                 <!-- Reportes -->
                 <article class="relative mt-32">
-                    <img class="object-contain select-none absolute right-20 -top-80" :draggable="false"
-                        src="@/../../public/images/bg-05.png" alt="Destello neon de adorno en el fondo">
+                    <img class="object-contain select-none absolute right-20 -top-60" :draggable="false"
+                        src="@/../../public/images/bg-05.png" alt="Destello neón de adorno en el fondo"
+                        data-aos="zoom-in" data-aos-duration="1600" data-aos-delay="800">
                     <img class="object-contain select-none absolute left-0 top-20" :draggable="false"
-                        src="@/../../public/images/bg-06.png" alt="Destello neon de adorno en el fondo">
+                        src="@/../../public/images/bg-06.png" alt="Destello neón de adorno en el fondo"
+                        data-aos="fade-riht" data-aos-duration="1600" data-aos-delay="800">
                     <div class="flex mx-32" data-aos="fade-left" data-aos-duration="700" data-aos-offset="450">
                         <div class="w-[30%] text-white">
                             <h2 class="font-bold text-4xl">Reportes</h2>
@@ -494,7 +641,7 @@ const imageSets = ref([
                         <figure class="w-[45%] mt-10 z-10">
                             <img class="object-contain select-none" :draggable="false"
                                 src="@/../../public/images/features-05.png"
-                                alt="Grafica de barras con colores llamativos neon">
+                                alt="Grafica de barras con colores llamativos neón">
                         </figure>
                         <figure class="w-[17%] z-10">
                             <img class="object-contain select-none" :draggable="false"
@@ -503,27 +650,236 @@ const imageSets = ref([
                         </figure>
                     </div>
                 </article>
+                <!-- ventajas -->
+                <article class="relative mt-32 mx-40">
+                    <p class="text-white text-2xl font-bold text-center">
+                        ¿Por qué elegir Ezy Ventas?
+                    </p>
+                    <div class="flex space-x-24 mt-8">
+                        <!-- From Uiverse.io by ayman-ashine -->
+                        <div class="card w-[30%] self-center mt-6">
+                            <img class="image mx-auto" alt="" src="@/../../public/images/landing-08.png" />
+                            <div class="heading pt-4">
+                                El futuro de las ventas está en tus manos
+                            </div>
+                            <button @click="openWhatsapp"
+                                class="w-full flex items-center justify-center space-x-2 text-center bg-[#212121] text-white rounded-[10px] py-2">
+                                <i class="fa-brands fa-whatsapp"></i>
+                                <span class="font-bold">Contáctanos</span>
+                            </button>
+                        </div>
+                        <div class="w-2/3">
+                            <ol class="text-white text-lg font-normal *:flex *:items-center *:space-x-2 *:mt-7">
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Compatible con cualquier dispositivo (Computadoras, tablets y
+                                        smartphones)</span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Ingresa desde cualquier lugar </span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Gestión de inventario y seguimiento de ventas en tiempo real</span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Productos pre-cargados para tiendas de abarrotes y papelerías</span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>No requiere de instalaciones </span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Soporte todo el año</span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Actualizaciones y mejoras constantes</span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16350_254)">
+                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        </g>
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                        <defs>
+                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                                height="13.0916" filterUnits="userSpaceOnUse"
+                                                color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="1.45455"
+                                                    result="effect1_foregroundBlur_16350_254" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>No ocupa espacio de almacenamiento, ya que toda la información se guarda en la
+                                        nube.</span>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </article>
             </section>
-
             <!-- Simulador -->
-            <section class="mt-56 text-center">
-                <h2 class="text-[#999999] text-lg mb-9">SIMULADOR</h2>
-
-                <p class="text-[#999999]">Personaliza tu suscripción con los módulos que necesitas.</p>
-                <p class="text-white underline">Paga únicamente por lo que utilizas</p>
-                <p class="text-primary uppercase">Con días de regalo para que lo pruebes</p>
-                <!-- <p class="text-[#999999] mt-5">Elige el giro y te recomendamos que módulos son importantes para tu negocio</p> -->
-
+            <section id="prices" class="mt-36 text-center relative">
+                <img class="object-contain select-none absolute left-0 -top-40" :draggable="false"
+                    src="@/../../public/images/bg-07.png" alt="Destello neón de adorno en el fondo"
+                    data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
+                <img class="object-contain select-none absolute right-0 bottom-10" :draggable="false"
+                    src="@/../../public/images/bg-08.png" alt="Destello neón de adorno en el fondo"
+                    data-aos="fade-left" data-aos-duration="1200" data-aos-delay="800">
+                <h2 class="text-white text-2xl font-bold">SIMULADOR</h2>
+                <p class="text-white text-lg mt-3">Personaliza tu suscripción con los módulos que necesitas.</p>
+                <img class="object-contain select-none mx-auto" :draggable="false"
+                    src="@/../../public/images/sim-01.png"
+                    alt="Letras con color azul neón que dicen: Con 30 dias gratis de prueba">
                 <div class="mt-14 text-left xl:w-[75%] xl:mx-auto mx-5">
                     <Simulator id="simulator" />
                 </div>
             </section>
+            <button v-if="showScrollButton" @click="scrollToTop"
+                class="fixed bottom-10 right-4 flex items-center justify-center size-10 rounded-full bg-grayD9">
+                <i class="fa-solid fa-arrow-up fa-bounce text-gray37"></i>
+            </button>
         </main>
         <!-- footer -->
-        <footer class="bg-black1 p-5 -mt-12">
+        <footer class="bg-black1 p-5">
             <div class="border-b border-[#373737] w-full"></div>
             <div class="flex items-center md:justify-between text-white text-sm my-3">
-                <p>Copyright &copy; 2024 | Todos los derechos reservador por Ezy Ventas</p>
+                <p>Copyright &copy; 2024-2025 | Todos los derechos reservador por Ezy Ventas</p>
                 <div class="flex space-x-3">
                     <a class="underline" target="_blank" :href="route('terms.show')">Términos y condiciones</a>
                     <a class="underline" target="_blank" :href="route('policy.show')">Política de privacidad</a>
