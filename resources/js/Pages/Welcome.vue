@@ -21,6 +21,8 @@ defineProps({
 
 const windowWidth = ref(window.innerWidth);
 const carouselHeight = ref('600px');
+const quantity1 = ref(1);
+const quantity2 = ref(1);
 
 const updateCarouselHeight = () => {
     const width = window.innerWidth;
@@ -305,7 +307,7 @@ const imageSets = ref([
                 </article>
                 <!-- Clientes -->
                 <article class="mt-32 relative" data-aos="fade-left" data-aos-duration="700" data-aos-offset="320">
-                    <img class="object-contain select-none absolute left-0 -top-40" :draggable="false"
+                    <img class="object-contain select-none absolute left-[5%] -top-40" :draggable="false"
                         src="@/../../public/images/bg-04.png" alt="Destello neon de adorno en el fondo"
                         data-aos="zoom-in-down" data-aos-duration="800">
                     <div class="mx-40 flex space-x-32 text-end">
@@ -314,263 +316,214 @@ const imageSets = ref([
                                 src="@/../../public/images/features-03.png"
                                 alt="Carrito de compras con aparatos electronicos entrando y brillando">
                         </figure>
-                        <div class="w-1/3 text-white mt-36">
+                        <div class="w-[36%] text-white mt-36">
                             <h2 class="font-bold text-4xl">Clientes</h2>
                             <p class="text-justify text-3xl mt-8">
                                 Gestiona toda la información de tus clientes en un solo lugar.
                             </p>
-                            <ul class="text-3xl mt-8 *:mt-3">
-                                <li>Historial de compras</li>
-                                <li>Ventas a crédito y al contado</li>
-                                <li>Cotizaciones</li>
+                            <ul class="text-2xl mt-8 *:mt-3">
+                                <li class="flex items-center justify-end space-x-2">
+                                    <svg width="28" height="28" viewBox="0 0 13 13" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16318_47)">
+                                            <circle cx="6.5" cy="6.5" r="2.5" fill="#0B6965" />
+                                        </g>
+                                        <circle cx="6.5" cy="6.5" r="2.5" fill="#13B5AD" />
+                                        <circle cx="5.5" cy="5.5" r="2.5" fill="#D9D9D9" />
+                                        <defs>
+                                            <filter id="filter0_f_16318_47" x="0" y="0" width="13" height="13"
+                                                filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="2"
+                                                    result="effect1_foregroundBlur_16318_47" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Historial de compras</span>
+                                </li>
+                                <li class="flex items-center justify-end space-x-2">
+                                    <svg width="28" height="28" viewBox="0 0 13 13" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16318_47)">
+                                            <circle cx="6.5" cy="6.5" r="2.5" fill="#0B6965" />
+                                        </g>
+                                        <circle cx="6.5" cy="6.5" r="2.5" fill="#13B5AD" />
+                                        <circle cx="5.5" cy="5.5" r="2.5" fill="#D9D9D9" />
+                                        <defs>
+                                            <filter id="filter0_f_16318_47" x="0" y="0" width="13" height="13"
+                                                filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="2"
+                                                    result="effect1_foregroundBlur_16318_47" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Ventas a crédito y al contado</span>
+                                </li>
+                                <li class="flex items-center justify-end space-x-2">
+                                    <svg width="28" height="28" viewBox="0 0 13 13" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g filter="url(#filter0_f_16318_47)">
+                                            <circle cx="6.5" cy="6.5" r="2.5" fill="#0B6965" />
+                                        </g>
+                                        <circle cx="6.5" cy="6.5" r="2.5" fill="#13B5AD" />
+                                        <circle cx="5.5" cy="5.5" r="2.5" fill="#D9D9D9" />
+                                        <defs>
+                                            <filter id="filter0_f_16318_47" x="0" y="0" width="13" height="13"
+                                                filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                    result="shape" />
+                                                <feGaussianBlur stdDeviation="2"
+                                                    result="effect1_foregroundBlur_16318_47" />
+                                            </filter>
+                                        </defs>
+                                    </svg>
+                                    <span>Cotizaciones</span>
+                                </li>
                                 <li>y mucho más...</li>
                             </ul>
                         </div>
                     </div>
                 </article>
-
-                <!-- GESTIONA TU INVENTARIO -->
-                <article class="my-7">
-                    <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
-                        <!-- imagen -->
-                        <figure class="lg:w-1/2 pl-5" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400"
-                            data-aos-offset="400">
-                            <img class="w-full" src="@/../../public/images/function_2.png" alt="ganancias">
-                        </figure>
-
-                        <div class="lg:w-1/2" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400"
-                            data-aos-offset="400">
-                            <h2 class="text-2xl text-center text-white">GESTIONA TU INVENTARIO</h2>
-
-                            <!-- texto -->
-                            <section>
-                                <div class="mt-7 flex space-x-5">
-                                    <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g clip-path="url(#clip0_12910_382)">
-                                            <path
-                                                d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z"
-                                                fill="#858488" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_12910_382">
-                                                <rect width="25" height="16" fill="white" />
-                                            </clipPath>
-                                        </defs>
+                <!-- Tienda en linea -->
+                <article class="mt-32 flex space-x-32 bg-purple-500 px-40 py-16">
+                    <!-- <img class="object-contain select-none" :draggable="false" data-aos="zoom-in-down"
+                        data-aos-duration="1100" data-aos-offset="150" src="@/../../public/images/features-04.png"
+                        alt="Fondo con nubes y luces de color morado y azul neon"> -->
+                    <div class="w-[45%]">
+                        <div class="w-[66%] text-white" data-aos="fade-down" data-aos-duration="1600"
+                            data-aos-offset="300" data-aos-delay="300">
+                            <h2 class="font-bold text-4xl">Tienda en línea</h2>
+                            <p class="text-justify text-2xl mt-8">
+                                Lleva tu negocio al mundo digital con una tienda en línea integrada.
+                            </p>
+                            <p class="text-lg mt-4 text-end">
+                                Sincronización con inventario
+                            </p>
+                            <p class="text-lg text-end">
+                                Seguimiento de pedidos
+                            </p>
+                        </div>
+                        <img class="w-[20%] object-contain select-none mt-24" :draggable="false"
+                            src="@/../../public/images/qr-code.png"
+                            alt="Código QR con el logo de EzyVentas en el centro" data-aos="fade-right"
+                            data-aos-duration="1600" data-aos-delay="900">
+                    </div>
+                    <div class="flex items-end space-x-10">
+                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 relative pt-52 px-6">
+                            <img class="w-[60%] object-contain select-none absolute left-[calc(50%-80px)] -top-10"
+                                :draggable="false" src="@/../../public/images/robot-01.png"
+                                alt="Robot pequeño, blanco con 4 ruedas y 2 ojos grandes">
+                            <div>
+                                <p class="text-[#1D1D1D] text-sm font-medium">Robot de entrega</p>
+                                <p class="text-[#414141] text-sm font-normal">MXN</p>
+                                <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity1 * 90 }} K</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <el-input-number v-model="quantity1" size="small" :min="1" :max="5" />
+                                <button @click=""
+                                    class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor"
+                                        class="size-5 text-[#3e3e3e] group-hover:text-white transition-all ease-linear duration-200">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                     </svg>
-                                    <p class="text-white text-lg w-[450px]">Registra y gestiona tus productos.</p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5">
-                                    <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g clip-path="url(#clip0_12910_382)">
-                                            <path
-                                                d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z"
-                                                fill="#858488" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_12910_382">
-                                                <rect width="25" height="16" fill="white" />
-                                            </clipPath>
-                                        </defs>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[28rem] w-72 relative pt-[21rem] px-6">
+                            <img class="w-[60%] object-contain select-none absolute left-[calc(50%-90px)] -top-28"
+                                :draggable="false" src="@/../../public/images/robot-02.png"
+                                alt="Robot Alto, blanco con forma humanoide">
+                            <div>
+                                <p class="text-[#1D1D1D] text-sm font-medium">Robot asistente</p>
+                                <p class="text-[#414141] text-sm font-normal">MXN</p>
+                                <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity2 * 180 }} K</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <el-input-number v-model="quantity2" size="small" :min="1" :max="5" />
+                                <button @click=""
+                                    class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor"
+                                        class="size-5 text-[#3e3e3e] group-hover:text-white transition-all ease-linear duration-200">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                     </svg>
-                                    <p class="text-white text-lg w-[450px]">Catálogo base para Abarrotes y Papelerías
-                                        que
-                                        incluye productos de diversas categorías y marcas reconocidas.</p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5">
-                                    <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g clip-path="url(#clip0_12910_382)">
-                                            <path
-                                                d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z"
-                                                fill="#858488" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_12910_382">
-                                                <rect width="25" height="16" fill="white" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Alertas de bajo stock.</p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5">
-                                    <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g clip-path="url(#clip0_12910_382)">
-                                            <path
-                                                d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z"
-                                                fill="#858488" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_12910_382">
-                                                <rect width="25" height="16" fill="white" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Actualización de inventario en tiempo real.
-                                    </p>
-                                </div>
-                            </section>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </article>
-
-                <!-- CORTES DE CAJA -->
-                <article class="my-7">
-                    <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
-                        <div class="lg:w-1/2" data-aos="fade-right" data-aos-duration="500" data-aos-delay="400"
-                            data-aos-offset="400">
-                            <h2 class="text-2xl text-center text-white">CORTES DE CAJA</h2>
-                            <!-- texto -->
-                            <section>
-                                <div class="mt-7 flex space-x-5 pl-5">
-                                    <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g clip-path="url(#clip0_12910_382)">
-                                            <path
-                                                d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z"
-                                                fill="#858488" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_12910_382">
-                                                <rect width="25" height="16" fill="white" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Realiza cortes de manera rápida y precisa.
-                                    </p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5 pl-5">
-                                    <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g clip-path="url(#clip0_12910_382)">
-                                            <path
-                                                d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z"
-                                                fill="#858488" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_12910_382">
-                                                <rect width="25" height="16" fill="white" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Seguimiento de transacciones en tiempo real.
-                                    </p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5 pl-5">
-                                    <svg class="mt-3" width="25" height="16" viewBox="0 0 20 11" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g clip-path="url(#clip0_12910_382)">
-                                            <path
-                                                d="M0.067827 11C3.41655 7.91095 6.88516 6.34423 10.7075 7.75342C16.216 9.2872 20.4009 5.49928 19.9686 0C17.7469 1.48223 14.0277 2.00781 9.89685 1.18005C2.84959 -0.236297 -0.531564 5.29163 0.067827 11Z"
-                                                fill="#858488" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_12910_382">
-                                                <rect width="25" height="16" fill="white" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Realiza ingresos y retiros de efectivo desde
-                                        caja, permitiendo mayor transparencia y control.</p>
-                                </div>
-                            </section>
-                        </div>
-                        <!-- imagen -->
-                        <figure class="lg:w-1/2 pl-5" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400"
-                            data-aos-offset="400">
-                            <img class="w-full" src="@/../../public/images/function_3.png" alt="ganancias">
-                        </figure>
+                <!-- <article class="mt-32 relative">
+                    <img class="object-contain select-none" :draggable="false" data-aos="zoom-in-down"
+                        data-aos-duration="1100" data-aos-offset="150" src="@/../../public/images/features-04.png"
+                        alt="Fondo con nubes y luces de color morado y azul neon">
+                    <img class="w-[8%] object-contain select-none absolute left-[12%] bottom-60" :draggable="false"
+                        src="@/../../public/images/qr-code.png" alt="Código QR con el logo de EzyVentas en el centro"
+                        data-aos="fade-right" data-aos-duration="1600" data-aos-delay="900">
+                    <div class="w-[24%] text-white absolute left-[13%] top-60" data-aos="fade-down"
+                        data-aos-duration="1600" data-aos-offset="300" data-aos-delay="300">
+                        <h2 class="font-bold text-4xl">Tienda en línea</h2>
+                        <p class="text-justify text-2xl mt-8">
+                            Lleva tu negocio al mundo digital con una tienda en línea integrada.
+                        </p>
+                        <p class="text-lg mt-4 text-end">
+                            Sincronización con inventario
+                        </p>
+                        <p class="text-lg text-end">
+                            Seguimiento de pedidos
+                        </p>
                     </div>
-                </article>
-
-                <!-- ¿Por qué elegir Ezy Ventas? -->
-                <article class="my-7">
-                    <div class="lg:flex justify-between items-center space-x-10 mt-12 lg:mt-0">
-                        <!-- imagen -->
-                        <figure class="lg:w-1/2 pl-12" data-aos="fade-right" data-aos-duration="800"
-                            data-aos-delay="400" data-aos-offset="400">
-                            <img class="w-2/3 mx-auto" src="@/../../public/images/function_4.png" alt="ganancias">
-                        </figure>
-
-                        <div class="lg:w-1/2 mt-5" data-aos="fade-left" data-aos-duration="500" data-aos-delay="400"
-                            data-aos-offset="400">
-                            <h2 class="text-2xl text-center text-white">¿POR QUÉ ELEGIR EZY VENTAS?</h2>
-                            <!-- texto -->
-                            <section>
-                                <div class="mt-7 flex space-x-5 pl-5">
-                                    <svg width="39" height="31" viewBox="0 0 39 31" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z"
-                                            fill="#99FB77" />
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Compatible con cualquier dispositivo.</p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5 pl-5">
-                                    <svg width="39" height="31" viewBox="0 0 39 31" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z"
-                                            fill="#99FB77" />
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Ingresa desde cualquier lugar.</p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5 pl-5">
-                                    <svg width="39" height="31" viewBox="0 0 39 31" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z"
-                                            fill="#99FB77" />
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">No requiere de instalaciones.</p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5 pl-5">
-                                    <svg width="39" height="31" viewBox="0 0 39 31" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z"
-                                            fill="#99FB77" />
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Gestión de inventario y seguimiento de
-                                        ventas en
-                                        tiempo real.</p>
-                                </div>
-
-                                <div class="mt-4 flex space-x-5 pl-5">
-                                    <svg width="39" height="31" viewBox="0 0 39 31" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9.19472 30.7548C6.41169 22.8071 0.361582 16.4854 0.0193154 16.11C-0.322951 15.7347 3.91886 15.0218 9.92875 21.2357C21.3209 8.36968 32.3648 -0.0344495 38.556 0.000789626C38.7945 -0.0234503 39.1605 0.51685 38.923 0.733029C25.2154 7.24386 17.6274 18.8122 11.0298 30.7548C10.99 31.1167 9.17897 31.0447 9.19472 30.7548Z"
-                                            fill="#99FB77" />
-                                    </svg>
-                                    <p class="text-white text-lg w-[450px]">Productos pre-cargados para tiendas de
-                                        abarrotes
-                                        y papelerías.</p>
-                                </div>
-
-                                <div class="flex justify-start space-x-3 mt-10">
-                                    <Link :href="$page.props.auth.user ? route('register') : route('login')">
-                                    <PrimaryButton class="!text-sm">Probar ahora</PrimaryButton>
-                                    </Link>
-                                    <a :href="whatsappLink" target="_blank">
-                                        <ThirthButton class="!border-white !text-white !text-sm">Contáctanos
-                                        </ThirthButton>
-                                    </a>
-                                </div>
-                            </section>
+                    <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 absolute left-[45%] top-60 pt-52 px-6">
+                        <img class="w-[60%] object-contain select-none absolute left-[calc(50%-80px)] -top-10"
+                            :draggable="false" src="@/../../public/images/robot-01.png"
+                            alt="Robot pequeño, blanco con 4 ruedas y 2 ojos grandes">
+                        <div>
+                            <p class="text-[#1D1D1D] text-sm font-medium">Robot de entrega</p>
+                            <p class="text-[#414141] text-sm font-normal">MXN</p>
+                            <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity1 * 90 }} K</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <el-input-number v-model="quantity1" size="small" :min="1" :max="5" />
+                            <button @click=""
+                                class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-5 text-[#3e3e3e] group-hover:text-white transition-all ease-linear duration-200">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                </article>
+                    <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[28rem] w-72 absolute right-[13%] top-60 pt-[21rem] px-6">
+                        <img class="w-[60%] object-contain select-none absolute left-[calc(50%-90px)] -top-28"
+                            :draggable="false" src="@/../../public/images/robot-02.png"
+                            alt="Robot Alto, blanco con forma humanoide">
+                        <div>
+                            <p class="text-[#1D1D1D] text-sm font-medium">Robot asistente</p>
+                            <p class="text-[#414141] text-sm font-normal">MXN</p>
+                            <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity2 * 180 }} K</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <el-input-number v-model="quantity2" size="small" :min="1" :max="5" />
+                            <button @click=""
+                                class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-5 text-[#3e3e3e] group-hover:text-white transition-all ease-linear duration-200">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </article> -->
             </section>
 
             <!-- Simulador -->
