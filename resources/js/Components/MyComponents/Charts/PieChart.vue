@@ -1,6 +1,6 @@
 <template>
     <div
-        class="min-h-[100px] max-h-[420px] border-gray3 border rounded-[10px] lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
+        class="min-h-[100px] max-h-[420px] rounded-lg shadow-xl text-center lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
         <h1 class="font-bold text-center flex items-center justify-center">{{ title }} <span class="ml-3" v-html="icon"></span></h1>
 
         <div v-if="this.options.series.length" id="chart">

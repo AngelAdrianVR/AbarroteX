@@ -24,10 +24,11 @@
                 </div>
             </div>
 
-            <section v-for="(cash_cut, index) in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" class="xl:w-[90%] text-xs md:text-sm">
+            <section v-for="(cash_cut, index) in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" 
+                class="xl:w-[90%] text-xs md:text-sm">
                 <p class="mb-2 ml-2">Notas de corte: <strong class="ml-2">{{ cash_cut.notes ?? 'Sin notas' }}</strong></p>
                 <article class="lg:flex lg:space-x-7 mx-auto">
-                    <div class="w-full border border-grayD9 rounded-lg self-start">
+                    <div class="w-full border border-gray-300 rounded-2xl shadow-lg bg-white p-1 self-start transition-all ease-linear duration-200">
                         <div class="flex justify-between border-b border-grayD9 py-2 md:px-4 px-2">
                             <p>{{ cash_cut.cash_register.name + ' • ' + cash_cut.user.name }}</p>
                             <p class="text-gray99">{{ formatDateHour(cash_cut.created_at) }}</p>
@@ -79,7 +80,7 @@
                                 </div>
                             </div>
                         </div>
-                        <footer class="bg-[#F2F2F2] text-black font-bold py-2 flex px-2">
+                        <footer class="bg-[#F2F2F2] rounded-xl text-black font-bold py-2 flex px-2">
                             <p class="w-3/4 text-right pr-7">Efectivo esperado</p>
                             <p class="w-1/4 pl-4">
                                 <span class="mr-3">
@@ -91,8 +92,8 @@
                     </div>
 
                     <!-- resumen de corte en pequeño--------------------- -->
-                    <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 rounded-lg self-start">
-                        <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-t-lg">Resumen de corte</h2>
+                    <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 self-start rounded-2xl shadow-lg p-1">
+                        <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-xl">Resumen de corte</h2>
                         <div class="flex justify-between space-x-1 p-5">
                             <div class="font-semibold space-y-1 w-32">
                                 <p>Efectivo al iniciar</p>
@@ -123,7 +124,7 @@
                             'text-green-500 bg-green-100': (cash_cut.expected_cash - cash_cut.counted_cash) === 0,
                             'text-blue-500 bg-blue-100': (cash_cut.expected_cash - cash_cut.counted_cash) < 0,
                             'text-red-500 bg-red-100': (cash_cut.expected_cash - cash_cut.counted_cash) > 0
-                        }" class="rounded-b-lg text-xs py-[2px] px-2 text-center">
+                        }" class="rounded-b-xl text-xs py-[2px] px-2 text-center">
                             <i v-if="(cash_cut.expected_cash - cash_cut.counted_cash) === 0"
                                 class="fa-solid fa-check mr-1"></i>
                             <i v-else-if="(cash_cut.expected_cash - cash_cut.counted_cash) < 0"
