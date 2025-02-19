@@ -91,7 +91,7 @@
 
                 <div class="flex justify-end space-x-5 pt-2 pb-1 py-3 mt-9">
                     <button class="text-primary" @click="configModal = false; finishModal = true">Omitir</button>
-                    <button @click="configModal = false; finishModal = true; launchConfetti()" class="btn-conteiner">
+                    <button @click="handleFinish()" class="btn-conteiner">
                         <a class="btn-content" href="#">
                             <span class="btn-title">Siguiente</span>
                             <span class="icon-arrow">
@@ -182,6 +182,38 @@ export default {
 
     },
     methods: {
+        handleFinish() {
+            this.updateSettingsValues();
+            this.configModal = false;
+            this.finishModal = true; 
+            this.launchConfetti();
+        },
+        async updateSettingsValues() {
+            try {
+                this.loading = true;
+                
+                // Construimos el array de configuraciones con sus valores actualizados
+                const updatedSettings = this.settings.map((item, index) => ({
+                    setting_id: item.id,
+                    value: this.values[index] // Tomamos el valor actualizado del switch
+                }));
+
+                // Enviamos los datos al backend
+                const response = await axios.post(route('stores.update-settings'), {
+                    store_id: this.$page.props.auth.user.store_id, 
+                    settings: updatedSettings
+                });
+
+                if (response.status === 200) {
+                    this.$message.success("Configuraciones actualizadas correctamente.");
+                }
+            } catch (error) {
+                console.error("Error al actualizar las configuraciones:", error);
+                this.$message.error("Hubo un error al actualizar las configuraciones.");
+            } finally {
+                this.loading = false;
+            }
+        },
         launchConfetti() {
             confetti({
                 particleCount: 100,
@@ -193,16 +225,29 @@ export default {
             try {
                 this.loading = true;
                 const response = await axios.get(route('stores.get-settings-by-module', {
-                    store: this.$page.props.auth.user.store_id, module: 'Punto de venta'
+                    store: this.$page.props.auth.user.store_id, 
+                    module: 'Punto de venta'
                 }));
 
                 if (response.status === 200) {
                     this.settings = response.data.items;
                     this.settingLoading = new Array(response.data.items.length).fill(false);
-                    this.values = response.data.items.map(item => {
-                        return item.type == 'Bool'
-                            ? Boolean(item.pivot.value)
-                            : item.pivot.value;
+
+                    // Lista de configuraciones que deben ser 0
+                    const settingsToZero = [
+                        'Impresión automática de tickets',
+                        'Control de inventario',
+                        'Aviso de monto máximo en caja'
+                    ];
+
+                    this.values = this.settings.map(item => {
+                        // Si la configuración está en la lista, se fuerza a 0
+                        if (settingsToZero.includes(item.key)) {
+                            return false; // Para que el switch esté en "Deshabilitado"
+                        }
+
+                        // Si no está en la lista, se mantiene su valor actual
+                        return item.type == 'Bool' ? Boolean(item.pivot.value) : item.pivot.value;
                     });
                 }
             } catch (error) {
