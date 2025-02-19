@@ -176,8 +176,8 @@ onUnmounted(() => {
                     <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }"
                         class="sm:hidden bg-[#232323]">
                         <div class="pt-2 pb-3 space-y-px">
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Punto de venta')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Punto de venta') &&
+                                $page.props.auth.user.permissions?.includes('Punto de venta')"
                                 :href="route('sales.point')" :active="route().current('sales.point')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24"
                                     height="16" width="16" id="Shopping-Basket-2--Streamline-Core">
@@ -199,9 +199,9 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Punto de venta</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Reportes')"
-                                :href="route('dashboard')" :active="route().current('dashboard')">
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Reportes') &&
+                                $page.props.auth.user.permissions?.includes('Reportes')" :href="route('dashboard')"
+                                :active="route().current('dashboard')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24"
                                     height="16" width="16" id="Graph-Bar-Increase--Streamline-Core">
                                     <desc>Graph Bar Increase Streamline Icon: https://streamlinehq.com</desc>
@@ -231,8 +231,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Reportes</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Ventas registradas')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Ventas registradas') &&
+                                $page.props.auth.user.permissions?.includes('Ventas registradas')"
                                 :href="route('sales.index')"
                                 :active="route().current('sales.index') || route().current('sales.show')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24"
@@ -261,8 +261,9 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Ventas registradas</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Gastos')"
-                                :href="route('expenses.index')" :active="route().current('expenses.*')">
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Gastos') &&
+                                $page.props.auth.user.permissions?.includes('Gastos')" :href="route('expenses.index')"
+                                :active="route().current('expenses.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.565 -0.565 18 18"
                                     height="16" width="16" id="Cash-Payment-Bills--Streamline-Ultimate">
                                     <desc>Cash Payment Bills Streamline Icon: https://streamlinehq.com</desc>
@@ -290,8 +291,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Gastos</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Cotizaciones')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Cotizaciones') &&
+                                $page.props.auth.user.permissions?.includes('Cotizaciones')"
                                 :href="route('quotes.index')" :active="route().current('quotes.*')">
                                 <svg width="18" height="15" viewBox="0 0 18 15" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -301,8 +302,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Cotizaciones</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Renta de productos')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Renta de productos') &&
+                                $page.props.auth.user.permissions?.includes('Renta de productos')"
                                 :href="route('rentals.index')" :active="route().current('rentals.*')">
                                 <svg stroke="currentColor" width="16" height="16" viewBox="0 0 15 18" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -323,8 +324,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Renta de productos</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Productos')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Productos') &&
+                                $page.props.auth.user.permissions?.includes('Productos')"
                                 :href="route('products.index')"
                                 :active="route().current('products.*') || route().current('global-product-store.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.565 -0.565 18 18"
@@ -348,8 +349,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Productos</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Servicios')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Servicios') &&
+                                $page.props.auth.user.permissions?.includes('Servicios')"
                                 :href="route('services.index')" :active="route().current('services.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -400,9 +401,9 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Reportes de servicio</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Clientes')"
-                                :href="route('clients.index')" :active="route().current('clients.*')">
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Clientes') &&
+                                $page.props.auth.user.permissions?.includes('Clientes')" :href="route('clients.index')"
+                                :active="route().current('clients.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24"
                                     id="User-Check-Validate--Streamline-Core" height="16" width="16">
                                     <desc>User Check Validate Streamline Icon: https://streamlinehq.com</desc>
@@ -424,7 +425,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Clientes</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Caja')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Caja') &&
+                                $page.props.auth.user.permissions?.includes('Caja')"
                                 :href="route('cash-registers.index')" :active="route().current('cash-registers.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -433,8 +435,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Caja</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea') &&
+                                $page.props.auth.user.permissions?.includes('Tienda en línea')"
                                 :href="route('online-sales.index')" :active="route().current('online-sales.*')">
                                 <svg width="16" height="18" viewBox="0 0 10 16" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -454,7 +456,8 @@ onUnmounted(() => {
                                 <span>Tienda en línea</span>
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Configuraciones')"
+                                v-if="$page.props.auth.user.store.activated_modules?.includes('Configuraciones') &&
+                                $page.props.auth.user.permissions?.includes('Configuraciones')"
                                 :href="route('settings.index')" :active="route().current('settings.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -527,7 +530,8 @@ onUnmounted(() => {
 
                 <div class="overflow-y-auto h-[calc(100vh-3rem)]">
                     <!-- mensaje de suscripcion a punto de expirar-->
-                    <section v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7 || $page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
+                    <section
+                        v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7 || $page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
                         class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-[11px] md:text-xs lg:px-10">
                         <div v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) > 0">
                             Tu suscripción expira en
