@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\CashCut;
 use App\Models\CashRegister;
-use App\Models\CashRegisterMovement;
-use App\Models\OnlineSale;
-use App\Models\Store;
 use App\Models\User;
+use App\Notifications\BasicEmailNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -147,5 +145,16 @@ class CashRegisterController extends Controller
         $user->update([
             'cash_register_id' => $cash_register_id
         ]);
+    }
+
+    public function sendMaxCashNotification()
+    {
+        $firstUser = auth()->user()->store->users()->first();
+        $user_name = auth()->user()->name;
+        $firstUser->notify(new BasicEmailNotification(
+            "Hacer corte de caja",
+            "El usuario $user_name ha solicitado que se realice el corte de caja. Por favor, atiende la solicitud lo antes posible o ponte en contacto con él/ella.",
+            route('sales.point')
+        ));
     }
 }

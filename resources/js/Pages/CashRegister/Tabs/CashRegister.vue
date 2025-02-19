@@ -53,7 +53,7 @@
 
     <!-- Información de caja -->
     <section class="lg:flex lg:space-x-7 md:w-full xl:w-[90%] mx-auto text-xs md:text-sm mt-7">
-      <div class="w-full border border-grayD9 rounded-lg self-start">
+      <div class="w-full border border-gray-300 rounded-2xl shadow-lg bg-white p-1 self-start transition-all ease-linear duration-200">
         <div class="p-2 md:p-4 grid grid-cols-4 gap-x-2 gap-y-1">
           <p class="font-bold mb-3 col-span-3">Efectivo esperado</p>
           <div v-if="cutLoading">
@@ -97,7 +97,7 @@
             </p>
           </div>
         </div>
-        <footer class="bg-[#F2F2F2] text-gray99 py-2 flex px-2">
+        <footer class="bg-[#F2F2F2] text-gray99 py-2 rounded-xl flex px-2">
           <p class="w-3/4 text-right pr-7">Total</p>
           <div v-if="cutLoading">
             <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
@@ -114,7 +114,7 @@
 
       <!-- Lado derecho -->
       <div v-if="canEdit"
-        class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-lg border border-gray-grayD9 p-3 my-4 lg:mt-0 self-start">
+        class="w-full lg:w-[450px] space-y-3 bg-[#F7F7F7] rounded-2xl shadow-lg border border-gray-grayD9 p-3 my-4 lg:mt-0 self-start">
         <p class="font-bold text-center">Ajustes generales</p>
         <!-- Editar cantidad maxima permitida en caja -->
         <div v-if="isMaxCashOn" class="py-3 mx-auto lg:mx-0 border border-grayD9 rounded-lg self-start relative">

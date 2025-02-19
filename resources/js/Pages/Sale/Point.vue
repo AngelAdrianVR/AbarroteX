@@ -110,7 +110,7 @@
           </div>
           <article class="flex items-center space-x-3">
             <!-- Indicadores activos como báscula y descuentos -->
-            <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled" placement="left">
+            <el-tooltip v-if="$page.props.auth.user.scale_config.is_enabled || true" placement="left">
               <template #content>
                 <p v-if="isConnectedScale" class="text-sm">Báscula activada</p>
                 <div v-else class="text-sm">
@@ -192,7 +192,7 @@
         <!-- cuerpo de la pagina -->
         <div class="lg:flex lg:space-x-5 my-2">
           <!-- atajos de teclado -->
-          <div class="relative">
+          <div class="relative hidden lg:block">
             <el-tooltip content="Atajos de teclado" placement="top">
               <button @click="showShortCuts = !showShortCuts"
                 class="size-10 border border-primary rounded-full flex items-center justify-center text-primary">
@@ -206,7 +206,7 @@
           </div>
           <!-- ventana de shortcuts -->
           <div v-if="showShortCuts"
-            class="absolute top-36 left-20 bg-white border border-[#D9D9D9] rounded-xl p-4 z-40">
+            class="absolute top-36 left-20 bg-white shadow-lg border border-[#D9D9D9] rounded-xl p-4 z-40">
             <div class="flex items-center justify-between">
               <h2 class="font-bold">Atajos de teclado</h2>
               <i @click="showShortCuts = false" class="fa-solid fa-xmark text-gray-500 cursor-pointer"></i>
@@ -359,7 +359,7 @@
                   <div class="text-center">
                     <p class="text-gray-500">Total</p>
                     <p class="text-[#5FCB1F] text-lg font-bold">${{ (quantity *
-                      productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                      productFoundSelected.public_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                   </div>
                 </div>
 
@@ -897,14 +897,38 @@
         <h1>Se ha llegado al límite de dinero permitido en caja</h1>
       </template>
       <template #content>
-        <p>
-          ¿Deseas realizar corte para no exceder el límite de dinero permitido en caja?
+        <div v-if="$page.props.auth.user.store.first_user.id != $page.props.auth.user.id">
+          <p v-if="!maxCashNotificationSent && !maxCashNotifying">
+            Puedes
+            <button @click="sendMaxCashNotification" class="text-primary underline">
+              notificar/volver a notificar a {{ $page.props.auth.user.store.first_user.email }}
+            </button>
+            para que realice el corte personalmente.
+          </p>
+          <p v-else-if="maxCashNotifying" class="flex items-center space-x-2">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <span>Enviando notificación...</span>
+          </p>
+          <p v-else class="flex items-center space-x-2">
+            <svg width="18" height="18" viewBox="0 0 54 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12.5263 42.0011C8.73489 31.147 0.492597 22.5137 0.0263141 22.0011C-0.439969 21.4884 5.33881 20.5148 13.5263 29.0011C29.0463 11.4303 44.0918 -0.0470468 52.5263 0.00107837C52.8512 -0.0320255 53.3498 0.705849 53.0263 1.00108C34.3519 9.89275 24.0145 25.6913 15.0263 42.0011C14.9721 42.4953 12.5049 42.397 12.5263 42.0011Z"
+                fill="#189203" />
+            </svg>
+            <span>Se ha enviado la notificación.</span>
+          </p>
+          <p class="mt-3">
+            Si lo prefieres y estas autorizada(o), puedes realizar el corte presionando "Hacer corte"
+          </p>
+        </div>
+        <p v-else>
+          Realiza el corte de caja para no volver a mostrar este mensaje cada que registres una venta.
         </p>
       </template>
       <template #footer>
         <div class="flex items-center space-x-1">
-          <CancelButton @click="showLimitCashModal = false">Ahora no</CancelButton>
-          <PrimaryButton @click="showLimitCashModal = false; handleCashCut()">Hacer corte</PrimaryButton>
+          <CancelButton @click="showLimitCashModal = false" :disabled="maxCashNotifying">Ahora no</CancelButton>
+          <PrimaryButton @click="showLimitCashModal = false; handleCashCut()" :disabled="maxCashNotifying">Hacer corte</PrimaryButton>
         </div>
       </template>
     </ConfirmationModal>
@@ -1011,6 +1035,8 @@ export default {
       selectedCashRegisterId: this.$page.props.auth.user.cash_register_id, //id de la caja registradora seleccionada
       asignedCashRegister: this.$page.props.auth.user.cash_register_id, // caja registradora asignada a la venta de el usuario logueado
       showCashRegisterSelectionModal: false, //muestra u oculta el modal de selección de caja
+      maxCashNotificationSent: false,
+      maxCashNotifying: false,
 
       // conexion a internet
       isOnline: navigator.onLine, // Verificar el estado de conexión al cargar el componente
@@ -1045,6 +1071,8 @@ export default {
       isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
       // mostrar seleccion rapida de productos sin codigo activado
       isQuickNoCodeSelectionOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Selección rápida de productos sin código')?.value,
+      // Imprimir automáticamente el ticket de venta despues de finalizarla
+      automaticPrinting: this.$page.props.auth.user.store.settings.find(item => item.name == 'Impresión automática de tickets')?.value,
 
       // cargas
       storeProcessing: false, //cargando store de venta
@@ -1219,7 +1247,7 @@ export default {
           localStorage.setItem('pendentProcess', false);
 
           //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
-          if (this.$page.props.auth.user.printer_config?.automaticPrinting) {
+          if (this.automaticPrinting) {
             window.open(route('sales.print-ticket', response.data.folio_stored), '_blank');
           }
         }
@@ -1385,6 +1413,20 @@ export default {
         console.log(error);
       }
     },
+    async sendMaxCashNotification() {
+      try {
+        this.maxCashNotifying = true;
+        const response = await axios.get(route('cash-registers.max-cash-notify'));
+        if (response.status === 200) {
+          this.maxCashNotifying = false;
+          this.maxCashNotificationSent = true;
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.maxCashNotifying = false;
+      }
+    },
     storeCashRegisterMovement() {
       this.form.post(route('cash-register-movements.store', { cash_register_id: this.asignedCashRegister?.id }), {
         onSuccess: () => {
@@ -1420,7 +1462,9 @@ export default {
         const response = await axios.get(route('cash-registers.fetch-cash-register', this.asignedCashRegister?.id));
         if (response.status === 200) {
           this.localCurrentCash = response.data.item.current_cash;
+          // Mostrar limite de caja alcanzado
           if ((this.localCurrentCash >= this.asignedCashRegister?.max_cash) && this.isMaxCashOn && this.isOnline) {
+            this.maxCashNotificationSent = false;
             this.showLimitCashModal = true;
           }
         }
@@ -1826,7 +1870,7 @@ export default {
 
     // redirigir a los tutoriales si no los ha finalizado
     if (!this.$page.props.auth.user.tutorials_seen) {
-      this.$inertia.visit(route('tutorials.index'));
+      this.$inertia.visit(route('started-tutorial'));
     }
 
     //verificar si el usuario tiene una caja asignada

@@ -46,7 +46,7 @@ class CreateNewUser implements CreatesNewUsers
             'address' => $input['address'],
             'type' => $input['type'],
             'contact_phone' => $input['contact_phone'],
-            'next_payment' => now()->addDays(2),
+            'next_payment' => now()->addDays(30),
             'online_store_properties' => [
                 "whatsapp" => '',
                 "delivery_price" => null,
@@ -62,11 +62,24 @@ class CreateNewUser implements CreatesNewUsers
             'activated_modules' => $activated_modules,
         ]);
 
-        // agregar las configuraciones iniciales a la tienda
+        // Obtener las configuraciones iniciales de la tienda
         $settings = Setting::all();
+
         $settings->each(function ($setting) use ($store) {
-            $store->settings()->attach($setting->id, ['value' => 1]);
+            // Lista de configuraciones que deben tener un valor de 0
+            $settingsToZero = [
+                'Impresión automática de tickets',
+                'Control de inventario',
+                'Aviso de monto máximo en caja',
+            ];
+
+            // Determinar el valor según el nombre de la configuración
+            $value = in_array($setting->name, $settingsToZero) ? 0 : 1;
+
+            // Asociar la configuración a la tienda con el valor correspondiente
+            $store->settings()->attach($setting->id, ['value' => $value]);
         });
+
 
         //Crea la caja registradora para esta nueva tienda
         $cash_register = CashRegister::create([

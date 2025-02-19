@@ -204,9 +204,9 @@ methods:{
                     type: 'success',
                 });
                 //se busca el index del cliente eliminado para removerlo del arreglo
-                const indexQuoteDeleted = this.services.findIndex(item => item.id == this.itemIdToDelete);
+                const indexQuoteDeleted = this.quotes.findIndex(item => item.id == this.itemIdToDelete);
                 if ( indexQuoteDeleted != -1 ) {
-                    this.services.splice(indexQuoteDeleted, 1);
+                    this.quotes.splice(indexQuoteDeleted, 1);
                 }
                 this.showDeleteConfirm = false;
             }

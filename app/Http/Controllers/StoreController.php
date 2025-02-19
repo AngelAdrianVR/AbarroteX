@@ -145,4 +145,23 @@ class StoreController extends Controller
         return response()->json(compact('store'));
     }
 
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'store_id' => 'required|exists:stores,id',
+            'settings' => 'required|array',
+            'settings.*.setting_id' => 'required|exists:settings,id',
+            'settings.*.value' => 'required'
+        ]);
+
+        $store = Store::findOrFail($request->store_id);
+
+        foreach ($request->settings as $setting) {
+            $store->settings()->updateExistingPivot($setting['setting_id'], ['value' => $setting['value']]);
+        }
+
+        return response()->json(['message' => 'Configuraciones actualizadas correctamente.'], 200);
+    }
+
+
 }

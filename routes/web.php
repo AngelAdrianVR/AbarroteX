@@ -40,6 +40,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Laravel\Jetstream\Agent;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,12 +54,13 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    $agent = new Agent();
+
+    if ($agent->isDesktop() || $agent->isLaptop()) {
+        return inertia('Welcome');
+    } else {
+        return inertia('WelcomeMobile');
+    }
 });
 
 
@@ -74,6 +76,7 @@ Route::middleware([
     Route::get('dashboard-get-week-data/{date}', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
+
 
 // Route::get('update-folio', function () {
 //     // Obtener las ventas de la tienda con id 5 y tomar los primeros 15
@@ -318,6 +321,8 @@ Route::post('stores-update-modules/{store}', [StoreController::class, 'UpdateMod
 Route::post('stores/store-logo', [StoreController::class, 'storeLogo'])->name('stores.store-logo');
 Route::post('stores/store-banner', [StoreController::class, 'storeBanner'])->name('stores.store-banner');
 Route::post('stores/store-online-properties', [StoreController::class, 'storeOnlineProperties'])->name('stores.store-online-properties');
+Route::post('/stores/update-settings', [StoreController::class, 'updateSettings'])->name('stores.update-settings');
+
 
 
 // User routes-----------------------------------------------------------------------------------------
@@ -392,6 +397,7 @@ Route::post('payments/store-invoice/{payment}', [PaymentController::class, 'stor
 //----------------------------------------------------------------------------------------------------------
 Route::resource('cash-registers', CashRegisterController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Caja', 'verified']);
 Route::get('cash-registers-fetch-cash-register/{cash_register_id}', [CashRegisterController::class, 'fetchCashRegister'])->middleware('auth')->name('cash-registers.fetch-cash-register');
+Route::get('cash-registers-max-cash-notify', [CashRegisterController::class, 'sendMaxCashNotification'])->middleware('auth')->name('cash-registers.max-cash-notify');
 Route::put('cash-registers-asign/{user}/{cash_register_id}', [CashRegisterController::class, 'asignCashRegister'])->middleware('auth')->name('cash-registers.asign');
 
 
@@ -414,6 +420,7 @@ Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'get
 //Tutorial routes-----------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('tutorials', TutorialController::class)->middleware('auth');
+Route::get('/tutorials/{tutorial}/increment-views', [TutorialController::class, 'incrementViews'])->name('tutorials.increment-views');
 
 
 //Abonos routes-----------------------------------------------------------------------------------------------------
@@ -489,6 +496,17 @@ Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->n
 //-----------------------------------------------------------------------------------------------------------------------
 // Route::resource('discount-sticket', DiscountTicketController::class)->middleware('auth');
 Route::get('discount-tickets/fetch-active-tickets', [DiscountTicketController::class, 'fetchActiveTickets'])->name('discount-tickets.fetch-active-tickets')->middleware('auth');
+
+
+// ver tutoriales
+Route::get('/started-turtorial', function () {
+    if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
+        return inertia('StartedTutorial/BoutiqueIndex');
+    } else {
+        return inertia('StartedTutorial/Index');
+    }
+})->name('started-tutorial');
+
 
 // comandos Artisan
 Route::get('/backup', function () {
