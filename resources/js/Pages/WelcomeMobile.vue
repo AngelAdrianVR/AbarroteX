@@ -5,6 +5,7 @@ import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Simulator from '@/Components/MyComponents/Landing/Simulator.vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import confetti from "canvas-confetti";
 
 defineProps({
     canLogin: Boolean,
@@ -25,10 +26,11 @@ const scrollToTop = () => {
     });
 };
 
-const scrollToElement = (id) => {
-    const element = document.getElementById(id);
-    element.scrollIntoView({
-        behavior: 'smooth'
+const launchConfetti = () => {
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
     });
 };
 
@@ -575,7 +577,7 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="flex items-center justify-between">
                                 <el-input-number v-model="quantity1" size="small" class="mr-4" :min="1" :max="5" />
-                                <button @click=""
+                                <button @click="launchConfetti"
                                     class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor"
@@ -598,7 +600,7 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="flex items-center justify-between">
                                 <el-input-number v-model="quantity2" size="small" class="mr-4" :min="1" :max="5" />
-                                <button @click=""
+                                <button @click="launchConfetti"
                                     class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor"
