@@ -2,6 +2,7 @@
     <AppLayout title="Nuevo usuario">
         <div class="px-3 md:px-10 py-7">
             <Back :to="route('settings.index', { tab: '2' })" />
+
             <form v-if="usersNotExceededYet" @submit.prevent="store"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 grid grid-cols-2 gap-3 mx-auto mt-7">
                 <h1 class="font-bold ml-2 col-span-full">Crear nuevo usuario</h1>
@@ -53,13 +54,20 @@
                 <h1 class="font-bold text-5xl text-center mb-5">¡Cima alcanzada!</h1>
                 <p class="text-xl text-center">Has llegado al límite de usuarios de tu plan contratado.</p>
                 <p class="text-xl text-center">
-                    Sigue creciendo tu negocio y descubre nuestros planes haciendo clic en el siguiente botón
+                    Para poder crear más usuarios comunicate con nuestro equipo de soporte vía whatsApp <br> o deja tu reporte desde el módulo de reportes.
                 </p>
-                <div class="flex justify-center mt-5">
-                    <PrimaryButton @click="$inertia.get(route('profile.show'))" :disabled="form.processing">
-                        Explorar planes
-                    </PrimaryButton>
-                </div>
+
+            <div class="flex items-center justify-center space-x-3 mt-20">
+                <PrimaryButton @click="$inertia.visit(route('support-reports.create'))">
+                    Dejar reporte
+                </PrimaryButton>
+
+                <!-- <el-tooltip content="Chat vía whatsApp" placement="right"> -->
+                    <a href="https://api.whatsapp.com/send?phone=523322268824" target="_blank" class="flex items-center justify-center rounded-full size-9 bg-primary text-white">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                    </a>
+                <!-- </el-tooltip> -->
+            </div>
             </section>
         </div>
         <!-- modale de creacion de rol -->
@@ -284,6 +292,6 @@ export default {
                 },
             })
         },
-    }
+    },
 }
 </script>

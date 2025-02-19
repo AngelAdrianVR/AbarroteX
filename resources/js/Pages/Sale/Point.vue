@@ -192,7 +192,7 @@
         <!-- cuerpo de la pagina -->
         <div class="lg:flex lg:space-x-5 my-2">
           <!-- atajos de teclado -->
-          <div class="relative">
+          <div class="relative hidden lg:block">
             <el-tooltip content="Atajos de teclado" placement="top">
               <button @click="showShortCuts = !showShortCuts"
                 class="size-10 border border-primary rounded-full flex items-center justify-center text-primary">
@@ -1071,6 +1071,8 @@ export default {
       isMaxCashOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Aviso de monto máximo en caja')?.value,
       // mostrar seleccion rapida de productos sin codigo activado
       isQuickNoCodeSelectionOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Selección rápida de productos sin código')?.value,
+      // Imprimir automáticamente el ticket de venta despues de finalizarla
+      automaticPrinting: this.$page.props.auth.user.store.settings.find(item => item.name == 'Impresión automática de tickets')?.value,
 
       // cargas
       storeProcessing: false, //cargando store de venta
@@ -1245,7 +1247,7 @@ export default {
           localStorage.setItem('pendentProcess', false);
 
           //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
-          if (this.$page.props.auth.user.printer_config?.automaticPrinting) {
+          if (this.automaticPrinting) {
             window.open(route('sales.print-ticket', response.data.folio_stored), '_blank');
           }
         }

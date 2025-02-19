@@ -106,6 +106,7 @@ const submit = () => {
 
             <div class="flex items-center justify-center mt-6 px-9 disabled:cursor-not-allowed disabled:opacity-25">
                 <PrimaryButton class="w-full" :disabled="form.processing">
+                    <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                     Ingresar
                 </PrimaryButton>
             </div>
