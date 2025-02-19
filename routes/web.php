@@ -40,6 +40,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Laravel\Jetstream\Agent;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,12 +54,13 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    $agent = new Agent();
+
+    if ($agent->isDesktop() || $agent->isLaptop()) {
+        return inertia('Welcome');
+    } else {
+        return inertia('WelcomeMobile');
+    }
 });
 
 
