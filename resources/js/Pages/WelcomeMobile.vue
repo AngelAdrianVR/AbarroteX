@@ -277,7 +277,7 @@ onBeforeUnmount(() => {
             src="@/../../public/images/bg-01.png" alt="Destello neón de adorno en el fondo">
         <nav class="bg-transparent" data-aos="zoom-in" data-aos-duration="1200">
             <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
-                <div class="flex justify-between items-center h-14 bg-[#404040]/30 rounded-full pl-6 pr-2">
+                <div class="flex justify-between items-center h-14 bg-[#404040]/30 rounded-full pl-3 pr-2">
                     <div class="flex">
                         <!-- Logo -->
                         <div class="shrink-0 flex items-center">
@@ -285,12 +285,6 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                     <div class="flex sm:items-center space-x-12 sm:ms-6">
-                        <button @click="scrollToElement('features')" class="text-white focus:border-none focus:ring-0"
-                            type="button">Funcionalidades</button>
-                        <button @click="scrollToElement('prices')" class="text-white focus:border-none focus:ring-0"
-                            type="button">Precios</button>
-                        <button @click="scrollToElement('products')" class="text-white focus:border-none focus:ring-0"
-                            type="button">Productos</button>
                         <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
                         <button class="buttonupgrade">
                             Iniciar sesión
@@ -302,25 +296,19 @@ onBeforeUnmount(() => {
         </nav>
         <main class="bg-transparent selection:bg-primary selection:text-white pb-24 relative">
             <!-- hero -->
-            <section class="flex relative">
-                <figure class="w-[24%] mx-12 mt-10" data-aos="fade-right" data-aos-duration="1200" data-aos-delay="200">
+            <section class="mx-6 relative">
+                <figure class="mt-6" data-aos="fade-right" data-aos-duration="1200" data-aos-delay="200">
                     <img class="object-contain select-none" :draggable="false"
-                        src="@/../../public/images/landing-01.png"
-                        alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
-                    <img class="object-contain select-none mt-4 ml-auto" :draggable="false"
-                        src="@/../../public/images/price.png"
+                        src="@/../../public/images/landing-01-mb.png"
                         alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
                 </figure>
-                <figure class="w-[27%] ml-20 mt-20 z-10" data-aos="fade-down" data-aos-duration="1200"
+                <figure class="w-[90%] mx-auto mt-6 z-10" data-aos="fade-down" data-aos-duration="1200"
                     data-aos-delay="1000">
                     <img class="object-contain select-none" :draggable="false"
                         src="@/../../public/images/landing-02.png" alt="Tablet que muestra un carrito de compras">
                 </figure>
-                <img class="object-contain select-none absolute -right-[3%] top-28" :draggable="false"
-                    src="@/../../public/images/landing-03.png" alt="Tablet que muestra un carrito de compras"
-                    data-aos="fade-left" data-aos-duration="1200" data-aos-delay="600">
-                <div class="absolute bottom-4 right-[22%]" data-aos="fade-up" data-aos-duration="1200"
-                    data-aos-delay="1500" data-aos-offset="500">
+                <div class="flex justify-center mt-4" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="1500"
+                    data-aos-offset="500">
                     <button @click="$inertia.visit('register')" class="button1" style="--clr: #7808d0">
                         <span class="button1__icon-wrapper">
                             <svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -341,58 +329,54 @@ onBeforeUnmount(() => {
                 </div>
             </section>
             <!-- funcionalidades -->
-            <section class="mt-56 relative">
-                <img class="object-contain select-none absolute left-0 -top-72" :draggable="false"
+            <section class="mt-16 relative">
+                <img class="w-[50%] object-contain select-none absolute left-0 top-0" :draggable="false"
                     src="@/../../public/images/bg-02.png" alt="Destello neón de adorno en el fondo"
                     data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
-                <p id="features" class="text-5xl text-center font-extrabold text-white" data-aos="flip-left"
+                <p id="features" class="text-xl text-center font-extrabold text-white" data-aos="flip-left"
                     data-aos-duration="700">FUNCIONALIDAD DE LOS MÓDULOS</p>
                 <!-- Punto de venta -->
-                <article class="mx-40 flex space-x-32 relative">
-                    <figure class="w-[40%]" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+                <article class="mx-6 relative">
+                    <div class="text-white mt-14" data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
+                        <h2 class="font-bold text-2xl text-center">Punto de venta</h2>
+                        <p class="text-center text-lg mt-2">
+                            Integración con básculas, impresoras de tickets, lectores de códigos de barra y más.
+                        </p>
+                    </div>
+                    <figure class="w-[90%] mx-auto" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
                         <img class="object-contain select-none" :draggable="false"
                             src="@/../../public/images/features-01.png"
                             alt="Carrito de compras con aparatos electronicos entrando y brillando">
                     </figure>
-                    <div class="w-1/2 text-white mt-52" data-aos="fade-right" data-aos-duration="1200"
-                        data-aos-delay="800">
-                        <h2 class="font-bold text-4xl">Punto de venta</h2>
-                        <p class="text-justify text-3xl mt-8">
-                            Integración con básculas, impresoras de tickets, lectores de códigos de barra y más.
-                        </p>
-                        <div class="flex justify-between mt-16">
-                            <figure class="w-[30%] flex flex-col" data-aos="fade-up" data-aos-duration="500"
-                                data-aos-delay="1500">
-                                <img class="w-[36%] mx-auto object-contain select-none" :draggable="false"
-                                    src="@/../../public/images/wifi.png"
-                                    alt="Simbolo de wifi con diagonal que indica sin conexion a internet">
-                                <p class="text-center text-sm mt-4">No pierdas ventas: opera sin conexión y sincroniza
-                                    después.</p>
-                            </figure>
-                            <img class="w-[24%] object-contain select-none mt-1" :draggable="false" data-aos="fade-up"
-                                data-aos-duration="300" data-aos-delay="1900" src="@/../../public/images/printer.png"
-                                alt="Impresora de tikets pequeña con un tiket surgiendo de ella">
-                        </div>
-                        <p class="text-center text-3xl mt-12" style="font-family: 'Licorice';" data-aos="fade-up"
-                            data-aos-duration="240" data-aos-delay="1950">
-                            ¡Simplifica tus ventas, todo en uno!
-                        </p>
+                    <div class="flex justify-between text-white">
+                        <figure class="w-[45%] flex flex-col" data-aos="fade-up" data-aos-duration="500"
+                            data-aos-delay="1100">
+                            <img class="w-[55%] mx-auto object-contain select-none" :draggable="false"
+                                src="@/../../public/images/wifi.png"
+                                alt="Simbolo de wifi con diagonal que indica sin conexion a internet">
+                            <p class="text-center text-xs mt-3">No pierdas ventas: opera sin conexión y sincroniza
+                                después.</p>
+                        </figure>
+                        <img class="w-[36%] object-contain select-none mt-1" :draggable="false" data-aos="fade-up"
+                            data-aos-duration="300" data-aos-delay="1500" src="@/../../public/images/printer.png"
+                            alt="Impresora de tikets pequeña con un tiket surgiendo de ella">
                     </div>
+                    <p class="text-center text-3xl mt-6 text-white" style="font-family: 'Licorice';" data-aos="fade-up"
+                        data-aos-duration="240" data-aos-delay="1550">
+                        ¡Simplifica tus ventas, todo en uno!
+                    </p>
                 </article>
                 <!-- Registro de venta -->
-                <article class="mt-20 relative">
-                    <img class="object-contain select-none absolute right-0 -top-40" :draggable="false"
-                        src="@/../../public/images/bg-03.png" alt="Destello neón de adorno en el fondo"
-                        data-aos="fade-left" data-aos-duration="1200" data-aos-delay="800">
-                    <div class="mx-40 flex space-x-32">
-                        <div class="w-1/2 text-white" data-aos="fade-right" data-aos-duration="800">
-                            <h2 class="font-bold text-4xl">Registro de ventas</h2>
-                            <p class="text-justify text-3xl mt-8">Accede al historial completo de transacciones en
+                <article class="mt-14 relative">
+                    <div class="mx-6 z-10">
+                        <div class="text-white text-center" data-aos="fade-right" data-aos-duration="800">
+                            <h2 class="font-bold text-2xl">Registro de ventas</h2>
+                            <p class="text-base mt-2">Accede al historial completo de transacciones en
                                 segundos.
                             </p>
-                            <ul class="text-3xl mt-8 *:mt-3 *:flex *:items-center *:space-x-2">
+                            <ul class="text-base mt-8 *:mt-1 *:flex *:items-center *:space-x-2">
                                 <li>
-                                    <svg width="30" height="30" viewBox="0 0 13 13" fill="none"
+                                    <svg width="25" height="25" viewBox="0 0 13 13" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <g filter="url(#filter0_f_16318_44)">
                                             <circle cx="6.5" cy="6.5" r="2.5" fill="#410B69" />
@@ -413,7 +397,7 @@ onBeforeUnmount(() => {
                                     <span>Edita ventas</span>
                                 </li>
                                 <li>
-                                    <svg width="30" height="30" viewBox="0 0 13 13" fill="none"
+                                    <svg width="25" height="25" viewBox="0 0 13 13" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <g filter="url(#filter0_f_16318_44)">
                                             <circle cx="6.5" cy="6.5" r="2.5" fill="#410B69" />
@@ -434,7 +418,7 @@ onBeforeUnmount(() => {
                                     <span>Haz reembolsos</span>
                                 </li>
                                 <li>
-                                    <svg width="30" height="30" viewBox="0 0 13 13" fill="none"
+                                    <svg width="25" height="25" viewBox="0 0 13 13" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <g filter="url(#filter0_f_16318_44)">
                                             <circle cx="6.5" cy="6.5" r="2.5" fill="#410B69" />
@@ -456,32 +440,31 @@ onBeforeUnmount(() => {
                                 </li>
                             </ul>
                         </div>
-                        <figure class="w-[38%] z-10" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400">
+                        <figure class="w-[95%] mx-auto mt-6" data-aos="fade-left" data-aos-duration="800"
+                            data-aos-delay="400">
                             <img class="object-contain select-none" :draggable="false"
                                 src="@/../../public/images/features-02.png"
                                 alt="Carrito de compras con aparatos electronicos entrando y brillando">
                         </figure>
                     </div>
+                    <img class="w-[50%] object-contain select-none absolute right-0 top-0" :draggable="false"
+                        src="@/../../public/images/bg-03.png" alt="Destello neón de adorno en el fondo"
+                        data-aos="fade-left" data-aos-duration="1200" data-aos-delay="800">
                 </article>
                 <!-- Clientes -->
-                <article class="mt-32 relative">
-                    <img class="object-contain select-none absolute left-[5%] -top-40" :draggable="false"
+                <article class="mt-12 relative">
+                    <img class="object-contain select-none absolute left-0 top-32" :draggable="false"
                         src="@/../../public/images/bg-04.png" alt="Destello neón de adorno en el fondo"
                         data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
-                    <div class="mx-40 flex space-x-32 text-end">
-                        <figure class="w-[65%] z-10" data-aos="fade-right" data-aos-duration="800" data-aos-delay="300">
-                            <img class="object-contain select-none" :draggable="false"
-                                src="@/../../public/images/features-03.png"
-                                alt="Carrito de compras con aparatos electronicos entrando y brillando">
-                        </figure>
-                        <div class="w-[36%] text-white mt-36" data-aos="fade-left" data-aos-duration="800">
-                            <h2 class="font-bold text-4xl">Clientes</h2>
-                            <p class="text-justify text-3xl mt-8">
+                    <div class="mx-6 text-end">
+                        <div class="text-white" data-aos="fade-left" data-aos-duration="800">
+                            <h2 class="font-bold text-2xl text-center">Clientes</h2>
+                            <p class="text-center text-base mt-2">
                                 Gestiona toda la información de tus clientes en un solo lugar.
                             </p>
-                            <ul class="text-2xl mt-8 *:mt-3">
+                            <ul class="text-base mt-3 *:mt-3">
                                 <li class="flex items-center justify-end space-x-2">
-                                    <svg width="28" height="28" viewBox="0 0 13 13" fill="none"
+                                    <svg width="25" height="25" viewBox="0 0 13 13" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <g filter="url(#filter0_f_16318_47)">
                                             <circle cx="6.5" cy="6.5" r="2.5" fill="#0B6965" />
@@ -502,7 +485,7 @@ onBeforeUnmount(() => {
                                     <span>Historial de compras</span>
                                 </li>
                                 <li class="flex items-center justify-end space-x-2">
-                                    <svg width="28" height="28" viewBox="0 0 13 13" fill="none"
+                                    <svg width="25" height="25" viewBox="0 0 13 13" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <g filter="url(#filter0_f_16318_47)">
                                             <circle cx="6.5" cy="6.5" r="2.5" fill="#0B6965" />
@@ -523,7 +506,7 @@ onBeforeUnmount(() => {
                                     <span>Ventas a crédito y al contado</span>
                                 </li>
                                 <li class="flex items-center justify-end space-x-2">
-                                    <svg width="28" height="28" viewBox="0 0 13 13" fill="none"
+                                    <svg width="25" height="25" viewBox="0 0 13 13" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <g filter="url(#filter0_f_16318_47)">
                                             <circle cx="6.5" cy="6.5" r="2.5" fill="#0B6965" />
@@ -546,35 +529,43 @@ onBeforeUnmount(() => {
                                 <li>y mucho más...</li>
                             </ul>
                         </div>
+                        <figure class="w-[95%] mt-3" data-aos="fade-right" data-aos-duration="800" data-aos-delay="300">
+                            <img class="object-contain select-none" :draggable="false"
+                                src="@/../../public/images/features-03-mb.png"
+                                alt="Caras de personas sonriendo y conectadas por lineas de colores neón">
+                        </figure>
+                        <p class="text-center text-3xl mt-6 text-white" style="font-family: 'Licorice';"
+                            data-aos="fade-up" data-aos-duration="240" data-aos-delay="1550">
+                            Mejora la relación con tus clientes
+                        </p>
                     </div>
                 </article>
                 <!-- Tienda en linea -->
                 <article
-                    class="mt-32 flex space-x-32 bg-[url('/images/features-04.png')] bg-no-repeat bg-center px-40 pt-80 h-[900px]"
+                    class="mt-12 bg-[url('/images/features-04-mb.png')] bg-no-repeat bg-center px-6 pt-20 h-[900px]"
                     data-aos="zoom-in" data-aos-duration="1800">
-                    <div class="w-[45%] -mt-24">
-                        <div class="w-[66%] text-white self-start" data-aos="fade-down" data-aos-duration="1600"
-                            data-aos-delay="900">
-                            <h2 class="font-bold text-4xl">Tienda en línea</h2>
-                            <p class="text-justify text-2xl mt-8">
-                                Lleva tu negocio al mundo digital con una tienda en línea integrada.
-                            </p>
-                            <p class="text-lg mt-4 text-end">
-                                Sincronización con inventario
-                            </p>
-                            <p class="text-lg text-end">
-                                Seguimiento de pedidos
-                            </p>
-                        </div>
-                        <img class="w-[20%] object-contain select-none mt-24" :draggable="false"
+                    <div class="text-white text-center" data-aos="fade-down" data-aos-duration="1600"
+                        data-aos-delay="900">
+                        <h2 class="font-bold text-2xl">Tienda en línea</h2>
+                        <p class="text-base mt-5">
+                            Lleva tu negocio al mundo digital con una tienda en línea integrada.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between mt-3">
+                        <img class="w-[30%] object-contain select-none mt-5" :draggable="false"
                             src="@/../../public/images/qr-code.png"
                             alt="Código QR con el logo de EzyVentas en el centro" data-aos="fade-right"
                             data-aos-duration="400" data-aos-delay="1900">
+                        <p class="flex flex-col text-sm text-white text-end" data-aos="fade-left"
+                            data-aos-duration="400" data-aos-delay="1900">
+                            <span>Sincronización con inventario</span>
+                            <span>Seguimiento de pedidos</span>
+                        </p>
                     </div>
-                    <div class="flex space-x-10">
-                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 relative pt-52 px-6 mt-32"
+                    <div class="flex justify-center space-x-10 scale-[70%] mt-28">
+                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-60 w-96 relative pt-32 px-6 mt-32"
                             data-aos="fade-down" data-aos-duration="600" data-aos-delay="2000">
-                            <img class="w-[60%] object-contain select-none absolute left-[calc(50%-80px)] -top-10"
+                            <img class="w-[60%] object-contain select-none absolute left-[calc(50%-60px)] -top-10"
                                 :draggable="false" src="@/../../public/images/robot-01.png"
                                 alt="Robot pequeño, blanco con 4 ruedas y 2 ojos grandes">
                             <div>
@@ -583,7 +574,7 @@ onBeforeUnmount(() => {
                                 <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity1 * 90 }} K</p>
                             </div>
                             <div class="flex items-center justify-between">
-                                <el-input-number v-model="quantity1" size="small" :min="1" :max="5" />
+                                <el-input-number v-model="quantity1" size="small" class="mr-4" :min="1" :max="5" />
                                 <button @click=""
                                     class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -595,9 +586,9 @@ onBeforeUnmount(() => {
                                 </button>
                             </div>
                         </div>
-                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[28rem] w-72 relative pt-[21rem] px-6"
+                        <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[21rem] w-72 relative pt-[14rem] px-6"
                             data-aos="fade-up" data-aos-duration="600" data-aos-delay="2100">
-                            <img class="w-[60%] object-contain select-none absolute left-[calc(50%-90px)] -top-28"
+                            <img class="w-[60%] object-contain select-none absolute left-[calc(50%-70px)] -top-28"
                                 :draggable="false" src="@/../../public/images/robot-02.png"
                                 alt="Robot Alto, blanco con forma humanoide">
                             <div>
@@ -606,7 +597,7 @@ onBeforeUnmount(() => {
                                 <p class="text-[#1D1D1D] text-lg font-bold">${{ quantity2 * 180 }} K</p>
                             </div>
                             <div class="flex items-center justify-between">
-                                <el-input-number v-model="quantity2" size="small" :min="1" :max="5" />
+                                <el-input-number v-model="quantity2" size="small" class="mr-4" :min="1" :max="5" />
                                 <button @click=""
                                     class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -621,248 +612,246 @@ onBeforeUnmount(() => {
                     </div>
                 </article>
                 <!-- Reportes -->
-                <article class="relative mt-32">
-                    <img class="object-contain select-none absolute right-20 -top-60" :draggable="false"
+                <article class="relative mt-4">
+                    <img class="w-[75%] object-contain select-none absolute -right-6 -top-40" :draggable="false"
                         src="@/../../public/images/bg-05.png" alt="Destello neón de adorno en el fondo"
                         data-aos="zoom-in" data-aos-duration="1600" data-aos-delay="800">
-                    <img class="object-contain select-none absolute left-0 top-20" :draggable="false"
+                    <img class="w-[60%] object-contain select-none absolute left-0 top-52" :draggable="false"
                         src="@/../../public/images/bg-06.png" alt="Destello neón de adorno en el fondo"
                         data-aos="fade-riht" data-aos-duration="1600" data-aos-delay="800">
-                    <div class="flex mx-32" data-aos="fade-left" data-aos-duration="700" data-aos-offset="450">
-                        <div class="w-[30%] text-white">
-                            <h2 class="font-bold text-4xl">Reportes</h2>
-                            <p class="text-justify text-3xl mt-8">
+                    <div class="mx-6" data-aos="fade-left" data-aos-duration="700" data-aos-offset="450">
+                        <div class="text-center text-white">
+                            <h2 class="font-bold text-2xl">Reportes</h2>
+                            <p class="text-justify text-base mt-3">
                                 Toma decisiones inteligentes con reportes en tiempo real y analisis detallados
                             </p>
-                            <p class="w-[60%] text-center ml-auto mt-32">
-                                Identifica tendencias y oportunidades de crecimiento
-                            </p>
                         </div>
-                        <figure class="w-[45%] mt-10 z-10">
-                            <img class="object-contain select-none" :draggable="false"
-                                src="@/../../public/images/features-05.png"
-                                alt="Grafica de barras con colores llamativos neón">
-                        </figure>
-                        <figure class="w-[17%] z-10">
+                        <figure class="w-[75%] mx-auto mt-12">
                             <img class="object-contain select-none" :draggable="false"
                                 src="@/../../public/images/features-06.png"
                                 alt="Graficas circulares y una flecha que indica crecimiento">
                         </figure>
+                        <p class="text-center text-white">
+                            Identifica tendencias y oportunidades de crecimiento
+                        </p>
+                        <figure class="mx-auto mt-6">
+                            <img class="object-contain select-none" :draggable="false"
+                                src="@/../../public/images/features-05.png"
+                                alt="Grafica de barras con colores llamativos neón">
+                        </figure>
                     </div>
                 </article>
                 <!-- ventajas -->
-                <article class="relative mt-32 mx-40">
+                <article class="relative mt-10 mx-6">
                     <p class="text-white text-2xl font-bold text-center">
                         ¿Por qué elegir Ezy Ventas?
                     </p>
-                    <div class="flex space-x-24 mt-8">
-                        <!-- From Uiverse.io by ayman-ashine -->
-                        <div class="card w-[30%] self-center mt-6">
-                            <img class="image mx-auto" alt="" src="@/../../public/images/landing-08.png" />
-                            <div class="heading pt-4">
-                                El futuro de las ventas está en tus manos
-                            </div>
-                            <button @click="openWhatsapp"
-                                class="w-full flex items-center justify-center space-x-2 text-center bg-[#212121] text-white rounded-[10px] py-2">
-                                <i class="fa-brands fa-whatsapp"></i>
-                                <span class="font-bold">Contáctanos</span>
-                            </button>
+                    <div>
+                        <ol class="text-white text-sm font-normal *:flex *:items-center *:space-x-2 *:mt-7">
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>Compatible con cualquier dispositivo (Computadoras, tablets y
+                                    smartphones)</span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>Ingresa desde cualquier lugar </span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>Gestión de inventario y seguimiento de ventas en tiempo real</span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>Productos pre-cargados para tiendas de abarrotes y papelerías</span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>No requiere de instalaciones </span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>Soporte todo el año</span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>Actualizaciones y mejoras constantes</span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_f_16350_254)">
+                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    </g>
+                                    <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
+                                    <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
+                                    <defs>
+                                        <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
+                                            height="13.0916" filterUnits="userSpaceOnUse"
+                                            color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
+                                                result="shape" />
+                                            <feGaussianBlur stdDeviation="1.45455"
+                                                result="effect1_foregroundBlur_16350_254" />
+                                        </filter>
+                                    </defs>
+                                </svg>
+                                <span>No ocupa espacio de almacenamiento, ya que toda la información se guarda en la
+                                    nube.</span>
+                            </li>
+                        </ol>
+                    </div>
+                    <!-- From Uiverse.io by ayman-ashine -->
+                    <div class="card w-[90%] mx-auto mt-12">
+                        <img class="image mx-auto" alt="" src="@/../../public/images/landing-08.png" />
+                        <div class="heading pt-4">
+                            El futuro de las ventas está en tus manos
                         </div>
-                        <div class="w-2/3">
-                            <ol class="text-white text-lg font-normal *:flex *:items-center *:space-x-2 *:mt-7">
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>Compatible con cualquier dispositivo (Computadoras, tablets y
-                                        smartphones)</span>
-                                </li>
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>Ingresa desde cualquier lugar </span>
-                                </li>
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>Gestión de inventario y seguimiento de ventas en tiempo real</span>
-                                </li>
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>Productos pre-cargados para tiendas de abarrotes y papelerías</span>
-                                </li>
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>No requiere de instalaciones </span>
-                                </li>
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>Soporte todo el año</span>
-                                </li>
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>Actualizaciones y mejoras constantes</span>
-                                </li>
-                                <li>
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" class="shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g filter="url(#filter0_f_16350_254)">
-                                            <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        </g>
-                                        <circle cx="7.36293" cy="7.36293" r="3.63636" fill="#D3FF0F" />
-                                        <circle cx="6.63636" cy="6.63636" r="3.63636" fill="white" />
-                                        <defs>
-                                            <filter id="filter0_f_16350_254" x="0.817472" y="0.817472" width="13.0916"
-                                                height="13.0916" filterUnits="userSpaceOnUse"
-                                                color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix" />
-                                                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix"
-                                                    result="shape" />
-                                                <feGaussianBlur stdDeviation="1.45455"
-                                                    result="effect1_foregroundBlur_16350_254" />
-                                            </filter>
-                                        </defs>
-                                    </svg>
-                                    <span>No ocupa espacio de almacenamiento, ya que toda la información se guarda en la
-                                        nube.</span>
-                                </li>
-                            </ol>
-                        </div>
+                        <button @click="openWhatsapp"
+                            class="w-full flex items-center justify-center space-x-2 text-center bg-[#212121] text-white rounded-[10px] py-2">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span class="font-bold">Contáctanos</span>
+                        </button>
                     </div>
                 </article>
             </section>
             <!-- Simulador -->
-            <section id="prices" class="mt-36 text-center relative">
-                <img class="object-contain select-none absolute left-0 -top-40" :draggable="false"
+            <section id="prices" class="mt-24 text-center relative">
+                <img class="w-[40%] object-contain select-none absolute left-0 -top-40" :draggable="false"
                     src="@/../../public/images/bg-07.png" alt="Destello neón de adorno en el fondo"
                     data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
-                <img class="object-contain select-none absolute right-0 bottom-10" :draggable="false"
-                    src="@/../../public/images/bg-08.png" alt="Destello neón de adorno en el fondo"
-                    data-aos="fade-left" data-aos-duration="1200" data-aos-delay="800">
+                <img class="w-[40%] object-contain select-none absolute right-0 bottom-52" :draggable="false"
+                    src="@/../../public/images/bg-08.png" alt="Destello neón de adorno en el fondo" data-aos="fade-left"
+                    data-aos-duration="1200" data-aos-delay="800">
                 <h2 class="text-white text-2xl font-bold">SIMULADOR</h2>
-                <p class="text-white text-lg mt-3">Personaliza tu suscripción con los módulos que necesitas.</p>
+                <p class="text-white text-base mt-3">Personaliza tu suscripción con los módulos que necesitas.</p>
                 <img class="object-contain select-none mx-auto" :draggable="false"
                     src="@/../../public/images/sim-01.png"
                     alt="Letras con color azul neón que dicen: Con 30 dias gratis de prueba">
@@ -876,14 +865,14 @@ onBeforeUnmount(() => {
             </button>
         </main>
         <!-- footer -->
-        <footer class="bg-black1 p-5">
+        <footer class="bg-black1 p-4">
             <div class="border-b border-[#373737] w-full"></div>
-            <div class="flex items-center md:justify-between text-white text-sm my-3">
-                <p>Copyright &copy; 2024-2025 | Todos los derechos reservador por Ezy Ventas</p>
-                <div class="flex space-x-3">
+            <div class="md:justify-between text-white text-xs my-3">
+                <div class="flex justify-center space-x-3">
                     <a class="underline" target="_blank" :href="route('terms.show')">Términos y condiciones</a>
                     <a class="underline" target="_blank" :href="route('policy.show')">Política de privacidad</a>
                 </div>
+                <p class="mt-3">Copyright &copy; 2024-2025 | Todos los derechos reservador por Ezy Ventas</p>
             </div>
             <div class="flex items-center justify-between">
                 <figure class="mt-4">
