@@ -321,6 +321,8 @@ Route::post('stores-update-modules/{store}', [StoreController::class, 'UpdateMod
 Route::post('stores/store-logo', [StoreController::class, 'storeLogo'])->name('stores.store-logo');
 Route::post('stores/store-banner', [StoreController::class, 'storeBanner'])->name('stores.store-banner');
 Route::post('stores/store-online-properties', [StoreController::class, 'storeOnlineProperties'])->name('stores.store-online-properties');
+Route::post('/stores/update-settings', [StoreController::class, 'updateSettings'])->name('stores.update-settings');
+
 
 
 // User routes-----------------------------------------------------------------------------------------
