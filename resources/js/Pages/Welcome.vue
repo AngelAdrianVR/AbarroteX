@@ -4,6 +4,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Simulator from '@/Components/MyComponents/Landing/Simulator.vue';
 import AOS from 'aos';
+import confetti from "canvas-confetti";
 import 'aos/dist/aos.css';
 
 defineProps({
@@ -22,6 +23,14 @@ const scrollToTop = () => {
     window.scrollTo({
         top: 0,
         behavior: 'smooth'
+    });
+};
+
+const launchConfetti = () => {
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
     });
 };
 
@@ -289,8 +298,8 @@ onBeforeUnmount(() => {
                             type="button">Funcionalidades</button>
                         <button @click="scrollToElement('prices')" class="text-white focus:border-none focus:ring-0"
                             type="button">Precios</button>
-                        <button @click="scrollToElement('products')" class="text-white focus:border-none focus:ring-0"
-                            type="button">Productos</button>
+                        <!-- <button @click="scrollToElement('products')" class="text-white focus:border-none focus:ring-0"
+                            type="button">Productos</button> -->
                         <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
                         <button class="buttonupgrade">
                             Iniciar sesión
@@ -349,10 +358,11 @@ onBeforeUnmount(() => {
                     data-aos-duration="700">FUNCIONALIDAD DE LOS MÓDULOS</p>
                 <!-- Punto de venta -->
                 <article class="mx-40 flex space-x-32 relative">
-                    <figure class="w-[40%]" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+                    <figure class="w-[40%]">
                         <img class="object-contain select-none" :draggable="false"
                             src="@/../../public/images/features-01.png"
-                            alt="Carrito de compras con aparatos electronicos entrando y brillando">
+                            alt="Carrito de compras con aparatos electronicos entrando y brillando" data-aos="fade-left"
+                            data-aos-duration="1400" data-aos-delay="200">
                     </figure>
                     <div class="w-1/2 text-white mt-52" data-aos="fade-right" data-aos-duration="1200"
                         data-aos-delay="800">
@@ -584,7 +594,7 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="flex items-center justify-between">
                                 <el-input-number v-model="quantity1" size="small" :min="1" :max="5" />
-                                <button @click=""
+                                <button @click="launchConfetti"
                                     class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor"
@@ -607,7 +617,7 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="flex items-center justify-between">
                                 <el-input-number v-model="quantity2" size="small" :min="1" :max="5" />
-                                <button @click=""
+                                <button @click="launchConfetti"
                                     class="size-8 group flex items-center justify-center rounded-full border border-[#3e3e3e] hover:border-white hover:bg-primary hover:border-transparent hover:text-white transition-all ease-linear duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-black">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor"
@@ -859,8 +869,8 @@ onBeforeUnmount(() => {
                     src="@/../../public/images/bg-07.png" alt="Destello neón de adorno en el fondo"
                     data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
                 <img class="object-contain select-none absolute right-0 bottom-10" :draggable="false"
-                    src="@/../../public/images/bg-08.png" alt="Destello neón de adorno en el fondo"
-                    data-aos="fade-left" data-aos-duration="1200" data-aos-delay="800">
+                    src="@/../../public/images/bg-08.png" alt="Destello neón de adorno en el fondo" data-aos="fade-left"
+                    data-aos-duration="1200" data-aos-delay="800">
                 <h2 class="text-white text-2xl font-bold">SIMULADOR</h2>
                 <p class="text-white text-lg mt-3">Personaliza tu suscripción con los módulos que necesitas.</p>
                 <img class="object-contain select-none mx-auto" :draggable="false"
