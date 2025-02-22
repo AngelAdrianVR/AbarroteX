@@ -45,10 +45,10 @@
                 <el-tab-pane label="Ventas al contado" name="2">
                     <CashSales :clientId="client.id" />
                 </el-tab-pane>
-                <el-tab-pane label="Cotizaciones" name="3">
+                <el-tab-pane :disabled="!this.$page.props.auth.user.store.activated_modules?.includes('Cotizaciones')" label="Cotizaciones" name="3">
                     <Quotes :clientId="client.id" />
                 </el-tab-pane>
-                <el-tab-pane label="Rentas" name="4">
+                <el-tab-pane :disabled="!this.$page.props.auth.user.store.activated_modules?.includes('Renta de productos')" label="Rentas" name="4">
                     <Rentals :clientId="client.id" />
                 </el-tab-pane>
             </el-tabs>

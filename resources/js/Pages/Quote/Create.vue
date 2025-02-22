@@ -94,9 +94,9 @@
 
                 <!-- Servicios -->
                 <!-- ------------------------------------------------------------------- -->
-                <h2 class="font-bold ml-3 mt-3 mb-1 col-span-full">Servicios</h2>
+                <h2 v-if="this.$page.props.auth.user.store.activated_modules?.includes('Servicios')" class="font-bold ml-3 mt-3 mb-1 col-span-full">Servicios</h2>
 
-                <section class="max-h-72 overflow-auto col-span-full">
+                <section v-if="this.$page.props.auth.user.store.activated_modules?.includes('Servicios')" class="max-h-72 overflow-auto col-span-full">
                     <div class="space-y-3">
                         <ServiceInput :services="services" v-for="(item, index) in form.services" :key="item.id" :id="item.id"
                         @deleteItem="deleteItemService(index)" @syncItem="syncItemsService(index, $event)" class="mb-1" />
@@ -104,7 +104,7 @@
                     <p v-if="!form.services?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a agregar
                     servicios </p>
                 </section>
-                <div class="mt-4 mb-3 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
+                <div v-if="this.$page.props.auth.user.store.activated_modules?.includes('Servicios')" class="mt-4 mb-3 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
                     <button class="text-primary text-sm self-start" type="button" @click="addNewService">
                         <i class="fa-solid fa-plus"></i>
                         Agregar Servicio
@@ -337,8 +337,10 @@ methods:{
                 this.form.contact_name = client.name;
                 this.form.phone = client.phone;
                 this.form.email = client.email;
-                this.form.address = client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' 
+                if ( client.street && client.suburb ) {
+                    this.form.address = client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. ' 
                     + client.town + ', ' + client.polity_state;
+                }
             }
         } catch (error) {
             console.log(error);
