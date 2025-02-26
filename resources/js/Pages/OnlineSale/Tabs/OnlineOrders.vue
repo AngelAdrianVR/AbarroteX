@@ -35,7 +35,8 @@
                     </div>
                 </div>
             </div>
-            <PrimaryButton v-if="canCreate" @click="createOnlineOrderModal = true" class="!py-1">Registrar pedido
+            <PrimaryButton v-if="canCreate" @click="createOnlineOrderModal = true" class="!py-1">
+                Registrar pedido
             </PrimaryButton>
         </div>
     </div>
@@ -95,7 +96,7 @@
                                             :command="'processing|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
-                                                class="size-[14px] mr-2 text-blue-500">
+                                                class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                             </svg>
@@ -106,7 +107,7 @@
                                             :command="'delivered|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
-                                                class="size-[14px] mr-2 text-green-500">
+                                                class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="m4.5 12.75 6 6 9-13.5" />
                                             </svg>
@@ -117,7 +118,7 @@
                                             :command="'cancel|' + online_order.id">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
-                                                class="size-[14px] mr-2 text-red-500">
+                                                class="size-[14px] mr-2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M6 18 18 6M6 6l12 12" />
                                             </svg>
@@ -135,7 +136,7 @@
                                         </el-dropdown-item>
                                         <el-dropdown-item v-if="online_order.phone && canWhatsapp"
                                             :command="'whatsapp|' + online_order.phone">
-                                            <i class="fa-brands fa-whatsapp text-green-500"></i>
+                                            <i class="fa-brands fa-whatsapp"></i>
                                             <span class="text-xs">Mandar whatapp</span>
                                         </el-dropdown-item>
                                         <el-dropdown-item v-if="canDelete" :command="'delete|' + online_order.id">
