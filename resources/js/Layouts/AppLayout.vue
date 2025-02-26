@@ -468,6 +468,11 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Configuraciones</span>
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('tutorials.index')" :active="route().current('tutorials.*')">
+                                <i class="fa-brands fa-youtube text-lg"></i>
+                                <span>Tutoriales</span>
+                            </ResponsiveNavLink>
                             <div class="bg-[#296A6B] px-2 py-1 w-full">
                                 <a href="https://finanzas.dtw.com.mx" target="_blank"
                                     class="flex items-center justify-center space-x-2">

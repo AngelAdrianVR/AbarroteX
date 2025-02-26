@@ -18,7 +18,7 @@
             <!-- Productos -->
             <section class="pb-16">
                 <!-- tabs -->
-                <div class="flex justify-center pb-5">
+                <div v-if="this.store.activated_modules?.includes('Servicios')" class="flex justify-center pb-5">
                     <ToggleButton v-if="services.length && products.length" id="start" ref="togglebutton"
                         @update="handleToggle" :labels="['Productos', 'Servicios']"
                         class="w-3/4 md:w-[45%] lg:w-[35%] xl:w-[20%]" />

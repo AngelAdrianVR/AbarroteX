@@ -460,6 +460,7 @@ Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'r
 Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
 Route::get('online-sales-show-service/{service}', [OnlineSaleController::class, 'showService'])->name('online-sales.show-service');
 Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class, 'quoteService'])->name('online-sales.quote-service');
+Route::get('online-sales-thanks/{encoded_store_id}', [OnlineSaleController::class, 'thanks'])->name('online-sales.thanks');
 
 
 //Internal invoices routes----------------------------------------------------------------------------------------------------

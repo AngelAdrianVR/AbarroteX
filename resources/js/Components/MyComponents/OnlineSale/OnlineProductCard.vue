@@ -183,7 +183,7 @@ export default {
             });
 
             // Emitir el evento personalizado
-            emitter.emit('product-added-to-cart');
+            emitter.emit('update-cart');
         },
     },
     mounted() {

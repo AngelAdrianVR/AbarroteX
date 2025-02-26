@@ -27,14 +27,14 @@
         </section>
         <Loading v-if="loading" class="my-16" />
         <main v-else class="mx-2 lg:mx-14 my-6">
-            <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5">
+            <section class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 gap-1 lg:gap-5 space-y-3 md:space-y-0">
                 <template v-for="(item, index) in getSimpleKpisOptions" :key="index">
                     <SimpleKPI v-if="item.show" :title="item.title" :icon="item.icon" class="self-start card"
                         :value="item.value" />
                 </template>
                 <Kpi class="chart" v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
             </section>
-            <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2">
+            <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2 space-y-3 md:space-y-0">
                 <template v-for="(item, index) in getBarChartOptions" :key="index">
                     <ComparisonBarChart class="chart" v-if="item.show" :options="item" :title="getBarChartTitle(item.title)" />
                 </template>
