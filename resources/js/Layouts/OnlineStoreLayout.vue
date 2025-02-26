@@ -209,11 +209,11 @@ export default {
         this.encodeStoreId();
 
         // Escucha el evento personalizado para actualizar carrito
-        emitter.on('product-added-to-cart', this.loadCart);
+        emitter.on('update-cart', this.loadCart);
     },
     beforeUnmount() {
         // Elimina el listener del evento cuando se desmonta el componente
-        emitter.off('product-added-to-cart', this.loadCart);
+        emitter.off('update-cart', this.loadCart);
     }
 }
 </script>

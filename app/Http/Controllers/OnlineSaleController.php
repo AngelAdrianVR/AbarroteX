@@ -101,7 +101,8 @@ class OnlineSaleController extends Controller
             return $product['product_id'];
         });
 
-        $is_inventory_on = auth()->user()->store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
+        $store = Store::find($validated['store_id']);
+        $is_inventory_on = $store->settings()->where('key', 'Control de inventario')->first()?->pivot->value;
         if ($is_inventory_on) {
             $this->checkProductStock($validated['products']);
         }
@@ -116,7 +117,6 @@ class OnlineSaleController extends Controller
             return to_route('online-sales.show', $new_online_sale->id);
         } else {
             // notificar
-            $store = Store::find($validated['store_id']);
             $store->users->each(function ($user) use ($new_online_sale) {
                 $user->notify(new OnlineSaleNotification(
                     'Nuevo pedido en linea',
@@ -125,7 +125,7 @@ class OnlineSaleController extends Controller
                     'new',
                 ));
             });
-            return redirect()->route('online-sales.client-index', ['encoded_store_id' => $encoded_store_id]);
+            return redirect()->route('online-sales.thanks', ['encoded_store_id' => $encoded_store_id]);
         }
     }
 
@@ -607,5 +607,22 @@ class OnlineSaleController extends Controller
                 }
             }
         }
+    }
+
+    public function thanks($encoded_store_id)
+    {
+        // Decodificar el ID de la tienda
+        $store_id = base64_decode($encoded_store_id);
+
+        $store_id = intval($store_id);
+
+        // Buscar la tienda
+        $store = Store::find($store_id);
+
+        if (!$store) {
+            return inertia('Error/404'); // Manejar caso de tienda no encontrada
+        }
+
+        return inertia('OnlineSale/Thanks', compact('store'));
     }
 }

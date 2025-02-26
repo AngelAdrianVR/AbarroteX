@@ -55,8 +55,12 @@
 
                         <div>
                             <InputLabel value="Estado*" class="ml-3 mb-1" />
-                            <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan"
-                                :maxlength="255" clearable />
+                            <el-select v-model="form.polity_state" class="!w-full" filterable required clearable
+                                placeholder="Selecciona" no-data-text="No hay opciones registradas"
+                                no-match-text="No se encontraron coincidencias">
+                                <el-option v-for="(state, index) in polityStates" :key="index" :value="state"
+                                    :label="state" />
+                            </el-select>
                             <InputError :message="form.errors.polity_state" />
                         </div>
                     </div>
@@ -93,9 +97,10 @@
                             coordinar
                             todos los detalles de la entrega y el pago.
                         </p>
-                        <p v-if="store?.online_store_properties?.delivery_conditions" class="flex space-x-2 mt-4 text-sm">
+                        <p v-if="store?.online_store_properties?.delivery_conditions"
+                            class="flex space-x-2 mt-4 text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" class="size-5 md:size-7">
+                                stroke="currentColor" class="size-5 md:size-5||||||||||||||||||||||||">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                             </svg>
@@ -125,47 +130,33 @@
                         <div class="w-48">
                             <p>Subtotal:</p>
                             <p>Costo de envío:</p>
-                            <p>Total:</p>
+                            <strong>Total:</strong>
                         </div>
-                        <div>
-                            <p><span class="mr-4">$</span>{{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                ",") }}</p>
-                            <!-- Costo de envio si esta activado el minimo para envio gratis -->
-                            <div v-if="store?.online_store_properties?.enabled_free_delivery">
-                                <p v-if="(form.total < store?.online_store_properties?.min_free_delivery)"><span
-                                        class="mr-4">$</span>{{
-                                            parseFloat(store?.online_store_properties?.delivery_price ||
-                                                0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                                <p class="text-green-500" v-else><span class="mr-4">$</span>0</p>
-                            </div>
-                            <!-- Costo de envío si esta desactivado el envio gratis -->
-                            <p v-else><span class="mr-4">$</span>{{
-                                parseFloat(store?.online_store_properties?.delivery_price ||
-                                    0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                            <!-- Total a pagar -->
-                            <p v-if="form.total < store?.online_store_properties?.min_free_delivery" class="font-bold">
-                                <span class="mr-4">$</span>{{ (form.total +
-                                    parseFloat(store?.online_store_properties?.delivery_price ||
-                                        0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        <div class="w-20">
+                            <p class="flex items-center justify-between">
+                                <span>$</span>
+                                <span>
+                                    {{ form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",") }}
+                                </span>
                             </p>
-                            <p v-else class="font-bold"><span class="mr-4">$</span>{{
-                                form.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            <p class="flex items-center justify-between">
+                                <span>$</span>
+                                <span>{{ deliveryPrice.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            </p>
+                            <p class="font-bold flex items-center justify-between">
+                                <span>$</span>
+                                <span>{{ (form.total + deliveryPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}</span>
+                            </p>
                         </div>
                     </div>
-
-                    <!-- Aviso de restante para envio gratis -->
-                    <p v-if="(form.total < store?.online_store_properties?.min_free_delivery) && store?.online_store_properties?.enabled_free_delivery"
-                        class="text-sm text-center py-1 border-b border-grayD9">
-                        Agregar
-                        <span>
-                            ${{ (parseFloat(store?.online_store_properties?.min_free_delivery || 0) -
-                                form.total)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                        </span>
-                        más para conseguir envió gratis.
-                        <span @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))"
-                            class="text-primary cursor-pointer ml-1">Seguir comprando</span>
-                    </p>
-
+                    <div v-if="deliveryPrice" class="text-center py-2 border-b">
+                        <p class="text-sm">Agregar ${{ remainingToFreeDelivery }} más para conseguir envió gratis.
+                            <span @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))"
+                                class="text-primary cursor-pointer ml-1">Seguir comprando</span>
+                        </p>
+                    </div>
                     <label for="confirm" class="text-xs items-center flex">
                         <el-checkbox id="confirm" class="px-2" name="confirm" v-model="confirmSale"></el-checkbox>
                         Confirmo que mi pedido es correcto y deseo continuar
@@ -193,6 +184,7 @@ import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
+import emitter from '@/eventBus.js';
 
 export default {
     data() {
@@ -222,7 +214,14 @@ export default {
             confirmSale: false,
             cart: [],
             encodedIdStore: null, //id codificado de la tienda
-            store: {} //guarda la información de la tienda
+            store: {}, //guarda la información de la tienda
+            polityStates: [
+                "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas", "Chihuahua",
+                "Ciudad de México", "Coahuila", "Colima", "Durango", "Estado de México", "Guanajuato", "Guerrero",
+                "Hidalgo", "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro",
+                "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz",
+                "Yucatán", "Zacatecas"
+            ],
         }
     },
     components: {
@@ -235,26 +234,30 @@ export default {
     },
     props: {
     },
+    computed: {
+        deliveryPrice() {
+            const delivery = this.store.online_store_properties?.delivery_price ?? 0;
+            const minFreeDelivery = this.store.online_store_properties?.min_free_delivery ?? 0;
+
+            if (minFreeDelivery === 0 || this.form.total < minFreeDelivery) {
+                return parseFloat(delivery);
+            }
+
+            return 0;
+        },
+        remainingToFreeDelivery() {
+            const minFreeDelivery = this.store.online_store_properties?.min_free_delivery ?? 0;
+            return minFreeDelivery - this.form.total;
+        }
+    },
     methods: {
         storeOrder() {
-            // si no se alcanza el monto mínimo calcula el envio.
-            const storeProperties = this.store?.online_store_properties;
-            this.form.delivery_price = storeProperties?.enabled_free_delivery && this.form.total >= storeProperties?.min_free_delivery
-                ? 0
-                : parseFloat(storeProperties?.delivery_price);
-
+            this.form.delivery_price = this.deliveryPrice;
             this.form.post(route("online-sales.store"), {
                 onSuccess: () => {
-                    // Mandar informacion de actualizacion de stock para IDB del admin de la tienda
-                    // Aqui
-
-                    this.$notify({
-                        title: "Correcto",
-                        message: "Se ha creado tu pedido correctamente. Nos comunicaremos contigo",
-                        type: "success",
-                    });
+                    // limpiar carro de compras
                     localStorage.removeItem('Ezycart');
-                    location.reload();
+                    emitter.emit('update-cart');
                 },
             });
         },
