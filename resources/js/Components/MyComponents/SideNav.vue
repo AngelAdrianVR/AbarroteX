@@ -1,25 +1,25 @@
 <template>
     <!-- sidebar -->
-    <div class="h-screen hidden md:block shadow-lg relative">
+    <div class="h-screen hidden md:block shadow-lg relative bg-[#232323]">
         <i @click="updateSideNavSize(false)" v-if="small"
-            class="fa-solid fa-angle-right text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
+            class="fa-solid fa-angle-right text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-8 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
         <i @click="updateSideNavSize(true)" v-else
-            class="fa-solid fa-angle-left text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-24 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
-        <div class="bg-[#232323] h-full overflow-auto">
+            class="fa-solid fa-angle-left text-center text-xs pt-[2px] text-white rounded-full size-5 bg-primary absolute top-8 -right-3 cursor-pointer hover:scale-125 transition-transform ease-linear duration-150"></i>
+        <div class="h-full overflow-auto">
             <!-- Logo -->
             <div class="flex items-center justify-center mt-7">
                 <Link v-if="small" :href="route('sales.point')">
                 <figure class="">
-                    <img class="w-16 px-2 mb-[52px]" src="@/../../public/images/isologo.png" alt="logo">
+                    <img class="w-16 px-2 mb-[20px]" src="@/../../public/images/isologo.png" alt="logo">
                 </figure>
                 </Link>
                 <Link v-else :href="route('sales.point')">
                 <figure class="">
-                    <img class="w-32 px-2 mb-8" src="@/../../public/images/white_logo.png" alt="logo">
+                    <img class="w-32 px-2" src="@/../../public/images/white_logo.png" alt="logo">
                 </figure>
                 </Link>
             </div>
-            <nav class="pr-2 text-white">
+            <nav class="pr-2 text-white h-[82%] overflow-auto">
                 <!-- Con barra pequeña -->
                 <section v-if="small">
                     <div v-for="(menu, index) in menus" :key="index">
@@ -31,7 +31,6 @@
                         </button>
                     </div>
                 </section>
-
                 <!-- Con barra grande -->
                 <section v-else v-for="(menu, index) in menus" :key="index">
                     <!-- Con submenues -->
@@ -59,18 +58,19 @@
                         </button>
                     </div>
                 </section>
-                <div v-if="small" class="bg-[#296A6B] px-2 py-1 absolute w-full bottom-2">
-                    <a href="https://finanzas.dtw.com.mx" target="_blank" class="flex items-center justify-center space-x-2">
-                        <img class="w-5 object-contain" src="@/../../public/images/isologo_finanzas.png">
-                    </a>
-                </div>
-                <div v-else class="bg-[#296A6B] px-2 py-1 absolute bottom-2">
-                    <a href="https://finanzas.dtw.com.mx" target="_blank" class="flex items-center space-x-2">
-                        <img class="w-5 object-contain" src="@/../../public/images/isologo_finanzas.png">
-                        <span class="text-xs">Control de finanzas gratis!</span>
-                    </a>
-                </div>
             </nav>
+            <div v-if="small" class="bg-[#296A6B] px-2 py-1 absolute w-full bottom-2">
+                <a href="https://finanzas.dtw.com.mx" target="_blank"
+                    class="flex items-center justify-center space-x-2">
+                    <img class="w-5 object-contain" src="@/../../public/images/isologo_finanzas.png">
+                </a>
+            </div>
+            <div v-else class="bg-[#296A6B] text-white px-2 py-1 absolute bottom-2">
+                <a href="https://finanzas.dtw.com.mx" target="_blank" class="flex items-center space-x-2">
+                    <img class="w-5 object-contain" src="@/../../public/images/isologo_finanzas.png">
+                    <span class="text-xs">Control de finanzas gratis!</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -119,7 +119,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Punto de venta') &&
-                          this.$page.props.auth.user.permissions?.includes('Punto de venta')
+                        this.$page.props.auth.user.permissions?.includes('Punto de venta')
                 },
                 {
                     label: 'Reportes',
@@ -129,7 +129,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Reportes') &&
-                    this.$page.props.auth.user.permissions?.includes('Reportes')
+                        this.$page.props.auth.user.permissions?.includes('Reportes')
                 },
                 {
                     label: 'Registro de ventas',
@@ -139,7 +139,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Ventas registradas') &&
-                    this.$page.props.auth.user.permissions?.includes('Ventas registradas')
+                        this.$page.props.auth.user.permissions?.includes('Ventas registradas')
                 },
                 {
                     label: 'Gastos',
@@ -149,7 +149,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Gastos') &&
-                    this.$page.props.auth.user.permissions?.includes('Gastos')
+                        this.$page.props.auth.user.permissions?.includes('Gastos')
                 },
                 {
                     label: 'Cotizaciones',
@@ -159,7 +159,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Cotizaciones') &&
-                    this.$page.props.auth.user.permissions?.includes('Cotizaciones')
+                        this.$page.props.auth.user.permissions?.includes('Cotizaciones')
                 },
                 {
                     label: 'Renta de productos',
@@ -169,7 +169,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Renta de productos') &&
-                    this.$page.props.auth.user.permissions?.includes('Renta de productos')
+                        this.$page.props.auth.user.permissions?.includes('Renta de productos')
                 },
                 {
                     label: 'Productos',
@@ -179,7 +179,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Productos') &&
-                    this.$page.props.auth.user.permissions?.includes('Productos')
+                        this.$page.props.auth.user.permissions?.includes('Productos')
                 },
                 {
                     label: 'Servicios',
@@ -189,7 +189,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Servicios') &&
-                    this.$page.props.auth.user.permissions?.includes('Servicios')
+                        this.$page.props.auth.user.permissions?.includes('Servicios')
                 },
                 {
                     label: 'Reportes de servicio',
@@ -208,7 +208,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Clientes') &&
-                    this.$page.props.auth.user.permissions?.includes('Clientes')
+                        this.$page.props.auth.user.permissions?.includes('Clientes')
                 },
                 {
                     label: 'Caja',
@@ -218,7 +218,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Caja') &&
-                    this.$page.props.auth.user.permissions?.includes('Caja')
+                        this.$page.props.auth.user.permissions?.includes('Caja')
                 },
                 {
                     label: 'Tienda en línea',
@@ -228,7 +228,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Tienda en línea') &&
-                    this.$page.props.auth.user.permissions?.includes('Tienda en línea')
+                        this.$page.props.auth.user.permissions?.includes('Tienda en línea')
                 },
                 {
                     label: 'Configuraciones',
@@ -238,7 +238,7 @@ export default {
                     options: [],
                     dropdown: false,
                     show: this.$page.props.auth.user.store.activated_modules?.includes('Configuraciones') &&
-                    this.$page.props.auth.user.permissions?.includes('Configuraciones')
+                        this.$page.props.auth.user.permissions?.includes('Configuraciones')
                 },
                 {
                     label: 'Tutoriales',
