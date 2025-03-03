@@ -14,7 +14,7 @@
 
             <!-- transfer -->
             <section class="mt-10 flex flex-col items-center xl:flex-row xl:items-start xl:space-x-5">
-                <div class="mx-auto xl:w-2/3 relative">
+                <div class="mx-auto xl:w-[85%] relative">
                     <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
                         :titles="['Catálogo base', 'Mi tienda']" :data="globalProducts"
                         @left-check-change="handleLeftCheckChange" @right-check-change="handleLeftCheckChange">
@@ -91,7 +91,7 @@
                     <div class="py-5 flex flex-col items-center">
                         <figure class="h-48 w-48 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                             <img v-if="productInfo?.media[0]?.original_url" :src="productInfo.media[0].original_url" 
-                                class="object-cover h-full w-full">
+                                class="object-contain h-full w-full">
                             <span v-else class="text-gray-400 text-sm">Sin imagen</span>
                         </figure>
                         <div class="mt-6 text-sm grid grid-cols-2 gap-y-2 w-full px-4">
@@ -366,3 +366,20 @@ export default {
     }
 };
 </script>
+
+<style scoped>
+::v-deep(.el-transfer-panel) {
+  width: 300px;
+  height: 350px;
+  padding: 10px;
+}
+
+::v-deep(.el-transfer-panel__body) {
+  font-size: 12px;
+}
+
+::v-deep(.el-transfer__buttons button) {
+  font-size: 12px;
+  padding: 10px 16px;
+}
+</style>
