@@ -6,7 +6,7 @@
             <p class="text-lg text-gray-700 mb-6">Tu pedido ha sido recibido y está siendo procesado.</p>
             <p class="text-md text-gray-600 mb-8">Nos pondremos en contacto contigo por whatsapp para coordinar la
                 entrega.</p>
-            <Link :href="route('online-sales.client-index', encodedIdStore ?? 0)" class="text-primary hover:underline">
+            <Link :href="route('online-sales.client-index', store?.slug ?? '')" class="text-primary hover:underline">
                 Volver a la tienda
             </Link>
         </div>

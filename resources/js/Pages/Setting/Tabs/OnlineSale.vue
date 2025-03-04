@@ -207,7 +207,7 @@
         </svg>
         <p>
             Da click en el siguiente enlace para ver tu tienda en línea:
-            <a :href="route('online-sales.client-index', encodeUrlStore ?? 0)" target="_blank"
+            <a :href="route('online-sales.client-index', $page.props.auth.user.store.slug)" target="_blank"
                 class="text-primary underline">
                 Ver tienda
             </a>
@@ -276,10 +276,6 @@ export default {
         },
         storeBannerUrl() {
             return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'banner')?.original_url;
-        },
-        encodeUrlStore() {
-            const encodedId = btoa(this.$page.props.auth.user.store_id.toString());
-            return encodedId;
         },
     },
     methods: {

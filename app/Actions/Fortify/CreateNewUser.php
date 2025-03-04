@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
+use Illuminate\Support\Str;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -39,9 +40,18 @@ class CreateNewUser implements CreatesNewUsers
         // Combina los módulos esenciales con los módulos activados desde el formulario
         $activated_modules = array_merge($activated_modules, $input['activated_modules']);
 
+        // crear slug del nombre de la tienda
+        $slug = Str::slug($input['store_name'], '-', 'es');
+        // Verifica si el slug ya existe en la base de datos
+        $count = Store::where('slug', $slug)->count();
+        // Si existe, agrega un sufijo numérico
+        if ($count > 0) {
+            $slug = $slug . '-' . ($count + 1);
+        }
         //crea la tienda relacionada a este nuevo usuario.
         $store = Store::create([
             'name' => $input['store_name'],
+            'slug' => $slug,
             'contact_name' => $input['name'],
             'address' => $input['address'],
             'type' => $input['type'],

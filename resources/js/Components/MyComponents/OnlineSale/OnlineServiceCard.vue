@@ -3,7 +3,7 @@
         <!-- Imagen -->
         <figure class="h-1/2 text-center rounded-xl bg-[#f9f9f9] flex items-center justify-center">
             <Link
-                :href="route('online-sales.show-service', service.id)">
+                :href="route('online-sales.show-service', {slug: store.slug, service: service.id})">
             <img v-if="service.media?.length"
                 :src="service.media[0]?.original_url"
                 alt="servicio" class="h-full object-contain mx-auto">
