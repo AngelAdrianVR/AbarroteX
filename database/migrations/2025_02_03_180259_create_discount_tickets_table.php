@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('discount_tickets', function (Blueprint $table) {
             $table->id();
             $table->string('code'); //código de descuento
+            $table->text('description')->nullable(); //descripción del cupón
             $table->boolean('is_percentage_discount')->default(true); //bandera que indica si es descuento en porcentage
             $table->float('discount_amount'); //cantidad de descuento
             $table->unsignedSmallInteger('times_used')->nullable()->default(0); //cantidad de veces que se ha usado.

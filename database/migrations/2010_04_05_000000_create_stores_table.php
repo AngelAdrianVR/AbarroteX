@@ -30,6 +30,7 @@ return new class extends Migration
             // porque al migrar las tablas tiene que ir en primer lugar
             $table->foreignId('seller_id')->nullable()->constrained('admins')->cascadeOnDelete(); 
             $table->string('status')->default('Pagado');
+            $table->string('partner_cupon')->nullable(); // cupon de partner
             $table->json('colors')->nullable();
             $table->timestamps();
         });

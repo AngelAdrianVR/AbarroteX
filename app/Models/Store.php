@@ -30,6 +30,7 @@ class Store extends Model implements HasMedia
         'suscription_period',
         'default_card_id', //tarjata para pagar
         'colors',
+        'partner_cupon',
     ];
 
     protected $casts = [

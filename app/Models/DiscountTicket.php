@@ -11,8 +11,10 @@ class DiscountTicket extends Model
 
     protected $fillable = [
         'code',
+        'description',
         'is_percentage_discount',
         'discount_amount',
+        'times_used',
         'is_active',
         'expired_date',
     ];
