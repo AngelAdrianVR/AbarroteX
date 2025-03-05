@@ -498,6 +498,7 @@ Route::get('/scale/get-ports', [ScaleController::class, 'getAvailablePorts'])->n
 //-----------------------------------------------------------------------------------------------------------------------
 // Route::resource('discount-sticket', DiscountTicketController::class)->middleware('auth');
 Route::get('discount-tickets/fetch-active-tickets', [DiscountTicketController::class, 'fetchActiveTickets'])->name('discount-tickets.fetch-active-tickets')->middleware('auth');
+Route::get('my-referrals/index', [DiscountTicketController::class, 'referralsIndex'])->name('referrals.index')->middleware('auth');
 
 
 // ver tutoriales

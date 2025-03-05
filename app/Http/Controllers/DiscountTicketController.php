@@ -11,6 +11,11 @@ class DiscountTicketController extends Controller
     {
         //
     }
+    
+    public function referralsIndex()
+    {
+        return inertia('Referrals/Index');
+    }
 
     public function create()
     {

@@ -8,6 +8,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import SideNav from '@/Components/MyComponents/SideNav.vue';
+import NeonButton from '@/Components/MyComponents/NeonButton.vue';
 import NotificationsCenter from '@/Components/MyComponents/NotificationsCenter.vue';
 import OnlineSalesNotifications from '@/Components/MyComponents/OnlineSalesNotifications.vue';
 
@@ -84,6 +85,28 @@ onUnmounted(() => {
                                 </div>
                             </div>
                             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                                <!-- Refiere y gana -->
+                                <NeonButton @click="$inertia.visit(route('referrals.index'))" class="text-sm px-3 py-1 flex items-center space-x-2">
+                                    <svg width="19" height="20" viewBox="0 0 19 20" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M3.53838 5.14977C1.13208 3.23977 5.59093 -2.64669 9.05757 5.06725C13.588 -3.14196 18.1882 3.30957 14.3667 5.14973C16.7642 3.09548 13.6587 -1.44344 9.05757 5.06725C6.3694 -0.664971 2.09586 2.67639 3.53838 5.14977Z"
+                                            fill="#B339FF" />
+                                        <path
+                                            d="M9.05757 5.06725C5.59093 -2.64669 1.13208 3.23977 3.53838 5.14977C2.09586 2.67639 6.3694 -0.664971 9.05757 5.06725ZM9.05757 5.06725C13.588 -3.14197 18.1882 3.30957 14.3667 5.14973C16.7642 3.09548 13.6587 -1.44344 9.05757 5.06725Z"
+                                            stroke="#B339FF" stroke-width="0.14154" />
+                                        <path
+                                            d="M0 9.03148V6.12991C-0.00026239 5.28067 0.0707705 5.06836 0.778472 5.06836H17.7633C18.5418 5.06836 18.5418 5.49298 18.5418 6.12991V9.03148C18.5418 9.73918 18.3295 10.0223 17.7633 10.0223H0.778472C0.0707708 10.0223 0 9.66841 0 9.03148Z"
+                                            fill="#D38CFF" />
+                                        <path
+                                            d="M0.777344 19.2916V10.1622L17.6914 10.1621V19.2916C17.6914 19.8576 17.4083 19.9993 16.8421 19.9993H1.62658C0.989654 19.9993 0.777344 19.7868 0.777344 19.2916Z"
+                                            fill="#D38CFF" />
+                                        <path d="M7.21875 19.9992V10.1621H11.1111V19.9992H7.21875Z" fill="#B339FF" />
+                                        <path d="M6.93359 10.0223V5.06836H11.5336V10.0223H6.93359Z" fill="#B339FF" />
+                                    </svg>
+                                    <span>Recomienda y gana </span>
+                                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                                </NeonButton>
                                 <!-- notificaciones de tienda en linea -->
                                 <OnlineSalesNotifications
                                     v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" />
@@ -455,8 +478,7 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Tienda en línea</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                v-if="$page.props.auth.user.store.activated_modules?.includes('Configuraciones') &&
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Configuraciones') &&
                                 $page.props.auth.user.permissions?.includes('Configuraciones')"
                                 :href="route('settings.index')" :active="route().current('settings.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -468,8 +490,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Configuraciones</span>
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('tutorials.index')" :active="route().current('tutorials.*')">
+                            <ResponsiveNavLink :href="route('tutorials.index')"
+                                :active="route().current('tutorials.*')">
                                 <i class="fa-brands fa-youtube text-lg"></i>
                                 <span>Tutoriales</span>
                             </ResponsiveNavLink>
