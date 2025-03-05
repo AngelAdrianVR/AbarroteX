@@ -19,7 +19,7 @@
             <path d="M11.875 7.5h1.25" stroke-width="1"></path>
             <path d="m1.875 1.875 11.25 11.25" stroke-width="1"></path>
         </svg>
-        <PrimaryButton @click="$inertia.visit(route('online-sales.client-index', slug))" class="my-6">Volver a la tienda
+        <PrimaryButton @click="$inertia.visit(route('dashboard'))" class="my-6">Volver a la Punto de venta
         </PrimaryButton>
     </section>
     <!-- </AppLayout> -->

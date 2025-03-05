@@ -28,7 +28,8 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/Index', compact('online_orders', 'cash_registers', 'total_online_orders', 'clients'));
     }
 
-    public function clientIndex($encoded_store_id)
+    // para url antigua con id de tienda codificado
+    public function clientIndexOld($encoded_store_id)
     {
         // Decodificar el ID de la tienda
         $store_id = base64_decode($encoded_store_id);
@@ -59,12 +60,40 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id'));
     }
 
-    public function cartIndex()
+    public function clientIndex($slug)
+    {
+        // Buscar la tienda
+        $store = Store::with(['media'])->firstWhere('slug', $slug);
+        
+        if (!$store) {
+            return inertia('Error/404'); // Manejar caso de tienda no encontrada
+        }
+
+        $store_id = $store->id;
+
+        // Obtener todos los productos (locales y transferidos)
+        $all_products = $this->getAllProducts($store_id);
+        // Contar el total de productos
+        $total_products = $all_products->count();
+
+        // Tomar solo los primeros 12 productos
+        $products = $all_products->take(12);
+
+        //servicios
+        $services = Service::with('media')->where('store_id', $store_id)->get();
+        $total_services = Service::where('store_id', $store_id)->get()->count();
+
+        // return $all_products;
+        // Retornar la vista con los datos
+        return inertia('OnlineSale/ClientIndex', compact('store', 'products', 'total_products', 'services', 'total_services', 'store_id'));
+    }
+
+    public function cartIndex($slug)
     {
         return inertia('OnlineSale/Cart');
     }
 
-    public function create()
+    public function create($slug)
     {
         return inertia('OnlineSale/Create');
     }
@@ -125,7 +154,7 @@ class OnlineSaleController extends Controller
                     'new',
                 ));
             });
-            return redirect()->route('online-sales.thanks', ['encoded_store_id' => $encoded_store_id]);
+            return redirect()->route('online-sales.thanks', ['slug' => $store->slug, 'encoded_store_id' => $encoded_store_id]);
         }
     }
 
@@ -134,20 +163,20 @@ class OnlineSaleController extends Controller
         return inertia('OnlineSale/Show', compact('online_sale'));
     }
 
-    public function ShowLocalProduct($product_id)
+    public function showLocalProduct($slug, $product_id)
     {
         $product = Product::with(['media', 'category:id,name', 'brand:id,name'])->find($product_id);
 
         return inertia('OnlineSale/ShowLocalProduct', compact('product'));
     }
 
-    public function ShowGlobalProduct($global_product_id)
+    public function showGlobalProduct($global_product_id)
     {
         $global_product = GlobalProductStore::with(['globalProduct' => ['media', 'category:id,name', 'brand:id,name']])->find($global_product_id);
         return inertia('OnlineSale/ShowGlobalProduct', compact('global_product'));
     }
 
-    public function showService($service)
+    public function showService($slug, $service)
     {
         $service = Service::with('media')->find($service);
 
@@ -609,7 +638,7 @@ class OnlineSaleController extends Controller
         }
     }
 
-    public function thanks($encoded_store_id)
+    public function thanks($slug, $encoded_store_id)
     {
         // Decodificar el ID de la tienda
         $store_id = base64_decode($encoded_store_id);
@@ -620,7 +649,7 @@ class OnlineSaleController extends Controller
         $store = Store::find($store_id);
 
         if (!$store) {
-            return inertia('Error/404'); // Manejar caso de tienda no encontrada
+            return inertia('Error/404', compact('slug')); // Manejar caso de tienda no encontrada
         }
 
         return inertia('OnlineSale/Thanks', compact('store'));

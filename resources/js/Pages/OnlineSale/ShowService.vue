@@ -30,7 +30,6 @@
                         <h1 class="font-bold text-2xl my-4">{{ service.name }}</h1>
                         <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
                     </div>
-
                     <div class="mb-2 mt-8 md:mt-0 flex justify-center">
                         <!-- pedir cotización directo a whatsapp -->
                         <button class="rounded-full bg-primary flex items-center justify-center px-20 py-1 text-white">
@@ -39,7 +38,6 @@
                                 Cotizar
                             </a>
                         </button>
-
                         <!-- formulario de solicitud de cotizacion -->
                         <!-- <PrimaryButton @click="$inertia.get(route('online-sales.quote-service', service.id))" class="!px-20">Cotizar</PrimaryButton> -->
                     </div>

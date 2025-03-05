@@ -3,6 +3,8 @@
 namespace App\Actions\Fortify;
 
 use App\Models\CashRegister;
+use App\Models\DiscountTicket;
+use App\Models\Partner;
 use App\Models\Setting;
 use App\Models\Store;
 use App\Models\User;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
+use Illuminate\Support\Str;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -39,9 +42,18 @@ class CreateNewUser implements CreatesNewUsers
         // Combina los módulos esenciales con los módulos activados desde el formulario
         $activated_modules = array_merge($activated_modules, $input['activated_modules']);
 
+        // crear slug del nombre de la tienda
+        $slug = Str::slug($input['store_name'], '-', 'es');
+        // Verifica si el slug ya existe en la base de datos
+        $count = Store::where('slug', $slug)->count();
+        // Si existe, agrega un sufijo numérico
+        if ($count > 0) {
+            $slug = $slug . '-' . ($count + 1);
+        }
         //crea la tienda relacionada a este nuevo usuario.
         $store = Store::create([
             'name' => $input['store_name'],
+            'slug' => $slug,
             'contact_name' => $input['name'],
             'address' => $input['address'],
             'type' => $input['type'],
@@ -114,6 +126,22 @@ class CreateNewUser implements CreatesNewUsers
             ],
         ]);
         $user->syncRoles(['Administrador']);
+
+        // crear un cupon de descuento para la tienda
+        $cupon = DiscountTicket::create([
+             // generar código alfanumerico que tenga que ver con el nombre de la tienda
+            'code' => strtoupper(Str::random(5)),
+            'description' => "Descuento de bienvenida para referidos de la tienda $store->name",
+            'discount_amount' => 10,
+        ]);
+
+        // crear un partner con los datos de la tienda
+        Partner::create([
+            'name' => $input['store_name'],
+            'phone' => $input['contact_phone'],
+            'email' => $user->email,
+            'discount_ticket_id' => $cupon->id,
+        ]);
 
         return $user;
     }

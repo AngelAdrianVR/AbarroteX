@@ -22,12 +22,12 @@
                         </div>
                         <div v-else>
                             <el-empty description="No hay productos en tu carrito" />
-                            <p @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))"
+                            <p @click="$inertia.get(route('online-sales.client-index', store?.slug ?? ''))"
                                 class="text-primary text-center cursor-pointer">Seguir comprando</p>
                         </div>
                     </div>
                     <!-- Parte derecha -->
-                    <div v-if="cart.length" class="md:w-[30%] md:py-4 md:px-2 text-xs lg:text-sm">
+                    <div v-if="cart.length" class="md:w-[35%] md:py-4 md:px-2 text-xs lg:text-sm">
                         <section>
                             <div class="border border-grayD9 grid grid-cols-3 gap-x-1 rounded-lg p-3 mb-5 *:mb-1">
                                 <p class="col-span-2">Subtotal:</p>
@@ -55,9 +55,9 @@
                             </p>
 
                             <div class="text-center pb-5">
-                                <PrimaryButton @click="$inertia.get(route('online-sales.create'))" class="!px-8">
+                                <PrimaryButton @click="$inertia.get(route('online-sales.create', store?.slug ?? ''))" class="!px-8">
                                     Finalizar pedido</PrimaryButton>
-                                <p @click="$inertia.get(route('online-sales.client-index', encodedIdStore ?? 0))"
+                                <p @click="$inertia.get(route('online-sales.client-index', store?.slug ?? ''))"
                                     class="text-primary mt-4 cursor-pointer">Seguir comprando</p>
                             </div>
                         </section>
@@ -81,7 +81,6 @@ export default {
             cart: [],
             storeId: null, //se recupera el id de la tienda desde el localstorage
             store: {}, //se recupera la información de la tienda para utilizar el costo de envío.
-            encodedIdStore: null, //id codificado de la tienda
             // cargas
             loading: true,
 
@@ -120,7 +119,6 @@ export default {
 
                     //decodifica el id de la tienda
                     const encodedId = btoa(this.storeId.toString());
-                    this.encodedIdStore = encodedId;
                 }
             } catch (error) {
                 console.log(error);

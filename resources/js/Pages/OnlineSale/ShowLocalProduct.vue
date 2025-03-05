@@ -1,7 +1,7 @@
 <template>
     <OnlineStoreLayout :title="product.name">
         <div class="p-4 md:p-9 lg:h-[calc(100vh-161px)]">
-            <Back :to="route('online-sales.client-index', encodedIdStore ?? 0)" />
+            <Back :to="route('online-sales.client-index', store?.slug ?? '')" />
 
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
                 <!-- Imagen del producto -->
@@ -13,12 +13,11 @@
                         <p class="text-sm text-gray-300">Imagen no disponible</p>
                     </div>
                 </figure>
-
                 <!-- Detalles del producto -->
                 <div>
                     <h1 class="font-bold text-2xl mt-4">{{ product.name }}</h1>
                     <p class="text-2xl text-primary font-bold mt-4">
-                        {{ product.currency === '$USD' ? 'USD' : 'MXN' }} ${{ integerPart }}
+                        <span>{{ product.currency === '$USD' ? 'USD' : 'MXN' }} ${{ integerPart }}</span>
                         <span class="decimal-part">{{ decimalPart }}</span>
                         <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
                     </p>
@@ -158,7 +157,7 @@ export default {
             });
 
             // Emitir el evento personalizado
-            emitter.emit('product-added-to-cart');
+            emitter.emit('update-cart');
         },
         formatDescription() {
             if (this.product.description != null) {
@@ -219,7 +218,7 @@ export default {
 
 <style scoped>
 .decimal-part {
-    font-size: 0.75em;
+    font-size: 0.50em;
     vertical-align: super;
 }
 

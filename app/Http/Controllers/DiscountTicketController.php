@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DiscountTicket;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 
 class DiscountTicketController extends Controller
@@ -10,6 +11,13 @@ class DiscountTicketController extends Controller
     public function index()
     {
         //
+    }
+    
+    public function referralsIndex()
+    {
+        $partner = Partner::with(['discountTicket'])->firstWhere('name', auth()->user()->store->name);
+        
+        return inertia('Referrals/Index', compact('partner'));
     }
 
     public function create()
