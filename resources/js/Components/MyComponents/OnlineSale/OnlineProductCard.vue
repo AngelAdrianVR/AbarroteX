@@ -9,7 +9,9 @@
         <!-- Imagen -->
         <figure class="h-1/2 text-center rounded-xl bg-[#f9f9f9] flex items-center justify-center">
             <Link class="h-full flex items-center justify-center"
-                :href="product.global_product_id ? route('online-sales.show-global-product', product.id) : route('online-sales.show-local-product', product.id)">
+                :href="product.global_product_id 
+                ? route('online-sales.show-global-product', {slug: store.slug, global_product_id: product.id}) 
+                : route('online-sales.show-local-product', {slug: store.slug, product_id: product.id})">
             <img class="h-full object-contain p-3" v-if="product.global_product_id ? product.global_product.media?.length : product.media?.length"
                 :src="product.global_product_id ? product.global_product.media[0]?.original_url : product.media[0]?.original_url"
                 alt="producto">
@@ -19,7 +21,6 @@
             </div>
             </Link>
         </figure>
-
         <!-- Detalles -->
         <div class="text-left ml-3 mt-2 flex flex-col justify-center h-1/2">
             <div class="h-12">
@@ -27,8 +28,8 @@
                 <span class="text-gray99">{{ product.currency === '$USD' ? 'USD' : 'MXN' }}</span>
             </div>
             
-            <div class="flex items-center space-x-1">
-                <p class="text-2xl font-bold my-3">
+            <div class="flex items-center space-x-1 my-4">
+                <p class="text-2xl font-bold">
                     ${{ product.global_product_id ? product.global_product.public_price 
                         :product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>

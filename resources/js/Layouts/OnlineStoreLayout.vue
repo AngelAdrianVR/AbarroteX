@@ -10,13 +10,12 @@
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between h-20 borde items-center">
                             <!-- Logo -->
-                            <Link v-if="!loadigLogo" :href="route('online-sales.client-index', encodedIdStore ?? 0)">
+                            <Link v-if="!loadigLogo" :href="route('online-sales.client-index', store?.slug ?? '')">
                             <img v-if="storeLogoUrl" class="h-12 md:h-16" :src="storeLogoUrl"
                                 alt="logotipo de la tienda">
                             <img v-else class="h-12 md:h-16" src="@/../../public/images/black_logo.png"
                                 alt="Logo de ezyventas">
                             </Link>
-
                             <!-- buscador de productos -->
                             <div class="relative w-44 md:w-80">
                                 <input v-model="searchQuery" @focus="searchFocus = true" @blur="handleBlur"
@@ -28,8 +27,9 @@
                                 <div v-if="searchFocus && searchQuery"
                                     class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-50 max-h-48 overflow-auto">
                                     <ul v-if="productsFound?.length > 0 && !loading">
-                                        <li @click="product.global_product_id ? $inertia.get(route('online-sales.show-global-product', product.id))
-                                            : $inertia.get(route('online-sales.show-local-product', product.id))"
+                                        <li @click="product.global_product_id
+                                            ? $inertia.get(route('online-sales.show-global-product', {slug: store.slug, global_product_id: product.id}))
+                                            : $inertia.get(route('online-sales.show-local-product', {slug: store.slug, product_id: product.id}))"
                                             v-for="(product, index) in productsFound" :key="index"
                                             class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
                                                 product.global_product_id ?
@@ -46,7 +46,7 @@
                                 </div>
                             </div>
                             <!-- Carrito -->
-                            <Link :href="route('online-sales.cart')" class="relative">
+                            <Link :href="route('online-sales.cart', store?.slug ?? '')" class="relative">
                             <button class="bg-[#232323] rounded-full size-9 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-5 text-white">
@@ -61,7 +61,6 @@
                         </div>
                     </div>
                 </nav>
-
                 <div class="flex flex-col justify-between bg-white">
                     <slot />
                 </div>
@@ -70,8 +69,7 @@
                 class="flex justify-between items-center bg-[#232323] p-3 h-[72px] md:h-20 md:px-7">
                 <!-- Logo de la tienda -->
                 <figure class="flex items-center space-x-2">
-                    <img v-if="storeLogoUrl" class="h-10 md:h-12" :src="storeLogoUrl"
-                        alt="logotipo de la tienda">
+                    <img v-if="storeLogoUrl" class="h-10 md:h-12" :src="storeLogoUrl" alt="logotipo de la tienda">
                     <p v-else class="tex-sm text-gray99">{{ store?.name }}</p>
                 </figure>
                 <!-- whatsapp button computed -->
