@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('phone', 15)->nullable();
             $table->string('email')->nullable();
+            $table->unsignedFloat('earnings', 9, 2)->default(0);
             $table->unsignedSmallInteger('referrals')->default(0);
             $table->foreignId('discount_ticket_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

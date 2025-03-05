@@ -16,6 +16,7 @@ use App\Http\Controllers\GlobalProductController;
 use App\Http\Controllers\GlobalProductStoreController;
 use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\OnlineSaleController;
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductBoutiqueController;
 use App\Http\Controllers\ProductController;
@@ -78,106 +79,32 @@ Route::middleware([
 });
 
 
-// Route::get('update-folio', function () {
-//     // Obtener las ventas de la tienda con id 5 y tomar los primeros 15
-//     $sales = Sale::where('store_id', 5)->get()->skip(5797);
+// crear cupones y partner para tiendas existentes
+use Illuminate\Support\Str;
+Route::get('create-partners', function () {
+    // iterar cada tienda
+    $stores = \App\Models\Store::all();
+    foreach ($stores as $store) {
+        // crear un cupon de descuento para la tienda
+        $cupon = \App\Models\DiscountTicket::create([
+            // generar código alfanumerico que tenga que ver con el nombre de la tienda
+           'code' => strtoupper(Str::random(5)),
+           'description' => "Descuento de bienvenida para referidos de la tienda $store->name",
+           'discount_amount' => 10,
+       ]);
+    
+       // crear un partner con los datos de la tienda
+       \App\Models\Partner::create([
+           'name' => $store->name,
+           'phone' => $store->contact_phone,
+           'email' => $store->users[0]->email,
+           'discount_ticket_id' => $cupon->id,
+       ]);
+    }
 
-//     // Agrupar las ventas por 'created_at' truncado a segundos
-//     $groupedSales = $sales->groupBy(function ($sale) {
-//         return Carbon\Carbon::parse($sale->created_at)->format('Y-m-d H:i:s');
-//     });
+    return "cupones y partners creados!";
+});
 
-//     // Folio inicial
-//     $folio = 3121;
-
-//     // Iterar sobre cada grupo de ventas y actualizar el folio
-//     foreach ($groupedSales as $group) {
-//         foreach ($group as $sale) {
-//             $sale->update(['folio' => $folio]);
-//         }
-//         // Incrementar el folio para el próximo grupo
-//         $folio++;
-//     }
-
-//     return 'Folios actualizados correctamente!.';
-// });
-
-// Route::get('update-from-json', function () {
-//     // Ruta al archivo JSON
-//     $filePath = public_path('files/sales1.json');
-
-//     // Verificar si el archivo existe
-//     if (!Illuminate\Support\Facades\File::exists($filePath)) {
-//         return 'Archivo JSON no encontrado. ' . $filePath;
-//     }
-
-//     // Leer el contenido del archivo JSON
-//     $jsonData =  Illuminate\Support\Facades\File::get($filePath);
-//     $items = json_decode($jsonData, true);
-
-//     // Verificar si la decodificación fue exitosa
-//     if (json_last_error() !== JSON_ERROR_NONE) {
-//         return 'Error al decodificar el archivo JSON.';
-//     }
-
-//     foreach ($items as $itemData) {
-//         // $prd = App\Models\GlobalProductStore::where('store_id', 5)
-//         //     ->whereHas('globalProduct', function ($q) use ($itemData) {
-//         //         $q->where('code', $itemData['code']);
-//         //     })->first();
-
-//         // if (!$prd) {
-//         //     // Manejar el caso cuando el producto no se encuentra, si es necesario
-//         //     continue;
-//         // }
-
-//         App\Models\Sale::create($itemData);
-//     }
-
-//     return 'items migrados correctamente!.';
-// });
-
-// ---------email de prueba
-// Route::get('email-test', function () {
-//     $admin = App\Models\Admin::find(1);
-//     $title = "Nuevo pago registrado";
-//     $description = "La tienda 'tienda de prueba' ha pagado una suscripción 'mensual' ($ 199.00).";
-//     $url = 'http://localhost:8000/stores';
-//     $admin->notify(new App\Notifications\BasicNotification($title, $description, $url));
-
-//     return "Email sent to $admin->name successfuly!";
-// });
-
-
-// Route::get('add-categories', function () {
-//     $categories = [
-//         'Ropa de mujer' => ['0' => null, '1' => null, '3' => null, '5' => null, '7' => null, '9' => null, '11' => null, '13' => null, '15' => null, 'Extra chica' => 'XS', 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Exta grande' => 'XL', 'Doble exta grande' => '2XL', 'Triple exta grande' => '3XL'],
-//         'Ropa de hombre' => ['28' => null, '29' => null, '30' => null, '31' => null, '32' => null, '33' => null, '34' => null, '36' => null, '38' => null, '40' => null, 'Extra chica' => 'XS', 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Exta grande' => 'XL', 'Doble exta grande' => '2XL', 'Triple exta grande' => '3XL'],
-//         'Ropa de niño(a)' => ['2' => null, '4' => null, '6' => null, '8' => null, '10' => null, '12' => null, '14' => null],
-//         'Calzado de mujer' => ['23' => null, '23.5' => null, '24' => null, '24.5' => null, '25' => null, '25.5' => null, '26' => null, '26.5' => null, '27' => null, '27.5' => null, '28' => null],
-//         'Calzado de hombre' => ['23' => null, '23.5' => null, '24' => null, '24.5' => null, '25' => null, '25.5' => null, '26' => null, '26.5' => null, '27' => null, '27.5' => null, '28' => null, '28.5' => null, '29' => null, '29.5' => null, '30' => null, '30.5' => null, '31' => null],
-//         'Calzado de niño(a)' => ['13' => null, '13.5' => null, '14' => null, '14.5' => null, '15' => null, '15.5' => null, '16' => null, '16.5' => null, '17' => null, '17.5' => null, '18' => null, '18.5' => null, '19' => null, '19.5' => null, '20' => null, '21.5' => null, '22' => null],
-//         'Accesorios' => ['Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L'],
-//         'Lencería' => ['32A' => null, '32B' => null, '34B' => null,'34C' => null, '36C' => null, '36D' => null, '38D' => null, '40E' => null, 'Chica' => 'S', 'Mediana' => 'M', 'Grande' => 'L', 'Extra grande' => 'XL', 'Doble extra grande' => '2XL'],
-//     ];
-
-//     foreach ($categories as $category => $sizes) {
-//         Category::create([
-//             'name' => $category,
-//             'business_line_name' => 'Boutique / Tienda de Ropa / Zapatería',
-//         ]);
-
-//         foreach ($sizes as $size => $short) {
-//             Size::create([
-//                 'name' => $size,
-//                 'short' => $short,
-//                 'category' => $category,
-//             ]);
-//         }
-//     }
-
-//     return "Categorias agregadas!";
-// });
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
@@ -501,6 +428,12 @@ Route::get('discount-tickets/fetch-active-tickets', [DiscountTicketController::c
 Route::get('my-referrals/index', [DiscountTicketController::class, 'referralsIndex'])->name('referrals.index')->middleware('auth');
 
 
+//rutas de partners --------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::resource('partners', PartnerController::class);
+Route::get('landing/register-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
+
+
 // ver tutoriales
 Route::get('/started-turtorial/pos', function () {
     if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
@@ -511,8 +444,8 @@ Route::get('/started-turtorial/pos', function () {
 })->name('started-tutorial');
 
 
-// comandos Artisan
-Route::get('/backup', function () {
-    Artisan::call('storage:link');
-    return 'linked!!';
-});
+// // comandos Artisan
+// Route::get('/backup', function () {
+//     Artisan::call('storage:link');
+//     return 'linked!!';
+// });

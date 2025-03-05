@@ -3,6 +3,8 @@
 namespace App\Actions\Fortify;
 
 use App\Models\CashRegister;
+use App\Models\DiscountTicket;
+use App\Models\Partner;
 use App\Models\Setting;
 use App\Models\Store;
 use App\Models\User;
@@ -124,6 +126,22 @@ class CreateNewUser implements CreatesNewUsers
             ],
         ]);
         $user->syncRoles(['Administrador']);
+
+        // crear un cupon de descuento para la tienda
+        $cupon = DiscountTicket::create([
+             // generar código alfanumerico que tenga que ver con el nombre de la tienda
+            'code' => strtoupper(Str::random(5)),
+            'description' => "Descuento de bienvenida para referidos de la tienda $store->name",
+            'discount_amount' => 10,
+        ]);
+
+        // crear un partner con los datos de la tienda
+        Partner::create([
+            'name' => $input['store_name'],
+            'phone' => $input['contact_phone'],
+            'email' => $user->email,
+            'discount_ticket_id' => $cupon->id,
+        ]);
 
         return $user;
     }

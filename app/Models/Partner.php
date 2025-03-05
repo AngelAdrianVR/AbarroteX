@@ -13,6 +13,7 @@ class Partner extends Model
         'name',
         'phone',
         'email',
+        'earnings',
         'referrals',
         'discount_ticket_id',
     ];

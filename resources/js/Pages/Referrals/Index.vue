@@ -3,31 +3,33 @@
     <div class="px-2 lg:px-10 py-7">
       <figure class="relative w-full">
         <img src="@/../../public/images/referalBanner.png" alt="Banner con anunncio de recomienda y gana"
-          :draggable="false" class="object-cover select-none w-full">
-        <p class="w-[54%] font-bold text-white text-4xl absolute top-8 left-[23%] text-center">
+          :draggable="false" class="object-cover select-none w-full hidden lg:block">
+        <img src="@/../../public/images/referalBannerMobile.png" alt="Banner con anunncio de recomienda y gana"
+          :draggable="false" class="object-cover select-none w-full lg:hidden">
+        <p class="w-[86%] lg:w-[54%] text-white text-xl lg:text-5xl absolute top-5 lg:top-8 left-[7%] lg:left-[23%] text-center tracking-wide" style="font-family: 'LeagueGothic';">
           Comienza a recomendar ahora y gana el 50% del pago a cada referido.
         </p>
-        <p class="w-[66%] text-white text-2xl absolute bottom-5 left-[17%] text-center">
+        <p class="w-[96%] lg:w-[66%] text-white text-sm lg:text-2xl absolute bottom-5 left-[2%] lg:left-[17%] text-center">
           ¡Copia tu código y compártelo con amigos y negocios!
         </p>
       </figure>
-      <section class="mt-12 mx-14">
+      <section class="mt-12 mx-3 lg:mx-14">
         <h2 class="font-bold">Recomienda a tus amigos y gana</h2>
         <p class="text-sm">Invita a tus amigos a utilizar Ezy Ventas y gana recompensas por cada amigo que se una y
           complete el pago de su suscripción.</p>
         <p class="text-sm mt-6">Copia el código y comparte con tus amigos.</p>
-
         <article class="flex items-center space-x-3 mt-2">
           <div
             class="border border-primary bg-primarylight border-dashed rounded-full text-sm inline-flex space-x-8 items-center px-1">
-            <span class="px-2 text-primary">{{ '123456' }}</span>
+            <span class="px-2 text-primary">{{ partner.discount_ticket.code }}</span>
             <button @click="copyText"
               class="flex items-center py-1 my-1 px-4 text-xs bg-primary text-white rounded-full">
               <span>Copiar</span>
             </button>
           </div>
           <span>ó</span>
-          <button class="size-7 flex items-center justify-center border rounded-full border-grayD9">
+          <button @click="shareByWhatsapp"
+            class="size-7 flex items-center justify-center border rounded-full border-grayD9">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M2.35877 2.33229C3.85857 0.832643 5.88736 -0.0061213 8 3.36363e-05C10.1127 -0.00593527 12.1415 0.832985 13.6413 2.33275C15.141 3.83251 15.9893 5.87063 16 7.99996C15.9874 9.44973 15.5875 10.8693 14.8425 12.1095C14.0974 13.3497 13.0346 14.3647 11.7658 15.0479C10.497 15.731 9.06909 16.0571 7.63206 15.9918C6.19502 15.9265 4.80197 15.4723 3.59931 14.6769L0.525219 15.6619L1.52418 12.6905C0.532915 11.3305 -0.00112401 9.6868 0 7.99926C0.0106787 5.86999 0.858978 3.83194 2.35877 2.33229Z"
@@ -48,31 +50,33 @@
             <li>
               <span class="shrink-0 bg-[#EDEDED] size-6 rounded-full flex items-center justify-center">2</span>
               <span>Las personas que tengan tu código obtienen 30 días gratis de prueba + 10% de descuento en su primera
-              compra.</span>
+                compra.</span>
             </li>
             <li>
               <span class="shrink-0 bg-[#EDEDED] size-6 rounded-full flex items-center justify-center">3</span>
-            <span>Tu recompensa se activará cuando tu referido realice su primer pago. Obtendrás el 50% del valor de su
-              suscripción como pago por tu recomendación.</span>
+              <span>Tu recompensa se activará cuando tu referido realice su primer pago. Obtendrás el 50% del valor de
+                su
+                suscripción como pago por tu recomendación.</span>
             </li>
             <li>
               <span class="shrink-0 bg-[#EDEDED] size-6 rounded-full flex items-center justify-center">4</span>
-            <span> Tú decides cómo recibir tu recompensa: por transferencia a tu tarjeta o acumulada en tu suscripción. Si
-              eliges acumularla, te bonificaremos los días correspondientes al monto de tu recompensa más 3 meses
-              adicionales de regalo.</span>
+              <span> Tú decides cómo recibir tu recompensa: por transferencia a tu tarjeta o acumulada en tu
+                suscripción. Si
+                eliges acumularla, te bonificaremos los días correspondientes al monto de tu recompensa más 3 meses
+                adicionales de regalo.</span>
             </li>
           </ol>
         </article>
       </section>
-      <section class="mt-12 mx-14">
+      <section class="mt-12 mx-3 lg:mx-14">
         <h2 class="font-bold mt-10">Reporte de invitados</h2>
         <article class="flex space-x-3 mt-4">
           <div class="w-40 h-32 bg-[#DDFFDF] rounded-2xl flex flex-col items-center justify-center space-y-1">
-            <span class="font-bold text-xl">$500</span>
+            <span class="font-bold text-xl">${{ partner.earnings }}</span>
             <span class="text-[#333333] text-sm">Monto ganado</span>
           </div>
           <div class="w-40 h-32 bg-[#DDFFDF] rounded-2xl flex flex-col items-center justify-center space-y-1">
-            <span class="font-bold text-xl">10</span>
+            <span class="font-bold text-xl">{{ partner.discount_ticket.times_used }}</span>
             <span class="text-[#333333] text-sm">Registrados</span>
           </div>
         </article>
@@ -94,11 +98,17 @@ export default {
     AppLayout,
   },
   props: {
-    cupon: Object,
+    partner: Object,
   },
   methods: {
+    shareByWhatsapp() {
+      const cupon = this.partner.discount_ticket.code;
+      const message = `¡Hola! te comparto este cupón de descuento para EzyVentas: ${cupon}`;
+      const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    },
     copyText() {
-      navigator.clipboard.writeText('123456').then(() => {
+      navigator.clipboard.writeText(this.partner.discount_ticket.code).then(() => {
         ElMessage({
           message: 'Copiado al portapapeles',
           type: 'success',

@@ -86,7 +86,8 @@ onUnmounted(() => {
                             </div>
                             <div class="hidden sm:flex sm:items-center sm:ms-6">
                                 <!-- Refiere y gana -->
-                                <NeonButton @click="$inertia.visit(route('referrals.index'))" class="text-sm px-3 py-1 flex items-center space-x-2">
+                                <NeonButton @click="$inertia.visit(route('referrals.index'))"
+                                    class="text-sm px-3 py-1 flex items-center space-x-2">
                                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path
@@ -495,12 +496,59 @@ onUnmounted(() => {
                                 <i class="fa-brands fa-youtube text-lg"></i>
                                 <span>Tutoriales</span>
                             </ResponsiveNavLink>
-                            <div class="bg-[#296A6B] px-2 py-1 w-full">
-                                <a href="https://finanzas.dtw.com.mx" target="_blank"
-                                    class="flex items-center justify-center space-x-2">
-                                    <img class="w-4 object-contain" src="@/../../public/images/isologo_finanzas.png">
-                                    <span class="text-xs text-white">¡Control de finanzas gratis!</span>
-                                </a>
+                            <div class="h-px border-t border-[#505050] pb-2"></div>
+                            <div
+                                class="bg-white text-[#296A6B] px-2 py-1 mx-auto w-[90%] rounded-[5px] flex items-center justify-between">
+                                <p class="flex items-center space-x-2">
+                                    <svg width="14" height="15" viewBox="0 0 14 15" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M5.05977 4.58333C5.05977 2.97619 2.38895 1.04686 0 0V5.41667C0 6.4881 2.19578 8.3558 5.05977 9.70238V4.58333Z"
+                                            fill="#296A6B" />
+                                        <path
+                                            d="M13.1554 1.30952C9.70286 2.20238 6.0122 6.0119 6.0122 7.2619V15C6.24814 14.8761 6.37889 14.8076 6.60747 14.7024C6.81582 11.966 7.36268 10.7301 9.22664 9.04762C10.3447 7.23105 11.1886 6.41959 13.1554 5.47619V1.30952Z"
+                                            fill="#296A6B" />
+                                        <path
+                                            d="M8.57185 13.6905L7.32179 14.3452C7.46736 12.5964 7.77634 11.832 8.63137 10.7738C8.49837 11.7538 8.45423 12.343 8.57185 13.6905Z"
+                                            fill="#296A6B" />
+                                        <path
+                                            d="M13.1554 8.86905C12.7277 10.4821 11.933 11.4738 9.10759 13.4524C8.89584 11.8189 8.98881 11.1955 9.34569 10.1786C10.0674 8.96169 10.9512 8.52226 13.1554 8.09524V8.86905Z"
+                                            fill="#296A6B" />
+                                        <path
+                                            d="M13.1554 7.2619C11.9268 7.49322 11.3339 7.782 10.2981 8.33333C11.1244 7.13512 11.787 6.60828 13.1554 6.07143V7.2619Z"
+                                            fill="#296A6B" />
+                                    </svg>
+                                    <span class="text-xs">¡Controla tus finanzas gratis!</span>
+                                </p>
+                                <a as="button" href="https://finanzas.dtw.com.mx" target="_blank"
+                                    class="rounded-full bg-[#296A6B] text-white px-3 py-1 text-xs">Registrarse</a>
+                            </div>
+                            <div class="h-px pb-1"></div>
+                            <div @click="$inertia.visit(route('referrals.index'))"
+                                class="bg-[#D38CFF] text-[#9800F6] px-2 py-2 mx-auto w-[90%] rounded-[5px] flex items-center justify-between">
+                                <p class="flex items-center space-x-2">
+                                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M3.61665 3.58397C1.58147 1.96855 5.35264 -3.01004 8.28462 3.51418C12.1163 -3.42894 16.0071 2.02758 12.7749 3.58394C14.8027 1.84652 12.1761 -1.99237 8.28462 3.51418C6.01105 -1.33397 2.3966 1.49206 3.61665 3.58397Z"
+                                            fill="#9800F6" />
+                                        <path
+                                            d="M8.28462 3.51418C5.35264 -3.01004 1.58147 1.96855 3.61665 3.58397C2.3966 1.49206 6.01105 -1.33397 8.28462 3.51418ZM8.28462 3.51418C12.1163 -3.42894 16.0071 2.02758 12.7749 3.58394C14.8027 1.84652 12.1761 -1.99237 8.28462 3.51418Z"
+                                            stroke="#9800F6" stroke-width="0.119711" />
+                                        <path
+                                            d="M0.617188 6.86752V4.41345C0.616966 3.69519 0.677043 3.51562 1.2756 3.51562H15.6409C16.2993 3.51562 16.2993 3.87476 16.2993 4.41345V6.86752C16.2993 7.46607 16.1197 7.7055 15.6409 7.7055H1.2756C0.677043 7.7055 0.617188 7.40622 0.617188 6.86752Z"
+                                            fill="#B133FF" />
+                                        <path
+                                            d="M1.28125 15.5457V7.82433L15.5867 7.82422V15.5457C15.5867 16.0244 15.3472 16.1442 14.8684 16.1442H1.99951C1.46082 16.1442 1.28125 15.9645 1.28125 15.5457Z"
+                                            fill="#B133FF" />
+                                        <path d="M6.71875 16.1441V7.82422H10.0108V16.1441H6.71875Z" fill="#9800F6" />
+                                        <path d="M6.48438 7.7055V3.51562H10.375V7.7055H6.48438Z" fill="#9800F6" />
+                                    </svg>
+                                    <span class="text-xs">
+                                        Recomienda y gana el 50% del pago a cada referido 
+                                    </span>
+                                </p>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
                             </div>
                         </div>
 
