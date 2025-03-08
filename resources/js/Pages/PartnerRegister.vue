@@ -35,7 +35,7 @@
                 </p>
                 <p
                     class="w-[96%] lg:w-[66%] text-white text-sm lg:text-2xl absolute bottom-3 left-[2%] lg:left-[17%] text-center">
-                    Clic para registrarte, genera tu cupón y compártelo con amigos y negocios!
+                    Registrarte, genera tu cupón y compártelo con amigos y negocios!
                 </p>
             </figure>
             <!-- recuperación de código -->
@@ -76,7 +76,7 @@
                         <div
                             class="mt-2 border border-primary bg-primarylight border-dashed rounded-full text-sm inline-flex space-x-8 items-center px-1">
                             <span class="px-2 text-primary">{{ recoveredCode }}</span>
-                            <button @click="copyText" type="button"
+                            <button @click="copyText(recoveredCode)" type="button"
                                 class="flex items-center py-1 my-1 px-4 text-xs bg-primary text-white rounded-full">
                                 <span>Copiar</span>
                             </button>
@@ -127,7 +127,7 @@
                             <div
                                 class="mt-2 border border-primary bg-primarylight border-dashed rounded-full text-sm inline-flex space-x-8 items-center px-1">
                                 <span class="px-2 text-primary">{{ form.code }}</span>
-                                <button @click="copyText" type="button"
+                                <button @click="copyText(form.code)" type="button"
                                     class="flex items-center py-1 my-1 px-4 text-xs bg-primary text-white rounded-full">
                                     <span>Copiar</span>
                                 </button>
@@ -270,8 +270,8 @@ export default {
                 origin: { y: 0.6 },
             })
         },
-        copyText() {
-            navigator.clipboard.writeText(this.form.code).then(() => {
+        copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
                 ElMessage({
                     message: 'Copiado al portapapeles',
                     type: 'success',
