@@ -298,6 +298,8 @@ onBeforeUnmount(() => {
                             type="button">Funcionalidades</button>
                         <button @click="scrollToElement('prices')" class="text-white focus:border-none focus:ring-0"
                             type="button">Precios</button>
+                        <button @click="$inertia.get(route('landing.create-partner'))" class="text-white focus:border-none focus:ring-0"
+                            type="button">Recomienda y gana</button>
                         <!-- <button @click="scrollToElement('products')" class="text-white focus:border-none focus:ring-0"
                             type="button">Productos</button> -->
                         <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
@@ -318,15 +320,15 @@ onBeforeUnmount(() => {
                         alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
                     <img class="object-contain select-none mt-4 ml-auto" :draggable="false"
                         src="@/../../public/images/price.png"
-                        alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
+                        alt="Letrero en neón que dice: desde $229 al mes">
                 </figure>
                 <figure class="w-[27%] ml-20 mt-20 z-10" data-aos="fade-down" data-aos-duration="1200"
                     data-aos-delay="1000">
                     <img class="object-contain select-none" :draggable="false"
                         src="@/../../public/images/landing-02.png" alt="Tablet que muestra un carrito de compras">
                 </figure>
-                <img class="object-contain select-none absolute -right-[3%] top-28" :draggable="false"
-                    src="@/../../public/images/landing-03.png" alt="Tablet que muestra un carrito de compras"
+                <img class="object-contain select-none absolute -right-[5%] top-28" :draggable="false"
+                    src="@/../../public/images/landing-03.png" alt="cuerdas de neón de colores con iconos dentro de un extremo"
                     data-aos="fade-left" data-aos-duration="1200" data-aos-delay="600">
                 <div class="absolute bottom-4 right-[22%]" data-aos="fade-up" data-aos-duration="1200"
                     data-aos-delay="1500" data-aos-offset="500">

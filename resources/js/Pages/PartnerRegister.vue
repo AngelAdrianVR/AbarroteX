@@ -1,58 +1,310 @@
-<script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+<template>
+
+    <Head title="Registro de Partner" />
+    <div class="bg-black2 relative overflow-x-hidden">
+        <nav class="bg-transparent" data-aos="zoom-in" data-aos-duration="1200">
+            <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
+                <div class="flex justify-between items-center h-14 bg-[#404040]/30 rounded-full pl-3 pr-2">
+                    <div class="flex">
+                        <!-- Logo -->
+                        <Link href="/" class="shrink-0 flex items-center">
+                            <ApplicationMark class="block h-10 md:h-12 w-auto" />
+                        </Link>
+                    </div>
+                    <div class="flex sm:items-center space-x-12 sm:ms-6">
+                        <button @click="$inertia.visit('/')" class="text-white focus:border-none focus:ring-0 hidden lg:block"
+                            type="button">Inicio</button>
+                        <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
+                        <button class="buttonupgrade">
+                            Iniciar sesión
+                        </button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <main class="bg-transparent selection:bg-primary selection:text-white pb-24 relative">
+            <figure class="relative w-11/12 lg:w-5/4 mt-3 mx-auto">
+                <img src="@/../../public/images/referalBanner.png" alt="Banner con anunncio de recomienda y gana"
+                    :draggable="false" class="object-cover select-none w-full hidden lg:block">
+                <img src="@/../../public/images/referalBannerMobile.png" alt="Banner con anunncio de recomienda y gana"
+                    :draggable="false" class="object-cover select-none w-full lg:hidden">
+                <p class="w-[86%] lg:w-[54%] text-white text-xl lg:text-5xl absolute top-5 lg:top-8 left-[7%] lg:left-[23%] text-center tracking-wide"
+                    style="font-family: 'LeagueGothic';">
+                    ¡Recomienda y gana el 50% del pago a cada referido!
+                </p>
+                <p
+                    class="w-[96%] lg:w-[66%] text-white text-sm lg:text-2xl absolute bottom-3 left-[2%] lg:left-[17%] text-center">
+                    Clic para registrarte, genera tu cupón y compártelo con amigos y negocios!
+                </p>
+            </figure>
+            <!-- recuperación de código -->
+            <section class="mt-3 mx-3 lg:mx-24">
+                <div class="flex items-center justify-end space-x-3">
+                    <p class="text-white text-xs">¿Ya estás registrado?</p>
+                    <PrimaryButton @click="showRecuperationForm = true"
+                        class="!text-xs md:!text-sm !rounded-[6px] !tracking-normal !py-1 !px-2">
+                        Recupera tu código de referido
+                    </PrimaryButton>
+                </div>
+            </section>
+            <section v-if="showRecuperationForm && !registered"
+                class="border rounded-2xl border-gray9A py-4 px-5 w-11/12 lg:w-1/2 mx-auto mt-4">
+                <h1 class="text-white font-bold text-sm">
+                    Recupera tu código de referido
+                </h1>
+                <p class="text-[#B8B8B8] text-xs">Si ya estas registrado, ingresa tu correo electrónico con el que te
+                    registraste.</p>
+                <form @submit.prevent="fetchCode">
+                    <div class="mt-3">
+                        <InputLabel for="email" value="Correo electrónico *" class="text-white" />
+                        <input v-model="recuperationEmail" id="email" type="email" placeholder="daniela@gmail.com"
+                            class="border border-gray9A rounded-[3px] placeholder:text-gray9A placeholder:text-xs focus:border-primary focus:ring-0 text-white bg-transparent w-full h-7 px-2 text-sm" />
+                        <InputError :message="recuperationMessage" />
+                    </div>
+                    <PrimaryButton v-if="!recoveredCode" class="col-span-full mt-3" type="submit"
+                        :disabled="fetchingCode || !recuperationEmail">
+                        Recuperar código
+                    </PrimaryButton>
+                    <button v-if="!recoveredCode" @click="showRecuperationForm = false" type="button"
+                        class="flex items-center space-x-3 text-primary text-xs mt-6">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Aún no estoy registrado, generar código</span>
+                    </button>
+                    <div v-else class="col-span-full mt-3 text-center">
+                        <p class="text-white text-xs">Haz recuperado tu código de referido, compártelo</p>
+                        <div
+                            class="mt-2 border border-primary bg-primarylight border-dashed rounded-full text-sm inline-flex space-x-8 items-center px-1">
+                            <span class="px-2 text-primary">{{ recoveredCode }}</span>
+                            <button @click="copyText" type="button"
+                                class="flex items-center py-1 my-1 px-4 text-xs bg-primary text-white rounded-full">
+                                <span>Copiar</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <!-- formulario de registro -->
+            <section class="border rounded-2xl border-gray9A py-4 px-5 w-11/12 lg:w-1/2 mx-auto mt-8">
+                <h1 class="text-white font-bold text-sm">Registro de recompensas</h1>
+                <p class="text-[#B8B8B8] text-xs">Agrega tus datos para generar tu cupón.</p>
+                <article>
+                    <form @submit.prevent="store" class="grid grid-cols-2 gap-3 pt-4">
+                        <div>
+                            <InputLabel for="name" value="Nombre *" class="text-white" />
+                            <input v-model="form.name" id="name" type="text" placeholder="Ej. Daniela"
+                                class="border border-gray9A rounded-[3px] placeholder:text-gray9A placeholder:text-xs focus:border-primary focus:ring-0 text-white bg-transparent w-full h-7 px-2 text-sm" />
+                            <InputError :message="form.errors.name" />
+                        </div>
+                        <div>
+                            <InputLabel for="last_name" value="Apellido *" class="text-white" />
+                            <input v-model="form.last_name" id="last_name" type="text" placeholder="González"
+                                class="border border-gray9A rounded-[3px] placeholder:text-gray9A placeholder:text-xs focus:border-primary focus:ring-0 text-white bg-transparent w-full h-7 px-2 text-sm" />
+                            <InputError :message="form.errors.last_name" />
+                        </div>
+                        <div>
+                            <InputLabel for="phone" value="Número de teléfono *" class="text-white" />
+                            <input v-model="form.phone" id="phone" type="text" placeholder="00 00 00 00 00"
+                                class="border border-gray9A rounded-[3px] placeholder:text-gray9A placeholder:text-xs focus:border-primary focus:ring-0 text-white bg-transparent w-full h-7 px-2 text-sm" />
+                            <InputError :message="form.errors.phone" />
+                        </div>
+                        <div>
+                            <InputLabel for="email" value="Correo electrónico *" class="text-white" />
+                            <input v-model="form.email" id="email" type="email" placeholder="daniela@gmail.com"
+                                class="border border-gray9A rounded-[3px] placeholder:text-gray9A placeholder:text-xs focus:border-primary focus:ring-0 text-white bg-transparent w-full h-7 px-2 text-sm" />
+                            <InputError :message="form.errors.email" />
+                        </div>
+                        <p class="text-gray9A text-xs col-span-full">
+                            Tus datos se guardarán de forma segura para validar y entregar las recompensas que generes
+                            con tus recomendaciones
+                        </p>
+                        <PrimaryButton v-if="!registered" class="col-span-full mt-3" type="submit"
+                            :disabled="form.processing || !form.name || !form.last_name || !form.phone || !form.email">
+                            Generar código
+                        </PrimaryButton>
+                        <div v-else class="col-span-full mt-3 text-center">
+                            <p class="text-white text-xs">Copia el código y comparte con tus amigos.</p>
+                            <div
+                                class="mt-2 border border-primary bg-primarylight border-dashed rounded-full text-sm inline-flex space-x-8 items-center px-1">
+                                <span class="px-2 text-primary">{{ form.code }}</span>
+                                <button @click="copyText" type="button"
+                                    class="flex items-center py-1 my-1 px-4 text-xs bg-primary text-white rounded-full">
+                                    <span>Copiar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </article>
+                <article class="mt-4 text-sm">
+                    <h2 class="font-bold text-white">¿Cómo funciona?</h2>
+                    <ol class="*:flex *:space-x-2 *:my-2">
+                        <li>
+                            <span
+                                class="shrink-0 bg-[#EDEDED] size-5 rounded-full flex items-center justify-center">1</span>
+                            <span class="text-white">
+                                ¿Aún no eres usuario de Ezy Ventas? ¡No hay problema! Registra tus datos, recomienda el
+                                sistema y gana recompensas por cada referido. Y si en el futuro decides
+                                suscribirte, disfrutarás de un 50% de descuento con el mismo cupón.
+                            </span>
+                        </li>
+                        <li>
+                            <span
+                                class="shrink-0 bg-[#EDEDED] size-5 rounded-full flex items-center justify-center">2</span>
+                            <span class="text-white">
+                                Las personas que tengan tu código obtienen 30 días gratis de prueba + 10% de descuento
+                                en su primera compra.
+                            </span>
+                        </li>
+                        <li>
+                            <span
+                                class="shrink-0 bg-[#EDEDED] size-5 rounded-full flex items-center justify-center">3</span>
+                            <span class="text-white">
+                                Tu recompensa se activará cuando tu referido realice su primer pago. Obtendrás el 50%
+                                del valor de su suscripción como pago por tu recomendación.
+                            </span>
+                        </li>
+                        <li>
+                            <span
+                                class="shrink-0 bg-[#EDEDED] size-5 rounded-full flex items-center justify-center">4</span>
+                            <span class="text-white">
+                                Asegúrate de agregar bien tus datos para poder contactarte y entregar las recompensas.
+                            </span>
+                        </li>
+                    </ol>
+                </article>
+            </section>
+            <button v-if="showScrollButton" @click="scrollToTop"
+                class="fixed bottom-10 right-4 flex items-center justify-center size-10 rounded-full bg-grayD9">
+                <i class="fa-solid fa-arrow-up fa-bounce text-gray37"></i>
+            </button>
+        </main>
+        <!-- footer -->
+        <footer class="bg-black1 p-4">
+            <div class="border-b border-[#373737] w-full"></div>
+            <div class="md:justify-between text-white text-xs my-3">
+                <div class="flex justify-center space-x-3">
+                    <a class="underline" target="_blank" :href="route('terms.show')">Términos y condiciones</a>
+                    <a class="underline" target="_blank" :href="route('policy.show')">Política de privacidad</a>
+                </div>
+                <p class="mt-3">Copyright &copy; 2024-2025 | Todos los derechos reservador por Ezy Ventas</p>
+            </div>
+            <div class="flex items-center justify-between">
+                <figure class="mt-4">
+                    <img class="w-20 lg:w-[40%]" src="@/../../public/images/white_logo.png" alt="">
+                </figure>
+                <figure class="mt-4 cursor-pointer">
+                    <a class="flex justify-end items-center" href="https://app.dtw.com.mx/" target="_blank">
+                        <p class="text-white text-xl">BY</p>
+                        <img class="w-20 lg:w-[10%]" src="@/../../public/images/DTW_logo_blanco.png" alt="">
+                    </a>
+                </figure>
+            </div>
+        </footer>
+    </div>
+</template>
+
+<script>
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
-import Simulator from '@/Components/MyComponents/Landing/Simulator.vue';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
 import confetti from "canvas-confetti";
+import InputLabel from '@/Components/InputLabel.vue';
+import InputError from '@/Components/InputError.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import axios from 'axios';
+import Back from '@/Components/MyComponents/Back.vue';
 
-defineProps({
-    canLogin: Boolean,
-    canRegister: Boolean,
-    laravelVersion: String,
-    phpVersion: String,
-});
+export default {
+    data() {
+        const form = useForm({
+            name: null,
+            last_name: null,
+            phone: null,
+            email: null,
+            code: Math.random().toString(36).substring(2, 7).toUpperCase(), // codigo alfanumerico con 5 caracteres en mayusculas
+        });
 
-const quantity1 = ref(1);
-const quantity2 = ref(1);
-const showScrollButton = ref(false);
+        return {
+            form,
+            showScrollButton: false,
+            showRecuperationForm: false,
+            registered: false,
+            // recuperación de código
+            recuperationEmail: null,
+            recoveredCode: null,
+            recuperationMessage: null,
+            fetchingCode: false,
+        }
+    },
+    components: {
+        Head,
+        Link,
+        ApplicationMark,
+        InputLabel,
+        InputError,
+        PrimaryButton,
+        Back,
+    },
+    methods: {
+        store() {
+            this.form.post(route('partners.store'), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    this.registered = true;
+                    this.launchConfetti();
+                },
+            });
+        },
+        scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        },
+        handleScroll() {
+            this.showScrollButton = window.scrollY > 1000;
+        },
+        launchConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+            })
+        },
+        copyText() {
+            navigator.clipboard.writeText(this.form.code).then(() => {
+                ElMessage({
+                    message: 'Copiado al portapapeles',
+                    type: 'success',
+                });
+            }).catch(err => {
+                console.error('Error al copiar texto: ', err);
+            });
+        },
+        async fetchCode() {
+            this.fetchingCode = true;
+            try {
+                const response = await axios.post(route('landing.recover-partner'), {
+                    email: this.recuperationEmail,
+                });
 
-// Definir la URL de WhatsApp como una propiedad computada
-const scrollToTop = () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+                if (response.status === 200) {
+                    this.recoveredCode = response.data.code;
+                    this.recuperationMessage = response.data.message;
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.fetchingCode = false;
+            }
+        },
+    },
+    mounted() {
+        window.addEventListener('scroll', this.handleScroll);
+    },
+    beforeUnmount() {
+        window.removeEventListener('scroll', this.handleScroll);
+    },
 };
-
-const launchConfetti = () => {
-    confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-    });
-};
-
-const handleScroll = () => {
-    showScrollButton.value = window.scrollY > 1000;
-};
-
-const openWhatsapp = () => {
-    const url = 'https://api.whatsapp.com/send?phone=523322268824&text=¡Hola!%20vi%20tu%20página%20y%20me%20interesa%20el%20punto%20de%20venta'
-    window.open(url, '_blank');
-};
-
-onMounted(() => {
-    AOS.init();
-    window.addEventListener('scroll', handleScroll);
-});
-
-onBeforeUnmount(() => {
-    window.removeEventListener('scroll', handleScroll);
-});
-
-
 </script>
 
 <style scoped>
@@ -208,7 +460,7 @@ onBeforeUnmount(() => {
 
 @keyframes keyframes-intro {
     100% {
-        ransform: translate(-100%);
+        transform: translate(-100%);
         opacity: 0;
     }
 }
@@ -270,74 +522,3 @@ onBeforeUnmount(() => {
     background-color: var(--semidark);
 }
 </style>
-
-<template>
-
-    <Head title="Registro de Partner" />
-    <div class="bg-black2 relative overflow-x-hidden">
-        <img class="object-contain select-none absolute right-0 top-0" :draggable="false"
-            src="@/../../public/images/bg-01.png" alt="Destello neón de adorno en el fondo">
-        <nav class="bg-transparent" data-aos="zoom-in" data-aos-duration="1200">
-            <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
-                <div class="flex justify-between items-center h-14 bg-[#404040]/30 rounded-full pl-3 pr-2">
-                    <div class="flex">
-                        <!-- Logo -->
-                        <div class="shrink-0 flex items-center">
-                            <ApplicationMark class="block h-10 md:h-12 w-auto" />
-                        </div>
-                    </div>
-                    <div class="flex sm:items-center space-x-12 sm:ms-6">
-                        <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
-                        <button class="buttonupgrade">
-                            Iniciar sesión
-                        </button>
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </nav>
-        <main class="bg-transparent selection:bg-primary selection:text-white pb-24 relative">
-            <figure
-                class="relative w-11/12 lg:w-3/4 mt-3 mx-auto">
-                <img src="@/../../public/images/referalBanner.png" alt="Banner con anunncio de recomienda y gana"
-                    :draggable="false" class="object-cover select-none w-full hidden lg:block">
-                <img src="@/../../public/images/referalBannerMobile.png" alt="Banner con anunncio de recomienda y gana"
-                    :draggable="false" class="object-cover select-none w-full lg:hidden">
-                <p class="w-[86%] lg:w-[54%] text-white text-xl lg:text-5xl absolute top-5 lg:top-8 left-[7%] lg:left-[23%] text-center tracking-wide"
-                    style="font-family: 'LeagueGothic';">
-                    ¡Recomienda y gana el 50% del pago a cada referido!
-                </p>
-                <p
-                    class="w-[96%] lg:w-[66%] text-white text-sm lg:text-2xl absolute bottom-3 left-[2%] lg:left-[17%] text-center">
-                    Clic para registrarte, genera tu cupón y compártelo con amigos y negocios!
-                </p>
-            </figure>
-            <button v-if="showScrollButton" @click="scrollToTop"
-                class="fixed bottom-10 right-4 flex items-center justify-center size-10 rounded-full bg-grayD9">
-                <i class="fa-solid fa-arrow-up fa-bounce text-gray37"></i>
-            </button>
-        </main>
-        <!-- footer -->
-        <footer class="bg-black1 p-4">
-            <div class="border-b border-[#373737] w-full"></div>
-            <div class="md:justify-between text-white text-xs my-3">
-                <div class="flex justify-center space-x-3">
-                    <a class="underline" target="_blank" :href="route('terms.show')">Términos y condiciones</a>
-                    <a class="underline" target="_blank" :href="route('policy.show')">Política de privacidad</a>
-                </div>
-                <p class="mt-3">Copyright &copy; 2024-2025 | Todos los derechos reservador por Ezy Ventas</p>
-            </div>
-            <div class="flex items-center justify-between">
-                <figure class="mt-4">
-                    <img class="w-20 lg:w-[40%]" src="@/../../public/images/white_logo.png" alt="">
-                </figure>
-                <figure class="mt-4 cursor-pointer">
-                    <a class="flex justify-end items-center" href="https://app.dtw.com.mx/" target="_blank">
-                        <p class="text-white text-xl">BY</p>
-                        <img class="w-20 lg:w-[10%]" src="@/../../public/images/DTW_logo_blanco.png" alt="">
-                    </a>
-                </figure>
-            </div>
-        </footer>
-    </div>
-</template>
