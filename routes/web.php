@@ -435,8 +435,7 @@ Route::get('/started-turtorial/pos', function () {
 })->name('started-tutorial');
 
 
-// // comandos Artisan
-// Route::get('/backup', function () {
-//     Artisan::call('storage:link');
-//     return 'linked!!';
+// // ui components para videos
+// Route::get('ui', function () {
+//     return inertia('UIComponent/Index');
 // });
