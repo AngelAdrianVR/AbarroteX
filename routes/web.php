@@ -43,16 +43,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Jetstream\Agent;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
 
 Route::get('/', function () {
     $agent = new Agent();
@@ -80,30 +70,30 @@ Route::middleware([
 
 
 // crear cupones y partner para tiendas existentes
-use Illuminate\Support\Str;
-Route::get('create-partners', function () {
-    // iterar cada tienda
-    $stores = \App\Models\Store::all();
-    foreach ($stores as $store) {
-        // crear un cupon de descuento para la tienda
-        $cupon = \App\Models\DiscountTicket::create([
-            // generar código alfanumerico que tenga que ver con el nombre de la tienda
-           'code' => strtoupper(Str::random(5)),
-           'description' => "Descuento de bienvenida para referidos de la tienda $store->name",
-           'discount_amount' => 10,
-       ]);
+// use Illuminate\Support\Str;
+// Route::get('create-partners', function () {
+//     // iterar cada tienda
+//     $stores = \App\Models\Store::all();
+//     foreach ($stores as $store) {
+//         // crear un cupon de descuento para la tienda
+//         $cupon = \App\Models\DiscountTicket::create([
+//             // generar código alfanumerico que tenga que ver con el nombre de la tienda
+//            'code' => strtoupper(Str::random(5)),
+//            'description' => "Descuento de bienvenida para referidos de la tienda $store->name",
+//            'discount_amount' => 10,
+//        ]);
     
-       // crear un partner con los datos de la tienda
-       \App\Models\Partner::create([
-           'name' => $store->name,
-           'phone' => $store->contact_phone,
-           'email' => $store->users[0]->email,
-           'discount_ticket_id' => $cupon->id,
-       ]);
-    }
+//        // crear un partner con los datos de la tienda
+//        \App\Models\Partner::create([
+//            'name' => $store->name,
+//            'phone' => $store->contact_phone,
+//            'email' => $store->users[0]->email,
+//            'discount_ticket_id' => $cupon->id,
+//        ]);
+//     }
 
-    return "cupones y partners creados!";
-});
+//     return "cupones y partners creados!";
+// });
 
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
@@ -431,7 +421,8 @@ Route::get('my-referrals/index', [DiscountTicketController::class, 'referralsInd
 //rutas de partners --------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('partners', PartnerController::class);
-Route::get('landing/register-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
+Route::get('landing/partner-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
+Route::post('landing/partner-recover', [PartnerController::class, 'landingRecover'])->name('landing.recover-partner');
 
 
 // ver tutoriales
