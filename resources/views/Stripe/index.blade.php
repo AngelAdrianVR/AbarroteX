@@ -76,7 +76,7 @@
                 @csrf
                 <input type="hidden" name="products" value="{{ json_encode($products) }}">
                 <input type="hidden" name="modules_updated" value="{{ json_encode($modules_updated) }}">
-                {{-- <input type="hidden" name="discount_ticket_code" value="{{ json_encode($discount_ticket) }}"> --}}
+                <input type="hidden" name="discount_ticket" value="{{ json_encode($discount_ticket) }}">
                 <button type="submit" onclick="location.reload()" class="bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700">
                     Completar el pago
                 </button>
