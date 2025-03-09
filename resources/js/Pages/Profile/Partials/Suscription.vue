@@ -106,8 +106,24 @@
                                         <p>678679678665342245</p>
                                         <p>Miguel O. Vazquez</p>
                                         <p>Nu México</p>
-                                        <p class="font-bold">
-                                            ${{ amountToPay }}
+                                        <p class="font-bold flex items-center space-x-2">
+                                            <span>${{ amountToPay }}</span>
+                                             <el-tooltip v-if="verifiedTicket" placement="right">
+                                                <template #content>
+                                                <div>
+                                                    <p class="text-cyan-500">Cupón de descuento utilizado</p>
+                                                    <p>Descuento: {{ verifiedTicket?.is_percentage_discount ? '%' : '$' }}{{ verifiedTicket?.discount_amount }}</p>
+                                                    <button class="text-white rounded-md px-3 bg-red-500 mt-3 mr-auto" @click="verifiedTicket = null">
+                                                    Quitar cupón
+                                                    </button>
+                                                </div>
+                                                </template>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                stroke="currentColor" class="size-4 text-primary">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+                                                </svg>
+                                            </el-tooltip>
                                         </p>
                                     </div>
                                 </div>
@@ -124,6 +140,31 @@
                                     vez
                                     confirmada, podrás continuar disfrutando de tu suscripción. Puedes verificar el
                                     estado de tu suscripción en cualquier momento.</p>
+
+                                <!-- Codigo promocional -->
+                                <div class="w-1/2 ml-auto rounded-xl bg-gray-100 p-4">
+                                    <div v-if="!verifiedTicket">
+                                        <h2 class="font-bold">Agrega el código promocional</h2>
+                                        <div class="mt-3 col-span-full">
+                                            <InputLabel value="Código" class="ml-3 mb-1" />
+                                            <el-input v-model="ticketCode" @keydown.enter="VerifyTicket()" placeholder="Escribe el código de promoción" :maxlength="100" clearable />
+                                            <span v-if="ticketCodeError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> El cupón no es válido. Verifica nuevamente</span>
+                                            <span v-if="ticketReferredError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> Ya has utilizado un cupón de referido</span>
+                                        </div>
+
+                                        <div class="flex justify-start mt-5">
+                                        <PrimaryButton @click="VerifyTicket()">Verificar</PrimaryButton>
+                                        </div>
+                                    </div>
+
+                                    <div v-else>
+                                        <p class="text-cyan-500">Cupón de descuento utilizado</p>
+                                        <p>Descuento: {{ verifiedTicket?.is_percentage_discount ? '%' : '$' }}{{ verifiedTicket?.discount_amount }}</p>
+                                        <button class="text-white rounded-md px-3 py-1 bg-red-500 mt-3 mr-auto" @click="verifiedTicket = null">
+                                        Quitar cupón
+                                        </button>
+                                    </div>
+                                </div>
 
                                 <form @submit.prevent="checkout" class="flex items-center justify-end space-x-2 md:space-x-8 mx-4 mt-4">
                                     <button @click="edit = false" type="button" class="text-primary">Ahora no</button>
@@ -283,13 +324,42 @@
             </article>
         </div>
     </section>
+    <!-- -------------- Modal de código aplicado correctamente ----------------------- -->
+    <Modal :show="showApliedDiscountTicket" @close="showApliedDiscountTicket = false" maxWidth="sm">
+      <div class="p-4 relative">
+        <i @click="showApliedDiscountTicket = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+
+        <h2 class="font-bold text-center">Descuento aplicado con éxito</h2>
+
+        <section class="mt-4 text-center">
+          <p class="flex items-center space-x-2 rounded-full border border-dashed border-primary text-primary bg-primarylight py-1 px-3 w-1/2 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+            </svg>
+            <span>{{ verifiedTicket.discount_amount }}{{ verifiedTicket.is_percentage_discount ? '%' : '$' }} descuento</span>
+          </p>
+
+          <div class="mt-5 flex flex-col items-center justify-center">
+            <svg width="26" height="20" viewBox="0 0 26 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.91758 19.8418C4.12647 14.7142 0.232709 10.6358 0.0124311 10.3936C-0.207847 10.1514 2.52212 9.69147 6.39 13.7005C13.7218 5.3998 20.8295 -0.0222255 24.8141 0.000509436C24.9676 -0.0151292 25.2031 0.333452 25.0503 0.472922C16.2283 4.67346 11.3447 12.1369 7.09861 19.8418C7.07299 20.0753 5.90745 20.0289 5.91758 19.8418Z" fill="#189203"/>
+            </svg>
+            <p class="text-[#189203]">¡Disfruta de tu descuento!</p>
+          </div>
+        </section>
+      </div>
+    </Modal>
 </template>
 <script>
+import InputLabel from "@/Components/InputLabel.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useForm } from '@inertiajs/vue3';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import Modal from "@/Components/Modal.vue";
 import visaImage from "@/../../public/images/visa.jpg";
 import mastercardImage from "@/../../public/images/mastercard.png";
 import americanExpressImage from "@/../../public/images/american_express.png";
@@ -303,6 +373,7 @@ export default {
             days_gifted: null,
             image: null,
             activeModules: null,
+            discountTicketUsed: null,
             // default_card_id: this.$page.props.auth.user.store.default_card_id,
         });
 
@@ -310,6 +381,13 @@ export default {
             form,
             edit: false,
             loading: false,
+            showPaymentModal: false,
+            showApliedDiscountTicket: false,
+            discountTickets: null, //cupones de descuento activos
+            ticketCode: null, //codigo del ticket ingresado
+            verifiedTicket: null, //codigo del ticket correctamente verificado
+            ticketCodeError: false, //codigo del ticket no encontrado, bandera de error
+            ticketReferredError: false, //codigo del ticket de referido usado
             modules: [
                 {
                     name: 'Gastos',
@@ -391,16 +469,38 @@ export default {
         user: Object,
     },
     components: {
+        InputFilePreview,
         PrimaryButton,
-        InputFilePreview
+        InputLabel,
+        Modal
     },
     computed: {
         getDefultCard() {
             return this.cards.find(item => item.id == this.$page.props.auth.user.store.default_card_id);
         },
         amountToPay() {
-            return this.suscriptions.find(item => item.name == this.form.suscription_period)?.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-        },
+            const subscription = this.suscriptions.find(item => item.name == this.form.suscription_period);
+            if (!subscription) return null; // Si no se encuentra la suscripción, retorna null o un valor predeterminado
+            
+            let amount = subscription.amount;
+
+            // Verifica si hay un descuento
+            if (this.verifiedTicket) {
+                const discount = this.verifiedTicket.discount_amount;
+
+                if (this.verifiedTicket.is_percentage_discount) {
+                    // Si es un descuento porcentual, aplica el porcentaje
+                    amount = amount - (amount * discount / 100);
+                } else {
+                    // Si no es un descuento porcentual, resta la cantidad fija
+                    amount = amount - discount;
+                }
+            }
+
+            // Formatea el monto final con comas y 2 decimales
+            return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
         //habilita el pago segun los días que se desee para la expiración del plan actual
         // enablePayment() {
         //     const today = new Date();
@@ -414,6 +514,7 @@ export default {
         checkout() {
             this.form.activeModules = this.modules.filter(item => this.$page.props.auth.user.store.activated_modules.includes(item.name));
             this.form.activeModules.unshift({ name: "Módulos básicos", cost: 229 });
+            this.form.discountTicketUsed = this.verifiedTicket;
             this.form.post(route('stripe.index'));
         },
         calculateTotalPeriosPrice() {
@@ -507,6 +608,8 @@ export default {
                     });
                     this.edit = false;
                     this.loading = false;
+                    this.form.reset();
+                    this.verifiedTicket = null;
                 },
             });
         },
@@ -530,9 +633,38 @@ export default {
         saveImage(image) {
             this.form.image = image;
         },
+        async fetchActiveDiscountTickets() {
+            try {
+                const response = await axios.get(route('discount-tickets.fetch-active-tickets'))
+                if (response.status === 200) {
+                    this.discountTickets = response.data.discount_tickets;
+                }
+
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        VerifyTicket() {
+            if ( this.discountTickets.some(ticket => ticket.code === this.ticketCode )) {
+                this.verifiedTicket = this.discountTickets.find(ticket => ticket.code === this.ticketCode);
+                if ( this.$page.props.auth.user.store.partner_cupon && this.verifiedTicket.description?.startsWith('Descuento de bienvenida para referidos') ) {
+                    this.ticketReferredError = true;
+                    this.verifiedTicket = null;
+                    return;
+                }
+                this.showApliedDiscountTicket = true;
+                this.ticketCodeError = false;
+                this.ticketReferredError = false;
+                this.ticketCode = null;
+            } else {
+                this.ticketCodeError = true;
+            }
+        },
     },
     mounted() {
         this.calculateTotalPeriosPrice();
+        //carga los cupones de descuento disponibles
+        this.fetchActiveDiscountTickets();
     }
 }
 </script>
