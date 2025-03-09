@@ -525,7 +525,7 @@ onUnmounted(() => {
                             </div>
                             <div class="h-px pb-1"></div>
                             <div @click="$inertia.visit(route('referrals.index'))"
-                                class="bg-[#D38CFF] text-[#9800F6] px-2 py-2 mx-auto w-[90%] rounded-[5px] flex items-center justify-between">
+                                class="bg-[#DCA4FE] text-[#9800F6] px-2 py-2 mx-auto w-[90%] rounded-[5px] flex items-center justify-between">
                                 <p class="flex items-center space-x-2">
                                     <svg width="17" height="17" viewBox="0 0 17 17" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
