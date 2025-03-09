@@ -115,7 +115,7 @@
                 <article class="border border-grayD9 rounded-lg mt-12 md:mt-0 self-start">
                     <div class="flex items-center justify-between border-b border-grayD9 py-2 px-7">
                         <p class="font-bold text-sm">Resumen del pedido</p>
-                        <p @click="$inertia.get(route('online-sales.cart'))"
+                        <p @click="$inertia.get(route('online-sales.cart', store?.slug))"
                             class="text-primary cursor-pointer text-sm">Editar</p>
                     </div>
 

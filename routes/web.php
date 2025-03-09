@@ -359,14 +359,14 @@ Route::resource('colors', ColorController::class)->middleware('auth');
 //-----------------------------------------------------------------------------------------------------------------------
 Route::resource('online-sales', OnlineSaleController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified'])->except('show');
 Route::get('/online-sales/{online_sale}', [OnlineSaleController::class, 'show'])->name('online-sales.show')->middleware(['auth', 'activeSuscription', 'hasModule:Tienda en línea', 'verified', 'isOwnResource']);
-Route::get('{slug}/create', [OnlineSaleController::class, 'create'])->name('online-sales.create'); //create para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
+Route::get('mx/{slug}/create', [OnlineSaleController::class, 'create'])->name('online-sales.create'); //create para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
 Route::post('online-sales/store', [OnlineSaleController::class, 'store'])->name('online-sales.store'); //store para no usar middleware porque no dejaba al cliente finalizar pedido hasta loguearse
 Route::get('online-sales-client-index/{encoded_store_id}', [OnlineSaleController::class, 'clientIndexOld'])->name('online-sales.client-index-old'); //index de clientes
-Route::get('{slug}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
+Route::get('mx/{slug}', [OnlineSaleController::class, 'clientIndex'])->name('online-sales.client-index'); //index de clientes
 Route::post('online-sales/load-more-products', [OnlineSaleController::class, 'loadMoreProducts'])->name('online-sales.load-more-products'); //carga mas products con scroll
-Route::get('{slug}/show-l/{product_id}', [OnlineSaleController::class, 'showLocalProduct'])->name('online-sales.show-local-product');
-Route::get('{slug}/show-g/{global_product_id}', [OnlineSaleController::class, 'showGlobalProduct'])->name('online-sales.show-global-product');
-Route::get('{slug}/cart', [OnlineSaleController::class, 'cartIndex'])->name('online-sales.cart');
+Route::get('mx/{slug}/show-l/{product_id}', [OnlineSaleController::class, 'showLocalProduct'])->name('online-sales.show-local-product');
+Route::get('mx/{slug}/show-g/{global_product_id}', [OnlineSaleController::class, 'showGlobalProduct'])->name('online-sales.show-global-product');
+Route::get('mx/{slug}/cart', [OnlineSaleController::class, 'cartIndex'])->name('online-sales.cart');
 Route::get('online-sales-fetch-product/{product_id}/{is_local}', [OnlineSaleController::class, 'fetchProduct'])->name('online-sales.fetch-product');
 Route::get('online-sales-search-products/{store_id}', [OnlineSaleController::class, 'searchProducts'])->name('online-sales.search-products');
 Route::get('online-sales-filter', [OnlineSaleController::class, 'filterOnlineSales'])->name('online-sales.filter')->middleware('auth');
@@ -376,9 +376,9 @@ Route::post('online-sales-get-by-page/{currentPage}', [OnlineSaleController::cla
 Route::get('online-sales-get-sales-by-date/{date}', [OnlineSaleController::class, 'getSalesByDate'])->name('online-sales.get-sales-by-date');
 Route::post('online-sales/refund/{onlineSale}', [OnlineSaleController::class, 'refund'])->name('online-sales.refund');
 Route::post('online-sales/cancel/{onlineSale}', [OnlineSaleController::class, 'cancel'])->name('online-sales.cancel');
-Route::get('{slug}/show-service/{service}', [OnlineSaleController::class, 'showService'])->name('online-sales.show-service');
+Route::get('mx/{slug}/show-service/{service}', [OnlineSaleController::class, 'showService'])->name('online-sales.show-service');
 Route::get('online-sales-quote-service/{service}', [OnlineSaleController::class, 'quoteService'])->name('online-sales.quote-service');
-Route::get('{slug}/thanks/{encoded_store_id}', [OnlineSaleController::class, 'thanks'])->name('online-sales.thanks');
+Route::get('mx/{slug}/thanks/{encoded_store_id}', [OnlineSaleController::class, 'thanks'])->name('online-sales.thanks');
 
 
 //Internal invoices routes----------------------------------------------------------------------------------------------------
@@ -421,8 +421,8 @@ Route::get('my-referrals/index', [DiscountTicketController::class, 'referralsInd
 //rutas de partners --------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('partners', PartnerController::class);
-Route::get('landing/partner-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
-Route::post('landing/partner-recover', [PartnerController::class, 'landingRecover'])->name('landing.recover-partner');
+Route::get('/partner-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
+Route::post('/partner-recover', [PartnerController::class, 'landingRecover'])->name('landing.recover-partner');
 
 
 // ver tutoriales

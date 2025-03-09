@@ -92,7 +92,7 @@ export default {
             });
         },
         encodeUrlStore() {
-            const baseUrl = 'https://ezyventas.com/';
+            const baseUrl = 'https://ezyventas.com/mx/';
             const slug = this.$page.props.auth.user.store.slug;
             this.encodedUrlStore = baseUrl + slug;
         },
