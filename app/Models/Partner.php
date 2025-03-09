@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Partner extends Model
 {
@@ -19,7 +20,7 @@ class Partner extends Model
     ];
 
     // relaciones
-    public function discountTicket()
+    public function discountTicket() :BelongsTo
     {
         return $this->belongsTo(DiscountTicket::class);
     }

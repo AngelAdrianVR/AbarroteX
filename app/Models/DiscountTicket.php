@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DiscountTicket extends Model
 {
@@ -22,5 +23,11 @@ class DiscountTicket extends Model
     protected $casts = [
         'expired_date' => 'date'
     ];
+
+    // relaciones
+    public function partner() :HasOne
+    {
+        return $this->hasOne(Partner::class);
+    }
     
 }

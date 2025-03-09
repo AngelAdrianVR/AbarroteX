@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DiscountTicket;
 use App\Models\Payment;
 use App\Models\Store;
 use Carbon\Carbon;
@@ -44,6 +45,7 @@ class StripeController extends Controller
         $remaining_plan_days = $request->remainingPlanDays; //días que faltan para que expire el plan pagado
         $discount_ticket = $request->discountTicketUsed; //cupón de descuento utiizado
 
+        // return $request;
         return view('Stripe.upgradeSubscription', compact('products', 'modules_updated', 'activated_modules', 'remaining_plan_days', 'discount_ticket'));
     }
 
@@ -51,10 +53,10 @@ class StripeController extends Controller
     public function checkout(Request $request)
     {
         $products = json_decode($request->input('products'), true); //lo hago array pero solo tiene un objeto. Lo dejo asi par ano modificar el ejemplo en caso de muchos elementos
+        $discount_ticket = json_decode($request->input('discount_ticket'), true); // cupon de descuento utilizado
         $modules_updated = json_decode($request->input('modules_updated'), true); //modulos pagados para guardarlos en base de datos y actualizar en caso de agregar nuevos o quitar
-        // $discount_ticket_code = json_decode($request->input('discount_ticket_code')); //codigo del cupón de descuento usado. (para aumentar en 1 las veces de uso del cupo y guardarla en bd)
 
-        \Stripe\Stripe::setApiKey(config(key:'stripe.sk')); //el helper config toma las llaves desde el directorio config/stripe
+        \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test')); //el helper config toma las llaves desde el directorio config/stripe
 
         $LineItems = [];
 
@@ -76,7 +78,8 @@ class StripeController extends Controller
             'line_items' => $LineItems,
             'mode' => 'payment',
             'success_url' => route('stripe.success', [], true) . "?session_id={CHECKOUT_SESSION_ID}"
-                                                                . "&products=" . urlencode(json_encode($products)) 
+                                                                . "&products=" . urlencode(json_encode($products))
+                                                                . "&discount_ticket=" . urlencode(json_encode($discount_ticket))
                                                                 . "&modules_updated=" . urlencode(json_encode($modules_updated)),
             'cancel_url' => route('stripe.cancel', [], true),
             'locale' => 'es',  
@@ -93,9 +96,10 @@ class StripeController extends Controller
     {
         $products = json_decode($request->input('products'), true); //lo hago array pero solo tiene un objeto. Lo dejo asi par ano modificar el ejemplo en caso de muchos elementos
         // $modules_updated = json_decode($request->input('modules_updated'), true); //modulo adicionales agregados al plan actual
+        $discount_ticket = json_decode($request->input('discount_ticket'), true); // cupon de descuento utilizado
         $activated_modules = json_decode($request->input('activated_modules'), true); //modulos pagados para guardarlos en base de datos y actualizar en caso de agregar nuevos o quitar
 
-        \Stripe\Stripe::setApiKey(config(key:'stripe.sk')); //el helper config toma las llaves desde el directorio config/stripe
+        \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test')); //el helper config toma las llaves desde el directorio config/stripe
 
         
         $LineItems = [];
@@ -119,7 +123,8 @@ class StripeController extends Controller
             'line_items' => $LineItems,
             'mode' => 'payment',
             'success_url' => route('stripe.update-plan-modules-success', [], true) . "?session_id={CHECKOUT_SESSION_ID}"
-                                                                . "&products=" . urlencode(json_encode($products)) 
+                                                                . "&products=" . urlencode(json_encode($products))
+                                                                . "&discount_ticket=" . urlencode(json_encode($discount_ticket)) 
                                                                 . "&modules_updated=" . urlencode(json_encode($activated_modules)),
             'cancel_url' => route('stripe.cancel', [], true),
             'locale' => 'es',  
@@ -153,7 +158,7 @@ class StripeController extends Controller
     //     $products = json_decode($request->input('products'), true);
     //     $modules_updated = json_decode($request->input('modules_updated'), true);
 
-    //     \Stripe\Stripe::setApiKey(config('stripe.sk'));
+    //     \Stripe\Stripe::setApiKey(config('stripe.sk_test'));
 
     //     $LineItems = [];
 
@@ -197,7 +202,7 @@ class StripeController extends Controller
 
         try {
             // Verificar el estado del pago a través de la API de Stripe usando el session_id
-            \Stripe\Stripe::setApiKey(config(key:'stripe.sk'));
+            \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test'));
             $session = \Stripe\Checkout\Session::retrieve($session_id);
 
             // Comprobar que el pago se haya completado correctamente
@@ -208,6 +213,7 @@ class StripeController extends Controller
             // Procesar los datos de la solicitud
             $products = json_decode($request->input('products'), true);
             $modules_updated = json_decode($request->input('modules_updated'), true);
+            $discount_ticket = json_decode($request->input('discount_ticket'), true);            
 
             // Recuperar tienda logueada
             $store = Store::find(auth()->user()->store_id);
@@ -218,7 +224,7 @@ class StripeController extends Controller
             // Si el pago está vencido, partir de hoy, si no, sumar a la fecha actual de next_payment
             $store->next_payment = ($nextPayment->isPast() ? $now : $nextPayment)->addDays($daysToAdd)->toDateTimeString();
 
-            if ($nextPayment->isPast()) {
+            if ($nextPayment->isPast() || $store->suscription_period === 'Periodo de prueba') {
                 $store->suscription_period = $daysToAdd === 30 ? 'Mensual' : 'Anual';
             }
             $store->save();
@@ -245,6 +251,31 @@ class StripeController extends Controller
                 'validated_at' => now(),
             ]);
 
+            //lógica de cupon de descuento / referido
+            if ($discount_ticket) {
+                // Verificar si el cupón existe y está activo
+                $ticket = DiscountTicket::find($discount_ticket['id']);
+            
+                if ($ticket && $ticket->is_active && (!$ticket->expired_date || $ticket->expired_date->isFuture())) {
+                    // Incrementar el contador de veces usado del cupon
+                    $ticket->increment('times_used');
+            
+                    // Verificar si el cupon está relacionado con un partner (referido)
+                    if ($ticket->partner) {
+                        $partner = $ticket->partner;
+            
+                        // Sumar el 50% del pago a las ganancias del partner
+                        $partner->earnings += $products[0]['price'] * 0.50; // 50% del precio
+                        $partner->increment('referrals');
+                        $partner->save();
+                    }
+            
+                    // Asociar el cupon con la tienda nueva (campo 'partner_cupon')
+                    $store->partner_cupon = $ticket->code;
+                    $store->save();
+                }
+            }
+
             // Redirigir a la página de éxito
             return inertia('Stripe/Success');
             
@@ -266,7 +297,7 @@ class StripeController extends Controller
 
         try {
             // Verificar el estado del pago a través de la API de Stripe usando el session_id
-            \Stripe\Stripe::setApiKey(config(key:'stripe.sk'));
+            \Stripe\Stripe::setApiKey(config(key:'stripe.sk_test'));
             $session = \Stripe\Checkout\Session::retrieve($session_id);
 
             // Comprobar que el pago se haya completado correctamente
@@ -276,6 +307,7 @@ class StripeController extends Controller
 
             // Procesar los datos de la solicitud
             $modules_updated = json_decode($request->input('modules_updated'), true); //todos los modulos de la tienda actualizados (completos)
+            $discount_ticket = json_decode($request->input('discount_ticket'), true);
 
             // Encontrar la tienda del usuario autenticado
             $store = Store::find(auth()->user()->store_id);            
@@ -295,6 +327,31 @@ class StripeController extends Controller
                 'created_at' => now(),
                 'validated_at' => now(),
             ]);
+
+            //lógica de cupon de descuento / referido
+            if ($discount_ticket) {
+                // Verificar si el cupón existe y está activo
+                $ticket = DiscountTicket::find($discount_ticket['id']);
+            
+                if ($ticket && $ticket->is_active && (!$ticket->expired_date || $ticket->expired_date->isFuture())) {
+                    // Incrementar el contador de veces usado del cupon
+                    $ticket->increment('times_used');
+            
+                    // Verificar si el cupon está relacionado con un partner (referido)
+                    if ($ticket->partner) {
+                        $partner = $ticket->partner;
+            
+                        // Sumar el 50% del pago a las ganancias del partner
+                        $partner->earnings += $products[0]['price'] * 0.50; // 50% del precio
+                        $partner->increment('referrals');
+                        $partner->save();
+                    }
+            
+                    // Asociar el cupon con la tienda nueva (campo 'partner_cupon')
+                    $store->partner_cupon = $ticket->code;
+                    $store->save();
+                }
+            }
 
             // Redirigir a la página de éxito
             return inertia('Stripe/Success');
