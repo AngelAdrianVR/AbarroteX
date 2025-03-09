@@ -151,6 +151,7 @@
             <InputLabel value="Código" class="ml-3 mb-1" />
             <el-input @keydown.enter="VerifyTicket()" v-model="ticketCode" placeholder="Escribe el código de promoción" :maxlength="100" clearable />
             <span v-if="ticketCodeError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> El cupón no es válido. Verifica nuevamente</span>
+            <span v-if="ticketReferredError" class="text-red-600 text-sm ml-4"><i class="fa-solid fa-xmark"></i> Ya has utilizado un cupón de referido</span>
         </div>
 
         <div class="flex justify-end mt-5">
@@ -211,7 +212,7 @@ export default {
       form,
       loading: false, // estado de carga de peticion de update modules
       nextPayment: this.$page.props.auth.user.store.next_payment, // proximo pago
-      period: this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
+      period: this.$page.props.auth.user.store.suscription_period === 'Periodo de prueba' ? 'Anual' : this.$page.props.auth.user.store.suscription_period, //Periodo de pago seleccionado
       activated_modules: [],
 
       //cupon de descuento
@@ -221,6 +222,7 @@ export default {
       ticketCode: null, //codigo del ticket ingresado
       verifiedTicket: null, //codigo del ticket correctamente verificado
       ticketCodeError: false, //codigo del ticket no encontrado, bandera de error
+      ticketReferredError: false, //codigo de cupón de referencia usado
 
       modules: [
         {
@@ -310,14 +312,21 @@ export default {
       }
     },
     VerifyTicket() {
-      if ( this.discountTickets.some(ticket => ticket.code === this.ticketCode )) {
-        this.verifiedTicket = this.discountTickets.find(ticket => ticket.code === this.ticketCode);
-        this.showDiscountModal = false;
-        this.showApliedDiscountTicket = true;
-        this.ticketCodeError = false;
-      } else {
-        this.ticketCodeError = true;
-      }
+        if ( this.discountTickets.some(ticket => ticket.code === this.ticketCode )) {
+            this.verifiedTicket = this.discountTickets.find(ticket => ticket.code === this.ticketCode);
+            if ( this.$page.props.auth.user.store.partner_cupon && this.verifiedTicket.description?.startsWith('Descuento de bienvenida para referidos') ) {
+                this.ticketReferredError = true;
+                this.verifiedTicket = null;
+                return;
+            }
+            this.showDiscountModal = false;
+            this.showApliedDiscountTicket = true;
+            this.ticketCodeError = false;
+            this.ticketReferredError = false;
+            this.ticketCode = null;
+        } else {
+            this.ticketCodeError = true;
+        }
     },
     calculateTotalPayment(calculateTotal) {
       let total;
