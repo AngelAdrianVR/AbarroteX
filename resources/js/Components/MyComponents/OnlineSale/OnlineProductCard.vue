@@ -35,7 +35,7 @@
                     <span class="text-lg">{{ product.bulk_product ? '/ ' + product.measure_unit : '' }}</span>
                 </p>
             </div>
-            <!-- Si es bajo pedido -->
+            <!-- Si no es bajo pedido -->
             <div @click.stop="" class="flex justify-between items-center cursor-default"
                 v-if="!product.product_on_request">
                 <el-input-number v-model="quantity" size="small" :min="1" :max="999" :precision="2" />
@@ -65,9 +65,8 @@
                 <!-- <p v-if="alreadyInCart" class="text-green-500"><i class="fa-regular fa-circle-check"></i> Agregado</p>
                 <PrimaryButton v-else @click="addToCart" class="!active:scale-75">Agregar al carrito</PrimaryButton> -->
             </div>
-
-            <!-- Si no es bajo pedido -->
-            <div class="flex justify-between items-center" v-else>
+            <!-- Si es bajo pedido -->
+            <div v-else @click.stop="" class="flex justify-between items-center">
                 <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
                 <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product.current_stock < 1"
                     v-model="quantity" size="small" :min="0" :max="product.current_stock" :precision="2" />
