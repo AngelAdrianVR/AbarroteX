@@ -68,34 +68,6 @@ Route::middleware([
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
 });
 
-
-// crear cupones y partner para tiendas existentes
-// use Illuminate\Support\Str;
-// Route::get('create-partners', function () {
-//     // iterar cada tienda
-//     $stores = \App\Models\Store::all();
-//     foreach ($stores as $store) {
-//         // crear un cupon de descuento para la tienda
-//         $cupon = \App\Models\DiscountTicket::create([
-//             // generar código alfanumerico que tenga que ver con el nombre de la tienda
-//            'code' => strtoupper(Str::random(5)),
-//            'description' => "Descuento de bienvenida para referidos de la tienda $store->name",
-//            'discount_amount' => 10,
-//        ]);
-    
-//        // crear un partner con los datos de la tienda
-//        \App\Models\Partner::create([
-//            'name' => $store->name,
-//            'phone' => $store->contact_phone,
-//            'email' => $store->users[0]->email,
-//            'discount_ticket_id' => $cupon->id,
-//        ]);
-//     }
-
-//     return "cupones y partners creados!";
-// });
-
-
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('global-products', GlobalProductController::class)->middleware(['auth']);
@@ -433,9 +405,3 @@ Route::get('/started-turtorial/pos', function () {
         return inertia('StartedTutorial/Index');
     }
 })->name('started-tutorial');
-
-
-// // ui components para videos
-// Route::get('ui', function () {
-//     return inertia('UIComponent/Index');
-// });

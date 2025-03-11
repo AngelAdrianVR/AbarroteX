@@ -23,6 +23,11 @@ class PartnerController extends Controller
     {
         return inertia('PartnerRegister');
     }
+    
+    public function landingStore()
+    {
+        return inertia('LandingStore');
+    }
 
     public function store(Request $request)
     {
