@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\CashRegisterMovement;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
 use App\Models\OnlineSale;
 use App\Models\Product;
@@ -28,7 +29,10 @@ class ProductController extends Controller
 
     public function index()
     {
-        return inertia('Product/Index');
+        // revisar si para el tipo de tienda existe un catalogo global
+        $exist_global_products = GlobalProduct::where('type', auth()->user()->store->type)->get(['id', 'name'])->count();
+        
+        return inertia('Product/Index', compact('exist_global_products'));
     }
 
     public function create()
@@ -51,7 +55,7 @@ class ProductController extends Controller
             'currency' => 'nullable|string',
             'cost' => 'nullable|numeric|min:0|max:9999999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
-            'description' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:800',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
             'category_id' => 'nullable',
@@ -126,7 +130,7 @@ class ProductController extends Controller
             'public_price' => 'required|numeric|min:0|max:9999999',
             'currency' => 'required|string',
             'cost' => 'nullable|numeric|min:0|max:9999999',
-            'description' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:800',
             'current_stock' => 'nullable|numeric|min:0|max:9999999',
             'min_stock' => 'nullable|numeric|min:0|max:9999999',
             'max_stock' => 'nullable|numeric|min:0|max:9999999',
@@ -173,7 +177,7 @@ class ProductController extends Controller
             'public_price' => 'required|numeric|min:0|max:9999999',
             'currency' => 'required|string',
             'cost' => 'nullable|numeric|min:0|max:9999999',
-            'description' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:800',
             'current_stock' => 'nullable|numeric|min:0|max:9999999',
             'min_stock' => 'nullable|numeric|min:0|max:9999999',
             'max_stock' => 'nullable|numeric|min:0|max:9999999',

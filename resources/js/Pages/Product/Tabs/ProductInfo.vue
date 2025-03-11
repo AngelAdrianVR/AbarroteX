@@ -18,14 +18,14 @@
                 </p>
                 <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
                 <p class="text-gray37">Categoría: <span class="font-bold">{{ product.category?.name ?? 'N/A'
-                        }}</span></p>
+                }}</span></p>
                 <span class="hidden md:block text-lg text-[#9A9A9A]">•</span>
                 <p class="text-gray37">Proveedor: <span class="font-bold">{{ product.brand?.name ?? 'N/A'
-                        }}</span></p>
+                }}</span></p>
             </div>
         </div>
         <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.created_at
-                }}</strong></p>
+        }}</strong></p>
         <p v-if="product.bulk_product" class="text-gray37 font-bold mt-3">Producto de venta a granel / ({{
             product.measure_unit }})</p>
         <p v-if="product.product_on_request" class="text-gray37 font-bold mt-3">Producto de venta bajo pedido / ({{
@@ -78,11 +78,8 @@
             <!-- Descripción del producto -->
             <div v-if="product.description" class="md:!w-[600px]">
                 <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
-                <div class="grid grid-cols-3 md:grid-cols-2 items-center rounded-md px-5 py-1">
-                    <p class="text-gray37">Descripción: </p>
-                    <div>
-                        <p class="whitespace-break-spaces col-span-2 md:col-span-1">{{ formattedDescription }}</p>
-                    </div>
+                <div>
+                    <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
                 </div>
             </div>
         </div>

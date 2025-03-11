@@ -1,6 +1,7 @@
 <template>
     <OnlineStoreLayout :title="product.name">
-        <div class="p-4 md:p-9 lg:h-[calc(100vh-161px)]">
+        <!-- <div class="p-4 md:p-9 lg:h-[calc(100vh-161px)]"> -->
+        <div class="p-4 md:p-9">
             <Back :to="route('online-sales.client-index', store?.slug ?? '')" />
 
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
