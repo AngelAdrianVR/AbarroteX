@@ -300,8 +300,8 @@ onBeforeUnmount(() => {
                             type="button">Precios</button>
                         <button @click="$inertia.get(route('landing.create-partner'))" class="text-white focus:border-none focus:ring-0"
                             type="button">Recomienda y gana</button>
-                        <!-- <button @click="scrollToElement('products')" class="text-white focus:border-none focus:ring-0"
-                            type="button">Productos</button> -->
+                        <button @click="$inertia.get(route('landing.store'))" class="text-white focus:border-none focus:ring-0"
+                            type="button">Productos</button>
                         <Link :href="$page.props.auth.user ? route('dashboard') : route('login')">
                         <button class="buttonupgrade">
                             Iniciar sesión

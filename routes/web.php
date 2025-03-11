@@ -422,6 +422,7 @@ Route::get('my-referrals/index', [DiscountTicketController::class, 'referralsInd
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('partners', PartnerController::class);
 Route::get('/partner-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
+Route::get('/store', [PartnerController::class, 'landingStore'])->name('landing.store');
 Route::post('/partner-recover', [PartnerController::class, 'landingRecover'])->name('landing.recover-partner');
 
 
