@@ -3,15 +3,16 @@
         <div class="lg:flex justify-between items-center">
             <div class="md:flex space-y-1 md:space-x-4 items-center">
                 <p class="text-gray37">Categoría: <span class="font-bold">{{ products[0].category?.name ?? 'N/A'
-                        }}</span></p>
+                }}</span></p>
             </div>
         </div>
         <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">
                 {{ formatDateTime(products[0].created_at) }}</strong></p>
-        <p v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" class="text-gray37 font-bold mt-3">
-            {{ products[0].show_in_online_store 
-            ? 'Este producto está visible en la tienda en línea' 
-            : 'Este producto no está visible en la tienda en línea' }}
+        <p v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+            class="text-gray37 font-bold mt-3">
+            {{ products[0].show_in_online_store
+                ? 'Este producto está visible en la tienda en línea'
+                : 'Este producto no está visible en la tienda en línea' }}
         </p>
         <h1 class="font-bold text-lg lg:text-xl my-2 lg:mt-4">{{ products[0].name }}</h1>
         <div class="xl:w-1/2 mt-3 lg:mt-3 space-y-2">
@@ -29,11 +30,8 @@
             </div>
             <div v-if="products[0].description">
                 <h2 class="mt-3 ml-5 font-bold text-lg">Sobre el producto</h2>
-                <div class="grid grid-cols-3 md:grid-cols-3 items-start rounded-md px-5 py-1">
-                    <p class="text-gray37">Descripción: </p>
-                    <div>
-                        <p class="whitespace-break-spaces col-span-2">{{ formattedDescription }}</p>
-                    </div>
+                <div>
+                    <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
                 </div>
             </div>
         </div>

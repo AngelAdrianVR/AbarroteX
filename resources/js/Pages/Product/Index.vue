@@ -2,7 +2,7 @@
     <AppLayout title="Productos">
         <div ref="scrollContainer" style="height: 93vh; overflow-y: scroll;" @scroll="handleScroll" class="px-2 lg:px-10 py-7">
             <!-- tabs -->
-            <div v-show="canTransfer" class="flex justify-center">
+            <div v-show="canTransfer && exist_global_products" class="flex justify-center">
                 <ToggleButton id="start" ref="togglebutton" @update="handleToggle" :labels="['Mis productos', 'Catálogo base']"
                     class="w-3/4 md:w-[45%] lg:w-[35%] xl:w-[20%]" />
             </div>
@@ -40,6 +40,7 @@ export default {
         BaseCatalog,
     },
     props: {
+        exist_global_products: Boolean,
     },
     methods: {
         handleToggle(active) {
