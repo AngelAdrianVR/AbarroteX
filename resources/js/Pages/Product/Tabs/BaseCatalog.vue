@@ -1,6 +1,5 @@
 <template>
-    <Loading v-if="loading" class="mt-20" />
-    <div v-else>
+    <div>
         <div class="px-2 py-7">
             <div class="flex justify-between items-center mb-4">
                 <h1 class="font-bold text-lg">Catálogo base</h1>
@@ -12,8 +11,15 @@
                 ¡y estarán listos para vender!
             </p>
 
+            <!-- Selector de giro -->
+            <div class="custom-style text-center mt-3">
+                <el-segmented @change="fetchDataForBaseCatalogView" v-model="storeType" :options="options" />
+            </div>
+
+            <Loading v-if="loading" class="mt-20" />
+
             <!-- transfer -->
-            <section class="mt-10 flex flex-col items-center xl:flex-row xl:items-start xl:space-x-5">
+            <section v-else class="mt-10 flex flex-col items-center xl:flex-row xl:items-start xl:space-x-5">
                 <div class="mx-auto xl:w-[85%] relative">
                     <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
                         :titles="['Catálogo base', 'Mi tienda']" :data="globalProducts"
@@ -175,6 +181,8 @@ export default {
             myProducts: [],
             categories: [],
             brands: [],
+            storeType: 'Abarrotes / Supermercado',
+            options: ['Abarrotes / Supermercado', 'Papelería', 'Ferretería'],
         };
     },
     components: {
@@ -257,12 +265,18 @@ export default {
         async fetchDataForBaseCatalogView() {
             try {
                 this.loading = true;
-                const response = await axios.get(route('global-product-store.get-data-for-base-catalog-view'));
+                const response = await axios.get(route('global-product-store.get-data-for-base-catalog-view'), {
+                    params: {
+                        store_type: this.storeType
+                    }
+                });
                 if (response.status === 200) {
                     this.totalGlobalProducts = response.data.global_products;
                     this.myProducts = response.data.my_products;
                     this.categories = response.data.categories;
                     this.brands = response.data.brands;
+                    this.globalProductsFormater();
+                    this.localProductsFormater();
                 }
             } catch (error) {
                 console.log(error);
@@ -381,5 +395,11 @@ export default {
 ::v-deep(.el-transfer__buttons button) {
   font-size: 12px;
   padding: 10px 16px;
+}
+
+.custom-style .el-segmented {
+  --el-segmented-item-selected-color: var(--el-text-color-primary);
+  --el-segmented-item-selected-bg-color: #f3c791;
+  --el-border-radius-base: 16px;
 }
 </style>

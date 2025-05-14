@@ -196,8 +196,18 @@ class GlobalProductStoreController extends Controller
 
     public function getDataForBaseCatalogView()
     {
-        $global_products = GlobalProduct::where('type', auth()->user()->store->type)->get(['id', 'name']);
-        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
+        //Guardar el tipo de tienda seleccionada en la vista en una variable
+        $type_store = request()->store_type;
+        // recupera todos los productos globales del tipo seleccionado
+        $global_products = GlobalProduct::where('type', $type_store)->get(['id', 'name']);
+        // recupera todos los productos de mi tienda con el tipo seleccionado
+        $my_products = GlobalProductStore::with('globalProduct:id,name,type')
+            ->where('store_id', auth()->user()->store_id)
+            ->whereHas('globalProduct', function ($query) use ($type_store) {
+                $query->where('type', $type_store);
+            })
+            ->get(['id', 'global_product_id']);
+
         $store = auth()->user()->store;
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
