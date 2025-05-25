@@ -1191,7 +1191,7 @@ export default {
       }
 
       // si el producto es a granel y en las configuraciones está activada la báscula se ejecuta el manejador de bascula
-      if (this.productFoundSelected.bulk_product && this.$page.props.auth.user.scale_config?.is_enabled) {
+      if (this.productFoundSelected.bulk_product) {
         //se ejecuta el manejador de bascula si el producto es a granel
         this.handleScale();
       }
