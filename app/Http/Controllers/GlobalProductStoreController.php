@@ -168,7 +168,7 @@ class GlobalProductStoreController extends Controller
     public function inventoryUpdate(Request $request, $global_product_store_id)
     {
         $request->validate([
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:0',
         ]);
 
         $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
