@@ -66,7 +66,7 @@
                 <PrimaryButton v-else @click="addToCart" class="!active:scale-75">Agregar al carrito</PrimaryButton> -->
             </div>
             <!-- Si es bajo pedido -->
-            <div v-else @click.stop="" class="flex justify-between items-center">
+            <div v-else @click.stop="" class="flex justify-between items-center cursor-default">
                 <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
                 <el-input-number v-if="store?.online_store_properties?.inventory" :disabled="product.current_stock < 1"
                     v-model="quantity" size="small" :min="0" :max="product.current_stock" :precision="2" />
