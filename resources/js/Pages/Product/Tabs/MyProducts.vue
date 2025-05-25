@@ -200,7 +200,10 @@
         <DialogModal :show="showInventoryModal" @close="showInventoryModal = false">
             <template #title>Ajuste de inventario</template>
             <template #content>
-                <p class="text-gray99">Para actualizar las existencias de un producto, teclea o escanea el código</p>
+                <p class="text-gray99">
+                    Para actualizar las existencias de un producto, teclea o escanea el código. <br>
+                    También puedes actualizar el precio a público del producto, si lo deseas.
+                </p>
                 <section>
                     <div class="mt-3 col-span-2">
                         <InputLabel value="Código del producto*" />
@@ -224,9 +227,7 @@
                         </el-input>
                         <InputError :message="form.errors.quantity" />
                     </div>
-                    <div v-if="fetchingProduct" class="flex justify-center items-center py-10">
-                        <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-                    </div>
+                    <SmallLoading v-if="fetchingProduct" class="mx-auto mt-5" />
                     <div v-else-if="productEntryFound?.length > 0" class="mt-5 grid grid-cols-3">
                         <figure class="w-32 ml-16">
                             <img class="w-32 object-contain"
@@ -241,7 +242,45 @@
                                     productEntryFound[0]?.global_product.name : productEntryFound[0]?.name }}
                             </strong>
                             <span>Precio:</span>
-                            <strong class="col-span-3">${{ productEntryFound[0]?.public_price }}</strong>
+                            <div v-if="editPrice" class="col-span-3 flex items-center space-x-2">
+                                <el-input v-model="priceForm.public_price" autofocus
+                                    @keydown.enter="updatePrice(productEntryFound[0])" class="!w-1/3"
+                                    placeholder="Precio público actual"
+                                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                                <div v-if="!priceForm.processing" class="flex items-center space-x-1">
+                                    <button @click="updatePrice(productEntryFound[0])" type="button"
+                                        :disabled="!priceForm.public_price || priceForm.processing"
+                                        class="text-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m4.5 12.75 6 6 9-13.5" />
+                                        </svg>
+                                    </button>
+                                    <button @click="priceForm.public_price = null; editPrice = false"
+                                        :disabled="priceForm.processing" type="button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6 18 18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <i v-else class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-primary"></i>
+                            </div>
+                            <div v-else class="col-span-3 flex items-center space-x-2">
+                                <strong>${{ productEntryFound[0]?.public_price }}</strong>
+                                <button
+                                    @click="priceForm.public_price = productEntryFound[0]?.public_price; editPrice = true"
+                                    type="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                    </svg>
+                                </button>
+                            </div>
                             <span>Existencias:</span>
                             <strong class="col-span-3">{{ productEntryFound[0]?.current_stock }}</strong>
                         </div>
@@ -250,9 +289,10 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-2">
-                    <CancelButton @click="closeInventoryModal" :disabled="form.processing">Cancelar</CancelButton>
+                    <CancelButton @click="closeInventoryModal" :disabled="form.processing || priceForm.processing">
+                        Cancelar</CancelButton>
                     <PrimaryButton @click="updateInventory(productEntryFound[0])" class="!rounded-full"
-                        :disabled="!form.quantity || form.processing">
+                        :disabled="!form.quantity || form.processing || priceForm.processing">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Actualizar stock
                     </PrimaryButton>
@@ -277,6 +317,7 @@ import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import { addOrUpdateBatchOfItems } from '@/dbService.js';
 import emitter from '@/eventBus.js';
+import SmallLoading from '@/Components/MyComponents/SmallLoading.vue';
 
 export default {
     data() {
@@ -285,17 +326,24 @@ export default {
             quantity: null,
         });
 
+        const priceForm = useForm({
+            public_price: null,
+        });
+
         const importForm = useForm({
             file: [],
         });
 
         return {
             form,
+            priceForm,
             importForm,
             loading: false,
             fetchingProduct: false,
             searchQuery: null,
+            // ajuste inventario
             showInventoryModal: false,
+            editPrice: false,
             productEntryFound: null,
             // tabs
             activeTab: 'Mis productos',
@@ -334,6 +382,7 @@ export default {
         Modal,
         DialogModal,
         FileUploader,
+        SmallLoading,
     },
     props: {
     },
@@ -360,7 +409,6 @@ export default {
             if (!this.form.quantity) {
                 return;
             }
-            // console.log(product);
             let routePage;
             if (product.global_product_id) {
                 routePage = 'global-product-store.inventory-update';
@@ -370,22 +418,23 @@ export default {
             this.form.put(route(routePage, product.id), {
                 onSuccess: () => {
                     if (product.global_product_id) {
+                        // Actualiza el precio en la lista local mostrados en la tabla de productos
                         const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
-                        console.log(IndexProductEntry);
                         if (IndexProductEntry !== -1) {
                             this.localProducts[IndexProductEntry].current_stock = parseInt(this.form.quantity);
                         }
-                         this.$notify({
+                        this.$notify({
                             title: "Correcto",
                             message: 'Se han actualizado las existencias de ' + product.global_product?.name,
                             type: "success",
                         });
                     } else {
+                        // Actualiza el precio en la lista local mostrados en la tabla de productos
                         const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
                         if (IndexProductEntry !== -1) {
                             this.localProducts[IndexProductEntry].current_stock = parseInt(this.form.quantity);
                         }
-                         this.$notify({
+                        this.$notify({
                             title: "Correcto",
                             message: 'Se han actualizado las existencias de ' + product.name,
                             type: "success",
@@ -397,6 +446,52 @@ export default {
 
                     this.form.reset();
                     this.productEntryFound = null;
+                },
+                onError: (err) => {
+                    console.log(err);
+                }
+            });
+        },
+        updatePrice(product) {
+            if (!this.priceForm.public_price) {
+                return;
+            }
+
+            let routePage;
+            if (product.global_product_id) {
+                routePage = 'global-product-store.price-update';
+            } else {
+                routePage = 'products.price-update';
+            }
+            this.priceForm.put(route(routePage, product.id), {
+                onSuccess: () => {
+                    if (product.global_product_id) {
+                        // Actualiza el precio en la lista local mostrados en la tabla de productos
+                        const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
+                        if (IndexProductEntry !== -1) {
+                            this.localProducts[IndexProductEntry].public_price = parseFloat(this.priceForm.public_price);
+                        }
+                        product.public_price = parseFloat(this.priceForm.public_price);
+                        this.$notify({
+                            title: "Correcto",
+                            message: 'Se ha actualizado el precio a público' + product.global_product?.name,
+                            type: "success",
+                        });
+                    } else {
+                        // Actualiza el precio en la lista local mostrados en la tabla de productos
+                        const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
+                        if (IndexProductEntry !== -1) {
+                            this.localProducts[IndexProductEntry].public_price = parseFloat(this.priceForm.public_price);
+                        }
+                        product.public_price = parseFloat(this.priceForm.public_price);
+                        this.$notify({
+                            title: "Correcto",
+                            message: 'Se ha actualizado el precio a público' + product.name,
+                            type: "success",
+                        });
+                    }
+
+                    this.editPrice = false;
                 },
                 onError: (err) => {
                     console.log(err);
@@ -534,10 +629,18 @@ export default {
                 this.fetchingProduct = true;
                 const response = await axios.get(route('products.search'), { params: { query: this.form.code } });
                 if (response.status == 200) {
-                    this.productEntryFound = response.data.items;
-                    this.$nextTick(() => {
-                        this.$refs.quantityInput.focus(); // Enfocar el input de cantidad cuando se encuentra el producto
-                    });
+                    if (response.data.items.length == 0) {
+                        this.$notify({
+                            title: "No se encontró el producto",
+                            type: "info",
+                        });
+                        this.productEntryFound = [];
+                    } else {
+                        this.productEntryFound = response.data.items;
+                        this.$nextTick(() => {
+                            this.$refs.quantityInput.focus(); // Enfocar el input de cantidad cuando se encuentra el producto
+                        });
+                    }
                 }
 
             } catch (error) {
