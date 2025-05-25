@@ -188,6 +188,17 @@ class GlobalProductStoreController extends Controller
         ]);
     }
 
+    public function priceUpdate(Request $request, $global_product_store_id)
+    {
+        $request->validate([
+            'public_price' => 'required|numeric|min:0',
+        ]);
+
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $global_product_store->public_price = $request->public_price;
+        $global_product_store->save();
+    }
+
     public function fetchHistory($global_product_store_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
