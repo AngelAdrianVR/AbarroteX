@@ -339,6 +339,18 @@ class ProductController extends Controller
             'historicable_type' => Product::class
         ]);
     }
+    
+    public function priceUpdate(Request $request, $product_id)
+    {
+        $request->validate([
+            'public_price' => 'required|numeric|min:0',
+        ]);
+
+        $product = Product::find($product_id);
+
+        $product->public_price = $request->public_price;
+        $product->save();
+    }
 
     public function fetchHistory($product_id, $month = null, $year = null)
     {
