@@ -283,7 +283,7 @@ onBeforeUnmount(() => {
     <Head title="Ezy Ventas" />
     <div class="bg-black2 relative overflow-x-hidden">
         <img class="object-contain select-none absolute right-0 top-0" :draggable="false"
-            src="@/../../public/images/bg-01.png" alt="Destello neón de adorno en el fondo">
+            src="@/../../public/images/bg-01.webp" alt="Destello neón de adorno en el fondo">
         <nav class="bg-transparent" data-aos="zoom-in" data-aos-duration="1200">
             <div class="max-w-8xl mx-auto px-4 md:px-7 py-3">
                 <div class="flex justify-between items-center h-14 bg-[#404040]/30 rounded-full pl-6 pr-2">
@@ -316,18 +316,18 @@ onBeforeUnmount(() => {
             <section class="flex relative">
                 <figure class="w-[24%] mx-12 mt-10" data-aos="fade-right" data-aos-duration="1200" data-aos-delay="200">
                     <img class="object-contain select-none" :draggable="false"
-                        src="@/../../public/images/landing-01.png"
+                        src="@/../../public/images/landing-01.webp"
                         alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
                     <img class="object-contain select-none mt-4 ml-auto" :draggable="false"
-                        src="@/../../public/images/price.png" alt="Letrero en neón que dice: desde $229 al mes">
+                        src="@/../../public/images/price.webp" alt="Letrero en neón que dice: desde $229 al mes">
                 </figure>
                 <figure class="w-[27%] ml-20 mt-20 z-10" data-aos="fade-down" data-aos-duration="1200"
                     data-aos-delay="1000">
                     <img class="object-contain select-none" :draggable="false"
-                        src="@/../../public/images/landing-02.png" alt="Tablet que muestra un carrito de compras">
+                        src="@/../../public/images/landing-02.webp" alt="Tablet que muestra un carrito de compras">
                 </figure>
                 <img class="object-contain select-none absolute -right-[5%] top-28" :draggable="false"
-                    src="@/../../public/images/landing-03.png"
+                    src="@/../../public/images/landing-03.webp"
                     alt="cuerdas de neón de colores con iconos dentro de un extremo" data-aos="fade-left"
                     data-aos-duration="1200" data-aos-delay="600">
                 <div class="absolute bottom-4 right-[22%]" data-aos="fade-up" data-aos-duration="1200"
@@ -354,7 +354,7 @@ onBeforeUnmount(() => {
             <!-- funcionalidades -->
             <section class="mt-56 relative">
                 <img class="object-contain select-none absolute left-0 -top-72" :draggable="false"
-                    src="@/../../public/images/bg-02.png" alt="Destello neón de adorno en el fondo"
+                    src="@/../../public/images/bg-02.webp" alt="Destello neón de adorno en el fondo"
                     data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
                 <p id="features" class="text-5xl text-center font-extrabold text-white" data-aos="flip-left"
                     data-aos-duration="700">FUNCIONALIDAD DE LOS MÓDULOS</p>
@@ -362,7 +362,7 @@ onBeforeUnmount(() => {
                 <article class="mx-40 flex space-x-32 relative">
                     <figure class="w-[40%]">
                         <img class="object-contain select-none" :draggable="false"
-                            src="@/../../public/images/features-01.png"
+                            src="@/../../public/images/features-01.webp"
                             alt="Carrito de compras con aparatos electronicos entrando y brillando" data-aos="fade-left"
                             data-aos-duration="1400" data-aos-delay="200">
                     </figure>
@@ -376,13 +376,13 @@ onBeforeUnmount(() => {
                             <figure class="w-[30%] flex flex-col" data-aos="fade-up" data-aos-duration="500"
                                 data-aos-delay="1500">
                                 <img class="w-[36%] mx-auto object-contain select-none" :draggable="false"
-                                    src="@/../../public/images/wifi.png"
+                                    src="@/../../public/images/wifi.webp"
                                     alt="Simbolo de wifi con diagonal que indica sin conexion a internet">
                                 <p class="text-center text-sm mt-4">No pierdas ventas: opera sin conexión y sincroniza
                                     después.</p>
                             </figure>
                             <img class="w-[24%] object-contain select-none mt-1" :draggable="false" data-aos="fade-up"
-                                data-aos-duration="300" data-aos-delay="1900" src="@/../../public/images/printer.png"
+                                data-aos-duration="300" data-aos-delay="1900" src="@/../../public/images/printer.webp"
                                 alt="Impresora de tikets pequeña con un tiket surgiendo de ella">
                         </div>
                         <p class="text-center text-3xl mt-12" style="font-family: 'Licorice';" data-aos="fade-up"
@@ -394,7 +394,7 @@ onBeforeUnmount(() => {
                 <!-- Registro de venta -->
                 <article class="mt-20 relative">
                     <img class="object-contain select-none absolute right-0 -top-40" :draggable="false"
-                        src="@/../../public/images/bg-03.png" alt="Destello neón de adorno en el fondo"
+                        src="@/../../public/images/bg-03.webp" alt="Destello neón de adorno en el fondo"
                         data-aos="fade-left" data-aos-duration="1200" data-aos-delay="800">
                     <div class="mx-40 flex space-x-32">
                         <div class="w-1/2 text-white" data-aos="fade-right" data-aos-duration="800">
@@ -470,7 +470,7 @@ onBeforeUnmount(() => {
                         </div>
                         <figure class="w-[38%] z-10" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400">
                             <img class="object-contain select-none" :draggable="false"
-                                src="@/../../public/images/features-02.png"
+                                src="@/../../public/images/features-02.webp"
                                 alt="Carrito de compras con aparatos electronicos entrando y brillando">
                         </figure>
                     </div>
@@ -478,12 +478,12 @@ onBeforeUnmount(() => {
                 <!-- Clientes -->
                 <article class="mt-32 relative">
                     <img class="object-contain select-none absolute left-[5%] -top-40" :draggable="false"
-                        src="@/../../public/images/bg-04.png" alt="Destello neón de adorno en el fondo"
+                        src="@/../../public/images/bg-04.webp" alt="Destello neón de adorno en el fondo"
                         data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
                     <div class="mx-40 flex space-x-32 text-end">
                         <figure class="w-[65%] z-10" data-aos="fade-right" data-aos-duration="800" data-aos-delay="300">
                             <img class="object-contain select-none" :draggable="false"
-                                src="@/../../public/images/features-03.png"
+                                src="@/../../public/images/features-03.webp"
                                 alt="Carrito de compras con aparatos electronicos entrando y brillando">
                         </figure>
                         <div class="w-[36%] text-white mt-36" data-aos="fade-left" data-aos-duration="800">
@@ -562,7 +562,7 @@ onBeforeUnmount(() => {
                 </article>
                 <!-- Tienda en linea -->
                 <article
-                    class="mt-32 flex space-x-32 bg-[url('/images/features-04.png')] bg-no-repeat bg-center px-40 pt-80 h-[900px]"
+                    class="mt-32 flex space-x-32 bg-[url('/images/features-04.webp')] bg-no-repeat bg-center px-40 pt-80 h-[900px]"
                     data-aos="zoom-in" data-aos-duration="1800">
                     <div class="w-[45%] -mt-24">
                         <div class="w-[66%] text-white self-start" data-aos="fade-down" data-aos-duration="1600"
@@ -579,7 +579,7 @@ onBeforeUnmount(() => {
                             </p>
                         </div>
                         <img class="w-[20%] object-contain select-none mt-24" :draggable="false"
-                            src="@/../../public/images/qr-code.png"
+                            src="@/../../public/images/qr-code.webp"
                             alt="Código QR con el logo de EzyVentas en el centro" data-aos="fade-right"
                             data-aos-duration="400" data-aos-delay="1900">
                     </div>
@@ -587,7 +587,7 @@ onBeforeUnmount(() => {
                         <div class="bg-[#c6c6c6]/60 rounded-[10px] h-80 w-72 relative pt-52 px-6 mt-32"
                             data-aos="fade-down" data-aos-duration="600" data-aos-delay="2000">
                             <img class="w-[60%] object-contain select-none absolute left-[calc(50%-80px)] -top-10"
-                                :draggable="false" src="@/../../public/images/robot-01.png"
+                                :draggable="false" src="@/../../public/images/robot-01.webp"
                                 alt="Robot pequeño, blanco con 4 ruedas y 2 ojos grandes">
                             <div>
                                 <p class="text-[#1D1D1D] text-sm font-medium">Robot de entrega</p>
@@ -610,7 +610,7 @@ onBeforeUnmount(() => {
                         <div class="bg-[#c6c6c6]/60 rounded-[10px] h-[28rem] w-72 relative pt-[21rem] px-6"
                             data-aos="fade-up" data-aos-duration="600" data-aos-delay="2100">
                             <img class="w-[60%] object-contain select-none absolute left-[calc(50%-90px)] -top-28"
-                                :draggable="false" src="@/../../public/images/robot-02.png"
+                                :draggable="false" src="@/../../public/images/robot-02.webp"
                                 alt="Robot Alto, blanco con forma humanoide">
                             <div>
                                 <p class="text-[#1D1D1D] text-sm font-medium">Robot asistente</p>
@@ -635,10 +635,10 @@ onBeforeUnmount(() => {
                 <!-- Reportes -->
                 <article class="relative mt-32">
                     <img class="object-contain select-none absolute right-20 -top-60" :draggable="false"
-                        src="@/../../public/images/bg-05.png" alt="Destello neón de adorno en el fondo"
+                        src="@/../../public/images/bg-05.webp" alt="Destello neón de adorno en el fondo"
                         data-aos="zoom-in" data-aos-duration="1600" data-aos-delay="800">
                     <img class="object-contain select-none absolute left-0 top-20" :draggable="false"
-                        src="@/../../public/images/bg-06.png" alt="Destello neón de adorno en el fondo"
+                        src="@/../../public/images/bg-06.webp" alt="Destello neón de adorno en el fondo"
                         data-aos="fade-riht" data-aos-duration="1600" data-aos-delay="800">
                     <div class="flex mx-32" data-aos="fade-left" data-aos-duration="700" data-aos-offset="450">
                         <div class="w-[30%] text-white">
@@ -652,12 +652,12 @@ onBeforeUnmount(() => {
                         </div>
                         <figure class="w-[45%] mt-10 z-10">
                             <img class="object-contain select-none" :draggable="false"
-                                src="@/../../public/images/features-05.png"
+                                src="@/../../public/images/features-05.webp"
                                 alt="Grafica de barras con colores llamativos neón">
                         </figure>
                         <figure class="w-[17%] z-10">
                             <img class="object-contain select-none" :draggable="false"
-                                src="@/../../public/images/features-06.png"
+                                src="@/../../public/images/features-06.webp"
                                 alt="Graficas circulares y una flecha que indica crecimiento">
                         </figure>
                     </div>
@@ -670,7 +670,7 @@ onBeforeUnmount(() => {
                     <div class="flex space-x-24 mt-8">
                         <!-- From Uiverse.io by ayman-ashine -->
                         <div class="card w-[30%] self-center mt-6">
-                            <img class="image mx-auto" alt="" src="@/../../public/images/landing-08.png" />
+                            <img class="image mx-auto" alt="" src="@/../../public/images/landing-08.webp" />
                             <div class="heading pt-4">
                                 El futuro de las ventas está en tus manos
                             </div>
@@ -868,15 +868,15 @@ onBeforeUnmount(() => {
             <!-- Simulador -->
             <section id="prices" class="mt-36 text-center relative">
                 <img class="object-contain select-none absolute left-0 -top-40" :draggable="false"
-                    src="@/../../public/images/bg-07.png" alt="Destello neón de adorno en el fondo"
+                    src="@/../../public/images/bg-07.webp" alt="Destello neón de adorno en el fondo"
                     data-aos="fade-right" data-aos-duration="1200" data-aos-delay="800">
                 <img class="object-contain select-none absolute right-0 bottom-10" :draggable="false"
-                    src="@/../../public/images/bg-08.png" alt="Destello neón de adorno en el fondo" data-aos="fade-left"
+                    src="@/../../public/images/bg-08.webp" alt="Destello neón de adorno en el fondo" data-aos="fade-left"
                     data-aos-duration="1200" data-aos-delay="800">
                 <h2 class="text-white text-2xl font-bold">SIMULADOR</h2>
                 <p class="text-white text-lg mt-3">Personaliza tu suscripción con los módulos que necesitas.</p>
                 <img class="object-contain select-none mx-auto" :draggable="false"
-                    src="@/../../public/images/sim-01.png"
+                    src="@/../../public/images/sim-01.webp"
                     alt="Letras con color azul neón que dicen: Con 30 dias gratis de prueba">
                 <div class="mt-14 text-left xl:w-[75%] xl:mx-auto mx-5">
                     <Simulator id="simulator" />

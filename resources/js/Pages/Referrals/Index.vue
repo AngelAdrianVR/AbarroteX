@@ -2,9 +2,9 @@
   <AppLayout title="Referidos">
     <div class="px-2 lg:px-10 py-7">
       <figure class="relative w-full">
-        <img src="@/../../public/images/referalBanner.png" alt="Banner con anunncio de recomienda y gana"
+        <img src="@/../../public/images/referalBanner.webp" alt="Banner con anunncio de recomienda y gana"
           :draggable="false" class="object-cover select-none w-full hidden lg:block">
-        <img src="@/../../public/images/referalBannerMobile.png" alt="Banner con anunncio de recomienda y gana"
+        <img src="@/../../public/images/referalBannerMobile.webp" alt="Banner con anunncio de recomienda y gana"
           :draggable="false" class="object-cover select-none w-full lg:hidden">
         <p class="w-[86%] lg:w-[54%] text-white text-xl lg:text-5xl absolute top-5 lg:top-8 left-[7%] lg:left-[23%] text-center tracking-wide" style="font-family: 'LeagueGothic';">
           Comienza a recomendar ahora y gana el 50% del pago a cada referido.

@@ -25,9 +25,9 @@
         </nav>
         <main class="bg-transparent selection:bg-primary selection:text-white pb-24 relative">
             <figure class="relative w-11/12 lg:w-5/4 mt-3 mx-auto">
-                <img src="@/../../public/images/referalBanner.png" alt="Banner con anunncio de recomienda y gana"
+                <img src="@/../../public/images/referalBanner.webp" alt="Banner con anunncio de recomienda y gana"
                     :draggable="false" class="object-cover select-none w-full hidden lg:block">
-                <img src="@/../../public/images/referalBannerMobile.png" alt="Banner con anunncio de recomienda y gana"
+                <img src="@/../../public/images/referalBannerMobile.webp" alt="Banner con anunncio de recomienda y gana"
                     :draggable="false" class="object-cover select-none w-full lg:hidden">
                 <p class="w-[86%] lg:w-[54%] text-white text-xl lg:text-5xl absolute top-5 lg:top-8 left-[7%] lg:left-[23%] text-center tracking-wide"
                     style="font-family: 'LeagueGothic';">

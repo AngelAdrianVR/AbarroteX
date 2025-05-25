@@ -241,6 +241,7 @@
                         <label class="text-sm ml-3">Nombre del proveedor *</label>
                         <el-input v-model="brandForm.name" placeholder="Escribe el nombre del proveedor"
                             :maxlength="100" required clearable />
+                        <p v-if="brandNameError" class="text-xs text-red-500">El proveedor ya ha sido registrado</p>
                         <InputError :message="brandForm.errors.name" />
                     </div>
                 </form>
@@ -303,6 +304,7 @@ export default {
             form,
             brandForm,
             categoryForm,
+            brandNameError: false, //error para mostrar si el proveedor ya existe
             localCategories: this.categories,
             localBrands: this.brands,
             showCategoryFormModal: false, //muestra formulario para agregar categoría
@@ -390,10 +392,12 @@ export default {
                     this.localBrands.push(response.data.item);
                     this.form.brand_id = response.data.item.id;
                     this.showBrandFormModal = false;
+                    this.brandNameError = false;
                     this.brandForm.reset();
                 }
             } catch (error) {
-                console.log(error)
+                console.log(error);
+                this.brandNameError = true;
             }
         },
         saveImage(image) {
