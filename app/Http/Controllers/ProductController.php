@@ -23,15 +23,13 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductController extends Controller
 {
-    public function __construct(protected TinifyService $tinifyService)
-    {
-    }
+    public function __construct(protected TinifyService $tinifyService) {}
 
     public function index()
     {
         // revisar si para el tipo de tienda existe un catalogo global
         $exist_global_products = GlobalProduct::where('type', auth()->user()->store->type)->get(['id', 'name'])->count();
-        
+
         return inertia('Product/Index', compact('exist_global_products'));
     }
 
@@ -210,7 +208,7 @@ class ProductController extends Controller
             $mediaItem = $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
             // Ruta del archivo guardado
             $path = $mediaItem->getPath();
-    
+
             // Verificar el tamaño del archivo y si estamos en entorno de producción
             if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
                 // Comprimir la imagen directamente en su ubicación original si supera los 600KB
@@ -219,7 +217,7 @@ class ProductController extends Controller
                 // comprimir de otra forma  
             }
         }
-        
+
         //codifica el id del producto
         $encoded_product_id = base64_encode($product->id);
 
@@ -317,6 +315,29 @@ class ProductController extends Controller
                 'expense_id' => $expense->id,
             ]);
         }
+    }
+
+    public function inventoryUpdate(Request $request, $product_id)
+    {
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+        ]);
+
+        $product = Product::find($product_id);
+        $old_quantity = $product->current_stock;
+        $new_quantity = floatval($request->quantity);
+
+        $product->current_stock = $new_quantity;
+        // Guarda el producto
+        $product->save();
+
+        // Crear ajuste
+        ProductHistory::create([
+            'description' => 'Ajuste de producto. De ' . $old_quantity . ' a ' . $new_quantity . ' unidades',
+            'type' => 'Ajuste',
+            'historicable_id' => $product_id,
+            'historicable_type' => Product::class
+        ]);
     }
 
     public function fetchHistory($product_id, $month = null, $year = null)

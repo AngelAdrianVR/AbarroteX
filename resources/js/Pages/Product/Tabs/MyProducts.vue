@@ -17,7 +17,7 @@
                 </el-tag>
             </article>
             <div class="my-4 lg:my-0 flex items-center justify-end space-x-3">
-                <!-- <ThirthButton v-if="isInventoryOn" @click="openEntryModal">
+                <!-- <ThirthButton v-if="isInventoryOn" @click="openInventoryModal">
                         Entrada de producto
                     </ThirthButton> -->
                 <el-dropdown split-button type="primary" @click="$inertia.get(route('products.create'))" trigger="click"
@@ -25,7 +25,7 @@
                     Nuevo producto
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <!-- <el-dropdown-item command="chekin">Dar entrada a producto</el-dropdown-item> -->
+                            <el-dropdown-item command="inventory">Ajuste de inventario</el-dropdown-item>
                             <el-dropdown-item command="import">Importar productos</el-dropdown-item>
                             <el-dropdown-item command="export">Exportar productos</el-dropdown-item>
                         </el-dropdown-menu>
@@ -55,7 +55,8 @@
             <p v-if="loadingItems" class="text-xs my-4 text-center">
                 Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
             </p>
-            <button v-else-if="!searchedWord && totalProducts > 30 && localProducts.length < totalProducts && localProducts.length"
+            <button
+                v-else-if="!searchedWord && totalProducts > 30 && localProducts.length < totalProducts && localProducts.length"
                 @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">
                 Cargar más elementos
             </button>
@@ -162,7 +163,6 @@
                 </div>
             </template>
         </DialogModal>
-
         <!-- modal de exportacion -->
         <DialogModal :show="showExportModal" @close="showExportModal = false">
             <template #title> Exportar productos </template>
@@ -196,16 +196,14 @@
                 </div>
             </template>
         </DialogModal>
-        <!-- modal de entrada de producto -->
-        <Modal :show="entryProductModal" @close="entryProductModal = false">
-            <div class="p-4 relative">
-                <i @click="closeEntryModal"
-                    class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
-
-                <h1 class="font-bold my-4">Ingresar producto a almacén</h1>
-                <section class="text-center mt-5 mb-2 mx-5">
+        <!-- modal de entrada/salida de producto -->
+        <DialogModal :show="showInventoryModal" @close="showInventoryModal = false">
+            <template #title>Ajuste de inventario</template>
+            <template #content>
+                <p class="text-gray99">Para actualizar las existencias de un producto, teclea o escanea el código</p>
+                <section>
                     <div class="mt-3 col-span-2">
-                        <InputLabel value="Código del producto*" class="ml-3 mb-1" />
+                        <InputLabel value="Código del producto*" />
                         <el-input v-model="form.code" @keydown.enter="getProduct" ref="codeInput"
                             placeholder="Escanea o teclea el código del producto" :maxlength="100" clearable>
                             <template #prefix>
@@ -214,10 +212,10 @@
                         </el-input>
                     </div>
                     <div v-if="productEntryFound?.length > 0" class="mt-3">
-                        <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
+                        <InputLabel value="Existencias actuales" />
                         <el-input v-model="form.quantity" ref="quantityInput" autofocus
-                            @keydown.enter="entryProduct(productEntryFound[0])"
-                            placeholder="Cantidad que entra a almacén"
+                            @keydown.enter="updateInventory(productEntryFound[0])"
+                            placeholder="Cantidad real en existencia"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                             :parser="(value) => value.replace(/\D/g, '')">
                             <template #prefix>
@@ -226,39 +224,41 @@
                         </el-input>
                         <InputError :message="form.errors.quantity" />
                     </div>
-
-                    <!-- estado de carga -->
-                    <div v-if="loading" class="flex justify-center items-center py-10">
+                    <div v-if="fetchingProduct" class="flex justify-center items-center py-10">
                         <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
                     </div>
-
-                    <!-- informacion del producto escaneado -->
-                    <div v-if="productEntryFound?.length > 0" class="mt-5 grid grid-cols-3">
+                    <div v-else-if="productEntryFound?.length > 0" class="mt-5 grid grid-cols-3">
                         <figure class="w-32 ml-16">
                             <img class="w-32 object-contain"
                                 :src="productEntryFound[0]?.global_product_id ? productEntryFound[0]?.global_product.media[0]?.original_url : productEntryFound[0]?.media[0]?.original_url">
                         </figure>
-
-                        <div class="col-span-2 text-left">
-                            <p>Nombre: <strong class="ml-2">{{ productEntryFound[0]?.global_product_id ?
-                                productEntryFound[0]?.global_product.name : productEntryFound[0]?.name }}</strong>
-                            </p>
-                            <p>Precio: <strong class="ml-2">${{ productEntryFound[0]?.public_price }}</strong></p>
-                            <p>Existencias: <strong class="ml-2">{{ productEntryFound[0]?.current_stock }}</strong></p>
+                        <div class="col-span-2 grid grid-cols-4 gap-y-2 self-start">
+                            <span>Nombre:</span>
+                            <strong class="col-span-3">
+                                {{ productEntryFound[0]?.global_product_id ?
+                                    productEntryFound[0]?.global_product.name : productEntryFound[0]?.name }}
+                                {{ productEntryFound[0]?.global_product_id ?
+                                    productEntryFound[0]?.global_product.name : productEntryFound[0]?.name }}
+                            </strong>
+                            <span>Precio:</span>
+                            <strong class="col-span-3">${{ productEntryFound[0]?.public_price }}</strong>
+                            <span>Existencias:</span>
+                            <strong class="col-span-3">{{ productEntryFound[0]?.current_stock }}</strong>
                         </div>
                     </div>
-                    <!-- <p v-else-if="!loading && " class="mt-5 text-gray-500 text-center text-sm">No se encontró
-                        ningun producto</p> -->
-
-                    <div class="flex justify-end space-x-3 pt-7 pb-1 py-2">
-                        <PrimaryButton @click="entryProduct(productEntryFound[0])" class="!rounded-full"
-                            :disabled="!form.quantity">Ingresar
-                            producto</PrimaryButton>
-                        <CancelButton @click="closeEntryModal">Cancelar</CancelButton>
-                    </div>
                 </section>
-            </div>
-        </Modal>
+            </template>
+            <template #footer>
+                <div class="flex items-center space-x-2">
+                    <CancelButton @click="closeInventoryModal" :disabled="form.processing">Cancelar</CancelButton>
+                    <PrimaryButton @click="updateInventory(productEntryFound[0])" class="!rounded-full"
+                        :disabled="!form.quantity || form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Actualizar stock
+                    </PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
     </div>
 </template>
 
@@ -293,8 +293,9 @@ export default {
             form,
             importForm,
             loading: false,
+            fetchingProduct: false,
             searchQuery: null,
-            entryProductModal: false,
+            showInventoryModal: false,
             productEntryFound: null,
             // tabs
             activeTab: 'Mis productos',
@@ -342,24 +343,29 @@ export default {
                 this.showImportModal = true;
             } else if (command == 'export') {
                 this.showExportModal = true;
+            } else if (command == 'inventory') {
+                this.openInventoryModal();
             }
         },
         exportProducts() {
             this.$inertia.visit(route('products.export'));
         },
-        openEntryModal() {
-            this.entryProductModal = true;
+        openInventoryModal() {
+            this.showInventoryModal = true;
             this.$nextTick(() => {
                 this.$refs.codeInput.focus(); // Enfocar el input de código cuando se abre el modal
             });
         },
-        entryProduct(product) {
-            console.log(product);
+        updateInventory(product) {
+            if (!this.form.quantity) {
+                return;
+            }
+            // console.log(product);
             let routePage;
             if (product.global_product_id) {
-                routePage = 'global-product-store.entry';
+                routePage = 'global-product-store.inventory-update';
             } else {
-                routePage = 'products.entry';
+                routePage = 'products.inventory-update';
             }
             this.form.put(route(routePage, product.id), {
                 onSuccess: () => {
@@ -367,21 +373,21 @@ export default {
                         const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
                         console.log(IndexProductEntry);
                         if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                            this.localProducts[IndexProductEntry].current_stock = parseInt(this.form.quantity);
                         }
-                        this.$notify({
+                         this.$notify({
                             title: "Correcto",
-                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + product.global_product?.name,
+                            message: 'Se han actualizado las existencias de ' + product.global_product?.name,
                             type: "success",
                         });
                     } else {
                         const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
                         if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].current_stock += parseInt(this.form.quantity);
+                            this.localProducts[IndexProductEntry].current_stock = parseInt(this.form.quantity);
                         }
-                        this.$notify({
+                         this.$notify({
                             title: "Correcto",
-                            message: 'Se ha ingresado ' + this.form.quantity + ' unidades de ' + this.localProducts[IndexProductEntry].name,
+                            message: 'Se han actualizado las existencias de ' + product.name,
                             type: "success",
                         });
                     }
@@ -392,12 +398,15 @@ export default {
                     this.form.reset();
                     this.productEntryFound = null;
                 },
+                onError: (err) => {
+                    console.log(err);
+                }
             });
         },
-        closeEntryModal() {
+        closeInventoryModal() {
             this.form.reset();
             this.productEntryFound = null;
-            this.entryProductModal = false;
+            this.showInventoryModal = false;
         },
         resetLocalProducts() {
             return new Promise((resolve) => {
@@ -428,7 +437,7 @@ export default {
         async fetchDataForProductsView() {
             try {
                 this.loading = true;
-                const response = await axios.post(route('products.get-data-for-products-view'), {page: this.currentPage});
+                const response = await axios.post(route('products.get-data-for-products-view'), { page: this.currentPage });
 
                 if (response.status === 200) {
                     this.products = response.data.products;
@@ -511,7 +520,7 @@ export default {
                     this.loading = false;
                     this.inputFocus();
                 }
-            } else {    
+            } else {
                 // Aquí podemos simular una operación asíncrona para mostrar el indicador de carga
                 try {
                     await this.resetLocalProducts();
@@ -522,7 +531,7 @@ export default {
         },
         async getProduct() {
             try {
-                this.loading = true;
+                this.fetchingProduct = true;
                 const response = await axios.get(route('products.search'), { params: { query: this.form.code } });
                 if (response.status == 200) {
                     this.productEntryFound = response.data.items;
@@ -534,7 +543,7 @@ export default {
             } catch (error) {
                 console.log(error);
             } finally {
-                this.loading = false;
+                this.fetchingProduct = false;
             }
         },
         async fetchAllItemsForCurrentPage() {

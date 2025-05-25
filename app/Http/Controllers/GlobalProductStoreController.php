@@ -164,6 +164,29 @@ class GlobalProductStoreController extends Controller
             ]);
         }
     }
+    
+    public function inventoryUpdate(Request $request, $global_product_store_id)
+    {
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+        ]);
+
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $old_quantity = $global_product_store->current_stock;
+        $new_quantity = floatval($request->quantity);
+
+        $global_product_store->current_stock = $new_quantity;
+        // Guarda el producto
+        $global_product_store->save();
+        
+        // Crear ajuste
+        ProductHistory::create([
+            'description' => 'Ajuste de producto. De ' . $old_quantity . ' a ' . $new_quantity . ' unidades',
+            'type' => 'Ajuste',
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
+    }
 
     public function fetchHistory($global_product_store_id, $month = null, $year = null)
     {
@@ -196,8 +219,18 @@ class GlobalProductStoreController extends Controller
 
     public function getDataForBaseCatalogView()
     {
-        $global_products = GlobalProduct::where('type', auth()->user()->store->type)->get(['id', 'name']);
-        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
+        //Guardar el tipo de tienda seleccionada en la vista en una variable
+        $type_store = request()->store_type;
+        // recupera todos los productos globales del tipo seleccionado
+        $global_products = GlobalProduct::where('type', $type_store)->get(['id', 'name']);
+        // recupera todos los productos de mi tienda con el tipo seleccionado
+        $my_products = GlobalProductStore::with('globalProduct:id,name,type')
+            ->where('store_id', auth()->user()->store_id)
+            ->whereHas('globalProduct', function ($query) use ($type_store) {
+                $query->where('type', $type_store);
+            })
+            ->get(['id', 'global_product_id']);
+
         $store = auth()->user()->store;
         $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
         $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
