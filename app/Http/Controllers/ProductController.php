@@ -320,7 +320,7 @@ class ProductController extends Controller
     public function inventoryUpdate(Request $request, $product_id)
     {
         $request->validate([
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:0',
         ]);
 
         $product = Product::find($product_id);
