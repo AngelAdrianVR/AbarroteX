@@ -227,13 +227,13 @@
                         </el-input>
                         <InputError :message="form.errors.quantity" />
                     </div>
-                    <SmallLoading v-if="fetchingProduct" class="mx-auto mt-5" />
-                    <div v-else-if="productEntryFound?.length > 0" class="mt-5 grid grid-cols-3">
-                        <figure class="w-32 ml-16">
-                            <img class="w-32 object-contain"
+                    <SmallLoading v-if="fetchingProduct" class="mx-auto mt-4" />
+                    <div v-else-if="productEntryFound?.length > 0" class="mt-4 md:grid grid-cols-3">
+                        <figure class="w-24 md:w-32 mx-auto md:ml-16">
+                            <img class="w-24 md:w-32 object-contain"
                                 :src="productEntryFound[0]?.global_product_id ? productEntryFound[0]?.global_product.media[0]?.original_url : productEntryFound[0]?.media[0]?.original_url">
                         </figure>
-                        <div class="col-span-2 grid grid-cols-4 gap-y-2 self-start">
+                        <div class="col-span-2 grid grid-cols-4 gap-y-1 self-start">
                             <span>Nombre:</span>
                             <strong class="col-span-3">
                                 {{ productEntryFound[0]?.global_product_id ?
