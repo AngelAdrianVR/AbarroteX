@@ -13,7 +13,7 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Error al completar el pago</h2>
       <p class="text-gray-600 mb-6">Hubo un error al completar el pago. Por favor intente de nuevo o contacte con soporte si el problema persiste.</p>
       <div class="flex justify-between mx-auto lg:w-1/2">
-        <a href="https://api.whatsapp.com/send?phone=523314179923&text=Hola!%20tuve%20un%20problema%20con%20el%20pago:" target="_blank"
+        <a href="https://api.whatsapp.com/send?phone=523321705650&text=Hola!%20tuve%20un%20problema%20con%20el%20pago:" target="_blank"
             @click="contactSupport"
             class="mt-4 text-red-500 underline hover:text-red-600 transition-colors duration-300"
         >

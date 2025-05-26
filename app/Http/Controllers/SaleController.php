@@ -65,7 +65,7 @@ class SaleController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {   
         $folio_stored = $this->storeEachProductSold($request->all());
 
         return response()->json(compact('folio_stored'));
@@ -245,6 +245,7 @@ class SaleController extends Controller
         // Generar un id unico para productos vendidos a este cliente
         $last_sale = Sale::where('store_id', $store_id)->latest('id')->first();
         $folio = $last_sale ? intval($last_sale->folio) + 1 : 1;
+
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
@@ -347,7 +348,7 @@ class SaleController extends Controller
                     'user_id' => auth()->id(),
                 ]);
 
-                //crea un movimiento de caja para guardar el abono
+                //crea un movimiento de caja para guardar el abono si paga en efectivo y no con tarjeta
                 CashRegisterMovement::create([
                     'amount' => $sale_data['deposit'],
                     'type' => 'Ingreso',
@@ -369,8 +370,8 @@ class SaleController extends Controller
             }
 
             $client->save();
-        } else {
-            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja
+        } else if ($sale_data['paymentMethod'] === 'Efectivo') {
+            //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja si el pago fue en efectivo y no con tarjeta
             $cash_register->current_cash += $total_amount;
             $cash_register->save();
         }
