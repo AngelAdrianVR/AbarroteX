@@ -43,7 +43,7 @@
                 </PrimaryButton>
 
                 <el-tooltip class="" content="Contactar con soporte" placement="right">
-                    <a href="https://api.whatsapp.com/send?phone=523322268824" target="_blank" class="flex items-center justify-center rounded-full size-9 bg-primary text-white">
+                    <a href="https://api.whatsapp.com/send?phone=523321705650" target="_blank" class="flex items-center justify-center rounded-full size-9 bg-primary text-white">
                         <i class="fa-brands fa-whatsapp text-lg"></i>
                     </a>
                 </el-tooltip>

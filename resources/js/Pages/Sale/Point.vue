@@ -488,7 +488,7 @@
                 </div> -->
               </div>
               <!-- cobrando pago al contado -->
-              <div v-if="editableTabs[this.editableTabsValue - 1].cash">
+              <!-- <div v-if="editableTabs[this.editableTabsValue - 1].cash">
                 <p class="text-gray-99 text-center mb-3 text-2xl">Total $ <strong>{{ (calculateTotal() -
                   editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
                     minimumFractionDigits: 2
@@ -520,7 +520,7 @@
                     Aceptar
                   </PrimaryButton>
                 </div>
-              </div>
+              </div> -->
               <!-- Cobrando a crédito  -->
               <div v-if="editableTabs[this.editableTabsValue - 1]?.credit">
                 <div class="flex items-center justify-between">
@@ -619,6 +619,128 @@
       </section>
     </main>
 
+    <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
+    <Modal :show="showPaymentModal" @close="showPaymentModal = false">
+      <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
+        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !border-red-600" @click="showPaymentModal = false">
+          <span>Cancelar pago</span>
+          <i class="fa-solid fa-xmark"></i>
+        </ThirthButton>
+
+        <h1 class="font-bold mt-2">Opciones de pago</h1>
+        <p class="text-gray99">Seleccione el método de pago</p>
+
+        <section class="grid grid-cols-2 gap-4 mt-3 py-7">
+          <button @click="paymentModalStep = 2; paymentMethod = 'Efectivo'" type="button"
+            class="bg-[#E0FEC5] text-[#37672B] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+            <p class="text-lg text-center font-bold">EFECTIVO</p>
+            <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+          </button>
+          <button @click="paymentModalStep = 3; ; paymentMethod = 'Tarjeta'" type="button"
+            class="bg-[#DAE6FF] text-[#063B52] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+            <p class="text-lg text-center font-bold">TARJETA</p>
+            <img src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+          </button>
+
+        </section>
+      </div>
+
+      <!-- Pago con efectivo (step 2) -->
+      <div v-if="paymentModalStep === 2" class="py-4 px-7 relative">
+        <section class="flex items-center justify-between">
+          <h1 class="font-bold mt-2 text-lg">Pagar</h1>
+          <div @click="paymentModalStep = 1" class="flex items-center space-x-4 text-primary cursor-pointer">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Regresar</span>
+          </div>
+        </section>
+
+        <section class="mx-auto mt-2 md:w-2/3">
+          <div class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
+            <span class="font-bold text-[#37672B]">EFECTIVO</span>
+            <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo" class="h-7">
+          </div>
+
+          <div class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+            <span class="font-bold">Total a pagar</span>
+            <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+          </div>
+
+          <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
+            <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
+            <el-input-number @keydown.enter="store" v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" :min="1" :max="999999">
+              <template #prefix>
+                <span>$</span>
+              </template>
+            </el-input-number>
+            <p class="pt-5 font-bold">Cambio</p>
+            <div class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-7 flex items-center justify-between">
+              <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived" class="font-bold">
+                <span class="mr-5">$</span>
+                {{
+                  (editableTabs[this.editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
+                  editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
+                  minimumFractionDigits: 2
+                  })
+                }}
+              </p>
+            </div>
+             <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
+                class="text-base font-bold text-red-600 text-center mb-3">
+                La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
+              </p>
+            <div class="flex justify-center mt-7">
+              <PrimaryButton :disabled="storeProcessing" class="!px-20" @click="store">
+                <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                Confirmar pago
+              </PrimaryButton>
+            </div>
+          </div>
+
+          <!-- Confirmacion de pago -->
+          <template v-else>
+            <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
+            </div>
+          </template>
+
+        </section>
+      </div>
+
+      <!-- Pago con tarjeta (step 3) -->
+      <div v-if="paymentModalStep === 3" class="py-4 px-7 relative">
+        <section class="flex items-center justify-between">
+          <h1 class="font-bold mt-2 text-lg">Registrar pago</h1>
+          <div @click="paymentModalStep = 1" class="flex items-center space-x-4 text-primary cursor-pointer">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Regresar</span>
+          </div>
+        </section>
+
+        <section class="mx-auto mt-2 md:w-2/3">
+          <p class="my-3 text-sm text-center">El sistema no procesa pagos con tarjeta. Usa tu terminal bancaria externa y luego registra aquí el pago.</p>
+          <div class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
+            <span class="font-bold text-[#05394F]">TARJETA</span>
+            <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
+          </div>
+
+          <div class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+            <span class="font-bold">Total a pagar</span>
+            <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+          </div>
+        </section>
+
+        <div class="flex justify-center mt-7">
+          <PrimaryButton @click="store" :disabled="storeProcessing" class="!px-20">
+            <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+            Confirmar pago
+          </PrimaryButton>
+        </div>
+      </div>
+    </Modal>
     <!-- -------------- Modal selección de caja starts----------------------- -->
     <Modal :show="showCashRegisterSelectionModal" @close="showCashRegisterSelectionModal = false">
       <div class="py-4 px-7 relative">
@@ -1048,9 +1170,14 @@ export default {
       showClientFormModal: false, //muestra u oculta el modal de creación de cliente
       showCashRegisterMoney: true, //muestra u oculta el dinero de caja
       showClientConfirmModal: false, //muestra u oculta el modal de peticion de cliente para venta a crédito
-      showCreateProductModal: false,
+      showCreateProductModal: false, //muestra u oculta el modal de creación rápida de producto
+      showPaymentModal: false, //muestra u oculta el modal de pago al finalizar la venta
+
 
       // generales
+      paymentMethod: '', //Método de pago seleccionado
+      paymentConfirmed: false, //indica si el pago ha sido confirmado
+      paymentModalStep: 1, //paso del modal de pago
       showShortCuts: false,
       showNoCodeProducts: false,
       searchNoCodeProducts: null,
@@ -1232,17 +1359,27 @@ export default {
           deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
           // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
           limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
+          paymentMethod: this.paymentMethod, //método de pago seleccionado
         });
         if (response.status === 200) {
+
+          this.paymentConfirmed = true; //indica que el pago ha sido confirmado
+          setTimeout(() => {
+            this.paymentConfirmed = false;
+            // Aquí cierra el modal como lo manejes normalmente
+            this.showPaymentModal = false; // ajusta este método a tu implementación
+            this.paymentModalStep = 1; //reinicia el paso del modal de pago
+          }, 2000);
+
           this.updateCurrentStockInIndexedDB();
           this.clearTab();
           this.fetchCashRegister();
 
-          this.$notify({
-            title: "Correcto",
-            message: "Se ha registrado la venta",
-            type: "success",
-          });
+          // this.$notify({
+          //   title: "Correcto",
+          //   message: "Se ha registrado la venta",
+          //   type: "success",
+          // });
 
           localStorage.setItem('pendentProcess', false);
 
@@ -1273,6 +1410,7 @@ export default {
       }
 
       this.storeProcessing = false;
+      this.inputFocus(); //enfoca el input de busqueda
     },
     storeClient() { //registra un cliente
       this.clientForm.post(route('clients.store'), {
@@ -1451,8 +1589,8 @@ export default {
       this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
     },
     cashPayment() {
-      this.editableTabs[this.editableTabsValue - 1].cash = true;
-      this.receivedInputFocus();
+      this.showPaymentModal = true; //abre el modal de seleccion de pago (efectivo o tarjeta)
+      // this.editableTabs[this.editableTabsValue - 1].cash = true; //mostraba la vista vieja de pago en efectivo (sigue ahi pero comentado)
     },
     creditPayment() {
       this.editableTabs[this.editableTabsValue - 1].credit = true;
@@ -1912,3 +2050,20 @@ export default {
   },
 }
 </script>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+</style>
