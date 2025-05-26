@@ -1,5 +1,5 @@
 <template>
-    <section>
+    <section class="mt-4">
         <h1 class="mx-3 flex items-center justify-between">
             <span>Suscripción</span>
             <el-tag :type="$page.props.auth.user.store.is_active ? 'success' : 'danger'" effect="light">
