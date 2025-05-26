@@ -320,7 +320,7 @@ class ProductController extends Controller
     public function inventoryUpdate(Request $request, $product_id)
     {
         $request->validate([
-            'quantity' => 'required|numeric|min:0',
+            'quantity' => 'required|numeric|min:0|max:9999999',
         ]);
 
         $product = Product::find($product_id);
@@ -343,7 +343,7 @@ class ProductController extends Controller
     public function priceUpdate(Request $request, $product_id)
     {
         $request->validate([
-            'public_price' => 'required|numeric|min:0',
+            'public_price' => 'required|numeric|min:0|max:9999999',
         ]);
 
         $product = Product::find($product_id);
