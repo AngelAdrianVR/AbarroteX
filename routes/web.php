@@ -412,3 +412,12 @@ Route::get('/started-turtorial/pos', function () {
         return inertia('StartedTutorial/Index');
     }
 })->name('started-tutorial');
+
+
+// Actualizar el método de pago de todas las ventas a "Efectivo"
+use Illuminate\Support\Facades\DB;
+Route::get('/actualizar-payment-method', function () {
+    DB::table('sales')->update(['payment_method' => 'Efectivo']);
+
+    return 'Todos los registros se actualizaron con el método de pago "Efectivo".';
+});

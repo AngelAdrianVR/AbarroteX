@@ -37,11 +37,24 @@
                             <div class="w-3/4 space-y-1">
                                 <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
                                 <p class="text-gray99">Efectivo inicial</p>
-                                <p class="text-gray99">Ventas en tienda</p>
+                                <p class="text-gray99">Ventas pago en efectivo</p>
+                                <p class="text-gray99">Ventas pago con tarjeta</p>
                                 <p v-if="this.$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" class="text-gray99">Ventas en línea</p>
+                                <div class="flex items-center space-x-2">
+                                    <p class="text-black font-semibold">Total en ventas</p>
+                                    <el-tooltip
+                                        content="" placement="top">
+                                        <template #content>
+                                            <p class="">Ventas con pago en efectivo + <br> Ventas pago con tarjeta + <br> Ventas en línea (si cuentas con el módulo).</p>
+                                        </template>
+                                        <div class="rounded-full border border-primary size-3 flex items-center justify-center px-1">
+                                            <i class="fa-solid fa-info text-primary text-[7px]"></i>
+                                        </div>
+                                    </el-tooltip>
+                                </div>
 
-                                <p  v-if="cashCutMovements[index]?.length"
-                                    class="text-primary flex items-center">Movimientos de caja 
+                                <p v-if="cashCutMovements[index]?.length"
+                                    class="text-primary flex items-center pt-5">Movimientos de caja 
                                 </p>
 
                                 <div v-if="loadingMovements">
@@ -55,6 +68,7 @@
                                         'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
                                 </p>
                             </div>
+
                             <div class="w-1/4 space-y-1">
                                 <!-- <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
                                     cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
@@ -62,8 +76,14 @@
                                     cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                                 <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
                                     cash_cut.store_sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
+                                <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
+                                    cash_cut.store_sales_card?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
                                 <p v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
                                     cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+                                <p class="text-black font-bold ml-[18px]"><span class="text-black mr-3">$</span>{{
+                                    (cash_cut.store_sales_cash + cash_cut.store_sales_card + cash_cut.online_sales_cash)?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
+
+                                <!-- Movimientos de caja -->
                                 <div v-if="loadingMovements">
                                     <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                                 </div>
@@ -81,7 +101,7 @@
                             </div>
                         </div>
                         <footer class="bg-[#F2F2F2] rounded-xl text-black font-bold py-2 flex px-2">
-                            <p class="w-3/4 text-right pr-7">Efectivo esperado</p>
+                            <p class="w-3/4 text-right pr-7">Efectivo esperado en caja</p>
                             <p class="w-1/4 pl-4">
                                 <span class="mr-3">
                                     $
@@ -92,12 +112,16 @@
                     </div>
 
                     <!-- resumen de corte en pequeño--------------------- -->
-                    <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 sm:w-96 border border-grayD9 self-start rounded-2xl shadow-lg p-1">
+                    <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 w-96 md:w-[450px] border border-grayD9 self-start rounded-2xl shadow-lg p-1">
                         <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-xl">Resumen de corte</h2>
-                        <div class="flex justify-between space-x-1 p-5">
-                            <div class="font-semibold space-y-1 w-32">
+                        <div class="flex items-center space-x-2 px-5 pt-2">
+                            <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                            <p class="text-[#37672B] font-semibold">Efectivo</p>
+                        </div>
+                        <div class="flex justify-between space-x-1 px-5 pt-1">
+                            <div class="font-semibold space-y-1 w-40">
                                 <p>Efectivo al iniciar</p>
-                                <p>Esperado</p>
+                                <p>Esperado en caja</p>
                                 <p>Recuento manual</p>
                                 <p class="pb-5">Diferencia</p>
                                 <p>Retiro</p>
@@ -117,6 +141,28 @@
                                     cash_cut.withdrawn_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
                                 <p><span class="text-gray99 pr-3">$</span>{{ (cash_cut.counted_cash -
                                     cash_cut.withdrawn_cash)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Detalles de ventas pagadas con tarjeta -->
+                        <div class="flex items-center space-x-2 px-5 pt-7">
+                            <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                            <p class="text-[#05394F] font-semibold">Tarjeta</p>
+                        </div>
+                        <div class="flex justify-between space-x-1 px-5 pt-1">
+                            <div class="font-semibold space-y-1 w-40">
+                                <p class="pb-2">Esperado</p>
+                                <!-- <p>Reportado</p> -->
+                                <!-- <p class="pb-5">Diferencia</p> -->
+                            </div>
+                            <div class="space-y-1 font-semibold">
+                                <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.store_sales_card?.toLocaleString('en-US',
+                                    {minimumFractionDigits: 2}) ?? '0.00' }}</p>
+                                <!-- <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.store_sales_card?.toLocaleString('en-US', -->
+                                    <!-- {minimumFractionDigits: 2}) }}</p> -->
+                                <!-- <p class="pb-5" :class="differenceStyles(cash_cut)"><span class="pr-3">$</span>{{ -->
+                                    <!-- (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US', -->
+                                    <!-- {minimumFractionDigits: 2}) }}</p> -->
                             </div>
                         </div>
                         <!-- mensaje de diferencia de efectivo -->

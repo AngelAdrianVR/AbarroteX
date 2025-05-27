@@ -14,11 +14,13 @@ class CashCut extends Model
     protected $fillable = [
         'started_cash',
         'expected_cash',
-        'store_sales_cash',
-        'online_sales_cash',
-        'counted_cash',
-        'withdrawn_cash',
-        'difference',
+        'store_sales_cash', // Total de venta en tienda pagado en efectivo
+        'store_sales_card', // Total de venta en tienda pagado con tarjeta
+        'online_sales_cash', // Total de venta en línea pagado en efectivo
+        'online_sales_card', // Total de venta en línea pagado con tarjeta
+        'counted_cash', // Dinero contado manualmente de la caja
+        'withdrawn_cash', // Dinero retirado de caja despues de hacer el corte
+        'difference', // Diferencia entre el dinero esperado y el contado manualmente
         'notes',
         'cash_register_id',
         'store_id',
