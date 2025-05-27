@@ -37,7 +37,7 @@
         <p v-if="!printTicket" class="mx-auto">--------------------------------</p>
         
         <div class="flex flex-col text-[#373737] mt-3">
-            <p>Metodo de pago: {{ 'Efectivo' }}</p>
+            <p>Metodo de pago: {{ sales[0].payment_method }}</p>
             <span>GRACIAS POR SU COMPRA</span>
         </div>
 
@@ -47,25 +47,40 @@
         <p v-if="!printTicket" class="mx-auto">--------------------------------</p>
     </div>
 
-    <!-- Botones de conexión e impresión -->
-    <section class="text-center lg:space-x-2 mt-7 mx-10">
-    <ThirthButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="!printTicket" @click="conectarBluetooth" class="!py-1 !border-blue-600 !text-blue-600 mr-2 mb-2">
-        <i class="fa-brands fa-bluetooth text-lg mr-2"></i>
+    <section class="text-center mt-7 mx-4 flex flex-wrap justify-center gap-3">
+      <!-- Conectar impresora -->
+      <button
+        :disabled="!UUIDService && !UUIDCharacteristic"
+        v-if="!printTicket"
+        @click="conectarBluetooth"
+        class="flex items-center gap-2 px-4 py-2 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl transition duration-200 hover:bg-blue-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <i class="fa-brands fa-bluetooth text-lg"></i>
         Conectar impresora
-    </ThirthButton>
+      </button>
 
-    <!-- imprimir desde dispositivo movil -->
-    <PrimaryButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="(device && !printTicket)" class="mb-2 mr-2" @click="enviarDatosImpresion(device)">
+      <!-- Imprimir desde dispositivo móvil -->
+      <button
+        :disabled="!UUIDService && !UUIDCharacteristic"
+        v-if="device && !printTicket"
+        @click="enviarDatosImpresion(device)"
+        class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-xl transition duration-200 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <i class="fa-solid fa-print"></i>
         Imprimir ticket
-    </PrimaryButton>
+      </button>
 
-    <!-- imprimir desde pc de escritorio o dispositivo con windows -->
-    <PrimaryButton v-if="!printTicket" @click="print">
+      <!-- Imprimir pantalla desde PC -->
+      <button
+        v-if="!printTicket"
+        @click="print"
+        class="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white font-semibold rounded-xl transition duration-200 hover:bg-gray-900"
+      >
         <i class="fa-solid fa-display"></i>
-        Imprimir Pantalla 
-    </PrimaryButton>
+        Imprimir Pantalla
+      </button>
     </section>
+
     <p v-if="!UUIDService && !UUIDCharacteristic" class="text-sm text-center text-red-600 mt-4">
         No tienes ninguna impresora configurada.
         Para conectar con una impresora térmica vía bluetooth
