@@ -131,6 +131,15 @@
                     </svg>
                 </p>
             </div>
+
+            <div v-if="groupedSales.products[0].payment_method === 'Tarjeta'" class="py-1 flex items-center justify-start space-x-2">
+                <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
+            </div>
+            <div v-else class="py-1 flex items-center justify-start space-x-2">
+                <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
+            </div>
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
                 <div class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
