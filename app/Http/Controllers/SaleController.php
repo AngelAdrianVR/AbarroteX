@@ -267,6 +267,7 @@ class SaleController extends Controller
                 'current_price' => $product['product']['public_price'],
                 'quantity' => $product['quantity'],
                 'folio' => $folio,
+                'payment_method' => $sale_data['paymentMethod'],
                 'product_name' => $product_name,
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,

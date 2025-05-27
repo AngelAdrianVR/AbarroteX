@@ -17,6 +17,7 @@ class Sale extends Model
         'refunded_at',
         'original_price', //precio que indica que cambió el precio unicamente para esa venta
         'folio',
+        'payment_method', //tipo de pago, puede ser efectivo, tarjeta, etc.
         'product_id',
         'client_id',
         'is_global_product',
