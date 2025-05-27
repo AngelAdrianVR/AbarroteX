@@ -1,14 +1,18 @@
 <template>
     <AppLayout title="Detalles del corte">
         <div class="px-3 lg:px-14 py-5">
-            <div class="text-center">
-                <h1 class="lg:ml-10">Detalles de cortes</h1>
-                <h1 class="lg:ml-10 font-bold">{{ formatDate(Object.values(groupedCashCuts)[0].cuts[0].created_at) }}</h1>
-            </div>
+            <div class="flex items-center justify-between mb-4">
+                <!-- back -->
+                <div class="my-4">
+                    <Back :to="route('cash-registers.index', {tab: '2'})"/>
+                </div>
 
-            <!-- back -->
-            <div class="my-4">
-                <Back :to="route('cash-registers.index', {tab: '2'})"/>
+                <div class="text-center">
+                    <h1 class="lg:ml-10">Detalles de cortes</h1>
+                    <h1 class="lg:ml-10 font-bold">{{ formatDate(Object.values(groupedCashCuts)[0].cuts[0].created_at) }}</h1>
+                </div>
+
+                <PrintButton @click="handlePrint" />
             </div>
 
             <div class="flex mt-8 mb-10 text-sm">
@@ -191,6 +195,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Back from "@/Components/MyComponents/Back.vue";  
+import PrintButton from "@/Components/MyComponents/PrintButton.vue";  
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
@@ -204,14 +209,31 @@ export default {
         }
     },
     components: {
-        AppLayout,
         PrimaryButton,
+        PrintButton,
+        AppLayout,
         Back
     },
     props: {
         groupedCashCuts: Object
     },
     methods: {
+        handlePrint() {
+            const date = this.groupedCashCuts
+                ? this.groupedCashCuts[Object.keys(this.groupedCashCuts)[0]].cuts[0].created_at
+                : null;
+
+            if (date) {
+                const adjustedDate = new Date(date);
+                adjustedDate.setHours(adjustedDate.getHours() - 6);
+
+                const formattedDate = adjustedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                const printUrl = this.route('cash-cuts.print', formattedDate);
+                window.open(printUrl, '_blank');
+            } else {
+                alert('No se encontró una fecha válida para imprimir.');
+            }
+        },
         formatDateHour(dateString) {
             return format(parseISO(dateString), 'h:mm a', { locale: es });
         },

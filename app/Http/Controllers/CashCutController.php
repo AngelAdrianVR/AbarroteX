@@ -117,6 +117,41 @@ class CashCutController extends Controller
         $cash_cut->delete();
     }
 
+    public function print($created_at)
+    {
+        $date = Carbon::parse($created_at)->toDateString();
+
+        $cash_cuts = CashCut::with(['cashRegister:id,name', 'user:id,name'])
+            ->where('store_id', auth()->user()->store_id)
+            ->whereDate('created_at', $date)
+            ->latest()
+            ->get();
+
+        $groupedCashCuts = $cash_cuts->groupBy(function ($date) {
+            return $date->created_at->format('Y-m-d');
+        })
+        ->map(function ($group) {
+            $total_store_sales_cash = $group->sum('store_sales_cash');
+            $total_store_sales_card = $group->sum('store_sales_card');
+            $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
+            $total_difference = $group->sum('difference');
+            $amount_sales_products = $group->count();
+
+            return [
+                'cuts' => $group,
+                'total_store_sales_cash' => $total_store_sales_cash,
+                'total_store_sales_card' => $total_store_sales_card,
+                'total_online_sales' => $total_online_sales,
+                'total_sales' => $total_store_sales_cash + $total_store_sales_card + $total_online_sales,
+                'total_difference' => $total_difference,
+                'amount_sales_products' => $amount_sales_products
+            ];
+        });
+
+        return inertia('CashRegister/Print', compact('groupedCashCuts'));
+    }
+
+
     //METODO PARA RECUPERAR VENTAS PARA CORTE SIN TOMAR EN CUENTA PAGOS CON TARJETA
     // public function fetchTotalSaleForCashCut($cash_register_id)
     // {
