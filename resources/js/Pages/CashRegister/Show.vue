@@ -115,7 +115,7 @@
                     <div class="mt-3 lg:mt-0 mx-auto lg:mx-0 w-96 md:w-[450px] border border-grayD9 self-start rounded-2xl shadow-lg p-1">
                         <h2 class="py-2 bg-[#F2F2F2] text-center text-sm font-bold rounded-xl">Resumen de corte</h2>
                         <div class="flex items-center space-x-2 px-5 pt-2">
-                            <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago con tarjeta">
+                            <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
                             <p class="text-[#37672B] font-semibold">Efectivo</p>
                         </div>
                         <div class="flex justify-between space-x-1 px-5 pt-1">
