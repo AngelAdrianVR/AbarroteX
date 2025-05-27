@@ -668,7 +668,7 @@
 
           <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
             <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
-            <el-input-number @keydown.enter="store" v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" :min="1" :max="999999">
+            <el-input-number ref="receivedInput" @keydown.enter="store" v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" :min="1" :max="999999">
               <template #prefix>
                 <span>$</span>
               </template>
@@ -721,24 +721,37 @@
         </section>
 
         <section class="mx-auto mt-2 md:w-2/3">
-          <p class="my-3 text-sm text-center">El sistema no procesa pagos con tarjeta. Usa tu terminal bancaria externa y luego registra aquí el pago.</p>
-          <div class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
-            <span class="font-bold text-[#05394F]">TARJETA</span>
-            <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
+          <div v-if="!paymentConfirmed">
+            <p class="my-3 text-sm text-center">El sistema no procesa pagos con tarjeta. Usa tu terminal bancaria externa y luego registra aquí el pago.</p>
+            <div class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
+              <span class="font-bold text-[#05394F]">TARJETA</span>
+              <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
+            </div>
+
+            <div class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+              <span class="font-bold">Total a pagar</span>
+              <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+            </div>
+
+            <div class="flex justify-center mt-7">
+              <PrimaryButton @click="store" :disabled="storeProcessing" class="!px-20">
+                <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                Confirmar pago
+              </PrimaryButton>
+            </div>
           </div>
 
-          <div class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
-            <span class="font-bold">Total a pagar</span>
-            <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-          </div>
+           <!-- Confirmacion de pago -->
+          <template v-else>
+            <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
+            </div>
+          </template>
         </section>
 
-        <div class="flex justify-center mt-7">
-          <PrimaryButton @click="store" :disabled="storeProcessing" class="!px-20">
-            <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-            Confirmar pago
-          </PrimaryButton>
-        </div>
       </div>
     </Modal>
     <!-- -------------- Modal selección de caja starts----------------------- -->
@@ -840,8 +853,15 @@
           <div class="rounded-full h-3 bg-[#F2F2F2] my-2"></div>
 
           <section class="w-full flex justify-end space-x-3 text-sm">
-            <div class="w-44 space-y-2">
-              <p>Efectivo esperado en caja</p>
+            <div class="w-52 space-y-2">
+              <div class="flex items-center space-x-2">
+                <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                <p>Total pagado con tarjeta</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago con tarjeta">
+                <p>Efectivo esperado en caja</p>
+              </div>
               <p>Recuento manual</p>
               <p>Diferencia</p>
             </div>
@@ -849,8 +869,11 @@
               <div v-if="cutLoading">
                 <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
               </div>
-              <p v-else>${{ (asignedCashRegister?.started_cash + cutForm.totalStoreSale + cutForm.totalOnlineSale +
-                cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+              <div class="space-y-[8px]" v-else>
+                <p>${{ cutForm.totalStoreSale?.card?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                <p>${{ (asignedCashRegister?.started_cash + cutForm.totalStoreSale?.cash + cutForm.totalOnlineSale +
+                  cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+              </div>
               <el-input @input="difference()" v-model="cutForm.counted_cash" type="text" placeholder="0.00"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                 :parser="(value) => value.replace(/[^\d.]/g, '')" class="!w-24 !h-6">
@@ -907,10 +930,10 @@
           <div class="flex justify-end space-x-1 pt-2 pb-1 py-2 col-span-full">
             <CancelButton @click="cashCutModal = false; cutForm.reset()">Cancelar</CancelButton>
             <PrimaryButton
-              :disabled="!cutForm.counted_cash || cutForm.processing || (cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0)">
+              :disabled="!cutForm.counted_cash || cutForm.processing || (cutForm.totalCashMovements == 0 && (cutForm.totalStoreSale?.cash + cutForm.totalStoreSale?.card) == 0)">
               Hacer corte</PrimaryButton>
           </div>
-          <p v-if="cutForm.totalCashMovements == 0 && cutForm.totalStoreSale == 0"
+          <p v-if="cutForm.totalCashMovements == 0 && (cutForm.totalStoreSale?.cash + cutForm.totalStoreSale?.card) == 0"
             class="text-xs text-red-600 text-right">
             *Para hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
         </form>
@@ -1369,17 +1392,11 @@ export default {
             // Aquí cierra el modal como lo manejes normalmente
             this.showPaymentModal = false; // ajusta este método a tu implementación
             this.paymentModalStep = 1; //reinicia el paso del modal de pago
-          }, 2000);
+          }, 1000);
 
           this.updateCurrentStockInIndexedDB();
           this.clearTab();
           this.fetchCashRegister();
-
-          // this.$notify({
-          //   title: "Correcto",
-          //   message: "Se ha registrado la venta",
-          //   type: "success",
-          // });
 
           localStorage.setItem('pendentProcess', false);
 
@@ -1582,7 +1599,7 @@ export default {
     },
     difference() {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
-      this.cutForm.difference = (this.cutForm.totalStoreSale + this.cutForm.totalOnlineSale + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
+      this.cutForm.difference = (this.cutForm.totalStoreSale?.cash + this.cutForm.totalOnlineSale + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
     },
     deleteProduct(productId) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
@@ -1590,7 +1607,7 @@ export default {
     },
     cashPayment() {
       this.showPaymentModal = true; //abre el modal de seleccion de pago (efectivo o tarjeta)
-      // this.editableTabs[this.editableTabsValue - 1].cash = true; //mostraba la vista vieja de pago en efectivo (sigue ahi pero comentado)
+      this.receivedInputFocus();
     },
     creditPayment() {
       this.editableTabs[this.editableTabsValue - 1].credit = true;
