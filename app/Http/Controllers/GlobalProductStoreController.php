@@ -63,7 +63,6 @@ class GlobalProductStoreController extends Controller
         return inertia('GlobalProductStore/Edit', compact('global_product_store', 'categories', 'brands'));
     }
 
-
     public function update(Request $request, GlobalProductStore $global_product_store)
     {
         $request->validate([
@@ -100,7 +99,6 @@ class GlobalProductStoreController extends Controller
         return to_route('global-product-store.show', $encoded_global_product_id);
     }
 
-
     public function destroy(GlobalProductStore $global_product_store)
     {
         // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
@@ -108,7 +106,31 @@ class GlobalProductStoreController extends Controller
         $global_product_store->delete();
     }
 
+    public function outStock(Request $request, $global_product_store_id)
+    {
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.001|max:' . $global_product_store->current_stock,
+            'concept' => 'required',
+        ], [
+            'quantity.max' => 'La cantidad a retirar no puede ser mayor al stock actual (' . $global_product_store->current_stock . ').',
+        ]);
 
+        $old_quantity = $global_product_store->current_stock;
+        // Asegúrate de convertir la cantidad a un número antes de restar
+        $global_product_store->current_stock -= floatval($request->quantity);
+        // Guarda el producto
+        $global_product_store->save();
+
+        // Crear salida
+        ProductHistory::create([
+            'description' => "Salida de producto. de $old_quantity a $global_product_store->current_stock ($request->quantity unidades) por $request->concept",
+            'type' => 'Salida',
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
+    }
+    
     public function entryStock(Request $request, $global_product_store_id)
     {
         $messages = [
@@ -118,13 +140,13 @@ class GlobalProductStoreController extends Controller
         ];
 
         $request->validate([
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:0.001',
             'is_paid_by_cash_register' => 'boolean',
             'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
         ], $messages);
 
         $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
-
+        $old_quantity = $global_product_store->current_stock;
         // Asegúrate de convertir la cantidad a un número antes de sumar
         $global_product_store->current_stock += floatval($request->quantity);
 
@@ -133,7 +155,7 @@ class GlobalProductStoreController extends Controller
 
         // Crear entrada
         ProductHistory::create([
-            'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
+            'description' => "Entrada de producto. de $old_quantity a $global_product_store->current_stock ($request->quantity unidades)",
             'type' => 'Entrada',
             'historicable_id' => $global_product_store->id,
             'historicable_type' => GlobalProductStore::class

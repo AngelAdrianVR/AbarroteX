@@ -261,6 +261,32 @@ class ProductController extends Controller
         return response()->json(['items' => $products]);
     }
 
+    public function outStock(Request $request, $product_id)
+    {
+        $product = Product::find($product_id);
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.001|max:' . $product->current_stock,
+            'concept' => 'required',
+        ], [
+            'quantity.max' => 'La cantidad a retirar no puede ser mayor al stock actual (' . $product->current_stock . ').',
+        ]);
+
+        $old_quantity = $product->current_stock;
+        // Asegúrate de convertir la cantidad a un número antes de restar
+        $product->current_stock -= floatval($request->quantity);
+        // Guarda el producto
+        $product->save();
+
+        // Crear salida
+        ProductHistory::create([
+            'description' => "Salida de producto. de $old_quantity a $product->current_stock ($request->quantity unidades) por $request->concept",
+            'type' => 'Salida',
+            'historicable_id' => $product->id,
+            'historicable_type' => Product::class
+        ]);
+
+    }
+    
     public function entryStock(Request $request, $product_id)
     {
         $messages = [
@@ -270,13 +296,13 @@ class ProductController extends Controller
         ];
 
         $request->validate([
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:0.001',
             'is_paid_by_cash_register' => 'boolean',
             'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
         ], $messages);
 
         $product = Product::find($product_id);
-
+        $old_quantity = $product->current_stock;
         // Asegúrate de convertir la cantidad a un número antes de sumar
         $product->current_stock += floatval($request->quantity);
 
@@ -285,7 +311,7 @@ class ProductController extends Controller
 
         // Crear entrada
         ProductHistory::create([
-            'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
+            'description' => "Entrada de producto. de $old_quantity a $product->current_stock ($request->quantity unidades)",
             'type' => 'Entrada',
             'historicable_id' => $product_id,
             'historicable_type' => Product::class
@@ -316,7 +342,7 @@ class ProductController extends Controller
             ]);
         }
     }
-
+    
     public function inventoryUpdate(Request $request, $product_id)
     {
         $request->validate([

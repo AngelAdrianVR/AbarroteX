@@ -84,6 +84,7 @@ Route::get('global-products-filter', [GlobalProductController::class, 'filter'])
 Route::resource('products', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('products/update-with-media/{product}', [ProductController::class, 'updateWithMedia'])->name('products.update-with-media')->middleware('auth');
 Route::put('products-entry/{product_id}', [ProductController::class, 'entryStock'])->name('products.entry')->middleware('auth');
+Route::put('products-out/{product_id}', [ProductController::class, 'outStock'])->name('products.out')->middleware('auth');
 Route::put('products-inventory-update/{product_id}', [ProductController::class, 'inventoryUpdate'])->name('products.inventory-update')->middleware('auth');
 Route::put('products-price-update/{product_id}', [ProductController::class, 'priceUpdate'])->name('products.price-update')->middleware('auth');
 Route::get('products-search', [ProductController::class, 'searchProduct'])->name('products.search')->middleware('auth');
@@ -145,6 +146,7 @@ Route::resource('global-product-store', GlobalProductStoreController::class)->mi
 Route::get('global-product-store-get-data-for-base-catalog-view', [GlobalProductStoreController::class, 'getDataForBaseCatalogView'])->name('global-product-store.get-data-for-base-catalog-view')->middleware('auth');
 Route::post('global-product-store/transfer', [GlobalProductStoreController::class, 'transfer'])->name('global-product-store.transfer')->middleware('auth');
 Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
+Route::put('global-product-store-out/{global_product_store_id}', [GlobalProductStoreController::class, 'outStock'])->name('global-product-store.out')->middleware('auth');
 Route::put('global-product-store-inventory-update/{global_product_store_id}', [GlobalProductStoreController::class, 'inventoryUpdate'])->name('global-product-store.inventory-update')->middleware('auth');
 Route::put('global-product-store-price-update/{global_product_store_id}', [GlobalProductStoreController::class, 'priceUpdate'])->name('global-product-store.price-update')->middleware('auth');
 Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
