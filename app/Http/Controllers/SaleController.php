@@ -321,6 +321,7 @@ class SaleController extends Controller
             ProductHistory::create([
                 'description' => 'Registro de venta. ' . $product['quantity'] . ' pieza(s)' . $size,
                 'type' => 'Venta',
+                'user_id' => auth()->id(),
                 'historicable_id' => $product_id,
                 'historicable_type' => $is_global_product
                     ? GlobalProductStore::class
@@ -449,6 +450,7 @@ class SaleController extends Controller
             ProductHistory::create([
                 'description' => "Registro de entrada de producto por reembolso de venta con folio $saleFolio. " . $sale['quantity'] . ' pieza(s)',
                 'type' => 'Reembolso',
+                'user_id' => auth()->id(),
                 'historicable_id' => $current_product->id,
                 'historicable_type' => get_class($current_product),
             ]);
@@ -542,6 +544,7 @@ class SaleController extends Controller
                         ProductHistory::create([
                             'description' => $refund_description,
                             'type' => 'Edición',
+                            'user_id' => auth()->id(),
                             'historicable_id' => $current_product->id,
                             'historicable_type' => get_class($current_product),
                         ]);
@@ -555,6 +558,7 @@ class SaleController extends Controller
                         ProductHistory::create([
                             'description' => $sale_description,
                             'type' => 'Edición',
+                            'user_id' => auth()->id(),
                             'historicable_id' => $new_product->id,
                             'historicable_type' => get_class($new_product),
                         ]);
@@ -593,6 +597,7 @@ class SaleController extends Controller
                         ProductHistory::create([
                             'description' => $description,
                             'type' => $type,
+                            'user_id' => auth()->id(),
                             'historicable_id' => $current_product->id,
                             'historicable_type' => get_class($current_product),
                         ]);

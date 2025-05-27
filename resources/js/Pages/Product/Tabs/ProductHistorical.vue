@@ -18,6 +18,7 @@
                         :key="activity">
                         <span v-html="getIcon(activity.type)"></span>
                         <span>{{ activity.description + ' • ' + activity.created_at }}</span>
+                        <span v-if="activity.user">{{ ' • por ' + activity.user?.name }}</span>
                     </p>
                 </div>
             </div>

@@ -18,6 +18,7 @@
                     <p class="mt-1 ml-4 text-sm flex items-center space-x-2" v-for="activity in history" :key="activity">
                         <span v-html="getIcon(activity.type)" class="w-4"></span>
                         <span>{{ activity.description + ' • ' + activity.created_at }}</span>
+                        <span v-if="activity.user">{{ ' • por ' + activity.user?.name }}</span>
                     </p>
                 </div>
             </div>

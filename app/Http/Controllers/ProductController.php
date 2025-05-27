@@ -146,8 +146,9 @@ class ProductController extends Controller
 
         if ($current_price != $request->public_price) {
             ProductHistory::create([
-                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'description' => 'Cambio de precio de $' . $current_price . ' a $' . $request->public_price,
                 'type' => 'Precio',
+                'user_id' => auth()->id(),
                 'historicable_id' => $product->id,
                 'historicable_type' => Product::class
             ]);
@@ -192,8 +193,9 @@ class ProductController extends Controller
         $current_price = $product->public_price;
         if ($current_price != $request->public_price) {
             ProductHistory::create([
-                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'description' => 'Cambio de precio de $' . $current_price . ' a $' . $request->public_price,
                 'type' => 'Precio',
+                'user_id' => auth()->id(),
                 'historicable_id' => $product->id,
                 'historicable_type' => Product::class
             ]);
@@ -281,6 +283,7 @@ class ProductController extends Controller
         ProductHistory::create([
             'description' => "Salida de producto. de $old_quantity a $product->current_stock ($request->quantity unidades) por $request->concept",
             'type' => 'Salida',
+            'user_id' => auth()->id(),
             'historicable_id' => $product->id,
             'historicable_type' => Product::class
         ]);
@@ -313,6 +316,7 @@ class ProductController extends Controller
         ProductHistory::create([
             'description' => "Entrada de producto. de $old_quantity a $product->current_stock ($request->quantity unidades)",
             'type' => 'Entrada',
+            'user_id' => auth()->id(),
             'historicable_id' => $product_id,
             'historicable_type' => Product::class
         ]);
@@ -361,6 +365,7 @@ class ProductController extends Controller
         ProductHistory::create([
             'description' => 'Ajuste de producto. De ' . $old_quantity . ' a ' . $new_quantity . ' unidades',
             'type' => 'Ajuste',
+            'user_id' => auth()->id(),
             'historicable_id' => $product_id,
             'historicable_type' => Product::class
         ]);
@@ -378,8 +383,9 @@ class ProductController extends Controller
         $product->save();
 
         ProductHistory::create([
-            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->public_price . ' por ' . auth()->user()->name,
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->public_price,
             'type' => 'Precio',
+            'user_id' => auth()->id(),
             'historicable_id' => $product_id,
             'historicable_type' => Product::class
         ]);
@@ -388,7 +394,7 @@ class ProductController extends Controller
     public function fetchHistory($product_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('historicable_id', $product_id)
+        $query = ProductHistory::with(['user:id,name'])->where('historicable_id', $product_id)
             ->where('historicable_type', Product::class);
 
         if ($month && $year) {
@@ -710,8 +716,9 @@ class ProductController extends Controller
         $product->save();
 
          ProductHistory::create([
-            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice . ' por ' . auth()->user()->name,
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice,
             'type' => 'Precio',
+            'user_id' => auth()->id(),
             'historicable_id' => $product->id,
             'historicable_type' => Product::class
         ]);
