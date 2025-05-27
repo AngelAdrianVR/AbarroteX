@@ -164,7 +164,7 @@ class GlobalProductStoreController extends Controller
             ]);
         }
     }
-    
+
     public function inventoryUpdate(Request $request, $global_product_store_id)
     {
         $request->validate([
@@ -178,7 +178,7 @@ class GlobalProductStoreController extends Controller
         $global_product_store->current_stock = $new_quantity;
         // Guarda el producto
         $global_product_store->save();
-        
+
         // Crear ajuste
         ProductHistory::create([
             'description' => 'Ajuste de producto. De ' . $old_quantity . ' a ' . $new_quantity . ' unidades',
@@ -195,8 +195,16 @@ class GlobalProductStoreController extends Controller
         ]);
 
         $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $old_price = $global_product_store->public_price;
         $global_product_store->public_price = $request->public_price;
         $global_product_store->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->public_price . ' por ' . auth()->user()->name,
+            'type' => 'Precio',
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
     }
 
     public function fetchHistory($global_product_store_id, $month = null, $year = null)
@@ -265,7 +273,7 @@ class GlobalProductStoreController extends Controller
         GlobalProductStore::where('store_id', $store->id)
             ->whereNotIn('global_product_id', $product_ids)
             ->get()
-            ->each(fn ($prd) => $prd->delete());
+            ->each(fn($prd) => $prd->delete());
 
         // Filtrar los productos del catálogo para excluir aquellos que ya existen en mi tienda
         $new_product_ids = collect($product_ids)->reject(function ($productId) use ($my_products) {
@@ -308,13 +316,21 @@ class GlobalProductStoreController extends Controller
     }
 
     public function changePrice(Request $request)
-    {   
+    {
         // Extraer el número del string
         $idString = $request->product['id'];
         $idNumber = (int) preg_replace('/[^0-9]/', '', $idString);
 
         $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->where('id', $idNumber)->first();
+        $old_price = $product->public_price;
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice . ' por ' . auth()->user()->name,
+            'type' => 'Precio',
+            'historicable_id' => $product->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
     }
 }

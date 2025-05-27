@@ -347,9 +347,16 @@ class ProductController extends Controller
         ]);
 
         $product = Product::find($product_id);
-
+        $old_price = $product->public_price;
         $product->public_price = $request->public_price;
         $product->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->public_price . ' por ' . auth()->user()->name,
+            'type' => 'Precio',
+            'historicable_id' => $product_id,
+            'historicable_type' => Product::class
+        ]);
     }
 
     public function fetchHistory($product_id, $month = null, $year = null)
@@ -672,7 +679,15 @@ class ProductController extends Controller
     public function changePrice(Request $request)
     {
         $product = Product::where('store_id', auth()->user()->store_id)->where('code', $request->product['code'])->first();
+        $old_price = $product->public_price;
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
+
+         ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice . ' por ' . auth()->user()->name,
+            'type' => 'Precio',
+            'historicable_id' => $product->id,
+            'historicable_type' => Product::class
+        ]);
     }
 }
