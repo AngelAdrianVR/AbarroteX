@@ -17,6 +17,7 @@ class ProductHistoryResource extends JsonResource
         return [
             'id' => $this->id,
             'description' => $this->description,
+            'user' => $this->whenLoaded('user'),
             'type' => $this->type,
             'created_at' => $this->created_at?->isoFormat('DD MMM YYYY, h:mm a'),
             'updated_at' => $this->updated_at?->isoFormat('DD MMM YYYY, h:mm a'),

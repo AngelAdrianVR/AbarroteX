@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('description');
             $table->string('type');
             $table->morphs('historicable');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

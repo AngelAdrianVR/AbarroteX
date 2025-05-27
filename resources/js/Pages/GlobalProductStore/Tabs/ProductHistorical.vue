@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- estado de carga -->
-        <Loading2 v-if="loading" class="mt-10" />
+        <SmallLoading v-if="loading" class="mt-10 mx-auto" />
         <div v-else>
             <div class="flex items-center justify-center space-x-3">
                 <button @click="loadPreviousMonth" class="bg-grayD9 size-7 rounded-full"><i
@@ -16,8 +16,9 @@
                     <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
                         translateMonth(index) }}</h2>
                     <p class="mt-1 ml-4 text-sm flex items-center space-x-2" v-for="activity in history" :key="activity">
-                        <span v-html="getIcon(activity.type)"></span>
+                        <span v-html="getIcon(activity.type)" class="w-4"></span>
                         <span>{{ activity.description + ' • ' + activity.created_at }}</span>
+                        <span v-if="activity.user">{{ ' • por ' + activity.user?.name }}</span>
                     </p>
                 </div>
             </div>
@@ -27,7 +28,7 @@
 </template>
 
 <script>
-import Loading2 from '@/Components/MyComponents/Loading2.vue';
+import SmallLoading from '@/Components/MyComponents/SmallLoading.vue';
 
 export default {
     name: 'GlobalProductHistorical',
@@ -41,7 +42,7 @@ export default {
         };
     },
     components: {
-        Loading2,
+        SmallLoading,
     },
     props: {
         product: Object,
@@ -55,6 +56,10 @@ export default {
                 return '<i class="fa-solid fa-dollar-sign"></i>';
             } else if (type === 'Entrada') {
                 return '<i class="fa-regular fa-square-plus"></i>';
+            } else if (type === 'Salida') {
+                return '<i class="fa-regular fa-square-minus"></i>';
+            } else if (type === 'Ajuste') {
+                return '<i class="fa-solid fa-sliders"></i>';
             } else if (type === 'Venta') {
                 return '<i class="fa-solid fa-hand-holding-dollar"></i>';
             } else if (type === 'Reembolso') {

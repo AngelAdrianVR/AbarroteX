@@ -146,8 +146,9 @@ class ProductController extends Controller
 
         if ($current_price != $request->public_price) {
             ProductHistory::create([
-                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'description' => 'Cambio de precio de $' . $current_price . ' a $' . $request->public_price,
                 'type' => 'Precio',
+                'user_id' => auth()->id(),
                 'historicable_id' => $product->id,
                 'historicable_type' => Product::class
             ]);
@@ -192,8 +193,9 @@ class ProductController extends Controller
         $current_price = $product->public_price;
         if ($current_price != $request->public_price) {
             ProductHistory::create([
-                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'description' => 'Cambio de precio de $' . $current_price . ' a $' . $request->public_price,
                 'type' => 'Precio',
+                'user_id' => auth()->id(),
                 'historicable_id' => $product->id,
                 'historicable_type' => Product::class
             ]);
@@ -261,6 +263,33 @@ class ProductController extends Controller
         return response()->json(['items' => $products]);
     }
 
+    public function outStock(Request $request, $product_id)
+    {
+        $product = Product::find($product_id);
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.001|max:' . $product->current_stock,
+            'concept' => 'required',
+        ], [
+            'quantity.max' => 'La cantidad a retirar no puede ser mayor al stock actual (' . $product->current_stock . ').',
+        ]);
+
+        $old_quantity = $product->current_stock;
+        // Asegúrate de convertir la cantidad a un número antes de restar
+        $product->current_stock -= floatval($request->quantity);
+        // Guarda el producto
+        $product->save();
+
+        // Crear salida
+        ProductHistory::create([
+            'description' => "Salida de producto. de $old_quantity a $product->current_stock ($request->quantity unidades) por $request->concept",
+            'type' => 'Salida',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product->id,
+            'historicable_type' => Product::class
+        ]);
+
+    }
+    
     public function entryStock(Request $request, $product_id)
     {
         $messages = [
@@ -270,13 +299,13 @@ class ProductController extends Controller
         ];
 
         $request->validate([
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:0.001',
             'is_paid_by_cash_register' => 'boolean',
             'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
         ], $messages);
 
         $product = Product::find($product_id);
-
+        $old_quantity = $product->current_stock;
         // Asegúrate de convertir la cantidad a un número antes de sumar
         $product->current_stock += floatval($request->quantity);
 
@@ -285,8 +314,9 @@ class ProductController extends Controller
 
         // Crear entrada
         ProductHistory::create([
-            'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
+            'description' => "Entrada de producto. de $old_quantity a $product->current_stock ($request->quantity unidades)",
             'type' => 'Entrada',
+            'user_id' => auth()->id(),
             'historicable_id' => $product_id,
             'historicable_type' => Product::class
         ]);
@@ -316,7 +346,7 @@ class ProductController extends Controller
             ]);
         }
     }
-
+    
     public function inventoryUpdate(Request $request, $product_id)
     {
         $request->validate([
@@ -335,6 +365,7 @@ class ProductController extends Controller
         ProductHistory::create([
             'description' => 'Ajuste de producto. De ' . $old_quantity . ' a ' . $new_quantity . ' unidades',
             'type' => 'Ajuste',
+            'user_id' => auth()->id(),
             'historicable_id' => $product_id,
             'historicable_type' => Product::class
         ]);
@@ -347,15 +378,23 @@ class ProductController extends Controller
         ]);
 
         $product = Product::find($product_id);
-
+        $old_price = $product->public_price;
         $product->public_price = $request->public_price;
         $product->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->public_price,
+            'type' => 'Precio',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product_id,
+            'historicable_type' => Product::class
+        ]);
     }
 
     public function fetchHistory($product_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('historicable_id', $product_id)
+        $query = ProductHistory::with(['user:id,name'])->where('historicable_id', $product_id)
             ->where('historicable_type', Product::class);
 
         if ($month && $year) {
@@ -672,7 +711,16 @@ class ProductController extends Controller
     public function changePrice(Request $request)
     {
         $product = Product::where('store_id', auth()->user()->store_id)->where('code', $request->product['code'])->first();
+        $old_price = $product->public_price;
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
+
+         ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice,
+            'type' => 'Precio',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product->id,
+            'historicable_type' => Product::class
+        ]);
     }
 }

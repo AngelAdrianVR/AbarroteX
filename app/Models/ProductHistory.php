@@ -16,6 +16,7 @@ class ProductHistory extends Model
         'historicable_type',
         'description',
         'type',
+        'user_id',
         'created_at',
     ];
 
@@ -26,5 +27,10 @@ class ProductHistory extends Model
     public function historicable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
