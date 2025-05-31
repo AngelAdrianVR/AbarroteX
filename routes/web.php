@@ -311,6 +311,7 @@ Route::get('cash-cuts-fetch-total-sales-for-cash-cut/{cash_register_id}', [CashC
 Route::get('cash-cuts-filter', [CashCutController::class, 'filterCashCuts'])->name('cash-cuts.filter')->middleware('auth');
 Route::get('cash-cuts-get-by-page/{currentPage}', [CashCutController::class, 'getItemsByPage'])->name('cash-cuts.get-by-page')->middleware('auth');
 Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'getCashCutMovements'])->name('cash-cuts.get-movements')->middleware('auth');
+Route::get('cash-cuts-print/{created_at}', [CashCutController::class, 'print'])->name('cash-cuts.print');
 
 
 //Tutorial routes-----------------------------------------------------------------------------------------------------
@@ -412,3 +413,12 @@ Route::get('/started-turtorial/pos', function () {
         return inertia('StartedTutorial/Index');
     }
 })->name('started-tutorial');
+
+
+// Actualizar el método de pago de todas las ventas a "Efectivo"
+use Illuminate\Support\Facades\DB;
+Route::get('/actualizar-payment-method', function () {
+    DB::table('sales')->update(['payment_method' => 'Efectivo']);
+
+    return 'Todos los registros se actualizaron con el método de pago "Efectivo".';
+});

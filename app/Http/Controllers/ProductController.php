@@ -702,8 +702,8 @@ class ProductController extends Controller
                 'max_stock' => $data[5] ?? 1,
                 'current_stock' => $data[6] ?? 1,
                 'store_id' => auth()->user()->store_id,
-                'category_id' => 1, //Abarrotes por defecto
-                'brand_id' => 1, //Generico por defecto
+                // 'category_id' => 1, //Abarrotes por defecto
+                // 'brand_id' => 1, //Generico por defecto
             ]);
         }
     }

@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedFloat('started_cash');
             $table->unsignedFloat('expected_cash'); //suma algebraica de ingresos y retiros de caja
-            $table->unsignedFloat('store_sales_cash')->nullable(); //suma suma de todas las ventas hechoas en tienda
-            $table->unsignedFloat('online_sales_cash')->nullable(); //suma suma de todas las ventas hechas en línea
+            $table->unsignedFloat('store_sales_cash')->nullable(); //Total de venta en tienda pagado en efectivo
+            $table->unsignedFloat('store_sales_card')->nullable(); // Total de venta en tienda pagado con tarjeta
+            $table->unsignedFloat('online_sales_cash')->nullable(); // Total de venta en línea pagado en efectivo
+            $table->unsignedFloat('online_sales_card')->nullable(); // Total de venta en línea pagado con tarjeta
             $table->unsignedFloat('counted_cash'); //dinero contado manualmente de la caja
             $table->unsignedFloat('withdrawn_cash')->nullable(); //dinero retirado de caja despues de hacer el corte
             $table->float('difference'); //diferencia entre el dinero esperado y el contado manualmente

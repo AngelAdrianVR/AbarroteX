@@ -147,7 +147,6 @@ class SaleController extends Controller
         $is_out_of_cash_cut = false;
 
         // return $day_sales;
-
         return inertia('Sale/Show', compact('day_sales', 'is_out_of_cash_cut', 'previous_sale_date', 'next_sale_date'));
     }
 
@@ -267,6 +266,7 @@ class SaleController extends Controller
                 'current_price' => $product['product']['public_price'],
                 'quantity' => $product['quantity'],
                 'folio' => $folio,
+                'payment_method' => $sale_data['paymentMethod'],
                 'product_name' => $product_name,
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
@@ -708,6 +708,7 @@ class SaleController extends Controller
                             'is_global_product' => $sale->is_global_product,
                             'quantity' => $sale->quantity,
                             'original_price' => $sale->original_price,
+                            'payment_method' => $sale->payment_method,
                             'refunded_at' => $sale->refunded_at,
                             'cash_register_id' => $sale->cash_register_id,
                             'store_id' => $sale->store_id,
