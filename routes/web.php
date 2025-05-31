@@ -21,6 +21,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductBoutiqueController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
+use App\Http\Controllers\PromotionsController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\RentalPaymentController;
@@ -403,6 +404,12 @@ Route::get('my-referrals/index', [DiscountTicketController::class, 'referralsInd
 Route::resource('partners', PartnerController::class);
 Route::get('/partner-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
 Route::post('/partner-recover', [PartnerController::class, 'landingRecover'])->name('landing.recover-partner');
+
+
+//rutas de promociones --------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::get('promotions/local/{product}', [PromotionsController::class, 'localCreate'])->name('promotions.local.create')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions/global/{product}', [PromotionsController::class, 'globalCreate'])->name('promotions.global.create')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 // ver tutoriales

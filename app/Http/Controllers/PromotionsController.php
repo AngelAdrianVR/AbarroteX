@@ -2,62 +2,61 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GlobalProductStore;
+use App\Models\Product;
 use App\Models\Promotions;
 use Illuminate\Http\Request;
 
 class PromotionsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function localCreate($encoded_product_id)
     {
-        //
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
+        $product = Product::with(['media'])->where('store_id', auth()->user()->store_id)
+            ->findOrFail($decoded_product_id);
+
+        return inertia('Promotions/Create', compact('product'));
+    }
+    
+    public function globalCreate($encoded_product_id)
+    {
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
+        $product = GlobalProductStore::with(['globalProduct.media'])->where('store_id', auth()->user()->store_id)
+            ->findOrFail($decoded_product_id);
+
+            return $product;
+        return inertia('Promotions/Create', compact('product'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Promotions $promotions)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Promotions $promotions)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Promotions $promotions)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Promotions $promotions)
     {
         //
