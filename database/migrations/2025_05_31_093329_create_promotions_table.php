@@ -16,7 +16,7 @@ return new class extends Migration
             $table->morphs('promotionable'); // producto local o global a aplicar la promoción
             $table->string('type');
             // para tipo fijo o porcentaje
-            $table->unsignedFloat('discount')->nullable();
+            $table->unsignedFloat('discounted_price')->nullable();
             // para tipo precio especial por paquete
             $table->unsignedFloat('pack_quantity')->nullable();
             $table->unsignedFloat('pack_price')->nullable();

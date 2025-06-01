@@ -410,6 +410,8 @@ Route::post('/partner-recover', [PartnerController::class, 'landingRecover'])->n
 //--------------------------------------------------------------------------------------------------------------------
 Route::get('promotions/local/{product}', [PromotionsController::class, 'localCreate'])->name('promotions.local.create')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('promotions/global/{product}', [PromotionsController::class, 'globalCreate'])->name('promotions.global.create')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions-get-match/{query}', [PromotionsController::class, 'getMatches'])->name('promotions.get-match')->middleware('auth');
+Route::post('promotions/store', [PromotionsController::class, 'store'])->name('promotions.store')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 // ver tutoriales
