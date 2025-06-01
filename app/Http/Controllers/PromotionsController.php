@@ -33,7 +33,6 @@ class PromotionsController extends Controller
         $product = GlobalProductStore::with(['globalProduct.media'])->where('store_id', auth()->user()->store_id)
             ->findOrFail($decoded_product_id);
 
-            return $product;
         return inertia('Promotions/Create', compact('product'));
     }
 
