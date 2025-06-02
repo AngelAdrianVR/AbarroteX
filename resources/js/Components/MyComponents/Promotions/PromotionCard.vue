@@ -8,9 +8,9 @@
                 </h2>
                 <p class="text-[10px] text-[#999999]">
                     {{ promo.expiration_date
-                        ? isExpired(promo.expiration_date) 
-                            ? 'Venció ' + formatDate(promo.expiration_date) 
-                            : 'Vence '  + formatDate(promo.expiration_date)
+                        ? isExpired(promo.expiration_date)
+                            ? 'Venció ' + formatDate(promo.expiration_date)
+                            : 'Vence ' + formatDate(promo.expiration_date)
                         : 'Sin fecha de vencimiento' }}
                 </p>
             </div>
@@ -48,9 +48,8 @@
                     <el-tooltip placement="right" effect="light">
                         <template #content>
                             <figure class="flex items-center justify-center min-w-40">
-                                <img v-if="promo.giftable.media?.length" class="object-contain h-28 select-none"
-                                    :draggable="false" :src="promo.giftable.media[0].original_url"
-                                    :alt="promo.giftable.name">
+                                <img v-if="mediaURL(promo)" class="object-contain h-28 select-none"
+                                    :draggable="false" :src="mediaURL(promo)">
                                 <div v-else class="mt-2 flex flex-col items-center bg-white text-gray99 rounded-md">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="0.8" stroke="currentColor" class="size-10">
@@ -73,7 +72,9 @@
                             </button>
                         </template>
                         <span class="text-primary underline">
-                            {{ promo.giftable.name }}
+                            {{ promo.giftable.global_product
+                                ? promo.giftable.global_product.name
+                                : promo.giftable.name }}
                         </span>
                     </el-tooltip>
                 </b>
@@ -98,6 +99,19 @@ export default {
         }
     },
     methods: {
+        mediaURL(product) {
+            if (product.giftable.global_product) {
+                // Si el producto es un global_product, retorna la URL de la imagen del global_product
+                return product.giftable.global_product.media.length > 0
+                    ? product.giftable.global_product.media[0].original_url
+                    : null;
+            } else if (product.giftable.media && product.giftable.media.length > 0) {
+                // Si el producto es un producto normal, retorna la URL de la imagen del producto
+                return product.giftable.media[0].original_url;
+            } else {
+                return null; // Retorna null si no hay imagen
+            }
+        },
         formatDate(date) {
             return format(new Date(date), 'dd MMMM yyyy', { locale: es });
         },

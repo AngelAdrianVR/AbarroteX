@@ -402,7 +402,7 @@ export default {
         this.product.promotions.forEach(element => {
             if (element.giftable_id) {
                 let productName;
-                if (element.giftable.type === 'App\\Models\\GlobalProductStore') {
+                if (element.giftable_type === 'App\\Models\\GlobalProductStore') {
                     productName = element.giftable.global_product.name;
                 } else {
                     productName = element.giftable.name;
@@ -410,7 +410,6 @@ export default {
                 this.fetchProductsMatch(productName, false);
             }
         });
-        this.checkConflicts();
     },
 }
 </script>

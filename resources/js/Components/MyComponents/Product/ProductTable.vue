@@ -36,7 +36,7 @@
                     </td>
                     <td>
                         <div class="flex items-center">
-                            <el-dropdown v-if="promotions(product)?.length" trigger="click">
+                            <el-dropdown v-if="product.promotions?.length" trigger="click">
                                 <button type="button" @click.stop
                                     class="flex items-center justify-center text-[#AE080B] hover:bg-[#F2F2F2] rounded-full size-6 transition-all duration-200 ease-in-out">
                                     <svg width="11" height="16" viewBox="0 0 11 16" fill="none"
@@ -65,16 +65,16 @@
                                                     </button>
                                                 </div>
                                                 <PromotionCard
-                                                    v-for="(promo, index) in promotions(product).filter(p => !isExpired(p.expiration_date))"
+                                                    v-for="(promo, index) in product.promotions.filter(p => !isExpired(p.expiration_date))"
                                                     :key="index" :promo="promo" :product="product" />
                                             </section>
-                                            <section v-if="promotions(product).filter(p => isExpired(p.expiration_date)).length"
+                                            <section v-if="product.promotions.filter(p => isExpired(p.expiration_date)).length"
                                                 class="mt-4 space-y-1">
                                                 <h1 class="text-[#6E6E6E] font-semibold lg:text-sm ml-2">
                                                     Promociones vencidas
                                                 </h1>
                                                 <PromotionCard
-                                                    v-for="(promo, index) in promotions(product).filter(p => isExpired(p.expiration_date))"
+                                                    v-for="(promo, index) in product.promotions.filter(p => isExpired(p.expiration_date))"
                                                     :key="index" :promo="promo" :product="product" />
                                             </section>
                                         </main>
@@ -213,9 +213,6 @@ export default {
             // Convierte la fecha a objeto Date si es string
             const dateObj = typeof date === 'string' ? parseISO(date) : date;
             return isPast(dateObj);
-        },
-        promotions(product) {
-            return product.global_product_id ? product.global_product?.promotions : product.promotions;
         },
         handleCommand(command) {
             const commandName = command.split('|')[0];

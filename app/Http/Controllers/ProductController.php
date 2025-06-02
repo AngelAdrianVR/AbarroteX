@@ -238,7 +238,12 @@ class ProductController extends Controller
         $query = $request->input('query');
 
         // Realiza la búsqueda en la base de datos local
-        $local_products = Product::with(['category', 'brand', 'media', 'promotions.giftable.media'])
+        $local_products = Product::with(['category', 'brand', 'media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
             ->where('store_id', auth()->user()->store_id)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%$query%")
@@ -246,7 +251,12 @@ class ProductController extends Controller
             })
             ->get();
 
-        $global_products = GlobalProductStore::with(['globalProduct.media', 'promotions.giftable.media'])
+        $global_products = GlobalProductStore::with(['globalProduct.media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
             ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
                 $queryBuilder->where('name', 'like', "%$query%")
                     ->orWhere('code', 'like', "%$query%");
@@ -444,13 +454,31 @@ class ProductController extends Controller
     public function getAllProducts()
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media', 'promotions.giftable.media'])
+        $local_products = Product::with([
+            'category:id,name',
+            'brand:id,name',
+            'media',
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct.media']
+                ]);
+            }
+        ])
             ->where('store_id', auth()->user()->store_id)
             ->latest('id')
             ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category'], 'promotions.giftable.media'])
+        $transfered_products = GlobalProductStore::with([
+            'globalProduct' => ['media', 'category'],
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct.media']
+                ]);
+            }
+        ])
             ->where('store_id', auth()->user()->store_id)->get();
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos

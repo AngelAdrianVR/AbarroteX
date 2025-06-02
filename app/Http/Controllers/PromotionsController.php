@@ -70,7 +70,11 @@ class PromotionsController extends Controller
         // Decodificar el ID
         $decoded_product_id = base64_decode($encoded_product_id);
 
-        $product = Product::with(['media', 'promotions.giftable'])->where('store_id', auth()->user()->store_id)
+        $product = Product::with(['media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                GlobalProductStore::class => ['globalProduct']
+            ]);
+        }])->where('store_id', auth()->user()->store_id)
             ->findOrFail($decoded_product_id);
 
         return inertia('Promotions/Edit', compact('product'));
@@ -81,7 +85,11 @@ class PromotionsController extends Controller
         // Decodificar el ID
         $decoded_product_id = base64_decode($encoded_product_id);
 
-        $product = GlobalProductStore::with(['globalProduct.media', 'promotions.giftable'])->where('store_id', auth()->user()->store_id)
+        $product = GlobalProductStore::with(['globalProduct.media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                GlobalProductStore::class => ['globalProduct']
+            ]);
+        }])->where('store_id', auth()->user()->store_id)
             ->findOrFail($decoded_product_id);
 
         return inertia('Promotions/Edit', compact('product'));
