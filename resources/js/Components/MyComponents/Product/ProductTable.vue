@@ -35,8 +35,8 @@
                         {{ product.global_product_id ? product.global_product?.name : product.name }}
                     </td>
                     <td>
-                        <div class="flex items-center space-x-1">
-                            <el-dropdown trigger="click">
+                        <div class="flex items-center">
+                            <el-dropdown v-if="promotions(product)?.length" trigger="click">
                                 <button type="button" @click.stop
                                     class="flex items-center justify-center text-[#AE080B] hover:bg-[#F2F2F2] rounded-full size-6 transition-all duration-200 ease-in-out">
                                     <svg width="11" height="16" viewBox="0 0 11 16" fill="none"
@@ -64,30 +64,93 @@
                                                         </svg>
                                                     </button>
                                                 </div>
-                                                <article
-                                                    class="flex bg-[#FAFAFA] rounded-lg border border-grayD9 px-2 py-1">
-                                                    <div class="w-2/3">
-                                                        <h2 class="text-gray37 font-bold">
-                                                            Producto gratis al comprar otro
-                                                        </h2>
-                                                        <p>Compra 2 paga solo 1</p>
-                                                    </div>
-                                                    <div class="w-1/3 text-end">
-                                                        <span class="text-[10px] text-[#999999]">Vence 02 febrero
-                                                            2025</span>
-                                                    </div>
-                                                </article>
-                                                <article
-                                                    class="flex bg-[#FAFAFA] rounded-lg border border-grayD9 px-2 py-1">
-                                                    <div class="w-2/3">
-                                                        <h2 class="text-gray37 font-bold">
-                                                            Producto gratis al comprar otro
-                                                        </h2>
-                                                        <p>Compra 2 paga solo 1</p>
-                                                    </div>
-                                                    <div class="w-1/3 text-end">
-                                                        <span class="text-[10px] text-[#999999]">Vence 02 febrero
-                                                            2025</span>
+                                                <article v-for="(promo, index) in promotions(product)" :key="index"
+                                                    class="bg-[#FAFAFA] rounded-lg border border-grayD9 px-2 py-1">
+                                                    <div>
+                                                        <div class="flex items-center justify-between">
+                                                            <h2 class="text-gray37 font-bold">
+                                                                {{ promo.type }}
+                                                            </h2>
+                                                            <p class="text-[10px] text-[#999999]">
+                                                                {{ promo.expiration_date
+                                                                    ? 'Vence ' + formatDate(promo.expiration_date)
+                                                                    : 'Sin fecha de vencimiento' }}
+                                                            </p>
+                                                        </div>
+                                                        <p v-if="promo.type == 'Descuento en precio fijo'">
+                                                            De ${{
+                                                                product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                                                    ",") }}
+                                                            a <b>${{
+                                                                promo.discounted_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                                                    ",") }}</b>
+                                                        </p>
+                                                        <p v-if="promo.type == 'Descuento en porcentaje'">
+                                                            <b>{{ promo.discount }}%</b> de descuento
+                                                        </p>
+                                                        <p v-if="promo.type == 'Precio especial por paquete'">
+                                                            <b>{{ promo.pack_quantity }}</b>
+                                                            por
+                                                            <b>${{
+                                                                promo.pack_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                                                    ",")
+                                                            }}</b>
+                                                        </p>
+                                                        <p v-if="promo.type == 'Promoción tipo 2x1 o 3x2'">
+                                                            Compra
+                                                            <b>{{ promo.buy_quantity }}</b>
+                                                            paga solo
+                                                            <b>{{ promo.pay_quantity }}</b>
+                                                        </p>
+                                                        <p v-if="promo.type == 'Producto gratis al comprar otro'">
+                                                            Compra
+                                                            <b>{{ promo.min_quantity_to_gift }}</b>,
+                                                            llévate gratis
+                                                            <b>
+                                                                {{ promo.quantity_to_gift }}
+                                                                <el-tooltip placement="right" effect="light">
+                                                                    <template #content>
+                                                                        <figure
+                                                                            class="flex items-center justify-center">
+                                                                            <img v-if="promo.giftable.media?.length"
+                                                                                class="object-contain h-28"
+                                                                                :src="promo.giftable.media[0].original_url"
+                                                                                :alt="promo.giftable.name">
+                                                                            <div v-else
+                                                                                class="mt-2 flex flex-col items-center bg-white text-gray99 rounded-md">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                    fill="none" viewBox="0 0 24 24"
+                                                                                    stroke-width="0.8"
+                                                                                    stroke="currentColor"
+                                                                                    class="size-10">
+                                                                                    <path stroke-linecap="round"
+                                                                                        stroke-linejoin="round"
+                                                                                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                                                                </svg>
+                                                                                <p class="text-[10px]">Producto sin
+                                                                                    imagen</p>
+                                                                                <button type="button" @click="handleShowRoute(promo.giftable)"
+                                                                                    class="underline text-primary flex items-center space-x-1 mt-2 text-end">
+                                                                                    <span class="text-[10px]">Ir al producto</span>
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                        fill="none" viewBox="0 0 24 24"
+                                                                                        stroke-width="1.5"
+                                                                                        stroke="currentColor"
+                                                                                        class="size-3">
+                                                                                        <path stroke-linecap="round"
+                                                                                            stroke-linejoin="round"
+                                                                                            d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                                                                    </svg>
+                                                                                </button>
+                                                                            </div>
+                                                                        </figure>
+                                                                    </template>
+                                                                    <span class="text-primary underline">
+                                                                        {{ promo.giftable.name }}
+                                                                    </span>
+                                                                </el-tooltip>
+                                                            </b>
+                                                        </p>
                                                     </div>
                                                 </article>
                                             </section>
@@ -208,10 +271,11 @@
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
-import axios from 'axios';
 import { deleteItem, getItemByAttributes } from "@/dbService.js";
 import { useForm } from '@inertiajs/vue3';
 import emitter from '@/eventBus.js';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default {
     data() {
@@ -237,6 +301,12 @@ export default {
         products: Object
     },
     methods: {
+        promotions(product) {
+            return product.global_product_id ? product.global_product?.promotions : product.promotions;
+        },
+        formatDate(date) {
+            return format(new Date(date), 'dd MMMM yyyy', { locale: es });
+        },
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const index = command.split('|')[1];
@@ -276,6 +346,19 @@ export default {
             } else {
                 this.$inertia.get(route('products.show', encodedId))
             }
+        },
+        handleShowRoute(product) {
+            console.log('handleShowRoute', product);
+            let url;
+            const encodedId = btoa(product.id.toString());
+            if (product.global_product_id) {
+                url = route('global-product-store.show', encodedId);
+            } else {
+                url = route('products.show', encodedId);
+            }
+
+            // ir a ruta en pestaña nueva
+            window.open(url, '_blank');
         },
         deleteItem() {
             let routePage;

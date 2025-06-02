@@ -38,19 +38,25 @@ class PromotionsController extends Controller
 
     public function store(Request $request)
     {
+        // Primero validamos todas las promociones
         foreach ($request->promos as $key => $promo) {
-            if ($promo['type'] == 'Descuento en precio fijo') {
-                $validated = $request->validate([
-                    "promos.$key.type" => 'required|string|max:255',
-                    "promos.$key.expiration_date" => 'nullable|date',
-                    "promos.$key.discounted_price" => 'required|numeric|min:0',
-                ], [
-                    'promos.*.discounted_price.required' => 'El precio promocional es obligatorio.',
-                    'promos.*.discounted_price.numeric' => 'El precio promocional debe ser un número.',
-                    'promos.*.discounted_price.min' => 'El precio promocional no puede ser negativo.',
-                ]);
-            }
+            $this->validatePromo($request, $key, $promo['type']);
         }
+
+        // Luego, si todas las validaciones pasan, creamos las promociones
+        if ($request->product_type === 'local') {
+            $class = Product::class;
+        } else {
+            $class = GlobalProductStore::class;
+        }
+        foreach ($request->promos as $promo) {
+            Promotions::create($promo + [
+                'promotionable_id' => $request->product_id,
+                'promotionable_type' => $class,
+            ]);
+        }
+
+        return to_route('products.index');
     }
 
     public function show(Promotions $promotions)
@@ -111,5 +117,75 @@ class PromotionsController extends Controller
 
         // Devuelve los items encontrados
         return response()->json(['items' => $products], 200);
+    }
+
+    // Método privado para manejar las validaciones
+    private function validatePromo($request, $key, $type)
+    {
+        $rules = [];
+        $messages = [];
+
+        switch ($type) {
+            case 'Descuento en precio fijo':
+            case 'Descuento en porcentaje':
+                $rules = [
+                    "promos.$key.discounted_price" => 'required|numeric|min:0',
+                ];
+                $messages = [
+                    'promos.*.discounted_price.required' => 'El precio promocional es obligatorio.',
+                    'promos.*.discounted_price.numeric' => 'El precio promocional debe ser un número.',
+                    'promos.*.discounted_price.min' => 'El precio promocional no puede ser negativo.',
+                ];
+                break;
+
+            case 'Precio especial por paquete':
+                $rules = [
+                    "promos.$key.pack_quantity" => 'required|numeric|min:1|max:999999',
+                    "promos.$key.pack_price" => 'required|numeric|min:0|max:9999999',
+                ];
+                $messages = [
+                    'promos.*.pack_quantity.required' => 'La cantidad del paquete es obligatoria.',
+                    'promos.*.pack_quantity.numeric' => 'La cantidad del paquete debe ser un número.',
+                    'promos.*.pack_quantity.min' => 'La cantidad del paquete debe ser al menos 1.',
+                    'promos.*.pack_price.required' => 'El precio del paquete es obligatorio.',
+                    'promos.*.pack_price.numeric' => 'El precio del paquete debe ser un número.',
+                    'promos.*.pack_price.min' => 'El precio del paquete no puede ser negativo.',
+                ];
+                break;
+
+            case 'Promoción tipo 2x1 o 3x2':
+                $rules = [
+                    "promos.$key.buy_quantity" => 'required|numeric|min:1|max:999999',
+                    "promos.$key.pay_quantity" => 'required|numeric|min:1|max:999999',
+                ];
+                $messages = [
+                    'promos.*.buy_quantity.required' => 'La cantidad a comprar es obligatoria.',
+                    'promos.*.buy_quantity.numeric' => 'La cantidad a comprar debe ser un número.',
+                    'promos.*.buy_quantity.min' => 'La cantidad a comprar debe ser al menos 1.',
+                    'promos.*.pay_quantity.required' => 'La cantidad a pagar es obligatoria.',
+                    'promos.*.pay_quantity.numeric' => 'La cantidad a pagar debe ser un número.',
+                    'promos.*.pay_quantity.min' => 'La cantidad a pagar debe ser al menos 1.',
+                ];
+                break;
+
+            case 'Producto gratis al comprar otro':
+                $rules = [
+                    "promos.$key.giftable_id" => 'required',
+                    "promos.$key.min_quantity_to_gift" => 'required|numeric|min:1|max:999999',
+                    "promos.$key.quantity_to_gift" => 'required|numeric|min:1|max:999999',
+                ];
+                $messages = [
+                    'promos.*.giftable_id.required' => 'El producto a regalar es obligatorio.',
+                    'promos.*.min_quantity_to_gift.required' => 'La cantidad mínima para regalar es obligatoria.',
+                    'promos.*.min_quantity_to_gift.numeric' => 'La cantidad mínima para regalar debe ser un número.',
+                    'promos.*.min_quantity_to_gift.min' => 'La cantidad mínima para regalar debe ser al menos 1.',
+                    'promos.*.quantity_to_gift.required' => 'La cantidad a regalar es obligatoria.',
+                    'promos.*.quantity_to_gift.numeric' => 'La cantidad a regalar debe ser un número.',
+                    'promos.*.quantity_to_gift.min' => 'La cantidad a regalar debe ser al menos 1.',
+                ];
+                break;
+        }
+
+        $request->validate($rules, $messages);
     }
 }

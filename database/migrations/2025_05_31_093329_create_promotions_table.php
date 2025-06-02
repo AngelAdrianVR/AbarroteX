@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('type');
             // para tipo fijo o porcentaje
             $table->unsignedFloat('discounted_price')->nullable();
+            $table->unsignedFloat('discount')->nullable();
             // para tipo precio especial por paquete
             $table->unsignedFloat('pack_quantity')->nullable();
             $table->unsignedFloat('pack_price')->nullable();

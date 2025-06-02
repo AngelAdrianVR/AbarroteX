@@ -13,6 +13,7 @@ class Promotions extends Model
         'promotionable_id',
         'promotionable_type',
         'type',
+        'discount',
         'discounted_price',
         'pack_quantity',
         'pack_price',

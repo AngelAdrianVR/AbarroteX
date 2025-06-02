@@ -3,7 +3,7 @@
         <div class="px-3 md:px-10 py-7">
             <Back :to="route('products.index')" />
             <form @submit.prevent="store"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-3">
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto lg:grid lg:grid-cols-2 gap-3">
                 <h1 class="font-bold ml-2 text-gray37 col-span-full">Agregar promociones</h1>
                 <div class="col-span-full flex items-start space-x-3 text-[#999999] text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -109,7 +109,7 @@
                                         placeholder="Ej. 15%"
                                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                         :parser="(value) => value.replace(/[^\d.]/g, '')" />
-                                    <InputError :message="form.errors[`promos.${index}.discount`]" />
+                                    <InputError :message="form.errors[`promos.${index}.discounted_price`]" />
                                 </div>
                                 <div v-if="item.type === 'Descuento en porcentaje'">
                                     <InputLabel value="Precio con descuento" />
@@ -168,7 +168,7 @@
                                         <el-option v-for="product in products" :key="product.id" :label="product.name"
                                             :value="product.id" />
                                     </el-select>
-                                    <InputError :message="form.errors[`promos.${index}.min_quantity_to_gift`]" />
+                                    <InputError :message="form.errors[`promos.${index}.giftable_id`]" />
                                 </div>
                                 <div v-if="item.type === 'Producto gratis al comprar otro'">
                                     <InputLabel value="Cantidad de ragalo*" />
@@ -194,6 +194,7 @@
                     </PrimaryButton>
                 </div>
             </form>
+            {{ form.product_type }}
         </div>
     </AppLayout>
 </template>
@@ -230,6 +231,7 @@ export default {
                 }
             ],
             product_id: this.product.id,
+            product_type: this.product.global_product ? 'global' : 'local',
             product_name: this.product.global_product ? this.product.global_product.name : this.product.name,
         });
 
@@ -378,7 +380,10 @@ export default {
             try {
                 this.form.post(route("promotions.store"), {
                     onSuccess: async () => {
-
+                        this.$notify({
+                            title: "Promociones creadas",
+                            type: "success",
+                        });
                     },
                     onError: (errors) => {
                         console.log(errors);

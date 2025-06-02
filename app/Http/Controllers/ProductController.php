@@ -287,9 +287,8 @@ class ProductController extends Controller
             'historicable_id' => $product->id,
             'historicable_type' => Product::class
         ]);
-
     }
-    
+
     public function entryStock(Request $request, $product_id)
     {
         $messages = [
@@ -346,7 +345,7 @@ class ProductController extends Controller
             ]);
         }
     }
-    
+
     public function inventoryUpdate(Request $request, $product_id)
     {
         $request->validate([
@@ -370,7 +369,7 @@ class ProductController extends Controller
             'historicable_type' => Product::class
         ]);
     }
-    
+
     public function priceUpdate(Request $request, $product_id)
     {
         $request->validate([
@@ -445,13 +444,14 @@ class ProductController extends Controller
     public function getAllProducts()
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
+        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media', 'promotions.giftable.media'])
             ->where('store_id', auth()->user()->store_id)
             ->latest('id')
             ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
+        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category'], 'promotions.giftable.globalProduct.media'])
+            ->where('store_id', auth()->user()->store_id)->get();
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
@@ -715,7 +715,7 @@ class ProductController extends Controller
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
 
-         ProductHistory::create([
+        ProductHistory::create([
             'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice,
             'type' => 'Precio',
             'user_id' => auth()->id(),
