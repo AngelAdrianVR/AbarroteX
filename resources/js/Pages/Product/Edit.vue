@@ -62,8 +62,6 @@
                         show-word-limit clearable />
                     <InputError :message="form.errors.description" />
                 </div>
-
-                {{  }}
                 <div class="col-span-full flex items-center space-x-3">
                     <div class="flex items-center w-[50%] lg:w-[30%]">
                         <el-checkbox @change="form.measure_unit = null" v-model="form.bulk_product"

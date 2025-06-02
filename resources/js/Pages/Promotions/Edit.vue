@@ -1,10 +1,10 @@
 <template>
-    <AppLayout title="Agregar promociones">
+    <AppLayout title="Editar promociones">
         <div class="px-3 md:px-10 py-7">
             <Back :to="route('products.index')" />
-            <form @submit.prevent="store"
+            <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto lg:grid lg:grid-cols-2 gap-3">
-                <h1 class="font-bold ml-2 text-gray37 col-span-full">Agregar promociones</h1>
+                <h1 class="font-bold ml-2 text-gray37 col-span-full">Editar promociones</h1>
                 <div class="col-span-full flex items-start space-x-3 text-[#999999] text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-8">
@@ -56,7 +56,8 @@
                         </p>
                     </div>
                     <section class="col-span-full space-y-2">
-                        <article v-for="(item, index) in form.promos" :key="index" class="border rounded-[10px] pb-2">
+                        <article v-for="(item, index) in form.promos" :key="index" class="border rounded-[10px] pb-2"
+                            :class="isExpired(item.expiration_date) ? 'border-amber-600 bg-amber-50' : 'border-grayD9'">
                             <header class="relative">
                                 <div class="absolute -top-2 -right-2">
                                     <el-popconfirm v-if="form.promos.length > 1" confirm-button-text="Si"
@@ -69,6 +70,10 @@
                                             </button>
                                         </template>
                                     </el-popconfirm>
+                                </div>
+                                <div v-if="isExpired(item.expiration_date)"
+                                    class="absolute -top-2 left-10 text-xs bg-white text-amber-600 px-3">
+                                    <p class="font-semibold">Vencido</p>
                                 </div>
                             </header>
                             <div class="grid grid-cols-2 gap-3 px-2 py-1 mt-2">
@@ -94,7 +99,8 @@
                                 </div>
                                 <div v-if="item.type === 'Descuento en precio fijo'">
                                     <InputLabel value="Precio promocional*" />
-                                    <el-input v-model="item.discounted_price" placeholder="Agrega un precio menor al actual"
+                                    <el-input v-model="item.discounted_price"
+                                        placeholder="Agrega un precio menor al actual"
                                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                         :parser="(value) => value.replace(/[^\d.]/g, '')">
                                         <template #prefix>
@@ -190,7 +196,7 @@
                 <div class="col-span-full text-right mt-3">
                     <PrimaryButton class="!rounded-full" :disabled="form.processing || conflicts">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                        Crear promociones
+                        Guardar cambios
                     </PrimaryButton>
                 </div>
             </form>
@@ -209,26 +215,13 @@ import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
 import { addOrUpdateItem } from "@/dbService.js";
 import axios from 'axios';
+import { isPast, parseISO, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default {
     data() {
         const form = useForm({
-            promos: [
-                {
-                    type: 'Descuento en precio fijo',
-                    expiration_date: null,
-                    discount: null,
-                    discounted_price: null,
-                    pack_quantity: 0,
-                    pack_price: null,
-                    buy_quantity: 2,
-                    pay_quantity: 1,
-                    min_quantity_to_gift: 1,
-                    giftable_id: null,
-                    giftable_type: null,
-                    quantity_to_gift: 1,
-                }
-            ],
+            promos: this.product.promotions || [],
             product_id: this.product.id,
             product_type: this.product.global_product ? 'global' : 'local',
             product_name: this.product.global_product ? this.product.global_product.name : this.product.name,
@@ -261,6 +254,12 @@ export default {
         product: Object,
     },
     methods: {
+        isExpired(date) {
+            if (!date) return false; // Si no hay fecha, no está vencida
+            // Convierte la fecha a objeto Date si es string
+            const dateObj = typeof date === 'string' ? parseISO(date) : date;
+            return isPast(dateObj);
+        },
         checkDisabledRules(typeName, index) {
             if (index === 0 || typeName === 'Producto gratis al comprar otro') {
                 return false; // no hay conflictos
@@ -356,7 +355,7 @@ export default {
             today.setHours(0, 0, 0, 0);
             return time.getTime() <= today.getTime();
         },
-        async fetchProductsMatch(query) {
+        async fetchProductsMatch(query, overwrite = true) {
             if (!query) {
                 this.products = [];
                 return;
@@ -367,7 +366,12 @@ export default {
                 const response = await axios.get(route('promotions.get-match', { query }));
 
                 if (response.status === 200) {
-                    this.products = response.data.items;
+                    if (overwrite) {
+                        this.products = response.data.items;
+                    } else {
+                        // Si no se debe sobreescribir, agregar los nuevos productos
+                        this.products = [...new Set([...this.products, ...response.data.items])];
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching products:', error);
@@ -375,12 +379,12 @@ export default {
                 this.fetchingProducts = false;
             }
         },
-        async store() {
+        async update() {
             try {
-                this.form.post(route("promotions.store"), {
+                this.form.put(route("promotions.update"), {
                     onSuccess: async () => {
                         this.$notify({
-                            title: "Promociones creadas",
+                            title: "Promociones actualizadas",
                             type: "success",
                         });
                     },
@@ -392,6 +396,21 @@ export default {
                 console.error(error);
             }
         },
-    }
+    },
+    mounted() {
+        // Cargar productos al montar el componente
+        this.product.promotions.forEach(element => {
+            if (element.giftable_id) {
+                let productName;
+                if (element.giftable.type === 'App\\Models\\GlobalProductStore') {
+                    productName = element.giftable.global_product.name;
+                } else {
+                    productName = element.giftable.name;
+                }
+                this.fetchProductsMatch(productName, false);
+            }
+        });
+        this.checkConflicts();
+    },
 }
 </script>

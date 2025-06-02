@@ -6,6 +6,7 @@ use App\Models\GlobalProductStore;
 use App\Models\Product;
 use App\Models\Promotions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PromotionsController extends Controller
 {
@@ -64,14 +65,63 @@ class PromotionsController extends Controller
         //
     }
 
-    public function edit(Promotions $promotions)
+    public function localEdit($encoded_product_id)
     {
-        //
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
+        $product = Product::with(['media', 'promotions.giftable'])->where('store_id', auth()->user()->store_id)
+            ->findOrFail($decoded_product_id);
+
+        return inertia('Promotions/Edit', compact('product'));
     }
 
-    public function update(Request $request, Promotions $promotions)
+    public function globalEdit($encoded_product_id)
     {
-        //
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
+        $product = GlobalProductStore::with(['globalProduct.media', 'promotions.giftable'])->where('store_id', auth()->user()->store_id)
+            ->findOrFail($decoded_product_id);
+
+        return inertia('Promotions/Edit', compact('product'));
+    }
+
+    public function update(Request $request)
+    {
+        // Primero validamos todas las promociones
+        foreach ($request->promos as $key => $promo) {
+            $this->validatePromo($request, $key, $promo['type']);
+        }
+
+        // Luego, si todas las validaciones pasan, eliminamos, creamos y/o actualizamos las promociones
+        if ($request->product_type === 'local') {
+            $class = Product::class;
+        } else {
+            $class = GlobalProductStore::class;
+        }
+        // eliminar las promociones que no están en el request
+        Promotions::where('promotionable_id', $request->product_id)
+            ->where('promotionable_type', $class)
+            ->whereNotIn('id', collect($request->promos)->pluck('id')->filter())
+            ->delete();
+
+        foreach ($request->promos as $promo) {
+            if (!isset($promo['id'])) {
+                // Si no hay ID, significa que es una nueva promoción
+                Promotions::create($promo + [
+                    'promotionable_id' => $request->product_id,
+                    'promotionable_type' => $class,
+                ]);
+            } else {
+                // Si hay ID, significa que es una promoción existente
+                $promotion = Promotions::findOrFail($promo['id']);
+                // Actualizamos la promoción con los nuevos datos
+                $promotion->update($promo);
+            }
+        }
+
+        return to_route('products.index');
     }
 
     public function destroy(Promotions $promotions)
@@ -83,6 +133,7 @@ class PromotionsController extends Controller
     {
         // Realiza la búsqueda de productos locales
         $local = Product::where('name', 'like', "%{$query}%")
+            ->where('store_id', auth()->user()->store_id)
             ->take(10)
             ->get()
             ->map(function ($product) {
@@ -98,6 +149,7 @@ class PromotionsController extends Controller
             $q->where('name', 'like', "%{$query}%");
         })
             ->with('globalProduct') // Carga la relación para evitar N+1 queries
+            ->where('store_id', auth()->user()->store_id)
             ->take(10)
             ->get()
             ->map(function ($product) {
