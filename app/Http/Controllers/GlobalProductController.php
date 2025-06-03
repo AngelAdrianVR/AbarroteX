@@ -11,7 +11,7 @@ class GlobalProductController extends Controller
 {
     public function index()
     {
-        $global_products = GlobalProduct::with(['media', 'category'])->get()->take(30);
+        $global_products = GlobalProduct::with(['media', 'category'])->get()->take(50);
         $total_products = GlobalProduct::all()->count();
 
         return inertia('GlobalProduct/Index', compact('global_products', 'total_products'));
@@ -127,12 +127,12 @@ class GlobalProductController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 30;
+        $offset = $currentPage * 50;
         $global_products = GlobalProduct::with('category', 'media', 'brand')
             ->latest()
             ->get()
             ->splice($offset)
-            ->take(30);
+            ->take(50);
 
         return response()->json(['items' => $global_products]);
     }
