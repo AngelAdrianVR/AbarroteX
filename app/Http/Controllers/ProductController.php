@@ -607,7 +607,18 @@ class ProductController extends Controller
         $product_type = explode('_', $product)[0]; // obtener el tipo de producto (local o global)
 
         if ($product_type === 'local') {
-            $product = Product::where('store_id', auth()->user()->store_id)
+            $product = Product::with([
+                'media',
+                'promotions.giftable' => function ($query) {
+                    $query->morphWith([
+                        Product::class => ['media'],
+                        GlobalProductStore::class => ['globalProduct' => function ($query) {
+                            $query->select('id', 'name', 'code')->with('media');
+                        }]
+                    ]);
+                }
+            ])
+                ->where('store_id', auth()->user()->store_id)
                 ->findOrFail($product_id);
             // mapear el producto local
             $product = [
@@ -620,10 +631,43 @@ class ProductController extends Controller
                 'bulk_product' => $product->bulk_product,
                 'measure_unit' => $product->measure_unit,
                 'image_url' => $product->getFirstMediaUrl('imageCover'),
-                'promotions' => $product->promotions,
+                'promotions' => $product->promotions->map(function ($promotion) {
+                    if (!$promotion->giftable) {
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => null]
+                        );
+                    }
+
+                    $giftable = $promotion->giftable_type == Product::class
+                        ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                        : [
+                            'public_price' => $promotion->giftable->public_price,
+                            'current_stock' => $promotion->giftable->current_stock,
+                            'name' => $promotion->giftable->globalProduct->name ?? null,
+                            'code' => $promotion->giftable->globalProduct->code ?? null,
+                            // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                            // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                        ];
+
+                    return array_merge(
+                        $promotion->toArray(),
+                        ['giftable' => $giftable]
+                    );
+                })->toArray(),
             ];
         } else {
-            $product = GlobalProductStore::where('store_id', auth()->user()->store_id)
+            $product = GlobalProductStore::with([
+                'promotions.giftable' => function ($query) {
+                    $query->morphWith([
+                        Product::class => ['media'],
+                        GlobalProductStore::class => ['globalProduct' => function ($query) {
+                            $query->select('id', 'name', 'code')->with('media');
+                        }]
+                    ]);
+                }
+            ])
+                ->where('store_id', auth()->user()->store_id)
                 ->findOrFail($product_id);
             // mapear el producto global
             $product = [
@@ -633,7 +677,30 @@ class ProductController extends Controller
                 'public_price' => $product->public_price,
                 'current_stock' => $product->current_stock,
                 'image_url' => $product->globalProduct->getFirstMediaUrl('imageCover'),
-                'promotions' => $product->promotions,
+                'promotions' => $product->promotions->map(function ($promotion) {
+                    if (!$promotion->giftable) {
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => null]
+                        );
+                    }
+
+                    $giftable = $promotion->giftable_type == Product::class
+                        ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                        : [
+                            'public_price' => $promotion->giftable->public_price,
+                            'current_stock' => $promotion->giftable->current_stock,
+                            'name' => $promotion->giftable->globalProduct->name ?? null,
+                            'code' => $promotion->giftable->globalProduct->code ?? null,
+                            // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                            // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                        ];
+
+                    return array_merge(
+                        $promotion->toArray(),
+                        ['giftable' => $giftable]
+                    );
+                })->toArray(),
             ];
         }
 
@@ -643,7 +710,18 @@ class ProductController extends Controller
     public function getAllForIndexedDB()
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::where('store_id', auth()->user()->store_id)
+        $local_products = Product::with([
+            'media',
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct' => function ($query) {
+                        $query->select('id', 'name', 'code')->with('media');
+                    }]
+                ]);
+            }
+        ])
+            ->where('store_id', auth()->user()->store_id)
             ->latest()
             ->get()
             ->map(function ($product) {
@@ -656,13 +734,45 @@ class ProductController extends Controller
                     'current_stock' => $product->current_stock,
                     'bulk_product' => $product->bulk_product,
                     'measure_unit' => $product->measure_unit,
-                    'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
-                    'promotions' => $product->promotions,
+                    'image_url' => $product->getFirstMediaUrl('imageCover'),
+                    'promotions' => $product->promotions->map(function ($promotion) {
+                        if (!$promotion->giftable) {
+                            return array_merge(
+                                $promotion->toArray(),
+                                ['giftable' => null]
+                            );
+                        }
+
+                        $giftable = $promotion->giftable_type == Product::class
+                            ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                            : [
+                                'public_price' => $promotion->giftable->public_price,
+                                'current_stock' => $promotion->giftable->current_stock,
+                                'name' => $promotion->giftable->globalProduct->name ?? null,
+                                'code' => $promotion->giftable->globalProduct->code ?? null,
+                                // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                                // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                            ];
+
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => $giftable]
+                        );
+                    })->toArray(),
                 ];
             })->toArray();
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::query()
+        $transfered_products = GlobalProductStore::with([
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct' => function ($query) {
+                        $query->select('id', 'name', 'code')->with('media');
+                    }]
+                ]);
+            }
+        ])
             ->where('store_id', auth()->user()->store_id)
             ->get()
             ->map(function ($tp) {
@@ -673,10 +783,32 @@ class ProductController extends Controller
                     'public_price' => $tp->public_price,
                     'current_stock' => $tp->current_stock,
                     'image_url' => $tp->globalProduct->getFirstMediaUrl('imageCover'),
-                    'promotions' => $tp->promotions,
+                    'promotions' => $tp->promotions->map(function ($promotion) {
+                        if (!$promotion->giftable) {
+                            return array_merge(
+                                $promotion->toArray(),
+                                ['giftable' => null]
+                            );
+                        }
+
+                        $giftable = $promotion->giftable_type == Product::class
+                            ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                            : [
+                                'public_price' => $promotion->giftable->public_price,
+                                'current_stock' => $promotion->giftable->current_stock,
+                                'name' => $promotion->giftable->globalProduct->name ?? null,
+                                'code' => $promotion->giftable->globalProduct->code ?? null,
+                                // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                                // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                            ];
+
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => $giftable]
+                        );
+                    })->toArray(),
                 ];
             })->toArray();
-
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = collect(array_merge($local_products, $transfered_products));
