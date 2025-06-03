@@ -180,8 +180,7 @@ import { deleteItem, getItemByAttributes } from "@/dbService.js";
 import { useForm } from '@inertiajs/vue3';
 import emitter from '@/eventBus.js';
 import PromotionCard from '../Promotions/PromotionCard.vue';
-import { isPast, parseISO, format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { isPast, parseISO } from 'date-fns';
 
 export default {
     data() {

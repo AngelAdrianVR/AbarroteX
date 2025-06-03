@@ -24,8 +24,10 @@
                 }}</span></p>
             </div>
         </div>
-        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ product.created_at
-        }}</strong></p>
+        <p class="text-gray37 mt-3">
+            Fecha de alta:
+            <strong class="ml-5">{{ formatDate(product.created_at) }}</strong>
+        </p>
         <p v-if="product.bulk_product" class="text-gray37 font-bold mt-3">Producto de venta a granel / ({{
             product.measure_unit }})</p>
         <p v-if="product.product_on_request" class="text-gray37 font-bold mt-3">Producto de venta bajo pedido / ({{
@@ -87,6 +89,8 @@
 </template>
 
 <script>
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default {
     name: 'ProductInfo',
@@ -109,6 +113,9 @@ export default {
 
     },
     methods: {
+        formatDate(date) {
+            return format(new Date(date), 'dd MMMM yyyy • h:mm a', { locale: es });
+        },
         copyToClipboard() {
             const textToCopy = this.product.code;
 

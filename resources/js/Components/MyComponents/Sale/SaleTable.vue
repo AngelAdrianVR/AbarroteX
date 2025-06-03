@@ -12,8 +12,8 @@
       <div v-for="(sale, index) in saleProducts" :key="index"
         class="mb-2 flex items-center space-x-4 border rounded-md relative">
         <div class="grid grid-cols-2 items-center min-h-12 w-[45%]">
-          <img class="mx-auto h-14 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
-            :alt="sale.product.name">
+          <img v-if="sale.product.imageUrl" class="mx-auto h-14 object-contain select-none" :draggable="false"
+            :src="sale.product.imageUrl" :alt="sale.product.name">
           <div v-else
             class="size-10 mx-auto bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -69,25 +69,74 @@
           <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small"
             :max="sale.product.current_stock" :precision="2">
             <template #suffix>
-                <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{ 
-                  sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
-                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : '' 
-                }}</span>
-              </template>
+              <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{
+                sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :
+                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : ''
+              }}</span>
+            </template>
           </el-input-number>
           <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small">
             <template #suffix>
-                <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{ 
-                  sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' : 
-                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : '' 
-                }}</span>
-              </template>
+              <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{
+                sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :
+                  sale.product.measure_unit?.trim() === 'Litro' ? 'L' : ''
+              }}</span>
+            </template>
           </el-input-number>
         </div>
-        <div class="text-[#5FCB1F] font-bold w-[15%] text-lg">${{ (sale.product.public_price *
-          sale.quantity).toLocaleString('en-US', {
-            minimumFractionDigits: 2
-          }) }}</div>
+        <div class="w-[13%]">
+          <div class="flex items-center space-x-2">
+            <el-dropdown v-if="sale.product.promotions?.length" trigger="click">
+              <button type="button" @click.stop title="Promociones"
+                class="flex items-center justify-center hover:bg-grayF2 size-5 rounded-full transition-colors duration-200">
+                <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M4.28963 0C6.61877 2.72132 7.62955 4.40871 8.10018 8.09863C8.68001 7.68802 8.88776 7.19533 8.93416 5.7168C11.7333 11.4332 8.4584 15.0059 5.54061 15.1846C5.18334 15.2064 4.52925 15.2601 4.1119 15.125C-0.115441 13.7554 -1.60456 10.0636 2.14607 5.24023C4.57869 2.25074 4.74354 1.28426 4.28963 0ZM4.82479 7.44531C2.7427 10.1811 2.08598 12.5064 5.0035 14.0547C6.92255 13.584 7.62367 12.4473 7.80232 10.4824C7.42197 11.0129 7.17028 11.2542 6.49178 11.375C6.67028 9.76748 6.13695 8.64466 4.82479 7.44531Z"
+                    fill="#AE080B" />
+                </svg>
+              </button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <main class="px-3 py-2 w-72 lg:w-[410px]">
+                    <section class="space-y-1">
+                      <div class="flex items-center justify-between mb-2">
+                        <h1 class="font-semibold lg:text-sm ml-2">
+                          Producto con promoción
+                        </h1>
+                        <button type="button" title="Editar promociones"
+                          class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
+                          @click="handleEditPromo(sale.product)">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                              d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                          </svg>
+                        </button>
+                      </div>
+                      <!-- <PromotionCard
+                        v-for="(promo, index) in sale.product.promotions.filter(p => !isExpired(p.expiration_date))"
+                        :key="index" :promo="promo" :product="sale.product" /> -->
+                    </section>
+                    <!-- <section v-if="sale.product.promotions.filter(p => isExpired(p.expiration_date)).length"
+                      class="mt-4 space-y-1">
+                      <h1 class="text-[#6E6E6E] font-semibold lg:text-sm ml-2">
+                        Promociones vencidas
+                      </h1>
+                      <PromotionCard
+                        v-for="(promo, index) in sale.product.promotions.filter(p => isExpired(p.expiration_date))"
+                        :key="index" :promo="promo" :product="sale.product" />
+                    </section> -->
+                  </main>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <div class="text-[#5FCB1F] font-bold w-[15%] text-lg">${{ (sale.product.public_price *
+              sale.quantity).toLocaleString('en-US', {
+                minimumFractionDigits: 2
+              }) }}</div>
+          </div>
+          <p class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
+        </div>
         <div class="w-[5%] text-right pr-14">
           <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
             title="¿Continuar?" @confirm="deleteItem(sale.product.id)">
@@ -106,8 +155,8 @@
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-2 border rounded-md items-center relative">
       <figure>
-        <img class="mx-auto w-3/4 h-24 object-contain" v-if="sale.product.imageUrl" :src="sale.product.imageUrl"
-          :alt="sale.product.name">
+        <img v-if="sale.product.imageUrl" :draggable="false" class="mx-auto w-3/4 h-24 object-contain select-none"
+          :src="sale.product.imageUrl" :alt="sale.product.name">
         <div v-else
           class="size-24 mx-auto bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="0.8"
@@ -178,9 +227,10 @@
   </div>
   <div class="text-center text-gray-500 text-sm md:mt-14" v-if="saleProducts.length == 0">
     <div v-if="isScanOn" class="flex flex-col items-center justify-center text-gray99 text-sm">
-      <span>Escanea un producto para comenzar la venta</span>
+      <span class="select-none">Escanea un producto para comenzar la venta</span>
       <figure class="my-7 flex items-center justify-center select-none">
-          <img draggable="false" class="w-1/3 md:w-1/4 opacity-15" src="@/../../public/images/escaner2.png" alt="scaner">
+        <img :draggable="false" class="w-1/3 md:w-1/4 opacity-15 select-none" src="@/../../public/images/escaner2.png"
+          alt="scaner">
       </figure>
     </div>
     <p v-else class="flex items-center justify-center text-gray99 text-sm">
@@ -189,7 +239,6 @@
       <i class="lg:hidden fa-regular fa-hand-point-down ml-3"></i>
     </p>
   </div>
-
   <!-- Modal para preguntar si se quiere cambiar el precio definitivamente o solo en esa venta -->
   <ConfirmationModal :show="showChangePriceConfirmation" @close="showChangePriceConfirmation = false">
     <template #title>
@@ -214,6 +263,8 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import { syncIDBProducts } from "@/dbService.js";
+import PromotionCard from '../Promotions/PromotionCard.vue';
+import { isPast, parseISO } from 'date-fns';
 
 export default {
   data() {
@@ -237,7 +288,8 @@ export default {
   components: {
     ConfirmationModal,
     PrimaryButton,
-    CancelButton
+    CancelButton,
+    PromotionCard,
   },
   props: {
     saleProducts: Array,
@@ -248,6 +300,20 @@ export default {
   },
   emits: ['delete-product'],
   methods: {
+    isExpired(date) {
+      if (!date) return false; // Si no hay fecha, no está vencida
+      // Convierte la fecha a objeto Date si es string
+      const dateObj = typeof date === 'string' ? parseISO(date) : date;
+      return isPast(dateObj);
+    },
+    handleEditPromo(product) {
+      const encodedId = btoa(product.id.toString());
+      if (product.global_product_id) {
+        this.$inertia.get(route('promotions.global.edit', encodedId));
+      } else {
+        this.$inertia.get(route('promotions.local.edit', encodedId));
+      }
+    },
     handleChangePrice(sale) {
       this.saleProductToEdit = sale;
       this.showChangePriceConfirmation = true;

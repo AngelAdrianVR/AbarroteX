@@ -97,9 +97,22 @@ class ProductController extends Controller
         $decoded_product_id = base64_decode($encoded_product_id);
 
         $cash_register = auth()->user()->cashRegister;
-        $product = ProductResource::make(Product::with('category', 'brand')
+        $product = Product::with(['category', 'brand', 'media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($decoded_product_id));
+            ->findOrFail($decoded_product_id);
+        // $product = ProductResource::make(Product::with(['category', 'brand', 'promotions.giftable' => function ($query) {
+        //     $query->morphWith([
+        //         Product::class => ['media'],
+        //         GlobalProductStore::class => ['globalProduct.media']
+        //     ]);
+        // }])
+        //     ->where('store_id', auth()->user()->store_id)
+        //     ->findOrFail($decoded_product_id));
 
         return inertia('Product/Show', compact('product', 'cash_register'));
     }
