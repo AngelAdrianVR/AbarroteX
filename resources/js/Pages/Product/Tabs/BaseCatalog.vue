@@ -24,6 +24,12 @@
                     <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
                         :titles="['Catálogo base', 'Mi tienda']" :data="globalProducts"
                         @left-check-change="handleLeftCheckChange" @right-check-change="handleLeftCheckChange">
+                        <!-- <template #left-footer>
+                            <PrimaryButton @click="showLeftFilter = true" class="transfer-footer" size="small">Operation</PrimaryButton>
+                        </template>
+                        <template #right-footer>
+                            <PrimaryButton class="transfer-footer" size="small">Operation</PrimaryButton>
+                        </template> -->
                     </el-transfer>
                     <!-- ventana de filtro izquierdo -->
                     <div v-if="showLeftFilter"
