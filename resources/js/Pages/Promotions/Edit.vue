@@ -215,8 +215,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
 import { addOrUpdateItem } from "@/dbService.js";
 import axios from 'axios';
-import { isPast, parseISO, format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { isPast, parseISO } from 'date-fns';
 
 export default {
     data() {
@@ -383,6 +382,15 @@ export default {
             try {
                 this.form.put(route("promotions.update"), {
                     onSuccess: async () => {
+                        // guardar promociones a IndexedDB
+                        // Obtener producto mas reciente agregado
+                        const productId = this.product.global_product ? `global_${this.product.id}` : `local_${this.product.id}`;
+                        const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
+                        const product = response.data.product;
+                        // actualizar a indexedDB
+                        if (product) {
+                            addOrUpdateItem('products', product);
+                        }
                         this.$notify({
                             title: "Promociones actualizadas",
                             type: "success",

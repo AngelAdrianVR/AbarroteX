@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GlobalProductStore;
 use App\Models\Product;
+use App\Models\ProductHistory;
 use App\Models\Promotions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -54,6 +55,16 @@ class PromotionsController extends Controller
             Promotions::create($promo + [
                 'promotionable_id' => $request->product_id,
                 'promotionable_type' => $class,
+            ]);
+
+            // Registrar el histórico del producto
+            ProductHistory::create([
+                'description' => "Nueva promoción. " .
+                    $this->getRelevantValues($promo),
+                'type' => 'Promoción',
+                'user_id' => auth()->id(),
+                'historicable_id' => $request->product_id,
+                'historicable_type' => $class
             ]);
         }
 
@@ -121,9 +132,31 @@ class PromotionsController extends Controller
                     'promotionable_id' => $request->product_id,
                     'promotionable_type' => $class,
                 ]);
+
+                // Registrar el histórico del producto
+                ProductHistory::create([
+                    'description' => "Nueva promoción. " .
+                        $this->getRelevantValues($promo),
+                    'type' => 'Promoción',
+                    'user_id' => auth()->id(),
+                    'historicable_id' => $request->product_id,
+                    'historicable_type' => $class
+                ]);
             } else {
                 // Si hay ID, significa que es una promoción existente
                 $promotion = Promotions::findOrFail($promo['id']);
+                
+                // Registrar el histórico del producto
+                ProductHistory::create([
+                    'description' => "Promoción cambiada. De " .
+                        $this->getRelevantValues($promotion->toArray()) .
+                        " a " . $this->getRelevantValues($promo),
+                    'type' => 'Promoción',
+                    'user_id' => auth()->id(),
+                    'historicable_id' => $request->product_id,
+                    'historicable_type' => $class
+                ]);
+                
                 // Actualizamos la promoción con los nuevos datos
                 $promotion->update($promo);
             }
@@ -177,6 +210,32 @@ class PromotionsController extends Controller
 
         // Devuelve los items encontrados
         return response()->json(['items' => $products], 200);
+    }
+    // Método privado para obtener valores reelevantes de la promoción de acuerdo al tipo
+    private function getRelevantValues($promo)
+    {
+        $description = 'Tipo: ' . $promo['type'] . ', ';
+        switch ($promo['type']) {
+            case 'Descuento en precio fijo':
+            case 'Descuento en porcentaje':
+                return $description . 'precio con descuento: $' . $promo['discounted_price'];
+
+            case 'Precio especial por paquete':
+                return $description . 'cantidad de paquete: ' . $promo['pack_quantity'] . ', precio de paquete: $' . $promo['pack_price'];
+
+            case 'Promoción tipo 2x1 o 3x2':
+                return $description . 'cantidad a comprar: ' . $promo['buy_quantity'] . ', cantidad a pagar: ' . $promo['pay_quantity'];
+
+            case 'Producto gratis al comprar otro':
+                if ($promo['giftable_type'] == GlobalProductStore::class) {
+                    $giftable_name = GlobalProductStore::find($promo['giftable_id'])?->global_product?->name ?? 'Producto no encontrado';
+                } else {
+                    $giftable_name = Product::find($promo['giftable_id'])?->name ?? 'Producto no encontrado';
+                }
+                return $description . 'en la compra de ' . $promo['min_quantity_to_gift'] .
+                    ' unidades, gratis ' . $promo['quantity_to_gift'] .
+                    ' unidad(es) de ' . $giftable_name;
+        }
     }
 
     // Método privado para manejar las validaciones

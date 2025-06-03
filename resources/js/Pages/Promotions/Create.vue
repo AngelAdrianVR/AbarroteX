@@ -94,7 +94,8 @@
                                 </div>
                                 <div v-if="item.type === 'Descuento en precio fijo'">
                                     <InputLabel value="Precio promocional*" />
-                                    <el-input v-model="item.discounted_price" placeholder="Agrega un precio menor al actual"
+                                    <el-input v-model="item.discounted_price"
+                                        placeholder="Agrega un precio menor al actual"
                                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                         :parser="(value) => value.replace(/[^\d.]/g, '')">
                                         <template #prefix>
@@ -379,6 +380,15 @@ export default {
             try {
                 this.form.post(route("promotions.store"), {
                     onSuccess: async () => {
+                        // guardar promociones a IndexedDB
+                        // Obtener producto mas reciente agregado
+                        const productId = this.product.global_product ? `global_${this.product.id}` : `local_${this.product.id}`;
+                        const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
+                        const product = response.data.product;
+                        // actualizar a indexedDB
+                        if (product) {
+                            addOrUpdateItem('products', product);
+                        }
                         this.$notify({
                             title: "Promociones creadas",
                             type: "success",

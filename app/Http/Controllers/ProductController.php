@@ -601,6 +601,45 @@ class ProductController extends Controller
         ]);
     }
 
+    public function getByIdForIndexedDB($product)
+    {
+        $product_id = explode('_', $product)[1]; // separar el id del tipo de producto (local o global)
+        $product_type = explode('_', $product)[0]; // obtener el tipo de producto (local o global)
+
+        if ($product_type === 'local') {
+            $product = Product::where('store_id', auth()->user()->store_id)
+                ->findOrFail($product_id);
+            // mapear el producto local
+            $product = [
+                'id' => 'local_' . $product->id,
+                'name' => $product->name,
+                'code' => $product->code,
+                'additional' => $product->additional,
+                'public_price' => $product->public_price,
+                'current_stock' => $product->current_stock,
+                'bulk_product' => $product->bulk_product,
+                'measure_unit' => $product->measure_unit,
+                'image_url' => $product->getFirstMediaUrl('imageCover'),
+                'promotions' => $product->promotions,
+            ];
+        } else {
+            $product = GlobalProductStore::where('store_id', auth()->user()->store_id)
+                ->findOrFail($product_id);
+            // mapear el producto global
+            $product = [
+                'id' => 'global_' . $product->id,
+                'name' => $product->name,
+                'code' => $product->code,
+                'public_price' => $product->public_price,
+                'current_stock' => $product->current_stock,
+                'image_url' => $product->globalProduct->getFirstMediaUrl('imageCover'),
+                'promotions' => $product->promotions,
+            ];
+        }
+
+        return response()->json(compact('product'));
+    }
+
     public function getAllForIndexedDB()
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
@@ -618,6 +657,7 @@ class ProductController extends Controller
                     'bulk_product' => $product->bulk_product,
                     'measure_unit' => $product->measure_unit,
                     'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
+                    'promotions' => $product->promotions,
                 ];
             })->toArray();
 
@@ -633,6 +673,7 @@ class ProductController extends Controller
                     'public_price' => $tp->public_price,
                     'current_stock' => $tp->current_stock,
                     'image_url' => $tp->globalProduct->getFirstMediaUrl('imageCover'),
+                    'promotions' => $tp->promotions,
                 ];
             })->toArray();
 

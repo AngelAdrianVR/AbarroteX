@@ -1196,7 +1196,6 @@ export default {
       showCreateProductModal: false, //muestra u oculta el modal de creación rápida de producto
       showPaymentModal: false, //muestra u oculta el modal de pago al finalizar la venta
 
-
       // generales
       paymentMethod: '', //Método de pago seleccionado
       paymentConfirmed: false, //indica si el pago ha sido confirmado

@@ -130,7 +130,6 @@ function getItemsByNullAttribute(storeName, attributeName) {
   });
 }
 
-
 function getItemByPartialAttributes(storeName, attributes) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readonly');

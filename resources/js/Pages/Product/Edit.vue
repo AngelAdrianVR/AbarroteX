@@ -334,10 +334,11 @@ export default {
                     this.form.post(route("products.update-with-media", this.product.data.id), {
                         method: '_put',
                         onSuccess: async () => {
-                            // guardar nuevo producto a IndexedDB
+                            // guardar promociones a IndexedDB
                             // Obtener producto mas reciente agregado
-                            const response = await axios.get(route('products.get-all-for-indexedDB'));
-                            const product = response.data.local_products.find(item => item.id.split('_')[1] == this.product.data.id);
+                            const productId = `local_${this.product.data.id}`;
+                            const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
+                            const product = response.data.product;
                             // actualizar a indexedDB
                             if (product) {
                                 addOrUpdateItem('products', product);
