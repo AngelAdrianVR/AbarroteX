@@ -268,7 +268,7 @@ export default {
                 'Descuento en precio fijo': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
                 'Descuento en porcentaje': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
                 'Precio especial por paquete': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Producto gratis al comprar otro'],
-                'Promoción tipo 2x1 o 3x2': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete'],
+                'Promoción tipo 2x1 o 3x2': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
                 'Producto gratis al comprar otro': [] // restricciones dinámicas
             };
 

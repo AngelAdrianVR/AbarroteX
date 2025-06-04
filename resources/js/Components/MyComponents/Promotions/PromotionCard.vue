@@ -1,7 +1,8 @@
 <template>
-    <article class="bg-[#FAFAFA] rounded-lg border border-grayD9 px-2 py-1" :class="{
+    <article class="rounded-lg border border-grayD9 px-2 py-1" :class="{
         'text-gray99': isExpired(promo.expiration_date),
         'bg-[#DFFECC]': applied,
+        'bg-[#FAFAFA]': !applied,
     }">
         <div>
             <div class="flex items-center justify-between">

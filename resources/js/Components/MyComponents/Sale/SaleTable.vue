@@ -89,7 +89,7 @@
             <el-dropdown v-if="sale.product.promotions?.length" trigger="click">
               <button type="button" @click.stop title="Promociones"
                 class="flex items-center justify-center hover:bg-grayF2 size-5 rounded-full transition-colors duration-200"
-                :class="true ? 'text-gray99' : 'text-[#AE080B]'">
+                :class="someApplicablePromotion(sale) ? 'text-[#AE080B]' : 'text-gray99'">
                 <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M4.28963 0C6.61877 2.72132 7.62955 4.40871 8.10018 8.09863C8.68001 7.68802 8.88776 7.19533 8.93416 5.7168C11.7333 11.4332 8.4584 15.0059 5.54061 15.1846C5.18334 15.2064 4.52925 15.2601 4.1119 15.125C-0.115441 13.7554 -1.60456 10.0636 2.14607 5.24023C4.57869 2.25074 4.74354 1.28426 4.28963 0ZM4.82479 7.44531C2.7427 10.1811 2.08598 12.5064 5.0035 14.0547C6.92255 13.584 7.62367 12.4473 7.80232 10.4824C7.42197 11.0129 7.17028 11.2542 6.49178 11.375C6.67028 9.76748 6.13695 8.64466 4.82479 7.44531Z"
@@ -116,7 +116,7 @@
                       </div>
                       <PromotionCard v-for="promo in sale.product.promotions.filter(p => !isExpired(p.expiration_date))"
                         :key="promo.id" :promo="promo" :product="sale.product" :showGiftable="false"
-                        :applied="isApplicablePromotion(sale, promo, saleIndex)" />
+                        :applied="!!isApplicablePromotion(sale, promo)" />
                     </section>
                     <section v-if="sale.product.promotions.filter(p => isExpired(p.expiration_date)).length"
                       class="mt-4 space-y-1">
@@ -131,14 +131,15 @@
               </template>
             </el-dropdown>
             <div class="text-[#5FCB1F] font-bold text-lg">
-              ${{ (sale.product.public_price *
-                sale.quantity).toLocaleString('en-US', {
-                  minimumFractionDigits: 2
-                }) }}
+              ${{ sale.product.discounted_price
+                ? (sale.product.discounted_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })
+                : (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
             </div>
           </div>
-          <p v-if="sale.product.promotions?.length" class="text-gray99 text-[10px]">Promoción disponible</p>
-          <p class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
+          <div v-if="sale.product.promotions?.length">
+            <p v-if="someApplicablePromotion(sale)" class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
+            <p v-else class="text-gray99 text-[10px]">Promoción disponible</p>
+          </div>
         </div>
         <div class="w-[5%] text-right pr-10">
           <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
@@ -212,9 +213,10 @@
           :precision="2" />
         <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
         <div class="text-[#5FCB1F] font-bold text-lg">
-          ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', {
-            minimumFractionDigits: 2
-          }) }}</div>
+          ${{ sale.product.discounted_price
+            ? (sale.product.discounted_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })
+            : (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+        </div>
         <div class="self-end text-lg">
           <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
             @confirm="deleteItem(sale.product.id)" class="justify-self-end">
@@ -287,9 +289,7 @@ export default {
       quantity: 1,
       editMode: null,
       editedPrice: null,
-      originalPrices: this.saleProducts.map((sale) => ([
-        sale.product.public_price
-      ])),
+      originalPrices: [],
     };
   },
   components: {
@@ -370,24 +370,30 @@ export default {
       }
     },
     // funcion que revisa si una promocion ya es aplicable al producto de la venta
-    isApplicablePromotion(sale, promotion, index) {
-      sale.product.public_price = this.originalPrices[index]; // si no se cumple la cantidad, se restaura el precio original
+    isApplicablePromotion(sale, promotion) {
       if (promotion.type === 'Descuento en precio fijo' || promotion.type === 'Descuento en porcentaje') {
-        sale.product.public_price = promotion.discounted_price;
+        sale.product.discounted_price = promotion.discounted_price;
         return true;
       } else if (promotion.type === 'Precio especial por paquete') {
-        if (sale.quantity >= promotion.pack_quantity) {
-          sale.product.public_price = promotion.pack_price;
+        
+        if (sale.quantity % promotion.pack_quantity == 0) {
+          const applicableQuantity = Math.floor(sale.quantity / promotion.pack_quantity);
+          sale.product.discounted_price = promotion.pack_price / promotion.pack_quantity; // calcular el precio por unidad del paquete
+        } else {
+          sale.product.discounted_price = null; // si no se cumple la cantidad del paquete, no hay descuento
         }
-        return sale.quantity >= promotion.pack_quantity;
+        return sale.quantity % promotion.pack_quantity == 0;
       } else if (promotion.type === 'Promoción tipo 2x1 o 3x2') {
         // obtener cuantas promociones se pueden aplicar
         const applicableQuantity = Math.floor(sale.quantity / promotion.buy_quantity);
         const remainder = sale.quantity % promotion.buy_quantity;
         if (applicableQuantity > 0) {
           // obtener el precio a pagar por unidad para respetar la promocion y tomando en cuenta el resto a precio original
-          const priceToPay = (sale.product.public_price * (applicableQuantity * promotion.pay_quntity) + remainder) / sale.quantity;
-          sale.product.public_price = priceToPay;
+          const priceToPay = (sale.product.public_price * ((applicableQuantity * promotion.pay_quantity) + remainder)) / sale.quantity;
+          // redondear a 1 decimal
+          sale.product.discounted_price = Math.round(priceToPay * 10) / 10;
+        } else {
+          sale.product.discounted_price = null;
         }
         return applicableQuantity;
       } else if (promotion.type === 'Producto gratis al comprar otro') {
@@ -395,6 +401,10 @@ export default {
       } else {
         return false; // Si no coincide con ningún tipo conocido, no es aplicable
       }
+    },
+    // función que devuelve si por lo menos una promoción es aplicable al producto de la venta
+    someApplicablePromotion(sale) {
+      return sale.product.promotions.some(promo => this.isApplicablePromotion(sale, promo));
     }
   },
 };
