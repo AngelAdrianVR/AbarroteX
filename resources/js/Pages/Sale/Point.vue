@@ -277,8 +277,8 @@
                       </template>
                     </el-popconfirm>
                   </div>
-                  <SaleTable @delete-product="deleteProduct" :saleProducts="tab.saleProducts"
-                    :showFull="!showNoCodeProducts" />
+                  <SaleTable @delete-product="deleteProduct" @create-gift-product="addGiftProduct"
+                    :saleProducts="tab.saleProducts" :showFull="!showNoCodeProducts" />
                 </el-tab-pane>
               </el-tabs>
             </div>
@@ -622,7 +622,8 @@
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
-        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !border-red-600" @click="showPaymentModal = false">
+        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !border-red-600"
+          @click="showPaymentModal = false">
           <span>Cancelar pago</span>
           <i class="fa-solid fa-xmark"></i>
         </ThirthButton>
@@ -636,7 +637,7 @@
             <p class="text-lg text-center font-bold">EFECTIVO</p>
             <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
           </button>
-          <button @click="paymentModalStep = 3; ; paymentMethod = 'Tarjeta'" type="button"
+          <button @click="paymentModalStep = 3;; paymentMethod = 'Tarjeta'" type="button"
             class="bg-[#DAE6FF] text-[#063B52] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
             <p class="text-lg text-center font-bold">TARJETA</p>
             <img src="@/../../public/images/card.webp" alt="Pago con tarjeta">
@@ -656,39 +657,44 @@
         </section>
 
         <section class="mx-auto mt-2 md:w-2/3">
-          <div class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
+          <div
+            class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
             <span class="font-bold text-[#37672B]">EFECTIVO</span>
             <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo" class="h-7">
           </div>
 
-          <div class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+          <div
+            class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
             <span class="font-bold">Total a pagar</span>
-            <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+            <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue -
+              1].discount)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
           </div>
 
           <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
             <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
-            <el-input-number ref="receivedInput" @keydown.enter="store" v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" :min="1" :max="999999">
+            <el-input-number ref="receivedInput" @keydown.enter="store"
+              v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" :min="1" :max="999999">
               <template #prefix>
                 <span>$</span>
               </template>
             </el-input-number>
             <p class="pt-5 font-bold">Cambio</p>
             <div class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-7 flex items-center justify-between">
-              <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived" class="font-bold">
+              <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived"
+                class="font-bold">
                 <span class="mr-5">$</span>
                 {{
                   (editableTabs[this.editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
-                  editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
-                  minimumFractionDigits: 2
-                  })
+                    editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
+                      minimumFractionDigits: 2
+                    })
                 }}
               </p>
             </div>
-             <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
-                class="text-base font-bold text-red-600 text-center mb-3">
-                La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
-              </p>
+            <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
+              class="text-base font-bold text-red-600 text-center mb-3">
+              La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
+            </p>
             <div class="flex justify-center mt-7">
               <PrimaryButton :disabled="storeProcessing" class="!px-20" @click="store">
                 <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -700,7 +706,8 @@
           <!-- Confirmacion de pago -->
           <template v-else>
             <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
@@ -722,15 +729,21 @@
 
         <section class="mx-auto mt-2 md:w-2/3">
           <div v-if="!paymentConfirmed">
-            <p class="my-3 text-sm text-center">El sistema no procesa pagos con tarjeta. Usa tu terminal bancaria externa y luego registra aquí el pago.</p>
-            <div class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
+            <p class="my-3 text-sm text-center">El sistema no procesa pagos con tarjeta. Usa tu terminal bancaria
+              externa y
+              luego registra aquí el pago.</p>
+            <div
+              class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
               <span class="font-bold text-[#05394F]">TARJETA</span>
               <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
             </div>
 
-            <div class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+            <div
+              class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
               <span class="font-bold">Total a pagar</span>
-              <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+              <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue
+                -
+                1].discount)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
             </div>
 
             <div class="flex justify-center mt-7">
@@ -741,10 +754,11 @@
             </div>
           </div>
 
-           <!-- Confirmacion de pago -->
+          <!-- Confirmacion de pago -->
           <template v-else>
             <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
@@ -1073,7 +1087,8 @@
       <template #footer>
         <div class="flex items-center space-x-1">
           <CancelButton @click="showLimitCashModal = false" :disabled="maxCashNotifying">Ahora no</CancelButton>
-          <PrimaryButton @click="showLimitCashModal = false; handleCashCut()" :disabled="maxCashNotifying">Hacer corte</PrimaryButton>
+          <PrimaryButton @click="showLimitCashModal = false; handleCashCut()" :disabled="maxCashNotifying">Hacer corte
+          </PrimaryButton>
         </div>
       </template>
     </ConfirmationModal>
@@ -1600,9 +1615,21 @@ export default {
       //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
       this.cutForm.difference = (this.cutForm.totalStoreSale?.cash + this.cutForm.totalOnlineSale + this.cutForm.totalCashMovements + this.asignedCashRegister?.started_cash) - this.cutForm.counted_cash
     },
-    deleteProduct(productId) {
+    deleteProduct(productId, isGift = false) {
       const indexToDelete = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => sale.product.id === productId);
-      this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
+
+      if (indexToDelete != -1) {
+        // remover regalo si es que el producto es un regalo
+        if (isGift && this.editableTabs[this.editableTabsValue - 1].saleProducts[indexToDelete].quantity > 1) {
+          // Si hay más de una unidad, simplemente reduce la cantidad regalada
+          let existingSale = this.editableTabs[this.editableTabsValue - 1].saleProducts[indexToDelete];
+          existingSale.quantity -= existingSale.giftQuantity;
+          existingSale.giftQuantity = null; // Resetea la cantidad de regalo a null
+          existingSale.product.discounted_price = null; // Resetea la cantidad de regalo a null
+        } else {
+          this.editableTabs[this.editableTabsValue - 1].saleProducts.splice(indexToDelete, 1);
+        }
+      }
     },
     cashPayment() {
       this.showPaymentModal = true; //abre el modal de seleccion de pago (efectivo o tarjeta)
@@ -1714,16 +1741,70 @@ export default {
         this.inputFocus();
       }
     },
+    async addGiftProduct(product) {
+      try {
+        const results = await getItemByPartialAttributes('products', {
+          name: product.name,
+        });
+
+        let giftable = results.length ? results[0] : null;
+        if (!giftable) {
+          return;
+        } else {
+          // editar el precio a 0 para que no se cobre el producto
+          giftable.discounted_price = 0;
+        }
+
+        //revisa si el producto a agregar ya esta dentro del arreglo
+        const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
+          return sale.product.id == giftable.id;
+        });
+        if (existingIndex !== -1) {
+          let existingSale = this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex];
+          existingSale.quantity += product.quantity; // Aumenta la cantidad del producto existente
+          existingSale.giftQuantity = product.quantity; // guardar la cantidad regalada
+          // calcular precio unitario con descuento tomando en cuenta la cantidad regalada
+          const pricePerUnit =
+            (existingSale.product.public_price * (existingSale.quantity - existingSale.giftQuantity)) / existingSale.quantity;
+          existingSale.product.discounted_price = Math.round(pricePerUnit * 100) / 100; // redondear a 2 decimales
+
+          // this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
+          //   ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
+          //   quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + product.quantity
+          // };
+        } else {
+          // Si el producto no existe, agrégalo al array
+          this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
+            product: giftable,
+            quantity: product.quantity,
+            giftQuantity: product.quantity,
+            originalPrice: null,
+          });
+        }
+
+        // indicar al navegador mediante el local storage que hay proceso pendiente
+        const pendentProcess = JSON.parse(localStorage.getItem('pendentProcess'));
+        if (!pendentProcess) {
+          // guardar el valor en el localStorage
+          localStorage.setItem('pendentProcess', true);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
     addSaleProduct(product) {
-      //revisa si el producto a agregar ya esta dentro del arreglo
-      const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts.findIndex(sale => {
+      const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts?.findIndex(sale => {
         return sale.product.id == product.id;
       });
+
+      let existingSale = this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex];
+      //revisa si el producto a agregar ya esta dentro del arreglo
       if (existingIndex !== -1) {
-        this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
-          ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-          quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
-        };
+        existingSale.quantity += this.quantity; // Aumenta la cantidad del producto existente
+        // this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
+        //   ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
+        //   quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
+        // };
       } else {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
@@ -2068,18 +2149,19 @@ export default {
 </script>
 
 <style>
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
 
-  .animate-fade-in-up {
-    animation: fadeInUp 1s ease-out forwards;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s ease-out forwards;
+}
 </style>

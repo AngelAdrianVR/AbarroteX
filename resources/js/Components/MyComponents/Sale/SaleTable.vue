@@ -104,7 +104,7 @@
                         <h1 class="font-semibold lg:text-sm ml-2">
                           Producto con promoción
                         </h1>
-                        <button type="button" title="Editar promociones"
+                        <!-- <button type="button" title="Editar promociones"
                           class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
                           @click="handleEditPromo(sale.product)">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -112,7 +112,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                               d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                           </svg>
-                        </button>
+                        </button> -->
                       </div>
                       <PromotionCard v-for="promo in sale.product.promotions.filter(p => !isExpired(p.expiration_date))"
                         :key="promo.id" :promo="promo" :product="sale.product" :showGiftable="false"
@@ -131,8 +131,10 @@
               </template>
             </el-dropdown>
             <div class="text-[#5FCB1F] font-bold text-lg">
-              ${{ sale.product.discounted_price
-                ? (sale.product.discounted_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })
+              ${{ sale.product.discounted_price != null
+                ? (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
+                  minimumFractionDigits: 2
+                })
                 : (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
             </div>
           </div>
@@ -305,7 +307,7 @@ export default {
       default: true
     }
   },
-  emits: ['delete-product'],
+  emits: ['delete-product', 'create-gift-product'],
   methods: {
     isExpired(date) {
       if (!date) return false; // Si no hay fecha, no está vencida
@@ -313,14 +315,14 @@ export default {
       const dateObj = typeof date === 'string' ? parseISO(date) : date;
       return isPast(dateObj);
     },
-    handleEditPromo(product) {
-      const encodedId = btoa(product.id.toString());
-      if (product.global_product_id) {
-        this.$inertia.get(route('promotions.global.edit', encodedId));
-      } else {
-        this.$inertia.get(route('promotions.local.edit', encodedId));
-      }
-    },
+    // handleEditPromo(product) {
+    //   const encodedId = btoa(product.id.toString());
+    //   if (product.global_product_id) {
+    //     this.$inertia.get(route('promotions.global.edit', encodedId));
+    //   } else {
+    //     this.$inertia.get(route('promotions.local.edit', encodedId));
+    //   }
+    // },
     handleChangePrice(sale) {
       this.saleProductToEdit = sale;
       this.showChangePriceConfirmation = true;
@@ -341,7 +343,6 @@ export default {
         this.saleProductToEdit.originalPrice = this.saleProductToEdit.product.public_price; //agrega bandera para indicar que se le cambió el precio solo para esa venta
         this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
         this.showChangePriceConfirmation = false;
-
       } else { //se cambia el precio definitivo al producto.
         //si es local manda al controlador de locales 
         if (this.saleProductToEdit.product.id.split('_')[0] === 'local') {
@@ -375,28 +376,48 @@ export default {
         sale.product.discounted_price = promotion.discounted_price;
         return true;
       } else if (promotion.type === 'Precio especial por paquete') {
-        
-        if (sale.quantity % promotion.pack_quantity == 0) {
-          const applicableQuantity = Math.floor(sale.quantity / promotion.pack_quantity);
-          sale.product.discounted_price = promotion.pack_price / promotion.pack_quantity; // calcular el precio por unidad del paquete
+        const applicableQuantity = Math.floor(sale.quantity / promotion.pack_quantity);
+        const remainder = sale.quantity % promotion.pack_quantity;
+        if (applicableQuantity > 0) {
+          // calcular el precio por unidad del paquete
+          const pricePerUnit = ((applicableQuantity * promotion.pack_price) + (remainder * sale.product.public_price)) / sale.quantity;
+          sale.product.discounted_price = Math.round(pricePerUnit * 100) / 100; // redondear a 2 decimales
         } else {
           sale.product.discounted_price = null; // si no se cumple la cantidad del paquete, no hay descuento
         }
-        return sale.quantity % promotion.pack_quantity == 0;
+        return applicableQuantity > 0;
       } else if (promotion.type === 'Promoción tipo 2x1 o 3x2') {
         // obtener cuantas promociones se pueden aplicar
         const applicableQuantity = Math.floor(sale.quantity / promotion.buy_quantity);
         const remainder = sale.quantity % promotion.buy_quantity;
         if (applicableQuantity > 0) {
           // obtener el precio a pagar por unidad para respetar la promocion y tomando en cuenta el resto a precio original
-          const priceToPay = (sale.product.public_price * ((applicableQuantity * promotion.pay_quantity) + remainder)) / sale.quantity;
-          // redondear a 1 decimal
-          sale.product.discounted_price = Math.round(priceToPay * 10) / 10;
+          const pricePerUnit = (sale.product.public_price * ((applicableQuantity * promotion.pay_quantity) + remainder)) / sale.quantity;
+          sale.product.discounted_price = Math.round(pricePerUnit * 100) / 100; // redondear a 2 decimales;
         } else {
           sale.product.discounted_price = null;
         }
         return applicableQuantity;
       } else if (promotion.type === 'Producto gratis al comprar otro') {
+        if (sale.quantity >= promotion.min_quantity_to_gift) {
+          //revisar si ya hay un producto gratis aplicado
+          if (!sale.gifted_product) {
+            this.$emit('create-gift-product', {
+              name: promotion.giftable.name,
+              quantity: promotion.quantity_to_gift
+            });
+
+            sale.gifted_product = true; // marca que se ha aplicado un producto gratis
+          }
+        } else if (sale.gifted_product) {
+          const productId = promotion.giftable_type == 'App\\Models\\GlobalProductStore'
+            ? 'global_' + promotion.giftable_id
+            : 'local_' + promotion.giftable_id;
+          // si la cantidad ya no es suficiente para aplicar el producto gratis, eliminarlo
+          const isGift = true; 
+          this.$emit('delete-product', productId, isGift);
+          sale.gifted_product = false; // marca que ya no se aplica el producto gratis
+        }
         return sale.quantity >= promotion.min_quantity_to_gift;
       } else {
         return false; // Si no coincide con ningún tipo conocido, no es aplicable
