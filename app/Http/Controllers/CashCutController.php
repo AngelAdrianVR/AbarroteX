@@ -212,16 +212,21 @@ class CashCutController extends Controller
 
     public function fetchTotalSaleForCashCut($cash_register_id)
     {
+        $store_id = auth()->user()->store_id;
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
         $online_store_properties = auth()->user()->store->online_store_properties;
         $online_sales = null;
+
+        $has_online_sales_cash_register = is_array($online_store_properties)
+            && array_key_exists('online_sales_cash_register', $online_store_properties)
+            && intval($online_store_properties['online_sales_cash_register']) === intval($cash_register_id);
 
         if ($last_cash_cut !== null) {
             $sales = Sale::where('cash_register_id', $cash_register_id)
                 ->where('created_at', '>', $last_cash_cut->created_at)
                 ->get();
 
-            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === intval($cash_register_id)) {
+            if ($has_online_sales_cash_register) {
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
                     ->whereIn('status', ['Entregado', 'Reembolsado'])
                     ->where('created_at', '>', $last_cash_cut->created_at)
@@ -229,24 +234,24 @@ class CashCutController extends Controller
             }
         } else {
             $sales = Sale::where('cash_register_id', $cash_register_id)->get();
-
-            if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === intval($cash_register_id)) {
+            
+            if ($has_online_sales_cash_register) {
                 $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
-                    ->whereIn('status', ['Entregado', 'Reembolsado'])
-                    ->get();
+                ->whereIn('status', ['Entregado', 'Reembolsado'])
+                ->get();
             }
         }
-
+        
         // Filtra las ventas a crédito
-        $credit_sales_folios = CreditSaleData::pluck('folio')->toArray();
+        $credit_sales_folios = CreditSaleData::where('store_id', $store_id)->pluck('folio')->toArray();
         $filtered_sales = $sales->reject(function ($sale) use ($credit_sales_folios) {
             return in_array($sale->folio, $credit_sales_folios);
         });
-
+        
         // Separa ventas por método de pago
         $cash_sales = $filtered_sales->where('payment_method', 'Efectivo');
         $card_sales = $filtered_sales->where('payment_method', 'Tarjeta');
-
+        
         // Calcula los totales
         $total_cash_sales = $cash_sales->sum(function ($sale) {
             return $sale->quantity * $sale->current_price;
