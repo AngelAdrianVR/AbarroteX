@@ -50,7 +50,6 @@
         </el-dropdown>
       </div>
     </section>
-
     <!-- Información de caja -->
     <section class="lg:flex lg:space-x-7 md:w-full xl:w-[90%] mx-auto text-xs md:text-sm mt-7">
       <div class="w-full border border-gray-300 rounded-2xl shadow-lg bg-white p-1 self-start transition-all ease-linear duration-200">
