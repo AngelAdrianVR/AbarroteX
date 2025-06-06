@@ -66,7 +66,7 @@
           </template>
         </div>
         <div class="w-[20%]">
-          <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" size="small"
+          <el-input-number v-if="isInventoryOn" @change="handleChangeQuantity" v-model="sale.quantity" :min="0" size="small"
             :max="sale.product.current_stock" :precision="2">
             <template #suffix>
               <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{
@@ -75,7 +75,7 @@
               }}</span>
             </template>
           </el-input-number>
-          <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small">
+          <el-input-number v-else @change="handleChangeQuantity" v-model="sale.quantity" :min="0" :precision="2" size="small">
             <template #suffix>
               <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{
                 sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :

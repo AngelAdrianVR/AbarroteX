@@ -1801,6 +1801,14 @@ export default {
       //revisa si el producto a agregar ya esta dentro del arreglo
       if (existingIndex !== -1) {
         existingSale.quantity += this.quantity; // Aumenta la cantidad del producto existente
+        if (existingSale.giftQuantity) {
+          // Si es un regalo, se calcula el precio
+          const pricePerUnit =
+            (existingSale.product.public_price * (existingSale.quantity - existingSale.giftQuantity)) / existingSale.quantity;
+          existingSale.product.discounted_price = Math.round(pricePerUnit * 100) / 100; // redondear a 2 decimales
+        } else {
+          existingSale.giftQuantity = null; // Resetea la cantidad de regalo si no es un regalo
+        }
         // this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
         //   ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
         //   quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
