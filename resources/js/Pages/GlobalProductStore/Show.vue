@@ -6,6 +6,71 @@
                 <h1 class="font-bold text-lg">Productos</h1>
                 <div class="flex items-center space-x-1 my-2 lg:my-0">
                     <PrimaryButton @click="openEntryModal">Inventario</PrimaryButton>
+                    <el-dropdown trigger="click">
+                        <button @click.stop title="Promociones"
+                            class="flex items-center justify-center bg-[#EDEDED] text-primary size-8 rounded-full">
+                            <svg width="16" height="20" viewBox="0 0 11 16" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M4.28948 0C5.57479 1.07312 8.30838 3.47788 8.101 8.09863C8.68078 7.68803 8.88761 7.19526 8.93401 5.7168C12.1304 10.8078 8.65989 14.7059 5.54143 15.1846C5.18762 15.2389 4.52916 15.2602 4.11175 15.125C-0.11532 13.7553 -1.60454 10.0634 2.14593 5.24023C4.57877 2.25049 4.74345 1.28434 4.28948 0ZM4.82464 7.44336C2.74274 10.1789 2.08633 12.5045 5.00335 14.0527C6.92271 13.5821 7.62449 12.4455 7.80315 10.4805C7.42276 11.011 7.17113 11.2522 6.49261 11.373C6.6711 9.7655 6.13689 8.64274 4.82464 7.44336Z"
+                                    fill="#F68C0F" />
+                            </svg>
+                        </button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <main class="px-3 py-2 w-72 lg:w-[410px]">
+                                    <section class="space-y-1">
+                                        <div v-if="global_product_store.promotions.length"
+                                            class="flex items-center justify-between mb-2">
+                                            <h1 class="font-semibold lg:text-sm ml-2">
+                                                Producto con promoción
+                                            </h1>
+                                            <button type="button" title="Editar promociones"
+                                                class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
+                                                @click="handleEditPromo(global_product_store)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div v-else class="flex items-center justify-between mb-2">
+                                            <h1 class="flex items-center space-x-2 font-semibold lg:text-sm ml-2">
+                                                <span>Sin promociones aún. Crea una</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="size-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                                                </svg>
+                                            </h1>
+                                            <button type="button" title="Agregar promociones"
+                                                class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
+                                                @click="handleCreatePromo(global_product_store)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="size-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <PromotionCard
+                                            v-for="(promo, index) in global_product_store.promotions.filter(p => !isExpired(p.expiration_date))"
+                                            :key="index" :promo="promo" :product="global_product_store" />
+                                    </section>
+                                    <section v-if="global_product_store.promotions.filter(p => isExpired(p.expiration_date)).length"
+                                        class="mt-4 space-y-1">
+                                        <h1 class="text-[#6E6E6E] font-semibold lg:text-sm ml-2">
+                                            Promociones vencidas
+                                        </h1>
+                                        <PromotionCard
+                                            v-for="(promo, index) in global_product_store.promotions.filter(p => isExpired(p.expiration_date))"
+                                            :key="index" :promo="promo" :product="global_product_store" />
+                                    </section>
+                                </main>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
                     <button @click="$inertia.get(route('global-product-store.edit', encodedId))" title="Editar producto"
                         class="flex items-center justify-center bg-[#EDEDED] text-primary size-8 rounded-full">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -128,11 +193,10 @@
                         </div>
                         <div class="mt-3">
                             <InputLabel value="Motivo" />
-                            <el-select filterable v-model="form.concept" clearable
-                                placeholder="Seleccione" no-data-text="No hay opciones registradas"
+                            <el-select filterable v-model="form.concept" clearable placeholder="Seleccione"
+                                no-data-text="No hay opciones registradas"
                                 no-match-text="No se encontraron coincidencias">
-                                <el-option v-for="item in outConcepts" :key="item" :label="item"
-                                    :value="item" />
+                                <el-option v-for="item in outConcepts" :key="item" :label="item" :value="item" />
                             </el-select>
                         </div>
                     </el-tab-pane>
@@ -166,6 +230,8 @@ import axios from 'axios';
 import { useForm, Link } from "@inertiajs/vue3";
 import { addOrUpdateItem } from '@/dbService.js';
 import DialogModal from '@/Components/DialogModal.vue';
+import PromotionCard from '@/Components/MyComponents/Promotions/PromotionCard.vue';
+import { isPast, parseISO } from 'date-fns';
 
 export default {
     data() {
@@ -218,12 +284,27 @@ export default {
         ProductInfo,
         ProductHistorical,
         Link,
+        PromotionCard,
     },
     props: {
         global_product_store: Object,
         cash_register: Object,
     },
     methods: {
+        isExpired(date) {
+            if (!date) return false; // Si no hay fecha, no está vencida
+            // Convierte la fecha a objeto Date si es string
+            const dateObj = typeof date === 'string' ? parseISO(date) : date;
+            return isPast(dateObj);
+        },
+        handleEditPromo(product) {
+            const encodedId = btoa(product.id.toString());
+            this.$inertia.get(route('promotions.global.edit', encodedId));
+        },
+        handleCreatePromo(product) {
+            const encodedId = btoa(product.id.toString());
+            this.$inertia.get(route('promotions.global.create', encodedId));
+        },
         sendInventoryMovement() {
             if (this.inventoryActiveTab == '1') {
                 this.entryProduct();

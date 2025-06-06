@@ -40,7 +40,15 @@ class GlobalProductStoreController extends Controller
         $decoded_global_product_id = base64_decode($encoded_global_product_store_id);
 
         $cash_register = auth()->user()->cashRegister;
-        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])
+        $global_product_store = GlobalProductStore::with([
+            'globalProduct' => ['media', 'category', 'brand'],
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct.media']
+                ]);
+            }
+        ])
             ->where('store_id', auth()->user()->store_id)
             ->findOrFail($decoded_global_product_id);
 
@@ -132,7 +140,7 @@ class GlobalProductStoreController extends Controller
             'historicable_type' => GlobalProductStore::class
         ]);
     }
-    
+
     public function entryStock(Request $request, $global_product_store_id)
     {
         $messages = [

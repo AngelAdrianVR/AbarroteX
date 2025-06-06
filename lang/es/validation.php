@@ -198,5 +198,6 @@ return [
         'client_department' => 'departamento',
         'technician_name' => 'responsable',
         'receiver_name' => 'persona que recibe',
+        'discounted_price' => 'Precio promocional',
     ],
 ];

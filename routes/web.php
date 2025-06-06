@@ -21,6 +21,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductBoutiqueController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
+use App\Http\Controllers\PromotionsController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\RentalPaymentController;
@@ -95,6 +96,7 @@ Route::get('products-get-all-until-page/{currentPage}', [ProductController::clas
 Route::post('products/import', [ProductController::class, 'import'])->name('products.import')->middleware('auth');
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
+Route::get('products-get-by-id-for-indexedDB/{product}', [ProductController::class, 'getByIdForIndexedDB'])->name('products.get-by-id-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
 
@@ -403,6 +405,17 @@ Route::get('my-referrals/index', [DiscountTicketController::class, 'referralsInd
 Route::resource('partners', PartnerController::class);
 Route::get('/partner-register', [PartnerController::class, 'landingCreate'])->name('landing.create-partner');
 Route::post('/partner-recover', [PartnerController::class, 'landingRecover'])->name('landing.recover-partner');
+
+
+//rutas de promociones --------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::get('promotions/local/{product}', [PromotionsController::class, 'localCreate'])->name('promotions.local.create')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions/global/{product}', [PromotionsController::class, 'globalCreate'])->name('promotions.global.create')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions/local/{product}/edit', [PromotionsController::class, 'localEdit'])->name('promotions.local.edit')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions/global/{product}/edit', [PromotionsController::class, 'globalEdit'])->name('promotions.global.edit')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions-get-match/{query}', [PromotionsController::class, 'getMatches'])->name('promotions.get-match')->middleware('auth');
+Route::post('promotions/store', [PromotionsController::class, 'store'])->name('promotions.store')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::put('promotions/update', [PromotionsController::class, 'update'])->name('promotions.update')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
 // ver tutoriales
