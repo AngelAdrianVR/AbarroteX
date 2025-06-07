@@ -56,9 +56,10 @@
                   <i class="fa-solid fa-dollar-sign"></i>
                 </template>
               </el-input>
-              <button @click="handleChangePrice(sale)"
-                class="flex items-center justify-center rounded-full size-5 bg-primary flex-shrink-0"><i
-                  class="fa-solid fa-check text-white text-[10px]"></i></button>
+               <button :disabled="sale.product.public_price === editedPrice" @click="handleChangePrice(sale)"
+                class="flex items-center justify-center rounded-full size-5 bg-primary flex-shrink-0 disabled:cursor-not-allowed disabled:bg-gray-300">
+                <i class="fa-solid fa-check text-white text-[10px]"></i>
+              </button>
               <button @click="editMode = false"
                 class="flex items-center justify-center rounded-full size-5 bg-[#EDEDED] flex-shrink-0"><i
                   class="fa-solid fa-x mark text-black text-[10px]"></i></button>
