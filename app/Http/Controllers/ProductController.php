@@ -246,6 +246,9 @@ class ProductController extends Controller
         $product->delete();
     }
 
+    // Buscar productos locales y globales. Se usa en varias partes de la aplicación, como en el buscador de productos del carrito de ventas,
+    //en el buscador de productos del carrito de compras y en el buscador de productos del inventario.
+    // TENER CUIDADO SI SE MODIFICA, PUEDE AFECTAR A OTRAS PARTES DE LA APLICACIÓN.
     public function searchProduct(Request $request)
     {
         $query = $request->input('query');
@@ -264,7 +267,7 @@ class ProductController extends Controller
             })
             ->get();
 
-        $global_products = GlobalProductStore::with(['globalProduct.media', 'promotions.giftable' => function ($query) {
+        $global_products = GlobalProductStore::with(['globalProduct.media', 'globalProduct.brand', 'promotions.giftable' => function ($query) {
             $query->morphWith([
                 Product::class => ['media'],
                 GlobalProductStore::class => ['globalProduct.media']
@@ -285,6 +288,42 @@ class ProductController extends Controller
 
         return response()->json(['items' => $products]);
     }
+
+    // Filtrar productos por proveedor (marca)
+    // Se usa en el filtro de productos del inventario que se encuentra en el applayout
+    public function filterByProvider(Request $request)
+    {
+        $providerIds = $request->input('providers', []);
+
+        $storeId = auth()->user()->store_id;
+
+        $local_products = Product::with(['category', 'brand', 'media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
+            ->where('store_id', $storeId)
+            ->whereIn('brand_id', $providerIds)
+            ->get();
+
+        $global_products = GlobalProductStore::with(['globalProduct.media', 'globalProduct.brand', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
+            ->whereHas('globalProduct', function ($query) use ($providerIds) {
+                $query->whereIn('brand_id', $providerIds);
+            })
+            ->where('store_id', $storeId)
+            ->get();
+
+        $products = $local_products->merge($global_products);
+
+        return response()->json(['items' => $products]);
+    }
+
 
     public function outStock(Request $request, $product_id)
     {
@@ -369,6 +408,7 @@ class ProductController extends Controller
         }
     }
 
+    // Actualizar inventario de un producto
     public function inventoryUpdate(Request $request, $product_id)
     {
         $request->validate([
@@ -393,6 +433,36 @@ class ProductController extends Controller
         ]);
     }
 
+    // Actualizar el stock de varios productos (desde la opcion del AppLayout)
+    public function massiveUpdateStock(Request $request)
+    {
+        $updates = $request->input('updates', []);
+        
+        foreach ($updates as $item) {
+            if ( $item['global_product_id'] ) {
+                // Si el producto es global, buscarlo en GlobalProductStore
+                $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->find($item['id']);
+                if (!$product) {
+                    continue; // Si no se encuentra el producto, continuar con el siguiente
+                } 
+            } else {
+                // Si el producto es local, buscarlo en Product
+                $product = Product::where('store_id', auth()->user()->store_id)->find($item['id']);
+                if (!$product) {
+                    continue; // Si no se encuentra el producto, continuar con el siguiente
+                }
+            }
+
+            // Actualizar el stock actual del producto
+            if ($product) {
+                $product->current_stock += intval($item['quantity']);
+                $product->save();
+            }
+        }
+
+        return response()->json(['message' => 'Stock actualizado correctamente.']);
+    }
+    // Actualizar el precio de un producto
     public function priceUpdate(Request $request, $product_id)
     {
         $request->validate([
