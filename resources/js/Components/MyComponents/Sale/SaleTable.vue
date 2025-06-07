@@ -66,8 +66,8 @@
           </template>
         </div>
         <div class="w-[20%]">
-          <el-input-number v-if="isInventoryOn" @change="handleChangeQuantity" v-model="sale.quantity" :min="0" size="small"
-            :max="sale.product.current_stock" :precision="2">
+          <el-input-number v-if="isInventoryOn" @change="handleChangeQuantity(sale)" v-model="sale.quantity" :min="0"
+            size="small" :max="sale.product.current_stock" :precision="2">
             <template #suffix>
               <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{
                 sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :
@@ -75,7 +75,8 @@
               }}</span>
             </template>
           </el-input-number>
-          <el-input-number v-else @change="handleChangeQuantity" v-model="sale.quantity" :min="0" :precision="2" size="small">
+          <el-input-number v-else @change="handleChangeQuantity(sale)" v-model="sale.quantity" :min="0" :precision="2"
+            size="small">
             <template #suffix>
               <span v-if="sale.product.measure_unit?.trim() === 'Kilogramo'">{{
                 sale.product.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :
@@ -309,6 +310,16 @@ export default {
   },
   emits: ['delete-product', 'create-gift-product'],
   methods: {
+    handleChangeQuantity(sale) {
+      if (sale.giftQuantity) {
+        // Si es un regalo, se calcula el precio
+        const pricePerUnit =
+          (sale.product.public_price * (sale.quantity - sale.giftQuantity)) / sale.quantity;
+        sale.product.discounted_price = Math.round(pricePerUnit * 100) / 100; // redondear a 2 decimales
+      } else {
+        sale.giftQuantity = null; // Resetea la cantidad de regalo si no es un regalo
+      }
+    },
     isExpired(date) {
       if (!date) return false; // Si no hay fecha, no está vencida
       // Convierte la fecha a objeto Date si es string
@@ -374,6 +385,8 @@ export default {
     isApplicablePromotion(sale, promotion) {
       if (promotion.type === 'Descuento en precio fijo' || promotion.type === 'Descuento en porcentaje') {
         sale.product.discounted_price = promotion.discounted_price;
+        // indicar que la promoción esta aplicada
+        promotion.applied = true;
         return true;
       } else if (promotion.type === 'Precio especial por paquete') {
         const applicableQuantity = Math.floor(sale.quantity / promotion.pack_quantity);
@@ -385,6 +398,9 @@ export default {
         } else {
           sale.product.discounted_price = null; // si no se cumple la cantidad del paquete, no hay descuento
         }
+
+        // indicar que la promoción esta aplicada
+        promotion.applied = applicableQuantity > 0;
         return applicableQuantity > 0;
       } else if (promotion.type === 'Promoción tipo 2x1 o 3x2') {
         // obtener cuantas promociones se pueden aplicar
@@ -397,6 +413,9 @@ export default {
         } else {
           sale.product.discounted_price = null;
         }
+
+        // indicar que la promoción esta aplicada
+        promotion.applied = !!applicableQuantity;
         return applicableQuantity;
       } else if (promotion.type === 'Producto gratis al comprar otro') {
         if (sale.quantity >= promotion.min_quantity_to_gift) {
@@ -414,12 +433,16 @@ export default {
             ? 'global_' + promotion.giftable_id
             : 'local_' + promotion.giftable_id;
           // si la cantidad ya no es suficiente para aplicar el producto gratis, eliminarlo
-          const isGift = true; 
+          const isGift = true;
           this.$emit('delete-product', productId, isGift);
           sale.gifted_product = false; // marca que ya no se aplica el producto gratis
         }
+
+         // indicar que la promoción esta aplicada
+        promotion.applied = sale.quantity >= promotion.min_quantity_to_gift;
         return sale.quantity >= promotion.min_quantity_to_gift;
       } else {
+        promotion.applied = false;
         return false; // Si no coincide con ningún tipo conocido, no es aplicable
       }
     },

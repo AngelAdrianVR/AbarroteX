@@ -451,11 +451,13 @@
                   <p class="font-bold">Total</p>
                   <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
                     class="text-red-600 text-xs">El descuento es más grande que el total</p>
-                  <p v-else class="text-gray-99">$ <strong class="ml-3">{{ (calculateTotal() -
-                    editableTabs[this.editableTabsValue
-                      - 1].discount)?.toLocaleString('en-US', {
-                        minimumFractionDigits: 2
-                      }) }}</strong></p>
+                  <p v-else class="text-gray-99">
+                    $ <strong class="ml-3">
+                      {{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
+                        minimumFractionDigits: 2}) 
+                      }}
+                      </strong>
+                    </p>
                 </div>
 
                 <!------- botones venta a crédito y al contado ------->
@@ -1743,7 +1745,7 @@ export default {
     },
     async addGiftProduct(product) {
       try {
-        const results = await getItemByPartialAttributes('products', {
+        const results = await getItemByAttributes('products', {
           name: product.name,
         });
 
@@ -1863,12 +1865,18 @@ export default {
     calculateTotal() {
       // Suma de los productos del precio y la cantidad para cada elemento en saleProducts
       const total = this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.reduce((accumulator, sale) => {
-        return accumulator + sale.product.public_price * sale.quantity;
+        let priceToUse = sale.product.public_price;
+        // Si el producto tiene un precio con descuento, se usa ese precio
+        if (sale.product.discounted_price != null) {
+          priceToUse = sale.product.discounted_price;
+        }
+        
+        return accumulator + priceToUse * sale.quantity;
       }, 0);
 
       // Formatear el resultado al final
       // return total?.toLocaleString('en-US', { minimumFractionDigits: 2 }); formatea el total con comas pero me manda a NaN despues de 1000
-      return total;
+      return Math.round(total * 10) / 10; // redondea a un decimal
     },
     inputFocus() {
       this.$nextTick(() => {
