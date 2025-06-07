@@ -12,6 +12,8 @@ class Sale extends Model
 
     protected $fillable = [
         'current_price',
+        'discounted_price',
+        'promotions_applied',
         'product_name',
         'quantity',
         'refunded_at',
@@ -25,6 +27,10 @@ class Sale extends Model
         'store_id',
         'user_id',
         'created_at',
+    ];
+
+    protected $casts = [
+        'promotions_applied' => 'array',
     ];
 
     //relationships

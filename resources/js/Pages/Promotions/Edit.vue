@@ -260,16 +260,16 @@ export default {
             return isPast(dateObj);
         },
         checkDisabledRules(typeName, index) {
-            if (index === 0 || typeName === 'Producto gratis al comprar otro') {
+            if (index === 0) {
                 return false; // no hay conflictos
             }
 
             const conflictMatrix = {
                 'Descuento en precio fijo': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
                 'Descuento en porcentaje': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
-                'Precio especial por paquete': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Producto gratis al comprar otro'],
+                'Precio especial por paquete': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Producto gratis al comprar otro', 'Promoción tipo 2x1 o 3x2'],
                 'Promoción tipo 2x1 o 3x2': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
-                'Producto gratis al comprar otro': [] // restricciones dinámicas
+                'Producto gratis al comprar otro': ['Producto gratis al comprar otro'] // restricciones dinámicas
             };
 
             // Verifica si el tipo actual entra en conflicto con alguno ya seleccionado

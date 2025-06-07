@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SaleController extends Controller
 {
@@ -65,7 +66,7 @@ class SaleController extends Controller
     }
 
     public function store(Request $request)
-    {   
+    {
         $folio_stored = $this->storeEachProductSold($request->all());
 
         return response()->json(compact('folio_stored'));
@@ -261,9 +262,15 @@ class SaleController extends Controller
                 $product_name .= "({$product['product']['additional']['color']['name']}-{$product['product']['additional']['size']['name']})";
             }
 
+            
+            // obtiene un estracto para referir a la promoción en caso de tener
+            $promotions = $this->getPromotion($product);
+
             //regiatra cada producto vendido
             Sale::create([
                 'current_price' => $product['product']['public_price'],
+                'discounted_price' => $product['product']['discounted_price'],
+                'promotions_applied' => $promotions,
                 'quantity' => $product['quantity'],
                 'folio' => $folio,
                 'payment_method' => $sale_data['paymentMethod'],
@@ -614,7 +621,7 @@ class SaleController extends Controller
                 if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería' && $current_product->additional) {
                     $product_name .= " ({$current_product->additional['color']['name']}-{$current_product->additional['size']['name']})";
                 }
-                
+
                 // Actualizar la venta
                 $sale->update([
                     'product_id' => $product_id,
@@ -769,5 +776,43 @@ class SaleController extends Controller
                 });
             }
         });
+    }
+
+    private function getPromotion($product)
+    {
+        if (!$product['product']['promotions']) {
+            return null;
+        }
+
+        $promotions_applied = [];
+
+        foreach ($product['product']['promotions'] as $promo) {
+            // si la promoción en curso no fue alicada, pasa al siguiente
+            if (!$promo['applied']) continue;
+
+            if ($promo['type'] == 'Descuento en precio fijo') {
+                $promotions_applied[] = "Descuento de $" . $promo['public_price'] . "a $" . $promo['discounted_price'];
+            } elseif ($promo['type'] == 'Descuento en porcentaje') {
+                $promotions_applied[] = "Descuento del {$promo['discount']}% (" . $promo['public_price'] . "a $" . $promo['discounted_price'] . ")";
+            } elseif ($promo['type'] == 'Precio especial por paquete') {
+                $promotions_applied[] = "Precio especial por paquete: {$promo['pack_quantity']} a $" . $promo['pack_price'];
+            } elseif ($promo['type'] == 'Promoción tipo 2x1 o 3x2') {
+                $promotions_applied[] = "{$promo['buy_quantity']}x{$promo['pay_quantity']}";
+            } elseif ($promo['type'] == 'Producto gratis al comprar otro') {
+                if ($promo['giftable_type'] == Product::class) {
+                    $giftable = Product::find($promo['giftable_id']);
+                    $gift_name = $giftable->name;
+                } else {
+                    $giftable = GlobalProductStore::with(['globalProduct'])->find($promo['giftable_id']);
+                    $gift_name = $giftable->globalProducts->name;
+                }
+
+                $promotions_applied[] = "En la comprea de {$promo['min_quantity_to_gift']}, gratis {$promo['quantity_to_gift']} $gift_name";
+            } else {
+                return "Promoción desconocida";
+            }
+        }
+
+        return $promotions_applied;
     }
 }
