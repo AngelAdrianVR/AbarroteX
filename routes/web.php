@@ -87,6 +87,7 @@ Route::post('products/update-with-media/{product}', [ProductController::class, '
 Route::put('products-entry/{product_id}', [ProductController::class, 'entryStock'])->name('products.entry')->middleware('auth');
 Route::put('products-out/{product_id}', [ProductController::class, 'outStock'])->name('products.out')->middleware('auth');
 Route::put('products-inventory-update/{product_id}', [ProductController::class, 'inventoryUpdate'])->name('products.inventory-update')->middleware('auth');
+Route::post('products-massive-update-stock', [ProductController::class, 'massiveUpdateStock'])->name('products.massive-update-stock');
 Route::put('products-price-update/{product_id}', [ProductController::class, 'priceUpdate'])->name('products.price-update')->middleware('auth');
 Route::get('products-search', [ProductController::class, 'searchProduct'])->name('products.search')->middleware('auth');
 Route::get('products-get-product-scaned/{product_id}', [ProductController::class, 'getProductScaned'])->name('products.get-product-scaned')->middleware('auth');
@@ -99,6 +100,7 @@ Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllF
 Route::get('products-get-by-id-for-indexedDB/{product}', [ProductController::class, 'getByIdForIndexedDB'])->name('products.get-by-id-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
+Route::get('products-filter-by-provider', [ProductController::class, 'filterByProvider'])->name('products.filter-by-provider');
 
 
 // productos de boutique
@@ -164,6 +166,8 @@ Route::resource('categories', CategoryController::class)->middleware('auth');
 //brands routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('brands', BrandController::class)->middleware('auth');
+Route::get('brands-fetch-all', [BrandController::class, 'fetchAll'])->name('brand.fetch-all');
+
 
 
 //sales routes-------------------------------------------------------------------------------------
