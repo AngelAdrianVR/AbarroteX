@@ -2,7 +2,7 @@
     <Dropdown @click="readNotifications()" align="right" width="notifications" class="mt-2" :closeInClick="false">
         <template #trigger>
             <button
-                class="ml-6 relative text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150"
+                class="mx-2 relative text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150"
                 :class="getUnreadMessages.length ? 'text-primary' : 'text-[#97989A]'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-4">
