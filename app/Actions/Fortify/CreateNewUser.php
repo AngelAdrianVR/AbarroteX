@@ -86,7 +86,7 @@ class CreateNewUser implements CreatesNewUsers
             ];
 
             // Determinar el valor según el nombre de la configuración
-            $value = in_array($setting->name, $settingsToZero) ? 0 : 1;
+            $value = in_array($setting->name, $settingsToZero) ? null : 1;
 
             // Asociar la configuración a la tienda con el valor correspondiente
             $store->settings()->attach($setting->id, ['value' => $value]);
