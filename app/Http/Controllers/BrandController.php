@@ -55,4 +55,10 @@ class BrandController extends Controller
     {
         //
     }
+
+    public function fetchAll()
+    {
+        $brands = Brand::all(['id','name']); // o con algún orden si gustas: Brand::orderBy('name')->get();
+        return response()->json($brands);
+    }
 }
