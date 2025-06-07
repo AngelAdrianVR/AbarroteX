@@ -23,6 +23,8 @@ defineProps({
 
 const showingNavigationDropdown = ref(false);
 const syncInterval = ref(null);
+const notificationsCenterRef = ref(null);
+const onlineNotificationsCenterRef = ref(null);
 
 // Modal para agregar stock por proveedor
 const showInventoryModal = ref(false)
@@ -33,6 +35,12 @@ const productsFound = ref([])
 const providers = ref([])
 const selectedProviders = ref([])
 const stockUpdates = reactive({})
+
+// lee las notificaciones
+const readNotifications = () => {
+  notificationsCenterRef.value?.readNotifications()
+  onlineNotificationsCenterRef.value?.readNotifications()
+}
 
 // calcula dias restantes de la suscripcion a fecha de hoy
 const calculateRemainingDays = (nextPayment) => {
@@ -232,45 +240,45 @@ onUnmounted(() => {
                                     <i class="fa-solid fa-arrow-right text-xs"></i>
                                 </NeonButton>
 
-                                <section class="relative flex justify-center items-center">
+                                <section @click="handleOpenInventory" class="relative flex justify-center items-center">
                                     <div
                                         class="group flex justify-center transition-all"
                                     >
                                         <!-- modal de inventario para agregar stock por proveedor -->
-                                        <button @click="handleOpenInventory" class="mx-1 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
+                                        <button class="mx-1 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                             </svg>
                                         </button>
                                         <span
-                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-9 duration-700 text-xs"
+                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs"
                                         >Inventario</span
                                         >
                                     </div>
                                 </section>
 
-                                <section class="relative flex justify-center items-center">
+                                <section @click="readNotifications" class="relative flex justify-center items-center">
                                     <div
                                         class="group flex justify-center transition-all"
                                     >
                                         <!-- notificaciones de tienda en linea -->
-                                        <OnlineSalesNotifications
+                                        <OnlineSalesNotifications ref="onlineNotificationsCenterRef"
                                             v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" />
                                         <span
-                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-9 duration-700 text-xs"
+                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs"
                                         >Pedidos</span
                                         >
                                     </div>
                                 </section>
 
-                                <section class="relative flex justify-center items-center">
+                                <section @click="readNotifications" class="relative flex justify-center items-center">
                                     <div
                                         class="group flex justify-center transition-all"
                                     >
                                         <!-- notifications -->
-                                        <NotificationsCenter />
+                                        <NotificationsCenter ref="notificationsCenterRef" />
                                         <span
-                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-9 duration-700 text-xs"
+                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs"
                                         >Notificaciones</span
                                         >
                                     </div>
