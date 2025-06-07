@@ -251,33 +251,33 @@ class SaleController extends Controller
 
         // total de dinero en venta
         $total_amount = 0;
-        foreach ($sale_data['saleProducts'] as $product) {
-            $total_amount += $product['product']['public_price'] * $product['quantity'];
-            $is_global_product = explode('_', $product['product']['id'])[0] == 'global';
-            $product_id = explode('_', $product['product']['id'])[1];
+        foreach ($sale_data['saleProducts'] as $sale) {
+            $total_amount += $sale['product']['public_price'] * $sale['quantity'];
+            $is_global_product = explode('_', $sale['product']['id'])[0] == 'global';
+            $product_id = explode('_', $sale['product']['id'])[1];
 
-            $product_name = $product['product']['name'];
+            $product_name = $sale['product']['name'];
             if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
                 // agregar color y talla al nombre
-                $product_name .= "({$product['product']['additional']['color']['name']}-{$product['product']['additional']['size']['name']})";
+                $product_name .= "({$sale['product']['additional']['color']['name']}-{$sale['product']['additional']['size']['name']})";
             }
 
-            
+
             // obtiene un estracto para referir a la promoción en caso de tener
-            $promotions = $this->getPromotion($product);
+            $promotions = $this->getPromotion($sale);
 
             //regiatra cada producto vendido
             Sale::create([
-                'current_price' => $product['product']['public_price'],
-                'discounted_price' => $product['product']['discounted_price'],
+                'current_price' => $sale['product']['public_price'],
+                'discounted_price' => $sale['product']['discounted_price'],
                 'promotions_applied' => $promotions,
-                'quantity' => $product['quantity'],
+                'quantity' => $sale['quantity'],
                 'folio' => $folio,
                 'payment_method' => $sale_data['paymentMethod'],
                 'product_name' => $product_name,
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
-                'original_price' => $product['originalPrice'],
+                'original_price' => $sale['originalPrice'],
                 'client_id' => $sale_data['client_id'] == false ? null : $sale_data['client_id'],
                 'store_id' => $store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
@@ -292,7 +292,7 @@ class SaleController extends Controller
                 ? GlobalProductStore::find($product_id)
                 : Product::find($product_id);
 
-            if ($current_product->current_stock <= $product['quantity']) {
+            if ($current_product->current_stock <= $sale['quantity']) {
                 $current_product->update(['current_stock' => 0]);
 
                 if ($is_inventory_on) {
@@ -306,7 +306,7 @@ class SaleController extends Controller
                     auth()->user()->notify(new BasicNotification($title, $description, $url));
                 }
             } else {
-                $current_product->decrement('current_stock', $product['quantity']);
+                $current_product->decrement('current_stock', $sale['quantity']);
 
                 // notificar si ha llegado al limite de existencias bajas
                 if ($current_product->current_stock <= $current_product->min_stock && $is_inventory_on) {
@@ -326,7 +326,7 @@ class SaleController extends Controller
                 $size = ' talla ' . $current_product->additional['size']['name'] . ' color ' . $current_product->additional['color']['name'];
             }
             ProductHistory::create([
-                'description' => 'Registro de venta. ' . $product['quantity'] . ' pieza(s)' . $size,
+                'description' => 'Registro de venta. ' . $sale['quantity'] . ' pieza(s)' . $size,
                 'type' => 'Venta',
                 'user_id' => auth()->id(),
                 'historicable_id' => $product_id,
@@ -683,7 +683,11 @@ class SaleController extends Controller
             $totalSale = $normalSales->sum(function ($sale) {
                 $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
                 if (!$credit_data) {
-                    return $sale->quantity * $sale->current_price;
+                    // usar precio con descuento si existe
+                    $price_to_use = $sale->discounted_price >= 0
+                        ? $sale->discounted_price
+                        : $sale->current_price;
+                    return $sale->quantity * $price_to_use;
                 }
             });
 
@@ -702,7 +706,11 @@ class SaleController extends Controller
 
                 // Calcular el total de todos los productos en la venta
                 $totalSale = $folioSales->sum(function ($sale) {
-                    return $sale->quantity * $sale->current_price;
+                    // usar precio con descuento si existe
+                    $price_to_use = $sale->discounted_price >= 0
+                        ? $sale->discounted_price
+                        : $sale->current_price;
+                    return $sale->quantity * $price_to_use;
                 });
 
                 return [
@@ -710,6 +718,8 @@ class SaleController extends Controller
                         return [
                             'id' => $sale->id,
                             'current_price' => $sale->current_price,
+                            'discounted_price' => $sale->discounted_price,
+                            'promotions_applied' => $sale->promotions_applied,
                             'product_name' => $sale->product_name,
                             'product_id' => $sale->product_id,
                             'is_global_product' => $sale->is_global_product,
@@ -778,26 +788,48 @@ class SaleController extends Controller
         });
     }
 
-    private function getPromotion($product)
+    private function getPromotion($sale)
     {
-        if (!$product['product']['promotions']) {
+        if (!$sale['product']['promotions']) {
             return null;
         }
 
         $promotions_applied = [];
+        $product = $sale['product'];
 
-        foreach ($product['product']['promotions'] as $promo) {
+        foreach ($sale['product']['promotions'] as $promo) {
             // si la promoción en curso no fue alicada, pasa al siguiente
             if (!$promo['applied']) continue;
 
+            // calcular descuento
+            if ($promo['type'] == 'Producto gratis al comprar otro') {
+                $total_discounted = 0.0;
+            } else {
+                $original_price_total = $product['public_price'] * $sale['quantity'];
+                $discount_price_total = $product['discounted_price'] * $sale['quantity'];
+                $total_discounted = (float) number_format(($original_price_total - $discount_price_total), 1);
+            }
+
             if ($promo['type'] == 'Descuento en precio fijo') {
-                $promotions_applied[] = "Descuento de $" . $promo['public_price'] . "a $" . $promo['discounted_price'];
+                $promotions_applied[] = [
+                    'discount' => $total_discounted,
+                    'description' => "Descuento de $" . $product['public_price'] . " a $" . $product['discounted_price']
+                ];
             } elseif ($promo['type'] == 'Descuento en porcentaje') {
-                $promotions_applied[] = "Descuento del {$promo['discount']}% (" . $promo['public_price'] . "a $" . $promo['discounted_price'] . ")";
+                $promotions_applied[] = [
+                    'discount' => $total_discounted,
+                    'description' => "Descuento del {$product['discount']}% (" . $product['public_price'] . " a $" . $product['discounted_price'] . ")"
+                ];
             } elseif ($promo['type'] == 'Precio especial por paquete') {
-                $promotions_applied[] = "Precio especial por paquete: {$promo['pack_quantity']} a $" . $promo['pack_price'];
+                $promotions_applied[] = [
+                    'discount' => $total_discounted,
+                    'description' => "Precio especial por paquete: {$promo['pack_quantity']} a $" . $promo['pack_price']
+                ];
             } elseif ($promo['type'] == 'Promoción tipo 2x1 o 3x2') {
-                $promotions_applied[] = "{$promo['buy_quantity']}x{$promo['pay_quantity']}";
+                $promotions_applied[] = [
+                    'discount' => $total_discounted,
+                    'description' => "{$promo['buy_quantity']}x{$promo['pay_quantity']}"
+                ];
             } elseif ($promo['type'] == 'Producto gratis al comprar otro') {
                 if ($promo['giftable_type'] == Product::class) {
                     $giftable = Product::find($promo['giftable_id']);
@@ -807,7 +839,10 @@ class SaleController extends Controller
                     $gift_name = $giftable->globalProducts->name;
                 }
 
-                $promotions_applied[] = "En la comprea de {$promo['min_quantity_to_gift']}, gratis {$promo['quantity_to_gift']} $gift_name";
+                $promotions_applied[] = [
+                    'discount' => $total_discounted,
+                    'description' => "En la compra de {$promo['min_quantity_to_gift']}, gratis {$promo['quantity_to_gift']} $gift_name"
+                ];
             } else {
                 return "Promoción desconocida";
             }
