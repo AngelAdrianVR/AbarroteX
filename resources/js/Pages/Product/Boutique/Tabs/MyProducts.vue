@@ -160,7 +160,6 @@
                 </div>
             </template>
         </DialogModal>
-
         <!-- modal de exportacion -->
         <DialogModal :show="showExportModal" @close="showExportModal = false">
             <template #title> Exportar productos </template>
@@ -195,7 +194,6 @@
                 </div>
             </template>
         </DialogModal>
-
         <!-- modal de entrada de producto -->
         <Modal :show="entryProductModal" @close="entryProductModal = false">
             <div class="p-4 relative">
