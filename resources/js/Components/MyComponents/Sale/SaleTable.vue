@@ -346,9 +346,8 @@ export default {
       this.editMode = index;
       this.editedPrice = sale.product.public_price;
     },
-    stopEditing(changeJustForThisSale) {
+    async stopEditing(changeJustForThisSale) {
       this.editMode = null;
-
       //si se cambia el precio sólo para la venta
       if (changeJustForThisSale) {
         // Actualizamos el precio en el objeto de venta directamente.
@@ -358,12 +357,12 @@ export default {
       } else { //se cambia el precio definitivo al producto.
         //si es local manda al controlador de locales 
         if (this.saleProductToEdit.product.id.split('_')[0] === 'local') {
-          axios.post(route('products.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
+          await axios.post(route('products.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
           this.saleProductToEdit.originalPrice = null; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
         } else { //para un producto global
-          axios.post(route('global-product-store.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
+          await axios.post(route('global-product-store.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
           this.saleProductToEdit.originalPrice = null; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;

@@ -149,7 +149,7 @@ export default {
   components: {
     PrimaryButton,
     ThirthButton,
-    Head
+    Head,
   },
   props: {
     sales: Object,
@@ -307,7 +307,7 @@ export default {
     },
     totalSale() {
       return this.sales.reduce((total, item) => {
-        const priceToUse = item.discounted_price >= 0
+        const priceToUse = item.discounted_price != null && item.discounted_price >= 0
           ? item.discounted_price
           : item.current_price;
         return total + priceToUse * item.quantity;

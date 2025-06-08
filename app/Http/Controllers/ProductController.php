@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Services\TinifyService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -994,7 +995,8 @@ class ProductController extends Controller
 
     public function changePrice(Request $request)
     {
-        $product = Product::where('store_id', auth()->user()->store_id)->where('code', $request->product['code'])->first();
+        $product_id = explode('_', $request->product['id'])[1]; 
+        $product = Product::where('store_id', auth()->user()->store_id)->where('id', $product_id)->first();
         $old_price = $product->public_price;
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
