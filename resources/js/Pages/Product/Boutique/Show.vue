@@ -241,7 +241,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
 import { useForm, Link } from "@inertiajs/vue3";
-import { syncIDBProducts } from "@/dbService.js";
+// import { syncIDBProducts } from "@/dbService.js";
 import DialogModal from '@/Components/DialogModal.vue';
 
 export default {
@@ -377,9 +377,9 @@ export default {
                 onSuccess: () => {
                     this.fetchProductsByName(false);
                     // actualizar current stock de producto en indexedDB si el seguimiento de inventario esta activo
-                    // if (this.isInventoryOn) {
-                    syncIDBProducts();
-                    // }
+                    // // if (this.isInventoryOn) {
+                    // syncIDBProducts();
+                    // // }
 
                     this.form.reset();
                     this.entryProductModal = false;
@@ -402,9 +402,9 @@ export default {
                 onSuccess: () => {
                     this.fetchProductsByName(false);
                     // actualizar current stock de producto en indexedDB si el seguimiento de inventario esta activo
-                    // if (this.isInventoryOn) {
-                    syncIDBProducts();
-                    // }
+                    // // if (this.isInventoryOn) {
+                    // syncIDBProducts();
+                    // // }
 
                     this.form.reset();
                     this.entryProductModal = false;

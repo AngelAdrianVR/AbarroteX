@@ -164,7 +164,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { addOrUpdateBatchOfItems } from '@/dbService.js';
+// import { addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
     name: 'SelectGlobalProduct',
@@ -345,11 +345,11 @@ export default {
                     this.initialProducts = this.products;
 
                     // Obtener productos
-                    const response2 = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response2.data.products;
+                    // const response2 = await axios.get(route('products.get-all-for-indexedDB'));
+                    // const products = response2.data.products;
 
-                    // actualizar lista de productos en indexedDB
-                    await addOrUpdateBatchOfItems('products', products);
+                    // // actualizar lista de productos en indexedDB
+                    // await addOrUpdateBatchOfItems('products', products);
 
                     if (response.data.rejected_products.length) {
                         this.$notify({
