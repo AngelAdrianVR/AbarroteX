@@ -398,7 +398,7 @@
                       Agregar
                     </button>
 
-                    <el-tooltip v-if="productFoundSelected?.bulk_product" content="Agregar cantidad manualmente"
+                    <el-tooltip v-if="productFoundSelected?.bulk_product && isConnectedScale" content="Agregar cantidad manualmente"
                       placement="bottom">
                       <button @click="stopReadingScale(); focusQuantitySelector()"
                         class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
@@ -604,7 +604,7 @@
             </template>
           </el-skeleton>
           <div v-show="showNoCodeProducts" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-            <button @click="addSaleProduct(item)" type="button" v-for="(item, index) in filteredNoCodeProducts"
+            <button @click="handleFastProductSelection(item)" type="button" v-for="(item, index) in filteredNoCodeProducts"
               :key="index" class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-grayF2 rounded-md">
               <h2 class="text-xs text-center">{{ item.name }}</h2>
               <figure class="flex items-center justify-center h-14">
@@ -1318,6 +1318,15 @@ export default {
     clients: Array
   },
   methods: {
+    handleFastProductSelection(item) {
+      if ( item.bulk_product ) {
+        this.productFoundSelected = item; //asigna el producto seleccionado a la variable productFoundSelected
+        this.quantity = 1; //asigna la cantidad por defecto a 1
+        this.handleScale(); //ejecuta el manejador de bascula si el producto es a granel
+      } else {
+        this.addSaleProduct(item); //agrega el producto a la lista de venta
+      }
+    },
     filterNoCodeProducts() {
       if (this.searchNoCodeProducts) {
         this.filteredNoCodeProducts = this.noCodeProducts.filter(product =>

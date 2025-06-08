@@ -57,8 +57,9 @@ class BrandController extends Controller
     }
 
     public function fetchAll()
-    {
-        $brands = Brand::all(['id','name']); // o con algún orden si gustas: Brand::orderBy('name')->get();
+    {   
+        $store = auth()->user()->store;
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get(['id','name']);
         return response()->json($brands);
     }
 }
