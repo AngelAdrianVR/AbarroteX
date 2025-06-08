@@ -56,7 +56,7 @@
                   <i class="fa-solid fa-dollar-sign"></i>
                 </template>
               </el-input>
-               <button :disabled="sale.product.public_price === editedPrice" @click="handleChangePrice(sale)"
+              <button :disabled="sale.product.public_price === editedPrice" @click="handleChangePrice(sale)"
                 class="flex items-center justify-center rounded-full size-5 bg-primary flex-shrink-0 disabled:cursor-not-allowed disabled:bg-gray-300">
                 <i class="fa-solid fa-check text-white text-[10px]"></i>
               </button>
@@ -213,13 +213,66 @@
             </div>
           </template>
         </div>
-        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" :min="0" :max="sale.product.current_stock"
-          :precision="2" />
-        <el-input-number v-else v-model="sale.quantity" :min="0" :precision="2" size="small" />
-        <div class="text-[#5FCB1F] font-bold text-lg">
-          ${{ sale.product.discounted_price
-            ? (sale.product.discounted_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })
-            : (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" @change="handleChangeQuantity(sale)" :min="0"
+          :max="sale.product.current_stock" :precision="2" />
+        <el-input-number v-else v-model="sale.quantity" @change="handleChangeQuantity(sale)" :min="0" :precision="2"
+          size="small" />
+        <div class="flex items-center space-x-2">
+          <el-dropdown v-if="sale.product.promotions?.length" trigger="click">
+            <button type="button" @click.stop title="Promociones"
+              class="flex items-center justify-center hover:bg-grayF2 size-5 rounded-full transition-colors duration-200"
+              :class="someApplicablePromotion(sale) ? 'text-[#AE080B]' : 'text-gray99'">
+              <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M4.28963 0C6.61877 2.72132 7.62955 4.40871 8.10018 8.09863C8.68001 7.68802 8.88776 7.19533 8.93416 5.7168C11.7333 11.4332 8.4584 15.0059 5.54061 15.1846C5.18334 15.2064 4.52925 15.2601 4.1119 15.125C-0.115441 13.7554 -1.60456 10.0636 2.14607 5.24023C4.57869 2.25074 4.74354 1.28426 4.28963 0ZM4.82479 7.44531C2.7427 10.1811 2.08598 12.5064 5.0035 14.0547C6.92255 13.584 7.62367 12.4473 7.80232 10.4824C7.42197 11.0129 7.17028 11.2542 6.49178 11.375C6.67028 9.76748 6.13695 8.64466 4.82479 7.44531Z"
+                  fill="currentColor" />
+              </svg>
+            </button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <main class="px-3 py-2 w-72 lg:w-[410px]">
+                  <section class="space-y-1">
+                    <div class="flex items-center justify-between mb-2">
+                      <h1 class="font-semibold lg:text-sm ml-2">
+                        Producto con promoción
+                      </h1>
+                      <!-- <button type="button" title="Editar promociones"
+                            class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
+                            @click="handleEditPromo(sale.product)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                              stroke="currentColor" class="size-4">
+                              <path stroke-linecap="round" stroke-linejoin="round"
+                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                            </svg>
+                          </button> -->
+                    </div>
+                    <PromotionCard v-for="promo in sale.product.promotions.filter(p => !isExpired(p.expiration_date))"
+                      :key="promo.id" :promo="promo" :product="sale.product" :showGiftable="false"
+                      :applied="!!isApplicablePromotion(sale, promo)" />
+                  </section>
+                  <section v-if="sale.product.promotions.filter(p => isExpired(p.expiration_date)).length"
+                    class="mt-4 space-y-1">
+                    <h1 class="text-[#6E6E6E] font-semibold lg:text-sm ml-2">
+                      Promociones vencidas
+                    </h1>
+                    <PromotionCard v-for="promo in sale.product.promotions.filter(p => isExpired(p.expiration_date))"
+                      :promo="promo" :product="sale.product" :showGiftable="false" :key="promo.id" />
+                  </section>
+                </main>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <div class="text-[#5FCB1F] font-bold text-lg">
+            ${{ sale.product.discounted_price != null
+              ? (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
+                minimumFractionDigits: 2
+              })
+              : (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+          </div>
+        </div>
+        <div v-if="sale.product.promotions?.length">
+          <p v-if="someApplicablePromotion(sale)" class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
+          <p v-else class="text-gray99 text-[10px]">Promoción disponible</p>
         </div>
         <div class="self-end text-lg">
           <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
@@ -346,9 +399,8 @@ export default {
       this.editMode = index;
       this.editedPrice = sale.product.public_price;
     },
-    stopEditing(changeJustForThisSale) {
+    async stopEditing(changeJustForThisSale) {
       this.editMode = null;
-
       //si se cambia el precio sólo para la venta
       if (changeJustForThisSale) {
         // Actualizamos el precio en el objeto de venta directamente.
@@ -358,12 +410,12 @@ export default {
       } else { //se cambia el precio definitivo al producto.
         //si es local manda al controlador de locales 
         if (this.saleProductToEdit.product.id.split('_')[0] === 'local') {
-          axios.post(route('products.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
+          await axios.post(route('products.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
           this.saleProductToEdit.originalPrice = null; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
         } else { //para un producto global
-          axios.post(route('global-product-store.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
+          await axios.post(route('global-product-store.change-price'), { product: this.saleProductToEdit.product, newPrice: this.editedPrice });
           this.saleProductToEdit.product.public_price = parseFloat(this.editedPrice);
           this.saleProductToEdit.originalPrice = null; //agrega bandera para indicar que no se cambio solo a la venta
           this.showChangePriceConfirmation = false;
@@ -439,7 +491,7 @@ export default {
           sale.gifted_product = false; // marca que ya no se aplica el producto gratis
         }
 
-         // indicar que la promoción esta aplicada
+        // indicar que la promoción esta aplicada
         promotion.applied = sale.quantity >= promotion.min_quantity_to_gift;
         return sale.quantity >= promotion.min_quantity_to_gift;
       } else {

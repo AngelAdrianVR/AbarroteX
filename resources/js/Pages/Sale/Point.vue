@@ -1622,9 +1622,9 @@ export default {
 
       if (indexToDelete != -1) {
         // remover regalo si es que el producto es un regalo
-        if (isGift && this.editableTabs[this.editableTabsValue - 1].saleProducts[indexToDelete].quantity > 1) {
+        let existingSale = this.editableTabs[this.editableTabsValue - 1].saleProducts[indexToDelete];
+        if (isGift && this.editableTabs[this.editableTabsValue - 1].saleProducts[indexToDelete].quantity > existingSale.giftQuantity) {
           // Si hay más de una unidad, simplemente reduce la cantidad regalada
-          let existingSale = this.editableTabs[this.editableTabsValue - 1].saleProducts[indexToDelete];
           existingSale.quantity -= existingSale.giftQuantity;
           existingSale.giftQuantity = null; // Resetea la cantidad de regalo a null
           existingSale.product.discounted_price = null; // Resetea la cantidad de regalo a null

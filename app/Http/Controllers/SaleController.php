@@ -269,7 +269,7 @@ class SaleController extends Controller
             //regiatra cada producto vendido
             Sale::create([
                 'current_price' => $sale['product']['public_price'],
-                'discounted_price' => $sale['product']['discounted_price'],
+                'discounted_price' => array_key_exists('discounted_price', $sale['product']) ? $sale['product']['discounted_price'] : null,
                 'promotions_applied' => $promotions,
                 'quantity' => $sale['quantity'],
                 'folio' => $folio,
@@ -684,7 +684,7 @@ class SaleController extends Controller
                 $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
                 if (!$credit_data) {
                     // usar precio con descuento si existe
-                    $price_to_use = $sale->discounted_price >= 0
+                    $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
                         ? $sale->discounted_price
                         : $sale->current_price;
                     return $sale->quantity * $price_to_use;
@@ -707,9 +707,10 @@ class SaleController extends Controller
                 // Calcular el total de todos los productos en la venta
                 $totalSale = $folioSales->sum(function ($sale) {
                     // usar precio con descuento si existe
-                    $price_to_use = $sale->discounted_price >= 0
+                    $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
                         ? $sale->discounted_price
                         : $sale->current_price;
+
                     return $sale->quantity * $price_to_use;
                 });
 
@@ -818,7 +819,7 @@ class SaleController extends Controller
             } elseif ($promo['type'] == 'Descuento en porcentaje') {
                 $promotions_applied[] = [
                     'discount' => $total_discounted,
-                    'description' => "Descuento del {$product['discount']}% (" . $product['public_price'] . " a $" . $product['discounted_price'] . ")"
+                    'description' => "Descuento del {$promo['discount']}% (" . $product['public_price'] . " a $" . $product['discounted_price'] . ")"
                 ];
             } elseif ($promo['type'] == 'Precio especial por paquete') {
                 $promotions_applied[] = [
