@@ -106,16 +106,19 @@ const searchProducts = async () => {
 
 // Filtrar productos por proveedor
 const filterByProvider = async () => {
-  try {
-    const response = await axios.get(route('products.filter-by-provider'), {
-      params: { providers: selectedProviders.value }
-    })
-    if (response.status === 200) {
-      productsFound.value = response.data.items
+    searchLoading.value = true
+    try {
+        const response = await axios.get(route('products.filter-by-provider'), {
+        params: { providers: selectedProviders.value }
+        })
+        if (response.status === 200) {
+        productsFound.value = response.data.items
+        }
+    } catch (error) {
+        console.error('Error al filtrar por proveedor:', error)
+    } finally {
+        searchLoading.value = false
     }
-  } catch (error) {
-    console.error('Error al filtrar por proveedor:', error)
-  }
 }
 
 // actualiza el stock de los productos seleccionados
