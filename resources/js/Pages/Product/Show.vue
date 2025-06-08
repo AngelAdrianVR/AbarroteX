@@ -223,7 +223,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
 import { useForm, Link } from "@inertiajs/vue3";
-import { addOrUpdateItem } from "@/dbService.js";
+// import { addOrUpdateItem } from "@/dbService.js";
 import DialogModal from '@/Components/DialogModal.vue';
 import PromotionCard from '@/Components/MyComponents/Promotions/PromotionCard.vue';
 import { isPast, parseISO } from 'date-fns';
@@ -355,15 +355,15 @@ export default {
                 onSuccess: () => {
                     // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
                     // if (this.isInventoryOn) {
-                    const product = {
-                        id: 'local_' + this.product.id,
-                        name: this.product.name,
-                        code: this.product.code,
-                        public_price: this.product.public_price,
-                        current_stock: this.product.current_stock + this.form.quantity,
-                        image_url: this.product.media[0]?.original_url,
-                    };
-                    addOrUpdateItem('products', product);
+                    // const product = {
+                    //     id: 'local_' + this.product.id,
+                    //     name: this.product.name,
+                    //     code: this.product.code,
+                    //     public_price: this.product.public_price,
+                    //     current_stock: this.product.current_stock + this.form.quantity,
+                    //     image_url: this.product.media[0]?.original_url,
+                    // };
+                    // addOrUpdateItem('products', product);
                     // }
 
                     this.form.reset();
@@ -387,15 +387,15 @@ export default {
                 onSuccess: () => {
                     // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
                     // if (this.isInventoryOn) {
-                    const product = {
-                        id: 'local_' + this.product.id,
-                        name: this.product.name,
-                        code: this.product.code,
-                        public_price: this.product.public_price,
-                        current_stock: this.product.current_stock + this.form.quantity,
-                        image_url: this.product.media[0]?.original_url,
-                    };
-                    addOrUpdateItem('products', product);
+                    // const product = {
+                    //     id: 'local_' + this.product.id,
+                    //     name: this.product.name,
+                    //     code: this.product.code,
+                    //     public_price: this.product.public_price,
+                    //     current_stock: this.product.current_stock + this.form.quantity,
+                    //     image_url: this.product.media[0]?.original_url,
+                    // };
+                    // addOrUpdateItem('products', product);
                     // }
 
                     this.form.reset();

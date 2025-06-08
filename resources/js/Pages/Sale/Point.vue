@@ -398,8 +398,8 @@
                       Agregar
                     </button>
 
-                    <el-tooltip v-if="productFoundSelected?.bulk_product && isConnectedScale" content="Agregar cantidad manualmente"
-                      placement="bottom">
+                    <el-tooltip v-if="productFoundSelected?.bulk_product && isConnectedScale"
+                      content="Agregar cantidad manualmente" placement="bottom">
                       <button @click="stopReadingScale(); focusQuantitySelector()"
                         class="rounded-full flex items-center justify-center size-9 bg-gray-300 text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -453,11 +453,13 @@
                     class="text-red-600 text-xs">El descuento es más grande que el total</p>
                   <p v-else class="text-gray-99">
                     $ <strong class="ml-3">
-                      {{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
-                        minimumFractionDigits: 2}) 
+                      {{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US',
+                        {
+                          minimumFractionDigits: 2
+                        })
                       }}
-                      </strong>
-                    </p>
+                    </strong>
+                  </p>
                 </div>
 
                 <!------- botones venta a crédito y al contado ------->
@@ -604,8 +606,9 @@
             </template>
           </el-skeleton>
           <div v-show="showNoCodeProducts" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-            <button @click="handleFastProductSelection(item)" type="button" v-for="(item, index) in filteredNoCodeProducts"
-              :key="index" class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-grayF2 rounded-md">
+            <button @click="handleFastProductSelection(item)" type="button"
+              v-for="(item, index) in filteredNoCodeProducts" :key="index"
+              class="border border-[#D9D9D9] bg-white px-3 py-2 active:bg-grayF2 rounded-md">
               <h2 class="text-xs text-center">{{ item.name }}</h2>
               <figure class="flex items-center justify-center h-14">
                 <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="object-contain h-14 mx-auto">
@@ -1319,11 +1322,12 @@ export default {
   },
   methods: {
     handleFastProductSelection(item) {
-      if ( item.bulk_product ) {
+      if (item.bulk_product) {
         this.productFoundSelected = item; //asigna el producto seleccionado a la variable productFoundSelected
         this.quantity = 1; //asigna la cantidad por defecto a 1
         this.handleScale(); //ejecuta el manejador de bascula si el producto es a granel
       } else {
+        item.imageUrl = item.image_url
         this.addSaleProduct(item); //agrega el producto a la lista de venta
       }
     },
@@ -1778,11 +1782,6 @@ export default {
           const pricePerUnit =
             (existingSale.product.public_price * (existingSale.quantity - existingSale.giftQuantity)) / existingSale.quantity;
           existingSale.product.discounted_price = Math.round(pricePerUnit * 100) / 100; // redondear a 2 decimales
-
-          // this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
-          //   ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-          //   quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + product.quantity
-          // };
         } else {
           // Si el producto no existe, agrégalo al array
           this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
@@ -1820,10 +1819,6 @@ export default {
         } else {
           existingSale.giftQuantity = null; // Resetea la cantidad de regalo si no es un regalo
         }
-        // this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex] = {
-        //   ...this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex],
-        //   quantity: this.editableTabs[this.editableTabsValue - 1].saleProducts[existingIndex].quantity + this.quantity
-        // };
       } else {
         // Si el producto no existe, agrégalo al array
         this.editableTabs[this.editableTabsValue - 1].saleProducts.push({
@@ -1879,7 +1874,7 @@ export default {
         if (sale.product.discounted_price != null) {
           priceToUse = sale.product.discounted_price;
         }
-        
+
         return accumulator + priceToUse * sale.quantity;
       }, 0);
 
@@ -1921,12 +1916,22 @@ export default {
         has_credit: this.editableTabs[this.editableTabsValue - 1]?.has_credit,
         client_id: this.editableTabs[this.editableTabsValue - 1]?.client_id ?? null, //id del cliente al que se vendió
         deposit: this.editableTabs[this.editableTabsValue - 1]?.deposit ?? 0.00, //abono para venta a crédito
+        paymentMethod: this.paymentMethod, //método de pago seleccionado
         // deposit_notes: this.editableTabs[this.editableTabsValue - 1]?.deposit_notes, //notas de venta a crédito
         limit_date: this.editableTabs[this.editableTabsValue - 1]?.limit_date ?? null, //fecha límite de crédito
       };
 
       // Agrega el nuevo objeto al arreglo
       storedData.push(dataToStore);
+
+      this.paymentConfirmed = true; //indica que el pago ha sido confirmado
+      setTimeout(() => {
+        this.paymentConfirmed = false;
+        // Aquí cierra el modal como lo manejes normalmente
+        this.showPaymentModal = false; // ajusta este método a tu implementación
+        this.paymentModalStep = 1; //reinicia el paso del modal de pago
+      }, 1000);
+
 
       // Vuelve a guardar el arreglo en el Local Storage
       localStorage.setItem('sales', JSON.stringify(storedData));

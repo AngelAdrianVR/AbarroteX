@@ -358,7 +358,7 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateItem } from "@/dbService.js";
+// import { addOrUpdateItem } from "@/dbService.js";
 import axios from 'axios';
 
 export default {
@@ -523,16 +523,15 @@ export default {
                     onSuccess: async () => {
                         // guardar nuevo producto a IndexedDB
                         // Obtener producto mas reciente agregado
-                        const response = await axios.get(route('products.get-all-for-indexedDB'));
-                        const product = response.data.local_products[0];
+                        // const response = await axios.get(route('products.get-all-for-indexedDB'));
+                        // const product = response.data.local_products[0];
 
-                        // agregar a indexedDB
-                        await addOrUpdateItem('products', product);
+                        // // agregar a indexedDB
+                        // await addOrUpdateItem('products', product);
 
                         // toast
                         this.$notify({
-                            title: "Correcto",
-                            message: "",
+                            title: "Producto creado",
                             type: "success",
                         });
                     },

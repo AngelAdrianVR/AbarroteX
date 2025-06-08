@@ -228,7 +228,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
 import { useForm, Link } from "@inertiajs/vue3";
-import { addOrUpdateItem } from '@/dbService.js';
+// import { addOrUpdateItem } from '@/dbService.js';
 import DialogModal from '@/Components/DialogModal.vue';
 import PromotionCard from '@/Components/MyComponents/Promotions/PromotionCard.vue';
 import { isPast, parseISO } from 'date-fns';
@@ -365,17 +365,17 @@ export default {
                 this.form.put(route('global-product-store.out', this.global_product_store.id), {
                     onSuccess: () => {
                         // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
-                        // if (this.isInventoryOn) {
-                        const product = {
-                            id: 'global_' + this.global_product_store.id,
-                            name: this.global_product_store.global_product.name,
-                            code: this.global_product_store.global_product.code,
-                            public_price: this.global_product_store.public_price,
-                            current_stock: this.global_product_store.current_stock - this.form.quantity,
-                            image_url: this.global_product_store.global_product.media[0]?.original_url,
-                        };
-                        addOrUpdateItem('products', product);
-                        // }
+                        // // if (this.isInventoryOn) {
+                        // const product = {
+                        //     id: 'global_' + this.global_product_store.id,
+                        //     name: this.global_product_store.global_product.name,
+                        //     code: this.global_product_store.global_product.code,
+                        //     public_price: this.global_product_store.public_price,
+                        //     current_stock: this.global_product_store.current_stock - this.form.quantity,
+                        //     image_url: this.global_product_store.global_product.media[0]?.original_url,
+                        // };
+                        // addOrUpdateItem('products', product);
+                        // // }
 
                         this.form.reset();
                         this.entryProductModal = false;
@@ -397,17 +397,17 @@ export default {
                 this.form.put(route('global-product-store.entry', this.global_product_store.id), {
                     onSuccess: () => {
                         // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
-                        // if (this.isInventoryOn) {
-                        const product = {
-                            id: 'global_' + this.global_product_store.id,
-                            name: this.global_product_store.global_product.name,
-                            code: this.global_product_store.global_product.code,
-                            public_price: this.global_product_store.public_price,
-                            current_stock: this.global_product_store.current_stock + this.form.quantity,
-                            image_url: this.global_product_store.global_product.media[0]?.original_url,
-                        };
-                        addOrUpdateItem('products', product);
-                        // }
+                        // // if (this.isInventoryOn) {
+                        // const product = {
+                        //     id: 'global_' + this.global_product_store.id,
+                        //     name: this.global_product_store.global_product.name,
+                        //     code: this.global_product_store.global_product.code,
+                        //     public_price: this.global_product_store.public_price,
+                        //     current_stock: this.global_product_store.current_stock + this.form.quantity,
+                        //     image_url: this.global_product_store.global_product.media[0]?.original_url,
+                        // };
+                        // addOrUpdateItem('products', product);
+                        // // }
 
                         this.form.reset();
                         this.entryProductModal = false;

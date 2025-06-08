@@ -87,7 +87,10 @@
           </el-input-number>
         </div>
         <div class="w-[15%]">
-          <div class="flex items-center space-x-2">
+          <p v-if="sale.product.discounted_price != null" class="text-gray99 line-through text-base ml-5">
+            ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+          </p>
+          <div class="flex items-center">
             <el-dropdown v-if="sale.product.promotions?.length" trigger="click">
               <button type="button" @click.stop title="Promociones"
                 class="flex items-center justify-center hover:bg-grayF2 size-5 rounded-full transition-colors duration-200"
@@ -132,12 +135,15 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <div class="text-[#5FCB1F] font-bold text-lg">
-              ${{ sale.product.discounted_price != null
-                ? (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
+            <div class="font-bold text-[#5FCB1F] text-lg">
+              <p v-if="sale.product.discounted_price != null" :class="!sale.product.promotions.length ? 'ml-5' : null">
+                ${{ (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
                   minimumFractionDigits: 2
-                })
-                : (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                }) }}
+              </p>
+              <p v-else :class="!sale.product.promotions.length ? 'ml-5' : null">
+                ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+              </p>
             </div>
           </div>
           <div v-if="sale.product.promotions?.length">
@@ -217,7 +223,10 @@
           :max="sale.product.current_stock" :precision="2" />
         <el-input-number v-else v-model="sale.quantity" @change="handleChangeQuantity(sale)" :min="0" :precision="2"
           size="small" />
-        <div class="flex items-center space-x-2">
+        <p v-if="sale.product.discounted_price != null" class="text-gray99 line-through text-base ml-5">
+          ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+        </p>
+        <div class="flex items-center">
           <el-dropdown v-if="sale.product.promotions?.length" trigger="click">
             <button type="button" @click.stop title="Promociones"
               class="flex items-center justify-center hover:bg-grayF2 size-5 rounded-full transition-colors duration-200"
@@ -262,12 +271,15 @@
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <div class="text-[#5FCB1F] font-bold text-lg">
-            ${{ sale.product.discounted_price != null
-              ? (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
+          <div class="font-bold text-[#5FCB1F] text-lg">
+            <p v-if="sale.product.discounted_price != null" :class="!sale.product.promotions.length ? 'ml-5' : null">
+              ${{ (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
                 minimumFractionDigits: 2
-              })
-              : (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+              }) }}
+            </p>
+            <p v-else :class="!sale.product.promotions.length ? 'ml-5' : null">
+              ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+            </p>
           </div>
         </div>
         <div v-if="sale.product.promotions?.length">

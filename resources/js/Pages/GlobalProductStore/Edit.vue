@@ -198,7 +198,7 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateItem } from "@/dbService.js";
+// import { addOrUpdateItem } from "@/dbService.js";
 import axios from 'axios';
 
 export default {
@@ -261,17 +261,16 @@ export default {
                     onSuccess: async () => {
                         // guardar a IndexedDB
                         // Obtener producto mas reciente agregado
-                        const productId = `global_${this.global_product_store.id}`;
-                        const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
-                        const product = response.data.product;
-                        // actualizar a indexedDB
-                        if (product) {
-                            addOrUpdateItem('products', product);
-                        }
+                        // const productId = `global_${this.global_product_store.id}`;
+                        // const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
+                        // const product = response.data.product;
+                        // // actualizar a indexedDB
+                        // if (product) {
+                        //     addOrUpdateItem('products', product);
+                        // }
 
                         this.$notify({
-                            title: "Correcto",
-                            message: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
+                            title: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
                             type: "success",
                         });
                     },

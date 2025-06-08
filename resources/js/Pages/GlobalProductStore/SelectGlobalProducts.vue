@@ -148,7 +148,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { addOrUpdateBatchOfItems } from '@/dbService.js';
+// import { addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
   name: 'SelectGlobalProduct',
@@ -317,11 +317,11 @@ export default {
           this.initialProducts = this.products;
 
           // Obtener productos
-          response = await axios.get(route('products.get-all-for-indexedDB'));
-          const products = response.data.products;
+          // response = await axios.get(route('products.get-all-for-indexedDB'));
+          // const products = response.data.products;
 
-          // Descargar y almacenar imágenes
-          addOrUpdateBatchOfItems('products', products);
+          // // Descargar y almacenar imágenes
+          // addOrUpdateBatchOfItems('products', products);
 
           // resetear variable de local storage a false
           localStorage.setItem('pendentProcess', false);
