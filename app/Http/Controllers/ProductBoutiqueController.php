@@ -478,6 +478,8 @@ class ProductBoutiqueController extends Controller
                         }
                     }
                 } else {
+                    // Primero eliminar cualquier imagen existente en la colección
+                    $new_product->clearMediaCollection('imageCover');
                     // Copiar el medio al nuevo producto registrado
                     if ($mediaItem) {
                         $new_product->copyMedia($mediaItem->getPath())->usingName($mediaItem->name)->toMediaCollection('imageCover');
