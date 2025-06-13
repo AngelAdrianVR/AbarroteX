@@ -49,17 +49,22 @@
                             product.global_product.name :
                             product.name }}</h2>
                         <p class="text-base text-[#999999] mt-2">
-                            Precio actual: <span class="text-black">${{ product.public_price }}</span>
+                            Precio actual: <span class="text-black">
+                                ${{ product.public_price?.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
                         </p>
                         <p class="text-base text-[#999999]">
-                            Existencias actuales: <span class="text-black">{{ product.current_stock }}</span>
+                            Existencias actuales: <span class="text-black">
+                                {{ product.current_stock }}
+                            </span>
                         </p>
                     </div>
                     <section class="col-span-full space-y-2">
+                        <p v-if="!form.promos.length" class="text-center text-gray99 text-sm">No hay ninguna promoción para agregar</p>
                         <article v-for="(item, index) in form.promos" :key="index" class="border rounded-[10px] pb-2">
                             <header class="relative">
                                 <div class="absolute -top-2 -right-2">
-                                    <el-popconfirm v-if="form.promos.length > 1" confirm-button-text="Si"
+                                    <el-popconfirm confirm-button-text="Si"
                                         cancel-button-text="No" icon-color="#373737" :title="'¿Desea eliminar?'"
                                         @confirm="deletePromo(index)">
                                         <template #reference>
@@ -189,7 +194,7 @@
                     </section>
                 </div>
                 <div class="col-span-full text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing || conflicts">
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing || conflicts || !form.promos.length">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Crear promociones
                     </PrimaryButton>

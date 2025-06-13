@@ -49,20 +49,26 @@
                             product.global_product.name :
                             product.name }}</h2>
                         <p class="text-base text-[#999999] mt-2">
-                            Precio actual: <span class="text-black">${{ product.public_price }}</span>
+                            Precio actual: <span class="text-black">
+                                ${{ product.public_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
                         </p>
                         <p class="text-base text-[#999999]">
-                            Existencias actuales: <span class="text-black">{{ product.current_stock }}</span>
+                            Existencias actuales: <span class="text-black">
+                                {{ product.current_stock }}
+                            </span>
                         </p>
                     </div>
                     <section class="col-span-full space-y-2">
+                        <p v-if="!form.promos.length" class="text-center text-gray99 text-sm">Se han eliminado todas las
+                            promociones de este producto
+                        </p>
                         <article v-for="(item, index) in form.promos" :key="index" class="border rounded-[10px] pb-2"
                             :class="isExpired(item.expiration_date) ? 'border-amber-600 bg-amber-50' : 'border-grayD9'">
                             <header class="relative">
                                 <div class="absolute -top-2 -right-2">
-                                    <el-popconfirm v-if="form.promos.length > 1" confirm-button-text="Si"
-                                        cancel-button-text="No" icon-color="#373737" :title="'¿Desea eliminar?'"
-                                        @confirm="deletePromo(index)">
+                                    <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#373737"
+                                        :title="'¿Desea eliminar?'" @confirm="deletePromo(index)">
                                         <template #reference>
                                             <button type="button"
                                                 class="size-5 bg-[#EDEDED] flex items-center justify-center rounded-full">
