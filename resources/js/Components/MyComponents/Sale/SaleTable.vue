@@ -146,10 +146,10 @@
               </p>
             </div>
           </div>
-          <div v-if="sale.product.promotions?.length">
+          <!-- <div v-if="sale.product.promotions?.length">
             <p v-if="someApplicablePromotion(sale)" class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
             <p v-else class="text-gray99 text-[10px]">Promoción disponible</p>
-          </div>
+          </div> -->
         </div>
         <div class="w-[5%] text-right pr-10">
           <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
@@ -282,10 +282,10 @@
             </p>
           </div>
         </div>
-        <div v-if="sale.product.promotions?.length">
+        <!-- <div v-if="sale.product.promotions?.length">
           <p v-if="someApplicablePromotion(sale)" class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
           <p v-else class="text-gray99 text-[10px]">Promoción disponible</p>
-        </div>
+        </div> -->
         <div class="self-end text-lg">
           <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
             @confirm="deleteItem(sale.product.id)" class="justify-self-end">

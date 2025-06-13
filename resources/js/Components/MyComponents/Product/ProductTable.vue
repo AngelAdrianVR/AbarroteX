@@ -223,7 +223,11 @@ export default {
             } else if (commandName == 'edit') {
                 this.handleEdit(product);
             } else if (commandName == 'promo') {
-                this.handleCreatePromo(product);
+                if (!product.promotions.length) {
+                    this.handleCreatePromo(product);
+                } else {
+                    this.handleEditPromo(product);
+                }
             } else if (commandName == 'delete') {
                 this.showDeleteConfirm = true;
                 this.itemToDelete = product;

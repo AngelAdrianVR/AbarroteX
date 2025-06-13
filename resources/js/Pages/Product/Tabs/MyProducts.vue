@@ -270,7 +270,9 @@
                                 <i v-else class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-primary"></i>
                             </div>
                             <div v-else class="col-span-3 flex items-center space-x-2">
-                                <strong>${{ productEntryFound[0]?.public_price }}</strong>
+                                <strong>
+                                    ${{ productEntryFound[0]?.public_price?.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                </strong>
                                 <button
                                     @click="priceForm.public_price = productEntryFound[0]?.public_price; editPrice = true"
                                     type="button">

@@ -68,7 +68,7 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2 h-[calc(94vh-4px)]"><!--mover altura para productos sin codigo -->
+    <main class="pt-2 h-[calc(92vh)]"><!--mover altura para productos sin codigo -->
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[70%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
