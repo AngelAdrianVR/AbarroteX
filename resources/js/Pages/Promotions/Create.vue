@@ -60,13 +60,13 @@
                         </p>
                     </div>
                     <section class="col-span-full space-y-2">
-                        <p v-if="!form.promos.length" class="text-center text-gray99 text-sm">No hay ninguna promoción para agregar</p>
+                        <p v-if="!form.promos.length" class="text-center text-gray99 text-sm">No hay ninguna promoción
+                            para agregar</p>
                         <article v-for="(item, index) in form.promos" :key="index" class="border rounded-[10px] pb-2">
                             <header class="relative">
                                 <div class="absolute -top-2 -right-2">
-                                    <el-popconfirm confirm-button-text="Si"
-                                        cancel-button-text="No" icon-color="#373737" :title="'¿Desea eliminar?'"
-                                        @confirm="deletePromo(index)">
+                                    <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#373737"
+                                        :title="'¿Desea eliminar?'" @confirm="deletePromo(index)">
                                         <template #reference>
                                             <button type="button"
                                                 class="size-5 bg-[#EDEDED] flex items-center justify-center rounded-full">
@@ -83,7 +83,7 @@
                                         clearable placeholder="Selecciona" no-data-text="No hay opciones registradas"
                                         no-match-text="No se encontraron coincidencias">
                                         <el-option v-for="type in promoTypes" :key="type.name" :label="type.name"
-                                            :value="type.name" :disabled="checkDisabledRules(type.name, index)">
+                                            :value="type.name" :disabled="checkDisabledType(type.name, index)">
                                             <span class="text-sm mr-2">{{ type.name }}</span>
                                             <span class="text-xs text-[#999999]">{{ type.example }}</span>
                                         </el-option>
@@ -194,7 +194,8 @@
                     </section>
                 </div>
                 <div class="col-span-full text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing || conflicts || !form.promos.length">
+                    <PrimaryButton class="!rounded-full"
+                        :disabled="form.processing || conflicts || !form.promos.length">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Crear promociones
                     </PrimaryButton>
@@ -267,7 +268,22 @@ export default {
         product: Object,
     },
     methods: {
-        checkDisabledRules(typeName, index) {
+        checkConflictsRules(promo) {
+            const conflictMatrix = {
+                'Descuento en precio fijo': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
+                'Descuento en porcentaje': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
+                'Precio especial por paquete': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Producto gratis al comprar otro', 'Promoción tipo 2x1 o 3x2'],
+                'Promoción tipo 2x1 o 3x2': ['Descuento en precio fijo', 'Descuento en porcentaje', 'Precio especial por paquete', 'Promoción tipo 2x1 o 3x2'],
+                'Producto gratis al comprar otro': ['Producto gratis al comprar otro']
+            };
+
+            // Obtener promociones excluyendo la actual
+            const promoList = this.form.promos.filter(p => p !== promo);
+
+            // Verifica si el tipo actual entra en conflicto con alguno ya seleccionado
+            return promoList.some(p => conflictMatrix[p.type]?.includes(promo.type));
+        },
+        checkDisabledType(typeName, index) {
             if (index === 0) {
                 return false; // no hay conflictos
             }
@@ -283,19 +299,18 @@ export default {
             // Verifica si el tipo actual entra en conflicto con alguno ya seleccionado
             return this.form.promos.some(promo => conflictMatrix[promo.type]?.includes(typeName));
         },
-        checkConflicts() {
-            // revisar entre las promociones si hay conflictos y si lo hay, mostrar un mensaje
+        checkConflicts(promo) {
+            // revisar si hay conflictos y si lo hay, mostrar un mensaje
             this.conflicts = false;
-            this.form.promos.forEach((p, i) => {
-                if (this.checkDisabledRules(p.type, i)) {
-                    this.$notify({
-                        title: "Advertencia",
-                        message: "Esta promoción entra en conflicto con otra ya seleccionada.",
-                        type: "warning",
-                    });
-                    this.conflicts = true;
-                }
-            });
+
+            if (this.checkConflictsRules(promo)) {
+                this.$notify({
+                    title: "Advertencia",
+                    message: "Esta promoción entra en conflicto con otra ya seleccionada.",
+                    type: "warning",
+                });
+                this.conflicts = true;
+            }
         },
         handleChangeProduct(index) {
             const promo = this.form.promos[index];
@@ -325,7 +340,7 @@ export default {
             promo.giftable_type = null;
             promo.quantity_to_gift = 1;
 
-            this.checkConflicts();
+            this.checkConflicts(promo);
         },
         handleDiscountPercentageChange(index) {
             const promo = this.form.promos[index];
@@ -355,7 +370,7 @@ export default {
         },
         deletePromo(index) {
             this.form.promos.splice(index, 1);
-            this.checkConflicts();
+            this.conflicts = false;
         },
         disabledDate(time) {
             const today = new Date();
