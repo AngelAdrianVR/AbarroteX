@@ -6,10 +6,12 @@
           :draggable="false" class="object-cover select-none w-full hidden lg:block">
         <img src="@/../../public/images/referalBannerMobile.webp" alt="Banner con anunncio de recomienda y gana"
           :draggable="false" class="object-cover select-none w-full lg:hidden">
-        <p class="w-[86%] lg:w-[54%] text-white text-xl lg:text-5xl absolute top-5 lg:top-8 left-[7%] lg:left-[23%] text-center tracking-wide" style="font-family: 'LeagueGothic';">
+        <p class="w-[86%] lg:w-[54%] text-white text-xl lg:text-5xl absolute top-5 lg:top-8 left-[7%] lg:left-[23%] text-center tracking-wide"
+          style="font-family: 'LeagueGothic';">
           Comienza a recomendar ahora y gana el 50% del pago a cada referido.
         </p>
-        <p class="w-[96%] lg:w-[66%] text-white text-sm lg:text-2xl absolute bottom-5 left-[2%] lg:left-[17%] text-center">
+        <p
+          class="w-[96%] lg:w-[66%] text-white text-sm lg:text-2xl absolute bottom-5 left-[2%] lg:left-[17%] text-center">
           ¡Copia tu código y compártelo con amigos y negocios!
         </p>
       </figure>
@@ -103,7 +105,7 @@ export default {
   methods: {
     shareByWhatsapp() {
       const cupon = this.partner.discount_ticket.code;
-      const message = `¡Hola! te comparto este cupón de descuento para EzyVentas: ${cupon}`;
+      const message = `Hola! Estoy usando EzyVentas como sistema de Punto Venta.\nEs muy completo y fácil de usar.\nSi usas este código *${cupon}*, obtienes 30 días gratis y 10% de descuento en tu primer pago.\n👉 ezyventas.com`;
       const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     },

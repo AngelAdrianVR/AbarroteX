@@ -304,7 +304,8 @@ async function syncIDBProducts() {
         localProduct.code !== serverProduct.code ||
         localProduct.public_price !== serverProduct.public_price ||
         localProduct.current_stock !== serverProduct.current_stock ||
-        localProduct.image_url !== serverProduct.image_url
+        localProduct.image_url !== serverProduct.image_url ||
+        localProduct.promotions !== serverProduct.promotions
       ) {
         productsToAddOrUpdate.push(serverProduct);
       }

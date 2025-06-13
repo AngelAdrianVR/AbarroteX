@@ -38,8 +38,8 @@ const stockUpdates = reactive({})
 
 // lee las notificaciones
 const readNotifications = () => {
-  notificationsCenterRef.value?.readNotifications()
-  onlineNotificationsCenterRef.value?.readNotifications()
+    notificationsCenterRef.value?.readNotifications()
+    onlineNotificationsCenterRef.value?.readNotifications()
 }
 
 // calcula dias restantes de la suscripcion a fecha de hoy
@@ -60,7 +60,7 @@ const logout = () => {
 
 const handleOpenInventory = () => {
     //recupera los proveedores y abre el modal
-    if ( providers.value.length > 0 ) {
+    if (providers.value.length > 0) {
         showInventoryModal.value = true;
         return;
     } else {
@@ -72,10 +72,10 @@ const handleOpenInventory = () => {
 const fetchProviders = async () => {
     loadingProviders.value = true
     try {
-            if ( !providers.value.length ) {
-                const response = await axios.get(route('brand.fetch-all'))
-                if (response.status === 200) {
-                    providers.value = response.data
+        if (!providers.value.length) {
+            const response = await axios.get(route('brand.fetch-all'))
+            if (response.status === 200) {
+                providers.value = response.data
             } else {
                 return
             }
@@ -89,19 +89,19 @@ const fetchProviders = async () => {
 
 // Buscar productos
 const searchProducts = async () => {
-  searchLoading.value = true
-  try {
-    const response = await axios.get(route('products.search'), {
-      params: { query: searchQuery.value }
-    })
-    if (response.status === 200) {
-      productsFound.value = response.data.items
+    searchLoading.value = true
+    try {
+        const response = await axios.get(route('products.search'), {
+            params: { query: searchQuery.value }
+        })
+        if (response.status === 200) {
+            productsFound.value = response.data.items
+        }
+    } catch (error) {
+        console.error(error)
+    } finally {
+        searchLoading.value = false
     }
-  } catch (error) {
-    console.error(error)
-  } finally {
-    searchLoading.value = false
-  }
 }
 
 // Filtrar productos por proveedor
@@ -109,10 +109,10 @@ const filterByProvider = async () => {
     searchLoading.value = true
     try {
         const response = await axios.get(route('products.filter-by-provider'), {
-        params: { providers: selectedProviders.value }
+            params: { providers: selectedProviders.value }
         })
         if (response.status === 200) {
-        productsFound.value = response.data.items
+            productsFound.value = response.data.items
         }
     } catch (error) {
         console.error('Error al filtrar por proveedor:', error)
@@ -123,50 +123,50 @@ const filterByProvider = async () => {
 
 // actualiza el stock de los productos seleccionados
 const updateProductStock = async () => {
-  try {
-    const payload = Object.entries(stockUpdates).map(([productId, quantity]) => {
-      const product = productsFound.value.find(p => p.id == productId)
-      return {
-        id: productId,
-        quantity,
-        global_product_id: product?.global_product_id ?? null,
-      }
-    })
+    try {
+        const payload = Object.entries(stockUpdates).map(([productId, quantity]) => {
+            const product = productsFound.value.find(p => p.id == productId)
+            return {
+                id: productId,
+                quantity,
+                global_product_id: product?.global_product_id ?? null,
+            }
+        })
 
-    const response = await axios.post(route('products.massive-update-stock'), { updates: payload })
+        const response = await axios.post(route('products.massive-update-stock'), { updates: payload })
 
-    if (response.status === 200) {
-      ElMessage.success('Stock actualizado correctamente.')
+        if (response.status === 200) {
+            ElMessage.success('Stock actualizado correctamente.')
 
-      if ( selectedProviders.value.length > 0 ) {
-        // Si hay proveedores seleccionados, filtra los productos por proveedor
-        await filterByProvider()
-      } else {
-        // Si no hay proveedores seleccionados, recarga todos los productos
-        await searchProducts()
-      }
-        // Limpia los campos
+            if (selectedProviders.value.length > 0) {
+                // Si hay proveedores seleccionados, filtra los productos por proveedor
+                await filterByProvider()
+            } else {
+                // Si no hay proveedores seleccionados, recarga todos los productos
+                await searchProducts()
+            }
+            // Limpia los campos
+        }
+    } catch (error) {
+        console.error('Error al actualizar el stock:', error)
+        ElMessage.error('Error al actualizar el stock.')
     }
-  } catch (error) {
-    console.error('Error al actualizar el stock:', error)
-    ElMessage.error('Error al actualizar el stock.')
-  }
 }
 
 
 const providerOptions = computed(() =>
-  providers.map(provider => ({
-    id: provider.id,
-    name: provider.name,
-  }))
+    providers.map(provider => ({
+        id: provider.id,
+        name: provider.name,
+    }))
 )
 
 const page = usePage()
 
 const isInventoryOn = computed(() => {
-  return page.props.auth.user.store.settings.find(
-    item => item.name === 'Control de inventario'
-  )?.value
+    return page.props.auth.user.store.settings.find(
+        item => item.name === 'Control de inventario'
+    )?.value
 })
 
 onMounted(() => {
@@ -244,19 +244,16 @@ onUnmounted(() => {
                                 </NeonButton>
 
                                 <section @click="handleOpenInventory" class="relative flex justify-center items-center">
-                                    <div
-                                        class="group flex justify-center transition-all"
-                                    >
+                                    <div class="group flex justify-center transition-all">
                                         <!-- modal de inventario para agregar stock por proveedor -->
+
                                         <button class="mx-2 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                             </svg>
                                         </button>
                                         <span
-                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs"
-                                        >Inventario</span
-                                        >
+                                            class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs">Inventario</span>
                                     </div>
                                 </section>
 
@@ -267,22 +264,16 @@ onUnmounted(() => {
                                         <!-- notificaciones de tienda en linea -->
                                         <OnlineSalesNotifications ref="onlineNotificationsCenterRef" />
                                         <span
-                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs"
-                                        >Pedidos</span
-                                        >
+                                            class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs">Pedidos</span>
                                     </div>
                                 </section>
 
                                 <section @click="readNotifications" class="relative flex justify-center items-center">
-                                    <div
-                                        class="group flex justify-center transition-all"
-                                    >
+                                    <div class="group flex justify-center transition-all">
                                         <!-- notifications -->
                                         <NotificationsCenter ref="notificationsCenterRef" />
                                         <span
-                                        class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs"
-                                        >Notificaciones</span
-                                        >
+                                            class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs">Notificaciones</span>
                                     </div>
                                 </section>
 
@@ -347,9 +338,12 @@ onUnmounted(() => {
                             <!-- Hamburger -->
                             <div class="-me-2 flex items-center sm:hidden">
                                 <!-- modal de inventario para agregar stock por proveedor -->
-                                <button @click="handleOpenInventory" class="flex items-center justify-end ml-5 text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                <button @click="handleOpenInventory"
+                                    class="flex items-center justify-end ml-5 text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                     </svg>
                                 </button>
                                 <!-- notificaciones de tienda en linea -->
@@ -672,7 +666,16 @@ onUnmounted(() => {
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('tutorials.index')"
                                 :active="route().current('tutorials.*')">
-                                <i class="fa-brands fa-youtube text-lg"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    id="Youtube-Clip-Logo--Streamline-Logos" height="18" width="18">
+                                    <desc>Youtube Clip Logo Streamline Icon: https://streamlinehq.com</desc>
+                                    <path stroke="currentColor" stroke-linejoin="round"
+                                        d="M1.5 12c0 -1.477 0.071 -2.87 0.164 -4.038 0.14 -1.764 1.538 -3.12 3.303 -3.243C6.663 4.6 8.98 4.5 12 4.5c3.02 0 5.337 0.1 7.033 0.219 1.765 0.123 3.163 1.48 3.303 3.243 0.093 1.169 0.164 2.56 0.164 4.038 0 1.53 -0.076 2.969 -0.174 4.163a3.374 3.374 0 0 1 -3.166 3.121c-1.713 0.117 -4.11 0.216 -7.16 0.216s-5.447 -0.099 -7.16 -0.216a3.374 3.374 0 0 1 -3.166 -3.121A51.642 51.642 0 0 1 1.5 12Z"
+                                        stroke-width="1.4"></path>
+                                    <path stroke="currentColor" stroke-linejoin="round" d="M10 15V9l5.5 3 -5.5 3Z"
+                                        stroke-width="1.4">
+                                    </path>
+                                </svg>
                                 <span>Tutoriales</span>
                             </ResponsiveNavLink>
                             <div class="h-px border-t border-[#505050] pb-2"></div>
@@ -724,7 +727,7 @@ onUnmounted(() => {
                                         <path d="M6.48438 7.7055V3.51562H10.375V7.7055H6.48438Z" fill="#9800F6" />
                                     </svg>
                                     <span class="text-xs">
-                                        Recomienda y gana el 50% del pago a cada referido 
+                                        Recomienda y gana el 50% del pago a cada referido
                                     </span>
                                 </p>
                                 <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -835,27 +838,11 @@ onUnmounted(() => {
                     <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
                 </div>
 
-                <div class="flex space-x-2 max-w-lg">
-                    <el-select
-                        v-model="selectedProviders"
-                        multiple
-                        filterable
-                        allow-create
-                        default-first-option
-                        :reserve-keyword="false"
-                        placeholder="Selecciona proveedores"
-                        style="width: 100%"
-                    >
-                    <el-option
-                        v-for="provider in providers"
-                        :key="provider.id"
-                        :label="provider.name"
-                        :value="provider.id"
-                    />
-                    </el-select>
-                    <el-button type="primary" @click="filterByProvider" class="!px-4 !py-2">
-                        <i class="fa-solid fa-magnifying-glass mr-1"></i> Filtrar
-                    </el-button>
+
+                <div class="flex items-center justify-end mt-4 space-x-3">
+                    <CancelButton @click="showInventoryModal = false;">Cancelar</CancelButton>
+                    <PrimaryButton :disabled="!productsFound.length" @click="updateProductStock">Registrar entradas
+                    </PrimaryButton>
                 </div>
             </article>
 

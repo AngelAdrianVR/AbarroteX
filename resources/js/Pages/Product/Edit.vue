@@ -256,7 +256,7 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateItem } from "@/dbService.js";
+// import { addOrUpdateItem } from "@/dbService.js";
 import axios from 'axios';
 
 export default {
@@ -336,17 +336,16 @@ export default {
                         onSuccess: async () => {
                             // guardar promociones a IndexedDB
                             // Obtener producto mas reciente agregado
-                            const productId = `local_${this.product.data.id}`;
-                            const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
-                            const product = response.data.product;
-                            // actualizar a indexedDB
-                            if (product) {
-                                addOrUpdateItem('products', product);
-                            }
+                            // const productId = `local_${this.product.data.id}`;
+                            // const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
+                            // const product = response.data.product;
+                            // // actualizar a indexedDB
+                            // if (product) {
+                            //     addOrUpdateItem('products', product);
+                            // }
 
                             this.$notify({
-                                title: "Correcto",
-                                message: 'Se ha editado el producto ' + this.product.data.name,
+                                title: 'Se ha editado el producto ' + this.product.data.name,
                                 type: "success",
                             });
                         },
@@ -356,17 +355,16 @@ export default {
                         onSuccess: async () => {
                             // guardar nuevo producto a IndexedDB
                             // Obtener producto que coincida con el id editado
-                            const response = await axios.get(route('products.get-all-for-indexedDB'));
-                            const product = response.data.local_products.find(item => item.id.split('_')[1] == this.product.data.id);
+                            // const response = await axios.get(route('products.get-all-for-indexedDB'));
+                            // const product = response.data.local_products.find(item => item.id.split('_')[1] == this.product.data.id);
 
-                            // actualizar a indexedDB
-                            if (product) {
-                                addOrUpdateItem('products', product);
-                            }
+                            // // actualizar a indexedDB
+                            // if (product) {
+                            //     addOrUpdateItem('products', product);
+                            // }
 
                             this.$notify({
-                                title: "Correcto",
-                                message: 'Se ha editado el producto ' + this.product.data.name,
+                                title: 'Se ha editado el producto ' + this.product.data.name,
                                 type: "success",
                             });
                         },

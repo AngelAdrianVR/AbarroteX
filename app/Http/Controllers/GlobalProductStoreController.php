@@ -319,7 +319,7 @@ class GlobalProductStoreController extends Controller
             });
         });
 
-        // obtener prouductos totales en la tienda para establecer limite de 1500 (paquete basico)
+        // obtener prouductos totales en la tienda para establecer limite de 3000 (paquete basico)
         $total_local_products = Product::where('store_id', $store->id)->get(['id'])->count();
         $total_global_products = GlobalProductStore::where('store_id', $store->id)->get(['id'])->count();
         $total_products = $total_local_products + $total_global_products;
@@ -328,7 +328,7 @@ class GlobalProductStoreController extends Controller
         foreach ($new_product_ids as $productId) {
             $product = GlobalProduct::with(['category', 'brand'])->find($productId);
             // fijar un limite para paquete basico
-            if ($total_products < 1500) {
+            if ($total_products < 3000) {
                 // Se obtiene el producto global con el id recibido
 
                 if ($product) {
@@ -354,11 +354,8 @@ class GlobalProductStoreController extends Controller
 
     public function changePrice(Request $request)
     {
-        // Extraer el número del string
-        $idString = $request->product['id'];
-        $idNumber = (int) preg_replace('/[^0-9]/', '', $idString);
-
-        $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->where('id', $idNumber)->first();
+        $product_id = explode('_', $request->product['id'])[1]; 
+        $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->where('id', $product_id)->first();
         $old_price = $product->public_price;
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
         $product->save();
