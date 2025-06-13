@@ -246,12 +246,10 @@ onUnmounted(() => {
                                 <section @click="handleOpenInventory" class="relative flex justify-center items-center">
                                     <div class="group flex justify-center transition-all">
                                         <!-- modal de inventario para agregar stock por proveedor -->
-                                        <button
-                                            class="mx-1 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+
+                                        <button class="mx-2 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                             </svg>
                                         </button>
                                         <span
@@ -259,11 +257,12 @@ onUnmounted(() => {
                                     </div>
                                 </section>
 
-                                <section @click="readNotifications" class="relative flex justify-center items-center">
-                                    <div class="group flex justify-center transition-all">
+                                <section v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" @click="readNotifications" class="relative flex justify-center items-center">
+                                    <div
+                                        class="group flex justify-center transition-all"
+                                    >
                                         <!-- notificaciones de tienda en linea -->
-                                        <OnlineSalesNotifications ref="onlineNotificationsCenterRef"
-                                            v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" />
+                                        <OnlineSalesNotifications ref="onlineNotificationsCenterRef" />
                                         <span
                                             class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs">Pedidos</span>
                                     </div>
@@ -820,98 +819,23 @@ onUnmounted(() => {
 
     <!-- -------------- Modal de actualizacion de inventario ----------------------- -->
     <Modal :show="showInventoryModal" @close="showInventoryModal = false" maxWidth="5xl">
-        <div class="p-4 relative">
-            <i @click="showInventoryModal = false"
-                class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+      <div class="p-4 relative">
+        <i @click="showInventoryModal = false"
+          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
 
-            <h2 class="font-bold">Inventario</h2>
+        <h2 class="font-bold">Inventario</h2>
 
-            <p class="text-sm">Registra entradas de productos por proveedor o de forma individual. Ideal para capturar
-                surtidos y mantener actualizado tu inventario.</p>
+        <p class="text-sm">Registra entradas de productos por proveedor o de forma individual. Ideal para capturar surtidos y mantener actualizado tu inventario.</p>
+        
+        <SmallLoading v-if="loadingProviders" class="my-3 mx-auto" />
 
-            <SmallLoading v-if="loadingProviders" class="my-3 mx-auto" />
-
-            <section v-else class="mt-5 py-2">
-                <article class="flex justify-between items-center">
-                    <!-- Buscar por nombre o código del producto: -->
-                    <div class="lg:w-1/4 relative">
-                        <input v-model="searchQuery" @keyup.enter="searchProducts" class="input w-full pl-9"
-                            placeholder="Buscar por nombre o código" type="search">
-                        <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
-                    </div>
-
-                    <div class="flex space-x-2 max-w-lg">
-                        <el-select v-model="selectedProviders" multiple filterable allow-create default-first-option
-                            :reserve-keyword="false" placeholder="Selecciona proveedores" style="width: 100%">
-                            <el-option v-for="provider in providers" :key="provider.id" :label="provider.name"
-                                :value="provider.id" />
-                        </el-select>
-                        <el-button type="primary" @click="filterByProvider" class="!px-4 !py-2">
-                            <i class="fa-solid fa-magnifying-glass mr-1"></i> Filtrar
-                        </el-button>
-                    </div>
-                </article>
-
-                <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
-
-                <div v-else class="overflow-auto my-7 max-h-[500px]">
-                    <table v-if="productsFound?.length" class="w-full table-fixed">
-                        <thead>
-                            <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                                <th class="w-16">Imagen</th>
-                                <th class="w-32">Código</th>
-                                <th class="w-44">Nombre de producto</th>
-                                <th class="w-28">Proveedor</th>
-                                <th class="w-28">Existencias</th>
-                                <th class="w-32">Cant. a agregar</th>
-                                <th class="w-28">Existencias mínimas</th>
-                                <th class="w-28">Existencias Máximas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(product, index) in productsFound" :key="product.id"
-                                class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight">
-                                <td class="rounded-s-full">
-                                    <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
-                                        class="size-10 bg-white object-contain rounded-md"
-                                        :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
-                                    <div v-else
-                                        class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="size-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                        </svg>
-                                    </div>
-                                </td>
-                                <td>{{ (product.global_product_id ? product.global_product?.code : product.code) ?? '-'
-                                    }}
-                                </td>
-                                <td>{{ product.global_product_id ? product.global_product?.name : product.name }}</td>
-                                <td>{{ (product.global_product_id ? product.global_product?.brand?.name :
-                                    product.brand?.name) ?? '-' }}</td>
-                                <td>
-                                    <p
-                                        :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
-                                        {{ product.current_stock ?? '-' }}
-                                        <i v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                            class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
-                                        <span v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                            class="text-[11px]">Bajo
-                                            stock</span>
-                                    </p>
-                                </td>
-                                <td>
-                                    <el-input-number size="small" v-model="stockUpdates[product.id]" :min="0" :max="999"
-                                        :model-value="stockUpdates[product.id] ?? 0" />
-                                </td>
-                                <td>{{ product.min_stock ?? '-' }}</td>
-                                <td>{{ product.max_stock ?? '-' }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <el-empty v-else
-                        description="No hay productos para mostrar. Búscalos por nombre, código o proveedor" />
+        <section v-else class="mt-5 py-2">
+            <article class="flex justify-between items-center">
+                <!-- Buscar por nombre o código del producto -->
+                <div class="lg:w-1/4 relative">
+                    <input v-model="searchQuery" @keyup.enter="searchProducts"
+                        class="input w-full pl-9" placeholder="Buscar por nombre o código" type="search">
+                    <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
                 </div>
 
 
@@ -920,7 +844,76 @@ onUnmounted(() => {
                     <PrimaryButton :disabled="!productsFound.length" @click="updateProductStock">Registrar entradas
                     </PrimaryButton>
                 </div>
-            </section>
-        </div>
+            </article>
+
+            <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
+
+            <div v-else class="overflow-auto my-7 max-h-[500px]">
+                <table v-if="productsFound?.length" class="w-full table-fixed">
+                    <thead>
+                        <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
+                            <th class="w-16">Imagen</th>
+                            <th class="w-32">Código</th>
+                            <th class="w-44">Nombre de producto</th>
+                            <th class="w-28">Proveedor</th>
+                            <th class="w-28">Existencias</th>
+                            <th class="w-32">Cant. a agregar</th>
+                            <th class="w-28">Existencias mínimas</th>
+                            <th class="w-28">Existencias Máximas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="product in productsFound" :key="product.id"
+                            class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight">
+                            <td class="rounded-s-full">
+                                <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
+                                    class="size-10 bg-white object-contain rounded-md"
+                                    :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                                <div v-else
+                                    class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                        stroke="currentColor" class="size-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                    </svg>
+                                </div>
+                            </td>
+                            <td>{{ (product.global_product_id ? product.global_product?.code : product.code) ?? '-' }}</td>
+                            <td>{{ product.global_product_id ? product.global_product?.name : product.name }}</td>
+                            <td>{{ (product.global_product_id ? product.global_product?.brand?.name : product.brand?.name) ?? '-' }}</td>
+                            <td>
+                                <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
+                                    {{ product.current_stock ?? '-' }}
+                                    <i v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                        class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
+                                    <span v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                        class="text-[11px]">Bajo
+                                        stock</span>
+                                </p>
+                            </td>
+                            <td>
+                                <el-input-number
+                                    size="small"
+                                    v-model="stockUpdates[product.id]"
+                                    :min="0"
+                                    :max="999"
+                                    :model-value="stockUpdates[product.id] ?? 0"
+                                />
+                            </td>
+                            <td>{{ product.min_stock ?? '-' }}</td>
+                            <td>{{ product.max_stock ?? '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <el-empty v-else description="No hay productos para mostrar. Búscalos por nombre, código o proveedor" />
+            </div>
+
+
+            <div class="flex items-center justify-end mt-4 space-x-3">
+                <CancelButton @click="showInventoryModal = false;">Cancelar</CancelButton>
+                <PrimaryButton :disabled="!productsFound.length" @click="updateProductStock">Registrar entradas</PrimaryButton>
+            </div>
+        </section>
+      </div>
     </Modal>
 </template>

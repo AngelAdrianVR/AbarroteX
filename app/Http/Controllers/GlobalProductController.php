@@ -148,40 +148,45 @@ class GlobalProductController extends Controller
 
     public function filter(Request $request)
     {
-        // Obtener los parámetros de la solicitud
-        $category_id = request('category_id');
-        $brand_id = request('brand_id');
+        $category_ids = $request->input('category_ids', []);
+        $brand_ids = $request->input('brand_ids', []);
 
-        // Consultar los productos globales con los filtros aplicados
-        $filtered_global_products = GlobalProduct::query();
+        $query = GlobalProduct::query();
 
-        // Aplicar el filtro por categoría si está presente
-        if ($category_id !== null) {
-            $filtered_global_products->where('category_id', $category_id);
+        // Filtro por múltiples categorías
+        if (!empty($category_ids)) {
+            $query->whereIn('category_id', $category_ids);
         }
 
-        // Aplicar el filtro por marca si está presente
-        if ($brand_id !== null) {
-            $filtered_global_products->where('brand_id', $brand_id);
+        // Filtro por múltiples marcas
+        if (!empty($brand_ids)) {
+            $query->whereIn('brand_id', $brand_ids);
         }
 
-        // Obtener los resultados filtrados
-        $filtered_global_products = $filtered_global_products->get();
+        $filtered_global_products = $query->get();
 
-        // Devolver los resultados como una respuesta JSON
         return response()->json(['items' => $filtered_global_products]);
     }
 
     public function searchProduct(Request $request)
     {
         $query = $request->input('query');
+        $bussiness_line = auth()->user()->store->type;
 
-        // Realiza la búsqueda en la base de datos local
-        $global_products = GlobalProduct::with(['category', 'brand', 'media'])
-            ->where('name', 'like', "%$query%")
-            ->orWhere('code', $query)
-            ->take(20)
-            ->get();
+        if ( $request->input('module') === 'base_catalog' ) {
+            // Realiza la búsqueda en la base de datos para catalogo base
+            $global_products = GlobalProduct::where('name', 'like', "%$query%")
+                ->where('type', $bussiness_line)
+                ->orWhere('code', $query)
+                ->get();
+        } else {
+            // Realiza la búsqueda en la base de datos local con media, categoría y marca para index de catalogo de productos
+            $global_products = GlobalProduct::with(['category', 'brand', 'media'])
+                ->where('name', 'like', "%$query%")
+                ->orWhere('code', $query)
+                ->take(20)
+                ->get();
+        }
 
         return response()->json(['items' => $global_products]);
     }
