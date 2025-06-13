@@ -248,7 +248,7 @@ onUnmounted(() => {
                                         class="group flex justify-center transition-all"
                                     >
                                         <!-- modal de inventario para agregar stock por proveedor -->
-                                        <button class="mx-1 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
+                                        <button class="mx-2 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                             </svg>
@@ -260,13 +260,12 @@ onUnmounted(() => {
                                     </div>
                                 </section>
 
-                                <section @click="readNotifications" class="relative flex justify-center items-center">
+                                <section v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" @click="readNotifications" class="relative flex justify-center items-center">
                                     <div
                                         class="group flex justify-center transition-all"
                                     >
                                         <!-- notificaciones de tienda en linea -->
-                                        <OnlineSalesNotifications ref="onlineNotificationsCenterRef"
-                                            v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" />
+                                        <OnlineSalesNotifications ref="onlineNotificationsCenterRef" />
                                         <span
                                         class="absolute opacity-0 group-hover:opacity-100 group-hover:translate-y-12 duration-700 text-xs"
                                         >Pedidos</span
@@ -829,7 +828,7 @@ onUnmounted(() => {
 
         <section v-else class="mt-5 py-2">
             <article class="flex justify-between items-center">
-                <!-- Buscar por nombre o código del producto: -->
+                <!-- Buscar por nombre o código del producto -->
                 <div class="lg:w-1/4 relative">
                     <input v-model="searchQuery" @keyup.enter="searchProducts"
                         class="input w-full pl-9" placeholder="Buscar por nombre o código" type="search">
@@ -877,7 +876,7 @@ onUnmounted(() => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(product, index) in productsFound" :key="product.id"
+                        <tr v-for="product in productsFound" :key="product.id"
                             class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight">
                             <td class="rounded-s-full">
                                 <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"

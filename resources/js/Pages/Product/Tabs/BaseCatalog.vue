@@ -19,12 +19,21 @@
             <Loading v-if="loading" class="mt-20" />
 
             <!-- Transfer 2.0 (hecho desde 0) -->
-           
-
             <!-- transfer -->
             <section v-else class="mt-10 flex flex-col items-center xl:flex-row xl:items-start xl:space-x-5">
                 <div class="mx-auto xl:w-[85%] relative">
-                    <Transfer />
+                    <Transfer 
+                        :brands="brands" 
+                        :categories="categories" 
+                        :globalProducts="globalProducts"
+                        :myProducts="myProducts"
+                        @product-preview="getLeftProductCheckedInfo($event)"
+                        @filter-global-products="filterGlobalProducts($event)"
+                        @clean-filter="fetchDataForBaseCatalogView" 
+                        @search-products="searchProducts($event)"/>
+                        
+
+
                     <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
                         :titles="['Catálogo base', 'Mi tienda']" :data="globalProducts"
                         @left-check-change="handleLeftCheckChange" @right-check-change="handleLeftCheckChange">
@@ -102,8 +111,9 @@
                 </div>
                 
                 <!-- Vista previa de producto -->
-                <Loading v-if="loadingProduct" class="mt-28" />
-                <div v-else-if="productInfo" class="rounded-2xl shadow-lg border border-gray-200 w-full sm:w-3/4 xl:w-1/2 mt-5 xl:mt-0 bg-white p-6">
+                <Loading v-if="loadingProduct" class="mt-28 sm:w-3/4 xl:w-[40%]" />
+
+                <div v-else-if="productInfo" class="rounded-2xl shadow-lg border border-gray-200 w-full sm:w-3/4 xl:w-[40%] mt-5 xl:mt-0 bg-white p-6">
                     <p class="border-b border-gray-300 font-semibold text-lg pb-3">Vista previa del producto</p>
                     <div class="py-5 flex flex-col items-center">
                         <figure class="h-48 w-48 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
@@ -255,11 +265,23 @@ export default {
             this.initialProducts = this.products;
         },
         globalProductsFormater() {
-            this.globalProducts = this.totalGlobalProducts.map(product => ({
+            // Filtra los productos que NO estén en this.products
+            const filtered = this.totalGlobalProducts.filter(product => {
+                return !this.products.includes(product.id);
+            });
+
+            // Formatea y ordena los productos filtrados
+            this.globalProducts = filtered.map(product => ({
                 key: product.id,
                 label: product.name
             })).sort((a, b) => a.label.localeCompare(b.label));
         },
+        // globalProductsFormater() {
+        //     this.globalProducts = this.totalGlobalProducts.map(product => ({
+        //         key: product.id,
+        //         label: product.name
+        //     })).sort((a, b) => a.label.localeCompare(b.label));
+        // },
         handleLeftCheckChange(checkedProducts) {
             // Verificar si hay al menos un elemento seleccionado
             if (checkedProducts.length > 0) {
@@ -290,6 +312,7 @@ export default {
                     this.brands = response.data.brands;
                     this.globalProductsFormater();
                     this.localProductsFormater();
+                    console.log('raw global products', this.totalGlobalProducts);
                 }
             } catch (error) {
                 console.log(error);
@@ -297,25 +320,43 @@ export default {
                 this.loading = false;
             }
         },
-        async filterGlobalProducts() {
+        async searchProducts(query) {
             try {
-                const response = await axios.get(route('global-products.filter', { category_id: this.leftFilterCategory, brand_id: this.leftFilterBrand }));
+                const response = await axios.get(route('global-products.search'), {
+                    params: {
+                        query: query,
+                        module: 'base_catalog',
+                    }
+                });
+
                 if (response.status === 200) {
-                    this.globalProducts = response.data.items;
-                    this.leftFilterCategory = null;
-                    this.leftFilterBrand = null;
-                    this.showLeftFilter = false;
-                    //formatea el nuevo arreglo de productos globales filtrado
-                    this.globalProducts = this.globalProducts.map(product => ({
-                        key: product.id,
-                        label: product.name
-                    }));
+                    this.totalGlobalProducts = response.data.items;
+                    this.globalProductsFormater();
                 }
             } catch (error) {
-                console.log(error);
+                console.error('Error al buscar productos:', error);
             }
         },
-        // recupera la informacion del producto seleccionado
+        // filtra los productos globales por marca y categoria
+        async filterGlobalProducts(items) {
+            try {
+                const response = await axios.post(route('global-products.filter'), {
+                    brand_ids: items.brand_ids,
+                    category_ids: items.category_ids,
+                });
+
+                this.globalProducts = response.data.items;
+
+                //formatea el nuevo arreglo de productos globales filtrado
+                this.globalProducts = this.globalProducts.map(product => ({
+                    key: product.id,
+                    label: product.name
+                }));
+            } catch (error) {
+            console.error('Error al filtrar productos:', error);
+            }
+        },
+        // recupera la informacion del producto seleccionado para mostrar sus detalles en la vista previa
         async getLeftProductCheckedInfo(productId) {
             try {
                 this.loadingProduct = true;
