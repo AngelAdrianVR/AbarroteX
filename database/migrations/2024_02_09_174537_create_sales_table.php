@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
             $table->unsignedFloat('current_price');
+            $table->unsignedFloat('discounted_price')->nullable(); //indica el precio que se le aplicó un descuento
+            $table->json('promotions_applied')->nullable(); //indica las promos aplicadas a la venta
             $table->string('product_name');
             $table->unsignedMediumInteger('product_id')->nullable();
             $table->boolean('is_global_product');
@@ -21,6 +23,7 @@ return new class extends Migration
             $table->unsignedFloat('quantity');
             $table->timestamp('refunded_at')->nullable();
             $table->string('folio');
+            $table->string('payment_method')->nullable(); //tipo de pago, puede ser efectivo, tarjeta, etc.
             $table->foreignId('client_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('cash_register_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();

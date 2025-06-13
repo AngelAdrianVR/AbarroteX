@@ -40,6 +40,12 @@ class GlobalProductStore extends Model
         return $this->hasMany(ProductHistory::class);
     }
 
+    // obtener promociones del producto morph
+    public function promotions()
+    {
+        return $this->morphMany(Promotions::class, 'promotionable');
+    }
+    
     // events
     protected static function boot()
     {

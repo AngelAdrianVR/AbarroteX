@@ -18,12 +18,22 @@
 
             <Loading v-if="loading" class="mt-20" />
 
+            <!-- Transfer 2.0 (hecho desde 0) -->
+           
+
             <!-- transfer -->
             <section v-else class="mt-10 flex flex-col items-center xl:flex-row xl:items-start xl:space-x-5">
                 <div class="mx-auto xl:w-[85%] relative">
+                    <Transfer />
                     <el-transfer class="w-full" v-model="products" filterable filter-placeholder="Buscar producto"
                         :titles="['Catálogo base', 'Mi tienda']" :data="globalProducts"
                         @left-check-change="handleLeftCheckChange" @right-check-change="handleLeftCheckChange">
+                        <!-- <template #left-footer>
+                            <PrimaryButton @click="showLeftFilter = true" class="transfer-footer" size="small">Operation</PrimaryButton>
+                        </template>
+                        <template #right-footer>
+                            <PrimaryButton class="transfer-footer" size="small">Operation</PrimaryButton>
+                        </template> -->
                     </el-transfer>
                     <!-- ventana de filtro izquierdo -->
                     <div v-if="showLeftFilter"
@@ -90,6 +100,7 @@
                         </div>
                     </transition>
                 </div>
+                
                 <!-- Vista previa de producto -->
                 <Loading v-if="loadingProduct" class="mt-28" />
                 <div v-else-if="productInfo" class="rounded-2xl shadow-lg border border-gray-200 w-full sm:w-3/4 xl:w-1/2 mt-5 xl:mt-0 bg-white p-6">
@@ -147,12 +158,13 @@
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
+import Transfer from "@/Components/MyComponents/Product/Transfer.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { addOrUpdateBatchOfItems } from '@/dbService.js';
+// import { addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
     name: 'SelectGlobalProduct',
@@ -186,12 +198,13 @@ export default {
         };
     },
     components: {
+        ConfirmationModal,
         PrimaryButton,
         CancelButton,
         InputLabel,
+        Transfer,
         Loading,
         Back,
-        ConfirmationModal,
     },
     props: {
     },
@@ -332,11 +345,11 @@ export default {
                     this.initialProducts = this.products;
 
                     // Obtener productos
-                    const response2 = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response2.data.products;
+                    // const response2 = await axios.get(route('products.get-all-for-indexedDB'));
+                    // const products = response2.data.products;
 
-                    // actualizar lista de productos en indexedDB
-                    await addOrUpdateBatchOfItems('products', products);
+                    // // actualizar lista de productos en indexedDB
+                    // await addOrUpdateBatchOfItems('products', products);
 
                     if (response.data.rejected_products.length) {
                         this.$notify({

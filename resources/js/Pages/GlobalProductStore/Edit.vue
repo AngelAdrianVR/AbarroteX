@@ -85,16 +85,16 @@
                 <div class="mt-3">
                     <InputLabel value="Cantidad mínima" />
                     <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
-                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.min_stock" />
                 </div>
 
                 <div class="mt-3">
                     <InputLabel value="Cantidad máxima" />
                     <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
-                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                    :parser="(value) => value.replace(/[^\d.]/g, '')" />
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.max_stock" />
                 </div>
                 <div class="mt-3 col-span-full">
@@ -120,8 +120,7 @@
                     </el-input>
                     <InputError :message="form.errors.code" />
                 </div>
-                <div v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
-                    class="mt-3">
+                <div v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" class="mt-3">
                     <div class="flex items-center w-[50%] lg:w-[30%]">
                         <el-checkbox v-model="form.show_in_online_store" label="Mostrar en tienda en línea" />
                         <el-tooltip placement="top">
@@ -199,7 +198,8 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateItem } from "@/dbService.js";
+// import { addOrUpdateItem } from "@/dbService.js";
+import axios from 'axios';
 
 export default {
     data() {
@@ -214,7 +214,7 @@ export default {
             brand_id: this.global_product_store.global_product?.brand_id,
             min_stock: this.global_product_store.min_stock,
             max_stock: this.global_product_store.max_stock,
-            show_in_online_store: !! this.global_product_store.show_in_online_store,
+            show_in_online_store: !!this.global_product_store.show_in_online_store,
             imageCover: null,
             imageCoverCleared: false
         });
@@ -259,19 +259,18 @@ export default {
             try {
                 this.form.put(route("global-product-store.update", this.global_product_store.id), {
                     onSuccess: async () => {
-                        // guardar nuevo producto a IndexedDB
-                        // Obtener producto que coincida con el id editado
-                        const response = await axios.get(route('products.get-all-for-indexedDB'));
-                        const product = response.data.transfered_products.find(item => item.id.split('_')[1] == this.global_product_store.id);
-
-                        // actualizar a indexedDB
-                        if (product) {
-                            addOrUpdateItem('products', product);
-                        }
+                        // guardar a IndexedDB
+                        // Obtener producto mas reciente agregado
+                        // const productId = `global_${this.global_product_store.id}`;
+                        // const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
+                        // const product = response.data.product;
+                        // // actualizar a indexedDB
+                        // if (product) {
+                        //     addOrUpdateItem('products', product);
+                        // }
 
                         this.$notify({
-                            title: "Correcto",
-                            message: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
+                            title: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
                             type: "success",
                         });
                     },

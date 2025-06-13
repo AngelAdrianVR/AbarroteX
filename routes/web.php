@@ -21,6 +21,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductBoutiqueController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
+use App\Http\Controllers\PromotionsController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\RentalPaymentController;
@@ -84,7 +85,9 @@ Route::get('global-products-filter', [GlobalProductController::class, 'filter'])
 Route::resource('products', ProductController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('products/update-with-media/{product}', [ProductController::class, 'updateWithMedia'])->name('products.update-with-media')->middleware('auth');
 Route::put('products-entry/{product_id}', [ProductController::class, 'entryStock'])->name('products.entry')->middleware('auth');
+Route::put('products-out/{product_id}', [ProductController::class, 'outStock'])->name('products.out')->middleware('auth');
 Route::put('products-inventory-update/{product_id}', [ProductController::class, 'inventoryUpdate'])->name('products.inventory-update')->middleware('auth');
+Route::post('products-massive-update-stock', [ProductController::class, 'massiveUpdateStock'])->name('products.massive-update-stock');
 Route::put('products-price-update/{product_id}', [ProductController::class, 'priceUpdate'])->name('products.price-update')->middleware('auth');
 Route::get('products-search', [ProductController::class, 'searchProduct'])->name('products.search')->middleware('auth');
 Route::get('products-get-product-scaned/{product_id}', [ProductController::class, 'getProductScaned'])->name('products.get-product-scaned')->middleware('auth');
@@ -94,8 +97,10 @@ Route::get('products-get-all-until-page/{currentPage}', [ProductController::clas
 Route::post('products/import', [ProductController::class, 'import'])->name('products.import')->middleware('auth');
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
+Route::get('products-get-by-id-for-indexedDB/{product}', [ProductController::class, 'getByIdForIndexedDB'])->name('products.get-by-id-for-indexedDB')->middleware('auth');
 Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
+Route::get('products-filter-by-provider', [ProductController::class, 'filterByProvider'])->name('products.filter-by-provider');
 
 
 // productos de boutique
@@ -103,6 +108,7 @@ Route::post('products-change-price', [ProductController::class, 'changePrice'])-
 Route::resource('boutique-products', ProductBoutiqueController::class)->middleware('auth')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('boutique-products/update-with-media/{product}', [ProductBoutiqueController::class, 'updateWithMedia'])->name('boutique-products.update-with-media')->middleware('auth');
 Route::put('boutique-products-entry', [ProductBoutiqueController::class, 'entryStock'])->name('boutique-products.entry')->middleware('auth');
+Route::put('boutique-products-out', [ProductBoutiqueController::class, 'outStock'])->name('boutique-products.out')->middleware('auth');
 Route::get('boutique-products-search', [ProductBoutiqueController::class, 'searchProduct'])->name('boutique-products.search')->middleware('auth');
 Route::get('boutique-products-get-product-scaned/{product_id}', [ProductBoutiqueController::class, 'getProductScaned'])->name('boutique-products.get-product-scaned')->middleware('auth');
 Route::get('boutique-products-fetch-history/{product_name}/{month}/{year}', [ProductBoutiqueController::class, 'fetchHistory'])->name('boutique-products.fetch-history')->middleware('auth');
@@ -145,6 +151,7 @@ Route::resource('global-product-store', GlobalProductStoreController::class)->mi
 Route::get('global-product-store-get-data-for-base-catalog-view', [GlobalProductStoreController::class, 'getDataForBaseCatalogView'])->name('global-product-store.get-data-for-base-catalog-view')->middleware('auth');
 Route::post('global-product-store/transfer', [GlobalProductStoreController::class, 'transfer'])->name('global-product-store.transfer')->middleware('auth');
 Route::put('global-product-store-entry/{global_product_store_id}', [GlobalProductStoreController::class, 'entryStock'])->name('global-product-store.entry')->middleware('auth');
+Route::put('global-product-store-out/{global_product_store_id}', [GlobalProductStoreController::class, 'outStock'])->name('global-product-store.out')->middleware('auth');
 Route::put('global-product-store-inventory-update/{global_product_store_id}', [GlobalProductStoreController::class, 'inventoryUpdate'])->name('global-product-store.inventory-update')->middleware('auth');
 Route::put('global-product-store-price-update/{global_product_store_id}', [GlobalProductStoreController::class, 'priceUpdate'])->name('global-product-store.price-update')->middleware('auth');
 Route::get('global-product-store-fetch-history/{global_product_store_id}/{month}/{year}', [GlobalProductStoreController::class, 'fetchHistory'])->name('global-product-store.fetch-history')->middleware('auth');
@@ -159,6 +166,8 @@ Route::resource('categories', CategoryController::class)->middleware('auth');
 //brands routes----------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
 Route::resource('brands', BrandController::class)->middleware('auth');
+Route::get('brands-fetch-all', [BrandController::class, 'fetchAll'])->name('brand.fetch-all');
+
 
 
 //sales routes-------------------------------------------------------------------------------------
@@ -308,6 +317,7 @@ Route::get('cash-cuts-fetch-total-sales-for-cash-cut/{cash_register_id}', [CashC
 Route::get('cash-cuts-filter', [CashCutController::class, 'filterCashCuts'])->name('cash-cuts.filter')->middleware('auth');
 Route::get('cash-cuts-get-by-page/{currentPage}', [CashCutController::class, 'getItemsByPage'])->name('cash-cuts.get-by-page')->middleware('auth');
 Route::get('cash-cuts-get-movements/{cash_cut}', [CashCutController::class, 'getCashCutMovements'])->name('cash-cuts.get-movements')->middleware('auth');
+Route::get('cash-cuts-print/{created_at}', [CashCutController::class, 'print'])->name('cash-cuts.print');
 
 
 //Tutorial routes-----------------------------------------------------------------------------------------------------
@@ -401,6 +411,17 @@ Route::get('/partner-register', [PartnerController::class, 'landingCreate'])->na
 Route::post('/partner-recover', [PartnerController::class, 'landingRecover'])->name('landing.recover-partner');
 
 
+//rutas de promociones --------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+Route::get('promotions/local/{product}', [PromotionsController::class, 'localCreate'])->name('promotions.local.create')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions/global/{product}', [PromotionsController::class, 'globalCreate'])->name('promotions.global.create')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions/local/{product}/edit', [PromotionsController::class, 'localEdit'])->name('promotions.local.edit')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions/global/{product}/edit', [PromotionsController::class, 'globalEdit'])->name('promotions.global.edit')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('promotions-get-match/{query}', [PromotionsController::class, 'getMatches'])->name('promotions.get-match')->middleware('auth');
+Route::post('promotions/store', [PromotionsController::class, 'store'])->name('promotions.store')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::put('promotions/update', [PromotionsController::class, 'update'])->name('promotions.update')->middleware(['auth', 'activeSuscription', 'verified']);
+
+
 // ver tutoriales
 Route::get('/started-turtorial/pos', function () {
     if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
@@ -409,3 +430,12 @@ Route::get('/started-turtorial/pos', function () {
         return inertia('StartedTutorial/Index');
     }
 })->name('started-tutorial');
+
+
+// Actualizar el método de pago de todas las ventas a "Efectivo"
+use Illuminate\Support\Facades\DB;
+Route::get('/actualizar-payment-method', function () {
+    DB::table('sales')->update(['payment_method' => 'Efectivo']);
+
+    return 'Todos los registros se actualizaron con el método de pago "Efectivo".';
+});

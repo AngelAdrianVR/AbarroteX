@@ -1,6 +1,7 @@
 <template>
-    <article class="border border-grayD9 rounded-md">
-        <header class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1 text-white bg-gray-200">
+    <article class="border border-grayD9 rounded-md text-xs lg:text-base">
+        <header
+            class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1 text-white bg-gray-200">
             <div class="flex items-center space-x-3">
                 <p class="text-gray99">Folio: <span class="text-gray37">{{ groupedSales.folio }}</span></p>
                 <span class="text-gray99">•</span>
@@ -71,48 +72,93 @@
                     </button>
                 </template>
                 <template #content>
-                    <table class="w-full">
-                        <thead>
-                            <tr class="*:px-2">
-                                <th class="w-[55%] text-start">Producto</th>
-                                <th class="w-[15%] text-start">Precio</th>
-                                <th class="w-[15%] text-start">Cantidad</th>
-                                <th class="w-[15%] text-end">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y-[1px]">
-                            <tr v-for="(sale, index) in groupedSales.products" :key="index"
-                                class="*:px-2 *:py-[6px] *:align-top border-grayD9">
-                                <td>
-                                    <button v-if="sale.product_id" @click="viewProduct(sale)"
-                                        class="text-start text-primary underline">
-                                        {{ sale.product_name }}
-                                    </button>
-                                    <el-tooltip v-else content="El producto fue eliminado" placement="right">
-                                        <span class="text-red-700">{{ sale.product_name }}</span>
-                                    </el-tooltip>
-                                </td>
-                                <td v-if="sale.original_price">
-                                    <el-tooltip
-                                        :content="'El precio fue modificado de $' + sale.original_price + ' a $' + sale.current_price"
-                                        placement="bottom">
-                                        <span class="border-b border-dashed border-primary cursor-default">${{
-                                            sale.current_price }}</span>
-                                    </el-tooltip>
-                                </td>
-                                <td v-else>
-                                    ${{ sale.current_price }}
-                                </td>
-                                <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                                <td class="text-end pb-1">${{ (sale.current_price *
-                                    sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-scroll text-xs lg:text-sm">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="*:px-2">
+                                    <th class="w-[50%] text-start">Producto</th>
+                                    <th class="w-[10%] text-start">Precio</th>
+                                    <th class="w-[10%] text-start">Cantidad</th>
+                                    <th class="w-[30%] text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y-[1px]">
+                                <template v-for="(sale, index) in groupedSales.products" :key="index">
+                                    <!-- Fila principal del producto -->
+                                    <tr class="*:px-2 *:py-[6px] *:align-top border-grayD9">
+                                        <td>
+                                            <button v-if="sale.product_id" @click="viewProduct(sale)"
+                                                class="text-start text-primary underline">
+                                                {{ sale.product_name }}
+                                            </button>
+                                            <el-tooltip v-else content="El producto fue eliminado" placement="right">
+                                                <span class="text-red-700">{{ sale.product_name }}</span>
+                                            </el-tooltip>
+                                        </td>
+                                        <td v-if="sale.original_price">
+                                            <el-tooltip
+                                                :content="'El precio fue modificado de $' + sale.original_price + ' a $' + sale.current_price"
+                                                placement="bottom">
+                                                <span class="border-b border-dashed border-primary cursor-default">${{
+                                                    sale.current_price }}</span>
+                                            </el-tooltip>
+                                        </td>
+                                        <td v-else>
+                                            ${{ sale.current_price }}
+                                        </td>
+                                        <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                        <td class="text-end pb-1">
+                                            ${{ (sale.current_price *
+                                                sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                        </td>
+                                    </tr>
+                                    <!-- Fila de promociones (ocupa todas las columnas) -->
+                                    <tr v-if="sale.promotions_applied || (sale.discounted_price != null && !sale.promotions_applied)"
+                                        class="*:px-2 *:py-[6px] border-grayD9 italic">
+                                        <td colspan="4" class="!p-0">
+                                            <div v-if="sale.promotions_applied" class="px-2 py-1 bg-gray-50">
+                                                <div v-for="promo in sale.promotions_applied"
+                                                    class="flex items-center justify-end gap-4 w-full">
+                                                    <span
+                                                        class="flex items-center gap-2 text-[#AE080B] max-w-[70%]">
+                                                        <svg width="10" height="16" viewBox="0 0 10 16" fill="none"
+                                                            class="shrink-0" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M4.28948 0C6.61872 2.72141 7.63037 4.40864 8.101 8.09863C8.68078 7.68803 8.88761 7.19526 8.93401 5.7168C11.7333 11.4332 8.45922 15.0058 5.54143 15.1846C5.18415 15.2064 4.52916 15.2602 4.11175 15.125C-0.11532 13.7553 -1.60454 10.0634 2.14593 5.24023C4.57877 2.25049 4.74345 1.28434 4.28948 0ZM4.82464 7.44531C2.74274 10.1809 2.08633 12.5065 5.00335 14.0547C6.92271 13.584 7.62449 12.4474 7.80315 10.4824C7.42276 11.0129 7.17113 11.2542 6.49261 11.375C6.6711 9.76745 6.13689 8.64469 4.82464 7.44531Z"
+                                                                fill="currentColor" />
+                                                        </svg>
+                                                        <span class="truncate" :title="promo.description">{{ promo.description }}</span>
+                                                    </span>
+                                                    <span class="shrink-0">-${{ promo.discount }}</span>
+                                                </div>
+                                            </div>
+                                            <div v-else-if="sale.discounted_price != null && !sale.promotions_applied"
+                                                class="px-2 py-1 bg-gray-50 flex items-center justify-end gap-4">
+                                                <span class="flex items-center gap-2 text-[#AE080B]">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="size-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                                    </svg>
+                                                    <span>Regalo por promoción</span>
+                                                </span>
+                                                <span class="shrink-0">
+                                                    -${{
+                                                        calculateTotalDiscount(sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                                            ",") }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </template>
             </Accordion>
         </main>
-        <footer class="text-end md:flex" :class="groupedSales.credit_data ? 'justify-between' : 'justify-end'">
+        <footer class="text-end md:flex text-xs lg:text-sm" :class="groupedSales.credit_data ? 'justify-between' : 'justify-end'">
             <div v-if="groupedSales.credit_data"
                 class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
                 <span class="text-gray99">Fecha de vencimiento:</span>
@@ -131,6 +177,15 @@
                     </svg>
                 </p>
             </div>
+            <div v-if="groupedSales.products[0].payment_method === 'Tarjeta'"
+                class="py-1 flex items-center justify-start space-x-2">
+                <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
+            </div>
+            <div v-else class="py-1 flex items-center justify-start space-x-2">
+                <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
+            </div>
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
                 <div class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
@@ -140,7 +195,8 @@
                             </p>
                         </template>
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
-                            Reembolsado</p>
+                            Reembolsado
+                        </p>
                     </el-tooltip>
                     <span class="text-start w-32">Total de la venta:</span>
                     <span class="w-12">$</span>
@@ -255,6 +311,12 @@ export default {
         },
     },
     methods: {
+        calculateTotalDiscount(sale) {
+            const originalTotal = sale.current_price * sale.quantity;
+            const discountTotal = sale.discounted_price * sale.quantity;
+
+            return originalTotal - discountTotal;
+        },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },

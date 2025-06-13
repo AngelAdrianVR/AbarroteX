@@ -55,4 +55,11 @@ class BrandController extends Controller
     {
         //
     }
+
+    public function fetchAll()
+    {   
+        $store = auth()->user()->store;
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get(['id','name']);
+        return response()->json($brands);
+    }
 }

@@ -65,6 +65,12 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(Brand::class);
     }
 
+    // obtener promociones del producto morph
+    public function promotions()
+    {
+        return $this->morphMany(Promotions::class, 'promotionable');
+    }
+
     // events
     protected static function boot()
     {

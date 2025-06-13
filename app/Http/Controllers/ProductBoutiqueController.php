@@ -478,6 +478,8 @@ class ProductBoutiqueController extends Controller
                         }
                     }
                 } else {
+                    // Primero eliminar cualquier imagen existente en la colección
+                    $new_product->clearMediaCollection('imageCover');
                     // Copiar el medio al nuevo producto registrado
                     if ($mediaItem) {
                         $new_product->copyMedia($mediaItem->getPath())->usingName($mediaItem->name)->toMediaCollection('imageCover');
@@ -534,6 +536,45 @@ class ProductBoutiqueController extends Controller
         return response()->json(['items' => $products]);
     }
 
+    public function outStock(Request $request)
+    {
+        $messages = [
+            'sizes.*.quantity.required' => 'obligatorio.',
+            'sizes.*.quantity.numeric' => 'Este campo debe ser un número.',
+            'sizes.*.quantity.min' => 'Este campo debe ser positivo.',
+        ];
+
+        $validated = $request->validate([
+            'sizes.*.product_id' => 'required|numeric|min:1',
+            'sizes.*.size_name' => 'nullable',
+            'sizes.*.quantity' => 'required|numeric|min:1',
+            'sizes.*.concept' => 'required',
+        ], $messages);
+
+        foreach ($validated['sizes'] as $entry) {
+            $product = Product::find($entry['product_id']);
+            $old_quantity = $product->current_stock;
+            // Asegurar convertir la cantidad a un número antes de restar
+            if ($product->current_stock < $entry['quantity']) {
+                $product->current_stock = 0; // No permitir stock negativo
+            } else {
+                $product->current_stock -= floatval($entry['quantity']);
+            }
+
+            // Guarda el producto
+            $product->save();
+
+            // Crear salida
+            ProductHistory::create([
+                'description' => "Salida de producto. De $old_quantity a $product->current_stock ({$entry['quantity']} unidad(es) de talla {$entry['size_name']}), motivo: {$entry['concept']}",
+                'type' => 'Salida',
+                'user_id' => auth()->id(),
+                'historicable_id' => $entry['product_id'],
+                'historicable_type' => Product::class
+            ]);
+        }
+    }
+
     public function entryStock(Request $request)
     {
         $messages = [
@@ -550,7 +591,7 @@ class ProductBoutiqueController extends Controller
 
         foreach ($validated['sizes'] as $entry) {
             $product = Product::find($entry['product_id']);
-
+            $old_quantity = $product->current_stock;
             // Asegurar convertir la cantidad a un número antes de sumar
             $product->current_stock += floatval($entry['quantity']);
 
@@ -559,8 +600,9 @@ class ProductBoutiqueController extends Controller
 
             // Crear entrada
             ProductHistory::create([
-                'description' => 'Entrada de producto. ' . $entry['quantity'] . ' unidad(es) de talla ' . $entry['size_name'],
+                'description' => "Entrada de producto. De $old_quantity a $product->current_stock ({$entry['quantity']} unidad(es) de talla {$entry['size_name']})",
                 'type' => 'Entrada',
+                'user_id' => auth()->id(),
                 'historicable_id' => $entry['product_id'],
                 'historicable_type' => Product::class
             ]);
@@ -579,7 +621,7 @@ class ProductBoutiqueController extends Controller
     {
         $products_ids = Product::where('name', $product_name)->get()->pluck('id');
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::whereIn('historicable_id', $products_ids)
+        $query = ProductHistory::with(['user:id,name'])->whereIn('historicable_id', $products_ids)
             ->where('historicable_type', Product::class);
 
         if ($month && $year) {

@@ -34,6 +34,7 @@ class ProductResource extends JsonResource
             'imageCover' => $this->getMedia('imageCover')->all(),
             'category' => $this->whenLoaded('category'),
             'brand' => $this->whenLoaded('brand'),
+            'promotions' => $this->whenLoaded('promotions'),
             'created_at' => $this->created_at?->isoFormat('DD MMM YYYY'),
             'updated_at' => $this->updated_at?->isoFormat('DD MMM YYYY'),
         ];

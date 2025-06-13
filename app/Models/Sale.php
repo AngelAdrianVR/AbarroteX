@@ -12,11 +12,14 @@ class Sale extends Model
 
     protected $fillable = [
         'current_price',
+        'discounted_price',
+        'promotions_applied',
         'product_name',
         'quantity',
         'refunded_at',
         'original_price', //precio que indica que cambió el precio unicamente para esa venta
         'folio',
+        'payment_method', //tipo de pago, puede ser efectivo, tarjeta, etc.
         'product_id',
         'client_id',
         'is_global_product',
@@ -24,6 +27,10 @@ class Sale extends Model
         'store_id',
         'user_id',
         'created_at',
+    ];
+
+    protected $casts = [
+        'promotions_applied' => 'array',
     ];
 
     //relationships
