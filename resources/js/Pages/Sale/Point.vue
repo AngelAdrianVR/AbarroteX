@@ -714,12 +714,10 @@
           <span>Cancelar pago</span>
           <i class="fa-solid fa-xmark"></i>
         </ThirthButton>
-
         <h1 class="font-bold mt-2">Opciones de pago</h1>
         <p class="text-gray99">Seleccione el método de pago</p>
-
         <section class="grid grid-cols-2 gap-4 mt-3 py-7">
-          <button @click="paymentModalStep = 2; paymentMethod = 'Efectivo'" type="button"
+          <button @click="paymentModalStep = 2; paymentMethod = 'Efectivo'; receivedInputFocus()" type="button"
             class="bg-[#E0FEC5] text-[#37672B] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
             <p class="text-lg text-center font-bold">EFECTIVO</p>
             <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
@@ -741,21 +739,18 @@
             <span>Regresar</span>
           </div>
         </section>
-
         <section class="mx-auto mt-2 md:w-2/3">
           <div
             class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
             <span class="font-bold text-[#37672B]">EFECTIVO</span>
             <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo" class="h-7">
           </div>
-
           <div
             class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
             <span class="font-bold">Total a pagar</span>
             <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue -
               1].discount)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
           </div>
-
           <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
             <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
             <el-input-number ref="receivedInput" @keydown.enter="store"
@@ -1729,7 +1724,6 @@ export default {
     },
     cashPayment() {
       this.showPaymentModal = true; //abre el modal de seleccion de pago (efectivo o tarjeta)
-      this.receivedInputFocus();
     },
     creditPayment() {
       this.editableTabs[this.editableTabsValue - 1].credit = true;
@@ -1849,6 +1843,8 @@ export default {
         } else {
           // editar el precio a 0 para que no se cobre el producto
           giftable.discounted_price = 0;
+          // agregar prop para ecitar conflicto al mostrar imagen
+          giftable.imageUrl = giftable.image_url;
         }
 
         //revisa si el producto a agregar ya esta dentro del arreglo
@@ -1974,7 +1970,7 @@ export default {
     },
     receivedInputFocus() {
       this.$nextTick(() => {
-        this.$refs.receivedInput.focus(); // Enfocar el input de código cuando se abre el modal
+        this.$refs.receivedInput.focus(); // Enfocar el input de recibido cuando se abre el modal
       });
     },
     handleOnline() {
