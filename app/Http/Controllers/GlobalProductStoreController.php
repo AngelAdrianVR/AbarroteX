@@ -275,8 +275,10 @@ class GlobalProductStoreController extends Controller
     {
         //Guardar el tipo de tienda seleccionada en la vista en una variable
         $type_store = request()->store_type;
+
         // recupera todos los productos globales del tipo seleccionado
-        $global_products = GlobalProduct::where('type', $type_store)->get(['id', 'name']);
+        $global_products = GlobalProduct::where('type', $type_store)->get(['id', 'name', 'brand_id', 'category_id', 'type']);
+        
         // recupera todos los productos de mi tienda con el tipo seleccionado
         $my_products = GlobalProductStore::with('globalProduct:id,name,type')
             ->where('store_id', auth()->user()->store_id)

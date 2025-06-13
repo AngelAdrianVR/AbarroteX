@@ -48,9 +48,12 @@ class PromotionsController extends Controller
         // Luego, si todas las validaciones pasan, creamos las promociones
         if ($request->product_type === 'local') {
             $class = Product::class;
+            $route = 'products.show';
         } else {
             $class = GlobalProductStore::class;
+            $route = 'global-product-store.show';
         }
+
         foreach ($request->promos as $promo) {
             Promotions::create($promo + [
                 'promotionable_id' => $request->product_id,
@@ -68,7 +71,9 @@ class PromotionsController extends Controller
             ]);
         }
 
-        return to_route('products.index');
+        //codifica el id del producto para redirección
+        $encoded_product_id = base64_encode($request->product_id);
+        return to_route($route, $encoded_product_id);
     }
 
     public function show(Promotions $promotions)
@@ -116,14 +121,33 @@ class PromotionsController extends Controller
         // Luego, si todas las validaciones pasan, eliminamos, creamos y/o actualizamos las promociones
         if ($request->product_type === 'local') {
             $class = Product::class;
+            $route = 'products.show';
         } else {
             $class = GlobalProductStore::class;
+            $route = 'global-product-store.show';
         }
         // eliminar las promociones que no están en el request
         Promotions::where('promotionable_id', $request->product_id)
             ->where('promotionable_type', $class)
             ->whereNotIn('id', collect($request->promos)->pluck('id')->filter())
             ->delete();
+
+        //codifica el id del producto para redirección
+        $encoded_product_id = base64_encode($request->product_id);
+
+        // Si se borraron todas las promociones, regresar sin intentar agregar o actualizar
+        if (!count($request->promos)) {
+            // Registrar el histórico del producto
+            ProductHistory::create([
+                'description' => "Promociones removidas.",
+                'type' => 'Promoción',
+                'user_id' => auth()->id(),
+                'historicable_id' => $request->product_id,
+                'historicable_type' => $class
+            ]);
+
+            return to_route($route, $encoded_product_id);
+        }
 
         foreach ($request->promos as $promo) {
             if (!isset($promo['id'])) {
@@ -145,7 +169,7 @@ class PromotionsController extends Controller
             } else {
                 // Si hay ID, significa que es una promoción existente
                 $promotion = Promotions::findOrFail($promo['id']);
-                
+
                 // Registrar el histórico del producto
                 ProductHistory::create([
                     'description' => "Promoción cambiada. De " .
@@ -156,13 +180,13 @@ class PromotionsController extends Controller
                     'historicable_id' => $request->product_id,
                     'historicable_type' => $class
                 ]);
-                
+
                 // Actualizamos la promoción con los nuevos datos
                 $promotion->update($promo);
             }
         }
 
-        return to_route('products.index');
+        return to_route($route, $encoded_product_id);
     }
 
     public function destroy(Promotions $promotions)
