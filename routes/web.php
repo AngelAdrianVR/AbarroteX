@@ -77,7 +77,7 @@ Route::post('global-products/update-with-media/{global_product}', [GlobalProduct
 // Route::get('global-products-select', [GlobalProductController::class, 'selectGlobalProducts'])->name('global-products.select')->middleware('auth');
 Route::get('global-products-get-by-page/{currentPage}', [GlobalProductController::class, 'getItemsByPage'])->name('global-products.get-by-page')->middleware('auth');
 Route::get('global-products-fetch-product-info/{global_product_id}', [GlobalProductController::class, 'fetchProductInfo'])->name('global-products.fetch-info-product')->middleware('auth');
-Route::get('global-products-filter', [GlobalProductController::class, 'filter'])->name('global-products.filter')->middleware('auth');
+Route::post('global-products-filter', [GlobalProductController::class, 'filter'])->name('global-products.filter')->middleware('auth');
 
 
 //products routes----------------------------------------------------------------------------------
