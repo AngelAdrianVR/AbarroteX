@@ -837,7 +837,7 @@ class SaleController extends Controller
                     $gift_name = $giftable->name;
                 } else {
                     $giftable = GlobalProductStore::with(['globalProduct'])->find($promo['giftable_id']);
-                    $gift_name = $giftable->globalProducts->name;
+                    $gift_name = $giftable->globalProduct->name;
                 }
 
                 $promotions_applied[] = [
