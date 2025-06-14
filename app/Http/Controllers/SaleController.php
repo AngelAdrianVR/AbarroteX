@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Laravel\Jetstream\Agent;
 
 class SaleController extends Controller
 {
@@ -47,7 +48,14 @@ class SaleController extends Controller
 
         $clients = Client::where('store_id', $store_id)->get(['id', 'name']);
 
-        return inertia('Sale/Point', compact('products', 'cash_registers', 'clients', 'products_quantity'));
+        // Redireccionar a la vista de acuerdo al dispositivo
+        $agent = new Agent();
+        if ($agent->isDesktop() || $agent->isLaptop()) {
+            return inertia('Sale/Point', compact('products', 'cash_registers', 'clients', 'products_quantity'));
+        } else {
+            return inertia('Sale/PointMobile', compact('products', 'cash_registers', 'clients', 'products_quantity'));
+        }
+
     }
 
     public function index()
