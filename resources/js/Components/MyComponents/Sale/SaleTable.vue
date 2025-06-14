@@ -165,37 +165,51 @@
   </div>
 
   <!-- vista movil -->
-  <div :class="saleProducts.length ? 'min-h-[230px]' : 'min-h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
+  <div :class="saleProducts.length ? 'max-h-[245px]' : 'min-h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
     <div v-for="(sale, index) in saleProducts" :key="index"
-      class="mb-2 grid grid-cols-3 gap-2 border rounded-md items-center relative">
-      <figure>
-        <img v-if="sale.product.imageUrl" :draggable="false" class="mx-auto w-3/4 h-24 object-contain select-none"
-          :src="sale.product.imageUrl" :alt="sale.product.name">
-        <div v-else
-          class="size-24 mx-auto bg-white border border-grayD9 text-gray99 rounded-md text-sm flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="0.8"
-            stroke="currentColor" class="size-10">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-          </svg>
-        </div>
+      class="mb-2 grid grid-cols-3 gap-x-4 gap-y-1 items-start relative">
+      <figure class="border border-grayD9 rounded-[10px] h-28 flex items-center justify-center">
+        <img v-if="sale.product.imageUrl" :draggable="false"
+          class="mx-auto h-full object-contain select-none rounded-[10px]" :src="sale.product.imageUrl"
+          :alt="sale.product.name">
+        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="0.8"
+          stroke="currentColor" class="size-10 text-gray99">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+        </svg>
       </figure>
       <div class="col-span-2 flex flex-col space-y-1 justify-center py-1">
-        <div class="text-base">
-          <p class="text-xs">Categoria: {{ sale.product.additional?.category }}</p>
-          <p class="font-bold">{{ sale.product.name }}</p>
+        <div>
+          <p v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'" class="text-xs">
+            Categoria:
+            {{ sale.product.additional?.category }}
+          </p>
+          <div class="font-bold text-sm text-gray37 flex items-center justify-between">
+            <h2>{{ sale.product.name }}</h2>
+            <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
+              @confirm="deleteItem(sale.product.id)" class="justify-self-end">
+              <template #reference>
+                <button class="text-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                </button>
+              </template>
+            </el-popconfirm>
+          </div>
           <span v-if="$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería'" class="text-gray99">
             ({{ sale.product.additional?.name }})
           </span>
         </div>
-        <div class="flex items-center space-x-2 text-lg">
+        <div class="flex items-center space-x-2 text-sm">
           <template v-if="editMode !== index">
-            ${{ sale.product.public_price }}{{ getPrefix(sale) }}
+            <span>$ {{ sale.product.public_price }}{{ getPrefix(sale) }}</span>
             <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
-            <button @click.stop="startEditing(sale, index)"
-              class="flex items-center justify-center text-primary bg-gray-200 size-4 rounded-full ml-2 mr-1">
+            <button @click.stop="startEditing(sale, index)" class="text-primary ml-2">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-3">
+                stroke="currentColor" class="size-4">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
               </svg>
@@ -204,7 +218,8 @@
           <template v-else-if="editMode == index">
             <div class="flex items-center space-x-2">
               <div class="w-1/2">
-                <el-input v-model="editedPrice" @keyup.enter="handleChangePrice(sale)" type="number" step="0.01">
+                <el-input v-model="editedPrice" @keyup.enter="handleChangePrice(sale)" type="number" step="0.01"
+                  size="small">
                   <template #prefix>
                     <i class="fa-solid fa-dollar-sign"></i>
                   </template>
@@ -219,82 +234,73 @@
             </div>
           </template>
         </div>
-        <el-input-number v-if="isInventoryOn" v-model="sale.quantity" @change="handleChangeQuantity(sale)" :min="0"
-          :max="sale.product.current_stock" :precision="2" />
-        <el-input-number v-else v-model="sale.quantity" @change="handleChangeQuantity(sale)" :min="0" :precision="2"
-          size="small" />
-        <p v-if="sale.product.discounted_price != null" class="text-gray99 line-through text-base ml-5">
-          ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
-        </p>
-        <div class="flex items-center">
-          <el-dropdown v-if="sale.product.promotions?.length" trigger="click">
-            <button type="button" @click.stop title="Promociones"
-              class="flex items-center justify-center hover:bg-grayF2 size-5 rounded-full transition-colors duration-200"
-              :class="someApplicablePromotion(sale) ? 'text-[#AE080B]' : 'text-gray99'">
-              <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M4.28963 0C6.61877 2.72132 7.62955 4.40871 8.10018 8.09863C8.68001 7.68802 8.88776 7.19533 8.93416 5.7168C11.7333 11.4332 8.4584 15.0059 5.54061 15.1846C5.18334 15.2064 4.52925 15.2601 4.1119 15.125C-0.115441 13.7554 -1.60456 10.0636 2.14607 5.24023C4.57869 2.25074 4.74354 1.28426 4.28963 0ZM4.82479 7.44531C2.7427 10.1811 2.08598 12.5064 5.0035 14.0547C6.92255 13.584 7.62367 12.4473 7.80232 10.4824C7.42197 11.0129 7.17028 11.2542 6.49178 11.375C6.67028 9.76748 6.13695 8.64466 4.82479 7.44531Z"
-                  fill="currentColor" />
+        <div class="flex items-start justify-between">
+          <el-input-number v-if="isInventoryOn" v-model="sale.quantity" @change="handleChangeQuantity(sale)" :min="0"
+            :max="sale.product.current_stock" :precision="2" size="small" class="!w-[102px]" />
+          <el-input-number v-else v-model="sale.quantity" @change="handleChangeQuantity(sale)" :min="0" :precision="2"
+            size="small" class="!w-[102px]" />
+          <div>
+            <p v-if="sale.product.discounted_price != null" class="text-gray99 line-through text-sm ml-5">
+              $ {{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+            </p>
+            <div class="flex items-center">
+              <el-dropdown v-if="sale.product.promotions?.length" trigger="click">
+                <button type="button" @click.stop title="Promociones"
+                  class="flex items-center justify-center hover:bg-grayF2 size-5 rounded-full transition-colors duration-200"
+                  :class="someApplicablePromotion(sale) ? 'text-[#AE080B]' : 'text-gray99'">
+                  <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M4.28963 0C6.61877 2.72132 7.62955 4.40871 8.10018 8.09863C8.68001 7.68802 8.88776 7.19533 8.93416 5.7168C11.7333 11.4332 8.4584 15.0059 5.54061 15.1846C5.18334 15.2064 4.52925 15.2601 4.1119 15.125C-0.115441 13.7554 -1.60456 10.0636 2.14607 5.24023C4.57869 2.25074 4.74354 1.28426 4.28963 0ZM4.82479 7.44531C2.7427 10.1811 2.08598 12.5064 5.0035 14.0547C6.92255 13.584 7.62367 12.4473 7.80232 10.4824C7.42197 11.0129 7.17028 11.2542 6.49178 11.375C6.67028 9.76748 6.13695 8.64466 4.82479 7.44531Z"
+                      fill="currentColor" />
+                  </svg>
+                </button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <main class="px-3 py-2 w-72 lg:w-[410px]">
+                      <section class="space-y-1">
+                        <div class="flex items-center justify-between mb-2">
+                          <h1 class="font-semibold lg:text-sm ml-2">
+                            Producto con promoción
+                          </h1>
+                        </div>
+                        <PromotionCard
+                          v-for="promo in sale.product.promotions.filter(p => !isExpired(p.expiration_date))"
+                          :key="promo.id" :promo="promo" :product="sale.product" :showGiftable="false"
+                          :applied="!!isApplicablePromotion(sale, promo)" />
+                      </section>
+                      <section v-if="sale.product.promotions.filter(p => isExpired(p.expiration_date)).length"
+                        class="mt-4 space-y-1">
+                        <h1 class="text-[#6E6E6E] font-semibold lg:text-sm ml-2">
+                          Promociones vencidas
+                        </h1>
+                        <PromotionCard
+                          v-for="promo in sale.product.promotions.filter(p => isExpired(p.expiration_date))"
+                          :promo="promo" :product="sale.product" :showGiftable="false" :key="promo.id" />
+                      </section>
+                    </main>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+              <svg v-if="!sale.product.promotions?.length && sale.product.discounted_price != null"
+                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="size-4 text-[#AE080B]" title="Regalo">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               </svg>
-            </button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <main class="px-3 py-2 w-72 lg:w-[410px]">
-                  <section class="space-y-1">
-                    <div class="flex items-center justify-between mb-2">
-                      <h1 class="font-semibold lg:text-sm ml-2">
-                        Producto con promoción
-                      </h1>
-                      <!-- <button type="button" title="Editar promociones"
-                            class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
-                            @click="handleEditPromo(sale.product)">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                              stroke="currentColor" class="size-4">
-                              <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                            </svg>
-                          </button> -->
-                    </div>
-                    <PromotionCard v-for="promo in sale.product.promotions.filter(p => !isExpired(p.expiration_date))"
-                      :key="promo.id" :promo="promo" :product="sale.product" :showGiftable="false"
-                      :applied="!!isApplicablePromotion(sale, promo)" />
-                  </section>
-                  <section v-if="sale.product.promotions.filter(p => isExpired(p.expiration_date)).length"
-                    class="mt-4 space-y-1">
-                    <h1 class="text-[#6E6E6E] font-semibold lg:text-sm ml-2">
-                      Promociones vencidas
-                    </h1>
-                    <PromotionCard v-for="promo in sale.product.promotions.filter(p => isExpired(p.expiration_date))"
-                      :promo="promo" :product="sale.product" :showGiftable="false" :key="promo.id" />
-                  </section>
-                </main>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <div class="font-bold text-[#5FCB1F] text-lg">
-            <p v-if="sale.product.discounted_price != null" :class="!sale.product.promotions.length ? 'ml-5' : null">
-              ${{ (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
-                minimumFractionDigits: 2
-              }) }}
-            </p>
-            <p v-else :class="!sale.product.promotions.length ? 'ml-5' : null">
-              ${{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
-            </p>
+              <div class="font-bold text-[#5FCB1F] text-base">
+                <p v-if="sale.product.discounted_price != null"
+                  :class="!sale.product.promotions?.length ? 'ml-1' : null">
+                  $ {{ (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
+                     minimumFractionDigits: 2
+                  }) }}
+                </p>
+                <p v-else :class="!sale.product.promotions?.length ? 'ml-1' : null">
+                  $ {{ (sale.product.public_price * sale.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })
+                  }}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        <!-- <div v-if="sale.product.promotions?.length">
-          <p v-if="someApplicablePromotion(sale)" class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
-          <p v-else class="text-gray99 text-[10px]">Promoción disponible</p>
-        </div> -->
-        <div class="self-end text-lg">
-          <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
-            @confirm="deleteItem(sale.product.id)" class="justify-self-end">
-            <template #reference>
-              <button class="mr-2 text-primary cursor-pointer size-7 hover:bg-gray-100 rounded-full">
-                <i class="fa-regular fa-trash-can"></i>
-              </button>
-            </template>
-          </el-popconfirm>
         </div>
       </div>
     </div>
