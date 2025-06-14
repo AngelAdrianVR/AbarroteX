@@ -209,7 +209,7 @@ onUnmounted(() => {
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
                                     </svg>
-                                    <span>{{ $page.props.auth.user.store.name }}</span>
+                                    <span class="text-xs lg:text-base">{{ $page.props.auth.user.store.name }}</span>
                                 </div>
                                 <!-- Logo en movil -->
                                 <div class="md:hidden shrink-0 flex items-center">
@@ -221,8 +221,8 @@ onUnmounted(() => {
                             <div class="hidden sm:flex sm:items-center sm:ms-6">
                                 <!-- Refiere y gana -->
                                 <NeonButton @click="$inertia.visit(route('referrals.index'))"
-                                    class="text-sm px-3 py-1 flex items-center space-x-2 mr-5">
-                                    <svg width="19" height="20" viewBox="0 0 19 20" fill="none"
+                                    class="text-xs lg:text-sm px-3 py-1 flex items-center space-x-1 mr-1 lg:mr-5">
+                                    <svg width="19" height="20" viewBox="0 0 19 20" fill="none" class="size-4 lg:size-5"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path
                                             d="M3.53838 5.14977C1.13208 3.23977 5.59093 -2.64669 9.05757 5.06725C13.588 -3.14196 18.1882 3.30957 14.3667 5.14973C16.7642 3.09548 13.6587 -1.44344 9.05757 5.06725C6.3694 -0.664971 2.09586 2.67639 3.53838 5.14977Z"
@@ -246,8 +246,7 @@ onUnmounted(() => {
                                 <section @click="handleOpenInventory" class="relative flex justify-center items-center">
                                     <div class="group flex justify-center transition-all">
                                         <!-- modal de inventario para agregar stock por proveedor -->
-
-                                        <button class="mx-2 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-2 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
+                                        <button class="mx-1 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-1 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                             </svg>
@@ -259,8 +258,7 @@ onUnmounted(() => {
 
                                 <section v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" @click="readNotifications" class="relative flex justify-center items-center">
                                     <div
-                                        class="group flex justify-center transition-all"
-                                    >
+                                        class="group flex justify-center transition-all">
                                         <!-- notificaciones de tienda en linea -->
                                         <OnlineSalesNotifications ref="onlineNotificationsCenterRef" />
                                         <span
