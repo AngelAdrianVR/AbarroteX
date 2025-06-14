@@ -839,10 +839,27 @@ onUnmounted(() => {
                 </div>
 
 
-                <div class="flex items-center justify-end mt-4 space-x-3">
-                    <CancelButton @click="showInventoryModal = false;">Cancelar</CancelButton>
-                    <PrimaryButton :disabled="!productsFound.length" @click="updateProductStock">Registrar entradas
-                    </PrimaryButton>
+                <div class="flex space-x-2 max-w-lg">
+                    <el-select
+                        v-model="selectedProviders"
+                        multiple
+                        filterable
+                        allow-create
+                        default-first-option
+                        :reserve-keyword="false"
+                        placeholder="Selecciona proveedores"
+                        style="width: 100%"
+                    >
+                    <el-option
+                        v-for="provider in providers"
+                        :key="provider.id"
+                        :label="provider.name"
+                        :value="provider.id"
+                    />
+                    </el-select>
+                    <el-button type="primary" @click="filterByProvider" class="!px-4 !py-2">
+                        <i class="fa-solid fa-magnifying-glass mr-1"></i> Filtrar
+                    </el-button>
                 </div>
             </article>
 
