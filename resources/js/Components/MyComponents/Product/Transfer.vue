@@ -90,7 +90,7 @@
                 </div>
 
                 <!-- Checkbox para seleccionar todos -->
-                <div v-if="filterGlobalProducts.length" class="flex items-center">
+                <div v-if="filteredGlobalProducts.length > 0" class="flex items-center">
                     <el-checkbox
                         :model-value="allLeftSelected"
                         @change="toggleSelectAllLeft"
@@ -229,7 +229,7 @@
                 </div>
 
                 <!-- Checkbox para seleccionar todos -->
-                <div class="flex items-center">
+                <div v-if="filteredMyProducts.length" class="flex items-center">
                     <el-checkbox
                         :model-value="allRightSelected"
                         @change="toggleSelectAllRight"
@@ -281,11 +281,6 @@
             </PrimaryButton>
         </div>
     </transition>
-    {{ globalProducts.length }} globalProducts <br>
-    {{ filteredGlobalProducts.length }} filteredGlobalProducts <br>
-    {{ filteredMyProducts.length }} filteredMyProducts <br>
-    {{products}} mis prods <br>
-    {{initialProducts}} iniciales
 
     <ConfirmationModal :show="showConfirmModal" @close="showConfirmModal = false">
         <template #title>
@@ -371,6 +366,14 @@ emits: [
     'clean-filter',
     'search-products'
     ], // Emite un evento cuando se selecciona un producto para vista previa
+    watch: {
+        globalProducts: {
+            handler(newVal) {
+                this.filteredGlobalProducts = [...newVal]; // Resetea los productos filtrados al cargar nuevos productos
+            },
+            immediate: true, // Ejecuta el watcher inmediatamente al montar el componente
+        },
+    },
 computed: {
     allLeftSelected() {
         return this.filteredGlobalProducts.length > 0 &&
@@ -674,7 +677,6 @@ methods: {
     },
 },
 mounted() {
-    // Inicializar productos locales
     this.localProductsFormater();
 },
 }
