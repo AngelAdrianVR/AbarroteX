@@ -280,7 +280,7 @@ class GlobalProductStoreController extends Controller
         $global_products = GlobalProduct::where('type', $type_store)->get(['id', 'name', 'brand_id', 'category_id', 'type']);
         
         // recupera todos los productos de mi tienda con el tipo seleccionado
-        $my_products = GlobalProductStore::with('globalProduct:id,name,type')
+        $my_products = GlobalProductStore::with('globalProduct:id,name,type,brand_id,category_id')
             ->where('store_id', auth()->user()->store_id)
             ->whereHas('globalProduct', function ($query) use ($type_store) {
                 $query->where('type', $type_store);
@@ -298,6 +298,7 @@ class GlobalProductStoreController extends Controller
     public function transfer(Request $request)
     {
         $store = auth()->user()->store;
+
         // Mis productos ya registrados
         $my_products = GlobalProductStore::where('store_id', $store->id)
             ->pluck('global_product_id'); // Obtenemos solo los ids de los productos registrados
@@ -330,7 +331,6 @@ class GlobalProductStoreController extends Controller
             // fijar un limite para paquete basico
             if ($total_products < 3000) {
                 // Se obtiene el producto global con el id recibido
-
                 if ($product) {
                     GlobalProductStore::create([
                         'public_price' => $product->public_price,
