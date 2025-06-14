@@ -21,7 +21,7 @@
             <!-- Transfer 2.0 (hecho desde 0) -->
             <section v-else class="mt-8 flex flex-col items-center xl:flex-row xl:items-start xl:space-x-5">
                 <div class="mx-auto xl:w-[90%] relative">
-                    <Transfer 
+                    <Transfer
                         :brands="brands" 
                         :categories="categories" 
                         :globalProducts="globalProducts"
@@ -75,13 +75,15 @@ export default {
             products: [],
             initialProducts: [],
             productInfo: null,
-            processing: false,
+            
             // carga
+            processing: false,
             loadingProduct: false,
             loading: false,
 
             // Permisos de rol
             canTransfer: ['Administrador'].includes(this.$page.props.auth.user.rol),
+
             // datos para la vista
             totalGlobalProducts: [],
             globalProducts: [],
@@ -90,6 +92,7 @@ export default {
             brands: [],
             storeType: 'Abarrotes / Supermercado',
             options: ['Abarrotes / Supermercado', 'Papelería', 'Ferretería'],
+            ProductsCharged: false, // Indica si los productos han sido cargados
         };
     },
     components: {
@@ -102,7 +105,7 @@ export default {
         //recorre el arreglo de productos globales revisando que productos estan guardados en la tienda
         //y guarda en el arreglo products el (index + 1) del producto en el primer arreglo para mostrarlo en 
         //la parte derecha del transfer.
-        localProductsFormater() {
+        async localProductsFormater() {
             this.products = [];
             // Utiliza map en lugar de forEach para transformar los datos
             this.globalProducts.map((globalProduct, index) => {
@@ -114,8 +117,9 @@ export default {
             });
             // inicializar numero de productos en la tienda para saber si se quitan o agregan
             this.initialProducts = this.products;
+            this.ProductsCharged = true; // Indica que los productos han sido cargados
         },
-        globalProductsFormater() {
+       async globalProductsFormater() {
             // Filtra los productos que NO estén en this.products
             const filtered = this.totalGlobalProducts.filter(product => {
                 return !this.products.includes(product.id);
@@ -144,7 +148,6 @@ export default {
                     this.brands = response.data.brands;
                     this.globalProductsFormater();
                     this.localProductsFormater();
-                    console.log(this.totalGlobalProducts);
                 }
             } catch (error) {
                 console.log(error);
@@ -174,14 +177,14 @@ export default {
             }
         },
     },
-    async created() {
+    async mounted() {
         await this.fetchDataForBaseCatalogView();
 
         // resetear variable de local storage a false
         localStorage.setItem('pendentProcess', false);
 
-        this.globalProductsFormater()
-        this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
+        await this.globalProductsFormater()
+        await this.localProductsFormater(); //formatea el arreglo de products para mostrar productos de la tienda en la parte deracha del transfer
     }
 };
 </script>
