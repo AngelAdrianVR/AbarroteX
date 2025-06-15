@@ -28,6 +28,7 @@ return new class extends Migration
             $table->foreignId('cash_register_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('quote_id')->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
