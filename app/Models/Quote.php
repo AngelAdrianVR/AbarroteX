@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Quote extends Model
 {
@@ -20,7 +22,7 @@ class Quote extends Model
         'show_iva',
         'has_discount',
         'total',
-        'status',
+        'status', //Esperando respuesta, Autorizada, Rechazada, Pagada
         'products',
         'services',
         'expired_date',
@@ -46,5 +48,10 @@ class Quote extends Model
     public function store() :BelongsTo
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function sale() :HasMany
+    {
+        return $this->hasMany(Sale::class);
     }
 }
