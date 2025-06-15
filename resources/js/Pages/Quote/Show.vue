@@ -16,12 +16,12 @@
                 <PrimaryButton v-if="showEditIcon" @click="print">
                     Imprimir o guardar PDF
                 </PrimaryButton>
-                <div class="flex flex-col space-y-1 mr-16 text-right">
+                <!-- <div class="flex flex-col space-y-1 mr-16 text-right">
                     <p>{{ 'COT-' + String(report.folio).padStart(4, '0') }}</p>
                     <p class="font-bold">Fecha: <span class="font-light">
                         {{ formatDate(report.created_at) }}</span>
                     </p>
-                </div>
+                </div> -->
             </section>
 
             <!-- body ---------------------------- -->

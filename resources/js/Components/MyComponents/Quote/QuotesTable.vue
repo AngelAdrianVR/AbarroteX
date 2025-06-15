@@ -39,11 +39,15 @@
                             <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item v-if="canChangeStatus && quote.status === 'Esperando respuesta' || quote.status === 'Rechazada'" :command="'status|' + quote.id + '|Autorizada'">
-                                        <i class="fa-solid fa-check text-xs size-[14px] mr-2"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                        </svg>
                                         <span class="text-xs">Autorizada</span>
                                     </el-dropdown-item>
                                     <el-dropdown-item v-if="canChangeStatus && quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Rechazada'">
-                                        <i class="fa-solid fa-x text-xs size-[14px] mr-2"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                        </svg>
                                         <span class="text-xs">Rechazada</span>
                                     </el-dropdown-item>
                                     <!-- <el-dropdown-item v-if="canChangeStatus && quote.status !== 'Pagado' && quote.status !== 'Pago parcial' && quote.status !== 'Rechazada'" :command="'status|' + quote.id + '|Pago parcial'">
@@ -51,7 +55,9 @@
                                         <span class="text-xs">Pago parcial</span>
                                     </el-dropdown-item> -->
                                     <el-dropdown-item v-if="canChangeStatus && quote.status === 'Autorizada' || quote.status === 'Pago parcial' || quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Pagado'">
-                                        <i class="fa-solid fa-dollar-sign size-[14px] mr-2"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
                                         <span class="text-xs">Pagado</span>
                                     </el-dropdown-item>
                                     <el-dropdown-item :command="'see|' + encodeId(quote.id)">
