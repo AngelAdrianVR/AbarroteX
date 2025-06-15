@@ -13,7 +13,7 @@
                 </div>
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Cliente (en caso de tenerlo registrado)" class="ml-3 mb-1" />
+                        <InputLabel value="Cliente (en caso de tenerlo registrado)" />
                         <button
                             @click="showClientFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center mb-1">
@@ -22,14 +22,14 @@
                     </div>
                     <el-select @change="fillClientInfo()" class="w-1/2" filterable v-model="form.client_id" clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="client in clients" :key="client" :label="client.company"
+                        <el-option v-for="client in clients" :key="client" :label="client.name"
                             :value="client.id" />
                     </el-select>
                     <InputError :message="form.errors.client_id" />
                 </div>
 
                 <div class="mt-3">
-                    <InputLabel value="Nombre del contacto*" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre del contacto*" />
                     <el-input v-model="form.contact_name" placeholder="Escribe el nombre del contacto" :maxlength="100" clearable />
                     <InputError :message="form.errors.contact_name" />
                 </div>
@@ -44,20 +44,20 @@
                 </div>
 
                 <div class="mt-3">
-                    <InputLabel value="Correo electrónico (opcional)" class="ml-3 mb-1" />
+                    <InputLabel value="Correo electrónico (opcional)" />
                     <el-input v-model="form.email" placeholder="Escribe el correo electrónico del contacto" :maxlength="100" clearable />
                     <InputError :message="form.errors.email" />
                 </div>
 
                 <div class="mt-3">
-                    <InputLabel value="Fecha de expiración de cot." class="ml-3 mb-1" />
+                    <InputLabel value="Fecha de expiración de cot." />
                     <el-date-picker v-model="form.expired_date" type="date" class="!w-full" placeholder="día/mes/año"
                         :disabled-date="disabledPrevDays" />
                     <InputError :message="form.errors.expired_date" />
                 </div>
 
                 <div class="mt-3">
-                    <InputLabel value="Condiciones de pago" class="ml-3 mb-1" />
+                    <InputLabel value="Condiciones de pago" />
                     <el-select class="w-1/2" filterable v-model="form.payment_conditions" clearable placeholder="Seleccione"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                         <el-option v-for="payment_condition in payment_conditions" :key="payment_condition" :label="payment_condition"
@@ -66,15 +66,13 @@
                 </div>
                 
                 <div class="mt-3 col-span-full">
-                    <InputLabel value="Dirección (opcional)" class="ml-3 mb-1" />
+                    <InputLabel value="Dirección (opcional)" />
                     <el-input v-model="form.address" placeholder="Escribe la dirección del cliente" :maxlength="100" clearable />
                     <InputError :message="form.errors.address" />
                 </div>
 
                 <!-- productos -->
-                <!-- ------------------------------------------------------------------- -->
                 <h2 class="font-bold ml-3 mt-3 mb-1 col-span-full">Productos</h2>
-
                 <section class="max-h-72 overflow-auto col-span-full">
                     <div class="space-y-3">
                         <ProductInput :products="products" v-for="(item, index) in form.products" :key="item.id" :id="item.id"
@@ -89,11 +87,8 @@
                         Agregar producto
                     </button>
                 </div>
-                <!-- -------------------------------------------------------------------- -->
-
 
                 <!-- Servicios -->
-                <!-- ------------------------------------------------------------------- -->
                 <h2 v-if="this.$page.props.auth.user.store.activated_modules?.includes('Servicios')" class="font-bold ml-3 mt-3 mb-1 col-span-full">Servicios</h2>
 
                 <section v-if="this.$page.props.auth.user.store.activated_modules?.includes('Servicios')" class="max-h-72 overflow-auto col-span-full">
@@ -174,7 +169,7 @@
             <template #content>
                 <form @submit.prevent="storeClient" class="md:grid grid-cols-2 gap-x-3">
                 <div class="mt-3">
-                    <InputLabel value="Nombre*" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre*" />
                     <el-input v-model="clientForm.name" placeholder="Escribe el nombre del cliente" :maxlength="100" clearable />
                     <InputError :message="clientForm.errors.name" />
                 </div>
@@ -187,7 +182,7 @@
                     <InputError :message="clientForm.errors.phone" />
                 </div>
                 <div class="mt-3 col-span-full">
-                    <InputLabel value="RFC (opcional)" class="ml-3 mb-1" />
+                    <InputLabel value="RFC (opcional)" />
                     <el-input v-model="clientForm.rfc" placeholder="Escribe el RFC en caso de tenerlo" :maxlength="100" clearable />
                     <InputError :message="clientForm.errors.rfc" />
                 </div>

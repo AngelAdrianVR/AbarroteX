@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\Quote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 class QuoteController extends Controller
 {
@@ -17,7 +19,7 @@ class QuoteController extends Controller
     }
 
     public function create()
-    {   
+    {
         $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'company']);
 
         return inertia('Quote/Create', compact('clients'));
@@ -54,24 +56,24 @@ class QuoteController extends Controller
 
         return to_route('quotes.index');
     }
-    
+
     public function show($encoded_quote_id)
     {
-        // Decodificar el ID
         $decoded_quote_id = base64_decode($encoded_quote_id);
+        $store_id = auth()->user()->store_id;
+        $quote = Quote::with(['client'])->findOrFail($decoded_quote_id);
 
-        $quote = Quote::with(['client'])
-            ->findOrFail($decoded_quote_id);
+        // Ruta a la vista de Inertia (ej: 'Quote/Show14.vue')
+        $customViewPath = resource_path("js/Pages/Quote/Show{$store_id}.vue");
 
-        // return $quote;
-        //si el usuario es dm compresores manda al template personalizado, si no, al general.
-        if ( auth()->user()->store->name === 'DM Compresores' || auth()->user()->store_id === 6 || auth()->user()->store_id === 1 ) {
-            return inertia('Quote/ShowDMCompresores', compact('quote'));
-        } else {
-            return inertia('Quote/Show', compact('quote'));
-        }
+        // Usar la vista personalizada si existe, sino la predeterminada
+        $view = File::exists($customViewPath)
+            ? "Quote/Show{$store_id}"
+            : "Quote/Show";
+
+        return inertia($view, compact('quote'));
     }
-    
+
     public function edit($encoded_quote_id)
     {
         $clients = Client::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'company']);
@@ -85,7 +87,7 @@ class QuoteController extends Controller
         return inertia('Quote/Edit', compact('quote', 'clients'));
     }
 
-    
+
     public function update(Request $request, Quote $quote)
     {
         $request->validate([
@@ -115,7 +117,7 @@ class QuoteController extends Controller
         return to_route('quotes.index');
     }
 
-    
+
     public function destroy(Quote $quote)
     {
         $quote->delete();

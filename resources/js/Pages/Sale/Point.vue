@@ -234,7 +234,7 @@
                       </svg>
                       <span>Cliente</span>
                     </p>
-                    <el-select v-model="editableTabs[this.editableTabsValue - 1].client_id" clearable filterable
+                    <el-select v-model="editableTabs[editableTabsValue - 1].client_id" clearable filterable
                       placeholder="Seleccione si es necesario" no-data-text="No hay opciones registradas"
                       no-match-text="No se encontraron coincidencias">
                       <el-option v-for="client in clients" :key="client" :label="client.name" :value="client.id" />
@@ -417,7 +417,7 @@
             <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
               class="hidden lg:block border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
               <div
-                v-if="!editableTabs[this.editableTabsValue - 1].cash && !editableTabs[this.editableTabsValue - 1].credit">
+                v-if="!editableTabs[editableTabsValue - 1].cash && !editableTabs[editableTabsValue - 1].credit">
                 <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                   <p>Subtotal</p>
                   <p class="text-gray-99">$ <strong class="ml-3">{{
@@ -425,7 +425,7 @@
                 </div> -->
                 <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                   <p class="text-[#999999]">Descuento</p>
-                  <el-input v-model="editableTabs[this.editableTabsValue - 1].discount" type="number" class="!w-24 !h-8"
+                  <el-input v-model="editableTabs[editableTabsValue - 1].discount" type="number" class="!w-24 !h-8"
                     placeholder="0.00">
                     <template #prefix>
                       <i class="fa-solid fa-dollar-sign"></i>
@@ -434,11 +434,11 @@
                 </div> -->
                 <div class="flex items-center justify-between text-xl mx-5">
                   <p class="font-bold">Total</p>
-                  <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0"
+                  <p v-if="(calculateTotal() - editableTabs[editableTabsValue - 1].discount) < 0"
                     class="text-red-600 text-xs">El descuento es más grande que el total</p>
                   <p v-else class="text-gray-99">
                     $ <strong class="ml-3">
-                      {{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US',
+                      {{ (calculateTotal() - editableTabs[editableTabsValue - 1].discount)?.toLocaleString('en-US',
                         {
                           minimumFractionDigits: 2
                         })
@@ -452,10 +452,10 @@
                   <div class="flex items-center justify-end space-x-4">
                     <PrimaryButton v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
                       @click="creditPayment()"
-                      :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
+                      :disabled="editableTabs[editableTabsValue - 1]?.saleProducts?.length == 0"
                       class="!px-4 !bg-[#baf09b] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
                     <PrimaryButton @click="cashPayment()"
-                      :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
+                      :disabled="editableTabs[editableTabsValue - 1]?.saleProducts?.length == 0"
                       class="!px-4 !bg-[#5FCB1F] disabled:!bg-[#999999]">Al contado</PrimaryButton>
                   </div>
                   <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
@@ -466,7 +466,7 @@
                 <!------- botones venta normal sin crédito ------->
                 <!-- <div class="text-center mt-7">
                   <PrimaryButton @click="cashPayment()"
-                    :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) < 0 || !$page.props.auth?.user?.cash_register_id"
+                    :disabled="editableTabs[editableTabsValue - 1]?.saleProducts?.length == 0 || (calculateTotal() - editableTabs[editableTabsValue - 1].discount) < 0 || !$page.props.auth?.user?.cash_register_id"
                     class="!rounded-full !px-24 !bg-[#5FCB1F] disabled:!bg-[#999999]">Cobrar</PrimaryButton>
                   <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-sm text-red-600 mt-2">
                     Para cobrar asigna una caja registradora <span @click="showCashRegisterSelectionModal = true"
@@ -475,33 +475,33 @@
                 </div> -->
               </div>
               <!-- cobrando pago al contado -->
-              <!-- <div v-if="editableTabs[this.editableTabsValue - 1].cash">
+              <!-- <div v-if="editableTabs[editableTabsValue - 1].cash">
                 <p class="text-gray-99 text-center mb-3 text-2xl">Total $ <strong>{{ (calculateTotal() -
-                  editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US', {
+                  editableTabs[editableTabsValue - 1].discount)?.toLocaleString('en-US', {
                     minimumFractionDigits: 2
                   }) }}</strong>
                 </p>
                 <div class="flex items-center justify-between mx-5 space-x-10 text-lg">
                   <p>Entregado</p>
-                  <input v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" @keydown.enter="store"
+                  <input v-model="editableTabs[editableTabsValue - 1].moneyReceived" @keydown.enter="store"
                     type="number" class="input !rounded-md w-1/3" ref="receivedInput" placeholder="$0.00">
                 </div>
                 <div class="flex items-center justify-between mx-5 my-2 relative text-lg">
                   <p>Cambio</p>
                   <p
-                    v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived">
+                    v-if="(calculateTotal() - editableTabs[editableTabsValue - 1].discount) <= editableTabs[editableTabsValue - 1]?.moneyReceived">
                     ${{
-                      (editableTabs[this.editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
-                        editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
+                      (editableTabs[editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
+                        editableTabs[editableTabsValue - 1].discount)).toLocaleString('en-US', {
                           minimumFractionDigits: 2
                         }) }}</p>
                 </div>
-                <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
+                <p v-if="((calculateTotal() - editableTabs[editableTabsValue - 1].discount) > editableTabs[editableTabsValue - 1]?.moneyReceived) && editableTabs[editableTabsValue - 1].moneyReceived"
                   class="text-base font-bold text-primary text-center mb-3">
                   La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
                 </p>
                 <div class="flex space-x-2 justify-end">
-                  <CancelButton @click="editableTabs[this.editableTabsValue - 1].cash = false">Cancelar</CancelButton>
+                  <CancelButton @click="editableTabs[editableTabsValue - 1].cash = false">Cancelar</CancelButton>
                   <PrimaryButton :disabled="storeProcessing" @click="store" class="!rounded-full w-1/2">
                     <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                     Aceptar
@@ -509,9 +509,9 @@
                 </div>
               </div> -->
               <!-- Cobrando a crédito  -->
-              <div v-if="editableTabs[this.editableTabsValue - 1]?.credit">
+              <div v-if="editableTabs[editableTabsValue - 1]?.credit">
                 <div class="flex items-center justify-between">
-                  <i @click="editableTabs[this.editableTabsValue - 1].credit = false; editableTabs[this.editableTabsValue - 1].deposit = null"
+                  <i @click="editableTabs[editableTabsValue - 1].credit = false; editableTabs[editableTabsValue - 1].deposit = null"
                     class="fa-solid fa-angle-left text-xs p-2 cursor-pointer"></i>
                   <p class="text-gray-99 text-xl">$ <strong class="ml-3">{{
                     calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
@@ -521,7 +521,7 @@
                 <div class="flex items-center justify-between space-x-7 my-3">
                   <div class="w-2/3">
                     <InputLabel value="Monto abonado (opcional)" class="!text-base ml-2 !text-gray-400" />
-                    <el-input type="number" v-model="editableTabs[this.editableTabsValue - 1].deposit"
+                    <el-input type="number" v-model="editableTabs[editableTabsValue - 1].deposit"
                       placeholder="ingresa el abono">
                       <template #prefix>
                         <i class="fa-solid fa-dollar-sign"></i>
@@ -530,9 +530,9 @@
                   </div>
                   <div class="w-1/3">
                     <InputLabel value="Saldo restante" class="!text-base !text-gray-400" />
-                    <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) > 0">${{
+                    <p v-if="(calculateTotal() - editableTabs[editableTabsValue - 1].deposit) > 0">${{
                       (calculateTotal() -
-                        editableTabs[this.editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                        editableTabs[editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                           ",")
                     }}</p>
                     <p class="text-red-600 text-xs" v-else>La cantidad abonada debe de ser menor al monto total</p>
@@ -540,18 +540,18 @@
                 </div>
                 <div class="w-2/3 pr-5">
                   <InputLabel value="Fecha de vencimiento (opcional)" class="!text-base !text-gray-400 ml-2" />
-                  <el-date-picker v-model="editableTabs[this.editableTabsValue - 1].limit_date" class="!w-full"
+                  <el-date-picker v-model="editableTabs[editableTabsValue - 1].limit_date" class="!w-full"
                     type="date" placeholder="Seleccione" :disabled-date="disabledDate" />
                 </div>
                 <!-- <div class="mt-3">
                   <InputLabel value="Notas (opcional)" class="!text-base ml-2 !text-gray-400" />
-                  <el-input v-model="editableTabs[this.editableTabsValue - 1].deposit_notes"
+                  <el-input v-model="editableTabs[editableTabsValue - 1].deposit_notes"
                     :autosize="{ minRows: 3, maxRows: 5 }" type="textarea" placeholder="Escribe tus notas"
                     :maxlength="200" show-word-limit clearable />
                 </div> -->
                 <div class="flex items-center justify-end space-x-3 mt-4">
-                  <PrimaryButton @click="editableTabs[this.editableTabsValue - 1].has_credit = true; checkClientExist()"
-                    :disabled="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) < 0 || storeProcessing">
+                  <PrimaryButton @click="editableTabs[editableTabsValue - 1].has_credit = true; checkClientExist()"
+                    :disabled="(calculateTotal() - editableTabs[editableTabsValue - 1].deposit) < 0 || storeProcessing">
                     <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                     Finalizar venta
                   </PrimaryButton>
@@ -608,12 +608,12 @@
       <!-- Total por cobrar movil -->
       <section v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
         class="mt-1 mx-2 border border-grayD9 rounded-t-[13px] lg:hidden text-xs px-5 py-3">
-        <div v-if="!editableTabs[this.editableTabsValue - 1].cash && !editableTabs[this.editableTabsValue - 1].credit">
+        <div v-if="!editableTabs[editableTabsValue - 1].cash && !editableTabs[editableTabsValue - 1].credit">
           <div class="flex items-center justify-between text-base">
             <p class="font-bold">Total</p>
             <p class="text-gray-99">
               $ <strong class="ml-3">
-                {{ (calculateTotal() - editableTabs[this.editableTabsValue - 1].discount)?.toLocaleString('en-US',
+                {{ (calculateTotal() - editableTabs[editableTabsValue - 1].discount)?.toLocaleString('en-US',
                   {
                     minimumFractionDigits: 2
                   })
@@ -626,10 +626,10 @@
             <p class="text-gray37">Opciones de pago</p>
             <div class="flex items-center justify-end space-x-2">
               <PrimaryButton v-if="$page.props.auth.user.store.activated_modules.includes('Clientes')"
-                @click="creditPayment()" :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
+                @click="creditPayment()" :disabled="editableTabs[editableTabsValue - 1]?.saleProducts?.length == 0"
                 class="!px-6 !py-1 !bg-[#BDF891] disabled:!bg-[#999999] !text-black">A crédito</PrimaryButton>
               <PrimaryButton @click="cashPayment()"
-                :disabled="editableTabs[this.editableTabsValue - 1]?.saleProducts?.length == 0"
+                :disabled="editableTabs[editableTabsValue - 1]?.saleProducts?.length == 0"
                 class="!px-6 !py-1 !bg-[#4DE515] text-white disabled:!bg-[#999999]">Al contado</PrimaryButton>
             </div>
             <p v-if="!$page.props.auth?.user?.cash_register_id" class="text-red-600 mt-2">
@@ -640,9 +640,9 @@
         </div>
         <!-- cobrando pago al contado -->
         <!-- Cobrando a crédito  -->
-        <div v-if="editableTabs[this.editableTabsValue - 1]?.credit">
+        <div v-if="editableTabs[editableTabsValue - 1]?.credit">
           <div class="flex items-center justify-between">
-            <i @click="editableTabs[this.editableTabsValue - 1].credit = false; editableTabs[this.editableTabsValue - 1].deposit = null"
+            <i @click="editableTabs[editableTabsValue - 1].credit = false; editableTabs[editableTabsValue - 1].deposit = null"
               class="fa-solid fa-angle-left text-xs p-2 cursor-pointer"></i>
             <p class="text-gray-99 text-xl">$ <strong class="ml-3">{{
               calculateTotal().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
@@ -652,7 +652,7 @@
           <div class="flex items-center justify-between space-x-7 my-3">
             <div class="w-2/3">
               <InputLabel value="Monto abonado (opcional)" class="!text-base ml-2 !text-gray-400" />
-              <el-input type="number" v-model="editableTabs[this.editableTabsValue - 1].deposit"
+              <el-input type="number" v-model="editableTabs[editableTabsValue - 1].deposit"
                 placeholder="ingresa el abono">
                 <template #prefix>
                   <i class="fa-solid fa-dollar-sign"></i>
@@ -661,9 +661,9 @@
             </div>
             <div class="w-1/3">
               <InputLabel value="Saldo restante" class="!text-base !text-gray-400" />
-              <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) > 0">${{
+              <p v-if="(calculateTotal() - editableTabs[editableTabsValue - 1].deposit) > 0">${{
                 (calculateTotal() -
-                  editableTabs[this.editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                  editableTabs[editableTabsValue - 1].deposit)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",")
               }}</p>
               <p class="text-red-600 text-xs" v-else>La cantidad abonada debe de ser menor al monto total</p>
@@ -671,18 +671,18 @@
           </div>
           <div class="w-2/3 pr-5">
             <InputLabel value="Fecha de vencimiento (opcional)" class="!text-base !text-gray-400 ml-2" />
-            <el-date-picker v-model="editableTabs[this.editableTabsValue - 1].limit_date" class="!w-full" type="date"
+            <el-date-picker v-model="editableTabs[editableTabsValue - 1].limit_date" class="!w-full" type="date"
               placeholder="Seleccione" :disabled-date="disabledDate" />
           </div>
           <!-- <div class="mt-3">
                   <InputLabel value="Notas (opcional)" class="!text-base ml-2 !text-gray-400" />
-                  <el-input v-model="editableTabs[this.editableTabsValue - 1].deposit_notes"
+                  <el-input v-model="editableTabs[editableTabsValue - 1].deposit_notes"
                     :autosize="{ minRows: 3, maxRows: 5 }" type="textarea" placeholder="Escribe tus notas"
                     :maxlength="200" show-word-limit clearable />
                 </div> -->
           <div class="flex items-center justify-end space-x-3 mt-4">
-            <PrimaryButton @click="editableTabs[this.editableTabsValue - 1].has_credit = true; checkClientExist()"
-              :disabled="(calculateTotal() - editableTabs[this.editableTabsValue - 1].deposit) < 0 || storeProcessing">
+            <PrimaryButton @click="editableTabs[editableTabsValue - 1].has_credit = true; checkClientExist()"
+              :disabled="(calculateTotal() - editableTabs[editableTabsValue - 1].deposit) < 0 || storeProcessing">
               <i v-if="storeProcessing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
               Finalizar venta
             </PrimaryButton>
@@ -733,31 +733,31 @@
           <div
             class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
             <span class="font-bold">Total a pagar</span>
-            <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue -
+            <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[editableTabsValue -
               1].discount)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
           </div>
           <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
             <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
             <el-input-number ref="receivedInput" @keydown.enter="store"
-              v-model="editableTabs[this.editableTabsValue - 1].moneyReceived" :min="1" :max="999999">
+              v-model="editableTabs[editableTabsValue - 1].moneyReceived" :min="1" :max="999999">
               <template #prefix>
                 <span>$</span>
               </template>
             </el-input-number>
             <p class="pt-5 font-bold">Cambio</p>
             <div class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-7 flex items-center justify-between">
-              <p v-if="(calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) <= editableTabs[this.editableTabsValue - 1]?.moneyReceived"
+              <p v-if="(calculateTotal() - editableTabs[editableTabsValue - 1].discount) <= editableTabs[editableTabsValue - 1]?.moneyReceived"
                 class="font-bold">
                 <span class="mr-5">$</span>
                 {{
-                  (editableTabs[this.editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
-                    editableTabs[this.editableTabsValue - 1].discount)).toLocaleString('en-US', {
+                  (editableTabs[editableTabsValue - 1]?.moneyReceived - (calculateTotal() -
+                    editableTabs[editableTabsValue - 1].discount)).toLocaleString('en-US', {
                       minimumFractionDigits: 2
                     })
                 }}
               </p>
             </div>
-            <p v-if="((calculateTotal() - editableTabs[this.editableTabsValue - 1].discount) > editableTabs[this.editableTabsValue - 1]?.moneyReceived) && editableTabs[this.editableTabsValue - 1].moneyReceived"
+            <p v-if="((calculateTotal() - editableTabs[editableTabsValue - 1].discount) > editableTabs[editableTabsValue - 1]?.moneyReceived) && editableTabs[editableTabsValue - 1].moneyReceived"
               class="text-base font-bold text-red-600 text-center mb-3">
               La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total de compra.
             </p>
@@ -807,7 +807,7 @@
             <div
               class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
               <span class="font-bold">Total a pagar</span>
-              <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[this.editableTabsValue
+              <p class="font-bold"><span class="mr-4">$</span>{{ (calculateTotal() - editableTabs[editableTabsValue
                 -
                 1].discount)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
             </div>
@@ -1327,7 +1327,7 @@ export default {
           name: "1",
           saleProducts: [],
           has_credit: false,
-          deposit: false,
+          deposit: null,
           cash: false, //Pago al contado
           credit: false, //venta a crédito
           discount: 0,
@@ -1339,7 +1339,7 @@ export default {
           name: "2",
           saleProducts: [],
           has_credit: false,
-          deposit: false,
+          deposit: null,
           cash: false, //Pago al contado
           credit: false, //venta a crédito
           discount: 0,
@@ -1351,7 +1351,7 @@ export default {
           name: "3",
           saleProducts: [],
           has_credit: false,
-          deposit: false,
+          deposit: null,
           cash: false, //Pago al contado
           credit: false, //venta a crédito
           discount: 0,

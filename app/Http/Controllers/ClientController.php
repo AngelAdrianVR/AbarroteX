@@ -48,9 +48,9 @@ class ClientController extends Controller
     {
         // Decodificar el ID
         $decoded_client_id = base64_decode($encoded_client_id);
-
+        $store_id = auth()->user()->store_id;
         $client = Client::find($decoded_client_id);
-        $clients = Client::where('store_id', auth()->user()->store_id)->latest()->get(['id', 'name']);
+        $clients = Client::where('store_id', $store_id)->latest()->get(['id', 'name']);
         $client_debt = $client->calcTotalDebt();
 
         return inertia('Client/Show', compact('client', 'clients', 'client_debt'));

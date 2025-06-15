@@ -8,14 +8,15 @@
         </p>
         <article class="mt-5">
             <h1 class="rounded-full pl-10 bg-[#F2F2F2] py-1 text-sm">Usuarios</h1>
-            <div class="flex itemscenter justify-between space-x-4 mt-3">
+            <div class="flex items-start justify-between space-x-4 mt-3">
                 <p class="px-9 text-sm md:text-base">
                     Los usuarios pueden iniciar sesión con el correo electrónico
                     registrado y la contraseña: <span
                         class="border p-px rounded-[3px] border-[#575757]">ezyventas</span> ,
                     la cual pueden cambiar luego en su perfil
                 </P>
-                <ThirthButton v-if="canCreate && usersNotExceededYet" @click="$inertia.get(route('users.create'))">
+                <ThirthButton v-if="canCreate && usersNotExceededYet" @click="$inertia.get(route('users.create'))" 
+                class="!bg-primarylight flex-shrink-0">
                     Agregar usuario
                 </ThirthButton>
             </div>

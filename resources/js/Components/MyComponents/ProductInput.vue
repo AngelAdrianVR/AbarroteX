@@ -27,7 +27,7 @@
         </div>
         <div class="w-24">
             <InputLabel value="Precio/u" class="mb-1 text-sm" />
-            <el-input disabled v-model="price" min="1" required type="text"
+            <el-input v-model="price" min="1" required type="text"
                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                 :parser="(value) => value.replace(/[^\d.]/g, '')">
                 <template #prefix>
