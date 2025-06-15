@@ -68,18 +68,18 @@
                             <span class="w-1/4">$</span>
                             <span class="w-2/3 ml-3 text-gray37 text-end">
                                 {{
-                                    Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    Object.values(day_sales)[0].total_quotes_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",") }}
                             </span>
                         </p>
                     </div>
-                    <div v-if="getRefundedOnlineSales" class="flex items-center space-x-3">
+                    <div v-if="getRefundedQuotes" class="flex items-center space-x-3">
                         <span class="w-2/3">Reembolsados: </span>
                         <p class="flex text-gray37 w-1/3 font-bold">
                             <span class="w-1/4 text-gray99">-</span>
                             <span class="w-1/4">$</span>
                             <span class="w-2/3 ml-3 text-gray37 text-end">
-                                {{ getRefundedOnlineSales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                {{ getRefundedQuotes?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                             </span>
                         </p>
                     </div>
@@ -126,8 +126,10 @@
                         <span class="w-2/3 ml-3 text-gray37 text-end">
                             {{ (Object.values(day_sales)[0].online_sales_total +
                                 getTotalInstallmentsAmount +
-                                Object.values(day_sales)[0].total_sale -
+                                Object.values(day_sales)[0].total_sale +
+                                Object.values(day_sales)[0].total_quotes_sale -
                                 getRefundedOnlineSales -
+                                getRefundedQuotes -
                                 getRefundedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
@@ -184,11 +186,9 @@
                                 <p>Cotizaciones</p>
                             </div>
                         </template>
-                        <OnlineSales @show-modal="handleShowModal" :date="Object.keys(day_sales)[0]" />
+                        <QuoteSales @show-modal="handleShowModal" :sales="getGroupedQuoteSales" />
                     </el-tab-pane>
                 </el-tabs>
-                <!-- <SaleDetails v-for="(item, index) in getGroupedSales" :key="index" :groupedSales="item"
-                    @show-modal="handleShowModal" :isOutOfCashCut="is_out_of_cash_cut" /> -->
             </main>
         </div>
 
@@ -205,7 +205,7 @@
                     </div>
                     <div class="flex items-center justify-between mt-2 pb-2 border-b border-grayD9">
                         <p class="text-gray99">Folio de venta: <span class="text-gray37">{{ saleToSeeInstallments.folio
-                                }}</span></p>
+                        }}</span></p>
                         <span class="text-grayD9">|</span>
                         <p class="text-gray99">Total de venta: <span class="text-gray37">
                                 ${{ saleToSeeInstallments.total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -306,7 +306,7 @@
                                     <p>
                                         {{ item.name }}
                                         <span>({{ item.additional?.color.name }}-{{ item.additional?.size.name
-                                            }})</span>
+                                        }})</span>
                                     </p>
                                 </el-option>
                             </el-select>
@@ -381,6 +381,7 @@ import { addOrUpdateBatchOfItems, getAll, getItemByAttributes } from '@/dbServic
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import QuoteSales from './Tabs/QuoteSales.vue';
 
 export default {
     data() {
@@ -430,6 +431,7 @@ export default {
         SaleDetails,
         StoreSales,
         OnlineSales,
+        QuoteSales,
     },
     props: {
         day_sales: Object,
@@ -441,6 +443,12 @@ export default {
         getGroupedSales() {
             // Obtener las ventas del primer día (si hay múltiples días, se debe ajustar esta parte)
             const sales = Object.values(this.day_sales)[0].sales;
+
+            return Object.values(sales);
+        },
+        getGroupedQuoteSales() {
+            // Obtener las ventas por cotizacion del primer día (si hay múltiples días, se debe ajustar esta parte)
+            const sales = Object.values(this.day_sales)[0].quote_sales;
 
             return Object.values(sales);
         },
@@ -491,9 +499,38 @@ export default {
                 return accum1;
             }, 0);
         },
+        getCreditRefundedQuotes() {
+            return this.getGroupedQuoteSales.reduce((accum1, sale) => {
+                // Filtrar las ventas que tengan "credit_data" y que su status sea "Reembolsado"
+                if (sale.credit_data?.status === "Reembolsado") {
+                    // Sumar el total de los abonos realizados (installments) para esa venta
+                    return accum1 += sale.credit_data.installments
+                        ?.reduce((accum, installment) => accum += installment.amount, 0);
+                }
+                return accum1;
+            }, 0);
+        },
+        getCashRefundedQuotes() {
+            return this.getGroupedQuoteSales.reduce((accum1, sale) => {
+                // Verifica si la venta no tiene datos de crédito antes de sumarla
+                if (!sale.credit_data) {
+                    return accum1 += sale.products
+                        ?.filter(item => item.refunded_at)
+                        ?.reduce((accum, product) => accum += product.current_price * product.quantity, 0);
+                }
+                return accum1;
+            }, 0);
+        },
         getRefundedSales() {
             const refundedCreditSales = this.getCreditRefundedSales;
             const refundedCashSales = this.getCashRefundedSales;
+
+            // Sumar las ventas al contado con las ventas a crédito
+            return refundedCashSales + refundedCreditSales;
+        },
+        getRefundedQuotes() {
+            const refundedCreditSales = this.getCreditRefundedQuotes;
+            const refundedCashSales = this.getCashRefundedQuotes;
 
             // Sumar las ventas al contado con las ventas a crédito
             return refundedCashSales + refundedCreditSales;

@@ -679,18 +679,32 @@ class SaleController extends Controller
             }
         })->map(function ($sales) use ($returnSales, $installments) {
             // Filtrar ventas normales y en línea
-            $normalSales = $sales->filter(fn($sale) => isset($sale->current_price));
+            $normalSales = $sales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
+            $quoteSales = $sales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
             $onlineSales = $sales->filter(fn($sale) => !isset($sale->current_price));
 
             $totalQuantityNormalSale = $normalSales->sum('quantity');
+            $totalQuantityQuoteSale = $quoteSales->sum('quantity');
             $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
                 return count($onlineSale->products);
             });
 
-            // obtener el total solo de las ventas al contado
+            // obtener el total solo de las ventas al contado y sin cotizacion
             $totalSale = $normalSales->sum(function ($sale) {
                 $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
-                if (!$credit_data) {
+                if (!$credit_data && !$sale->quote_id) {
+                    // usar precio con descuento si existe
+                    $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                        ? $sale->discounted_price
+                        : $sale->current_price;
+                    return $sale->quantity * $price_to_use;
+                }
+            });
+            
+            // obtener el total solo de las ventas por cotizacion
+            $totalQuotesSale = $quoteSales->sum(function ($sale) {
+                $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
+                if (!$credit_data && $sale->quote_id) {
                     // usar precio con descuento si existe
                     $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
                         ? $sale->discounted_price
@@ -707,13 +721,15 @@ class SaleController extends Controller
             });
 
             $normalFolios = $normalSales->unique('folio')->count();
+            $quoteFolios = $quoteSales->unique('folio')->count();
             $onlineFolios = $onlineSales->count();
 
-            $salesByFolio = $normalSales->groupBy('folio')->map(function ($folioSales) {
+            // ventas en tienda por folio
+            $normalSalesByFolio = $normalSales->groupBy('folio')->map(function ($folioSales) {
                 $firstSale = $folioSales->first();
 
                 // Calcular el total de todos los productos en la venta
-                $totalSale = $folioSales->sum(function ($sale) {
+                $localTotalSale = $folioSales->sum(function ($sale) {
                     // usar precio con descuento si existe
                     $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
                         ? $sale->discounted_price
@@ -746,18 +762,66 @@ class SaleController extends Controller
                     'folio' => $firstSale->folio,
                     'user_name' => $firstSale->user->name,
                     'client_name' => $firstSale->client?->name ?? 'Público en general',
-                    'total_sale' => $totalSale,
+                    'total_sale' => $localTotalSale,
+                ];
+            });
+            
+            // ventas de cotizaciones por folio
+            $quoteSalesByFolio = $quoteSales->groupBy('folio')->map(function ($folioSales) {
+                $firstSale = $folioSales->first();
+
+                // Calcular el total de todos los productos en la venta
+                $localTotalSale = $folioSales->sum(function ($sale) {
+                    // usar precio con descuento si existe
+                    $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                        ? $sale->discounted_price
+                        : $sale->current_price;
+
+                    return $sale->quantity * $price_to_use;
+                });
+
+                return [
+                    'products' => $folioSales->map(function ($sale) {
+                        return [
+                            'id' => $sale->id,
+                            'current_price' => $sale->current_price,
+                            'discounted_price' => $sale->discounted_price,
+                            'promotions_applied' => $sale->promotions_applied,
+                            'product_name' => $sale->product_name,
+                            'product_id' => $sale->product_id,
+                            'is_global_product' => $sale->is_global_product,
+                            'quantity' => $sale->quantity,
+                            'original_price' => $sale->original_price,
+                            'payment_method' => $sale->payment_method,
+                            'refunded_at' => $sale->refunded_at,
+                            'cash_register_id' => $sale->cash_register_id,
+                            'store_id' => $sale->store_id,
+                            'quote_id' => $sale->quote_id,
+                            'created_at' => $sale->created_at,
+                            'updated_at' => $sale->updated_at,
+                        ];
+                    })->values(),
+                    'credit_data' => $firstSale->credit_data,
+                    'folio' => $firstSale->folio,
+                    'quote_folio' => $firstSale->quote->folio,
+                    'user_name' => $firstSale->user->name,
+                    'client_name' => $firstSale->client?->name ?? 'Público en general',
+                    'total_sale' => $localTotalSale,
                 ];
             });
 
             return [
                 'total_normal_quantity' => $totalQuantityNormalSale,
+                'total_quote_quantity' => $totalQuantityQuoteSale,
                 'total_online_quantity' => $totalQuantityOnlineSale,
                 'total_sale' => $totalSale,
+                'total_quotes_sale' => $totalQuotesSale,
                 'normal_folios' => $normalFolios,
+                'quote_folios' => $quoteFolios,
                 'online_folios' => $onlineFolios,
                 'online_sales_total' => $totalOnlineSale,
-                'sales' => $returnSales ? $salesByFolio : [],
+                'sales' => $returnSales ? $normalSalesByFolio : [],
+                'quote_sales' => $returnSales ? $quoteSalesByFolio : [],
                 'online_sales' => $returnSales ? $onlineSales->values() : [],
                 'installments' => $returnSales ? $installments->values() : [],
             ];
