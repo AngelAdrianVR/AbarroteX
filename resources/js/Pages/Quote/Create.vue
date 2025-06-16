@@ -147,23 +147,6 @@
                         Agregar Servicio
                     </button>
                 </div>
-                <!-- -------------------------------------------------------------------- -->
-
-                <!-- totales  -->
-                <!-- <div class="text-sm flex flex-col mr-7 items-end col-span-full">
-                    <p class="font-bold">Subtotal: <span class="mx-2">$</span>{{ (form.total - (form.total *
-                        0.16))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p v-if="form.show_iva" class="font-bold">IVA: <span class="mx-2">$</span>{{ (form.total *
-                        0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p v-if="form.is_percentage_discount" class="font-bold ">descuento: <span class="mx-2">$</span>{{
-                        (percentageDiscount())?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-                    <p v-else class="font-bold ">descuento: <span class="mx-2">$</span>{{
-                        form.discount?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-                    <p v-if="form.is_percentage_discount" class="font-bold">Total: <span class="mx-2">$</span>{{
-                        (form.total - percentageDiscount())?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p v-else class="font-bold">Total: <span class="mx-2">$</span>{{ (form.total -
-                        form.discount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                </div> -->
                 <div class="col-span-full">
                     <InputLabel value="Notas adicionales (opcional)" class="ml-3 mb-1 text-sm" />
                     <el-input v-model="form.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
@@ -175,10 +158,12 @@
                     <h2 class="font-bold text-gray37">
                         Opciones adicionales
                     </h2>
-                    <article class="grid lg:grid-cols-2 mx-2 gap-3 mt-2">
+                    <article class="grid xl:grid-cols-2 mx-2 gap-3 mt-2">
                         <div class="border border-grayD9 bg-white rounded-lg">
-                            <h2 class="text-gray37 bg-grayF2 rounded-t-lg text-sm font-semibold px-2 py-1">
-                                IVA
+                            <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
+                                <span class="text-sm font-semibold">IVA</span>
+                                <button v-if="form.iva_included != null" @click="form.iva_included = null" type="button"
+                                    class="text-primary text-xs">Limpiar</button>
                             </h2>
                             <div class="px-2 py-px">
                                 <p class="text-gray99 text-xs">
@@ -197,17 +182,20 @@
                             </div>
                         </div>
                         <div class="border border-grayD9 bg-white rounded-lg">
-                            <h2 class="text-gray37 bg-grayF2 rounded-t-lg text-sm font-semibold px-2 py-1">
-                                Descuento
+                            <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
+                                <span class="text-sm font-semibold">Descuento</span>
+                                <button v-if="form.is_percentage_discount != null"
+                                    @click="form.is_percentage_discount = null" type="button"
+                                    class="text-primary text-xs">Limpiar</button>
                             </h2>
                             <div class="px-2 py-px">
                                 <p class="text-gray99 text-xs">
                                     Aplica un descuento al total de la cotización
                                 </p>
                                 <div>
-                                    <el-radio-group v-model="form.has_discount">
+                                    <el-radio-group v-model="form.is_percentage_discount">
                                         <div class="w-full flex items-center justify-between">
-                                            <el-radio :value="true" size="small">
+                                            <el-radio :value="false" size="small">
                                                 <p>Descuento fijo</p>
                                             </el-radio>
                                             <el-input v-model="form.discount" placeholder="" class="!w-[40%]"
@@ -218,11 +206,11 @@
                                                 </template>
                                             </el-input>
                                         </div>
-                                        <div class="w-full flex items-center justify-between mt-1">
-                                            <el-radio :value="false" size="small">
+                                        <div class="w-full flex items-center justify-between my-1">
+                                            <el-radio :value="true" size="small">
                                                 <p>Porcentaje</p>
                                             </el-radio>
-                                            <el-input v-model="form.discount" placeholder="" class="!w-[40%]"
+                                            <el-input v-model="form.percentage" placeholder="" class="!w-[40%]"
                                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                                 :parser="(value) => value.replace(/[^\d.]/g, '')" size="small">
                                                 <template #append>
@@ -234,41 +222,68 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="border border-grayD9 bg-white rounded-lg">
+                            <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
+                                <span class="text-sm font-semibold">Costo de entrega o envío</span>
+                                <button v-if="form.delivery_type != null" @click="form.delivery_type = null"
+                                    type="button" class="text-primary text-xs">Limpiar</button>
+                            </h2>
+                            <div class="px-2 py-px">
+                                <p class="text-gray99 text-xs">
+                                    Incluye envío si aplica
+                                </p>
+                                <div>
+                                    <el-radio-group v-model="form.delivery_type">
+                                        <div class="w-full flex items-center justify-between">
+                                            <el-radio value="Entrega a domicilio" size="small">
+                                                <p>Entrega a domicilio</p>
+                                            </el-radio>
+                                            <el-input v-model="form.delivery1" placeholder="" class="!w-[40%]"
+                                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                                :parser="(value) => value.replace(/[^\d.]/g, '')" size="small">
+                                                <template #prepend>$</template>
+                                            </el-input>
+                                        </div>
+                                        <div class="w-full flex items-center justify-between my-1">
+                                            <el-radio value="Envío por paquetería" size="small">
+                                                <p>Envío por paquetería</p>
+                                            </el-radio>
+                                            <el-input v-model="form.delivery2" placeholder="" class="!w-[40%]"
+                                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                                :parser="(value) => value.replace(/[^\d.]/g, '')" size="small">
+                                                <template #prepend>$</template>
+                                            </el-input>
+                                        </div>
+                                    </el-radio-group>
+                                </div>
+                            </div>
+                        </div>
                     </article>
                 </section>
-                <div class="flex items-center space-x-5 col-span-full">
-                    <label for="has_discount" class="text-xs items-center flex mt-2 col-span-full">
-                        <el-checkbox @change="resetDiscount()" id="has_discount" class="px-2" name="has_discount"
-                            v-model="form.has_discount"></el-checkbox>
-                        Aplicar descuento
-                    </label>
-                    <label v-if="form.has_discount" for="is_percentage_discount"
-                        class="text-xs items-center flex mt-2 col-span-full">
-                        <el-checkbox @change="resetDiscount()" id="is_percentage_discount" class="px-2"
-                            name="is_percentage_discount" v-model="form.is_percentage_discount"></el-checkbox>
-                        Descuento en porcentaje
-                    </label>
-                    <!-- <label for="iva" class="text-xs items-center flex mt-2 col-span-full">
-                        <el-checkbox id="iva" class="px-2" name="iva" v-model="form.show_iva"></el-checkbox>
-                        Mostrar IVA
-                    </label> -->
+                <!-- totales  -->
+                <div class="text-sm flex flex-col mr-7 items-end col-span-full">
+                    <p>Subtotal: <span class="mx-2">$</span>
+                        {{ subtotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </p>
+                    <p v-if="form.iva_included != null">IVA: <span class="mx-2">$</span>
+                        {{ (form.total *
+                            0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                    </p>
+                    <p v-if="form.delivery_type">{{ form.delivery_type }}: <span class="mx-2">$</span>
+                        {{ deliveryCost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </p>
+                     <p v-if="form.is_percentage_discount != null">descuento: <span class="mx-2">$</span>
+                        {{
+                            discounted?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                    </p>
+                    <p class="font-bold">Total: <span class="mx-2">$</span>
+                        {{
+                            grandTotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                    </p>
                 </div>
-
-                <!-- Descuento -->
-                <div class="mt-3" v-if="form.has_discount">
-                    <div v-if="form.is_percentage_discount">
-                        <InputLabel value="% Porcentaje de descuento*" class="ml-3 mb-1 text-sm" />
-                        <el-input-number v-model="form.discount" :min="0" :max="100" />
-                        <InputError :message="form.errors.discount" />
-                    </div>
-                    <div v-else>
-                        <InputLabel value="Cantidad de descuento*" class="ml-3 mb-1 text-sm" />
-                        <el-input-number v-model="form.discount" :precision="2" :step="0.1" :min="0"
-                            :max="form.total" />
-                        <InputError :message="form.errors.discount" />
-                    </div>
-                </div>
-
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="isButtonDisabled">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -277,7 +292,6 @@
                 </div>
             </form>
         </div>
-
         <!-- client form ---------------------------->
         <DialogModal :show="showClientFormModal" @close="showClientFormModal = false; resetClientForm()">
             <template #title> Agregar cliente </template>
@@ -313,7 +327,6 @@
                 </div>
             </template>
         </DialogModal>
-        <!-- client form ---------------------------->
     </AppLayout>
 </template>
 
@@ -348,11 +361,14 @@ export default {
             address: null,
             notes: null,
             expired_date: null,
-            show_iva: true,
             iva_included: null,
-            has_discount: null, //aplicar descuento
+            // has_discount: null, //aplicar descuento
+            is_percentage_discount: null, //tipo de descuento
             discount: null, //cantidad de descuento
-            is_percentage_discount: false, //tipo de descuento
+            percentage: null, //porcentaje de descuento
+            delivery_type: null, //aplicar costo de envio
+            delivery1: null,
+            delivery2: null,
             total: 0, //cantidad total tomando en cuenta servcios, productos y descuento
             products: [],
             services: [],
@@ -444,6 +460,21 @@ export default {
             today.setHours(0, 0, 0, 0);
             return time.getTime() < today.getTime();
         },
+        totalMoneyOrder() {
+            //calcula el total de dinero para los productos 
+            this.totalProductsMoney = this.form.products.reduce((sum, item) => {
+                return sum + (item.price * item.quantity);
+            }, 0);
+
+            //calcula el total de dinero para los servicios 
+            this.totalServicesMoney = this.form.services.reduce((sum, item) => {
+                return sum + (item.price * item.quantity);
+            }, 0);
+            this.form.total = this.totalProductsMoney + this.totalServicesMoney;
+        },
+        percentageDiscount() {
+            return this.form.percentage * 0.01 * this.subtotal;
+        },
         async fillClientInfo() {
             this.loadingClient = true;
             try {
@@ -463,21 +494,6 @@ export default {
             } finally {
                 this.loadingClient = false;
             }
-        },
-        totalMoneyOrder() {
-            //calcula el total de dinero para los productos 
-            this.totalProductsMoney = this.form.products.reduce((sum, item) => {
-                return sum + (item.price * item.quantity);
-            }, 0);
-
-            //calcula el total de dinero para los servicios 
-            this.totalServicesMoney = this.form.services.reduce((sum, item) => {
-                return sum + (item.price * item.quantity);
-            }, 0);
-            this.form.total = this.totalProductsMoney + this.totalServicesMoney;
-        },
-        percentageDiscount() {
-            return this.form.discount * 0.01 * this.form.total;
         },
         async fetchAllProducts() {
             try {
@@ -520,7 +536,45 @@ export default {
                 (!this.form.products.length && !this.form.services.length) ||
                 this.form.products.some(product => !product.product_id) ||
                 this.form.services.some(service => !service.service_id);
-        }
+        },
+        subtotal() {
+            if (this.form.iva_included) {
+                return (this.form.total * 0.84);
+            }
+
+            return this.form.total;
+        },
+        grandTotal() {
+            let discounted = 0;
+            if (this.form.is_percentage_discount != null) {
+                discounted = this.form.is_percentage_discount
+                    ? this.percentageDiscount()
+                    : this.form.discount;
+            }
+
+            if (this.form.iva_included === false) {
+                return (this.form.total * 1.16) + this.deliveryCost - discounted;
+            }
+
+            return this.form.total + this.deliveryCost - discounted;
+
+        },
+        deliveryCost() {
+            if (this.form.delivery_type == 'Entrega a domicilio') {
+                return this.form.delivery1 ? parseFloat(this.form.delivery1) : 0;
+            } else if (this.form.delivery_type == 'Envío por paquetería') {
+                return this.form.delivery2 ? parseFloat(this.form.delivery2) : 0;
+            } else {
+                return 0;
+            }
+        },
+        discounted() {
+            if (this.form.is_percentage_discount) {
+                return this.percentageDiscount() ?? 0;
+            } else {
+                return this.form.discount ? parseFloat(this.form.discount) : 0;
+            }
+        },
     },
     mounted() {
         this.fetchAllProducts();
