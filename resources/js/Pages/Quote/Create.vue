@@ -11,18 +11,20 @@
                         <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                     </div>
                 </div>
-                <div :class="form.client_id ? 'col-span-full' : null">
-                    <div class="flex items-center justify-between" :class="form.client_id ? 'w-1/2' : null">
+                <div>
+                    <div class="flex items-center justify-between">
                         <InputLabel value="Cliente frecuente (opcional)" />
                         <button @click="showClientFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center mb-1">
                             <i class="fa-solid fa-plus text-primary text-[9px] pl-[1px]"></i>
                         </button>
                     </div>
-                    <el-select @change="fillClientInfo()" :class="form.client_id ? 'w-1/2' : null" filterable
+                    <el-select @change="fillClientInfo" filterable
                         v-model="form.client_id" clearable placeholder="Selecciona el cliente"
                         no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                        <el-option v-for="client in clients" :key="client" :label="client.name" :value="client.id" />
+                        <el-option v-for="client in clients" :key="client"
+                            :label="client.company ? client.company + ' - ' + client.name : client.name"
+                            :value="client.id" />
                     </el-select>
                     <InputError :message="form.errors.client_id" />
                 </div>
@@ -33,7 +35,7 @@
                     <InputError :message="form.errors.contact_name" />
                 </div>
                 <div>
-                    <InputLabel value="Teléfono*" />
+                    <InputLabel value="Teléfono (opcional)" />
                     <el-input v-model="form.phone"
                         :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
                         :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
@@ -46,14 +48,12 @@
                         :maxlength="100" clearable />
                     <InputError :message="form.errors.email" />
                 </div>
-
                 <div>
                     <InputLabel value="Fecha de expiración de cot. (opcional)" />
                     <el-date-picker v-model="form.expired_date" type="date" class="!w-full" placeholder="día/mes/año"
                         :disabled-date="disabledPrevDays" />
                     <InputError :message="form.errors.expired_date" />
                 </div>
-
                 <div>
                     <div class="flex items-center justify-between">
                         <InputLabel value="Condiciones de pago*" />
@@ -80,7 +80,6 @@
                             :label="payment_condition" :value="payment_condition" />
                     </el-select>
                 </div>
-
                 <div class="col-span-full">
                     <div class="flex items-center justify-between">
                         <InputLabel value="Dirección (opcional)" />
@@ -105,7 +104,6 @@
                         clearable />
                     <InputError :message="form.errors.address" />
                 </div>
-
                 <!-- productos -->
                 <h2 class="font-bold mt-3 mb-1 col-span-full">Productos</h2>
                 <section class="max-h-72 overflow-auto col-span-full">
@@ -124,11 +122,9 @@
                         Agregar producto
                     </button>
                 </div>
-
                 <!-- Servicios -->
                 <h2 v-if="this.$page.props.auth.user.store.activated_modules?.includes('Servicios')"
                     class="font-bold mt-3 mb-1 col-span-full">Servicios</h2>
-
                 <section v-if="this.$page.props.auth.user.store.activated_modules?.includes('Servicios')"
                     class="max-h-72 overflow-auto col-span-full">
                     <div class="space-y-3">
@@ -148,7 +144,7 @@
                     </button>
                 </div>
                 <div class="col-span-full">
-                    <InputLabel value="Notas adicionales (opcional)" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Notas adicionales (opcional)" />
                     <el-input v-model="form.notes" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
                         placeholder="Escribe aquí tus comentarios que consideres relevantes para el cliente"
                         :maxlength="800" show-word-limit clearable />
@@ -185,8 +181,8 @@
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
                                 <span class="text-sm font-semibold">Descuento</span>
                                 <button v-if="form.is_percentage_discount != null"
-                                    @click="form.is_percentage_discount = null" type="button"
-                                    class="text-primary text-xs">Limpiar</button>
+                                    @click="form.is_percentage_discount = null; form.discount = null; form.percentage = null"
+                                    type="button" class="text-primary text-xs">Limpiar</button>
                             </h2>
                             <div class="px-2 py-px">
                                 <p class="text-gray99 text-xs">
@@ -225,7 +221,8 @@
                         <div class="border border-grayD9 bg-white rounded-lg">
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
                                 <span class="text-sm font-semibold">Costo de entrega o envío</span>
-                                <button v-if="form.delivery_type != null" @click="form.delivery_type = null"
+                                <button v-if="form.delivery_type != null"
+                                    @click="form.delivery_type = null; form.delivery1 = null; form.delivery2 = null"
                                     type="button" class="text-primary text-xs">Limpiar</button>
                             </h2>
                             <div class="px-2 py-px">
@@ -261,28 +258,51 @@
                     </article>
                 </section>
                 <!-- totales  -->
-                <div class="text-sm flex flex-col mr-7 items-end col-span-full">
-                    <p>Subtotal: <span class="mx-2">$</span>
-                        {{ subtotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    </p>
-                    <p v-if="form.iva_included != null">IVA: <span class="mx-2">$</span>
-                        {{ (form.total *
-                            0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
-                    </p>
-                    <p v-if="form.delivery_type">{{ form.delivery_type }}: <span class="mx-2">$</span>
-                        {{ deliveryCost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    </p>
-                     <p v-if="form.is_percentage_discount != null">descuento: <span class="mx-2">$</span>
-                        {{
-                            discounted?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
-                    </p>
-                    <p class="font-bold">Total: <span class="mx-2">$</span>
-                        {{
-                            grandTotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
-                    </p>
+                <div
+                    class="text-sm flex flex-col mr-7 items-end col-span-full *:flex *:items-center *:justify-between *:w-[38%]">
+                    <div class="">
+                        <span>Subtotal: </span>
+                        <p class="flex items-center justify-between w-[40%]">
+                            <span class="mx-2">$</span>
+                            <span>{{ subtotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p>
+                    </div>
+                    <div v-if="form.iva_included != null" class="">
+                        <span>IVA: </span>
+                        <p class="flex items-center justify-between w-[40%]">
+                            <span class="mx-2">$</span>
+                            <span>
+                                {{ (form.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
+                    <div v-if="form.delivery_type" class="">
+                        <span>{{ form.delivery_type }}: </span>
+                        <p class="flex items-center justify-between w-[40%]">
+                            <span class="mx-2">$</span>
+                            <span>
+                                {{ deliveryCost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
+                    <div v-if="form.is_percentage_discount != null" class="">
+                        <span>Descuento: </span>
+                        <p class="flex items-center justify-between w-[40%]">
+                            <span class="mx-2">$</span>
+                            <span>
+                                {{ discounted?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="font-bold">
+                        <span>Total: </span>
+                        <p class="flex items-center justify-between w-[40%]">
+                            <span class="mx-2">$</span>
+                            <span>
+                                {{ grandTotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
+                        </p>
+                    </div>
                 </div>
                 <div class="col-span-2 text-right mt-5">
                     <PrimaryButton :disabled="isButtonDisabled">
@@ -296,15 +316,21 @@
         <DialogModal :show="showClientFormModal" @close="showClientFormModal = false; resetClientForm()">
             <template #title> Agregar cliente </template>
             <template #content>
-                <form @submit.prevent="storeClient" class="md:grid grid-cols-2 gap-x-3">
-                    <div class="mt-3">
+                <form @submit.prevent="storeClient" class="md:grid grid-cols-2 gap-3">
+                    <div>
+                        <InputLabel value="Empresa (opcional)" />
+                        <el-input v-model="clientForm.company" placeholder="Escribe el nombre de la empresa"
+                            :maxlength="100" clearable />
+                        <InputError :message="clientForm.errors.company" />
+                    </div>
+                    <div>
                         <InputLabel value="Nombre*" />
                         <el-input v-model="clientForm.name" placeholder="Escribe el nombre del cliente" :maxlength="100"
                             clearable />
                         <InputError :message="clientForm.errors.name" />
                     </div>
-                    <div class="mt-3">
-                        <InputLabel class="mb-1 ml-2" value="Teléfono *" />
+                    <div>
+                        <InputLabel value="Teléfono (opcional)" />
                         <el-input v-model="clientForm.phone"
                             :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
                             :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
@@ -347,31 +373,31 @@ export default {
     data() {
 
         const clientForm = useForm({
+            company: null,
             name: null,
             rfc: null,
             phone: null,
         });
 
         const form = useForm({
-            client_id: null,
             contact_name: null,
-            payment_conditions: null,
             phone: null,
+            payment_conditions: null,
             email: null,
             address: null,
-            notes: null,
-            expired_date: null,
             iva_included: null,
-            // has_discount: null, //aplicar descuento
+            total: 0, //cantidad total tomando en cuenta servcios, productos y descuento
+            products: [],
+            services: [],
+            expired_date: null,
+            notes: null,
             is_percentage_discount: null, //tipo de descuento
             discount: null, //cantidad de descuento
+            client_id: null,
             percentage: null, //porcentaje de descuento
             delivery_type: null, //aplicar costo de envio
             delivery1: null,
             delivery2: null,
-            total: 0, //cantidad total tomando en cuenta servcios, productos y descuento
-            products: [],
-            services: [],
             show_payment_conditions: false,
             show_address: false,
         });
@@ -485,7 +511,7 @@ export default {
                     this.form.phone = client.phone;
                     this.form.email = client.email;
                     if (client.street && client.suburb) {
-                        this.form.address = client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + client.int_number + '. '
+                        this.form.address = client.street + ' ' + client.ext_number + ', Col. ' + client.suburb + ' ' + (client.int_number ?? '') + '. '
                             + client.town + ', ' + client.polity_state;
                     }
                 }

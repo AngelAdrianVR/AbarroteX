@@ -19,7 +19,7 @@ class Quote extends Model
         'payment_conditions',
         'email',
         'address',
-        'show_iva',
+        'iva_included',
         'has_discount',
         'total',
         'status', //Esperando respuesta, Autorizada, Rechazada, Pagada
@@ -28,7 +28,13 @@ class Quote extends Model
         'expired_date',
         'notes',
         'is_percentage_discount',
+        'percentage',
         'discount',
+        'delivery_type',
+        'delivery_cost',
+        'show_payment_conditions',
+        'show_address',
+        'additionals',
         'client_id',
         'store_id',
     ];
@@ -36,7 +42,11 @@ class Quote extends Model
     protected $casts = [
         'expired_date' => 'date',
         'products' => 'array',
-        'services' => 'array'
+        'services' => 'array',
+        'additionals' => 'array',
+        'discounted' => 'boolean',
+        'iva_included' => 'boolean',
+        'is_percentage_discount' => 'boolean',
     ];
 
     //relationships
