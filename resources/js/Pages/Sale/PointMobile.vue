@@ -683,7 +683,7 @@
       </div>
     </Modal>
      <!-- buscar por nombre -->
-    <DialogModal :show="showSearchModal" @close="showSearchModal = false">
+    <DialogModal :show="showSearchModal" @close="showSearchModal = false" max-width="xl">
       <template #title> Buscar producto </template>
       <template #content>
         <el-autocomplete v-model="productFoundSelectedName" clearable :fetch-suggestions="searchProducts"

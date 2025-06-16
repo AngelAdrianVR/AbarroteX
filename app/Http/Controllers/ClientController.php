@@ -27,7 +27,7 @@ class ClientController extends Controller
         $request->validate([
             'company' => 'nullable|string|max:150',
             'name' => 'required|string|max:100',
-            'phone' => 'required|string|min:10|max:10',
+            'phone' => 'nullable|string|min:10|max:10',
             'notes' => 'nullable|string|max:255',
             'street' => $request->addAddress ? 'required|string|max:255' : 'nullable',
             'suburb' => $request->addAddress ? 'required|string|max:255' : 'nullable',

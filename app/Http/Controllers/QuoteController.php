@@ -36,29 +36,35 @@ class QuoteController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'contact_name' => 'required|string|max:150',
-            'phone' => 'required|string|min:10|max:10',
+            'phone' => 'nullable|string|min:10|max:10',
             'email' => 'nullable|string',
             'address' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:255',
             'payment_conditions' => 'nullable|string|max:100',
             'expired_date' => 'nullable|date|after:today',
-            'show_iva' => 'boolean',
-            'has_discount' => 'boolean',
-            'discount' => 'nullable|numeric|min:0|max:99999',
-            'is_percentage_discount' => 'boolean',
+            'iva_included' => 'nullable',
+            'has_discount' => 'nullable',
+            'is_percentage_discount' => 'nullable',
+            'percentage' => 'nullable|numeric|min:0|max:100',
+            'discount' => 'nullable|numeric|min:0|max:9999999',
+            'delivery_type' => 'nullable|string|max:255',
+            'delivery_cost' => 'nullable|numeric|min:0|max:9999999',
             'total' => 'required|numeric|min:0|max:9999999',
             'products' => 'nullable',
             'services' => 'nullable',
+            'show_payment_conditions' => 'boolean',
+            'show_address' => 'boolean',
             'client_id' => 'nullable',
         ]);
 
         $storeId = auth()->user()->store_id;
         $last_quote = Quote::where('store_id', $storeId)->latest('id')->first();
         $folio = $last_quote ? intval($last_quote->folio) + 1 : 1;
+        $validated['delivery_cost'] = $request->delivery1 ?? $request->delivery2;
 
-        Quote::create($request->all() + [
+        Quote::create($validated + [
             'store_id' => auth()->user()->store_id,
             'folio' => $folio,
         ]);
@@ -100,25 +106,31 @@ class QuoteController extends Controller
 
     public function update(Request $request, Quote $quote)
     {
-        $request->validate([
+        $validated = $request->validate([
             'contact_name' => 'required|string|max:150',
-            'phone' => 'required|string|min:10|max:10',
+            'phone' => 'nullable|string|min:10|max:10',
             'email' => 'nullable|string',
             'address' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:255',
             'payment_conditions' => 'nullable|string|max:100',
             'expired_date' => 'nullable|date|after:today',
-            'show_iva' => 'boolean',
-            'has_discount' => 'boolean',
-            'discount' => 'nullable|numeric|min:0|max:99999',
-            'is_percentage_discount' => 'boolean',
+            'iva_included' => 'nullable',
+            'has_discount' => 'nullable',
+            'is_percentage_discount' => 'nullable',
+            'percentage' => 'nullable|numeric|min:0|max:100',
+            'discount' => 'nullable|numeric|min:0|max:9999999',
+            'delivery_type' => 'nullable|string|max:255',
+            'delivery_cost' => 'nullable|numeric|min:0|max:9999999',
             'total' => 'required|numeric|min:0|max:9999999',
             'products' => 'nullable',
             'services' => 'nullable',
+            'show_payment_conditions' => 'boolean',
+            'show_address' => 'boolean',
             'client_id' => 'nullable',
         ]);
-
-        $quote->update($request->all());
+       
+        $validated['delivery_cost'] = $request->delivery1 ?? $request->delivery2;
+        $quote->update($validated);
 
         //codifica el id del quote
         $encoded_quote_id = base64_encode($quote->id);

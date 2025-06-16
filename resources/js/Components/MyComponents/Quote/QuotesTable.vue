@@ -11,24 +11,18 @@
                 </tr>
             </thead>
             <tbody>
-                <tr @click="handleShow(encodeId(quote.id))"
-                    v-for="(quote, index) in quotes" :key="index"
+                <tr @click="handleShow(encodeId(quote.id))" v-for="(quote, index) in quotes" :key="index"
                     class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight cursor-pointer">
                     <td class="rounded-s-full">
                         <el-tooltip :content="quote.status" placement="right">
-                            <i class="mr-1"
-                            :class="getStatusIcont(quote.status)"></i>
+                            <i class="mr-1" :class="getStatusIcont(quote.status)"></i>
                         </el-tooltip>
                         {{ 'C-' + String(quote.folio).padStart(4, '0') }}
                     </td>
                     <td>{{ formatDate(quote.created_at) }}</td>
                     <td>{{ quote.contact_name }}</td>
                     <td>
-                        <div v-if="quote.has_discount">
-                            <p v-if="quote.is_percentage_discount">${{ (quote.total - (quote.discount * quote.total * 0.01))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
-                            <p v-else>${{ (quote.total - quote.discount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
-                        </div>
-                        <p v-else>${{ quote.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                        <p>${{ grandTotal(quote).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
                     </td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
@@ -38,15 +32,22 @@
                             </button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item v-if="canChangeStatus && quote.status === 'Esperando respuesta' || quote.status === 'Rechazada'" :command="'status|' + quote.id + '|Autorizada'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    <el-dropdown-item
+                                        v-if="canChangeStatus && quote.status === 'Esperando respuesta' || quote.status === 'Rechazada'"
+                                        :command="'status|' + quote.id + '|Autorizada'">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m4.5 12.75 6 6 9-13.5" />
                                         </svg>
                                         <span class="text-xs">Autorizada</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-if="canChangeStatus && quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Rechazada'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    <el-dropdown-item v-if="canChangeStatus && quote.status === 'Esperando respuesta'"
+                                        :command="'status|' + quote.id + '|Rechazada'">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6 18 18 6M6 6l12 12" />
                                         </svg>
                                         <span class="text-xs">Rechazada</span>
                                     </el-dropdown-item>
@@ -54,9 +55,13 @@
                                         <i class="fa-solid fa-circle-dollar-to-slot text-indigo-500 text-xs"></i>
                                         <span class="text-xs">Pago parcial</span>
                                     </el-dropdown-item> -->
-                                    <el-dropdown-item v-if="canChangeStatus && quote.status === 'Autorizada' || quote.status === 'Pago parcial' || quote.status === 'Esperando respuesta'" :command="'status|' + quote.id + '|Pagado'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    <el-dropdown-item
+                                        v-if="canChangeStatus && quote.status === 'Autorizada' || quote.status === 'Pago parcial' || quote.status === 'Esperando respuesta'"
+                                        :command="'status|' + quote.id + '|Pagado'">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                         </svg>
                                         <span class="text-xs">Pagado</span>
                                     </el-dropdown-item>
@@ -125,110 +130,134 @@ import es from 'date-fns/locale/es';
 import axios from 'axios';
 
 export default {
-data() {
-    return {
-        showDeleteConfirm: false,
-        itemIdToDelete: null,
-        canEdit: this.$page.props.auth.user.permissions.includes('Editar cotizaciones'),
-        canDelete: this.$page.props.auth.user.permissions.includes('Eliminar cotizaciones'),
-        canChangeStatus: this.$page.props.auth.user.permissions.includes('Cambiar status cotizaciones'),
-    }
-},
-components:{
-ConfirmationModal,
-PrimaryButton,
-CancelButton,
-},
-props:{
-quotes: Array
-},
-methods:{
-    handleCommand(command) {
-        const commandName = command.split('|')[0];
-        const data = command.split('|')[1];
+    data() {
+        return {
+            showDeleteConfirm: false,
+            itemIdToDelete: null,
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar cotizaciones'),
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar cotizaciones'),
+            canChangeStatus: this.$page.props.auth.user.permissions.includes('Cambiar status cotizaciones'),
+        }
+    },
+    components: {
+        ConfirmationModal,
+        PrimaryButton,
+        CancelButton,
+    },
+    props: {
+        quotes: Array
+    },
+    methods: {
+        percentageDiscount(item) {
+            return item.percentage * 0.01 * this.subtotal(item);
+        },
+        subtotal(item) {
+            if (item.iva_included) {
+                return (item.total * 0.84);
+            }
 
-        if (commandName == 'see') {
-            this.$inertia.get(route('quotes.show', data));
-        } else if (commandName == 'edit') {
-            this.$inertia.get(route('quotes.edit', data));
-        } else if (commandName == 'status') {
-            this.updateStatus(data, command.split('|')[2]); 
-        }
-        else if (commandName == 'delete') {
-            this.showDeleteConfirm = true;
-            this.itemIdToDelete = data;
-        }
-    },
-    async updateStatus(quoteId, status) {
-        try {
-            const response = await axios.post(route('quotes.update-status', quoteId), {status: status });
-            if ( response.status == 200 ) {
-                const quoteIndex = this.quotes.findIndex(item => item.id == quoteId);
-                if ( quoteIndex != -1 ) {
-                    this.quotes[quoteIndex].status = response.data.status;
+            return item.total;
+        },
+        grandTotal(item) {
+            let discounted = 0;
+            if (item.is_percentage_discount != null) {
+                discounted = item.is_percentage_discount
+                    ? this.percentageDiscount(item)
+                    : item.discount;
+            }
+
+            if (item.iva_included === false) {
+                return (item.total * 1.16) + item.delivery_cost - discounted;
+            }
+
+            return item.total + item.delivery_cost - discounted;
+        },
+        handleCommand(command) {
+            const commandName = command.split('|')[0];
+            const data = command.split('|')[1];
+
+            if (commandName == 'see') {
+                this.$inertia.get(route('quotes.show', data));
+            } else if (commandName == 'edit') {
+                this.$inertia.get(route('quotes.edit', data));
+            } else if (commandName == 'status') {
+                this.updateStatus(data, command.split('|')[2]);
+            }
+            else if (commandName == 'delete') {
+                this.showDeleteConfirm = true;
+                this.itemIdToDelete = data;
+            }
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
+        },
+        formatDate(dateString) {
+            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+        },
+        handleShow(encodedId) {
+            window.open(route('quotes.show', encodedId, '_blank'));
+        },
+        getStatusIcont(status) {
+            if (status === 'Esperando respuesta') {
+                return 'fa-regular fa-clock text-amber-500';
+            } else if (status === 'Rechazada') {
+                return 'fa-solid fa-x text-red-500';
+            } else if (status === 'Autorizada') {
+                return 'fa-solid fa-check text-blue-500';
+            } else if (status === 'Pagado') {
+                return 'fa-solid fa-dollar-sign text-green-500';
+            } else if (status === 'Pago parcial') {
+                return 'fa-solid fa-circle-dollar-to-slot text-indigo-500';
+            }
+        },
+        async deleteItem() {
+            try {
+                const response = await axios.delete(route('quotes.destroy', this.itemIdToDelete));
+                if (response.status == 200) {
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha eliminado la cotización',
+                        type: 'success',
+                    });
+                    //se busca el index del cliente eliminado para removerlo del arreglo
+                    const indexQuoteDeleted = this.quotes.findIndex(item => item.id == this.itemIdToDelete);
+                    if (indexQuoteDeleted != -1) {
+                        this.quotes.splice(indexQuoteDeleted, 1);
+                    }
+                    this.showDeleteConfirm = false;
                 }
+            } catch (error) {
+                console.log(error);
                 this.$notify({
-                    title: 'Correcto',
-                    message: 'Se ha actualizazo el estatus de la cotización',
+                    title: 'El servidor no pudo procesar la petición',
+                    message: 'No se pudo eliminar la cotización. Intente más tarde o si el problema persiste, contacte a soporte',
+                    type: 'error',
+                });
+            }
+        },
+        async updateStatus(quoteId, status) {
+            try {
+                const response = await axios.post(route('quotes.update-status', quoteId), { status: status });
+                if (response.status == 200) {
+                    const quoteIndex = this.quotes.findIndex(item => item.id == quoteId);
+                    if (quoteIndex != -1) {
+                        this.quotes[quoteIndex].status = response.data.status;
+                    }
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha actualizazo el estatus de la cotización',
+                        type: 'success',
+                    });
+                }
+            } catch (error) {
+                this.$notify({
+                    title: 'No se pudo completar la petición',
+                    message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
                     type: 'success',
                 });
             }
-        } catch (error) {
-            this.$notify({
-                title: 'No se pudo completar la petición',
-                message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
-                type: 'success',
-            });
-        }
+        },
     },
-    formatDate(dateString) {
-        return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
-    },
-    handleShow(encodedId) {
-        window.open(route('quotes.show', encodedId, '_blank'));
-    },
-    getStatusIcont(status) {
-        if ( status === 'Esperando respuesta' ) {
-            return 'fa-regular fa-clock text-amber-500';
-        } else if ( status === 'Rechazada' ) {
-            return 'fa-solid fa-x text-red-500';
-        } else if ( status === 'Autorizada' ) {
-            return 'fa-solid fa-check text-blue-500';
-        } else if ( status === 'Pagado' ) {
-            return 'fa-solid fa-dollar-sign text-green-500';
-        } else if ( status === 'Pago parcial' ) {
-            return 'fa-solid fa-circle-dollar-to-slot text-indigo-500';
-        }
-    },
-    async deleteItem() {
-        try {
-            const response = await axios.delete(route('quotes.destroy', this.itemIdToDelete));
-            if (response.status == 200) {
-                this.$notify({
-                    title: 'Correcto',
-                    message: 'Se ha eliminado la cotización',
-                    type: 'success',
-                });
-                //se busca el index del cliente eliminado para removerlo del arreglo
-                const indexQuoteDeleted = this.quotes.findIndex(item => item.id == this.itemIdToDelete);
-                if ( indexQuoteDeleted != -1 ) {
-                    this.quotes.splice(indexQuoteDeleted, 1);
-                }
-                this.showDeleteConfirm = false;
-            }
-        } catch (error) {
-            console.log(error);
-            this.$notify({
-                title: 'El servidor no pudo procesar la petición',
-                message: 'No se pudo eliminar la cotización. Intente más tarde o si el problema persiste, contacte a soporte',
-                type: 'error',
-            });
-        }
-    },
-    encodeId(id) {
-        const encodedId = btoa(id.toString());
-        return encodedId;
-    },
-},
 }
 </script>

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('address')->nullable();
             $table->string('payment_conditions')->nullable();
-            $table->boolean('show_iva')->default(false);
+            $table->boolean('iva_included')->nullable();
             $table->boolean('has_discount')->default(false);
             $table->string('status')->default('Esperando respuesta');
             $table->unsignedDouble('total');
@@ -28,7 +28,13 @@ return new class extends Migration
             $table->timestamp('expired_date')->nullable();
             $table->string('notes')->nullable();
             $table->boolean('is_percentage_discount')->nullable(); //el descuento es porcentage
-            $table->unsignedFloat('discount')->nullable(); //cantidad o porcentage de descuento.
+            $table->unsignedFloat('discount')->nullable(); //cantidad fija de descuento.
+            $table->unsignedFloat('percentage')->nullable(); //porcentage de descuento.
+            $table->string('delivery_type')->nullable();
+            $table->unsignedFloat('delivery_cost')->nullable();
+            $table->boolean('show_payment_conditions')->default(false);
+            $table->boolean('show_address')->default(false);
+            $table->json('additionals')->nullable();
             $table->foreignId('client_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

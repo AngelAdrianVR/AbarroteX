@@ -1,6 +1,6 @@
 <template>
   <!-- vista desktop -->
-  <div v-if="saleProducts?.length" class="w-full mx-auto text-[11px] lg:text-sm over hidden md:block">
+  <div v-if="saleProducts?.length" class="w-full mx-auto text-[11px] lg:text-sm over hidden lg:block">
     <div class="text-center lg:text-base flex items-center space-x-4 *:font-bold *:text-left *:text-gray37">
       <div class="pl-2 w-[45%]">Producto</div>
       <div class="w-[15%]">Precio</div>
@@ -38,7 +38,6 @@
         <div :class="editMode !== null ? 'w-[18%]' : 'w-[15%]'" class="text-lg flex items-center">
           <template v-if="editMode !== saleIndex">
             ${{ sale.product.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}{{ getPrefix(sale) }}
-            <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
             <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
               @click.stop="startEditing(sale, saleIndex)"
               class="flex items-center justify-center text-primary hover:bg-gray-50 hover:shadow-gray-400 hover:shadow-sm size-5 rounded-md ml-2 mr-1">
@@ -136,11 +135,11 @@
               </template>
             </el-dropdown>
             <svg v-if="!sale.product.promotions?.length && sale.product.discounted_price != null"
-                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-4 text-[#AE080B]" title="Regalo">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-              </svg>
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-4 text-[#AE080B]" title="Regalo">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+            </svg>
             <div class="font-bold text-[#5FCB1F] text-lg">
               <p v-if="sale.product.discounted_price != null" :class="!sale.product.promotions.length ? 'ml-1' : null">
                 ${{ (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
@@ -152,10 +151,6 @@
               </p>
             </div>
           </div>
-          <!-- <div v-if="sale.product.promotions?.length">
-            <p v-if="someApplicablePromotion(sale)" class="text-[#AE080B] text-[10px]">Promoción aplicada</p>
-            <p v-else class="text-gray99 text-[10px]">Promoción disponible</p>
-          </div> -->
         </div>
         <div class="w-[5%] text-right pr-10">
           <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
@@ -171,7 +166,7 @@
   </div>
 
   <!-- vista movil -->
-  <div :class="saleProducts.length ? 'max-h-[245px]' : 'min-h-[40px]'" class="overflow-y-auto md:hidden text-[11px]">
+  <div :class="saleProducts.length ? 'max-h-[245px]' : 'min-h-[40px]'" class="overflow-y-auto lg:hidden text-[11px]">
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-x-4 gap-y-1 items-start relative">
       <figure class="border border-grayD9 rounded-[10px] h-28 flex items-center justify-center">
@@ -212,8 +207,8 @@
         <div class="flex items-center space-x-2 text-sm">
           <template v-if="editMode !== index">
             <span>$ {{ sale.product.public_price }}{{ getPrefix(sale) }}</span>
-            <!-- Condicional en el boton depende de la configuracion seleccionada para no poder editar precio -->
-            <button @click.stop="startEditing(sale, index)" class="text-primary ml-2">
+            <button v-if="isDiscountOn && $page.props.auth.user.permissions.includes('Editar precios')"
+              @click.stop="startEditing(sale, index)" class="text-primary ml-2">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-4">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -297,7 +292,7 @@
                 <p v-if="sale.product.discounted_price != null"
                   :class="!sale.product.promotions?.length ? 'ml-1' : null">
                   $ {{ (Math.round(sale.product.discounted_price * sale.quantity * 10) / 10).toLocaleString('en-US', {
-                     minimumFractionDigits: 2
+                    minimumFractionDigits: 2
                   }) }}
                 </p>
                 <p v-else :class="!sale.product.promotions?.length ? 'ml-1' : null">

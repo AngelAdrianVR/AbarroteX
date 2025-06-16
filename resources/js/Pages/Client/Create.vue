@@ -22,7 +22,7 @@
                 </div>
 
                 <div class="mt-3 col-span-full">
-                    <InputLabel class="mb-1 ml-2" value="Teléfono*" />
+                    <InputLabel value="Teléfono (opcional)" />
                     <el-input v-model="form.phone"
                         :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
                         :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
@@ -65,7 +65,7 @@
                     </div>
 
                     <div class="mt-3">
-                        <InputLabel class="mb-1 ml-2" value="Código postal*" />
+                        <InputLabel value="Código postal*" />
                         <el-input v-model="form.postal_code"
                             :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
                             :parser="(value) => value.replace(/\D/g, '')" maxlength="6" clearable
