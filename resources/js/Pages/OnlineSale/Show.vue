@@ -4,7 +4,59 @@
             <Back :to="route('online-sales.index')" />
 
             <article class="md:flex justify-between mt-4 text-sm">
-                <h1 class="font-bold mb-3 md:mb-0">Detalle del pedido</h1>
+                <div>
+                    <h1 class="font-bold mb-3 md:mb-0 text-2xl">Pedido No. {{ online_sale.id }}</h1>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <p class="text-[#999999]">Fecha de pedido:</p>
+                        <p>{{ formatDate(online_sale.created_at) }}</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- BARRA DE PROGRESO -->
+            <article class="max-w-lg mx-auto text-sm">
+                <section class="border border-gray-300 rounded-xl p-3 mt-4 shadow-sm bg-white">
+                    <!-- Mostrar progreso solo si no está cancelado ni reembolsado -->
+                    <template v-if="!isFinalState">
+                    <!-- Estados -->
+                    <div class="grid grid-cols-3 text-center text-gray-500 font-semibold">
+                        <p>Pendiente</p>
+                        <p>En camino</p>
+                        <p>Entregado</p>
+                    </div>
+
+                    <!-- Barra de progreso -->
+                    <div class="relative mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                        class="absolute left-0 top-0 h-full transition-all duration-500 ease-in-out bg-gradient-to-r from-[#751F8B] via-[#e4a3f5] to-[#1F0825] rounded-full"
+                        :style="{ width: progressWidth }"
+                        ></div>
+                    </div>
+                    </template>
+
+                    <!-- Estado cancelado o reembolsado -->
+                    <template v-else>
+                        <div class="flex items-center justify-center gap-2 text-center p-4 rounded-lg"
+                            :class="{
+                                'bg-red-100 text-red-600': status === 'Cancelado',
+                                'bg-violet-100 text-violet-600': status === 'Reembolsado'
+                            }"
+                        >
+                            <svg v-if="status === 'Cancelado'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+
+                            <span class="font-semibold text-base">{{ status }}</span>
+                        </div>
+                    </template>
+                </section>
+            </article>
+
+            <article class="flex justify-end mt-3">
                 <div class="flex items-center space-x-2">
                     <p>Estatus:</p>
                     <span v-html="getStatusIcon(online_sale.status)"></span>
@@ -14,13 +66,13 @@
                         no-match-text="No se encontraron coincidencias">
                         <el-option v-for="status in getStatuses" :key="status" :value="status" :label="status" />
                     </el-select>
-                    <PrimaryButton v-if="canEdit"
+                    <!-- <PrimaryButton v-if="canEdit"
                         :disabled="loadingProducts || online_sale.status == 'Entregado' || online_sale.status == 'Cancelado' || online_sale.status == 'Reembolsado'"
                         @click="form.reset(); editOnlineOrderModal = true">
                         Editar
-                    </PrimaryButton>
-                    <!-- <el-dropdown
-                        :disabled="loadingProducts || status == 'Entregado' || status == 'Cancelado' || status == 'Reembolsado'"
+                    </PrimaryButton> -->
+                    <el-dropdown v-if="canEdit"
+                        :disabled="loadingProducts || online_sale.status == 'Entregado' || online_sale.status == 'Cancelado' || online_sale.status == 'Reembolsado'"
                         split-button type="primary" @click="editOnlineOrderModal = true">
                         Editar
                         <template #dropdown>
@@ -28,17 +80,77 @@
                                 <el-dropdown-item @click="showDeleteConfirm = true">Eliminar</el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
-</el-dropdown> -->
+                    </el-dropdown>
                 </div>
             </article>
 
-            <article class="my-7">
+            <el-divider></el-divider>
+
+            <article>
+                <!-- Tabla de productos ordenados -->
+                <div class="overflow-auto">
+                    <table class="w-2/3 mt-2">
+                        <thead>
+                            <tr class="*:pb-2 *:px-4 *:text-base">
+                                <!-- <th></th> -->
+                                <th class="text-left">Productos</th>
+                                <!-- <th>Precio unitario</th> -->
+                                <!-- <th>Cantidad</th> -->
+                                <th class="text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="product in online_sale.products" :key="product.id"
+                                class="*:text-xs *:py-2 *:px-4">
+                                <td class="flex space-x-2">
+                                    <figure @click="handledShowProduct(product)" class="w-[100px] h-[96px] p-2 border border-[#D9D9D9] rounded-lg hover:scale-105 transition ease-linear duration-100 cursor-pointer">
+                                        <img v-if="product.image_url" :src="product?.image_url" alt="producto"
+                                            class="h-full object-contain mx-auto">
+                                        <div class="flex flex-col items-center justify-center" v-else>
+                                            <i class="fa-regular fa-image text-3xl text-gray-200"></i>
+                                            <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>
+                                        </div>
+                                    </figure>
+                                    <div class="text-[13px]">
+                                        <h1 class="text-[#373737] font-semibold">{{ product.name }}</h1>
+                                        <p class="text-[#999999] mt-1">$ {{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</p>
+                                        <p class="text-[#999999] mt-1">Cantidad: {{ product.quantity }}</p>
+                                    </div>
+                                </td>
+                                <!-- <td @click="handledShowProduct(product)" class="text-primary underline cursor-pointer">{{ product.name }}</td>
+                                <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                <td>{{ product.quantity }}</td> -->
+                                <td class="!text-sm text-right">$ <span class="pl-3">{{ (product.quantity * product.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <section class="w-2/3 flex justify-end text-sm pr-4">
+                        <div class="flex items-center">
+                            <div class="w-40 space-y-1">
+                                <p class="text-[#999999]">Subtotal:</p>
+                                <p class="text-[#999999]">Costo de envío:</p>
+                                <p class="text-[#999999]">Descuento:</p>
+                                <p class="text-[#999999]">Total:</p>
+                            </div>
+
+                            <div class="text-[#373737] space-y-1">
+                                <p>$<span class="pl-4">{{ online_sale.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+                                <p>$<span class="pl-4">{{ online_sale.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span></p>
+                                <p>$<span class="pl-4">{{ 0?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span></p>
+                                <p class="font-bold">$<span class="pl-4">{{ (online_sale.total + online_sale.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </article>
+
+            <el-divider></el-divider>
+
+            <h2 class="font-bold text-base">Detalles del cliente</h2>
+            <article class="my-5">
                 <div class="grid grid-cols-2 gap-1 md:w-1/2 text-sm">
-                    <p class="text-gray-500">Número de pedido:</p>
-                    <p>{{ online_sale.id }}</p>
-                    <p class="text-gray-500">Fecha:</p>
-                    <p>{{ formatDate(online_sale.created_at) }}</p>
-                    <p class="text-gray-500">Cliente:</p>
+                    <p class="text-gray-500">Nombre:</p>
                     <p>{{ online_sale.name }}</p>
                     <p class="text-gray-500">Teléfono:</p>
                     <p>{{ online_sale.phone }}</p>
@@ -51,57 +163,6 @@
                     </p>
                     <p class="text-gray-500">Referencias</p>
                     <p>{{ online_sale.address_references ?? '--' }}</p>
-                    <div class="col-span-full border-t mt-3"></div>
-                    <p class="font-bold mt-3">Subtotal:</p>
-                    <p class="font-bold mt-3">${{ online_sale.total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    </p>
-                    <p class="font-bold">Costo de envío:</p>
-                    <p class="font-bold">${{ online_sale.delivery_price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                        ",") }}</p>
-                    <p class="font-bold">Total:</p>
-                    <p class="font-bold">${{ (online_sale.total +
-                        online_sale.delivery_price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                </div>
-            </article>
-
-            <article>
-                <h2 class="font-bold">Productos ordenados</h2>
-
-                <!-- Tabla de productos ordenados -->
-                <div class="overflow-auto">
-                    <table class="w-full mt-7">
-                        <thead>
-                            <tr class="*:text-left *:pb-2 *:px-4 *:text-sm">
-                                <th></th>
-                                <th>Nombre de producto</th>
-                                <th>Precio unitario</th>
-                                <th>Cantidad</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="product in online_sale.products" :key="product.id"
-                                class="*:text-xs *:py-2 *:px-4">
-                                <td>
-                                    <figure class="size-16">
-                                        <img v-if="product.image_url" :src="product?.image_url" alt="producto"
-                                            class="h-full object-contain mx-auto">
-                                        <div class="flex flex-col items-center justify-center" v-else>
-                                            <i class="fa-regular fa-image text-3xl text-gray-200"></i>
-                                            <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>
-                                        </div>
-                                    </figure>
-                                </td>
-                                <td @click="handledShowProduct(product)" class="text-primary underline cursor-pointer">
-                                    {{ product.name }}
-                                </td>
-                                <td>${{ product.price?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                                <td>{{ product.quantity }}</td>
-                                <td>${{ (product.quantity * product.price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                    ",") }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </article>
         </section>
@@ -321,7 +382,7 @@ export default {
             form,
             loadingProducts: false,
             status: this.online_sale.status,
-            statuses: ['Procesando', 'Entregado', 'Cancelado', 'Reembolsado'],
+            statuses: ['Pendiente', 'Procesando', 'Entregado', 'Cancelado', 'Reembolsado'],
             showUpdateStatusConfirm: false, //modal de confirmación de cambio de estatus (Entregado y cancelado)
             showDeleteConfirm: false, //modal de confirmación de eliminación
             editOnlineOrderModal: false, //modal de ediciónde orden
@@ -360,6 +421,14 @@ export default {
                 return ['Entregado', 'Procesando', 'Cancelado'];
             }
         },
+        isFinalState() {
+            return this.status === 'Cancelado' || this.status === 'Reembolsado';
+        },
+        progressWidth() {
+            const index = this.statuses.indexOf(this.status) + 1; // +1 porque el primer estado es 'Pendiente'
+            const percent = (index / (this.statuses.length - 2)) * 100; // -2 porque 'Entregado' y 'Cancelado' son finales
+            return `${percent}%`;
+        }
     },
     methods: {
         updateOnlineSale() {
@@ -517,8 +586,7 @@ export default {
                 : parseFloat(storeProperties?.delivery_price);
         },
         handledShowProduct(product) {
-            const encodedId = btoa(product.product_id.toString());
-            console.log(product);
+            const encodedId = btoa(product.product_id?.toString());
             if (product.isLocal) {
                 this.$inertia.get(route('products.show', encodedId));
             } else {
