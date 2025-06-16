@@ -70,7 +70,7 @@ class QuoteController extends Controller
     {
         $decoded_quote_id = base64_decode($encoded_quote_id);
         $store_id = auth()->user()->store_id;
-        $quote = Quote::with(['client'])->findOrFail($decoded_quote_id);
+        $quote = Quote::with(['client', 'store'])->findOrFail($decoded_quote_id);
 
         // Ruta a la vista de Inertia (ej: 'Quote/Show14.vue')
         $customViewPath = resource_path("js/Pages/Quote/Show{$store_id}.vue");
@@ -79,7 +79,8 @@ class QuoteController extends Controller
         $view = File::exists($customViewPath)
             ? "Quote/Show{$store_id}"
             : "Quote/Show";
-
+        
+            // return $quote;
         return inertia($view, compact('quote'));
     }
 
