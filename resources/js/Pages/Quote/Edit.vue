@@ -113,7 +113,7 @@
                         </div>
                         <ProductInput v-else :products="products" v-for="(item, index) in form.products" :key="item.id"
                             :id="item.id" :init_state="item" @deleteItem="deleteItem(index)"
-                            @syncItem="syncItems(index, $event)" class="mb-1" />
+                            @syncItem="syncItems(index, $event)" :showDeleteButton="true" class="mb-1" />
                     </div>
                     <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a
                         agregar
