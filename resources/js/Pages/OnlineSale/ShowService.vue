@@ -1,15 +1,15 @@
 <template>
     <OnlineStoreLayout :title="service.name">
-        <div class="p-4 md:p-9">
+        <div class="p-4 md:p-9 lg:h-screen">
             <Back />
 
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
 
                 <article>
                     <!-- Imagen del servicio -->
-                    <figure class="border border-grayD9 rounded-md flex items-center justify-center h-96">
+                    <figure class="flex items-center justify-center h-full">
                         <img v-if="service.media?.length" :src="service.media[currentImage]?.original_url" alt="servicio"
-                            class="h-full mx-auto object-contain">
+                            class="h-full mx-auto object-cover rounded-[50px]">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
                             <p class="text-sm text-gray-300">Imagen no disponible</p>
@@ -38,8 +38,6 @@
                                 Cotizar
                             </a>
                         </button>
-                        <!-- formulario de solicitud de cotizacion -->
-                        <!-- <PrimaryButton @click="$inertia.get(route('online-sales.quote-service', service.id))" class="!px-20">Cotizar</PrimaryButton> -->
                     </div>
                 </div>
             </section>
