@@ -28,7 +28,7 @@
         </h1>
 
         <div v-if="visibleServices.length"
-            class="md:grid md:grid-cols-2 lg:grid-cols-3 gap-5 mx-2 sm:mx-4 md:mx-9 space-y-4 md:space-y-0">
+            class="md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 mx-2 sm:mx-4 md:mx-9 space-y-4 md:space-y-0">
             <OnlineServiceCard v-for="service in filteredServices" :key="service" :service="service" :store="store" />
         </div>
         <el-empty v-else description="No hay Servicios disponibles" />
