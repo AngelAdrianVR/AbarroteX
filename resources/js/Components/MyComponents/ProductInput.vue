@@ -38,8 +38,8 @@
             </div>
             <div class="w-24">
                 <InputLabel value="Cantidad" />
-                <el-input-number @change="syncItem()" @blur="handleBlur" :min="1" v-model="quantity" size="small"
-                    class="!w-full" placeholder="Ingresa la cantidad" />
+                <el-input @change="syncItem" min="1" v-model.number="quantity" type="number"
+                placeholder="Ingresa la cantidad" />
             </div>
             <div>
                 <InputLabel value="Total" />

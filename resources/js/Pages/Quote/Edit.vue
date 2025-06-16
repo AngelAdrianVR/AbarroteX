@@ -19,9 +19,9 @@
                             <i class="fa-solid fa-plus text-primary text-[9px] pl-[1px]"></i>
                         </button>
                     </div>
-                    <el-select @change="fillClientInfo" filterable
-                        v-model="form.client_id" clearable placeholder="Selecciona el cliente"
-                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                    <el-select @change="fillClientInfo" filterable v-model="form.client_id" clearable
+                        placeholder="Selecciona el cliente" no-data-text="No hay opciones registradas"
+                        no-match-text="No se encontraron coincidencias">
                         <el-option v-for="client in clients" :key="client"
                             :label="client.company ? client.company + ' - ' + client.name : client.name"
                             :value="client.id" />
@@ -137,8 +137,8 @@
                             @syncItem="syncItemsService(index, $event)" class="mb-1" />
                     </div>
                     <p v-if="!form.services?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a
-                        agregar
-                        servicios </p>
+                        agregar servicios
+                    </p>
                 </section>
                 <div class="mt-4 mb-3 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
                     <button class="text-primary text-sm self-start" type="button" @click="addNewService">

@@ -128,7 +128,7 @@ class QuoteController extends Controller
             'show_address' => 'boolean',
             'client_id' => 'nullable',
         ]);
-        Log::info($validated);
+       
         $validated['delivery_cost'] = $request->delivery1 ?? $request->delivery2;
         $quote->update($validated);
 
