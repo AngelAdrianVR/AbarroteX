@@ -154,6 +154,11 @@
                     <h2 class="font-bold text-gray37">
                         Opciones adicionales
                     </h2>
+                    <p class="text-xs text-gray99">
+                        Agrega opciones adicionales a cada cotización, si deseas que permanezcan en todas las cotización
+                        ve a Configuraciones y luego a la pestaña 
+                        <a :href="route('settings.index', {tab: 6})" target="_blank" class="text-primary underline">Cotizaciones</a>
+                    </p>
                     <article class="grid xl:grid-cols-2 mx-2 gap-3 mt-2">
                         <div class="border border-grayD9 bg-white rounded-lg">
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
