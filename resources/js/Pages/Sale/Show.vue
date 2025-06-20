@@ -457,7 +457,7 @@ export default {
                 item.amount, 0);
         },
         statusStyles() {
-            const status = this.saleToSeeInstallments.credit_data.status;
+            const status = this.saleToSeeInstallments?.credit_data?.status;
             if (status === 'Pendiente') {
                 return 'bg-[#FAFFDD] text-[#EFCE21]';
             } else if (status === 'Parcial') {
@@ -627,7 +627,7 @@ export default {
         },
         openInstallmentModal(saleFolio) {
             this.showInstallmentModal = true;
-            let sale = this.getGroupedSales.find(item => item.folio == saleFolio);
+            let sale = this.getGroupedQuoteSales.find(item => item.folio == saleFolio);
             this.saleToSeeInstallments = sale;
         },
         handleShowModal(modal, saleFolio) {
@@ -676,7 +676,7 @@ export default {
                 onSuccess: () => {
                     this.addInstallment = false;
                     this.installmentForm.reset();
-                    this.saleToSeeInstallments = this.getGroupedSales.find(item => item.folio == this.saleToSeeInstallments.folio);
+                    this.saleToSeeInstallments = this.getGroupedQuoteSales.find(item => item.folio == this.saleToSeeInstallments.folio);
                 },
                 onFinish: () => {
                     this.addingInstallment = false;
@@ -697,6 +697,40 @@ export default {
 
                     // actualizar elementos de la vista (reactividad)
                     let sale = this.getGroupedSales.find(item => item.folio == this.saleFolioToRefund);
+                    sale.products.forEach(element => {
+                        element.refunded_at = new Date().toISOString();
+                    });
+
+                    this.$notify({
+                        title: 'Venta reembolsada',
+                        message: '',
+                        type: 'success',
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+                this.$notify({
+                    title: 'No se pudo procesar la peticion de reembolso',
+                    message: '',
+                    type: 'error',
+                });
+            } finally {
+                this.refunding = false;
+            }
+        },
+        async refundQuoteSale() {
+            this.refunding = true;
+            try {
+                let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
+                if (response.status === 200) {
+                    // if (this.isInventoryOn) {
+                    this.updateIndexedDBproductsStock(response.data.updated_items);
+                    // }
+
+                    this.showRefundConfirm = false;
+
+                    // actualizar elementos de la vista (reactividad)
+                    let sale = this.getGroupedQuoteSales.find(item => item.folio == this.saleFolioToRefund);
                     sale.products.forEach(element => {
                         element.refunded_at = new Date().toISOString();
                     });

@@ -37,7 +37,7 @@
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
                             <template #dropdown>
-                                <el-dropdown-menu :class="canChangeStatus ? '!w-[210px]' : null">
+                                <el-dropdown-menu :class="canChangeStatus && quote.status != 'Pagado' ? '!w-[210px]' : null">
                                     <el-dropdown-item :command="'see|' + encodeId(quote.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -65,9 +65,9 @@
                                         </svg>
                                         <span class="text-xs text-red-600">Eliminar</span>
                                     </el-dropdown-item>
-                                    <div v-if="canChangeStatus">
+                                    <div v-if="canChangeStatus && quote.status != 'Pagado'">
                                         <p class="my-1 text-center text-xs text-gray99">Cambiar estado de cotización</p>
-                                        <el-dropdown-item :command="'status|' + quote.id + '|Sin enviar a cliente'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Sin enviar a cliente'">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                 fill="currentColor" class="size-4 mr-2">
                                                 <path fill-rule="evenodd"
@@ -76,7 +76,7 @@
                                             </svg>
                                             <span class="text-xs">Sin enviar a cliente</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'status|' + quote.id + '|Esperando respuesta'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Esperando respuesta'">
                                             <svg width="16" height="18" viewBox="0 0 13 16" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -86,7 +86,7 @@
                                             </svg>
                                             <span class="text-xs">Esperando respuesta</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'status|' + quote.id + '|Autorizada'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Autorizada'">
                                             <svg width="15" height="15" viewBox="0 0 14 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -107,7 +107,7 @@
                                             </svg>
                                             <span class="text-xs">Pago parcial (crédito)</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item :command="'status|' + quote.id + '|Pagado'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Pagado'">
                                             <svg width="15" height="15" viewBox="0 0 13 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -166,17 +166,20 @@
                 <div v-if="paymentModalStep === 1" class="px-4 relative">
                     <p class="text-gray99">Seleccione el método de pago</p>
                     <section class="grid grid-cols-2 gap-4 mt-2">
-                        <button @click="paymentModalStep = 2; statusForm.payment_method = 'Efectivo'" type="button"
+                        <button
+                            @click="paymentModalStep = 2; statusForm.payment_method = 'Efectivo'; receivedInputFocus()"
+                            type="button"
                             class="bg-[#E0FEC5] text-[#37672B] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
                             <p class="text-lg text-center font-bold">EFECTIVO</p>
                             <img src="@/../../public/images/dollar.webp" alt="Billete verde indica Pago en efectivo">
                         </button>
-                        <button @click="paymentModalStep = 3; statusForm.payment_method = 'Tarjeta'" type="button"
+                        <button
+                            @click="paymentModalStep = 3; statusForm.payment_method = 'Tarjeta'; receivedInputFocus()"
+                            type="button"
                             class="bg-[#DAE6FF] text-[#063B52] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
                             <p class="text-lg text-center font-bold">TARJETA</p>
                             <img src="@/../../public/images/card.webp" alt="Tarjeta azul que indica Pago con tarjeta">
                         </button>
-
                     </section>
                 </div>
                 <!-- Pago con efectivo (step 2) -->
@@ -202,15 +205,38 @@
                                 {{ grandTotal(quoteSelected)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
                             </p>
                         </div>
-                        <div class="mt-5 flex flex-col items-center space-y-3">
-                            <div v-if="!paymentConfirmed && isCreditPayment">
+                        <div v-if="!isCreditPayment && !quoteSelected.client_id"
+                            class="flex items-center justify-center space-x-1 mt-2">
+                            <el-checkbox v-model="statusForm.create_client" label="Crear cliente" size="large" />
+                            <el-tooltip placement="top">
+                                <template #content>
+                                    <p class="text-center">
+                                        ¿Deseas dar de alta al cliente para <br>
+                                        consultar sus cotizaciones?
+                                    </p>
+                                </template>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                </svg>
+                            </el-tooltip>
+                        </div>
+                        <div v-if="!paymentConfirmed && isCreditPayment"
+                            class="mt-5 flex flex-col items-center space-y-3">
+                            <div>
                                 <p class="text-center font-bold">¿Cuánto paga el cliente?</p>
                                 <el-input-number ref="receivedInput" @keydown.enter="updateStatus"
-                                    v-model="statusForm.amount" :min="1" :max="999999">
+                                    v-model="statusForm.amount" :min="1" :max="statusForm.grand_total">
                                     <template #prefix>
                                         <span>$</span>
                                     </template>
                                 </el-input-number>
+                            </div>
+                            <div>
+                                <p class="text-center font-bold">Fecha de vencimiento</p>
+                                <el-date-picker v-model="statusForm.limit_date" class="!w-full" type="date"
+                                    placeholder="dd/mm/aa" :disabled-date="disabledDate" />
                             </div>
                         </div>
                     </section>
@@ -226,7 +252,7 @@
                     </section>
                     <section class="mx-auto mt-2 md:w-2/3">
                         <div v-if="!paymentConfirmed">
-                            <p class="my-3 text-sm text-center">
+                            <p class="my-3 text-sm text-center text-black">
                                 El sistema no procesa pagos con tarjeta. Usa tu terminal
                                 bancaria externa y luego registra aquí el pago.
                             </p>
@@ -244,12 +270,56 @@
                                     }}
                                 </p>
                             </div>
+                            <div v-if="!isCreditPayment && !quoteSelected.client_id"
+                                class="flex items-center justify-center space-x-1 mt-2">
+                                <el-checkbox v-model="statusForm.create_client" label="Crear cliente" size="large" />
+                                <el-tooltip placement="top">
+                                    <template #content>
+                                        <p class="text-center">
+                                            ¿Deseas dar de alta al cliente para <br>
+                                            consultar sus cotizaciones?
+                                        </p>
+                                    </template>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                    </svg>
+                                </el-tooltip>
+                            </div>
+                            <div v-if="!paymentConfirmed && isCreditPayment"
+                                class="mt-5 flex flex-col items-center space-y-3">
+                                <div>
+                                    <p class="text-center font-bold">¿Cuánto paga el cliente?</p>
+                                    <el-input-number ref="receivedInput" @keydown.enter="updateStatus"
+                                        v-model="statusForm.amount" :min="1" :max="statusForm.grand_total">
+                                        <template #prefix>
+                                            <span>$</span>
+                                        </template>
+                                    </el-input-number>
+                                </div>
+                                <div>
+                                    <p class="text-center font-bold">Fecha de vencimiento</p>
+                                    <el-date-picker v-model="statusForm.limit_date" class="!w-full" type="date"
+                                        placeholder="dd/mm/aa" :disabled-date="disabledDate" />
+                                </div>
+                            </div>
                         </div>
                     </section>
                 </div>
                 <!-- botón de pago y mensaje de exito -->
-                <div v-if="paymentModalStep === 2 || paymentModalStep === 3">
-                    <div class="flex justify-center">
+                <div v-if="paymentModalStep === 2 || paymentModalStep === 3" class="mt-8">
+                    <p v-if="isCreditPayment && !quoteSelected.client_id" class="flex items-center justify-center space-x-1 text-[#52116C]">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M4.99078 12.1599H1.14485C0.0379915 8.17201 5.55392 5.89796 8.19572 9.04622M7.23111 11.5306L9.01163 13C10.5692 11.1965 11.4424 10.1854 13 8.38192M7.37355 3.37901C7.37355 4.6929 6.2894 5.75802 4.95203 5.75802C3.61467 5.75802 2.53052 4.6929 2.53052 3.37901C2.53052 2.06512 3.61467 1 4.95203 1C6.2894 1 7.37355 2.06512 7.37355 3.37901Z"
+                                stroke="currentColor" />
+                        </svg>
+                        <span>
+                            El cliente se creará automáticamente para el registro de abonos.
+                        </span>
+                    </p>
+                    <div class="flex justify-center mt-3">
                         <PrimaryButton :disabled="statusForm.processing" class="!px-20" @click="updateStatus">
                             <i v-if="statusForm.processing"
                                 class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -267,6 +337,9 @@
                             <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
                         </div>
                     </div>
+                    <p class="text-gray37 mt-3 mx-4 lg:mx-16 text-center">
+                        Se generará una nueva venta y los productos se descontarán automáticamente del inventario
+                    </p>
                 </div>
             </template>
             <template #footer>
@@ -293,6 +366,8 @@ export default {
             grand_total: null,
             payment_method: null,
             amount: null,
+            create_client: false,
+            limit_date: null,
         });
 
         return {
@@ -303,8 +378,6 @@ export default {
             isCreditPayment: false,
             quoteSelected: null,
             paymentModalStep: 1,
-            paymentMethod: null,
-            installmentAmount: null,
             canEdit: this.$page.props.auth.user.permissions.includes('Editar cotizaciones'),
             canDelete: this.$page.props.auth.user.permissions.includes('Eliminar cotizaciones'),
             canChangeStatus: this.$page.props.auth.user.permissions.includes('Cambiar status cotizaciones'),
@@ -320,6 +393,20 @@ export default {
         quotes: Array
     },
     methods: {
+        receivedInputFocus() {
+            this.$nextTick(() => {
+                try {
+                    this.$refs.receivedInput.focus(); // Enfocar el input de recibido cuando se abre el modal
+                } catch (error) {
+                    // console.log(error);                   
+                }
+            });
+        },
+        disabledDate(time) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return time.getTime() < today.getTime();
+        },
         percentageDiscount(item) {
             return item.percentage * 0.01 * this.subtotal(item);
         },
@@ -353,15 +440,18 @@ export default {
             } else if (commandName == 'edit') {
                 this.$inertia.get(route('quotes.edit', data));
             } else if (commandName == 'status') {
+                this.statusForm.reset();
                 const status = command.split('|')[2];
                 this.statusForm.status = status;
                 this.quoteSelected = this.quotes.find(q => q.id == data);
                 if (!['Pagado', 'Pago parcial'].includes(status)) {
                     this.updateStatus();
                 } else {
-                    this.statusForm.grand_total = this.grandTotal(this.quoteSelected);
+                    this.paymentModalStep = 1;
                     this.isCreditPayment = status == 'Pago parcial';
                     this.showPaymentModal = true;
+                    this.statusForm.grand_total = this.grandTotal(this.quoteSelected);
+                    this.statusForm.create_client = (status == 'Pago parcial' && !this.quoteSelected.client_id);
                 }
             }
             else if (commandName == 'delete') {
@@ -405,17 +495,18 @@ export default {
         updateStatus() {
             this.statusForm.post(route('quotes.update-status', this.quoteSelected.id), {
                 onSuccess: () => {
+                    this.$notify({
+                        title: 'Correcto',
+                        message: 'Se ha actualizazo el estatus de la cotización',
+                        type: 'success',
+                    });
+                    this.quoteSelected.status = this.statusForm.status;
                     this.paymentConfirmed = true; //indica que el pago ha sido confirmado
                     setTimeout(() => {
                         this.paymentConfirmed = false;
                         // Aquí cierra el modal como lo manejes normalmente
                         this.showPaymentModal = false; // ajusta este método a tu implementación
                         this.paymentModalStep = 1; //reinicia el paso del modal de pago
-                        this.$notify({
-                            title: 'Correcto',
-                            message: 'Se ha actualizazo el estatus de la cotización',
-                            type: 'success',
-                        });
                     }, 1000);
                 },
                 onError: (error) => {

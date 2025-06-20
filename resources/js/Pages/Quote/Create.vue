@@ -533,6 +533,10 @@ export default {
             return this.form.percentage * 0.01 * this.subtotal;
         },
         async fillClientInfo() {
+             if (!this.form.client_id) {
+                return;
+            }
+            
             this.loadingClient = true;
             try {
                 const response = await axios.get(route('clients.get-client-info', this.form.client_id));

@@ -87,8 +87,8 @@ class QuoteController extends Controller
         $view = File::exists($customViewPath)
             ? "Quote/Show{$store_id}"
             : "Quote/Show";
-        
-            // return $quote;
+
+        // return $quote;
         return inertia($view, compact('quote'));
     }
 
@@ -132,8 +132,9 @@ class QuoteController extends Controller
             'show_expiration' => 'boolean',
             'client_id' => 'nullable',
         ]);
-       
+
         $validated['delivery_cost'] = $request->delivery1 ?? $request->delivery2;
+        $validated['client_id'] = $request->client_id;
         $quote->update($validated);
 
         //codifica el id del quote
@@ -195,16 +196,31 @@ class QuoteController extends Controller
         ]);
 
         // Crear venta si esta pagada la cot
-        if ($request->status == "Pagado") {
+        if ($request->status == "Pagado" || $request->status == "Pago parcial") {
             $installment = $request->amount < $request->grand_total
-            ? $request->amount
-            : null;
-            
-            $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment);
+                ? $request->amount
+                : null;
+
+            // crear al cliente si es abono o si se especificó desde el pago
+            if ($request->create_client) {
+                $client = Client::create([
+                    'company' => $quote->company,
+                    'name' => $quote->contact_name,
+                    'phone' => $quote->phone,
+                    'email' => $quote->email,
+                    'notes' => 'Cliente agregado automáticamente por pago de cotización',
+                    'store_id' => auth()->user()->store_id,
+                ]);
+
+                $quote->client_id = $client->id;
+                $quote->save();
+            }
+
+            $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment, $request->limit_date);
         }
     }
 
-    private function storeEachProductSold($products_sold, $payment_method = null, $quote, $installment)
+    private function storeEachProductSold($products_sold, $payment_method = null, $quote, $installment, $limit_date)
     {
         $store_id = auth()->user()->store_id;
         // Generar un id unico para productos vendidos a este cliente
@@ -224,7 +240,7 @@ class QuoteController extends Controller
                 ? GlobalProductStore::find($product_id)
                 : Product::find($product_id);
 
-            $product_name = $is_global_product 
+            $product_name = $is_global_product
                 ? $current_product->globalProduct->name
                 : $current_product->name;
             if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
@@ -233,7 +249,7 @@ class QuoteController extends Controller
             }
 
             // obtiene un estracto para referir a la promoción en caso de tener
-           // $promotions = $this->getPromotion($sale);
+            // $promotions = $this->getPromotion($sale);
 
             //regiatra cada producto vendido
             Sale::create([
@@ -308,6 +324,7 @@ class QuoteController extends Controller
                 'folio' => $folio,
                 'store_id' => $store_id,
                 'client_id' => $quote->client_id,
+                'expired_date' => $limit_date,
                 'status' => 'Parcial',
             ]);
 
