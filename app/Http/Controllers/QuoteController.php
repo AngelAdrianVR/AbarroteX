@@ -57,6 +57,7 @@ class QuoteController extends Controller
             'services' => 'nullable',
             'show_payment_conditions' => 'boolean',
             'show_address' => 'boolean',
+            'show_expiration' => 'boolean',
             'client_id' => 'nullable',
         ]);
 
@@ -128,6 +129,7 @@ class QuoteController extends Controller
             'services' => 'nullable',
             'show_payment_conditions' => 'boolean',
             'show_address' => 'boolean',
+            'show_expiration' => 'boolean',
             'client_id' => 'nullable',
         ]);
        
@@ -169,22 +171,37 @@ class QuoteController extends Controller
         return response()->json(['items' => $quotes]);
     }
 
-    public function updateStatus(Quote $quote)
-    {
-        $status = request('status');
-        $payment_method = request('payment_method') ?? "Efectivo";
-        $installment = request('installment');
+    // public function updateStatus(Quote $quote)
+    // {
+    //     $status = request('status');
+    //     $payment_method = request('payment_method') ?? "Efectivo";
+    //     $installment = request('installment');
 
+    //     $quote->update([
+    //         'status' => $status
+    //     ]);
+
+    //     // Crear venta si esta pagada la cot
+    //     if ($status == "Pagado") {
+    //         $this->storeEachProductSold($quote->products, $payment_method, $quote, $installment);
+    //     }
+
+    //     return response()->json(compact('status'));
+    // }
+    public function updateStatus(Quote $quote, Request $request)
+    {
         $quote->update([
-            'status' => $status
+            'status' => $request->status
         ]);
 
         // Crear venta si esta pagada la cot
-        if ($status == "Pagado") {
-            $this->storeEachProductSold($quote->products, $payment_method, $quote, $installment);
+        if ($request->status == "Pagado") {
+            $installment = $request->amount < $request->grand_total
+            ? $request->amount
+            : null;
+            
+            $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment);
         }
-
-        return response()->json(compact('status'));
     }
 
     private function storeEachProductSold($products_sold, $payment_method = null, $quote, $installment)

@@ -55,7 +55,25 @@
                     <InputError :message="form.errors.email" />
                 </div>
                 <div>
-                    <InputLabel value="Fecha de expiración de cot. (opcional)" />
+                    <div class="flex items-center justify-between">
+                        <InputLabel value="Fecha de expiración de cot. (opcional)" />
+                        <div class="flex items-center space-x-1">
+                            <el-checkbox v-model="form.show_expiration" label="Mostrar" size="small" />
+                            <el-tooltip placement="top">
+                                <template #content>
+                                    <p class="text-center">
+                                        Al seleccionar esta opción, se mostrará <br>
+                                        en la plantilla de la cotización
+                                    </p>
+                                </template>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                </svg>
+                            </el-tooltip>
+                        </div>
+                    </div>
                     <el-date-picker v-model="form.expired_date" type="date" class="!w-full" placeholder="día/mes/año"
                         :disabled-date="disabledPrevDays" />
                     <InputError :message="form.errors.expired_date" />
@@ -165,8 +183,9 @@
                     </h2>
                     <p class="text-xs text-gray99">
                         Agrega opciones adicionales a cada cotización, si deseas que permanezcan en todas las cotización
-                        ve a Configuraciones y luego a la pestaña 
-                        <a :href="route('settings.index', {tab: 6})" target="_blank" class="text-primary underline">Cotizaciones</a>
+                        ve a Configuraciones y luego a la pestaña
+                        <a :href="route('settings.index', { tab: 6 })" target="_blank"
+                            class="text-primary underline">Cotizaciones</a>
                     </p>
                     <article class="grid xl:grid-cols-2 mx-2 gap-3 mt-2">
                         <div class="border border-grayD9 bg-white rounded-lg">
@@ -415,6 +434,7 @@ export default {
             delivery2: this.quote.delivery_type == 'Envío por paquetería' ? this.quote.delivery_cost : null,
             show_payment_conditions: !!this.quote.show_payment_conditions,
             show_address: !!this.quote.show_address,
+            show_expiration: !!this.quote.show_expiration,
         });
 
         return {

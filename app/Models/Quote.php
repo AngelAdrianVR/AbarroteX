@@ -35,6 +35,7 @@ class Quote extends Model
         'delivery_cost',
         'show_payment_conditions',
         'show_address',
+        'show_expiration',
         'additionals',
         'client_id',
         'store_id',

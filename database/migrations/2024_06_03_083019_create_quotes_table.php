@@ -35,6 +35,7 @@ return new class extends Migration
             $table->unsignedFloat('delivery_cost')->nullable();
             $table->boolean('show_payment_conditions')->default(false);
             $table->boolean('show_address')->default(false);
+            $table->boolean('show_expiration')->default(false);
             $table->json('additionals')->nullable();
             $table->foreignId('client_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();

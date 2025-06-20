@@ -55,7 +55,25 @@
                     <InputError :message="form.errors.email" />
                 </div>
                 <div>
-                    <InputLabel value="Fecha de expiración de cot. (opcional)" />
+                    <div class="flex items-center justify-between">
+                        <InputLabel value="Fecha de expiración de cot. (opcional)" />
+                        <div class="flex items-center space-x-1">
+                            <el-checkbox v-model="form.show_expiration" label="Mostrar" size="small" />
+                            <el-tooltip placement="top">
+                                <template #content>
+                                    <p class="text-center">
+                                        Al seleccionar esta opción, se mostrará <br>
+                                        en la plantilla de la cotización
+                                    </p>
+                                </template>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                </svg>
+                            </el-tooltip>
+                        </div>
+                    </div>
                     <el-date-picker v-model="form.expired_date" type="date" class="!w-full" placeholder="día/mes/año"
                         :disabled-date="disabledPrevDays" />
                     <InputError :message="form.errors.expired_date" />
@@ -412,6 +430,7 @@ export default {
             delivery2: null,
             show_payment_conditions: false,
             show_address: false,
+            show_expiration: false,
         });
 
         return {

@@ -68,8 +68,8 @@
                                     <div v-if="canChangeStatus">
                                         <p class="my-1 text-center text-xs text-gray99">Cambiar estado de cotización</p>
                                         <el-dropdown-item :command="'status|' + quote.id + '|Sin enviar a cliente'">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                                class="size-4 mr-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                fill="currentColor" class="size-4 mr-2">
                                                 <path fill-rule="evenodd"
                                                     d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 0 1-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 0 1-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 0 1-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584ZM12 18a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
                                                     clip-rule="evenodd" />
@@ -86,8 +86,7 @@
                                             </svg>
                                             <span class="text-xs">Esperando respuesta</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item
-                                            :command="'status|' + quote.id + '|Autorizada'">
+                                        <el-dropdown-item :command="'status|' + quote.id + '|Autorizada'">
                                             <svg width="15" height="15" viewBox="0 0 14 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -96,8 +95,7 @@
                                             </svg>
                                             <span class="text-xs">Autorizada</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item
-                                            :command="'status|' + quote.id + '|Pago parcial'">
+                                        <el-dropdown-item :command="'status|' + quote.id + '|Pago parcial'">
                                             <svg width="13" height="13" viewBox="0 0 13 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -109,8 +107,7 @@
                                             </svg>
                                             <span class="text-xs">Pago parcial (crédito)</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item
-                                            :command="'status|' + quote.id + '|Pagado'">
+                                        <el-dropdown-item :command="'status|' + quote.id + '|Pagado'">
                                             <svg width="15" height="15" viewBox="0 0 13 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -159,6 +156,123 @@
                 </div>
             </template>
         </ConfirmationModal>
+        <DialogModal :show="showPaymentModal" @close="showPaymentModal = false">
+            <template #title>
+                <h1 v-if="paymentModalStep === 1" class="font-bold mt-2">Opciones de pago</h1>
+                <h1 v-else-if="paymentModalStep === 2" class="font-bold mt-2 text-lg">Pagar</h1>
+                <h1 v-else-if="paymentModalStep === 3" class="font-bold mt-2 text-lg">Registrar pago</h1>
+            </template>
+            <template #content>
+                <div v-if="paymentModalStep === 1" class="px-4 relative">
+                    <p class="text-gray99">Seleccione el método de pago</p>
+                    <section class="grid grid-cols-2 gap-4 mt-2">
+                        <button @click="paymentModalStep = 2; statusForm.payment_method = 'Efectivo'" type="button"
+                            class="bg-[#E0FEC5] text-[#37672B] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+                            <p class="text-lg text-center font-bold">EFECTIVO</p>
+                            <img src="@/../../public/images/dollar.webp" alt="Billete verde indica Pago en efectivo">
+                        </button>
+                        <button @click="paymentModalStep = 3; statusForm.payment_method = 'Tarjeta'" type="button"
+                            class="bg-[#DAE6FF] text-[#063B52] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+                            <p class="text-lg text-center font-bold">TARJETA</p>
+                            <img src="@/../../public/images/card.webp" alt="Tarjeta azul que indica Pago con tarjeta">
+                        </button>
+
+                    </section>
+                </div>
+                <!-- Pago con efectivo (step 2) -->
+                <div v-if="paymentModalStep === 2" class="px-4 relative">
+                    <section class="flex items-center justify-between">
+                        <div @click="paymentModalStep = 1"
+                            class="flex items-center space-x-4 text-primary cursor-pointer">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Regresar</span>
+                        </div>
+                    </section>
+                    <section class="mx-auto mt-2 md:w-2/3">
+                        <div
+                            class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
+                            <span class="font-bold text-[#37672B]">EFECTIVO</span>
+                            <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo" class="h-7">
+                        </div>
+                        <div
+                            class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+                            <span class="font-bold">Total a pagar</span>
+                            <p class="font-bold">
+                                <span class="mr-4">$</span>
+                                {{ grandTotal(quoteSelected)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                            </p>
+                        </div>
+                        <div class="mt-5 flex flex-col items-center space-y-3">
+                            <div v-if="!paymentConfirmed && isCreditPayment">
+                                <p class="text-center font-bold">¿Cuánto paga el cliente?</p>
+                                <el-input-number ref="receivedInput" @keydown.enter="updateStatus"
+                                    v-model="statusForm.amount" :min="1" :max="999999">
+                                    <template #prefix>
+                                        <span>$</span>
+                                    </template>
+                                </el-input-number>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- Pago con tarjeta (step 3) -->
+                <div v-if="paymentModalStep === 3" class="px-4 relative">
+                    <section class="flex items-center justify-between">
+                        <div @click="paymentModalStep = 1"
+                            class="flex items-center space-x-4 text-primary cursor-pointer">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Regresar</span>
+                        </div>
+                    </section>
+                    <section class="mx-auto mt-2 md:w-2/3">
+                        <div v-if="!paymentConfirmed">
+                            <p class="my-3 text-sm text-center">
+                                El sistema no procesa pagos con tarjeta. Usa tu terminal
+                                bancaria externa y luego registra aquí el pago.
+                            </p>
+                            <div
+                                class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
+                                <span class="font-bold text-[#05394F]">TARJETA</span>
+                                <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
+                            </div>
+                            <div
+                                class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+                                <span class="font-bold">Total a pagar</span>
+                                <p class="font-bold">
+                                    <span class="mr-4">$</span>
+                                    {{ grandTotal(quoteSelected)?.toLocaleString('en-US', { minimumFractionDigits: 2 })
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- botón de pago y mensaje de exito -->
+                <div v-if="paymentModalStep === 2 || paymentModalStep === 3">
+                    <div class="flex justify-center">
+                        <PrimaryButton :disabled="statusForm.processing" class="!px-20" @click="updateStatus">
+                            <i v-if="statusForm.processing"
+                                class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                            Registrar pago
+                        </PrimaryButton>
+                    </div>
+                    <!-- Confirmacion de pago -->
+                    <div v-if="paymentConfirmed">
+                        <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template #footer>
+
+            </template>
+        </DialogModal>
     </div>
 </template>
 
@@ -169,12 +283,28 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
+import DialogModal from '@/Components/DialogModal.vue';
+import { useForm } from '@inertiajs/vue3';
 
 export default {
     data() {
+        const statusForm = useForm({
+            status: null,
+            grand_total: null,
+            payment_method: null,
+            amount: null,
+        });
+
         return {
+            statusForm,
             showDeleteConfirm: false,
-            itemIdToDelete: null,
+            showPaymentModal: false,
+            paymentConfirmed: false,
+            isCreditPayment: false,
+            quoteSelected: null,
+            paymentModalStep: 1,
+            paymentMethod: null,
+            installmentAmount: null,
             canEdit: this.$page.props.auth.user.permissions.includes('Editar cotizaciones'),
             canDelete: this.$page.props.auth.user.permissions.includes('Eliminar cotizaciones'),
             canChangeStatus: this.$page.props.auth.user.permissions.includes('Cambiar status cotizaciones'),
@@ -184,6 +314,7 @@ export default {
         ConfirmationModal,
         PrimaryButton,
         CancelButton,
+        DialogModal,
     },
     props: {
         quotes: Array
@@ -222,11 +353,20 @@ export default {
             } else if (commandName == 'edit') {
                 this.$inertia.get(route('quotes.edit', data));
             } else if (commandName == 'status') {
-                this.updateStatus(data, command.split('|')[2]);
+                const status = command.split('|')[2];
+                this.statusForm.status = status;
+                this.quoteSelected = this.quotes.find(q => q.id == data);
+                if (!['Pagado', 'Pago parcial'].includes(status)) {
+                    this.updateStatus();
+                } else {
+                    this.statusForm.grand_total = this.grandTotal(this.quoteSelected);
+                    this.isCreditPayment = status == 'Pago parcial';
+                    this.showPaymentModal = true;
+                }
             }
             else if (commandName == 'delete') {
                 this.showDeleteConfirm = true;
-                this.itemIdToDelete = data;
+                this.quoteSelected = data;
             }
         },
         encodeId(id) {
@@ -262,9 +402,35 @@ export default {
                 return '<svg width="16" height="16" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 0C3.13261 0 3.25979 0.0526784 3.35355 0.146447C3.44732 0.240215 3.5 0.367392 3.5 0.5V1.5H9.5V0.5C9.5 0.367392 9.55268 0.240215 9.64645 0.146447C9.74021 0.0526784 9.86739 0 10 0C10.1326 0 10.2598 0.0526784 10.3536 0.146447C10.4473 0.240215 10.5 0.367392 10.5 0.5V1.5H11C11.5304 1.5 12.0391 1.71071 12.4142 2.08579C12.7893 2.46086 13 2.96957 13 3.5V11C13 11.5304 12.7893 12.0391 12.4142 12.4142C12.0391 12.7893 11.5304 13 11 13H2C1.46957 13 0.960859 12.7893 0.585787 12.4142C0.210714 12.0391 0 11.5304 0 11V3.5C0 2.96957 0.210714 2.46086 0.585787 2.08579C0.960859 1.71071 1.46957 1.5 2 1.5H2.5V0.5C2.5 0.367392 2.55268 0.240215 2.64645 0.146447C2.74021 0.0526784 2.86739 0 3 0ZM12 6C12 5.73478 11.8946 5.48043 11.7071 5.29289C11.5196 5.10536 11.2652 5 11 5H2C1.73478 5 1.48043 5.10536 1.29289 5.29289C1.10536 5.48043 1 5.73478 1 6V11C1 11.2652 1.10536 11.5196 1.29289 11.7071C1.48043 11.8946 1.73478 12 2 12H11C11.2652 12 11.5196 11.8946 11.7071 11.7071C11.8946 11.5196 12 11.2652 12 11V6Z" fill="#1944B0"/><path d="M6.00086 9.6103C6.43553 9.74663 6.82957 9.51831 6.81532 9.26971C6.8038 9.06871 6.69817 8.98525 6.31884 8.8764C5.70938 8.7015 4.97006 8.54573 4.73072 7.8706C4.47416 7.14688 5.1106 6.56292 5.77873 6.40871C5.77873 6.31045 5.72797 6 5.86846 6H6.69164C6.879 6 6.81532 6.28805 6.81532 6.40871C7.33441 6.54145 7.6035 6.66753 7.90506 7.03572C7.95384 7.09527 7.95384 7.18775 7.90506 7.21916L7.25958 7.63485C6.95225 7.33789 6.11864 6.67075 5.8163 7.24893C5.51859 7.81825 6.42227 8.04361 6.81532 8.11169C7.64895 8.25607 8 8.79287 8 9.26971C8 9.74654 7.68405 10.2214 6.81532 10.4277C6.81532 10.5463 6.87135 10.7716 6.69774 10.7683H5.89895C5.72594 10.7683 5.77873 10.5432 5.77873 10.4277C5.21751 10.2713 4.95557 10.1181 4.71176 9.82929C4.64283 9.74764 4.66114 9.64477 4.71176 9.61935L5.40852 9.26971C5.55652 9.45408 5.78168 9.54156 6.00086 9.6103Z" fill="#1944B0"/></svg>';
             }
         },
+        updateStatus() {
+            this.statusForm.post(route('quotes.update-status', this.quoteSelected.id), {
+                onSuccess: () => {
+                    this.paymentConfirmed = true; //indica que el pago ha sido confirmado
+                    setTimeout(() => {
+                        this.paymentConfirmed = false;
+                        // Aquí cierra el modal como lo manejes normalmente
+                        this.showPaymentModal = false; // ajusta este método a tu implementación
+                        this.paymentModalStep = 1; //reinicia el paso del modal de pago
+                        this.$notify({
+                            title: 'Correcto',
+                            message: 'Se ha actualizazo el estatus de la cotización',
+                            type: 'success',
+                        });
+                    }, 1000);
+                },
+                onError: (error) => {
+                    this.$notify({
+                        title: 'No se pudo completar la petición',
+                        message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
+                        type: 'success',
+                    });
+                    console.error(error);
+                }
+            })
+        },
         async deleteItem() {
             try {
-                const response = await axios.delete(route('quotes.destroy', this.itemIdToDelete));
+                const response = await axios.delete(route('quotes.destroy', this.quoteSelected));
                 if (response.status == 200) {
                     this.$notify({
                         title: 'Correcto',
@@ -272,7 +438,7 @@ export default {
                         type: 'success',
                     });
                     //se busca el index del cliente eliminado para removerlo del arreglo
-                    const indexQuoteDeleted = this.quotes.findIndex(item => item.id == this.itemIdToDelete);
+                    const indexQuoteDeleted = this.quotes.findIndex(item => item.id == this.quoteSelected);
                     if (indexQuoteDeleted != -1) {
                         this.quotes.splice(indexQuoteDeleted, 1);
                     }
@@ -287,28 +453,28 @@ export default {
                 });
             }
         },
-        async updateStatus(quoteId, status) {
-            try {
-                const response = await axios.post(route('quotes.update-status', quoteId), { status: status });
-                if (response.status == 200) {
-                    const quoteIndex = this.quotes.findIndex(item => item.id == quoteId);
-                    if (quoteIndex != -1) {
-                        this.quotes[quoteIndex].status = response.data.status;
-                    }
-                    this.$notify({
-                        title: 'Correcto',
-                        message: 'Se ha actualizazo el estatus de la cotización',
-                        type: 'success',
-                    });
-                }
-            } catch (error) {
-                this.$notify({
-                    title: 'No se pudo completar la petición',
-                    message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
-                    type: 'success',
-                });
-            }
-        },
+        // async updateStatus(quoteId, status) {
+        //     try {
+        //         const response = await axios.post(route('quotes.update-status', quoteId), { status: status });
+        //         if (response.status == 200) {
+        //             const quoteIndex = this.quotes.findIndex(item => item.id == quoteId);
+        //             if (quoteIndex != -1) {
+        //                 this.quotes[quoteIndex].status = response.data.status;
+        //             }
+        //             this.$notify({
+        //                 title: 'Correcto',
+        //                 message: 'Se ha actualizazo el estatus de la cotización',
+        //                 type: 'success',
+        //             });
+        //         }
+        //     } catch (error) {
+        //         this.$notify({
+        //             title: 'No se pudo completar la petición',
+        //             message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
+        //             type: 'success',
+        //         });
+        //     }
+        // },
     },
 }
 </script>
