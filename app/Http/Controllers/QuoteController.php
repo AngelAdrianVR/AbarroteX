@@ -37,6 +37,7 @@ class QuoteController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'company' => 'nullable|string|max:255',
             'contact_name' => 'required|string|max:150',
             'phone' => 'nullable|string|min:10|max:10',
             'email' => 'nullable|string',
@@ -107,6 +108,7 @@ class QuoteController extends Controller
     public function update(Request $request, Quote $quote)
     {
         $validated = $request->validate([
+            'company' => 'nullable|string|max:255',
             'contact_name' => 'required|string|max:150',
             'phone' => 'nullable|string|min:10|max:10',
             'email' => 'nullable|string',

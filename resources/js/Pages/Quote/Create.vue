@@ -29,8 +29,14 @@
                     <InputError :message="form.errors.client_id" />
                 </div>
                 <div>
+                    <InputLabel value="Empresa (opcional)" />
+                    <el-input v-model="form.company" placeholder="Escribe el nombre de la empresa" :maxlength="150"
+                        clearable />
+                    <InputError :message="form.errors.company" />
+                </div>
+                <div>
                     <InputLabel value="Nombre del contacto*" />
-                    <el-input v-model="form.contact_name" placeholder="Escribe el nombre del contacto" :maxlength="100"
+                    <el-input v-model="form.contact_name" placeholder="Escribe el nombre del contacto" :maxlength="150"
                         clearable />
                     <InputError :message="form.errors.contact_name" />
                 </div>
@@ -385,6 +391,7 @@ export default {
         });
 
         const form = useForm({
+            company: null,
             contact_name: null,
             phone: null,
             payment_conditions: null,
@@ -512,6 +519,7 @@ export default {
                 const response = await axios.get(route('clients.get-client-info', this.form.client_id));
                 if (response.status === 200) {
                     const client = response.data.client;
+                    this.form.company = client.company;
                     this.form.contact_name = client.name;
                     this.form.phone = client.phone;
                     this.form.email = client.email;

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
             $table->string('folio')->nullable();
+            $table->string('company')->nullable();
             $table->string('contact_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
@@ -21,7 +22,7 @@ return new class extends Migration
             $table->string('payment_conditions')->nullable();
             $table->boolean('iva_included')->nullable();
             $table->boolean('has_discount')->default(false);
-            $table->string('status')->default('Esperando respuesta');
+            $table->string('status')->default('Sin eviar a cliente');
             $table->unsignedDouble('total');
             $table->json('products')->nullable(); //guarda los productos
             $table->json('services')->nullable(); //guarda los servicios

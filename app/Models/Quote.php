@@ -14,6 +14,7 @@ class Quote extends Model
 
     protected $fillable = [
         'folio',
+        'company',
         'contact_name',
         'phone',
         'payment_conditions',
