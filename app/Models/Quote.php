@@ -37,6 +37,7 @@ class Quote extends Model
         'show_address',
         'show_expiration',
         'additionals',
+        'remaining',
         'client_id',
         'store_id',
     ];
@@ -62,7 +63,7 @@ class Quote extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function sale() :HasMany
+    public function sales() :HasMany
     {
         return $this->hasMany(Sale::class);
     }

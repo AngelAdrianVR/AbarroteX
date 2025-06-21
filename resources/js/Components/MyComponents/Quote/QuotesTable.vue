@@ -56,7 +56,7 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-if="canDelete" :command="'delete|' + quote.id">
+                                    <el-dropdown-item v-if="canDelete && !['Pagado', 'Pago parcial'].includes(quote.status)" :command="'delete|' + quote.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -471,9 +471,9 @@ export default {
         },
         getStatusIcont(status) {
             if (status === 'Esperando respuesta') {
-                return '<svg width="16" height="18" viewBox="0 0 13 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.57423 8.04782L6.69533 8.83421L4.42867 6.66007C2.16201 10.4995 6.16502 13.5988 8.83423 11.1471C9.64555 10.4019 10.3652 8.83421 9.23953 6.66007L10.7171 5.31857C11.6085 6.27663 12.1538 7.56113 12.1538 8.97298C12.1538 11.9365 9.75138 14.3389 6.78784 14.3389C3.8243 14.3389 1.42188 11.9365 1.42188 8.97298C1.42188 6.00944 3.8243 3.60702 6.78784 3.60702V1.52539M6.78784 1.52539H4.42867M6.78784 1.52539H8.83423" stroke="#D0BF0A" stroke-width="1.38775" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                return '<svg width="17" height="21" viewBox="0 0 13 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.57423 8.04782L6.69533 8.83421L4.42867 6.66007C2.16201 10.4995 6.16502 13.5988 8.83423 11.1471C9.64555 10.4019 10.3652 8.83421 9.23953 6.66007L10.7171 5.31857C11.6085 6.27663 12.1538 7.56113 12.1538 8.97298C12.1538 11.9365 9.75138 14.3389 6.78784 14.3389C3.8243 14.3389 1.42188 11.9365 1.42188 8.97298C1.42188 6.00944 3.8243 3.60702 6.78784 3.60702V1.52539M6.78784 1.52539H4.42867M6.78784 1.52539H8.83423" stroke="#D0BF0A" stroke-width="1.38775" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             } else if (status === 'Rechazada') {
-                return '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-[#B80505]"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>';
+                return '<svg width="17" height="17" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.97288 4.41695L6.69492 6.69492M4.41695 8.97288L6.69492 6.69492M6.69492 6.69492L4.41695 4.41695M6.69492 6.69492L8.97288 8.97288M12.3898 6.69492C12.3898 9.84013 9.84013 12.3898 6.69492 12.3898C3.5497 12.3898 1 9.84013 1 6.69492C1 3.5497 3.5497 1 6.69492 1C9.84013 1 12.3898 3.5497 12.3898 6.69492Z" stroke="#B80505" stroke-width="1.13898" stroke-linecap="round" stroke-linejoin="round" /></svg>';
             } else if (status === 'Sin enviar a cliente') {
                 return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                         class="size-[19px] text-[#B80505]">
@@ -544,28 +544,6 @@ export default {
                 });
             }
         },
-        // async updateStatus(quoteId, status) {
-        //     try {
-        //         const response = await axios.post(route('quotes.update-status', quoteId), { status: status });
-        //         if (response.status == 200) {
-        //             const quoteIndex = this.quotes.findIndex(item => item.id == quoteId);
-        //             if (quoteIndex != -1) {
-        //                 this.quotes[quoteIndex].status = response.data.status;
-        //             }
-        //             this.$notify({
-        //                 title: 'Correcto',
-        //                 message: 'Se ha actualizazo el estatus de la cotización',
-        //                 type: 'success',
-        //             });
-        //         }
-        //     } catch (error) {
-        //         this.$notify({
-        //             title: 'No se pudo completar la petición',
-        //             message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
-        //             type: 'success',
-        //         });
-        //     }
-        // },
     },
 }
 </script>

@@ -37,6 +37,7 @@ return new class extends Migration
             $table->boolean('show_address')->default(false);
             $table->boolean('show_expiration')->default(false);
             $table->json('additionals')->nullable();
+            $table->unsignedFloat('remaining', 10, 2)->nullable();
             $table->foreignId('client_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
