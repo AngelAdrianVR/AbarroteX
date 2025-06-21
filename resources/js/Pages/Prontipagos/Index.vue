@@ -38,10 +38,11 @@
 
             <!-- Productos filtrados por subcategoría -->
             <section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4 my-10" v-if="subcategorySelected">
-              <div @click="seleccionarProducto(producto)"
+              <div @click="seleccionarProducto(product)"
                 v-for="product in filteredProducts" 
                 :key="product.sku"
-                class="cursor-pointer p-4 rounded-xl border hover:shadow-lg transition duration-200 bg-white hover:bg-gray-50"
+                class="cursor-pointer p-4 rounded-xl border hover:shadow-lg transition duration-200 hover:bg-gray-50"
+                :class="{ 'border-primary bg-gray-50': productoSeleccionado?.sku === product.sku }"
               >
                 <div class="font-medium text-gray-800">{{ product.name }}</div>
                 <div class="text-sm text-gray-500 truncate">{{ product.description }}</div>
