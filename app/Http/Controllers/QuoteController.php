@@ -14,11 +14,15 @@ use App\Models\Quote;
 use App\Models\Sale;
 use App\Notifications\BasicNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 
 class QuoteController extends Controller
 {
+    const STATUS_PAID = 'Pagado';
+    const STATUS_PARTIAL = 'Pago parcial';
+
     public function index()
     {
         $quotes = Quote::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
@@ -172,64 +176,215 @@ class QuoteController extends Controller
         return response()->json(['items' => $quotes]);
     }
 
+    // public function updateStatus(Quote $quote, Request $request)
+    // {
+    //     $quote->update([
+    //         'status' => $request->status
+    //     ]);
+
+    //     // Crear venta si est[a] pagada la cot
+    //     if ($request->status == "Pagado" || $request->status == "Pago parcial") {
+    //         $installment = $request->amount < $request->grand_total
+    //             ? $request->amount
+    //             : null;
+
+    //         // crear al cliente si es abono o si se especificó desde el pago
+    //         if ($request->create_client) {
+    //             $client = Client::create([
+    //                 'company' => $quote->company,
+    //                 'name' => $quote->contact_name,
+    //                 'phone' => $quote->phone,
+    //                 'email' => $quote->email,
+    //                 'notes' => 'Cliente agregado automáticamente por pago de cotización',
+    //                 'store_id' => auth()->user()->store_id,
+    //             ]);
+
+    //             $quote->client_id = $client->id;
+    //             $quote->save();
+    //         }
+
+    //         // Revisar si tiene adeudo la venta para registrar abono
+    //         if ($quote->remainig) {
+    //             $this->storeInstallment();
+    //         } else {
+    //             // Registrar por primera vez la venta
+    //             $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment, $request->limit_date);
+    //         }
+
+    //         if ($installment) {
+    //             //envitar negativos
+    //             if ($installment > $quote->remaining) {
+    //                 $installment = $quote->remaining;
+    //             }
+
+    //             // actualizar la cantidad pendiente de pago
+    //             if ($quote->remaining) {
+    //                 // ya tenia abonos, se resta el abono actual
+    //                 $quote->decrement('remaining', $installment);
+    //             } else {
+    //                 //no tenia abonos, se resta el actual al total
+    //                 $quote->remaining = $request->grand_total - $installment;
+    //                 $quote->save();
+    //             }
+
+    //             // si ya se pagó por completo
+    //             if ($quote->remaining == 0) {
+    //                 $quote->status = "Pagado";
+    //                 $quote->save();
+    //             }
+    //         }
+    //     }
+    // }
+
+    /**
+     * Update the quote status and handle related operations
+     * 
+     * @param Quote $quote
+     * @param Request $request
+     * @return void
+     */
     public function updateStatus(Quote $quote, Request $request)
     {
-        $quote->update([
-            'status' => $request->status
-        ]);
+        $this->validateStatusRequest($request);
 
-        // Crear venta si est[a] pagada la cot
-        if ($request->status == "Pagado" || $request->status == "Pago parcial") {
-            $installment = $request->amount < $request->grand_total
+        // Asegurar que todas las transacciones de base de datos se registran correctamente, si no, no registrar nada
+        DB::transaction(function () use ($quote, $request) {
+            $quote->update(['status' => $request->status]);
+
+            if ($this->isPaidStatus($request->status)) {
+                $this->handlePaidQuote($quote, $request);
+            }
+        });
+    }
+
+    /**
+     * Validate the status update request
+     * 
+     * @param Request $request
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateStatusRequest(Request $request)
+    {
+        $validStatuses = ['Pagado', 'Pago parcial', 'Rechazada', 'Autorizada', 'Sin enviar a cliente', 'Esperando respuesta'];
+
+        $rules = [
+            'status' => ['required', 'string', 'in:' . implode(',', $validStatuses)],
+        ];
+
+        // Solo validar amount y payment_method si el estado es de pago
+        if (in_array($request->status, ['Pagado', 'Pago parcial'])) {
+            $rules['amount'] = ['required', 'numeric', 'min:1'];
+            $rules['payment_method'] = ['required', 'string', 'in:Efectivo,Tarjeta'];
+        }
+
+        // Validar campos adicionales para pagos parciales
+        if ($request->status === 'Pago parcial') {
+            $rules['limit_date'] = ['nullable', 'date', 'after_or_equal:today'];
+        }
+
+        $request->validate($rules);
+    }
+
+    private function createClientFromQuote(Quote $quote)
+    {
+        return Client::create([
+            'company' => $quote->company,
+            'name' => $quote->contact_name,
+            'phone' => $quote->phone,
+            'email' => $quote->email,
+            'notes' => 'Cliente agregado automáticamente por pago de cotización',
+            'store_id' => auth()->user()->store_id,
+        ]);
+    }
+
+    private function isPaidStatus($status)
+    {
+        return in_array($status, [self::STATUS_PAID, self::STATUS_PARTIAL]);
+    }
+
+    private function handlePaidQuote(Quote $quote, Request $request)
+    {
+        $installment = $this->calculateInstallment($quote, $request);
+
+        if ($request->create_client) {
+            $this->createClientFromQuote($quote);
+        }
+
+        $quote->remaining
+            ? $this->storeInstallment($quote, $request, $installment)
+            : $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment, $request->limit_date);
+
+        if ($installment) {
+            $this->updateQuoteRemaining($quote, $request, $installment);
+        }
+    }
+
+    private function calculateInstallment(Quote $quote, Request $request)
+    {
+        // ya hay abonos registrados
+        if ($quote->remaining !== null) {
+            return min($request->amount, $quote->remaining);
+        } else {
+            return $request->amount < $request->grand_total
                 ? $request->amount
                 : null;
-
-            // crear al cliente si es abono o si se especificó desde el pago
-            if ($request->create_client) {
-                $client = Client::create([
-                    'company' => $quote->company,
-                    'name' => $quote->contact_name,
-                    'phone' => $quote->phone,
-                    'email' => $quote->email,
-                    'notes' => 'Cliente agregado automáticamente por pago de cotización',
-                    'store_id' => auth()->user()->store_id,
-                ]);
-
-                $quote->client_id = $client->id;
-                $quote->save();
-            }
-
-            // Revisar si tiene adeudo la venta para registrar abono
-            if ($quote->remainig) {
-                $this->storeInstallment();
-            } else {
-                // Registrar por primera vez la venta
-                $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment, $request->limit_date);
-            }
-
-            if ($installment) {
-                //envitar negativos
-                if ($installment > $quote->remaining) {
-                    $installment = $quote->remaining;
-                }
-                
-                // actualizar la cantidad pendiente de pago
-                if ($quote->remaining) {
-                    // ya tenia abonos, se resta el abono actual
-                    $quote->decrement('remaining', $installment);
-                } else {
-                    //no tenia abonos, se resta el actual al total
-                    $quote->remaining = $request->grand_total - $installment;
-                    $quote->save();
-                }
-
-                // si ya se pagó por completo
-                if ($quote->remaining == 0) {
-                    $quote->status = "Pagado";
-                    $quote->save();
-                }
-            }
         }
+    }
+
+    private function updateQuoteRemaining(Quote $quote, Request $request, $installment)
+    {
+        // hay abonos
+        if ($quote->remaining !== null) {
+            $quote->remaining = max(0, $quote->remaining - $installment);
+        } else { // primer pago
+            $quote->remaining = max(0, $request->grand_total - $installment);
+        }
+
+        if ($quote->remaining == 0) {
+            $quote->status = self::STATUS_PAID;
+        }
+
+        $quote->save();
+    }
+
+    private function storeInstallment(Quote $quote, Request $request, $installment)
+    {
+        $store_id = auth()->user()->store_id;
+
+        // Obtener el folio de venta por cotizacion
+        $folio = $quote->sales->first()->folio;
+
+        // Registrar el abono
+        $credit_sale_data = CreditSaleData::firstWhere([
+            'folio' => $folio,
+            'store_id' => $store_id,
+        ]);
+
+        Installment::create([
+            'amount' => $installment,
+            'notes' => 'Abono a cotización',
+            'credit_sale_data_id' => $credit_sale_data->id,
+            'user_id' => auth()->id(),
+        ]);
+
+        // Registrar movimiento de caja si es pago en efectivo
+        if ($request->payment_method === 'Efectivo') {
+            CashRegisterMovement::create([
+                'amount' => $installment,
+                'type' => 'Ingreso',
+                'notes' => 'Abono adicional hecho en la cotización con folio C-' . str_pad($quote->id, 4, '0'),
+                'cash_register_id' => auth()->user()->cash_register_id,
+            ]);
+
+            $cash_register = CashRegister::find(auth()->user()->cash_register_id);
+            $cash_register->current_cash += $installment;
+            $cash_register->save();
+        }
+
+        // Actualizar deuda del cliente
+        $client = Client::find($quote->client_id);
+        $client->debt = max(0, ($client->debt ?? 0) - $installment);
+        $client->save();
     }
 
     private function storeEachProductSold($products_sold, $payment_method = null, $quote, $installment, $limit_date)

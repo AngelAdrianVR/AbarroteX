@@ -232,6 +232,7 @@
                                         <span>$</span>
                                     </template>
                                 </el-input-number>
+                                <InputError :message="statusForm.errors.amount" />
                             </div>
                             <div>
                                 <p class="text-center font-bold">Fecha de vencimiento</p>
@@ -297,6 +298,7 @@
                                             <span>$</span>
                                         </template>
                                     </el-input-number>
+                                    <InputError :message="statusForm.errors.amount" />
                                 </div>
                                 <div>
                                     <p class="text-center font-bold">Fecha de vencimiento</p>
@@ -358,6 +360,7 @@ import es from 'date-fns/locale/es';
 import axios from 'axios';
 import DialogModal from '@/Components/DialogModal.vue';
 import { useForm } from '@inertiajs/vue3';
+import InputError from '@/Components/InputError.vue';
 
 export default {
     data() {
@@ -388,6 +391,7 @@ export default {
         PrimaryButton,
         CancelButton,
         DialogModal,
+        InputError,
     },
     props: {
         quotes: Array
@@ -510,11 +514,6 @@ export default {
                     }, 1000);
                 },
                 onError: (error) => {
-                    this.$notify({
-                        title: 'No se pudo completar la petición',
-                        message: 'Hubo un problema al cambiar el estatus. Actualiza la página e inténtalo de nuevo',
-                        type: 'success',
-                    });
                     console.error(error);
                 }
             })
@@ -540,7 +539,7 @@ export default {
                 this.$notify({
                     title: 'El servidor no pudo procesar la petición',
                     message: 'No se pudo eliminar la cotización. Intente más tarde o si el problema persiste, contacte a soporte',
-                    type: 'error',
+                    type: 'warning',
                 });
             }
         },
