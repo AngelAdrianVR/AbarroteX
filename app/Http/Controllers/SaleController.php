@@ -270,7 +270,6 @@ class SaleController extends Controller
                 $product_name .= "({$sale['product']['additional']['color']['name']}-{$sale['product']['additional']['size']['name']})";
             }
 
-
             // obtiene un estracto para referir a la promoción en caso de tener
             $promotions = $this->getPromotion($sale);
 
@@ -678,7 +677,7 @@ class SaleController extends Controller
                 return Carbon::parse($date)->toDateString();
             }
         })->map(function ($sales) use ($returnSales, $installments) {
-            // Filtrar ventas normales y en línea
+            // Filtrar ventas normales, cotización y en línea
             $normalSales = $sales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
             $quoteSales = $sales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
             $onlineSales = $sales->filter(fn($sale) => !isset($sale->current_price));
@@ -704,7 +703,7 @@ class SaleController extends Controller
             // obtener el total solo de las ventas por cotizacion
             $totalQuotesSale = $quoteSales->sum(function ($sale) {
                 $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
-                if (!$credit_data && $sale->quote_id) {
+                if (!$credit_data) {
                     // usar precio con descuento si existe
                     $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
                         ? $sale->discounted_price
@@ -802,8 +801,8 @@ class SaleController extends Controller
                         ];
                     })->values(),
                     'credit_data' => $firstSale->credit_data,
+                    'quote' => $firstSale->quote,
                     'folio' => $firstSale->folio,
-                    'quote_folio' => $firstSale->quote->folio,
                     'user_name' => $firstSale->user->name,
                     'client_name' => $firstSale->client?->name ?? 'Público en general',
                     'total_sale' => $localTotalSale,

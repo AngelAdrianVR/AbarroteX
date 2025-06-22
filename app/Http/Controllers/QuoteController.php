@@ -156,11 +156,26 @@ class QuoteController extends Controller
     public function searchQuote(Request $request)
     {
         $query = $request->input('query');
+        $storeId = auth()->user()->store_id;
 
-        $quotes = Quote::where('store_id', auth()->user()->store_id)
-            ->where(function ($q) use ($query) {
+        // Si el query es tipo C-0001, extraer el número
+        $folioNumber = null;
+        if (preg_match('/^C-(\d{4})$/i', $query, $matches)) {
+            $folioNumber = intval(ltrim($matches[1], '0'));
+        } elseif (preg_match('/^\d{4}$/', $query)) {
+            // Si el query es solo un número de 4 dígitos con ceros a la izquierda
+            $folioNumber = intval(ltrim($query, '0'));
+        }
+
+        $quotes = Quote::where('store_id', $storeId)
+            ->where(function ($q) use ($query, $folioNumber) {
                 $q->where('contact_name', 'like', "%$query%")
-                    ->orWhere('id', 'like', "%$query%");
+                    ->orWhere('company', 'like', "%$query%");
+                if ($folioNumber !== null) {
+                    $q->orWhere('folio', $folioNumber);
+                } else {
+                    $q->orWhere('folio', 'like', "%$query%");
+                }
             })
             ->get();
 
@@ -257,12 +272,6 @@ class QuoteController extends Controller
         });
     }
 
-    /**
-     * Validate the status update request
-     * 
-     * @param Request $request
-     * @throws \Illuminate\Validation\ValidationException
-     */
     private function validateStatusRequest(Request $request)
     {
         $validStatuses = ['Pagado', 'Pago parcial', 'Rechazada', 'Autorizada', 'Sin enviar a cliente', 'Esperando respuesta'];
@@ -272,7 +281,7 @@ class QuoteController extends Controller
         ];
 
         // Solo validar amount y payment_method si el estado es de pago
-        if (in_array($request->status, ['Pagado', 'Pago parcial'])) {
+        if (in_array($request->status, ['Pago parcial'])) {
             $rules['amount'] = ['required', 'numeric', 'min:1'];
             $rules['payment_method'] = ['required', 'string', 'in:Efectivo,Tarjeta'];
         }
@@ -307,12 +316,13 @@ class QuoteController extends Controller
         $installment = $this->calculateInstallment($quote, $request);
 
         if ($request->create_client) {
-            $this->createClientFromQuote($quote);
+            $new_client = $this->createClientFromQuote($quote);
+            $quote->client_id = $new_client->id;
         }
 
         $quote->remaining
             ? $this->storeInstallment($quote, $request, $installment)
-            : $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment, $request->limit_date);
+            : $this->storeEachProductSold($quote->products, $request, $quote, $installment);
 
         if ($installment) {
             $this->updateQuoteRemaining($quote, $request, $installment);
@@ -362,10 +372,17 @@ class QuoteController extends Controller
 
         Installment::create([
             'amount' => $installment,
+            'payment_method' => $request->payment_method,
             'notes' => 'Abono a cotización',
             'credit_sale_data_id' => $credit_sale_data->id,
             'user_id' => auth()->id(),
         ]);
+
+        // Se paga por completo la cotización. Actualizar el status del credito
+        if ($quote->remaining <= $installment) {
+            $credit_sale_data->status = 'Pagado';
+            $credit_sale_data->save();
+        }
 
         // Registrar movimiento de caja si es pago en efectivo
         if ($request->payment_method === 'Efectivo') {
@@ -387,7 +404,7 @@ class QuoteController extends Controller
         $client->save();
     }
 
-    private function storeEachProductSold($products_sold, $payment_method = null, $quote, $installment, $limit_date)
+    private function storeEachProductSold($products_sold, $request, $quote, $installment)
     {
         $store_id = auth()->user()->store_id;
         // Generar un id unico para productos vendidos a este cliente
@@ -397,10 +414,7 @@ class QuoteController extends Controller
         // obtiene la caja registradora asignada al cajero
         $cash_register = CashRegister::find(auth()->user()->cash_register_id);
 
-        // total de dinero en venta
-        $total_amount = 0;
         foreach ($products_sold as $sale) {
-            $total_amount += $sale['price'] * $sale['quantity'];
             $product_id = $sale['product_id'];
             $is_global_product = !$sale['isLocal'];
             $current_product = $is_global_product
@@ -423,11 +437,11 @@ class QuoteController extends Controller
                 'current_price' => $sale['price'],
                 'quantity' => $sale['quantity'],
                 'folio' => $folio,
-                'payment_method' => $payment_method,
+                'payment_method' => $request->payment_method,
                 'product_name' => $product_name,
                 'product_id' => $product_id,
                 'is_global_product' => $is_global_product,
-                'original_price' => 0,
+                'original_price' => $current_product->public_price != $sale['price'] ? $current_product->public_price : 0,
                 'client_id' => $quote->client_id,
                 'store_id' => $store_id,
                 'cash_register_id' => auth()->user()->cash_register_id,
@@ -491,13 +505,14 @@ class QuoteController extends Controller
                 'folio' => $folio,
                 'store_id' => $store_id,
                 'client_id' => $quote->client_id,
-                'expired_date' => $limit_date,
+                'expired_date' => $request->limit_date,
                 'status' => 'Parcial',
             ]);
 
             // registrar pago parcial o abono
             Installment::create([
                 'amount' => $installment,
+                'payment_method' => $request->payment_method,
                 'notes' => 'Anticipo de la cotización',
                 'credit_sale_data_id' => $new_credit_sale_data->id,
                 'user_id' => auth()->id(),
@@ -517,16 +532,19 @@ class QuoteController extends Controller
 
             // sumar la deuda al cliente tomando en cuenta el abono
             $client = Client::find($quote->client_id);
+            Log::info($client);
             if ($client->debt) {
-                $client->debt += $total_amount - $installment;
+                $client->debt += $request->grand_total - $installment;
             } else {
-                $client->debt = $total_amount - $installment;
+                $client->debt = $request->grand_total - $installment;
+                Log::info($request->grand_total);
+                Log::info($installment);
             }
 
             $client->save();
-        } else if ($payment_method === 'Efectivo') {
+        } else if ($request->payment_method === 'Efectivo') {
             //Suma la cantidad total de dinero vendido del producto al dinero actual de la caja si el pago fue en efectivo y no con tarjeta
-            $cash_register->current_cash += $total_amount;
+            $cash_register->current_cash += $request->grand_total;
             $cash_register->save();
         }
 

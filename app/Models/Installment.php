@@ -11,6 +11,7 @@ class Installment extends Model
 
     protected $fillable = [
         'amount',
+        'payment_method',
         'notes',
         'credit_sale_data_id',
         'user_id',

@@ -7,6 +7,7 @@
                     <th class="w-32">Fecha de creación</th>
                     <th class="w-32">Cliente</th>
                     <th class="w-32">Total</th>
+                    <th class="w-32">Saldo pendiente</th>
                     <th class="w-32"></th>
                 </tr>
             </thead>
@@ -28,7 +29,14 @@
                         {{ quote.contact_name }}
                     </td>
                     <td>
-                        <p>${{ grandTotal(quote).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                        <p>$ {{ grandTotal(quote).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</p>
+                    </td>
+                    <td>
+                        <p>
+                            {{ quote.remaining
+                                ? '$ ' + quote.remaining.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                : '-' }}
+                        </p>
                     </td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
@@ -37,7 +45,8 @@
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
                             <template #dropdown>
-                                <el-dropdown-menu :class="canChangeStatus && quote.status != 'Pagado' ? '!w-[210px]' : null">
+                                <el-dropdown-menu
+                                    :class="canChangeStatus && quote.status != 'Pagado' ? '!w-[210px]' : null">
                                     <el-dropdown-item :command="'see|' + encodeId(quote.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -56,7 +65,9 @@
                                         </svg>
                                         <span class="text-xs">Editar</span>
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-if="canDelete && !['Pagado', 'Pago parcial'].includes(quote.status)" :command="'delete|' + quote.id">
+                                    <el-dropdown-item
+                                        v-if="canDelete && !['Pagado', 'Pago parcial'].includes(quote.status)"
+                                        :command="'delete|' + quote.id">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor"
                                             class="size-[14px] mr-2 text-red-600">
@@ -65,9 +76,10 @@
                                         </svg>
                                         <span class="text-xs text-red-600">Eliminar</span>
                                     </el-dropdown-item>
-                                    <div v-if="canChangeStatus && quote.status != 'Pagado'">
+                                    <div v-if="canChangeStatus && !['Pagado', 'Pago parcial'].includes(quote.status)">
                                         <p class="my-1 text-center text-xs text-gray99">Cambiar estado de cotización</p>
-                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Sin enviar a cliente'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'"
+                                            :command="'status|' + quote.id + '|Sin enviar a cliente'">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                 fill="currentColor" class="size-4 mr-2">
                                                 <path fill-rule="evenodd"
@@ -76,7 +88,8 @@
                                             </svg>
                                             <span class="text-xs">Sin enviar a cliente</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Esperando respuesta'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'"
+                                            :command="'status|' + quote.id + '|Esperando respuesta'">
                                             <svg width="16" height="18" viewBox="0 0 13 16" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -86,7 +99,8 @@
                                             </svg>
                                             <span class="text-xs">Esperando respuesta</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Autorizada'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'"
+                                            :command="'status|' + quote.id + '|Autorizada'">
                                             <svg width="15" height="15" viewBox="0 0 14 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -105,9 +119,10 @@
                                                     d="M6.00086 9.6103C6.43553 9.74663 6.82957 9.51831 6.81532 9.26971C6.8038 9.06871 6.69817 8.98525 6.31884 8.8764C5.70938 8.7015 4.97006 8.54573 4.73072 7.8706C4.47416 7.14688 5.1106 6.56292 5.77873 6.40871C5.77873 6.31045 5.72797 6 5.86846 6H6.69164C6.879 6 6.81532 6.28805 6.81532 6.40871C7.33441 6.54145 7.6035 6.66753 7.90506 7.03572C7.95384 7.09527 7.95384 7.18775 7.90506 7.21916L7.25958 7.63485C6.95225 7.33789 6.11864 6.67075 5.8163 7.24893C5.51859 7.81825 6.42227 8.04361 6.81532 8.11169C7.64895 8.25607 8 8.79287 8 9.26971C8 9.74654 7.68405 10.2214 6.81532 10.4277C6.81532 10.5463 6.87135 10.7716 6.69774 10.7683H5.89895C5.72594 10.7683 5.77873 10.5432 5.77873 10.4277C5.21751 10.2713 4.95557 10.1181 4.71176 9.82929C4.64283 9.74764 4.66114 9.64477 4.71176 9.61935L5.40852 9.26971C5.55652 9.45408 5.78168 9.54156 6.00086 9.6103Z"
                                                     fill="currentColor" />
                                             </svg>
-                                            <span class="text-xs">Pago parcial (crédito)</span>
+                                            <span class="text-xs">Pago parcial</span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'" :command="'status|' + quote.id + '|Pagado'">
+                                        <el-dropdown-item v-if="quote.status != 'Pago parcial'"
+                                            :command="'status|' + quote.id + '|Pagado'">
                                             <svg width="15" height="15" viewBox="0 0 13 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -118,8 +133,7 @@
                                                 Pagado (contado)
                                             </span>
                                         </el-dropdown-item>
-                                        <el-dropdown-item v-if="!['Pagado', 'Pago parcial'].includes(quote.status)"
-                                            :command="'status|' + quote.id + '|Rechazada'">
+                                        <el-dropdown-item :command="'status|' + quote.id + '|Rechazada'">
                                             <svg width="15" height="15" viewBox="0 0 13 13" fill="none" class="mr-2"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path
@@ -128,6 +142,20 @@
                                                     stroke-linejoin="round" />
                                             </svg>
                                             <span class="text-xs">Rechazada</span>
+                                        </el-dropdown-item>
+                                    </div>
+                                    <div v-else-if="quote.status == 'Pago parcial'">
+                                        <el-dropdown-item :command="'status|' + quote.id + '|Pago parcial'">
+                                            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" class="mr-2"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M3 0C3.13261 0 3.25979 0.0526784 3.35355 0.146447C3.44732 0.240215 3.5 0.367392 3.5 0.5V1.5H9.5V0.5C9.5 0.367392 9.55268 0.240215 9.64645 0.146447C9.74021 0.0526784 9.86739 0 10 0C10.1326 0 10.2598 0.0526784 10.3536 0.146447C10.4473 0.240215 10.5 0.367392 10.5 0.5V1.5H11C11.5304 1.5 12.0391 1.71071 12.4142 2.08579C12.7893 2.46086 13 2.96957 13 3.5V11C13 11.5304 12.7893 12.0391 12.4142 12.4142C12.0391 12.7893 11.5304 13 11 13H2C1.46957 13 0.960859 12.7893 0.585787 12.4142C0.210714 12.0391 0 11.5304 0 11V3.5C0 2.96957 0.210714 2.46086 0.585787 2.08579C0.960859 1.71071 1.46957 1.5 2 1.5H2.5V0.5C2.5 0.367392 2.55268 0.240215 2.64645 0.146447C2.74021 0.0526784 2.86739 0 3 0ZM12 6C12 5.73478 11.8946 5.48043 11.7071 5.29289C11.5196 5.10536 11.2652 5 11 5H2C1.73478 5 1.48043 5.10536 1.29289 5.29289C1.10536 5.48043 1 5.73478 1 6V11C1 11.2652 1.10536 11.5196 1.29289 11.7071C1.48043 11.8946 1.73478 12 2 12H11C11.2652 12 11.5196 11.8946 11.7071 11.7071C11.8946 11.5196 12 11.2652 12 11V6Z"
+                                                    fill="currentColor" />
+                                                <path
+                                                    d="M6.00086 9.6103C6.43553 9.74663 6.82957 9.51831 6.81532 9.26971C6.8038 9.06871 6.69817 8.98525 6.31884 8.8764C5.70938 8.7015 4.97006 8.54573 4.73072 7.8706C4.47416 7.14688 5.1106 6.56292 5.77873 6.40871C5.77873 6.31045 5.72797 6 5.86846 6H6.69164C6.879 6 6.81532 6.28805 6.81532 6.40871C7.33441 6.54145 7.6035 6.66753 7.90506 7.03572C7.95384 7.09527 7.95384 7.18775 7.90506 7.21916L7.25958 7.63485C6.95225 7.33789 6.11864 6.67075 5.8163 7.24893C5.51859 7.81825 6.42227 8.04361 6.81532 8.11169C7.64895 8.25607 8 8.79287 8 9.26971C8 9.74654 7.68405 10.2214 6.81532 10.4277C6.81532 10.5463 6.87135 10.7716 6.69774 10.7683H5.89895C5.72594 10.7683 5.77873 10.5432 5.77873 10.4277C5.21751 10.2713 4.95557 10.1181 4.71176 9.82929C4.64283 9.74764 4.66114 9.64477 4.71176 9.61935L5.40852 9.26971C5.55652 9.45408 5.78168 9.54156 6.00086 9.6103Z"
+                                                    fill="currentColor" />
+                                            </svg>
+                                            <span class="text-xs">Registrar abono</span>
                                         </el-dropdown-item>
                                     </div>
                                 </el-dropdown-menu>
@@ -158,51 +186,93 @@
         </ConfirmationModal>
         <DialogModal :show="showPaymentModal" @close="showPaymentModal = false">
             <template #title>
-                <h1 v-if="paymentModalStep === 1" class="font-bold mt-2">Opciones de pago</h1>
-                <h1 v-else-if="paymentModalStep === 2" class="font-bold mt-2 text-lg">Pagar</h1>
-                <h1 v-else-if="paymentModalStep === 3" class="font-bold mt-2 text-lg">Registrar pago</h1>
+                <div v-if="!paymentConfirmed">
+                    <h1 v-if="paymentModalStep === 1" class="font-bold mt-2">Opciones de pago</h1>
+                    <h1 v-else-if="paymentModalStep === 2" class="font-bold mt-2 text-lg">Pagar</h1>
+                    <h1 v-else-if="paymentModalStep === 3" class="font-bold mt-2 text-lg">Registrar pago</h1>
+                </div>
+                <h1 v-else></h1>
             </template>
             <template #content>
-                <div v-if="paymentModalStep === 1" class="px-4 relative">
-                    <p class="text-gray99">Seleccione el método de pago</p>
-                    <section class="grid grid-cols-2 gap-4 mt-2">
-                        <button
-                            @click="paymentModalStep = 2; statusForm.payment_method = 'Efectivo'; receivedInputFocus()"
-                            type="button"
-                            class="bg-[#E0FEC5] text-[#37672B] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
-                            <p class="text-lg text-center font-bold">EFECTIVO</p>
-                            <img src="@/../../public/images/dollar.webp" alt="Billete verde indica Pago en efectivo">
-                        </button>
-                        <button
-                            @click="paymentModalStep = 3; statusForm.payment_method = 'Tarjeta'; receivedInputFocus()"
-                            type="button"
-                            class="bg-[#DAE6FF] text-[#063B52] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
-                            <p class="text-lg text-center font-bold">TARJETA</p>
-                            <img src="@/../../public/images/card.webp" alt="Tarjeta azul que indica Pago con tarjeta">
-                        </button>
-                    </section>
-                </div>
-                <!-- Pago con efectivo (step 2) -->
-                <div v-if="paymentModalStep === 2" class="px-4 relative">
-                    <section class="flex items-center justify-between">
-                        <div @click="paymentModalStep = 1"
-                            class="flex items-center space-x-4 text-primary cursor-pointer">
-                            <i class="fa-solid fa-arrow-left"></i>
-                            <span>Regresar</span>
-                        </div>
-                    </section>
-                    <section class="mx-auto mt-2 md:w-2/3">
-                        <div
-                            class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
-                            <span class="font-bold text-[#37672B]">EFECTIVO</span>
-                            <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo" class="h-7">
-                        </div>
-                        <div
-                            class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+                <div v-if="!paymentConfirmed">
+                    <div v-if="paymentModalStep === 1" class="px-4 relative">
+                        <p class="text-gray99">Seleccione el método de pago</p>
+                        <section class="grid grid-cols-2 gap-4 mt-2">
+                            <button
+                                @click="paymentModalStep = 2; statusForm.payment_method = 'Efectivo'; receivedInputFocus()"
+                                type="button"
+                                class="bg-[#E0FEC5] text-[#37672B] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+                                <p class="text-lg text-center font-bold">EFECTIVO</p>
+                                <img src="@/../../public/images/dollar.webp"
+                                    alt="Billete verde indica Pago en efectivo">
+                            </button>
+                            <button
+                                @click="paymentModalStep = 3; statusForm.payment_method = 'Tarjeta'; receivedInputFocus()"
+                                type="button"
+                                class="bg-[#DAE6FF] text-[#063B52] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+                                <p class="text-lg text-center font-bold">TARJETA</p>
+                                <img src="@/../../public/images/card.webp"
+                                    alt="Tarjeta azul que indica Pago con tarjeta">
+                            </button>
+                        </section>
+                    </div>
+                    <!-- Pago con efectivo (step 2) -->
+                    <div v-if="paymentModalStep === 2" class="px-4 relative">
+                        <section class="flex items-center justify-between">
+                            <div @click="paymentModalStep = 1"
+                                class="flex items-center space-x-4 text-primary cursor-pointer">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>Regresar</span>
+                            </div>
+                        </section>
+                        <section class="mx-auto mt-2 md:w-2/3">
+                            <div
+                                class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
+                                <span class="font-bold text-[#37672B]">EFECTIVO</span>
+                                <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo" class="h-7">
+                            </div>
+                        </section>
+                    </div>
+                    <!-- Pago con tarjeta (step 3) -->
+                    <div v-if="paymentModalStep === 3" class="px-4 relative">
+                        <section class="flex items-center justify-between">
+                            <div @click="paymentModalStep = 1"
+                                class="flex items-center space-x-4 text-primary cursor-pointer">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>Regresar</span>
+                            </div>
+                        </section>
+                        <section class="mx-auto mt-2 md:w-2/3">
+                            <div v-if="!paymentConfirmed">
+                                <p class="my-3 text-sm text-center text-black">
+                                    El sistema no procesa pagos con tarjeta. Usa tu terminal
+                                    bancaria externa y luego registra aquí el pago.
+                                </p>
+                                <div
+                                    class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
+                                    <span class="font-bold text-[#05394F]">TARJETA</span>
+                                    <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <!-- formulario, botón de pago y mensaje de exito -->
+                    <div v-if="paymentModalStep === 2 || paymentModalStep === 3" class="mt-3">
+                        <div v-if="statusForm.status == 'Pagado'"
+                            class="md:w-2/3 rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-2 mx-auto">
                             <span class="font-bold">Total a pagar</span>
                             <p class="font-bold">
                                 <span class="mr-4">$</span>
-                                {{ grandTotal(quoteSelected)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                                {{ grandTotal(quoteSelected)?.toLocaleString('en-US', { minimumFractionDigits: 2 })
+                                }}
+                            </p>
+                        </div>
+                        <div v-else
+                            class="md:w-2/3 rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-2 mx-auto">
+                            <span class="font-bold">Saldo pendiente</span>
+                            <p class="font-bold">
+                                <span class="mr-4">$</span>
+                                {{ calculateRemaining()?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
                             </p>
                         </div>
                         <div v-if="!isCreditPayment && !quoteSelected.client_id"
@@ -227,126 +297,55 @@
                             <div>
                                 <p class="text-center font-bold">¿Cuánto paga el cliente?</p>
                                 <el-input-number ref="receivedInput" @keydown.enter="updateStatus"
-                                    v-model="statusForm.amount" :min="1" :max="statusForm.grand_total">
+                                    v-model="statusForm.amount" :min="1" :max="statusForm.grand_total - 1">
                                     <template #prefix>
                                         <span>$</span>
                                     </template>
                                 </el-input-number>
                                 <InputError :message="statusForm.errors.amount" />
                             </div>
-                            <div>
+                            <div v-if="!quoteSelected.remaining">
                                 <p class="text-center font-bold">Fecha de vencimiento</p>
                                 <el-date-picker v-model="statusForm.limit_date" class="!w-full" type="date"
                                     placeholder="dd/mm/aa" :disabled-date="disabledDate" />
                             </div>
                         </div>
-                    </section>
-                </div>
-                <!-- Pago con tarjeta (step 3) -->
-                <div v-if="paymentModalStep === 3" class="px-4 relative">
-                    <section class="flex items-center justify-between">
-                        <div @click="paymentModalStep = 1"
-                            class="flex items-center space-x-4 text-primary cursor-pointer">
-                            <i class="fa-solid fa-arrow-left"></i>
-                            <span>Regresar</span>
-                        </div>
-                    </section>
-                    <section class="mx-auto mt-2 md:w-2/3">
-                        <div v-if="!paymentConfirmed">
-                            <p class="my-3 text-sm text-center text-black">
-                                El sistema no procesa pagos con tarjeta. Usa tu terminal
-                                bancaria externa y luego registra aquí el pago.
-                            </p>
-                            <div
-                                class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
-                                <span class="font-bold text-[#05394F]">TARJETA</span>
-                                <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
-                            </div>
-                            <div
-                                class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
-                                <span class="font-bold">Total a pagar</span>
-                                <p class="font-bold">
-                                    <span class="mr-4">$</span>
-                                    {{ grandTotal(quoteSelected)?.toLocaleString('en-US', { minimumFractionDigits: 2 })
-                                    }}
-                                </p>
-                            </div>
-                            <div v-if="!isCreditPayment && !quoteSelected.client_id"
-                                class="flex items-center justify-center space-x-1 mt-2">
-                                <el-checkbox v-model="statusForm.create_client" label="Crear cliente" size="large" />
-                                <el-tooltip placement="top">
-                                    <template #content>
-                                        <p class="text-center">
-                                            ¿Deseas dar de alta al cliente para <br>
-                                            consultar sus cotizaciones?
-                                        </p>
-                                    </template>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-                                    </svg>
-                                </el-tooltip>
-                            </div>
-                            <div v-if="!paymentConfirmed && isCreditPayment"
-                                class="mt-5 flex flex-col items-center space-y-3">
-                                <div>
-                                    <p class="text-center font-bold">¿Cuánto paga el cliente?</p>
-                                    <el-input-number ref="receivedInput" @keydown.enter="updateStatus"
-                                        v-model="statusForm.amount" :min="1" :max="statusForm.grand_total">
-                                        <template #prefix>
-                                            <span>$</span>
-                                        </template>
-                                    </el-input-number>
-                                    <InputError :message="statusForm.errors.amount" />
-                                </div>
-                                <div>
-                                    <p class="text-center font-bold">Fecha de vencimiento</p>
-                                    <el-date-picker v-model="statusForm.limit_date" class="!w-full" type="date"
-                                        placeholder="dd/mm/aa" :disabled-date="disabledDate" />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-                <!-- botón de pago y mensaje de exito -->
-                <div v-if="paymentModalStep === 2 || paymentModalStep === 3" class="mt-8">
-                    <p v-if="isCreditPayment && !quoteSelected.client_id" class="flex items-center justify-center space-x-1 text-[#52116C]">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M4.99078 12.1599H1.14485C0.0379915 8.17201 5.55392 5.89796 8.19572 9.04622M7.23111 11.5306L9.01163 13C10.5692 11.1965 11.4424 10.1854 13 8.38192M7.37355 3.37901C7.37355 4.6929 6.2894 5.75802 4.95203 5.75802C3.61467 5.75802 2.53052 4.6929 2.53052 3.37901C2.53052 2.06512 3.61467 1 4.95203 1C6.2894 1 7.37355 2.06512 7.37355 3.37901Z"
-                                stroke="currentColor" />
-                        </svg>
-                        <span>
-                            El cliente se creará automáticamente para el registro de abonos.
-                        </span>
-                    </p>
-                    <div class="flex justify-center mt-3">
-                        <PrimaryButton :disabled="statusForm.processing" class="!px-20" @click="updateStatus">
-                            <i v-if="statusForm.processing"
-                                class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                            Registrar pago
-                        </PrimaryButton>
-                    </div>
-                    <!-- Confirmacion de pago -->
-                    <div v-if="paymentConfirmed">
-                        <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
+                        <p v-if="isCreditPayment && !quoteSelected.client_id"
+                            class="flex items-center justify-center space-x-1 text-[#52116C] mt-6">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M4.99078 12.1599H1.14485C0.0379915 8.17201 5.55392 5.89796 8.19572 9.04622M7.23111 11.5306L9.01163 13C10.5692 11.1965 11.4424 10.1854 13 8.38192M7.37355 3.37901C7.37355 4.6929 6.2894 5.75802 4.95203 5.75802C3.61467 5.75802 2.53052 4.6929 2.53052 3.37901C2.53052 2.06512 3.61467 1 4.95203 1C6.2894 1 7.37355 2.06512 7.37355 3.37901Z"
+                                    stroke="currentColor" />
                             </svg>
-                            <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
+                            <span>
+                                El cliente se creará automáticamente para el registro de abonos.
+                            </span>
+                        </p>
+                        <div class="flex justify-center mt-3">
+                            <PrimaryButton :disabled="statusForm.processing" class="!px-20" @click="updateStatus">
+                                <i v-if="statusForm.processing"
+                                    class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                                Registrar pago
+                            </PrimaryButton>
                         </div>
+                        <p class="text-gray37 mt-3 mx-4 lg:mx-16 text-center">
+                            Se generará una nueva venta y los productos se descontarán automáticamente del inventario
+                        </p>
                     </div>
-                    <p class="text-gray37 mt-3 mx-4 lg:mx-16 text-center">
-                        Se generará una nueva venta y los productos se descontarán automáticamente del inventario
-                    </p>
+                </div>
+                <!-- Confirmacion de pago -->
+                <div v-else>
+                    <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p class="text-green-600 font-bold text-lg">¡Pago registrado con éxito!</p>
+                    </div>
                 </div>
             </template>
-            <template #footer>
-
-            </template>
+            <template #footer></template>
         </DialogModal>
     </div>
 </template>
@@ -397,6 +396,14 @@ export default {
         quotes: Array
     },
     methods: {
+        calculateRemaining() {
+            if (this.quoteSelected.remaining) {
+                // ya tiene abonos registrados
+                return this.quoteSelected.remaining - this.statusForm.amount;
+            } else {
+                return this.statusForm.grand_total - this.statusForm.amount;
+            }
+        },
         receivedInputFocus() {
             this.$nextTick(() => {
                 try {
@@ -499,19 +506,22 @@ export default {
         updateStatus() {
             this.statusForm.post(route('quotes.update-status', this.quoteSelected.id), {
                 onSuccess: () => {
-                    this.$notify({
-                        title: 'Correcto',
-                        message: 'Se ha actualizazo el estatus de la cotización',
-                        type: 'success',
-                    });
-                    this.quoteSelected.status = this.statusForm.status;
+                    // actualizar info de la vista
+                    this.quoteSelected.remaining = this.quoteSelected.remaining != null
+                        ? this.quoteSelected.remaining - this.statusForm.amount
+                        : null;
+
+                    this.quoteSelected.status = this.quoteSelected.remaining === 0
+                        ? 'Pagado'
+                        : this.statusForm.status;
+
                     this.paymentConfirmed = true; //indica que el pago ha sido confirmado
                     setTimeout(() => {
                         this.paymentConfirmed = false;
                         // Aquí cierra el modal como lo manejes normalmente
                         this.showPaymentModal = false; // ajusta este método a tu implementación
                         this.paymentModalStep = 1; //reinicia el paso del modal de pago
-                    }, 1000);
+                    }, 1500);
                 },
                 onError: (error) => {
                     console.error(error);
@@ -546,3 +556,20 @@ export default {
     },
 }
 </script>
+<style scoped>
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 1s ease-out forwards;
+}
+</style>

@@ -3,6 +3,14 @@
         <header
             class="flex items-center justify-between border-b border-grayD9 text-end px-1 lg:px-5 py-1 text-white bg-gray-200">
             <div class="flex items-center space-x-1 lg:space-x-3">
+                <p class="text-gray99">
+                    Cotización:
+                    <a as="button" :href="route('quotes.show', encodeId(groupedSales.products[0].quote_id))"
+                        target="_blank" class="text-primary hover:underline">
+                        C-{{ String(groupedSales.quote.folio).padStart(4, '0') }}
+                    </a>
+                </p>
+                <span class="text-gray99">•</span>
                 <p class="text-gray99">Folio: <span class="text-gray37">{{ groupedSales.folio }}</span></p>
                 <span class="text-gray99">•</span>
                 <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{
@@ -79,7 +87,16 @@
                                     <th class="w-[50%] text-start">Producto</th>
                                     <th class="w-[10%] text-start">Precio</th>
                                     <th class="w-[10%] text-start">Cantidad</th>
-                                    <th class="w-[30%] text-end">Total</th>
+                                    <th class="w-[30%] text-end">
+                                        Total
+                                        <span v-if="groupedSales.quote.iva_included != null">
+                                            {{
+                                                groupedSales.quote.iva_included
+                                                    ? '(IVA incluido)'
+                                                    : '(+ IVA)'
+                                            }}
+                                        </span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y-[1px]">
@@ -188,6 +205,85 @@
                 <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
             </div>
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
+                <div v-if="groupedSales.quote.iva_included !== null" class="flex items-center justify-end"
+                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
+                        <template #content>
+                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            </p>
+                        </template>
+                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
+                            Reembolsado
+                        </p>
+                    </el-tooltip>
+                    <span class="text-start w-40">
+                        Subtotal:
+                    </span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ subtotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div v-if="groupedSales.quote.iva_included !== null" class="flex items-center justify-end"
+                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
+                        <template #content>
+                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            </p>
+                        </template>
+                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
+                            Reembolsado
+                        </p>
+                    </el-tooltip>
+                    <span class="text-start w-40">
+                        IVA:
+                    </span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{
+                            groupedSales.quote.iva_included
+                                ? (groupedSales.total_sale - (groupedSales.total_sale /
+                                    1.16))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                : (groupedSales.total_sale * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}
+                    </span>
+                </div>
+                <div v-if="groupedSales.quote.delivery_cost" class="flex items-center justify-end"
+                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
+                        <template #content>
+                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            </p>
+                        </template>
+                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
+                            Reembolsado
+                        </p>
+                    </el-tooltip>
+                    <span class="text-start w-40">
+                        {{ groupedSales.quote.delivery_type }}:
+                    </span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ groupedSales.quote.delivery_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div v-if="groupedSales.quote.is_percentage_discount != null" class="flex items-center justify-end"
+                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
+                        <template #content>
+                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
+                            </p>
+                        </template>
+                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
+                            Reembolsado
+                        </p>
+                    </el-tooltip>
+                    <span class="text-start w-40">Descuento:</span>
+                    <span class="w-12">-$</span>
+                    <span class="w-12">
+                        {{ discounted.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
                 <div class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
                     <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
@@ -199,10 +295,10 @@
                             Reembolsado
                         </p>
                     </el-tooltip>
-                    <span class="text-start w-32">Total de la venta:</span>
+                    <span class="text-start w-40">Total de la venta:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ groupedSales.total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ grandTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
                 <div v-if="groupedSales.credit_data" class="flex items-center justify-end"
@@ -215,7 +311,7 @@
                         <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
                             Reembolsado</p>
                     </el-tooltip>
-                    <span class="text-start w-32">Total abonado:</span>
+                    <span class="text-start w-40">Total abonado:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
                         {{ calcTotalInstallments.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -225,10 +321,10 @@
                     :class="statusStyles.bg">
                     <span class="w-24 text-start" :class="statusStyles.text">
                         {{ groupedSales.credit_data.status }}</span>
-                    <span class="text-start w-32">Deuda restante:</span>
+                    <span class="text-start w-40">Deuda restante:</span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ (groupedSales.total_sale - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                        {{ (grandTotal - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                             ",") }}
                     </span>
                 </div>
@@ -310,8 +406,36 @@ export default {
                 return accumulator + currentValue.amount;
             }, 0);
         },
+        // para ventas con cotizacion
+        subtotal() {
+            if (this.groupedSales.quote.iva_included) {
+                return (this.groupedSales.quote.total / 1.16);
+            }
+
+            return this.groupedSales.quote.total;
+        },
+        grandTotal() {
+            if (this.groupedSales.quote.iva_included === false) {
+                return (this.groupedSales.quote.total * 1.16) + this.groupedSales.quote.delivery_cost - this.discounted;
+            }
+
+            return this.groupedSales.quote.total + this.groupedSales.quote.delivery_cost - this.discounted;
+        },
+        discounted() {
+            let discounted = 0;
+            if (this.groupedSales.quote.is_percentage_discount != null) {
+                discounted = this.groupedSales.quote.is_percentage_discount
+                    ? this.percentageDiscount()
+                    : this.groupedSales.quote.discount;
+            }
+
+            return discounted;
+        },
     },
     methods: {
+        percentageDiscount() {
+            return this.groupedSales.quote.percentage * 0.01 * this.subtotal;
+        },
         encodeId(id) {
             const encodedId = btoa(id.toString());
             return encodedId;
