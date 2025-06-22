@@ -19,9 +19,9 @@
                             <i class="fa-solid fa-plus text-primary text-[9px] pl-[1px]"></i>
                         </button>
                     </div>
-                    <el-select @change="fillClientInfo" filterable
-                        v-model="form.client_id" clearable placeholder="Selecciona el cliente"
-                        no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                    <el-select @change="fillClientInfo" filterable v-model="form.client_id" clearable
+                        placeholder="Selecciona el cliente" no-data-text="No hay opciones registradas"
+                        no-match-text="No se encontraron coincidencias">
                         <el-option v-for="client in clients" :key="client"
                             :label="client.company ? client.company + ' - ' + client.name : client.name"
                             :value="client.id" />
@@ -180,8 +180,9 @@
                     </h2>
                     <p class="text-xs text-gray99">
                         Agrega opciones adicionales a cada cotización, si deseas que permanezcan en todas las cotización
-                        ve a Configuraciones y luego a la pestaña 
-                        <a :href="route('settings.index', {tab: 6})" target="_blank" class="text-primary underline">Cotizaciones</a>
+                        ve a Configuraciones y luego a la pestaña
+                        <a :href="route('settings.index', { tab: 6 })" target="_blank"
+                            class="text-primary underline">Cotizaciones</a>
                     </p>
                     <article class="grid xl:grid-cols-2 mx-2 gap-3 mt-2">
                         <div class="border border-grayD9 bg-white rounded-lg">
@@ -301,7 +302,7 @@
                         <p class="flex items-center justify-between w-[40%]">
                             <span class="mx-2">$</span>
                             <span>
-                                {{ (form.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                {{ (subtotal * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                             </span>
                         </p>
                     </div>
@@ -533,10 +534,10 @@ export default {
             return this.form.percentage * 0.01 * this.subtotal;
         },
         async fillClientInfo() {
-             if (!this.form.client_id) {
+            if (!this.form.client_id) {
                 return;
             }
-            
+
             this.loadingClient = true;
             try {
                 const response = await axios.get(route('clients.get-client-info', this.form.client_id));
@@ -601,7 +602,7 @@ export default {
         },
         subtotal() {
             if (this.form.iva_included) {
-                return (this.form.total * 0.84);
+                return (this.form.total / 1.16);
             }
 
             return this.form.total;

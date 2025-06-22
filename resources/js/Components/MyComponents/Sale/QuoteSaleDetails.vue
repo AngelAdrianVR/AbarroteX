@@ -205,7 +205,7 @@
                 <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
             </div>
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
-                <div v-if="groupedSales.quote.iva_included !== null" class="flex items-center justify-end"
+                <div class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
                     <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
                         <template #content>
@@ -241,10 +241,7 @@
                     <span class="w-12">$</span>
                     <span class="w-12">
                         {{
-                            groupedSales.quote.iva_included
-                                ? (groupedSales.total_sale - (groupedSales.total_sale /
-                                    1.16))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                : (groupedSales.total_sale * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            (subtotal * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         }}
                     </span>
                 </div>

@@ -305,7 +305,7 @@
                         <p class="flex items-center justify-between w-[40%]">
                             <span class="mx-2">$</span>
                             <span>
-                                {{ (form.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                {{ (subtotal * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                             </span>
                         </p>
                     </div>
@@ -603,7 +603,7 @@ export default {
         },
         subtotal() {
             if (this.form.iva_included) {
-                return (this.form.total * 0.84);
+                return (this.form.total / 1.16);
             }
 
             return this.form.total;
