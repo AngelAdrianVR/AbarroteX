@@ -96,9 +96,9 @@
             <p>Mensual</p>
           </button>
           <!-- boton de Anual -->
-          <button @click="period = 'Anual'"
+          <button :disabled="period === 'Mensual'" @click="period = 'Anual'"
             :class="period === 'Anual' ? 'bg-primarylight text-[#373737] border-primary' : 'bg-transparent border-grayD9'"
-            class="cursor-pointer rounded-lg border-2 p-3 font-bold w-full relative shadow-md">
+            class="cursor-pointer rounded-lg border-2 p-3 font-bold w-full relative disabled:cursor-not-allowed disabled:bg-grayD9 shadow-md">
             <!-- popular -->
             <div
               class="absolute -top-3 right-2 rounded-full bg-[#006847] text-white flex items-center space-x-2 text-[10px] px-2 py-[2px]">

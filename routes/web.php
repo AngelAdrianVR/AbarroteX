@@ -22,6 +22,7 @@ use App\Http\Controllers\ProductBoutiqueController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductHistoryController;
 use App\Http\Controllers\PromotionsController;
+use App\Http\Controllers\ProntipagosController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\RentalPaymentController;
@@ -422,6 +423,17 @@ Route::post('promotions/store', [PromotionsController::class, 'store'])->name('p
 Route::put('promotions/update', [PromotionsController::class, 'update'])->name('promotions.update')->middleware(['auth', 'activeSuscription', 'verified']);
 
 
+//rutas de Prontipagos --------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------
+Route::get('/prontipagos', [ProntipagosController::class, 'index'])->name('prontipagos.index')->middleware('auth');
+Route::get('/prontipagos/token', [ProntipagosController::class, 'getToken'])->name('prontipagos.get-access-token')->middleware('auth');
+Route::get('/prontipagos/balance', [ProntipagosController::class, 'getCurrentBalance'])->name('prontipagos.get-current-balance')->middleware('auth');
+Route::get('/prontipagos/catalog-products', [ProntipagosController::class, 'getCatalogoProducts'])->name('prontipagos.get-catalog-products')->middleware('auth');
+Route::post('/prontipagos/venta', [ProntipagosController::class, 'realizarVenta'])->name('prontipagos.make-sale')->middleware('auth');
+Route::get('/prontipagos/sale/satus/{id}', [ProntipagosController::class, 'getSaleStatus'])->name('prontipagos.get-sale-status')->middleware('auth');
+
+
+
 // ver tutoriales
 Route::get('/started-turtorial/pos', function () {
     if (auth()->user()->store->type == 'Boutique / Tienda de Ropa / Zapatería') {
@@ -432,10 +444,12 @@ Route::get('/started-turtorial/pos', function () {
 })->name('started-tutorial');
 
 
-// Actualizar el método de pago de todas las ventas a "Efectivo"
-use Illuminate\Support\Facades\DB;
-Route::get('/actualizar-payment-method', function () {
-    DB::table('sales')->update(['payment_method' => 'Efectivo']);
 
-    return 'Todos los registros se actualizaron con el método de pago "Efectivo".';
-});
+
+// Actualizar el método de pago de todas las ventas a "Efectivo"
+// use Illuminate\Support\Facades\DB;
+// Route::get('/actualizar-payment-method', function () {
+//     DB::table('sales')->update(['payment_method' => 'Efectivo']);
+
+//     return 'Todos los registros se actualizaron con el método de pago "Efectivo".';
+// });

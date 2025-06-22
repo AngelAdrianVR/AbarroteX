@@ -31,6 +31,7 @@ const showInventoryModal = ref(false)
 const searchQuery = ref('')
 const searchLoading = ref(false)
 const loadingProviders = ref(false)
+const updatingStorage = ref(false)
 const productsFound = ref([])
 const providers = ref([])
 const selectedProviders = ref([])
@@ -89,6 +90,7 @@ const fetchProviders = async () => {
 
 // Buscar productos
 const searchProducts = async () => {
+    selectedProviders.value = [];
     searchLoading.value = true
     try {
         const response = await axios.get(route('products.search'), {
@@ -100,12 +102,13 @@ const searchProducts = async () => {
     } catch (error) {
         console.error(error)
     } finally {
-        searchLoading.value = false
+        searchLoading.value = false;
     }
 }
 
 // Filtrar productos por proveedor
 const filterByProvider = async () => {
+    searchQuery.value = '';
     searchLoading.value = true
     try {
         const response = await axios.get(route('products.filter-by-provider'), {
@@ -123,6 +126,7 @@ const filterByProvider = async () => {
 
 // actualiza el stock de los productos seleccionados
 const updateProductStock = async () => {
+    updatingStorage.value = true
     try {
         const payload = Object.entries(stockUpdates).map(([productId, quantity]) => {
             const product = productsFound.value.find(p => p.id == productId)
@@ -142,10 +146,13 @@ const updateProductStock = async () => {
                 // Si hay proveedores seleccionados, filtra los productos por proveedor
                 await filterByProvider()
             } else {
-                // Si no hay proveedores seleccionados, recarga todos los productos
+                // Si no hay proveedores seleccionados, recarga todos los productos para actualizar el stock
                 await searchProducts()
             }
             // Limpia los campos
+            // productsFound.value = []
+            Object.keys(stockUpdates).forEach(key => delete stockUpdates[key])
+            updatingStorage.value = false
         }
     } catch (error) {
         console.error('Error al actualizar el stock:', error)
@@ -153,6 +160,9 @@ const updateProductStock = async () => {
     }
 }
 
+const allStockZero = computed(() =>
+  Object.values(stockUpdates).every(quantity => !quantity || Number(quantity) === 0)
+)
 
 const providerOptions = computed(() =>
     providers.map(provider => ({
@@ -828,7 +838,7 @@ onUnmounted(() => {
         <SmallLoading v-if="loadingProviders" class="my-3 mx-auto" />
 
         <section v-else class="mt-5 py-2">
-            <article class="flex justify-between items-center">
+            <article class="md:flex justify-between items-center space-y-2 md:space-y-0">
                 <!-- Buscar por nombre o código del producto -->
                 <div class="lg:w-1/4 relative">
                     <input v-model="searchQuery" @keyup.enter="searchProducts"
@@ -837,7 +847,7 @@ onUnmounted(() => {
                 </div>
 
 
-                <div class="flex space-x-2 max-w-lg">
+                <div class="flex border max-w-lg rounded-lg">
                     <el-select
                         v-model="selectedProviders"
                         multiple
@@ -855,27 +865,27 @@ onUnmounted(() => {
                         :value="provider.id"
                     />
                     </el-select>
-                    <el-button type="primary" @click="filterByProvider" class="!px-4 !py-2">
-                        <i class="fa-solid fa-magnifying-glass mr-1"></i> Filtrar
-                    </el-button>
+                    <button @click="filterByProvider" :disabled="!selectedProviders.length" class="px-3 bg-gray-300 rounded-r-md -ml-1 disabled:bg-gray-200 disabled:cursor-not-allowed">
+                        <i :class="!selectedProviders.length ? 'text-gray-400' : 'text-gray-700'" class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </button>
                 </div>
             </article>
 
             <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
 
-            <div v-else class="overflow-auto my-7 max-h-[500px]">
+            <div v-else class="max-h-[500px] overflow-y-auto rounded mt-7">
                 <table v-if="productsFound?.length" class="w-full table-fixed">
                     <thead>
-                        <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                            <th class="w-16">Imagen</th>
-                            <th class="w-32">Código</th>
-                            <th class="w-44">Nombre de producto</th>
-                            <th class="w-28">Proveedor</th>
-                            <th class="w-28">Existencias</th>
-                            <th class="w-32">Cant. a agregar</th>
-                            <th class="w-28">Existencias mínimas</th>
-                            <th class="w-28">Existencias Máximas</th>
-                        </tr>
+                    <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
+                        <th class="w-16 bg-white sticky top-0 z-10">Imagen</th>
+                        <th class="w-32 bg-white sticky top-0 z-10">Código</th>
+                        <th class="w-44 bg-white sticky top-0 z-10">Nombre de producto</th>
+                        <th class="w-28 bg-white sticky top-0 z-10">Proveedor</th>
+                        <th class="w-28 bg-white sticky top-0 z-10">Existencias</th>
+                        <th class="w-32 bg-white sticky top-0 z-10">Cant. a agregar</th>
+                        <th class="w-28 bg-white sticky top-0 z-10">Existencias mínimas</th>
+                        <th class="w-28 bg-white sticky top-0 z-10">Existencias Máximas</th>
+                    </tr>
                     </thead>
                     <tbody>
                         <tr v-for="product in productsFound" :key="product.id"
@@ -926,7 +936,10 @@ onUnmounted(() => {
 
             <div class="flex items-center justify-end mt-4 space-x-3">
                 <CancelButton @click="showInventoryModal = false;">Cancelar</CancelButton>
-                <PrimaryButton :disabled="!productsFound.length" @click="updateProductStock">Registrar entradas</PrimaryButton>
+                <PrimaryButton :disabled="!productsFound.length || searchLoading || updatingStorage || allStockZero" @click="updateProductStock">
+                    <i v-if="updatingStorage" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                    Registrar entradas
+                </PrimaryButton>
             </div>
         </section>
       </div>
