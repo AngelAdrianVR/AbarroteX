@@ -90,6 +90,7 @@ const fetchProviders = async () => {
 
 // Buscar productos
 const searchProducts = async () => {
+    if ( searchQuery.value === '' ) return;
     selectedProviders.value = [];
     searchLoading.value = true
     try {
