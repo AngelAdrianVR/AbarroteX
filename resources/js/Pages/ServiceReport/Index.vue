@@ -1,12 +1,12 @@
 <template>
-  <AppLayout title="Reportes de Servicio">
+  <AppLayout title="Ordenes de Servicio">
     <div class="px-2 lg:px-10 py-7">
-      <h1>Reportes de Servicio</h1>
+      <h1>Ordenes de Servicio</h1>
       <div class="md:flex justify-between mt-3">
         <article class="flex items-center flex-col space-y-2 lg:flex-row lg:space-x-2 lg:space-y-0 lg:w-1/3">
           <div class="w-full relative">
             <input v-model="searchQuery" @keydown.enter="searchReports" class="input w-full pl-9"
-              placeholder="Buscar por solicitante, responsable o quien recibio" type="search" />
+              placeholder="Buscar por cliente, N° orden o fecha" type="search" />
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <el-tag @close="closedTag" v-if="searchedWord" closable type="primary">
@@ -15,7 +15,7 @@
         </article>
         <div v-if="canCreate" class="my-4 md:my-0 flex items-center justify-end space-x-3">
           <PrimaryButton @click="$inertia.get(route('service-reports.create'))">
-            Crear reporte
+            Crear orden
           </PrimaryButton>
         </div>
       </div>

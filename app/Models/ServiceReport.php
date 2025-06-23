@@ -15,13 +15,19 @@ class ServiceReport extends Model
         'service_date',
         'client_name',
         'client_department',
+        'phone_number',
+        'service_description',
+        'service_cost',
+        'advance_payment',
+        'payment_method',
         'product_details',
         'spare_parts',
         'observations',
+        'aditionals',
         'technician_name',
         'receiver_name',
         'description',
-        'store_id',
+        'store_id'
     ];
 
     protected $casts = [
@@ -29,6 +35,7 @@ class ServiceReport extends Model
         'product_details' => 'array',
         'spare_parts' => 'array',
         'observations' => 'array',
+        'aditionals' => 'array',
     ];
 
     //relationships
