@@ -55,7 +55,6 @@ class SaleController extends Controller
         } else {
             return inertia('Sale/PointMobile', compact('products', 'cash_registers', 'clients', 'products_quantity'));
         }
-
     }
 
     public function index()
@@ -269,7 +268,6 @@ class SaleController extends Controller
                 // agregar color y talla al nombre
                 $product_name .= "({$sale['product']['additional']['color']['name']}-{$sale['product']['additional']['size']['name']})";
             }
-
 
             // obtiene un estracto para referir a la promoción en caso de tener
             $promotions = $this->getPromotion($sale);
@@ -678,7 +676,7 @@ class SaleController extends Controller
                 return Carbon::parse($date)->toDateString();
             }
         })->map(function ($sales) use ($returnSales, $installments) {
-            // Filtrar ventas normales y en línea
+            // Filtrar ventas normales, cotización y en línea
             $normalSales = $sales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
             $quoteSales = $sales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
             $onlineSales = $sales->filter(fn($sale) => !isset($sale->current_price));
@@ -689,7 +687,7 @@ class SaleController extends Controller
                 return count($onlineSale->products);
             });
 
-            // obtener el total solo de las ventas al contado y sin cotizacion
+            // obtener el total de las ventas al contado y sin cotizacion
             $totalSale = $normalSales->sum(function ($sale) {
                 $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
                 if (!$credit_data && !$sale->quote_id) {
@@ -700,17 +698,46 @@ class SaleController extends Controller
                     return $sale->quantity * $price_to_use;
                 }
             });
-            
+            $total_day_sale = $normalSales->sum(function ($sale) {
+                // usar precio con descuento si existe
+                $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                    ? $sale->discounted_price
+                    : $sale->current_price;
+                return $sale->quantity * $price_to_use;
+            });
+
             // obtener el total solo de las ventas por cotizacion
             $totalQuotesSale = $quoteSales->sum(function ($sale) {
                 $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
-                if (!$credit_data && $sale->quote_id) {
+                if (!$credit_data) {
                     // usar precio con descuento si existe
                     $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
                         ? $sale->discounted_price
                         : $sale->current_price;
                     return $sale->quantity * $price_to_use;
                 }
+            });
+            $total_day_sale += $quoteSales->sum(function ($sale) {
+                $quote = $sale->quote;
+                // usar precio con descuento si existe
+                $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                    ? $sale->discounted_price
+                    : $sale->current_price;
+                $delivery = $quote->delivery_cost;
+                if ($quote->iva_included) {
+                    $subtotal = $quote->total / 1.16;
+                } else {
+                    $subtotal = $quote->total;
+                }
+
+                $discounted = 0;
+                if ($quote->has_discount) {
+                    $discounted = $quote->percentage
+                        ? $subtotal * 0.01 * $quote->percentage
+                        : $quote->discount;
+                }
+
+                return ($sale->quantity * $price_to_use) + $delivery - $discounted;
             });
 
             // total de ventas en línea entregados
@@ -719,6 +746,7 @@ class SaleController extends Controller
                     return $online_sale->total + $online_sale->delivery_price;
                 }
             });
+            $total_day_sale += $totalOnlineSale;
 
             $normalFolios = $normalSales->unique('folio')->count();
             $quoteFolios = $quoteSales->unique('folio')->count();
@@ -765,7 +793,7 @@ class SaleController extends Controller
                     'total_sale' => $localTotalSale,
                 ];
             });
-            
+
             // ventas de cotizaciones por folio
             $quoteSalesByFolio = $quoteSales->groupBy('folio')->map(function ($folioSales) {
                 $firstSale = $folioSales->first();
@@ -802,8 +830,8 @@ class SaleController extends Controller
                         ];
                     })->values(),
                     'credit_data' => $firstSale->credit_data,
+                    'quote' => $firstSale->quote,
                     'folio' => $firstSale->folio,
-                    'quote_folio' => $firstSale->quote->folio,
                     'user_name' => $firstSale->user->name,
                     'client_name' => $firstSale->client?->name ?? 'Público en general',
                     'total_sale' => $localTotalSale,
@@ -816,10 +844,11 @@ class SaleController extends Controller
                 'total_online_quantity' => $totalQuantityOnlineSale,
                 'total_sale' => $totalSale,
                 'total_quotes_sale' => $totalQuotesSale,
+                'online_sales_total' => $totalOnlineSale,
+                'total_day_sale' => $total_day_sale,
                 'normal_folios' => $normalFolios,
                 'quote_folios' => $quoteFolios,
                 'online_folios' => $onlineFolios,
-                'online_sales_total' => $totalOnlineSale,
                 'sales' => $returnSales ? $normalSalesByFolio : [],
                 'quote_sales' => $returnSales ? $quoteSalesByFolio : [],
                 'online_sales' => $returnSales ? $onlineSales->values() : [],

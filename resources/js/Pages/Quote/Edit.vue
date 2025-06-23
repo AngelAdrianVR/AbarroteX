@@ -29,6 +29,12 @@
                     <InputError :message="form.errors.client_id" />
                 </div>
                 <div>
+                    <InputLabel value="Empresa (opcional)" />
+                    <el-input v-model="form.company" placeholder="Escribe el nombre de la empresa" :maxlength="150"
+                        clearable />
+                    <InputError :message="form.errors.company" />
+                </div>
+                <div>
                     <InputLabel value="Nombre del contacto*" />
                     <el-input v-model="form.contact_name" placeholder="Escribe el nombre del contacto" :maxlength="100"
                         clearable />
@@ -49,7 +55,25 @@
                     <InputError :message="form.errors.email" />
                 </div>
                 <div>
-                    <InputLabel value="Fecha de expiración de cot. (opcional)" />
+                    <div class="flex items-center justify-between">
+                        <InputLabel value="Fecha de expiración de cot. (opcional)" />
+                        <div class="flex items-center space-x-1">
+                            <el-checkbox v-model="form.show_expiration" label="Mostrar" size="small" />
+                            <el-tooltip placement="top">
+                                <template #content>
+                                    <p class="text-center">
+                                        Al seleccionar esta opción, se mostrará <br>
+                                        en la plantilla de la cotización
+                                    </p>
+                                </template>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                </svg>
+                            </el-tooltip>
+                        </div>
+                    </div>
                     <el-date-picker v-model="form.expired_date" type="date" class="!w-full" placeholder="día/mes/año"
                         :disabled-date="disabledPrevDays" />
                     <InputError :message="form.errors.expired_date" />
@@ -157,6 +181,12 @@
                     <h2 class="font-bold text-gray37">
                         Opciones adicionales
                     </h2>
+                    <p class="text-xs text-gray99">
+                        Agrega opciones adicionales a cada cotización, si deseas que permanezcan en todas las cotización
+                        ve a Configuraciones y luego a la pestaña
+                        <a :href="route('settings.index', { tab: 6 })" target="_blank"
+                            class="text-primary underline">Cotizaciones</a>
+                    </p>
                     <article class="grid xl:grid-cols-2 mx-2 gap-3 mt-2">
                         <div class="border border-grayD9 bg-white rounded-lg">
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
@@ -275,7 +305,7 @@
                         <p class="flex items-center justify-between w-[40%]">
                             <span class="mx-2">$</span>
                             <span>
-                                {{ (form.total * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                {{ (subtotal * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                             </span>
                         </p>
                     </div>
@@ -383,6 +413,7 @@ export default {
         });
 
         const form = useForm({
+            company: this.quote.company,
             contact_name: this.quote.contact_name,
             phone: this.quote.phone,
             payment_conditions: this.quote.payment_conditions,
@@ -403,6 +434,7 @@ export default {
             delivery2: this.quote.delivery_type == 'Envío por paquetería' ? this.quote.delivery_cost : null,
             show_payment_conditions: !!this.quote.show_payment_conditions,
             show_address: !!this.quote.show_address,
+            show_expiration: !!this.quote.show_expiration,
         });
 
         return {
@@ -419,8 +451,9 @@ export default {
             totalServicesMoney: null, //total de dinero para los servicios
             totalProductsMoney: null, //total de dinero para los productos
             payment_conditions: [
-                'Al contado',
-                'Parcialidades',
+                'Pago por adelantado',
+                '50% anticipo / 50% contra entrega',
+                'Pago contra entrega',
             ]
         }
     },
@@ -496,11 +529,16 @@ export default {
             return time.getTime() < today.getTime();
         },
         async fillClientInfo() {
+            if (!this.form.client_id) {
+                return;
+            }
+
             this.loadingClient = true;
             try {
                 const response = await axios.get(route('clients.get-client-info', this.form.client_id));
                 if (response.status === 200) {
                     const client = response.data.client;
+                    this.form.company = client.company;
                     this.form.contact_name = client.name;
                     this.form.phone = client.phone;
                     this.form.email = client.email;
@@ -566,7 +604,7 @@ export default {
         },
         subtotal() {
             if (this.form.iva_included) {
-                return (this.form.total * 0.84);
+                return (this.form.total / 1.16);
             }
 
             return this.form.total;
