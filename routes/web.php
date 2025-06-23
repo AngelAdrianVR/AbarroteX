@@ -390,6 +390,8 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 Route::resource('service-reports', ServiceReportController::class);
 Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
+Route::post('services-reports-change-status/{service_report}', [ServiceReportController::class, 'changeStatus'])->name('service-reports.change-status')->middleware('auth');
+Route::post('services-reports-massive-delete', [ServiceReportController::class, 'massiveDelete'])->name('service-reports.massive-delete')->middleware('auth');
 
 
 //rutas de báscula ---------------------------------------------------------------------------------------------------
