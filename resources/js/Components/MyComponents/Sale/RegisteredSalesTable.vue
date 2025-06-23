@@ -93,8 +93,7 @@
                             ({{ sale.total_quote_quantity }} productos en total)
                         </td>
                         <td>
-                            ${{ (sale.total_sale + sale.online_sales_total + sale.total_quotes_sale)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                            ",") }}
+                            ${{ sale.total_day_sale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}
                         </td>
                         <td class="rounded-e-full text-end">
                             <el-dropdown trigger="click" @command="handleCommand">

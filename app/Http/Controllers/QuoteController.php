@@ -191,66 +191,6 @@ class QuoteController extends Controller
         return response()->json(['items' => $quotes]);
     }
 
-    // public function updateStatus(Quote $quote, Request $request)
-    // {
-    //     $quote->update([
-    //         'status' => $request->status
-    //     ]);
-
-    //     // Crear venta si est[a] pagada la cot
-    //     if ($request->status == "Pagado" || $request->status == "Pago parcial") {
-    //         $installment = $request->amount < $request->grand_total
-    //             ? $request->amount
-    //             : null;
-
-    //         // crear al cliente si es abono o si se especificó desde el pago
-    //         if ($request->create_client) {
-    //             $client = Client::create([
-    //                 'company' => $quote->company,
-    //                 'name' => $quote->contact_name,
-    //                 'phone' => $quote->phone,
-    //                 'email' => $quote->email,
-    //                 'notes' => 'Cliente agregado automáticamente por pago de cotización',
-    //                 'store_id' => auth()->user()->store_id,
-    //             ]);
-
-    //             $quote->client_id = $client->id;
-    //             $quote->save();
-    //         }
-
-    //         // Revisar si tiene adeudo la venta para registrar abono
-    //         if ($quote->remainig) {
-    //             $this->storeInstallment();
-    //         } else {
-    //             // Registrar por primera vez la venta
-    //             $this->storeEachProductSold($quote->products, $request->payment_method, $quote, $installment, $request->limit_date);
-    //         }
-
-    //         if ($installment) {
-    //             //envitar negativos
-    //             if ($installment > $quote->remaining) {
-    //                 $installment = $quote->remaining;
-    //             }
-
-    //             // actualizar la cantidad pendiente de pago
-    //             if ($quote->remaining) {
-    //                 // ya tenia abonos, se resta el abono actual
-    //                 $quote->decrement('remaining', $installment);
-    //             } else {
-    //                 //no tenia abonos, se resta el actual al total
-    //                 $quote->remaining = $request->grand_total - $installment;
-    //                 $quote->save();
-    //             }
-
-    //             // si ya se pagó por completo
-    //             if ($quote->remaining == 0) {
-    //                 $quote->status = "Pagado";
-    //                 $quote->save();
-    //             }
-    //         }
-    //     }
-    // }
-
     /**
      * Update the quote status and handle related operations
      * 

@@ -28,7 +28,7 @@ export default {
     },
     methods: {
         showModal(modal, saleFolio) {
-            this.$emit('show-modal', modal, saleFolio);
+            this.$emit('show-modal', modal, saleFolio, 'quote');
         },
     },
     mounted() {

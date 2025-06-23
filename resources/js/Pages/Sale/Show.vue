@@ -406,6 +406,7 @@ export default {
             saleToSeeInstallments: null,
             saleFolioToRefund: null,
             addInstallment: false,
+            saleType: 'Normal',
             // cargas
             addingInstallment: false,
             refunding: false,
@@ -630,7 +631,8 @@ export default {
             let sale = this.getGroupedQuoteSales.find(item => item.folio == saleFolio);
             this.saleToSeeInstallments = sale;
         },
-        handleShowModal(modal, saleFolio) {
+        handleShowModal(modal, saleFolio, type = 'Normal') {
+            this.saleType = type;
             if (modal == 'edit') this.openEditModal(saleFolio);
             else if (modal == 'refund') this.openRefundModal(saleFolio);
             else if (modal == 'installment') this.openInstallmentModal(saleFolio);
@@ -690,16 +692,23 @@ export default {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
                     // if (this.isInventoryOn) {
-                    this.updateIndexedDBproductsStock(response.data.updated_items);
+                    //this.updateIndexedDBproductsStock(response.data.updated_items);
                     // }
 
                     this.showRefundConfirm = false;
 
                     // actualizar elementos de la vista (reactividad)
-                    let sale = this.getGroupedSales.find(item => item.folio == this.saleFolioToRefund);
-                    sale.products.forEach(element => {
-                        element.refunded_at = new Date().toISOString();
-                    });
+                    if (this.saleType == 'quote') {
+                        let sale = this.getGroupedQuoteSales.find(item => item.folio == this.saleFolioToRefund);
+                        sale.products.forEach(element => {
+                            element.refunded_at = new Date().toISOString();
+                        });
+                    } else {
+                        let sale = this.getGroupedSales.find(item => item.folio == this.saleFolioToRefund);
+                        sale.products.forEach(element => {
+                            element.refunded_at = new Date().toISOString();
+                        });
+                    }
 
                     this.$notify({
                         title: 'Venta reembolsada',

@@ -207,15 +207,6 @@
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
                 <div class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
-                        <template #content>
-                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
-                            </p>
-                        </template>
-                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
-                            Reembolsado
-                        </p>
-                    </el-tooltip>
                     <span class="text-start w-40">
                         Subtotal:
                     </span>
@@ -226,15 +217,6 @@
                 </div>
                 <div v-if="groupedSales.quote.iva_included !== null" class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
-                        <template #content>
-                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
-                            </p>
-                        </template>
-                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
-                            Reembolsado
-                        </p>
-                    </el-tooltip>
                     <span class="text-start w-40">
                         IVA:
                     </span>
@@ -247,15 +229,6 @@
                 </div>
                 <div v-if="groupedSales.quote.delivery_cost" class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
-                        <template #content>
-                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
-                            </p>
-                        </template>
-                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
-                            Reembolsado
-                        </p>
-                    </el-tooltip>
                     <span class="text-start w-40">
                         {{ groupedSales.quote.delivery_type }}:
                     </span>
@@ -266,15 +239,6 @@
                 </div>
                 <div v-if="groupedSales.quote.is_percentage_discount != null" class="flex items-center justify-end"
                     :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
-                        <template #content>
-                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
-                            </p>
-                        </template>
-                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
-                            Reembolsado
-                        </p>
-                    </el-tooltip>
                     <span class="text-start w-40">Descuento:</span>
                     <span class="w-12">-$</span>
                     <span class="w-12">

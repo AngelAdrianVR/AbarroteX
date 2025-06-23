@@ -451,8 +451,9 @@ export default {
             totalServicesMoney: null, //total de dinero para los servicios
             totalProductsMoney: null, //total de dinero para los productos
             payment_conditions: [
-                'Al contado',
-                'Parcialidades',
+                'Pago por adelantado',
+                '50% anticipo / 50% contra entrega',
+                'Pago contra entrega',
             ]
         }
     },
