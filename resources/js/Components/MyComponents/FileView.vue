@@ -88,8 +88,13 @@ export default {
         },
         async deleteFile() {
             try {
-                const response = await axios.delete(route('products.delete-file', this.file.id));
+                const response = await axios.delete(route('media.delete-file', this.file.id));
                 if (response.status === 200) {
+                    this.$notify({
+                        title: "Archivo eliminado",
+                        message: "",
+                        type: "success",
+                    });
                     this.$emit('delete-file', this.file.id);
                 }
             } catch (error) {
