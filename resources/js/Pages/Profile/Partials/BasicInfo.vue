@@ -20,6 +20,16 @@
                             <span v-else>{{ form.store_address ?? '-' }}</span>
                             <InputError :message="form.errors.store_address" />
                         </p>
+                        <div v-if="canSeeStoreInfo" class="flex flex-col">
+                            <b>Logo</b>
+                            <div>
+                                <InputFilePreview @imagen="storeLogo($event)" width="w-32" height="h-24"
+                                    :imageUrl="storeLogoUrl" @cleared="storeLogo()" />
+                                <p v-if="logoForm.processing" class="text-gray-400 text-xs col-span-full">
+                                    Guardando...
+                                </p>
+                            </div>
+                        </div>
                         <el-divider content-position="left" class="col-span-full">Información del usuario</el-divider>
                         <p class="flex flex-col">
                             <b> Nombre</b>
@@ -73,6 +83,7 @@
 <script>
 import { useForm } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
+import InputFilePreview from '@/Components/MyComponents/InputFilePreview.vue';
 
 export default {
     data() {
@@ -84,7 +95,12 @@ export default {
             email: this.$page.props.auth.user.email,
         });
 
+        const logoForm = useForm({
+            img: null,
+        });
+
         return {
+            logoForm,
             form,
             edit: false,
             // Permisos de rol actual
@@ -93,11 +109,21 @@ export default {
     },
     components: {
         InputError,
+        InputFilePreview,
     },
     props: {
         user: Object,
     },
+    computed: {
+        storeLogoUrl() {
+            return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'logo')?.original_url;
+        },
+    },
     methods: {
+        storeLogo(img = null) {
+            this.logoForm.img = img;
+            this.logoForm.post(route("stores.store-logo"));
+        },
         store() {
             this.form.put(route('ezy-profile.update-basic'), {
                 onSuccess: () => {
