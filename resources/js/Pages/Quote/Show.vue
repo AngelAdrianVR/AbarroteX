@@ -22,10 +22,8 @@
                             <span class="ml-1">{{ formatDate(quote.expired_date) }}</span>
                         </p>
                     </div>
-                    <figure class="border rounded-lg p-2">
-                        <img class="w-[150px] h-[50px] object-contain"
-                            :src="quote.store?.logo ? '/storage/' + quote.store.logo : '/images/logo.png'"
-                            alt="Logo de la empresa" />
+                    <figure v-if="storeLogoUrl">
+                        <img class="w-[150px] h-[50px] object-contain" :src="storeLogoUrl" alt="Logo de la empresa" />
                     </figure>
                 </section>
                 <el-divider class="!my-2" />
@@ -59,7 +57,8 @@
                             <td>{{ product.name }}</td>
                             <!-- <td>-</td> -->
                             <!-- <td>${{ (product.price / 1.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }} con iva descontado-->
-                            <td>${{ parseFloat(product.price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}
+                            <td>${{ parseFloat(product.price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-'
+                            }}
                             </td>
                             <td>{{ product.quantity?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                             <td>${{ (product.price * product.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -171,6 +170,9 @@ export default {
         quote: Object
     },
     computed: {
+        storeLogoUrl() {
+            return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'logo')?.original_url;
+        },
         subtotal() {
             if (this.quote.iva_included) {
                 return (this.quote.total / 1.16);
