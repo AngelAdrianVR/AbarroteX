@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Laravel\Jetstream\Agent;
 
 class SaleController extends Controller
 {
@@ -47,7 +48,13 @@ class SaleController extends Controller
 
         $clients = Client::where('store_id', $store_id)->get(['id', 'name']);
 
-        return inertia('Sale/Point', compact('products', 'cash_registers', 'clients', 'products_quantity'));
+        // Redireccionar a la vista de acuerdo al dispositivo
+        $agent = new Agent();
+        if ($agent->isDesktop() || $agent->isLaptop()) {
+            return inertia('Sale/Point', compact('products', 'cash_registers', 'clients', 'products_quantity'));
+        } else {
+            return inertia('Sale/PointMobile', compact('products', 'cash_registers', 'clients', 'products_quantity'));
+        }
     }
 
     public function index()
@@ -261,7 +268,6 @@ class SaleController extends Controller
                 // agregar color y talla al nombre
                 $product_name .= "({$sale['product']['additional']['color']['name']}-{$sale['product']['additional']['size']['name']})";
             }
-
 
             // obtiene un estracto para referir a la promoción en caso de tener
             $promotions = $this->getPromotion($sale);
@@ -670,17 +676,38 @@ class SaleController extends Controller
                 return Carbon::parse($date)->toDateString();
             }
         })->map(function ($sales) use ($returnSales, $installments) {
-            // Filtrar ventas normales y en línea
-            $normalSales = $sales->filter(fn($sale) => isset($sale->current_price));
+            // Filtrar ventas normales, cotización y en línea
+            $normalSales = $sales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
+            $quoteSales = $sales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
             $onlineSales = $sales->filter(fn($sale) => !isset($sale->current_price));
 
             $totalQuantityNormalSale = $normalSales->sum('quantity');
+            $totalQuantityQuoteSale = $quoteSales->sum('quantity');
             $totalQuantityOnlineSale = $onlineSales->sum(function ($onlineSale) {
                 return count($onlineSale->products);
             });
 
-            // obtener el total solo de las ventas al contado
+            // obtener el total de las ventas al contado y sin cotizacion
             $totalSale = $normalSales->sum(function ($sale) {
+                $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
+                if (!$credit_data && !$sale->quote_id) {
+                    // usar precio con descuento si existe
+                    $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                        ? $sale->discounted_price
+                        : $sale->current_price;
+                    return $sale->quantity * $price_to_use;
+                }
+            });
+            $total_day_sale = $normalSales->sum(function ($sale) {
+                // usar precio con descuento si existe
+                $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                    ? $sale->discounted_price
+                    : $sale->current_price;
+                return $sale->quantity * $price_to_use;
+            });
+
+            // obtener el total solo de las ventas por cotizacion
+            $totalQuotesSale = $quoteSales->sum(function ($sale) {
                 $credit_data = CreditSaleData::where(['folio' => $sale->folio, 'store_id' => auth()->user()->store_id])->first();
                 if (!$credit_data) {
                     // usar precio con descuento si existe
@@ -690,6 +717,28 @@ class SaleController extends Controller
                     return $sale->quantity * $price_to_use;
                 }
             });
+            $total_day_sale += $quoteSales->sum(function ($sale) {
+                $quote = $sale->quote;
+                // usar precio con descuento si existe
+                $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                    ? $sale->discounted_price
+                    : $sale->current_price;
+                $delivery = $quote->delivery_cost;
+                if ($quote->iva_included) {
+                    $subtotal = $quote->total / 1.16;
+                } else {
+                    $subtotal = $quote->total;
+                }
+
+                $discounted = 0;
+                if ($quote->has_discount) {
+                    $discounted = $quote->percentage
+                        ? $subtotal * 0.01 * $quote->percentage
+                        : $quote->discount;
+                }
+
+                return ($sale->quantity * $price_to_use) + $delivery - $discounted;
+            });
 
             // total de ventas en línea entregados
             $totalOnlineSale = $onlineSales->sum(function ($online_sale) {
@@ -697,15 +746,18 @@ class SaleController extends Controller
                     return $online_sale->total + $online_sale->delivery_price;
                 }
             });
+            $total_day_sale += $totalOnlineSale;
 
             $normalFolios = $normalSales->unique('folio')->count();
+            $quoteFolios = $quoteSales->unique('folio')->count();
             $onlineFolios = $onlineSales->count();
 
-            $salesByFolio = $normalSales->groupBy('folio')->map(function ($folioSales) {
+            // ventas en tienda por folio
+            $normalSalesByFolio = $normalSales->groupBy('folio')->map(function ($folioSales) {
                 $firstSale = $folioSales->first();
 
                 // Calcular el total de todos los productos en la venta
-                $totalSale = $folioSales->sum(function ($sale) {
+                $localTotalSale = $folioSales->sum(function ($sale) {
                     // usar precio con descuento si existe
                     $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
                         ? $sale->discounted_price
@@ -738,18 +790,67 @@ class SaleController extends Controller
                     'folio' => $firstSale->folio,
                     'user_name' => $firstSale->user->name,
                     'client_name' => $firstSale->client?->name ?? 'Público en general',
-                    'total_sale' => $totalSale,
+                    'total_sale' => $localTotalSale,
+                ];
+            });
+
+            // ventas de cotizaciones por folio
+            $quoteSalesByFolio = $quoteSales->groupBy('folio')->map(function ($folioSales) {
+                $firstSale = $folioSales->first();
+
+                // Calcular el total de todos los productos en la venta
+                $localTotalSale = $folioSales->sum(function ($sale) {
+                    // usar precio con descuento si existe
+                    $price_to_use = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+                        ? $sale->discounted_price
+                        : $sale->current_price;
+
+                    return $sale->quantity * $price_to_use;
+                });
+
+                return [
+                    'products' => $folioSales->map(function ($sale) {
+                        return [
+                            'id' => $sale->id,
+                            'current_price' => $sale->current_price,
+                            'discounted_price' => $sale->discounted_price,
+                            'promotions_applied' => $sale->promotions_applied,
+                            'product_name' => $sale->product_name,
+                            'product_id' => $sale->product_id,
+                            'is_global_product' => $sale->is_global_product,
+                            'quantity' => $sale->quantity,
+                            'original_price' => $sale->original_price,
+                            'payment_method' => $sale->payment_method,
+                            'refunded_at' => $sale->refunded_at,
+                            'cash_register_id' => $sale->cash_register_id,
+                            'store_id' => $sale->store_id,
+                            'quote_id' => $sale->quote_id,
+                            'created_at' => $sale->created_at,
+                            'updated_at' => $sale->updated_at,
+                        ];
+                    })->values(),
+                    'credit_data' => $firstSale->credit_data,
+                    'quote' => $firstSale->quote,
+                    'folio' => $firstSale->folio,
+                    'user_name' => $firstSale->user->name,
+                    'client_name' => $firstSale->client?->name ?? 'Público en general',
+                    'total_sale' => $localTotalSale,
                 ];
             });
 
             return [
                 'total_normal_quantity' => $totalQuantityNormalSale,
+                'total_quote_quantity' => $totalQuantityQuoteSale,
                 'total_online_quantity' => $totalQuantityOnlineSale,
                 'total_sale' => $totalSale,
-                'normal_folios' => $normalFolios,
-                'online_folios' => $onlineFolios,
+                'total_quotes_sale' => $totalQuotesSale,
                 'online_sales_total' => $totalOnlineSale,
-                'sales' => $returnSales ? $salesByFolio : [],
+                'total_day_sale' => $total_day_sale,
+                'normal_folios' => $normalFolios,
+                'quote_folios' => $quoteFolios,
+                'online_folios' => $onlineFolios,
+                'sales' => $returnSales ? $normalSalesByFolio : [],
+                'quote_sales' => $returnSales ? $quoteSalesByFolio : [],
                 'online_sales' => $returnSales ? $onlineSales->values() : [],
                 'installments' => $returnSales ? $installments->values() : [],
             ];

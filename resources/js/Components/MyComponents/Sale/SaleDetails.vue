@@ -1,8 +1,8 @@
 <template>
     <article class="border border-grayD9 rounded-md text-xs lg:text-base">
         <header
-            class="flex items-center justify-between border-b border-grayD9 text-end px-1 md:px-5 py-1 text-white bg-gray-200">
-            <div class="flex items-center space-x-3">
+            class="flex items-center justify-between border-b border-grayD9 text-end px-1 lg:px-5 py-1 text-white bg-gray-200">
+            <div class="flex items-center space-x-1 lg:space-x-3">
                 <p class="text-gray99">Folio: <span class="text-gray37">{{ groupedSales.folio }}</span></p>
                 <span class="text-gray99">•</span>
                 <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{
@@ -119,15 +119,15 @@
                                             <div v-if="sale.promotions_applied" class="px-2 py-1 bg-gray-50">
                                                 <div v-for="promo in sale.promotions_applied"
                                                     class="flex items-center justify-end gap-4 w-full">
-                                                    <span
-                                                        class="flex items-center gap-2 text-[#AE080B] max-w-[70%]">
+                                                    <span class="flex items-center gap-2 text-[#AE080B] max-w-[70%]">
                                                         <svg width="10" height="16" viewBox="0 0 10 16" fill="none"
                                                             class="shrink-0" xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M4.28948 0C6.61872 2.72141 7.63037 4.40864 8.101 8.09863C8.68078 7.68803 8.88761 7.19526 8.93401 5.7168C11.7333 11.4332 8.45922 15.0058 5.54143 15.1846C5.18415 15.2064 4.52916 15.2602 4.11175 15.125C-0.11532 13.7553 -1.60454 10.0634 2.14593 5.24023C4.57877 2.25049 4.74345 1.28434 4.28948 0ZM4.82464 7.44531C2.74274 10.1809 2.08633 12.5065 5.00335 14.0547C6.92271 13.584 7.62449 12.4474 7.80315 10.4824C7.42276 11.0129 7.17113 11.2542 6.49261 11.375C6.6711 9.76745 6.13689 8.64469 4.82464 7.44531Z"
                                                                 fill="currentColor" />
                                                         </svg>
-                                                        <span class="truncate" :title="promo.description">{{ promo.description }}</span>
+                                                        <span class="truncate" :title="promo.description">{{
+                                                            promo.description }}</span>
                                                     </span>
                                                     <span class="shrink-0">-${{ promo.discount }}</span>
                                                 </div>
@@ -158,7 +158,8 @@
                 </template>
             </Accordion>
         </main>
-        <footer class="text-end md:flex text-xs lg:text-sm" :class="groupedSales.credit_data ? 'justify-between' : 'justify-end'">
+        <footer class="text-end md:flex text-xs lg:text-sm"
+            :class="groupedSales.credit_data ? 'justify-between' : 'justify-end'">
             <div v-if="groupedSales.credit_data"
                 class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
                 <span class="text-gray99">Fecha de vencimiento:</span>
@@ -178,11 +179,11 @@
                 </p>
             </div>
             <div v-if="groupedSales.products[0].payment_method === 'Tarjeta'"
-                class="py-1 flex items-center justify-start space-x-2">
+                class="py-1 flex items-center justify-start space-x-2 self-end">
                 <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
                 <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
             </div>
-            <div v-else class="py-1 flex items-center justify-start space-x-2">
+            <div v-else class="py-1 flex items-center justify-start space-x-2 self-end">
                 <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
                 <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
             </div>
@@ -311,6 +312,10 @@ export default {
         },
     },
     methods: {
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
+        },
         calculateTotalDiscount(sale) {
             const originalTotal = sale.current_price * sale.quantity;
             const discountTotal = sale.discounted_price * sale.quantity;

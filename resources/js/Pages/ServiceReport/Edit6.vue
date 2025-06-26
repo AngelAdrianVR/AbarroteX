@@ -1,11 +1,11 @@
 <template>
-    <AppLayout title="Nuevo reporte">
+    <AppLayout title="Editar reporte">
         <div class="px-3 md:px-10 py-7">
             <Back />
 
-            <form @submit.prevent="store"
+            <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-3">
-                <h1 class="font-bold ml-2 col-span-full">Reporte de servicio</h1>
+                <h1 class="font-bold ml-2 col-span-full">Editar reporte de servicio</h1>
                 <div>
                     <InputLabel value="Fecha del servicio*" />
                     <el-date-picker v-model="form.service_date" type="date" class="!w-full"
@@ -121,7 +121,8 @@
                     <div class="flex items-center space-x-3">
                         <div class="w-[35%]">
                             <InputLabel v-if="index == 0" value="No. De Parte *" />
-                            <el-select v-model="item.product_id" @change="handleChangeProduct(index)" placeholder="Busca producto">
+                            <el-select v-model="item.product_id" @change="handleChangeProduct(index)"
+                                placeholder="Busca producto">
                                 <el-option v-for="(product, index) in products" :key="index"
                                     :label="`${product.name} (${product.code ?? 'sin No. de parte'})`"
                                     :value="product.id">
@@ -146,8 +147,7 @@
                                 cancel-button-text="No" class="w-[5%]" icon-color="#373737" :title="'¿Desea eliminar?'"
                                 @confirm="deleteSparePart(index)">
                                 <template #reference>
-                                    <button type="button"
-                                        class="size-6 flex items-center justify-center rounded-full">
+                                    <button type="button" class="size-6 flex items-center justify-center rounded-full">
                                         <i class="fa-regular fa-trash-can text-sm text-primary"></i>
                                     </button>
                                 </template>
@@ -249,10 +249,25 @@
                     <el-input v-model="form.receiver_name" placeholder="Ej. Ernesto Ramírez" clearable />
                     <InputError :message="form.errors.receiver_name" />
                 </div>
+                <div>
+                    <InputLabel value="Costo del servicio" />
+                    <el-input
+                        v-model="form.service_cost"
+                        placeholder="Ej. 2,500"
+                        clearable
+                        :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
+                        :parser="(value) => value.replace(/\$\s?|(,*)/g, '')"
+                        >
+                        <template #append>
+                            $
+                        </template>
+                    </el-input>
+                    <InputError :message="form.errors.service_cost" />
+                </div>
                 <div class="col-span-full text-right mt-5">
                     <PrimaryButton :disabled="form.processing">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                        Crear reporte
+                        Guardar cambios
                     </PrimaryButton>
                 </div>
             </form>
@@ -273,45 +288,38 @@ import { format } from "date-fns";
 export default {
     data() {
         const form = useForm({
-            service_date: format(new Date(), "yyyy-MM-dd"), // Establece la fecha de hoy por defecto,
-            client_name: null,
-            client_department: null,
+            service_date: this.report.service_date,
+            client_name: this.report.client_name,
+            client_department: this.report.client_department,
             product_details: {
-                brand: null,
-                model: null,
-                serie: null,
-                capacity: null,
-                worked_hours: null,
-                maintenance_type: null,
-                charge_hours: null,
-                oil_type: null,
-                chiller_type: null,
-                voltage: null,
-                motor_brand: null,
-                fan_brand: null,
-                fan_hp: null,
+                brand: this.report.product_details.brand,
+                model: this.report.product_details.model,
+                serie: this.report.product_details.serie,
+                capacity: this.report.product_details.capacity,
+                worked_hours: this.report.product_details.worked_hours,
+                maintenance_type: this.report.product_details.maintenance_type,
+                charge_hours: this.report.product_details.charge_hours,
+                oil_type: this.report.product_details.oil_type,
+                chiller_type: this.report.product_details.chiller_type,
+                voltage: this.report.product_details.voltage,
+                motor_brand: this.report.product_details.motor_brand,
+                fan_brand: this.report.product_details.fan_brand,
+                fan_hp: this.report.product_details.fan_hp,
             },
-            spare_parts: [
-                {
-                    product_id: null,
-                    code: null,
-                    name: null,
-                    description: null,
-                    quantity: null,
-                },
-            ],
+            spare_parts: [],
             observations: {
-                plate_voltage: null,
-                plate_current: null,
-                measured_voltage: null,
-                measured_current: null,
-                temperature: null,
-                charge_pressure: null,
-                cut_pressure: null,
+                plate_voltage: this.report.observations.plate_voltage,
+                plate_current: this.report.observations.plate_current,
+                measured_voltage: this.report.observations.measured_voltage,
+                measured_current: this.report.observations.measured_current,
+                temperature: this.report.observations.temperature,
+                charge_pressure: this.report.observations.charge_pressure,
+                cut_pressure: this.report.observations.cut_pressure,
             },
-            technician_name: this.$page.props.auth.user.name,
-            receiver_name: null,
-            description: null,
+            technician_name: this.report.technician_name,
+            receiver_name: this.report.receiver_name,
+            description: this.report.description,
+            service_cost: this.report.service_cost,
         });
 
         return {
@@ -328,10 +336,11 @@ export default {
     },
     props: {
         products: Array,
+        report: Object,
     },
     methods: {
-        store() {
-            this.form.post(route("service-reports.store"), {
+        update() {
+            this.form.put(route("service-reports.update", this.report), {
                 onSuccess: () => {
                     this.$notify({
                         title: "Correcto",
@@ -364,6 +373,20 @@ export default {
 
             this.form.spare_parts.push(newSparePart);
         },
+    },
+    mounted() {
+        // cargar las refacciones
+        this.report.spare_parts.forEach(e => {
+            const sp = {
+                product_id: e.product_id,
+                code: e.code,
+                name: e.name,
+                description: e.description,
+                quantity: e.quantity,
+            };
+
+            this.form.spare_parts.push(sp);
+        });
     }
 }
 </script>

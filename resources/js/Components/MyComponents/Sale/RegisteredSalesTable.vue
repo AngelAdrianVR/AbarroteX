@@ -48,16 +48,12 @@
     </div>
     <Loading v-if="loading" class="mt-20" />
     <div class="mt-8" v-else>
-        <section class="text-center mt-3"  v-if="['Administrador'].includes($page.props.auth.user.rol)">
-            <el-tag
-                :key="`Total registrado: $${getTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`"
-                type="success"
-                effect="plain"
-                style="font-size: 19px;"
-            >
+        <!-- <section class="text-center mt-3" v-if="['Administrador'].includes($page.props.auth.user.rol)">
+            <el-tag :key="`Total registrado: $${getTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`"
+                type="success" effect="plain" style="font-size: 19px;">
                 {{ `Total registrado: $${getTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}` }}
             </el-tag>
-        </section>
+        </section> -->
         <p v-if="Object.keys(sales)?.length" class="text-gray66 text-[11px] mb-3">
             {{ Object.keys(sales)?.length }} de {{ totalSales }} elementos
         </p>
@@ -67,7 +63,12 @@
                     <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                         <th>Fecha</th>
                         <th>Ventas en tienda</th>
-                        <th v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')">Ventas en linea</th>
+                        <th v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')">
+                            Ventas en linea
+                        </th>
+                        <th v-if="$page.props.auth.user.store.activated_modules.includes('Cotizaciones')">
+                            Cotizaciones
+                        </th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -86,8 +87,14 @@
                             }}
                             ({{ sale.total_online_quantity }} productos en total)
                         </td>
-                        <td>${{ (sale.total_sale + sale.online_sales_total)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                            ",") }}</td>
+                        <td v-if="$page.props.auth.user.store.activated_modules.includes('Cotizaciones')">
+                            {{ sale.quote_folios != 1 ? sale.quote_folios + ' ventas' : sale.quote_folios + ' venta'
+                            }}
+                            ({{ sale.total_quote_quantity }} productos en total)
+                        </td>
+                        <td>
+                            ${{ sale.total_day_sale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}
+                        </td>
                         <td class="rounded-e-full text-end">
                             <el-dropdown trigger="click" @command="handleCommand">
                                 <button @click.stop

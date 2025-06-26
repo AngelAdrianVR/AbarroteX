@@ -26,6 +26,7 @@ class Sale extends Model
         'cash_register_id',
         'store_id',
         'user_id',
+        'quote_id',
         'created_at',
     ];
 
@@ -47,6 +48,11 @@ class Sale extends Model
     public function user() :BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+    
+    public function quote() :BelongsTo
+    {
+        return $this->belongsTo(Quote::class);
     }
 
     public function client() :BelongsTo

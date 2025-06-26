@@ -1,6 +1,6 @@
 <template>
     <AppLayout title="Productos">
-        <div ref="scrollContainer" style="height: 93vh; overflow-y: scroll;" @scroll="handleScroll" class="px-2 lg:px-10 py-7">
+        <div ref="scrollContainer" style="height: 93vh; overflow-y: scroll;" @scroll="handleScroll" class="px-2 lg:px-10 py-5">
             <!-- tabs -->
             <div v-show="canTransfer && !!exist_global_products" class="flex justify-center">
                 <ToggleButton id="start" ref="togglebutton" @update="handleToggle" :labels="['Mis productos', 'Catálogo base']"

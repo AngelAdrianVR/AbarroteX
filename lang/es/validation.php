@@ -199,5 +199,6 @@ return [
         'technician_name' => 'responsable',
         'receiver_name' => 'persona que recibe',
         'discounted_price' => 'Precio promocional',
+        'payment_method' => 'método de pago',
     ],
 ];

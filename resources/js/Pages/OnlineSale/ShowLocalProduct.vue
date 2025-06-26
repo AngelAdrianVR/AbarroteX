@@ -1,12 +1,12 @@
 <template>
     <OnlineStoreLayout :title="product.name">
         <!-- <div class="p-4 md:p-9 lg:h-[calc(100vh-161px)]"> -->
-        <div class="p-4 md:p-9">
+        <div class="p-4 md:p-9 lg:h-screen">
             <Back :to="route('online-sales.client-index', store?.slug ?? '')" />
 
             <section class="xl:w-[60%] md:grid grid-cols-2 gap-x-10 mx-auto mt-9">
                 <!-- Imagen del producto -->
-                <figure class="border border-grayD9 rounded-md flex items-center justify-center h-96">
+                <figure class="border border-grayD9 rounded-3xl flex items-center justify-center h-96">
                     <img v-if="product.media.length" :src="product.media[0]?.original_url" alt="producto"
                         class="h-full mx-auto object-contain">
                     <div v-else>
