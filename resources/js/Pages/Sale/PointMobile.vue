@@ -206,7 +206,7 @@
                       icon-color="#C30303" title="Se eliminará todo el registro de productos ¿Deseas continuar?"
                       @confirm="clearTab()">
                       <template #reference>
-                        <ThirthButton class="!text-[#9C0B0B] !py-1 mb-2 mt-1 md:mt-0">
+                        <ThirthButton class="!text-[#9C0B0B] !bg-[#FFB8B8] !py-1 mb-2 mt-1 md:mt-0">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -357,7 +357,7 @@
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
-        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !border-red-600"
+        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !bg-[#FFB8B8]"
           @click="showPaymentModal = false">
           <span>Cancelar pago</span>
           <i class="fa-solid fa-xmark"></i>
