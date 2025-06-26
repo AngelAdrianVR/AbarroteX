@@ -2,7 +2,7 @@
 
   <Head :title="'imprimir ticket folio ' + sales[0].folio" />
   <div id="text-to-print" class="w-full md:w-[420px] mx-auto text-sm border-2 border-black p-5 my-16 !text-[11px]">
-    <div class="flex items-center space-x-3">
+    <div class="flex items-center">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
         class="size-4 mr-1">
         <path stroke-linecap="round" stroke-linejoin="round"
@@ -74,7 +74,7 @@
         </tr>
       </template>
     </table>
-    <div class="flex justify-end mt-1 mr-8">
+    <div class="flex justify-end mt-1 mr-6">
       <p class="font-bold text-xs">
         Total
         <span class="ml-2">
@@ -155,21 +155,6 @@ export default {
     sales: Object,
   },
   methods: {
-    // conectarBluetooth() {
-    //   // Solicitar al usuario que seleccione la impresora vía Bluetooth
-    //   navigator.bluetooth.requestDevice({
-    //     acceptAllDevices: true, // Aceptar cualquier dispositivo Bluetooth
-    //     optionalServices: [this.UUIDService] // UUID del servicio de la impresora
-    //   })
-    //   .then(device => {
-    //     console.log('Dispositivo Bluetooth conectado:', device);
-    //     this.device = device;
-
-    //   })
-    //   .catch(error => {
-    //     console.error('Error al conectar con dispositivo Bluetooth:', error);
-    //   });
-    // },
     calculateTotalDiscount(sale) {
       const originalTotal = sale.current_price * sale.quantity;
       const discountTotal = sale.discounted_price * sale.quantity;
@@ -234,7 +219,7 @@ export default {
 
         // Enviar cada fragmento por separado
         for (const fragment of fragments) {
-          await characteristic.writeValue(new TextEncoder('utf-8').encode(fragment)); //con caracteres especiasles
+          await characteristic.writeValue(new TextEncoder('utf-16').encode(fragment)); //con caracteres especiasles
           //   await characteristic.writeValue(new TextEncoder().encode(fragment)); //sin caracteres especiasles
         }
 
@@ -250,49 +235,6 @@ export default {
       }
       return chunks;
     },
-
-    // // ----------------- Convertir a imagen ----------------------------------------------------
-    //  async convertToImage() {
-
-    //      // Obtener el contenedor que deseas imprimir
-    //     const element = document.getElementById('text-to-print');
-
-    //     // Convertir el contenedor a un canvas
-    //     const canvas = await html2canvas(element);
-
-    //     // Convertir el canvas a un data URL
-    //     const dataUrl = canvas.toDataURL('image/png');
-
-    //     // Convertir el data URL a un array buffer
-    //     const response = await fetch(dataUrl);
-    //     const blob = await response.blob();
-    //     const arrayBuffer = await blob.arrayBuffer();
-
-    //     // Llamar al método para enviar los datos de impresión
-    //     this.enviarDatosImpresion(this.device, arrayBuffer);
-    // },
-    // async enviarDatosImpresion(device, arrayBuffer) {
-    //     try {
-    //     // Obtener el servicio de impresión
-    //     const service = await device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
-
-    //     // Obtener la característica de escritura
-    //     const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
-
-    //     // Dividir el array buffer en fragmentos
-    //     const fragmentSize = 20; // Ajusta este tamaño según sea necesario
-    //     for (let i = 0; i < arrayBuffer.byteLength; i += fragmentSize) {
-    //         const fragment = arrayBuffer.slice(i, i + fragmentSize);
-    //         await characteristic.writeValue(fragment);
-    //     }
-
-    //     console.log('Datos de impresión enviados correctamente');
-    //     } catch (error) {
-    //     console.error('Error al enviar datos de impresión:', error);
-    //     }
-    // },
-    // // ----------------------------------------------------------------------------
-
     print() {
       this.printTicket = true;
       setTimeout(() => {

@@ -1,5 +1,5 @@
 <template>
-    <Head :title="'COT-' + quote.folio" />
+    <Head :title="'C-' + String(quote.folio).padStart(4, '0')" />
     
     <div :class="printing ? 'w-full' : 'w-[900px]'" class="mx-auto min-h-screen p-2">
 

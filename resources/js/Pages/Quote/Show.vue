@@ -28,7 +28,7 @@
                 </section>
                 <el-divider class="!my-2" />
                 <p>
-                    <span v-if="quote.store.name">{{ quote.store.name }} - </span>
+                    <span v-if="quote.company">{{ quote.company }} - </span>
                     <span>{{ quote.contact_name }}</span>
                 </p>
                 <p v-if="quote.show_address">{{ quote.address }}</p>
