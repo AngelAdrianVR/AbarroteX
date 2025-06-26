@@ -628,8 +628,11 @@ export default {
         },
         openInstallmentModal(saleFolio) {
             this.showInstallmentModal = true;
-            let sale = this.getGroupedQuoteSales.find(item => item.folio == saleFolio);
-            this.saleToSeeInstallments = sale;
+            if (this.saleType == 'quote') {
+                this.saleToSeeInstallments = this.getGroupedQuoteSales.find(item => item.folio == saleFolio);
+            } else {
+                this.saleToSeeInstallments = this.getGroupedSales.find(item => item.folio == saleFolio);
+            }
         },
         handleShowModal(modal, saleFolio, type = 'Normal') {
             this.saleType = type;
