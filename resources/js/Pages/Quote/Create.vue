@@ -56,7 +56,7 @@
                 </div>
                 <div>
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Fecha de expiración de cot. (opcional)" />
+                        <InputLabel value="Expiración de cot. (opcional)" />
                         <div class="flex items-center space-x-1">
                             <el-checkbox v-model="form.show_expiration" label="Mostrar" size="small" />
                             <el-tooltip placement="top">
@@ -178,12 +178,12 @@
                     <h2 class="font-bold text-gray37">
                         Opciones adicionales
                     </h2>
-                    <p class="text-xs text-gray99">
+                    <!-- <p class="text-xs text-gray99">
                         Agrega opciones adicionales a cada cotización, si deseas que permanezcan en todas las cotización
                         ve a Configuraciones y luego a la pestaña
                         <a :href="route('settings.index', { tab: 6 })" target="_blank"
                             class="text-primary underline">Cotizaciones</a>
-                    </p>
+                    </p> -->
                     <article class="grid xl:grid-cols-2 mx-2 gap-3 mt-2">
                         <div class="border border-grayD9 bg-white rounded-lg">
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
@@ -429,7 +429,7 @@ export default {
             delivery_type: null, //aplicar costo de envio
             delivery1: null,
             delivery2: null,
-            show_payment_conditions: false,
+            show_payment_conditions: true,
             show_address: false,
             show_expiration: false,
         });
