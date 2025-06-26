@@ -319,7 +319,7 @@ onBeforeUnmount(() => {
                         src="@/../../public/images/landing-01.webp"
                         alt="Letrero en neón que dice: Punto de venta. 30 dias gratis">
                     <img class="object-contain select-none mt-4 ml-auto" :draggable="false"
-                        src="@/../../public/images/price.webp" alt="Letrero en neón que dice: desde $229 al mes">
+                        src="@/../../public/images/price.webp" alt="Letrero en neón que dice: desde $199 al mes">
                 </figure>
                 <figure class="w-[27%] ml-20 mt-20 z-10" data-aos="fade-down" data-aos-duration="1200"
                     data-aos-delay="1000">
