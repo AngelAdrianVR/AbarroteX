@@ -77,7 +77,8 @@
                     </template>
                     <Scale />
                 </el-tab-pane>
-                <el-tab-pane v-if="this.$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" label="Tienda en línea" name="5">
+                <el-tab-pane v-if="this.$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+                    label="Tienda en línea" name="5">
                     <template #label>
                         <div class="flex items-center space-x-1">
                             <svg width="16" height="18" viewBox="0 0 10 16" fill="none"
@@ -100,6 +101,21 @@
                     </template>
                     <OnlineSale />
                 </el-tab-pane>
+                <!-- <el-tab-pane v-if="this.$page.props.auth.user.store.activated_modules?.includes('Cotizaciones')"
+                    label="Cotizaciones" name="6">
+                    <template #label>
+                        <div class="flex items-center space-x-1">
+                            <svg width="20" height="15" viewBox="0 0 18 15" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12.5 13C8.3995 13 6.1005 13 2 13C1 13 0.999994 12.5 1 11.5V2C1 1.5 1 1 2 1C2 1 6.35894 1 6.5 1C6.64106 1 7.5 2.5 8 2.5C8.5 2.5 15 2.5 15 2.5C15.5 2.5 16 3 16 3.5C16 4.67157 16 5.32843 16 6.5M14 13.3562L14.5127 13.7406C14.8543 13.997 15.3021 14.1252 15.75 14.1251M15.75 14.1251C16.1977 14.1251 16.6455 13.9969 16.9873 13.7406C17.6709 13.2278 17.6709 12.3972 16.9873 11.8844C16.646 11.6277 16.198 11.5 15.75 11.5C15.3271 11.5 14.9042 11.3717 14.5816 11.1156C13.9364 10.6028 13.9364 9.77217 14.5816 9.25942C14.9042 9.00304 15.3271 8.87485 15.75 8.87485M15.75 14.1251V15M15.75 8.87485C16.1729 8.87485 16.5958 9.00304 16.9184 9.25942M15.75 8.87485V8"
+                                    stroke="currentColor" stroke-width="1.5" />
+                            </svg>
+                            <p>Cotizaciones</p>
+                        </div>
+                    </template>
+                    <Quotes />
+                </el-tab-pane> -->
             </el-tabs>
         </div>
     </AppLayout>
@@ -113,6 +129,7 @@ import Users from '@/Pages/Setting/Tabs/Users.vue';
 import Printer from '@/Pages/Setting/Tabs/Printer.vue';
 import Scale from '@/Pages/Setting/Tabs/Scale.vue';
 import OnlineSale from '@/Pages/Setting/Tabs/OnlineSale.vue';
+import Quotes from './Tabs/Quotes.vue';
 
 export default {
     data() {
@@ -131,6 +148,7 @@ export default {
         Point,
         Scale,
         OnlineSale,
+        Quotes,
     },
     props: {
         users: Array,

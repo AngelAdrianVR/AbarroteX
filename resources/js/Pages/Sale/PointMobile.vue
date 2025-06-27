@@ -1,6 +1,6 @@
 <template>
   <AppLayout title="Registrar venta">
-    <div v-if="!isOnline" class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-[#232323] text-white text-xs">
+    <div v-if="!isOnline" class="w-full mt-2 rounded-s-[5px] px-4 py-1 bg-[#232323] text-white text-xs">
       <p class="text-sm flex items-center space-x-3 font-semibold">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.855 -0.855 24 24"
           id="Wifi-Disabled--Streamline-Core" height="16" width="16">
@@ -39,7 +39,7 @@
       </p>
     </div>
     <div v-if="syncingData || syncingIDB"
-      class="w-2/3 ml-auto mt-3 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
+      class="w-full ml-auto mt-2 rounded-s-[5px] px-4 py-1 bg-secondary text-gray37 text-xs">
       <p class="text-sm flex items-center space-x-3 font-semibold">
         <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
           id="Rotate-Right--Streamline-Sharp" height="16" width="16">
@@ -68,7 +68,7 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2" :class="editableTabs[editableTabsValue - 1]?.saleProducts?.length ? 'h-[calc(77vh)]' : 'h-[calc(92vh)]'"><!--mover altura para productos sin codigo -->
+    <main class="pt-1" :class="editableTabs[editableTabsValue - 1]?.saleProducts?.length ? 'h-[calc(77vh)]' : 'h-[calc(92vh)]'"><!--mover altura para productos sin codigo -->
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[65%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="mx-2">
@@ -206,7 +206,7 @@
                       icon-color="#C30303" title="Se eliminará todo el registro de productos ¿Deseas continuar?"
                       @confirm="clearTab()">
                       <template #reference>
-                        <ThirthButton class="!text-[#9C0B0B] !py-1 mb-2 mt-1 md:mt-0">
+                        <ThirthButton class="!text-[#9C0B0B] !bg-[#FFB8B8] !py-1 mb-2 mt-1 md:mt-0">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -357,7 +357,7 @@
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
-        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !border-red-600"
+        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !bg-[#FFB8B8]"
           @click="showPaymentModal = false">
           <span>Cancelar pago</span>
           <i class="fa-solid fa-xmark"></i>

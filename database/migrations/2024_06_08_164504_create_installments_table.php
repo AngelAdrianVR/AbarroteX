@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('installments', function (Blueprint $table) {
             $table->id();
             $table->unsignedFloat('amount')->nullable();
+            $table->string('payment_method')->default('Efectivo')->nullable();
             $table->text('notes')->nullable();
             $table->unsignedInteger('credit_sale_data_id');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

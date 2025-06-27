@@ -14,6 +14,7 @@ class Quote extends Model
 
     protected $fillable = [
         'folio',
+        'company',
         'contact_name',
         'phone',
         'payment_conditions',
@@ -34,7 +35,9 @@ class Quote extends Model
         'delivery_cost',
         'show_payment_conditions',
         'show_address',
+        'show_expiration',
         'additionals',
+        'remaining',
         'client_id',
         'store_id',
     ];
@@ -60,7 +63,7 @@ class Quote extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function sale() :HasMany
+    public function sales() :HasMany
     {
         return $this->hasMany(Sale::class);
     }

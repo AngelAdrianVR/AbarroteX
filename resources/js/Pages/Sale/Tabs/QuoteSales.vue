@@ -1,13 +1,13 @@
 <template>
     <div v-if="sales.length" class="text-sm mt-5 space-y-4">
-        <SaleDetails v-for="(item, index) in sales" :key="index" :groupedSales="item"
+        <QuoteSaleDetails v-for="(item, index) in sales" :key="index" :groupedSales="item"
                     @show-modal="showModal" :isOutOfCashCut="false" />
     </div>
     <el-empty v-else description="No hay ventas para mostrar" />
 </template>
 
 <script>
-import SaleDetails from "@/Components/MyComponents/Sale/SaleDetails.vue";
+import QuoteSaleDetails from "@/Components/MyComponents/Sale/QuoteSaleDetails.vue";
 
 export default {
     name: 'QuoteSales',
@@ -18,7 +18,7 @@ export default {
     },
     emits: ['show-modal'],
     components: {
-        SaleDetails,
+        QuoteSaleDetails,
     },
     props: {
         sales: Array,
@@ -28,7 +28,7 @@ export default {
     },
     methods: {
         showModal(modal, saleFolio) {
-            this.$emit('show-modal', modal, saleFolio);
+            this.$emit('show-modal', modal, saleFolio, 'quote');
         },
     },
     mounted() {
