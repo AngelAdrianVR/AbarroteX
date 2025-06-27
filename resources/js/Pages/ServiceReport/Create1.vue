@@ -130,7 +130,20 @@
                     <InputError :message="form.errors.technician_name" />
                 </div>
                 <div>
-                    <InputLabel value="Porcentage de comisión" />
+                    <div class="flex space-x-2">
+                        <InputLabel value="Porcentage de comisión" />
+                        <el-tooltip placement="top">
+                            <template #content>
+                                <p>Al cambiar la orden al estatus "Pagado", se <br>
+                                    registrará automáticamente un gasto con <br>
+                                    el concepto "Comisión", incluyendo el <br>
+                                    nombre del responsable del servicio.</p>
+                            </template>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            </svg>
+                        </el-tooltip>
+                    </div>
                    <el-input
                         v-model="form.comision_percentage"
                         placeholder="Ej. 10"

@@ -95,8 +95,17 @@ class ServiceReportController extends Controller
         // Decodificar el ID
         $decoded_report = base64_decode($encoded_report_id);
         $report = ServiceReport::findOrFail($decoded_report);
+        $store_id = auth()->user()->store_id;
 
-        return inertia('ServiceReport/Show', compact('report'));
+        // Ruta a la vista de Inertia (ej: 'ServiceReport/Show1.vue')
+        $customViewPath = resource_path("js/Pages/ServiceReport/Show{$store_id}.vue");
+
+        // Usar la vista personalizada si existe, sino la predeterminada
+        $view = File::exists($customViewPath)
+            ? "ServiceReport/Show{$store_id}"
+            : "PageNotFound"; // 404 not found vista
+
+        return inertia($view, compact('report'));
     }
 
     public function edit($encoded_report_id)
@@ -108,7 +117,7 @@ class ServiceReportController extends Controller
         $products = Product::where('store_id', $store_id)->get(['id', 'name', 'code', 'description']);
 
 
-        // Ruta a la vista de Inertia (ej: 'ServiceReport/Create14.vue')
+        // Ruta a la vista de Inertia (ej: 'ServiceReport/Edit1.vue')
         $customViewPath = resource_path("js/Pages/ServiceReport/Edit{$store_id}.vue");
 
         // Usar la vista personalizada si existe, sino la predeterminada
