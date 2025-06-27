@@ -19,10 +19,9 @@ class ServiceReportController extends Controller
 
     public function create()
     {
-        $storeId = auth()->user()->store_id;
         $products = Product::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'code', 'description']);
         $store_id = auth()->user()->store_id;
-        $last_report = ServiceReport::where('store_id', $storeId)->latest('id')->first();
+        $last_report = ServiceReport::where('store_id', $store_id)->latest('id')->first();
         $folio = $last_report ? intval($last_report->folio) + 1 : 1;
 
         // Ruta a la vista de Inertia (ej: 'ServiceReport/Create14.vue')
@@ -36,6 +35,7 @@ class ServiceReportController extends Controller
         return inertia($view, compact('products', 'folio'));
     }
 
+    //para guardar la orden de dm compresores.
     public function store(Request $request)
     {
         $request->validate([
@@ -49,16 +49,45 @@ class ServiceReportController extends Controller
             'service_cost' => 'nullable|numeric|min:0|max:999999',
         ]);
 
+        $this->finalStepStore($request);
+
+        return to_route('service-reports.index');
+    }
+
+    //para guardar ordenes de servicio de tiendas de reparacion de celulares (validacion diferente que el store para dm compresores)
+    public function storePhoneStores(Request $request)
+    {
+        $request->validate([
+            'service_date' => 'required',
+            'client_name' => 'required|string|max:255',
+            'client_phone_number' => 'required|string|max:10',
+            'spare_parts' => 'nullable|array|min:1',
+            'technician_name' => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'service_description' => 'required|string|max:1000',
+            'service_cost' => 'required|numeric|min:0|max:999999',
+        ]);
+
+        $this->finalStepStore($request);
+
+        return to_route('service-reports.index');
+    }
+
+    public function finalStepStore($request)
+    {
         $storeId = auth()->user()->store_id;
         $last_report = ServiceReport::where('store_id', $storeId)->latest('id')->first();
         $folio = $last_report ? intval($last_report->folio) + 1 : 1;
 
-        ServiceReport::create($request->all() + [
+        $service_order = ServiceReport::create($request->all() + [
             'store_id' => $storeId,
             'folio' => $folio,
         ]);
 
-        return to_route('service-reports.index');
+        // Subir y asociar las imagenes
+        if ( $request->media ) {
+            $service_order->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+        }
     }
 
     public function show($encoded_report_id)
@@ -66,18 +95,37 @@ class ServiceReportController extends Controller
         // Decodificar el ID
         $decoded_report = base64_decode($encoded_report_id);
         $report = ServiceReport::findOrFail($decoded_report);
+        $store_id = auth()->user()->store_id;
 
-        return inertia('ServiceReport/Show', compact('report'));
+        // Ruta a la vista de Inertia (ej: 'ServiceReport/Show1.vue')
+        $customViewPath = resource_path("js/Pages/ServiceReport/Show{$store_id}.vue");
+
+        // Usar la vista personalizada si existe, sino la predeterminada
+        $view = File::exists($customViewPath)
+            ? "ServiceReport/Show{$store_id}"
+            : "PageNotFound"; // 404 not found vista
+
+        return inertia($view, compact('report'));
     }
 
     public function edit($encoded_report_id)
     {
         // Decodificar el ID
         $decoded_report = base64_decode($encoded_report_id);
-        $report = ServiceReport::findOrFail($decoded_report);
-        $products = Product::where('store_id', auth()->user()->store_id)->get(['id', 'name', 'code', 'description']);
+        $report = ServiceReport::with('media')->findOrFail($decoded_report);
+        $store_id = auth()->user()->store_id;
+        $products = Product::where('store_id', $store_id)->get(['id', 'name', 'code', 'description']);
 
-        return inertia('ServiceReport/Edit', compact('report', 'products'));
+
+        // Ruta a la vista de Inertia (ej: 'ServiceReport/Edit1.vue')
+        $customViewPath = resource_path("js/Pages/ServiceReport/Edit{$store_id}.vue");
+
+        // Usar la vista personalizada si existe, sino la predeterminada
+        $view = File::exists($customViewPath)
+            ? "ServiceReport/Edit{$store_id}"
+            : "PageNotFound"; // 404 not found vista
+
+        return inertia($view, compact('report', 'products'));
     }
 
     public function update(Request $request, ServiceReport $serviceReport)
@@ -94,6 +142,29 @@ class ServiceReportController extends Controller
         ]);
 
         $serviceReport->update($request->all());
+
+        return to_route('service-reports.index');
+    }
+
+    public function updatePhoneStores(Request $request, ServiceReport $service_order)
+    {
+        $request->validate([
+            'service_date' => 'required',
+            'client_name' => 'required|string|max:255',
+            'client_phone_number' => 'required|string|max:10',
+            'spare_parts' => 'nullable|array|min:1',
+            'technician_name' => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'service_description' => 'required|string|max:1000',
+            'service_cost' => 'required|numeric|min:0|max:999999',
+        ]);
+
+        $service_order->update($request->all());
+
+        // Subir y asociar las imagenes
+        if ( $request->media ) {
+            $service_order->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+        }
 
         return to_route('service-reports.index');
     }

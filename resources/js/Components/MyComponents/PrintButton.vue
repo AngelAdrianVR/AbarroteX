@@ -21,8 +21,8 @@ export default {
   width: 120px;
   height: 40px;
   border-radius: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.349);
-  background-color: #6f6f70;
+  border: 1px solid #D9D9D9;
+  background-color: #fbfbff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,7 +54,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: black;
   z-index: 1;
   transition-duration: 0.3s;
   font-size: 0.9em;
