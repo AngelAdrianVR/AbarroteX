@@ -14,18 +14,14 @@
             </article>
 
             <!-- BARRA DE PROGRESO -->
-            <article class="max-w-lg mx-auto text-sm">
+            <!-- <article class="max-w-lg mx-auto text-sm">
                 <section class="border border-gray-300 rounded-xl p-3 mt-4 shadow-sm bg-white">
-                    <!-- Mostrar progreso solo si no está cancelado ni reembolsado -->
                     <template v-if="!isFinalState">
-                    <!-- Estados -->
                     <div class="grid grid-cols-3 text-center text-gray-500 font-semibold">
                         <p>Pendiente</p>
                         <p>En camino</p>
                         <p>Entregado</p>
                     </div>
-
-                    <!-- Barra de progreso -->
                     <div class="relative mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                         class="absolute left-0 top-0 h-full transition-all duration-500 ease-in-out bg-gradient-to-r from-[#751F8B] via-[#e4a3f5] to-[#1F0825] rounded-full"
@@ -33,8 +29,6 @@
                         ></div>
                     </div>
                     </template>
-
-                    <!-- Estado cancelado o reembolsado -->
                     <template v-else>
                         <div class="flex items-center justify-center gap-2 text-center p-4 rounded-lg"
                             :class="{
@@ -54,7 +48,7 @@
                         </div>
                     </template>
                 </section>
-            </article>
+            </article> -->
 
             <article class="flex justify-end mt-3">
                 <div class="flex items-center space-x-2">
