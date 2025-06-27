@@ -1,5 +1,5 @@
 <template>
-    <AppLayout title="Ventas">
+    <AppLayout title="Historial de ventas">
         <div class="px-2 lg:px-10 py-7">
             <!-- <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="String(index + 1)"> -->
