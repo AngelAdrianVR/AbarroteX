@@ -40,7 +40,7 @@
                     <td>{{ formatDate(report.service_date) }}</td>
                     <td>{{ report.client_name ?? 'No especificado' }}</td>
                     <td>{{ report.service_description ?? '-' }}</td>
-                    <td>${{ report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    <td>${{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
