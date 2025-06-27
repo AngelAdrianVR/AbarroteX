@@ -560,8 +560,8 @@
             </div>
           </div>
         </div>
-        <!-- lista de productos sin codigo -->
       </section>
+      <!-- lista de productos sin codigo -->
       <section v-if="isQuickNoCodeSelectionOn && noCodeProducts.length"
         class="border rounded-md mx-2 border-[#D9D9D9] bg-grayF2" :class="showNoCodeProducts ? 'h-[30%]' : 'h-[6%]'">
         <div class="mx-4">
@@ -1387,8 +1387,9 @@ export default {
         this.quantity = 1; //asigna la cantidad por defecto a 1
         this.handleScale(); //ejecuta el manejador de bascula si el producto es a granel
       } else {
-        item.imageUrl = item.image_url
-        this.addSaleProduct(item); //agrega el producto a la lista de venta
+        item.imageUrl = item.image_url;
+        focuseInputAfterAdd = false;
+        this.addSaleProduct(item, focuseInputAfterAdd); //agrega el producto a la lista de venta
       }
     },
     filterNoCodeProducts() {
@@ -1863,7 +1864,7 @@ export default {
         console.error(error);
       }
     },
-    addSaleProduct(product) {
+    addSaleProduct(product, focusInputAfterAdd = true) {
       const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts?.findIndex(sale => {
         return sale.product.id == product.id;
       });
@@ -1897,7 +1898,10 @@ export default {
       this.quantity = 1;
       this.scanning = false;
       this.productFoundSelected = null;
-      this.inputFocus();
+
+      if (focusInputAfterAdd) {
+        this.inputFocus();
+      }
 
       if (this.isReadingScale) {
         this.stopReadingScale(); //detiene la lectura de la báscula
