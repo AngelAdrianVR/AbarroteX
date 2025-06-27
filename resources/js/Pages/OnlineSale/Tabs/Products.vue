@@ -65,10 +65,21 @@ export default {
     computed: {
         //propiedad computada que retorna un arreglo con los nombres de categorias disponibles y sin repetir de los productos basandose en visibleProduct.category.name
         categories() {
-            return this.visibleProducts.map(product => product.category?.name).filter((value, index, self) => self.indexOf(value) === index);
+            // Tomar en cuenta tanto la categoria local como la de global_product
+            const categoryNames = this.visibleProducts.flatMap(product => [
+                product.category?.name,
+                product.global_product?.category?.name
+            ]).filter(Boolean); // Elimina undefined/null
+            // Quitar duplicados
+            return categoryNames.filter((value, index, self) => self.indexOf(value) === index);
         },
         filteredProducts() {
-            return this.visibleProducts.filter(product => this.currentCategory === 'Todas' || product.category?.name === this.currentCategory);
+            return this.visibleProducts.filter(product => {
+                if (this.currentCategory === 'Todas') return true;
+                // Considerar tanto la categoria local como la de global_product
+                return product.category?.name === this.currentCategory ||
+                       product.global_product?.category?.name === this.currentCategory;
+            });
         }
     },
     methods: {
