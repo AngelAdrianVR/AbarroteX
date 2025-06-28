@@ -141,7 +141,8 @@ class SaleController extends Controller
         // Obtener la fecha de la venta siguiente más cercana
         $next_sale = $next_sales->first();
         $next_sale_date = $next_sale ? $next_sale->created_at->toDateString() : null;
-
+        
+        return $day_sales;
         return inertia('Sale/Show', compact('day_sales', 'previous_sale_date', 'next_sale_date'));
     }
 
