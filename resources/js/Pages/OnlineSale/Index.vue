@@ -14,7 +14,7 @@
                         <p class="px-2 text-gray77">{{ encodedUrlStore }}</p>
                     </div>
                     <Link :href="route('online-sales.client-index', $page.props.auth.user.store.slug)">
-                    <ThirthButton class="!text-red-600">
+                    <ThirthButton>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-4 mr-1">
                             <path stroke-linecap="round" stroke-linejoin="round"

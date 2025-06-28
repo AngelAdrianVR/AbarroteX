@@ -1,11 +1,11 @@
 <template>
     <div class="flex justify-between items-center mx-3">
         <h1 class="font-bold">Pedidos en línea</h1>
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-1">
             <div class="relative">
                 <!-- filtro -->
                 <button @click.stop="showFilter = !showFilter"
-                    class="border border-[#D9D9D9] rounded-full py-1 px-4 flex items-center">
+                    class="border border-[#D9D9D9] rounded-full py-[7px] px-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="16" width="16"
                         id="Filter-Sort-Lines-Descending--Streamline-Ultimate">
                         <desc>Filter Sort Lines Descending Streamline Icon: https://streamlinehq.com</desc>
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            <PrimaryButton v-if="canCreate" @click="createOnlineOrderModal = true" class="!py-1">
+            <PrimaryButton v-if="canCreate" @click="createOnlineOrderModal = true">
                 Registrar pedido
             </PrimaryButton>
         </div>

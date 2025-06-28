@@ -11,7 +11,7 @@ class ClientController extends Controller
 {
     public function index()
     {
-        $clients = Client::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
+        $clients = Client::where('store_id', auth()->user()->store_id)->get()->take(20);
         $total_clients = Client::where('store_id', auth()->user()->store_id)->get()->count();
 
         return inertia('Client/Index', compact('clients', 'total_clients'));
@@ -101,7 +101,7 @@ class ClientController extends Controller
     {
         $offset = $currentPage * 20;
 
-        $clients = Client::where('store_id', auth()->user()->store_id)->latest()->skip($offset)->take(20)->get();
+        $clients = Client::where('store_id', auth()->user()->store_id)->skip($offset)->take(20)->get();
 
         return response()->json(['items' => $clients]);
     }

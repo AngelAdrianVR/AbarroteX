@@ -251,7 +251,7 @@
                       icon-color="#C30303" title="Se eliminará todo el registro de productos ¿Deseas continuar?"
                       @confirm="clearTab()">
                       <template #reference>
-                        <ThirthButton class="!text-[#9C0B0B] !py-2 mb-2">
+                        <ThirthButton class="!text-[#9C0B0B] !bg-[#FFB8B8] !py-2 mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -560,8 +560,8 @@
             </div>
           </div>
         </div>
-        <!-- lista de productos sin codigo -->
       </section>
+      <!-- lista de productos sin codigo -->
       <section v-if="isQuickNoCodeSelectionOn && noCodeProducts.length"
         class="border rounded-md mx-2 border-[#D9D9D9] bg-grayF2" :class="showNoCodeProducts ? 'h-[30%]' : 'h-[6%]'">
         <div class="mx-4">
@@ -694,7 +694,7 @@
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
-        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !border-red-600"
+        <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !bg-[#FFB8B8]"
           @click="showPaymentModal = false">
           <span>Cancelar pago</span>
           <i class="fa-solid fa-xmark"></i>
@@ -1387,8 +1387,9 @@ export default {
         this.quantity = 1; //asigna la cantidad por defecto a 1
         this.handleScale(); //ejecuta el manejador de bascula si el producto es a granel
       } else {
-        item.imageUrl = item.image_url
-        this.addSaleProduct(item); //agrega el producto a la lista de venta
+        item.imageUrl = item.image_url;
+        focuseInputAfterAdd = false;
+        this.addSaleProduct(item, focuseInputAfterAdd); //agrega el producto a la lista de venta
       }
     },
     filterNoCodeProducts() {
@@ -1863,7 +1864,7 @@ export default {
         console.error(error);
       }
     },
-    addSaleProduct(product) {
+    addSaleProduct(product, focusInputAfterAdd = true) {
       const existingIndex = this.editableTabs[this.editableTabsValue - 1].saleProducts?.findIndex(sale => {
         return sale.product.id == product.id;
       });
@@ -1897,7 +1898,10 @@ export default {
       this.quantity = 1;
       this.scanning = false;
       this.productFoundSelected = null;
-      this.inputFocus();
+
+      if (focusInputAfterAdd) {
+        this.inputFocus();
+      }
 
       if (this.isReadingScale) {
         this.stopReadingScale(); //detiene la lectura de la báscula

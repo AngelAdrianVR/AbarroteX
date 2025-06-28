@@ -202,5 +202,6 @@ return [
         'client_phone_number' => 'número tlefónico del cliente',
         'service_description' => 'descripción de servicios',
         'service_cost' => 'costo de servicio',
+        'payment_method' => 'método de pago',
     ],
 ];

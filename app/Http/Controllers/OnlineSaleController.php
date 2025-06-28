@@ -300,7 +300,7 @@ class OnlineSaleController extends Controller
             ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock', 'product_on_request', 'bulk_product', 'measure_unit', 'days_for_delivery', 'currency']);
 
         // productos transferidos desde el catálogo base y con permiso de mostrar en la tienda
-        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where([
+        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category:id,name']])->where([
             'store_id' => $store_id,
             'show_in_online_store' => 1,
         ])->get();
