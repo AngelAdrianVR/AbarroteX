@@ -506,16 +506,24 @@ export default {
         updateStatus() {
             this.statusForm.post(route('quotes.update-status', this.quoteSelected.id), {
                 onSuccess: () => {
-                    // actualizar info de la vista
-                    this.quoteSelected.remaining = this.quoteSelected.remaining != null
-                        ? this.quoteSelected.remaining - this.statusForm.amount
-                        : null;
+                    // actualizar restante en la tabla
+                    let remaining;
+                    if (this.quoteSelected.remaining != null) {
+                        remaining = this.quoteSelected.remaining - this.statusForm.amount;
+                    } else if (this.statusForm.amount) {
+                        remaining = this.statusForm.grand_total - this.statusForm.amount;
+                    } else {
+                        remaining = null;
+                    }
+                    this.quoteSelected.remaining = remaining;
 
+                    // actualizar status
                     this.quoteSelected.status = this.quoteSelected.remaining === 0
                         ? 'Pagado'
                         : this.statusForm.status;
 
                     this.paymentConfirmed = true; //indica que el pago ha sido confirmado
+                    this.statusForm.reset(); //reinicia el formulario de estado
                     setTimeout(() => {
                         this.paymentConfirmed = false;
                         // Aquí cierra el modal como lo manejes normalmente

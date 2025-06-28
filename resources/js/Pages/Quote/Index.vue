@@ -1,7 +1,7 @@
 <template>
   <AppLayout title="Cotizaciones">
     <div class="px-2 lg:px-10 py-7">
-      <h1>Cotizaciones</h1>
+      <h1 class="font-bold">Cotizaciones</h1>
 
       <div class="md:flex justify-between mt-3">
         <article class="flex items-center flex-col space-y-2 lg:flex-row lg:space-x-2 lg:space-y-0 lg:w-1/3">
@@ -14,7 +14,8 @@
             {{ searchedWord }}
           </el-tag>
         </article>
-        <div v-if="this.$page.props.auth.user.permissions.includes('Crear cotizaciones')" class="my-4 md:my-0 flex items-center justify-end space-x-3">
+        <div v-if="this.$page.props.auth.user.permissions.includes('Crear cotizaciones')"
+          class="my-4 md:my-0 flex items-center justify-end space-x-3">
           <PrimaryButton @click="$inertia.get(route('quotes.create'))">Crear cotización</PrimaryButton>
         </div>
       </div>
