@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between pb-5">
       <template v-for="(step, index) in steps" :key="index">
         <div class="flex-1 flex-col items-center">
-          <div class="flex justify-center items-center space-x-2">
+          <div class="flex flex-col md:flex-row justify-center items-center space-x-2">
             <div
               :class="'mb-1'"
             >

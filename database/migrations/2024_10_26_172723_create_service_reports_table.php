@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('client_name')->nullable();
             $table->string('client_department')->nullable();
             $table->string('client_phone_number')->nullable(); // numero telefonico del cliente(nuevo)
+            $table->string('cancellation_reason')->nullable(); // razón de cancelacion de orden de servicio (para apontephone)(nuevo)
             $table->text('service_description')->nullable(); // descripción del servicio a realizar (nuevo)
             $table->float('service_cost')->unsigned()->nullable(); // Costo del servicio sin tomar en cuenta refacciones (nuevo)
             $table->float('total_cost')->unsigned()->nullable(); // Costo total del servicio mas refacciones (nuevo)
