@@ -9,7 +9,7 @@
 export default {
   data() {
     return {
-      canvasSize: 85,
+      canvasSize: this.size,
       gridSize: 3,
       pointRadius: 10,
     };
@@ -18,7 +18,11 @@ export default {
     this.drawPattern();
   },
   props:{
-    points: Array
+    points: Array,
+    size: {
+      type: Number,
+      default: 85,
+    },
   },
   methods: {
     getCoordinates(index) {

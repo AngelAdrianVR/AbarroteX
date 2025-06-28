@@ -94,7 +94,7 @@ class ServiceReportController extends Controller
     {
         // Decodificar el ID
         $decoded_report = base64_decode($encoded_report_id);
-        $report = ServiceReport::findOrFail($decoded_report);
+        $report = ServiceReport::with('media')->findOrFail($decoded_report);
         $store_id = auth()->user()->store_id;
 
         // Ruta a la vista de Inertia (ej: 'ServiceReport/Show1.vue')
@@ -203,7 +203,6 @@ class ServiceReportController extends Controller
         $service_report->update([
             'status' => $request->status
         ]);
-
     }
 
     public function massiveDelete(Request $request)

@@ -13,12 +13,12 @@
                         @change="toggleSelectAll"
                         />
                     </th>
-                    <th class="">Orden</th>
-                    <th class="">Fecha del servicio</th>
-                    <th class="">Cliente</th>
-                    <th class="">Servicio</th>
-                    <th class="">Total a pagar</th>
-                    <th class=""></th>
+                    <th>Orden</th>
+                    <th>Fecha del servicio</th>
+                    <th>Cliente</th>
+                    <th>Servicio</th>
+                    <th>Total a pagar</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -35,12 +35,12 @@
                         <el-tooltip :content="report.status" placement="top">
                             <span v-html="getStatusIcon(report.status)"></span>
                         </el-tooltip>
-                        <span>{{ String(report.folio).padStart(4, '0') }}</span>
+                        <span>{{ String(report.folio).padStart(3, '0') }}</span>
                     </td>
                     <td>{{ formatDate(report.service_date) }}</td>
                     <td>{{ report.client_name ?? 'No especificado' }}</td>
                     <td>{{ report.service_description ?? '-' }}</td>
-                    <td>${{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '-' }}</td>
+                    <td>${{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
                     <td class="rounded-e-full text-end">
                         <el-dropdown trigger="click" @command="handleCommand">
                             <button @click.stop
