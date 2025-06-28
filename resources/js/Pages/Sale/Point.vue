@@ -416,8 +416,7 @@
             <!-- Total por cobrar escritorio-->
             <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
               class="hidden lg:block border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-              <div
-                v-if="!editableTabs[editableTabsValue - 1].cash && !editableTabs[editableTabsValue - 1].credit">
+              <div v-if="!editableTabs[editableTabsValue - 1].cash && !editableTabs[editableTabsValue - 1].credit">
                 <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                   <p>Subtotal</p>
                   <p class="text-gray-99">$ <strong class="ml-3">{{
@@ -435,7 +434,8 @@
                 <div class="flex items-center justify-between text-xl mx-5">
                   <p class="font-bold">Total</p>
                   <p v-if="(calculateTotal() - editableTabs[editableTabsValue - 1].discount) < 0"
-                    class="text-red-600 text-xs">El descuento es más grande que el total</p>
+                    class="text-red-600 text-xs">
+                    El descuento es más grande que el total</p>
                   <p v-else class="text-gray-99">
                     $ <strong class="ml-3">
                       {{ (calculateTotal() - editableTabs[editableTabsValue - 1].discount)?.toLocaleString('en-US',
@@ -540,8 +540,8 @@
                 </div>
                 <div class="w-2/3 pr-5">
                   <InputLabel value="Fecha de vencimiento (opcional)" class="!text-base !text-gray-400 ml-2" />
-                  <el-date-picker v-model="editableTabs[editableTabsValue - 1].limit_date" class="!w-full"
-                    type="date" placeholder="Seleccione" :disabled-date="disabledDate" />
+                  <el-date-picker v-model="editableTabs[editableTabsValue - 1].limit_date" class="!w-full" type="date"
+                    placeholder="Seleccione" :disabled-date="disabledDate" />
                 </div>
                 <!-- <div class="mt-3">
                   <InputLabel value="Notas (opcional)" class="!text-base ml-2 !text-gray-400" />
@@ -691,6 +691,25 @@
       </section>
     </main>
 
+    <!-- modal de inmpresión -->
+    <DialogModal :show="showPrintingModal" @close="showPrintingModal = false" max-width="md">
+      <template #title> Impresión de ticket </template>
+      <template #content>
+        <div class="flex items-start space-x-4">
+          <figure class="h-24">
+            <img src="@/../../public/images/ticket.png" :draggable="false" class="select-none object-contain h-full"
+              alt="Imagen de ticket de venta">
+          </figure>
+          <p class="w-2/3 text-base text-gray37">¿Desea imprimir el ticket de la venta?</p>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex items-center space-x-2">
+          <CancelButton @click="showPrintingModal = false">No</CancelButton>
+          <PrimaryButton @click="openPrintingTemplate" :disabled="clientForm.processing">Si, imprimir</PrimaryButton>
+        </div>
+      </template>
+    </DialogModal>
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
@@ -1276,6 +1295,7 @@ export default {
       showClientConfirmModal: false, //muestra u oculta el modal de peticion de cliente para venta a crédito
       showCreateProductModal: false, //muestra u oculta el modal de creación rápida de producto
       showPaymentModal: false, //muestra u oculta el modal de pago al finalizar la venta
+      showPrintingModal: false,
 
       // generales
       paymentMethod: '', //Método de pago seleccionado
@@ -1310,6 +1330,9 @@ export default {
       creatingProduct: false,
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
+
+      //impresión
+      folioToPrint: null,
 
       //buscador
       searchQuery: null,
@@ -1490,14 +1513,20 @@ export default {
 
           localStorage.setItem('pendentProcess', false);
 
-          //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
+          //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
           if (this.automaticPrinting) {
-            window.open(route('sales.print-ticket', response.data.folio_stored), '_blank');
+            this.showPrintingModal = true;
+            this.folioToPrint = response.data.folio_stored;
           }
         }
       } catch (error) {
         console.error(error);
       }
+    },
+    openPrintingTemplate() {
+      window.open(route('sales.print-ticket', this.folioToPrint), '_blank');
+      this.showPrintingModal = false;
+      this.folioToPrint = null;
     },
     processOfflineSale() {
       this.saveToLocalStorage();
