@@ -1,5 +1,6 @@
 <template>
     <AppLayout :title="'Orden-' + String(report.folio).padStart(3, '0')">
+
         <main class="py-4 px-1 lg:px-8">
             <Back />
             <h1 class="text-lg md:text-2xl font-bold">Orden de servicio No. {{ String(report.folio).padStart(3, '0') }}</h1>

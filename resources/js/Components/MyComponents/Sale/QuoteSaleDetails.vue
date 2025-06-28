@@ -175,34 +175,35 @@
                 </template>
             </Accordion>
         </main>
-        <footer class="text-end md:flex text-xs lg:text-sm"
-            :class="groupedSales.credit_data ? 'justify-between' : 'justify-end'">
-            <div v-if="groupedSales.credit_data"
-                class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
-                <span class="text-gray99">Fecha de vencimiento:</span>
-                <p :class="expiredDateClass" class="flex items-center space-x-2">
-                    <span v-if="wasRefunded" class="text-gray99">
-                        <i class="fa-solid fa-minus"></i>
-                    </span>
-                    <span v-else>
-                        {{ groupedSales.credit_data.expired_date ? formatDate(groupedSales.credit_data.expired_date)
-                            : 'No especificada' }}
-                    </span>
-                    <svg v-if="isExpired" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor" class="size-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                    </svg>
-                </p>
-            </div>
-            <div v-if="groupedSales.products[0].payment_method === 'Tarjeta'"
-                class="py-1 flex items-center justify-start space-x-2 self-end">
-                <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
-                <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
-            </div>
-            <div v-else class="py-1 flex items-center justify-start space-x-2 self-end">
-                <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
-                <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
+        <footer class="text-end md:flex items-end justify-between text-xs lg:text-sm">
+            <div>
+                <div v-if="groupedSales.products[0].payment_method === 'Tarjeta'"
+                    class="py-1 flex items-center justify-start space-x-2 self-end ml-3">
+                    <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                    <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
+                </div>
+                <div v-else class="py-1 flex items-center justify-start space-x-2 self-end ml-3">
+                    <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                    <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
+                </div>
+                <div v-if="groupedSales.credit_data"
+                    class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
+                    <span class="text-gray99">Fecha de vencimiento:</span>
+                    <p :class="expiredDateClass" class="flex items-center space-x-2">
+                        <span v-if="wasRefunded" class="text-gray99">
+                            <i class="fa-solid fa-minus"></i>
+                        </span>
+                        <span v-else>
+                            {{ groupedSales.credit_data.expired_date ? formatDate(groupedSales.credit_data.expired_date)
+                                : 'No especificada' }}
+                        </span>
+                        <svg v-if="isExpired" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="size-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </p>
+                </div>
             </div>
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
                 <div class="flex items-center justify-end"

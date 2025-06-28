@@ -243,6 +243,7 @@ class ServiceReportController extends Controller
         }
 
         $service_report->update($data);
+
     }
 
     public function massiveDelete(Request $request)

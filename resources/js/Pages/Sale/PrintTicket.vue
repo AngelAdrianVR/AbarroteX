@@ -1,85 +1,91 @@
 <template>
-
-  <Head :title="'imprimir ticket folio ' + sales[0].folio" />
-  <div id="text-to-print" class="w-full md:w-[420px] mx-auto text-sm border-2 border-black p-5 my-16 !text-[11px]">
-    <div class="flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-        class="size-4 mr-1">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-      </svg>
-      <p>{{ $page.props.auth.user.store.name }}</p>
+  <div>
+    <div class="w-full md:w-[420px] mx-auto mt-6">
+      <CancelButton v-if="!printTicket" @click="closeTab" class="!bg-[#EDEDED] !text-[#373737]">
+        <i class="fa-solid fa-arrow-left"></i>
+        Regresar a punto de venta
+      </CancelButton>
     </div>
-    <p class="flex items-center justify-between">
-      <span>Folio: {{ sales[0]?.folio }}</span>
-      <span>{{ formatDate(sales[0]?.created_at) }}</span>
-    </p>
-    <!-- tabla de productos -->
-    <table class="mt-2 w-full table-fixed">
-      <thead>
-        <tr class="text-left *:font-bold *:pb-2">
-          <th class="w-7/12">Producto</th>
-          <th class="w-5/12 text-right">Cant/Precio/Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="sale in sales" :key="sale.id">
-          <td class="pr-1 align-top">
-            <span class="uppercase">{{ sale.product_name }}</span>
-          </td>
-          <td class="text-right align-top whitespace-nowrap">
-            <span>{{ sale.quantity }}x</span>
-            <span class="pl-1">${{ (sale.current_price)?.toFixed(2) }} =</span>
-            <span class="font-bold pl-1">${{ (sale.quantity * sale.current_price)?.toFixed(2) }}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="flex justify-end mt-1 mr-6">
-      <p class="font-bold text-xs">
-        Total
-        <span class="ml-2">
-          ${{ totalSale().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-        </span>
+    <Head :title="'imprimir ticket folio ' + sales[0].folio" />
+    <div id="text-to-print" class="w-full md:w-[420px] mx-auto text-sm border-2 border-black p-5 my-4 !text-[11px]">
+      <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="size-4 mr-1">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+        </svg>
+        <p>{{ $page.props.auth.user.store.name }}</p>
+      </div>
+      <p class="flex items-center justify-between">
+        <span>Folio: {{ sales[0]?.folio }}</span>
+        <span>{{ formatDate(sales[0]?.created_at) }}</span>
+      </p>
+      <!-- tabla de productos -->
+      <table class="mt-2 w-full table-fixed">
+        <thead>
+          <tr class="text-left *:font-bold *:pb-2">
+            <th class="w-7/12">Producto</th>
+            <th class="w-5/12 text-right">Cant/Precio/Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="sale in sales" :key="sale.id">
+            <td class="pr-1 align-top">
+              <span class="uppercase">{{ sale.product_name }}</span>
+            </td>
+            <td class="text-right align-top whitespace-nowrap">
+              <span>{{ sale.quantity }}x</span>
+              <span class="pl-1">${{ (sale.current_price)?.toFixed(2) }} =</span>
+              <span class="font-bold pl-1">${{ (sale.quantity * sale.current_price)?.toFixed(2) }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="flex justify-end mt-1 mr-6">
+        <p class="font-bold text-xs">
+          Total
+          <span class="ml-2">
+            ${{ totalSale().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+          </span>
+        </p>
+      </div>
+      <p v-if="!printTicket" class="mt-2 border-t border-dashed border-black"></p>
+      <div class="flex flex-col text-[#373737] mt-1">
+        <p>Metodo de pago: {{ sales[0].payment_method }}</p>
+        <span>GRACIAS POR SU COMPRA</span>
+      </div>
+      <p v-if="$page.props.auth.user.store.address" class="text-center mt-1 border-b border-dashed border-black">
+        {{ $page.props.auth.user.store.address }}
       </p>
     </div>
-    <p v-if="!printTicket" class="mt-2 border-t border-dashed border-black"></p>
-    <div class="flex flex-col text-[#373737] mt-1">
-      <p>Metodo de pago: {{ sales[0].payment_method }}</p>
-      <span>GRACIAS POR SU COMPRA</span>
-    </div>
-    <p v-if="$page.props.auth.user.store.address" class="text-center mt-1 border-b border-dashed border-black">
-      {{ $page.props.auth.user.store.address }}
+    <!-- Botones de conexión e impresión -->
+    <section class="text-center lg:space-x-2 mt-7 mx-10 space-y-4">
+      <ThirthButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="!printTicket" @click="conectarBluetooth"
+        class="!py-1 !bg-blue-100 !text-blue-600 mr-2">
+        <i class="fa-brands fa-bluetooth text-lg mr-2"></i>
+        Conectar impresora
+      </ThirthButton>
+  
+      <!-- imprimir desde dispositivo movil -->
+      <PrimaryButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="(device && !printTicket)" class="mr-2"
+        @click="enviarDatosImpresion()">
+        <i class="fa-solid fa-print"></i>
+        Imprimir ticket de nuevo
+      </PrimaryButton>
+  
+      <!-- imprimir desde pc de escritorio o dispositivo con windows -->
+      <PrimaryButton v-if="!printTicket" @click="print" class="!bg-[#EDEDED] !text-[#373737]">
+        <i class="fa-solid fa-display"></i>
+        Guardar en PDF
+      </PrimaryButton>
+        </section>
+    <p v-if="!UUIDService && !UUIDCharacteristic" class="text-sm text-center text-red-600 mt-4">
+      No tienes ninguna impresora configurada.
+      Para conectar con una impresora térmica vía bluetooth
+      <strong @click="$inertia.get(route('settings.index', { tab: 3 }))"
+        class="text-primary underline cursor-pointer">configurala aquí</strong>
     </p>
   </div>
-  <!-- Botones de conexión e impresión -->
-  <section class="text-center lg:space-x-2 mt-7 mx-10 space-y-4">
-    <ThirthButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="!printTicket" @click="conectarBluetooth"
-      class="!py-1 !bg-blue-100 !text-blue-600 mr-2">
-      <i class="fa-brands fa-bluetooth text-lg mr-2"></i>
-      Conectar impresora
-    </ThirthButton>
-
-    <!-- imprimir desde dispositivo movil -->
-    <PrimaryButton :disabled="!UUIDService && !UUIDCharacteristic" v-if="(device && !printTicket)" class="mr-2"
-      @click="enviarDatosImpresion(device)">
-      <i class="fa-solid fa-print"></i>
-      Imprimir ticket
-    </PrimaryButton>
-
-    <!-- imprimir desde pc de escritorio o dispositivo con windows -->
-    <PrimaryButton v-if="!printTicket" @click="print" class="!bg-[#EDEDED] !text-[#373737]">
-      <i class="fa-solid fa-display"></i>
-      Guardar en PDF
-    </PrimaryButton>
-  </section>
-  <p v-if="!UUIDService && !UUIDCharacteristic" class="text-sm text-center text-red-600 mt-4">
-    No tienes ninguna impresora configurada.
-    Para conectar con una impresora térmica vía bluetooth
-    <strong @click="$inertia.get(route('settings.index', { tab: 3 }))"
-      class="text-primary underline cursor-pointer">configurala aquí</strong>
-  </p>
-
 </template>
 
 <script>
@@ -88,6 +94,7 @@ import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import { Head } from '@inertiajs/vue3';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import CancelButton from '@/Components/MyComponents/CancelButton.vue';
 
 export default {
   data() {
@@ -102,12 +109,17 @@ export default {
   components: {
     PrimaryButton,
     ThirthButton,
-    Head
+    Head,
+    CancelButton,
   },
   props: {
     sales: Object,
   },
   methods: {
+    closeTab() {
+      // Cerrar la pestaña actual
+      window.close();      
+    },
     conectarBluetooth() {
       // Solicitar al usuario que seleccione la impresora vía Bluetooth
       navigator.bluetooth.requestDevice({
@@ -116,6 +128,7 @@ export default {
       })
         .then(device => {
           this.device = device;
+          this.enviarDatosImpresion();
         })
         .catch(error => {
           console.error('Error al conectar con dispositivo Bluetooth:', error);
@@ -203,9 +216,9 @@ export default {
 
       return ticket;
     },
-    async enviarDatosImpresion(device) {
+    async enviarDatosImpresion() {
       try {
-        const service = await device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
+        const service = await this.device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
         const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
 
         // Generamos el ticket con los comandos justo antes de imprimir
