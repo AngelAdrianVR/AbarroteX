@@ -173,7 +173,7 @@
                             v-model:file-list="fileList"
                             :before-upload="beforeUpload"
                             :multiple="true"
-                            :limit="5"
+                            :limit="5 - report.media?.length"
                             list-type="picture-card"
                             :auto-upload="false"
                             >
@@ -201,7 +201,7 @@
                             <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span class="w-24 text-right">{{ form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-24 text-right">{{ form.advance_payment ?? '0.00' }}</span>
+                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-24 text-right">{{ form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
                             <span class="w-32">Refacciones</span><span class="ml-3">$</span><span class="w-24 text-right">{{ totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
