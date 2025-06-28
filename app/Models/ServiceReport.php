@@ -24,6 +24,7 @@ class ServiceReport extends Model implements HasMedia
         'service_description',
         'service_cost',
         'total_cost',
+        'status',
         'advance_payment',
         'payment_method',
         'comision_percentage',
