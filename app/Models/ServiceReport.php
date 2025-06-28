@@ -27,6 +27,7 @@ class ServiceReport extends Model implements HasMedia
         'cancellation_reason',
         'status',
         'advance_payment',
+        'paid_at',
         'payment_method',
         'comision_percentage',
         'product_details',
@@ -41,6 +42,7 @@ class ServiceReport extends Model implements HasMedia
 
     protected $casts = [
         'service_date' => 'date',
+        'paid_at' => 'date',
         'product_details' => 'array',
         'spare_parts' => 'array',
         'observations' => 'array',

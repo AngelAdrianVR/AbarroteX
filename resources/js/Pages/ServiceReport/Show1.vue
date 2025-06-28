@@ -4,7 +4,7 @@
             <Back />
             <h1 class="text-lg md:text-2xl font-bold">Orden de servicio No. {{ String(report.folio).padStart(3, '0') }}</h1>
             <div class="md:flex justify-between mt-3 mb-5">
-                <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{ formatDate(report.created_at) }}</span></p>
+                <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{ formatDate(report.service_date) }}</span></p>
                 <el-dropdown :disabled="report.status === 'Cancelada'" split-button trigger="click" type="primary" 
                     @click="report.status!== 'Cancelada' && report.status!== 'Entregado/Pagado' 
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id))) 
@@ -94,7 +94,7 @@
                             Cancelar orden de servicio
                         </button>
                         <el-popconfirm  v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada'" confirm-button-text="Si" cancel-button-text="No" icon-color="#6F6E72"
-                            :title="'Cambiar estatus?'" @confirm="changeStatus(statuses[statuses.findIndex(status => status === report.status) + 1])">
+                            :title="'Cambiar estatus?'" @confirm="handleChangeStatus(statuses[statuses.findIndex(status => status === report.status) + 1])">
                             <template #reference>
                                 <PrimaryButton 
                                     class="bg-gradient-to-r from-[#751F8B] via-[#754681] to-[#1F0825] disabled:bg-gray-500 !disabled:cursor-not-allowed"
@@ -260,95 +260,231 @@
                 </section>
             </body>
         </main>
+
         <!-- -------------- Modal de cancelacion ----------------------- -->
         <Modal :show="confirmCancelModal" @close="confirmCancelModal = false" maxWidth="2xl">
-        <div class="p-5 relative">
-            <i @click="confirmCancelModal = false"
-            class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+            <div class="p-5 relative">
+                <i @click="confirmCancelModal = false"
+                class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
 
-            <h2 class="font-bold text-lg mb-1">Cancelar orden de servicio</h2>
-            <p class="text-sm">Confirma los detalles de la cancelación. Indica si se cobrará revisión o si se requiere devolución de anticipo.</p>
+                <h2 class="font-bold text-lg mb-1">Cancelar orden de servicio</h2>
+                <p class="text-sm">Confirma los detalles de la cancelación. Indica si se cobrará revisión o si se requiere devolución de anticipo.</p>
 
-            <div>
-                <p class="font-semibold text-right">Resumen de la orden</p>
-                <div class="mt-2 text-[15px] space-y-1 flex flex-col items-end">
-                    <p class="flex">
-                        <span class="w-40">Costo del servicio</span><span class="ml-3">$</span><span class="w-24 text-right">{{ report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
-                    </p>
-                    <p class="flex">
-                        <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-24 text-right">{{ report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
-                    </p>
-                    <p class="flex">
-                        <span class="w-40">Refacciones</span><span class="ml-3">$</span><span class="w-24 text-right">{{ totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                    </p>
-                    <p class="flex font-bold">
-                        <span class="w-40">Total restante</span><span class="ml-3">$</span><span class="w-24 text-right">{{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                    </p>
+                <div>
+                    <p class="font-semibold text-right">Resumen de la orden</p>
+                    <div class="mt-2 text-[15px] space-y-1 flex flex-col items-end">
+                        <p class="flex">
+                            <span class="w-40">Costo del servicio</span><span class="ml-3">$</span><span class="w-24 text-right">{{ report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                        </p>
+                        <p class="flex">
+                            <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-24 text-right">{{ report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                        </p>
+                        <p class="flex">
+                            <span class="w-40">Refacciones</span><span class="ml-3">$</span><span class="w-24 text-right">{{ totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p>
+                        <p class="flex font-bold">
+                            <span class="w-40">Total restante</span><span class="ml-3">$</span><span class="w-24 text-right">{{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mt-3">
-                <InputLabel value="Motivo de cancelación (opcional)" class="ml-3 mb-1" />
-                <el-input v-model="cancellation_reason" placeholder="Ej. El cliente no aceptó el presupuesto" clearable />
-            </div>
+                <div class="mt-3">
+                    <InputLabel value="Motivo de cancelación (opcional)" class="ml-3 mb-1" />
+                    <el-input v-model="cancellation_reason" placeholder="Ej. El cliente no aceptó el presupuesto" clearable />
+                </div>
 
-            <div class="mx-4 mt-3">
-                <!-- Cobrar revisión -->
-                <el-checkbox v-model="chargeReview">Cobrar revisión</el-checkbox>
-                <div v-if="chargeReview">
-                    <InputLabel value="Monto de revisión" class="ml-3 mb-1" />
-                    <el-input
-                        class="!w-1/2"
-                        v-model="reviewAmount"
-                        placeholder="Ej. $300"
-                        :disabled="!chargeReview"
-                    >
-                        <template #prepend>
-                            <span class="text-gray-500">$</span>
+                <div class="mx-4 mt-3">
+                    <!-- Cobrar revisión -->
+                    <el-checkbox v-model="chargeReview">Cobrar revisión</el-checkbox>
+                    <div v-if="chargeReview">
+                        <InputLabel value="Monto de revisión" class="ml-3 mb-1" />
+                        <el-input
+                            class="!w-1/2"
+                            v-model="reviewAmount"
+                            placeholder="Ej. $300"
+                            :disabled="!chargeReview"
+                        >
+                            <template #prepend>
+                                <span class="text-gray-500">$</span>
+                            </template>
+                        </el-input>
+                    </div>
+
+                    <!-- Devolver anticipo -->
+                    <el-checkbox v-model="returnAdvance">Devolver anticipo al cliente</el-checkbox>
+                    <div v-if="returnAdvance">
+                        <InputLabel value="Monto a devolver" class="ml-3 mb-1" />
+                        <el-input
+                            class="!w-1/2"
+                            v-model="advanceAmount"
+                            placeholder="Ej. $100"
+                            :disabled="!returnAdvance"
+                        >
+                            <template #prepend>
+                                <span class="text-gray-500">$</span>
+                            </template>
+                        </el-input>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div v-if="returnAdvance || chargeReview" class="mt-2 text-[15px] space-y-1 flex flex-col items-end">
+                        <p class="flex">
+                            <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span class="w-24 text-right">{{ parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                        </p>
+                        <p class="flex">
+                            <span class="w-[170px]">Anticipo</span><span class="ml-[2px]">$</span><span class="w-24 text-right">{{ report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                        </p>
+                        <p v-if="report.advance_payment > 0" class="flex">
+                            <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span class="w-24 text-right">{{ (report.advance_payment - parseFloat(reviewAmount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p>
+                        <p v-else class="flex">
+                            <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span class="w-24 text-right">{{ parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p>
+
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-5">
+                    <CancelButton @click="confirmCancelModal = false" class="mr-2">Cerrar</CancelButton>
+                    <PrimaryButton @click="changeStatus('Cancelada')">Confirmar cancelación</PrimaryButton>
+                </div>
+            
+            </div>
+        </Modal>
+
+        <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
+        <Modal :show="showPaymentModal" @close="showPaymentModal = false">
+            <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
+                <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !bg-[#FFB8B8]"
+                    @click="showPaymentModal = false">
+                    <span>Cancelar pago</span>
+                    <i class="fa-solid fa-xmark"></i>
+                </ThirthButton>
+                <h1 class="font-bold mt-2">Opciones de pago</h1>
+                <p class="text-gray99">Seleccione el método de pago</p>
+                <section class="grid grid-cols-2 gap-4 mt-3 py-7">
+                    <button @click="paymentModalStep = 2; paymentMethod = 'Efectivo'; receivedInputFocus()" type="button"
+                        class="bg-[#E0FEC5] text-[#37672B] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+                        <p class="text-lg text-center font-bold">EFECTIVO</p>
+                        <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                    </button>
+                    <button @click="paymentModalStep = 3; paymentMethod = 'Tarjeta'" type="button"
+                        class="bg-[#DAE6FF] text-[#063B52] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+                        <p class="text-lg text-center font-bold">TARJETA</p>
+                        <img src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                    </button>
+                </section>
+            </div>
+            <!-- Pago con efectivo (step 2) -->
+            <div v-if="paymentModalStep === 2" class="py-4 px-7 relative">
+                <section class="flex items-center justify-between">
+                    <h1 class="font-bold mt-2 text-lg">Pagar</h1>
+                    <div @click="paymentModalStep = 1" class="flex items-center space-x-4 text-primary cursor-pointer">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Regresar</span>
+                    </div>
+                </section>
+                <section class="mx-auto mt-2 md:w-2/3">
+                    <div
+                        class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-4 flex items-center justify-between mt-3">
+                        <span class="font-bold text-[#37672B]">EFECTIVO</span>
+                        <img src="@/../../public/images/dollar.webp" alt="Pago en efectivo" class="h-7">
+                    </div>
+                    <div
+                        class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+                        <span class="font-bold">Total a pagar</span>
+                        <p class="font-bold"><span class="mr-4">$</span>{{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    </div>
+                    <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
+                        <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
+                        <el-input-number ref="receivedInput" @keydown.enter="changeStatus('Entregado/Pagado')"
+                            v-model="moneyReceived" :min="1" :max="999999">
+                        <template #prefix>
+                            <span>$</span>
                         </template>
-                    </el-input>
-                </div>
+                        </el-input-number>
+                        <p class="pt-5 font-bold">Cambio</p>
+                        <div class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-7 flex items-center justify-between">
+                            <p v-if="report.total_cost <= moneyReceived"
+                                class="font-bold">
+                                <span class="mr-5">$</span>
+                                {{
+                                    (moneyReceived - report.total_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}
+                            </p>
+                        </div>
+                        <p v-if="(report.total_cost > moneyReceived) && moneyReceived"
+                            class="text-base font-bold text-red-600 text-center mb-3">
+                            La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total a pagar.
+                        </p>
+                        <div class="flex justify-center mt-7">
+                        <PrimaryButton :disabled="updatingStatus" class="!px-20" @click="changeStatus('Entregado/Pagado')">
+                            <i v-if="updatingStatus" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                            Confirmar pago
+                        </PrimaryButton>
+                        </div>
+                    </div>
 
-                <!-- Devolver anticipo -->
-                <el-checkbox v-model="returnAdvance">Devolver anticipo al cliente</el-checkbox>
-                <div v-if="returnAdvance">
-                    <InputLabel value="Monto a devolver" class="ml-3 mb-1" />
-                    <el-input
-                        class="!w-1/2"
-                        v-model="advanceAmount"
-                        placeholder="Ej. $100"
-                        :disabled="!returnAdvance"
-                    >
-                        <template #prepend>
-                            <span class="text-gray-500">$</span>
-                        </template>
-                    </el-input>
-                </div>
-
-                <!-- Resumen -->
-                <div v-if="returnAdvance || chargeReview" class="mt-2 text-[15px] space-y-1 flex flex-col items-end">
-                    <p class="flex">
-                        <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span class="w-24 text-right">{{ parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
-                    </p>
-                    <p class="flex">
-                        <span class="w-[170px]">Anticipo</span><span class="ml-[2px]">$</span><span class="w-24 text-right">{{ report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
-                    </p>
-                    <p v-if="report.advance_payment > 0" class="flex">
-                        <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span class="w-24 text-right">{{ (report.advance_payment - parseFloat(reviewAmount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                    </p>
-                    <p v-else class="flex">
-                        <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span class="w-24 text-right">{{ parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                    </p>
-
-                </div>
+                    <!-- Confirmacion de pago -->
+                    <template v-else>
+                        <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
+                        </div>
+                    </template>
+                </section>
             </div>
 
-            <div class="flex justify-end mt-5">
-                <CancelButton @click="confirmCancelModal = false" class="mr-2">Cerrar</CancelButton>
-                <PrimaryButton @click="changeStatus('Cancelada')">Confirmar cancelación</PrimaryButton>
+            <!-- Pago con tarjeta (step 3) -->
+            <div v-if="paymentModalStep === 3" class="py-4 px-7 relative">
+                <section class="flex items-center justify-between">
+                    <h1 class="font-bold mt-2 text-lg">Registrar pago</h1>
+                    <div @click="paymentModalStep = 1" class="flex items-center space-x-4 text-primary cursor-pointer">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Regresar</span>
+                    </div>
+                </section>
+
+                <section class="mx-auto mt-2 md:w-2/3">
+                    <div v-if="!paymentConfirmed">
+                        <p class="my-3 text-sm text-center">El sistema no procesa pagos con tarjeta. Usa tu terminal bancaria
+                            externa y
+                            luego registra aquí el pago.</p>
+                        <div
+                            class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
+                            <span class="font-bold text-[#05394F]">TARJETA</span>
+                            <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
+                        </div>
+
+                        <div
+                            class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+                            <span class="font-bold">Total a pagar</span>
+                            <p class="font-bold"><span class="mr-4">$</span>{{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                        </div>
+
+                        <div class="flex justify-center mt-7">
+                            <PrimaryButton @click="changeStatus('Entregado/Pagado')" :disabled="updatingStatus" class="!px-20">
+                                <i v-if="updatingStatus" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                                Confirmar pago
+                            </PrimaryButton>
+                        </div>
+                    </div>
+
+                    <!-- Confirmacion de pago -->
+                    <template v-else>
+                        <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
+                        </div>
+                    </template>
+                </section>
             </div>
-        
-        </div>
         </Modal>
     </AppLayout>
 
@@ -374,6 +510,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import Modal from "@/Components/Modal.vue";
 import InputLabel from "@/Components/InputLabel.vue";
+import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import ConfirmationModal from "@/Components/ConfirmationModal.vue";
 import DrawPatternMobil from '@/Components/MyComponents/DrawPatternMobil.vue';
@@ -394,14 +531,20 @@ data() {
         chargeReview: false,
         reviewAmount: null, // monto que se cobra por revision al cancelar orden
         returnAdvance: false, 
-        advanceAmount: null // monto de regreso de anticipo al cancelar orden
+        advanceAmount: null, // monto de regreso de anticipo al cancelar orden
+        showPaymentModal: false,
+        paymentModalStep: 1, //paso del modal de pago
+        paymentMethod: '', //Método de pago seleccionado
+        paymentConfirmed: false, //indica si el pago ha sido confirmado
+        moneyReceived: null, // Monto recibido en efectivo
     }
 },
 components:{
-    DrawPatternMobil,
     ConfirmationModal,
+    DrawPatternMobil,
     PrimaryButton,
     CancelButton,
+    ThirthButton,
     StatusStep,
     InputLabel,
     AppLayout,
@@ -458,8 +601,19 @@ methods:{
         const url = route('service-reports.print-template', this.report.id);
         window.open(url, '_blank');
     },
+    receivedInputFocus() {
+      this.$nextTick(() => {
+        this.$refs.receivedInput.focus(); // Enfocar el input de recibido cuando se abre el modal
+      });
+    },
+    handleChangeStatus(newStatus) {
+        if ( newStatus === 'Entregado/Pagado' ) {
+            this.showPaymentModal = true; // Abre el modal de pago
+        } else {
+            this.changeStatus(newStatus);
+        }
+    },
     async changeStatus(newStatus) {
-        // const newStatus = this.statuses[this.statuses.findIndex(status => status === this.report.status) + 1];
         this.updatingStatus = true; // Indica que se está actualizando el estado
         try {
             const response = await axios.post(route('service-reports.change-status', this.report.id), { 
@@ -467,6 +621,7 @@ methods:{
                 cancellation_reason: this.cancellation_reason,
                 reviewAmount: this.reviewAmount,
                 advanceAmount: this.advanceAmount,
+                paymentMethod: this.paymentMethod,
              });
             if (response.status === 200) {
                 this.$notify({
@@ -475,6 +630,16 @@ methods:{
                     type: "success",
                 });
                 this.report.status = newStatus; // Actualiza el estado del reporte
+
+                if ( newStatus === 'Entregado/Pagado' ) {
+                    this.paymentConfirmed = true; //indica que el pago ha sido confirmado
+                    setTimeout(() => {
+                        this.paymentConfirmed = false;
+                        // Aquí cierra el modal como lo manejes normalmente
+                        this.showPaymentModal = false; // ajusta este método a tu implementación
+                        this.paymentModalStep = 1; //reinicia el paso del modal de pago
+                    }, 1000);
+                    }
             } else {
                 this.$notify({
                     title: "Error al actualizar status",
@@ -539,4 +704,20 @@ methods:{
   .animate-fade-in {
     animation: fade-in 0.4s ease-out;
   }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s ease-out forwards;
+}
 </style>
