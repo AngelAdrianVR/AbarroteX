@@ -66,7 +66,7 @@
         Imprimir ticket de nuevo (Bluetooth)
       </PrimaryButton>
 
-      <ThirthButton v-if="!printTicket" @click="conectarUSB" class="!py-1 !bg-green-100 !text-green-600 mr-2">
+      <!-- <ThirthButton v-if="!printTicket" @click="conectarUSB" class="!py-1 !bg-green-100 !text-green-600 mr-2">
         <i class="fa-solid fa-usb text-lg mr-2"></i>
         Conectar impresora (USB)
       </ThirthButton>
@@ -74,17 +74,17 @@
       <ThirthButton @click="imprimir" class="!py-1 !bg-green-100 !text-green-600 mr-2">
         <i class="fa-solid fa-usb text-lg mr-2"></i>
         imprimir (USB)
-      </ThirthButton>
+      </ThirthButton> -->
 
       <PrimaryButton v-if="usbDevice && !printTicket" class="mr-2" @click="enviarDatosImpresionUSB()">
         <i class="fa-solid fa-print"></i>
         Imprimir ticket de nuevo (USB)
       </PrimaryButton>
 
-      <PrimaryButton v-if="!printTicket" @click="print" class="!bg-[#EDEDED] !text-[#373737]">
+      <!-- <PrimaryButton v-if="!printTicket" @click="print" class="!bg-[#EDEDED] !text-[#373737]">
         <i class="fa-solid fa-display"></i>
         Guardar en PDF
-      </PrimaryButton>
+      </PrimaryButton> -->
     </section>
     <p v-if="!UUIDService && !UUIDCharacteristic" class="text-sm text-center text-red-600 mt-4">
       No tienes ninguna impresora configurada para Bluetooth.
