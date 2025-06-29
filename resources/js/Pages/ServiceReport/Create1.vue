@@ -216,7 +216,6 @@
                         Crear reporte
                     </PrimaryButton>
                 </div>
-                <!-- {{form}} -->
             </form>
         </div>
     </AppLayout>
@@ -333,6 +332,7 @@ export default {
                         message: "",
                         type: "success",
                     });
+
                 },
             });
         },
