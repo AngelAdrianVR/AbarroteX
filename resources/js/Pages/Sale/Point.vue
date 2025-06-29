@@ -68,7 +68,7 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2 h-[calc(94vh-4px)]"><!--mover altura para productos sin codigo -->
+    <main class="pt-2 h-[calc(94vh-4px)]" :class="getHeightClass"><!--mover altura para productos sin codigo -->
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[70%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
@@ -416,8 +416,7 @@
             <!-- Total por cobrar escritorio-->
             <div v-if="editableTabs[editableTabsValue - 1]?.saleProducts?.length"
               class="hidden lg:block border border-grayD9 rounded-lg p-4 mt-5 text-xs lg:text-base">
-              <div
-                v-if="!editableTabs[editableTabsValue - 1].cash && !editableTabs[editableTabsValue - 1].credit">
+              <div v-if="!editableTabs[editableTabsValue - 1].cash && !editableTabs[editableTabsValue - 1].credit">
                 <!-- <div v-if="isDiscountOn" class="flex items-center justify-between text-lg mx-5">
                   <p>Subtotal</p>
                   <p class="text-gray-99">$ <strong class="ml-3">{{
@@ -435,7 +434,8 @@
                 <div class="flex items-center justify-between text-xl mx-5">
                   <p class="font-bold">Total</p>
                   <p v-if="(calculateTotal() - editableTabs[editableTabsValue - 1].discount) < 0"
-                    class="text-red-600 text-xs">El descuento es más grande que el total</p>
+                    class="text-red-600 text-xs">
+                    El descuento es más grande que el total</p>
                   <p v-else class="text-gray-99">
                     $ <strong class="ml-3">
                       {{ (calculateTotal() - editableTabs[editableTabsValue - 1].discount)?.toLocaleString('en-US',
@@ -540,8 +540,8 @@
                 </div>
                 <div class="w-2/3 pr-5">
                   <InputLabel value="Fecha de vencimiento (opcional)" class="!text-base !text-gray-400 ml-2" />
-                  <el-date-picker v-model="editableTabs[editableTabsValue - 1].limit_date" class="!w-full"
-                    type="date" placeholder="Seleccione" :disabled-date="disabledDate" />
+                  <el-date-picker v-model="editableTabs[editableTabsValue - 1].limit_date" class="!w-full" type="date"
+                    placeholder="Seleccione" :disabled-date="disabledDate" />
                 </div>
                 <!-- <div class="mt-3">
                   <InputLabel value="Notas (opcional)" class="!text-base ml-2 !text-gray-400" />
@@ -563,10 +563,10 @@
       </section>
       <!-- lista de productos sin codigo -->
       <section v-if="isQuickNoCodeSelectionOn && noCodeProducts.length"
-        class="border rounded-md mx-2 border-[#D9D9D9] bg-grayF2" :class="showNoCodeProducts ? 'h-[30%]' : 'h-[6%]'">
+        class="border rounded-md mx-2 border-[#BCBCBC] bg-[#EDEDED]" :class="showNoCodeProducts ? 'h-[30%]' : 'h-[6%]'">
         <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
-            class="flex items-center justify-between text-primary w-full pt-3 text-xs lg:text-sm">
+            class="flex items-center justify-between text-gray37 w-full pt-3 text-xs lg:text-sm">
             <h1 class="text-black">Selección rápida para productos sin código</h1>
             <p class="flex items-center space-x-2 font-semibold">
               <span>{{ showNoCodeProducts ? 'Ocultar' : 'Mostrar' }}</span>
@@ -578,7 +578,7 @@
           <div class="mb-2 relative">
             <input v-model="searchNoCodeProducts" @input="filterNoCodeProducts" placeholder="Buscar producto"
               ref="noCodeProductsInput" type="search"
-              class="lg:w-1/3 h-8 pl-8 rounded-md bg-transparent text-gray-400 border border-gray-300 focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
+              class="lg:w-1/3 h-8 pl-8 rounded-md bg-transparent border border-[#BCBCBC] focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
             <i class="absolute left-2 top-2 fa-solid fa-magnifying-glass text-gray-400"></i>
           </div>
           <el-skeleton v-if="syncingIDB"
@@ -691,6 +691,25 @@
       </section>
     </main>
 
+    <!-- modal de inmpresión -->
+    <DialogModal :show="showPrintingModal" @close="showPrintingModal = false" max-width="md">
+      <template #title> Impresión de ticket </template>
+      <template #content>
+        <div class="flex items-start space-x-4">
+          <figure class="h-24">
+            <img src="@/../../public/images/ticket.png" :draggable="false" class="select-none object-contain h-full"
+              alt="Imagen de ticket de venta">
+          </figure>
+          <p class="w-2/3 text-base text-gray37">¿Desea imprimir el ticket de la venta?</p>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex items-center space-x-2">
+          <CancelButton @click="showPrintingModal = false">No</CancelButton>
+          <PrimaryButton @click="openPrintingTemplate" :disabled="clientForm.processing">Si, imprimir</PrimaryButton>
+        </div>
+      </template>
+    </DialogModal>
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
@@ -1276,6 +1295,7 @@ export default {
       showClientConfirmModal: false, //muestra u oculta el modal de peticion de cliente para venta a crédito
       showCreateProductModal: false, //muestra u oculta el modal de creación rápida de producto
       showPaymentModal: false, //muestra u oculta el modal de pago al finalizar la venta
+      showPrintingModal: false,
 
       // generales
       paymentMethod: '', //Método de pago seleccionado
@@ -1310,6 +1330,9 @@ export default {
       creatingProduct: false,
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
+
+      //impresión
+      folioToPrint: null,
 
       //buscador
       searchQuery: null,
@@ -1380,6 +1403,27 @@ export default {
     cash_registers: Array,
     clients: Array
   },
+  computed: {
+    isShowingExpirationMessage() {
+      const nextPayment = this.$page.props.auth.user.store.next_payment;
+      const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
+      const startDate = new Date(nextPayment);
+      const currentDate = new Date();
+
+      // Calcula la diferencia en días
+      const diffDays = Math.round((startDate - currentDate) / oneDay);
+
+      return diffDays <= 7 || this.$page.props.auth.user.store.suscription_period == 'Periodo de prueba';
+    },
+    getHeightClass() {
+      const hasProducts = !!this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length;
+      if (this.isShowingExpirationMessage) {
+        return 'h-[calc(91vh+1px)]';
+      } else {
+        return 'h-[calc(94vh-4px)]';
+      }
+    },
+  },
   methods: {
     handleFastProductSelection(item) {
       if (item.bulk_product) {
@@ -1388,7 +1432,7 @@ export default {
         this.handleScale(); //ejecuta el manejador de bascula si el producto es a granel
       } else {
         item.imageUrl = item.image_url;
-        focuseInputAfterAdd = false;
+        let focuseInputAfterAdd = false;
         this.addSaleProduct(item, focuseInputAfterAdd); //agrega el producto a la lista de venta
       }
     },
@@ -1490,14 +1534,20 @@ export default {
 
           localStorage.setItem('pendentProcess', false);
 
-          //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
+          //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
           if (this.automaticPrinting) {
-            window.open(route('sales.print-ticket', response.data.folio_stored), '_blank');
+            this.showPrintingModal = true;
+            this.folioToPrint = response.data.folio_stored;
           }
         }
       } catch (error) {
         console.error(error);
       }
+    },
+    openPrintingTemplate() {
+      window.open(route('sales.print-ticket', this.folioToPrint), '_blank');
+      this.showPrintingModal = false;
+      this.folioToPrint = null;
     },
     processOfflineSale() {
       this.saveToLocalStorage();

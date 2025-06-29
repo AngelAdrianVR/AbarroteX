@@ -90,7 +90,7 @@ const fetchProviders = async () => {
 
 // Buscar productos
 const searchProducts = async () => {
-    if ( searchQuery.value === '' ) return;
+    if (searchQuery.value === '') return;
     selectedProviders.value = [];
     searchLoading.value = true
     try {
@@ -162,7 +162,7 @@ const updateProductStock = async () => {
 }
 
 const allStockZero = computed(() =>
-  Object.values(stockUpdates).every(quantity => !quantity || Number(quantity) === 0)
+    Object.values(stockUpdates).every(quantity => !quantity || Number(quantity) === 0)
 )
 
 const providerOptions = computed(() =>
@@ -257,9 +257,12 @@ onUnmounted(() => {
                                 <section @click="handleOpenInventory" class="relative flex justify-center items-center">
                                     <div class="group flex justify-center transition-all">
                                         <!-- modal de inventario para agregar stock por proveedor -->
-                                        <button class="mx-1 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-1 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                        <button
+                                            class="mx-1 flex items-center justify-end text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-1 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150 mt-[10px]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                             </svg>
                                         </button>
                                         <span
@@ -267,9 +270,10 @@ onUnmounted(() => {
                                     </div>
                                 </section>
 
-                                <section v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" @click="readNotifications" class="relative flex justify-center items-center">
-                                    <div
-                                        class="group flex justify-center transition-all">
+                                <section
+                                    v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
+                                    @click="readNotifications" class="relative flex justify-center items-center">
+                                    <div class="group flex justify-center transition-all">
                                         <!-- notificaciones de tienda en linea -->
                                         <OnlineSalesNotifications ref="onlineNotificationsCenterRef" />
                                         <span
@@ -358,7 +362,7 @@ onUnmounted(() => {
                                 <!-- notificaciones de tienda en linea -->
                                 <OnlineSalesNotifications
                                     v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')"
-                                    class="-mr-4" />
+                                    class="-mr-2" />
                                 <!-- notifications -->
                                 <NotificationsCenter />
                                 <button
@@ -465,7 +469,7 @@ onUnmounted(() => {
                                             stroke-width="1.71"></path>
                                     </g>
                                 </svg>
-                                <span>Ventas registradas</span>
+                                <span>Historial de ventas</span>
                             </ResponsiveNavLink>
                             <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Gastos') &&
                                 $page.props.auth.user.permissions?.includes('Gastos')" :href="route('expenses.index')"
@@ -798,25 +802,21 @@ onUnmounted(() => {
                     <!-- mensaje de suscripcion a punto de expirar-->
                     <section
                         v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7 || $page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
-                        class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-[11px] md:text-xs lg:px-10">
+                        class="flex justify-between items-center bg-[#ededed] text-gray37 px-2 py-px text-[10px] lg:text-xs lg:px-10">
                         <div v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) > 0">
                             Tu suscripción expira en
                             <strong>
                                 {{ calculateRemainingDays($page.props.auth.user.store.next_payment) }} días.
-                            </strong> <br>
-                            Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción.
+                            </strong>
                         </div>
                         <p v-else>
-                            Tu suscripción <strong>ha expirado.</strong> <br>
-                            Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción.
+                            Tu suscripción <strong>ha expirado.</strong>
                         </p>
-                        <div v-if="$page.props.auth.user.rol == 'Administrador'" class="flex justify-end mt-1">
+                        <div v-if="$page.props.auth.user.rol == 'Administrador'">
                             <button type="button" @click="$inertia.visit(route('profile.show'))"
                                 class="underline text-primary">
                                 Pagar suscripción
-                                <i class="fa-solid fa-arrow-right-long ml-1 text-[10px]"></i>
+                                <i class="fa-solid fa-arrow-right-long ml-1 text-[9px]"></i>
                             </button>
                         </div>
                     </section>
@@ -828,121 +828,113 @@ onUnmounted(() => {
 
     <!-- -------------- Modal de actualizacion de inventario ----------------------- -->
     <Modal :show="showInventoryModal" @close="showInventoryModal = false" maxWidth="5xl">
-      <div class="p-4 relative">
-        <i @click="showInventoryModal = false"
-          class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
+        <div class="p-4 relative">
+            <i @click="showInventoryModal = false"
+                class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
 
-        <h2 class="font-bold">Inventario</h2>
+            <h2 class="font-bold">Inventario</h2>
 
-        <p class="text-sm">Registra entradas de productos por proveedor o de forma individual. Ideal para capturar surtidos y mantener actualizado tu inventario.</p>
-        
-        <SmallLoading v-if="loadingProviders" class="my-3 mx-auto" />
+            <p class="text-sm">Registra entradas de productos por proveedor o de forma individual. Ideal para capturar
+                surtidos y mantener actualizado tu inventario.</p>
 
-        <section v-else class="mt-5 py-2">
-            <article class="md:flex justify-between items-center space-y-2 md:space-y-0">
-                <!-- Buscar por nombre o código del producto -->
-                <div class="lg:w-1/4 relative">
-                    <input v-model="searchQuery" @keyup.enter="searchProducts"
-                        class="input w-full pl-9" placeholder="Buscar por nombre o código" type="search">
-                    <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
+            <SmallLoading v-if="loadingProviders" class="my-3 mx-auto" />
+
+            <section v-else class="mt-5 py-2">
+                <article class="md:flex justify-between items-center space-y-2 md:space-y-0">
+                    <!-- Buscar por nombre o código del producto -->
+                    <div class="lg:w-1/4 relative">
+                        <input v-model="searchQuery" @keyup.enter="searchProducts" class="input w-full pl-9"
+                            placeholder="Buscar por nombre o código" type="search">
+                        <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
+                    </div>
+
+
+                    <div class="flex border max-w-lg rounded-lg">
+                        <el-select v-model="selectedProviders" multiple filterable allow-create default-first-option
+                            :reserve-keyword="false" placeholder="Selecciona proveedores" style="width: 100%">
+                            <el-option v-for="provider in providers" :key="provider.id" :label="provider.name"
+                                :value="provider.id" />
+                        </el-select>
+                        <button @click="filterByProvider" :disabled="!selectedProviders.length"
+                            class="px-3 bg-gray-300 rounded-r-md -ml-1 disabled:bg-gray-200 disabled:cursor-not-allowed">
+                            <i :class="!selectedProviders.length ? 'text-gray-400' : 'text-gray-700'"
+                                class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
+
+                <div v-else class="max-h-[500px] overflow-y-auto rounded mt-7">
+                    <table v-if="productsFound?.length" class="w-full table-fixed">
+                        <thead>
+                            <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
+                                <th class="w-16 bg-white sticky top-0 z-10">Imagen</th>
+                                <th class="w-32 bg-white sticky top-0 z-10">Código</th>
+                                <th class="w-44 bg-white sticky top-0 z-10">Nombre de producto</th>
+                                <th class="w-28 bg-white sticky top-0 z-10">Proveedor</th>
+                                <th class="w-28 bg-white sticky top-0 z-10">Existencias</th>
+                                <th class="w-32 bg-white sticky top-0 z-10">Cant. a agregar</th>
+                                <th class="w-28 bg-white sticky top-0 z-10">Existencias mínimas</th>
+                                <th class="w-28 bg-white sticky top-0 z-10">Existencias Máximas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="product in productsFound" :key="product.id"
+                                class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight">
+                                <td class="rounded-s-full">
+                                    <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
+                                        class="size-10 bg-white object-contain rounded-md"
+                                        :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                                    <div v-else
+                                        class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                        </svg>
+                                    </div>
+                                </td>
+                                <td>{{ (product.global_product_id ? product.global_product?.code : product.code) ?? '-'
+                                }}
+                                </td>
+                                <td>{{ product.global_product_id ? product.global_product?.name : product.name }}</td>
+                                <td>{{ (product.global_product_id ? product.global_product?.brand?.name :
+                                    product.brand?.name) ?? '-' }}</td>
+                                <td>
+                                    <p
+                                        :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
+                                        {{ product.current_stock ?? '-' }}
+                                        <i v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                            class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
+                                        <span v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                            class="text-[11px]">Bajo
+                                            stock</span>
+                                    </p>
+                                </td>
+                                <td>
+                                    <el-input-number size="small" v-model="stockUpdates[product.id]" :min="0" :max="999"
+                                        :model-value="stockUpdates[product.id] ?? 0" />
+                                </td>
+                                <td>{{ product.min_stock ?? '-' }}</td>
+                                <td>{{ product.max_stock ?? '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <el-empty v-else
+                        description="No hay productos para mostrar. Búscalos por nombre, código o proveedor" />
                 </div>
 
 
-                <div class="flex border max-w-lg rounded-lg">
-                    <el-select
-                        v-model="selectedProviders"
-                        multiple
-                        filterable
-                        allow-create
-                        default-first-option
-                        :reserve-keyword="false"
-                        placeholder="Selecciona proveedores"
-                        style="width: 100%"
-                    >
-                    <el-option
-                        v-for="provider in providers"
-                        :key="provider.id"
-                        :label="provider.name"
-                        :value="provider.id"
-                    />
-                    </el-select>
-                    <button @click="filterByProvider" :disabled="!selectedProviders.length" class="px-3 bg-gray-300 rounded-r-md -ml-1 disabled:bg-gray-200 disabled:cursor-not-allowed">
-                        <i :class="!selectedProviders.length ? 'text-gray-400' : 'text-gray-700'" class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </button>
+                <div class="flex items-center justify-end mt-4 space-x-3">
+                    <CancelButton @click="showInventoryModal = false;">Cancelar</CancelButton>
+                    <PrimaryButton :disabled="!productsFound.length || searchLoading || updatingStorage || allStockZero"
+                        @click="updateProductStock">
+                        <i v-if="updatingStorage" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Registrar entradas
+                    </PrimaryButton>
                 </div>
-            </article>
-
-            <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
-
-            <div v-else class="max-h-[500px] overflow-y-auto rounded mt-7">
-                <table v-if="productsFound?.length" class="w-full table-fixed">
-                    <thead>
-                    <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                        <th class="w-16 bg-white sticky top-0 z-10">Imagen</th>
-                        <th class="w-32 bg-white sticky top-0 z-10">Código</th>
-                        <th class="w-44 bg-white sticky top-0 z-10">Nombre de producto</th>
-                        <th class="w-28 bg-white sticky top-0 z-10">Proveedor</th>
-                        <th class="w-28 bg-white sticky top-0 z-10">Existencias</th>
-                        <th class="w-32 bg-white sticky top-0 z-10">Cant. a agregar</th>
-                        <th class="w-28 bg-white sticky top-0 z-10">Existencias mínimas</th>
-                        <th class="w-28 bg-white sticky top-0 z-10">Existencias Máximas</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="product in productsFound" :key="product.id"
-                            class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight">
-                            <td class="rounded-s-full">
-                                <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
-                                    class="size-10 bg-white object-contain rounded-md"
-                                    :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
-                                <div v-else
-                                    class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor" class="size-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                    </svg>
-                                </div>
-                            </td>
-                            <td>{{ (product.global_product_id ? product.global_product?.code : product.code) ?? '-' }}</td>
-                            <td>{{ product.global_product_id ? product.global_product?.name : product.name }}</td>
-                            <td>{{ (product.global_product_id ? product.global_product?.brand?.name : product.brand?.name) ?? '-' }}</td>
-                            <td>
-                                <p :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
-                                    {{ product.current_stock ?? '-' }}
-                                    <i v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                        class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
-                                    <span v-if="product.current_stock < product.min_stock && isInventoryOn"
-                                        class="text-[11px]">Bajo
-                                        stock</span>
-                                </p>
-                            </td>
-                            <td>
-                                <el-input-number
-                                    size="small"
-                                    v-model="stockUpdates[product.id]"
-                                    :min="0"
-                                    :max="999"
-                                    :model-value="stockUpdates[product.id] ?? 0"
-                                />
-                            </td>
-                            <td>{{ product.min_stock ?? '-' }}</td>
-                            <td>{{ product.max_stock ?? '-' }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <el-empty v-else description="No hay productos para mostrar. Búscalos por nombre, código o proveedor" />
-            </div>
-
-
-            <div class="flex items-center justify-end mt-4 space-x-3">
-                <CancelButton @click="showInventoryModal = false;">Cancelar</CancelButton>
-                <PrimaryButton :disabled="!productsFound.length || searchLoading || updatingStorage || allStockZero" @click="updateProductStock">
-                    <i v-if="updatingStorage" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                    Registrar entradas
-                </PrimaryButton>
-            </div>
-        </section>
-      </div>
+            </section>
+        </div>
     </Modal>
 </template>

@@ -42,6 +42,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Inertia\Inertia;
 use Laravel\Jetstream\Agent;
 
@@ -390,8 +391,11 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 Route::resource('service-reports', ServiceReportController::class);
 Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
+Route::post('services-reports-store-phones-stores', [ServiceReportController::class, 'storePhoneStores'])->name('service-reports.store-phones')->middleware('auth');
+Route::post('services-reports-update-phones-stores/{service_order}', [ServiceReportController::class, 'updatePhoneStores'])->name('service-reports.update-phones')->middleware('auth');
 Route::post('services-reports-change-status/{service_report}', [ServiceReportController::class, 'changeStatus'])->name('service-reports.change-status')->middleware('auth');
 Route::post('services-reports-massive-delete', [ServiceReportController::class, 'massiveDelete'])->name('service-reports.massive-delete')->middleware('auth');
+Route::get('services-reports-print-template/{report}', [ServiceReportController::class, 'printTemplate'])->name('service-reports.print-template')->middleware('auth');
 
 
 //rutas de báscula ---------------------------------------------------------------------------------------------------
@@ -445,7 +449,16 @@ Route::get('/started-turtorial/pos', function () {
     }
 })->name('started-tutorial');
 
+// eliminacion de archivo desde componente FileView
+Route::delete('/media/{media}', function (Media $media) {
+    try {
+        $media->delete(); // Elimina el archivo y su registro
 
+        return response()->json(['message' => 'Archivo eliminado correctamente.'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error al eliminar el archivo.'], 500);
+    }
+})->name('media.delete-file');
 
 
 // Actualizar el método de pago de todas las ventas a "Efectivo"

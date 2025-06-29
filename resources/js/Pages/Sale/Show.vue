@@ -49,16 +49,6 @@
                             </span>
                         </p>
                     </div>
-                    <div v-if="getRefundedOnlineSales" class="flex items-center space-x-3">
-                        <span class="w-2/3">Reembolsados: </span>
-                        <p class="flex text-gray37 w-1/3 font-bold">
-                            <span class="w-1/4 text-gray99">-</span>
-                            <span class="w-1/4">$</span>
-                            <span class="w-2/3 ml-3 text-gray37 text-end">
-                                {{ getRefundedOnlineSales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                            </span>
-                        </p>
-                    </div>
                 </section>
                 <section>
                     <div v-if="hasQuotes" class="flex items-center space-x-3">
@@ -70,16 +60,6 @@
                                 {{
                                     Object.values(day_sales)[0].total_quotes_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",") }}
-                            </span>
-                        </p>
-                    </div>
-                    <div v-if="getRefundedQuotes" class="flex items-center space-x-3">
-                        <span class="w-2/3">Reembolsados: </span>
-                        <p class="flex text-gray37 w-1/3 font-bold">
-                            <span class="w-1/4 text-gray99">-</span>
-                            <span class="w-1/4">$</span>
-                            <span class="w-2/3 ml-3 text-gray37 text-end">
-                                {{ getRefundedQuotes?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                             </span>
                         </p>
                     </div>
@@ -97,26 +77,6 @@
                             </span>
                         </p>
                     </div>
-                    <div v-if="getTotalInstallmentsAmount" class="flex items-center space-x-3">
-                        <span class="w-2/3">Total de abonos: </span>
-                        <p class="flex text-gray37 w-1/3 font-bold">
-                            <span class="w-1/4"></span>
-                            <span class="w-1/4">$</span>
-                            <span class="w-2/3 ml-3 text-gray37 text-end">
-                                {{ getTotalInstallmentsAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                            </span>
-                        </p>
-                    </div>
-                    <div v-if="getRefundedSales" class="flex items-center space-x-3">
-                        <span class="w-2/3">Reembolsados: </span>
-                        <p class="flex text-gray37 w-1/3 font-bold">
-                            <span class="w-1/4 text-gray99">-</span>
-                            <span class="w-1/4">$</span>
-                            <span class="w-2/3 ml-3 text-gray37 text-end">
-                                {{ getRefundedSales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                            </span>
-                        </p>
-                    </div>
                 </section>
                 <div class="flex items-center space-x-3 border-t border-grayD9 pt-1">
                     <span class="w-2/3 font-bold">Total de ventas del Día: </span>
@@ -124,18 +84,11 @@
                         <span class="w-1/4"></span>
                         <span class="w-1/4">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ (Object.values(day_sales)[0].online_sales_total +
-                                getTotalInstallmentsAmount +
-                                Object.values(day_sales)[0].total_sale +
-                                Object.values(day_sales)[0].total_quotes_sale -
-                                getRefundedOnlineSales -
-                                getRefundedQuotes -
-                                getRefundedSales).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ (Object.values(day_sales)[0].total_day_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
                 </div>
             </header>
-
             <!-- Productos -->
             <main class="flex flex-col space-y-5 lg:mx-16 mt-8">
                 <el-tabs v-model="activeTab" @tab-click="updateURL">
@@ -187,6 +140,18 @@
                             </div>
                         </template>
                         <QuoteSales @show-modal="handleShowModal" :sales="getGroupedQuoteSales" />
+                    </el-tab-pane>
+                    <el-tab-pane v-if="hasQuotes" label="Ordenes de servicio" name="4">
+                        <template #label>
+                            <div class="flex items-center space-x-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+                                    stroke-width="1.5" stroke="currentColor" class="size-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
+                                </svg>
+                                <p>Ordenes de servicio</p>
+                            </div>
+                        </template>
+                        <ServiceSales @show-modal="handleShowModal" :sales="getGroupedQuoteSales" />
                     </el-tab-pane>
                 </el-tabs>
             </main>
@@ -377,11 +342,12 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateBatchOfItems, getAll, getItemByAttributes } from '@/dbService.js';
+import { getAll } from '@/dbService.js';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import QuoteSales from './Tabs/QuoteSales.vue';
+import ServiceSales from './Tabs/ServiceSales.vue';
 
 export default {
     data() {
@@ -433,10 +399,10 @@ export default {
         StoreSales,
         OnlineSales,
         QuoteSales,
+        ServiceSales,
     },
     props: {
         day_sales: Object,
-        is_out_of_cash_cut: Boolean, //indica si está fuera de corte actual para no mostrar opciones de editar y reembolso
         previous_sale_date: String,
         next_sale_date: String,
     },
@@ -453,10 +419,6 @@ export default {
 
             return Object.values(sales);
         },
-        getTotalInstallmentsAmount() {
-            return Object.values(this.day_sales)[0].installments.reduce((accum, item) => accum +=
-                item.amount, 0);
-        },
         statusStyles() {
             const status = this.saleToSeeInstallments?.credit_data?.status;
             if (status === 'Pendiente') {
@@ -467,74 +429,6 @@ export default {
                 return 'bg-[#E6FDDB] text-[#08B91A]';
             }
             return 'bg-[#C4FBAA] text-[#0AA91A]';
-        },
-        getCanceledOnlineSales() {
-            return Object.values(this.day_sales)[0]?.online_sales
-                ?.filter(item => item.status == 'Cancelado')
-                ?.reduce((accum, onlineSale) => accum += onlineSale.total, 0)
-        },
-        getRefundedOnlineSales() {
-            return Object.values(this.day_sales)[0]?.online_sales
-                ?.filter(item => item.status == 'Reembolsado')
-                ?.reduce((accum, onlineSale) => accum += onlineSale.total + onlineSale.delivery_price, 0)
-        },
-        getCreditRefundedSales() {
-            return this.getGroupedSales.reduce((accum1, sale) => {
-                // Filtrar las ventas que tengan "credit_data" y que su status sea "Reembolsado"
-                if (sale.credit_data?.status === "Reembolsado") {
-                    // Sumar el total de los abonos realizados (installments) para esa venta
-                    return accum1 += sale.credit_data.installments
-                        ?.reduce((accum, installment) => accum += installment.amount, 0);
-                }
-                return accum1;
-            }, 0);
-        },
-        getCashRefundedSales() {
-            return this.getGroupedSales.reduce((accum1, sale) => {
-                // Verifica si la venta no tiene datos de crédito antes de sumarla
-                if (!sale.credit_data) {
-                    return accum1 += sale.products
-                        ?.filter(item => item.refunded_at)
-                        ?.reduce((accum, product) => accum += product.current_price * product.quantity, 0);
-                }
-                return accum1;
-            }, 0);
-        },
-        getCreditRefundedQuotes() {
-            return this.getGroupedQuoteSales.reduce((accum1, sale) => {
-                // Filtrar las ventas que tengan "credit_data" y que su status sea "Reembolsado"
-                if (sale.credit_data?.status === "Reembolsado") {
-                    // Sumar el total de los abonos realizados (installments) para esa venta
-                    return accum1 += sale.credit_data.installments
-                        ?.reduce((accum, installment) => accum += installment.amount, 0);
-                }
-                return accum1;
-            }, 0);
-        },
-        getCashRefundedQuotes() {
-            return this.getGroupedQuoteSales.reduce((accum1, sale) => {
-                // Verifica si la venta no tiene datos de crédito antes de sumarla
-                if (!sale.credit_data) {
-                    return accum1 += sale.products
-                        ?.filter(item => item.refunded_at)
-                        ?.reduce((accum, product) => accum += product.current_price * product.quantity, 0);
-                }
-                return accum1;
-            }, 0);
-        },
-        getRefundedSales() {
-            const refundedCreditSales = this.getCreditRefundedSales;
-            const refundedCashSales = this.getCashRefundedSales;
-
-            // Sumar las ventas al contado con las ventas a crédito
-            return refundedCashSales + refundedCreditSales;
-        },
-        getRefundedQuotes() {
-            const refundedCreditSales = this.getCreditRefundedQuotes;
-            const refundedCashSales = this.getCashRefundedQuotes;
-
-            // Sumar las ventas al contado con las ventas a crédito
-            return refundedCashSales + refundedCreditSales;
         },
     },
     methods: {
@@ -644,14 +538,7 @@ export default {
             this.editing = true;
             this.form.post(route('sales.update-group-sale'), {
                 onSuccess: async () => {
-                    // Obtener productos de servidor
-                    const response = await axios.get(route('products.get-all-for-indexedDB'));
-                    const products = response.data.products;
-                    // actualizar lista de productos en indexedDB
-                    addOrUpdateBatchOfItems('products', products);
-
                     this.showEditModal = false;
-
                     this.$notify({
                         title: 'Venta actualizada',
                         message: '',
@@ -694,10 +581,6 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
-                    // if (this.isInventoryOn) {
-                    //this.updateIndexedDBproductsStock(response.data.updated_items);
-                    // }
-
                     this.showRefundConfirm = false;
 
                     // actualizar elementos de la vista (reactividad)
@@ -735,10 +618,6 @@ export default {
             try {
                 let response = await axios.post(route('sales.refund', this.saleFolioToRefund));
                 if (response.status === 200) {
-                    // if (this.isInventoryOn) {
-                    this.updateIndexedDBproductsStock(response.data.updated_items);
-                    // }
-
                     this.showRefundConfirm = false;
 
                     // actualizar elementos de la vista (reactividad)
@@ -764,29 +643,6 @@ export default {
                 this.refunding = false;
             }
         },
-        async updateIndexedDBproductsStock(updatedItems) {
-            // actualizar stock de productos de indexedDB
-            const products = await Promise.all(updatedItems.map(async (item) => {
-                // Obtener productos por código
-                let foundProducts = await getItemByAttributes('products', { name: item.name });
-
-                // Verificar si se encontró el producto
-                if (foundProducts.length > 0) {
-                    // Actualizar el stock
-                    foundProducts[0].current_stock = item.current_stock || 0;
-                    return foundProducts[0];
-                }
-
-                // Manejar el caso donde no se encuentre el producto
-                return null;
-            }));
-
-            // Filtrar productos que no fueron encontrados
-            const validProducts = products.filter(product => product !== null);
-
-            // Actualizar los productos en IndexedDB
-            await addOrUpdateBatchOfItems('products', validProducts);
-        }
     },
     watch: {
         'installmentForm.amount': function () {
@@ -796,8 +652,6 @@ export default {
     async mounted() {
         this.products = await getAll('products');
         this.formatSalesProductId();
-
-
         this.setActiveTabFromURL();
         // resetear variable de local storage a false
         localStorage.setItem('pendentProcess', false);

@@ -68,7 +68,7 @@
                     </div>
                 </div>
                 <div @click="addExpense"
-                    class="flex justify-center items-center cursor-pointer rounded-md border border-dashed border-primary">
+                    class="flex justify-center items-center cursor-pointer rounded-md border border-dashed border-grayD9">
                     <p class="text-primary text-sm my-3">+ Agregar otro gasto</p>
                 </div>
 

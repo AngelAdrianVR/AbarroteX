@@ -11,6 +11,11 @@
                         <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
                     </div>
                 </div>
+                <p v-if="cantEdit" class="col-span-full text-sm text-justify text-amber-600">
+                    Esta cotización tiene algunos campos deshabilitados porque ya fue pagada o pagada parcialmente. 
+                    Sólo es posible modificar ciertos datos que no afecten el monto ni la información en caso de estar
+                    relacionada con un cliente.
+                </p>
                 <div>
                     <div class="flex items-center justify-between">
                         <InputLabel value="Cliente frecuente (opcional)" />
@@ -21,7 +26,7 @@
                     </div>
                     <el-select @change="fillClientInfo" filterable v-model="form.client_id" clearable
                         placeholder="Selecciona el cliente" no-data-text="No hay opciones registradas"
-                        no-match-text="No se encontraron coincidencias">
+                        no-match-text="No se encontraron coincidencias" :disabled="cantEdit">
                         <el-option v-for="client in clients" :key="client"
                             :label="client.company ? client.company + ' - ' + client.name : client.name"
                             :value="client.id" />
@@ -137,13 +142,17 @@
                         </div>
                         <ProductInput v-else :products="products" v-for="(item, index) in form.products" :key="item.id"
                             :id="item.id" :init_state="item" @deleteItem="deleteItem(index)"
-                            @syncItem="syncItems(index, $event)" :showDeleteButton="true" class="mb-1" />
+                            @syncItem="syncItems(index, $event)" :showDeleteButton="true" :cantEdit="cantEdit" 
+                            class="mb-1" />
                     </div>
-                    <p v-if="!form.products?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a
-                        agregar
-                        productos </p>
+                    <p v-if="!form.products?.length && !cantEdit" class="text-sm text-gray-600">
+                        Click al botón de "+" para empezar a agregar productos
+                    </p>
+                    <p v-if="cantEdit" class="text-sm text-gray-600">
+                        Cuando las cotizaciones estan pagadas o pagadas parcialmente, no se pueden editar ni agregar más productos.
+                    </p>
                 </section>
-                <div class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
+                <div v-if="!cantEdit" class="mt-4 mb-6 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
                     <button class="text-primary text-sm self-start" type="button" @click="addNewItem">
                         <i class="fa-solid fa-plus"></i>
                         Agregar producto
@@ -158,13 +167,16 @@
                         </div>
                         <ServiceInput v-else :services="services" v-for="(item, index) in form.services" :key="item.id"
                             :id="item.id" :init_state="item" @deleteItem="deleteItemService(index)"
-                            @syncItem="syncItemsService(index, $event)" class="mb-1" />
+                            @syncItem="syncItemsService(index, $event)" :cantEdit="cantEdit" class="mb-1" />
                     </div>
-                    <p v-if="!form.services?.length" class="text-sm text-gray-600"> Click al botón de "+" para empezar a
-                        agregar servicios
+                    <p v-if="!form.services?.length && !cantEdit" class="text-sm text-gray-600">
+                        Click al botón de "+" para empezar a agregar servicios
+                    </p>
+                    <p v-if="cantEdit" class="text-sm text-gray-600">
+                        Cuando las cotizaciones estan pagadas o pagadas parcialmente, no se pueden editar ni agregar más servicios.
                     </p>
                 </section>
-                <div class="mt-4 mb-3 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
+                <div v-if="!cantEdit" class="mt-4 mb-3 text-left flex justify-between border-t border-grayD9 pt-2 text-sm col-span-full">
                     <button class="text-primary text-sm self-start" type="button" @click="addNewService">
                         <i class="fa-solid fa-plus"></i>
                         Agregar Servicio
@@ -191,7 +203,7 @@
                         <div class="border border-grayD9 bg-white rounded-lg">
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
                                 <span class="text-sm font-semibold">IVA</span>
-                                <button v-if="form.iva_included != null" @click="form.iva_included = null" type="button"
+                                <button v-if="form.iva_included != null && !cantEdit" @click="form.iva_included = null" type="button"
                                     class="text-primary text-xs">Limpiar</button>
                             </h2>
                             <div class="px-2 py-px">
@@ -199,7 +211,7 @@
                                     Solo aplica si manejas precios con IVA
                                 </p>
                                 <div>
-                                    <el-radio-group v-model="form.iva_included">
+                                    <el-radio-group v-model="form.iva_included" :disabled="cantEdit">
                                         <el-radio :value="false" size="small">
                                             IVA no incluido (agregar el 16% al total)
                                         </el-radio>
@@ -213,7 +225,7 @@
                         <div class="border border-grayD9 bg-white rounded-lg">
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
                                 <span class="text-sm font-semibold">Descuento</span>
-                                <button v-if="form.is_percentage_discount != null"
+                                <button v-if="form.is_percentage_discount != null && !cantEdit"
                                     @click="form.is_percentage_discount = null; form.discount = null; form.percentage = null"
                                     type="button" class="text-primary text-xs">Limpiar</button>
                             </h2>
@@ -222,12 +234,12 @@
                                     Aplica un descuento al total de la cotización
                                 </p>
                                 <div>
-                                    <el-radio-group v-model="form.is_percentage_discount">
+                                    <el-radio-group v-model="form.is_percentage_discount" :disabled="cantEdit">
                                         <div class="w-full flex items-center justify-between">
                                             <el-radio :value="false" size="small">
                                                 <p>Descuento fijo</p>
                                             </el-radio>
-                                            <el-input v-model="form.discount" placeholder="" class="!w-[40%]"
+                                            <el-input v-model="form.discount" placeholder="" class="!w-[40%]" :disabled="cantEdit"
                                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                                 :parser="(value) => value.replace(/[^\d.]/g, '')" size="small">
                                                 <template #prepend>
@@ -239,7 +251,7 @@
                                             <el-radio :value="true" size="small">
                                                 <p>Porcentaje</p>
                                             </el-radio>
-                                            <el-input v-model="form.percentage" placeholder="" class="!w-[40%]"
+                                            <el-input v-model="form.percentage" placeholder="" class="!w-[40%]" :disabled="cantEdit"
                                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                                 :parser="(value) => value.replace(/[^\d.]/g, '')" size="small">
                                                 <template #append>
@@ -254,7 +266,7 @@
                         <div class="border border-grayD9 bg-white rounded-lg">
                             <h2 class="flex items-center justify-between text-gray37 bg-grayF2 rounded-t-lg px-2 py-1">
                                 <span class="text-sm font-semibold">Costo de entrega o envío</span>
-                                <button v-if="form.delivery_type != null"
+                                <button v-if="form.delivery_type != null && !cantEdit"
                                     @click="form.delivery_type = null; form.delivery1 = null; form.delivery2 = null"
                                     type="button" class="text-primary text-xs">Limpiar</button>
                             </h2>
@@ -263,12 +275,12 @@
                                     Incluye envío si aplica
                                 </p>
                                 <div>
-                                    <el-radio-group v-model="form.delivery_type">
+                                    <el-radio-group v-model="form.delivery_type" :disabled="cantEdit">
                                         <div class="w-full flex items-center justify-between">
                                             <el-radio value="Entrega a domicilio" size="small">
                                                 <p>Entrega a domicilio</p>
                                             </el-radio>
-                                            <el-input v-model="form.delivery1" placeholder="" class="!w-[40%]"
+                                            <el-input v-model="form.delivery1" placeholder="" class="!w-[40%]" :disabled="cantEdit"
                                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                                 :parser="(value) => value.replace(/[^\d.]/g, '')" size="small">
                                                 <template #prepend>$</template>
@@ -278,7 +290,7 @@
                                             <el-radio value="Envío por paquetería" size="small">
                                                 <p>Envío por paquetería</p>
                                             </el-radio>
-                                            <el-input v-model="form.delivery2" placeholder="" class="!w-[40%]"
+                                            <el-input v-model="form.delivery2" placeholder="" class="!w-[40%]" :disabled="cantEdit"
                                                 :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                                                 :parser="(value) => value.replace(/[^\d.]/g, '')" size="small">
                                                 <template #prepend>$</template>
@@ -596,6 +608,9 @@ export default {
         },
     },
     computed: {
+        cantEdit() {
+            return ['Pagado', 'Pago parcial'].includes(this.quote.status);
+        },
         isButtonDisabled() {
             return this.form.processing ||
                 (!this.form.products.length && !this.form.services.length) ||

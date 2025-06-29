@@ -21,14 +21,14 @@
                 </div>
                 <el-select ref="productSelector" @change="syncItem()" v-model="selection" class="!w-full" filterable
                     required clearable placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                    no-match-text="No se encontraron coincidencias">
+                    no-match-text="No se encontraron coincidencias" :disabled="cantEdit">
                     <el-option :disabled="product.disabled" v-for="product in products" :key="product"
                         :value="product.relative_id" :label="product.name" />
                 </el-select>
             </div>
             <div class="w-24">
                 <InputLabel value="Precio/u" />
-                <el-input v-model="price" @change="handlePriceChange" required
+                <el-input v-model="price" @change="handlePriceChange" required :disabled="cantEdit"
                     :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                     :parser="(value) => value.replace(/[^\d.]/g, '')">
                     <template #prefix>
@@ -38,7 +38,7 @@
             </div>
             <div class="w-24">
                 <InputLabel value="Cantidad" />
-                <el-input @change="syncItem" min="1" v-model.number="quantity" type="number"
+                <el-input @change="syncItem" min="1" v-model.number="quantity" type="number" :disabled="cantEdit"
                     placeholder="Ingresa la cantidad" />
             </div>
             <div>
@@ -46,7 +46,7 @@
                 <p><span class="mr-2">$</span>{{ (quantity * price)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                 </p>
             </div>
-            <el-popconfirm v-if="showDeleteButton" confirm-button-text="Si" cancel-button-text="No" icon-color="#373737"
+            <el-popconfirm v-if="showDeleteButton && !cantEdit" confirm-button-text="Si" cancel-button-text="No" icon-color="#373737"
                 :title="'¿Continuar?'" @confirm="handleDelete">
                 <template #reference>
                     <button type="button">
@@ -95,6 +95,10 @@ export default {
         init_state: {
             type: Object,
             default: null,
+        },
+        cantEdit: {
+            type: Boolean,
+            default: false,
         },
     },
     computed: {

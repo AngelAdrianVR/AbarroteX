@@ -1,6 +1,6 @@
 <template>
     <div class="flex justify-between items-center mx-3">
-        <h1 class="font-bold text-lg">Registro de ventas</h1>
+        <h1 class="font-bold text-lg">Historial de ventas</h1>
         <div class="relative">
             <!-- filtro -->
             <button @click.stop="showFilter = !showFilter"

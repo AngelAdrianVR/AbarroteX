@@ -23,7 +23,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' =>'required|string|max:100|unique:categories,name',
+            'name' =>'required|string|max:150',
         ]);
 
         // guardar business_line_name con el id de la tienda para que solo ella pueda verlo

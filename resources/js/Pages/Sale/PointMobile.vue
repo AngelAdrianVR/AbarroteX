@@ -68,7 +68,8 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-1" :class="editableTabs[editableTabsValue - 1]?.saleProducts?.length ? 'h-[calc(77vh)]' : 'h-[calc(92vh)]'"><!--mover altura para productos sin codigo -->
+    <main class="pt-1" :class="getHeightClass">
+      <!--mover altura para productos sin codigo -->
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[65%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="mx-2">
@@ -227,10 +228,10 @@
       </section>
       <!-- lista de productos sin codigo -->
       <section v-if="isQuickNoCodeSelectionOn && noCodeProducts.length"
-        class="border rounded-md mx-2 border-[#D9D9D9] bg-grayF2" :class="showNoCodeProducts ? 'h-[35%]' : 'h-[6%]'">
+        class="border rounded-md mx-2 border-[#BCBCBC] bg-[#EDEDED]" :class="showNoCodeProducts ? 'h-[35%]' : 'h-[6%]'">
         <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
-            class="flex items-center justify-between text-primary w-full pt-2 text-xs lg:text-sm">
+            class="flex items-center justify-between text-gray37 w-full pt-2 text-xs lg:text-sm">
             <h1 class="text-black">Selección rápida para productos sin código</h1>
             <p class="flex items-center space-x-2 font-semibold">
               <span>{{ showNoCodeProducts ? 'Ocultar' : 'Mostrar' }}</span>
@@ -242,7 +243,7 @@
           <div class="mb-2 relative">
             <input v-model="searchNoCodeProducts" @input="filterNoCodeProducts" placeholder="Buscar producto"
               ref="noCodeProductsInput" type="search"
-              class="h-8 pl-8 rounded-md bg-transparent text-gray-400 border border-gray-300 focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
+              class="h-8 pl-8 rounded-md bg-transparent border border-[#BCBCBC] focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
             <i class="absolute left-2 top-2 fa-solid fa-magnifying-glass text-gray-400"></i>
           </div>
           <el-skeleton v-if="syncingIDB" class="col-span-full mt-2 px-3 py-1 grid grid-cols-2 md:grid-cols-4 gap-2"
@@ -315,8 +316,8 @@
           <div class="flex items-center justify-between space-x-7 my-3">
             <div class="w-2/3">
               <InputLabel value="Monto abonado (opcional)" class="!text-sm ml-2 !text-gray-400" />
-              <el-input v-model="editableTabs[editableTabsValue - 1].deposit"
-                placeholder="ingresa el abono" ref="depositInput">
+              <el-input v-model="editableTabs[editableTabsValue - 1].deposit" placeholder="ingresa el abono"
+                ref="depositInput">
                 <template #prefix>
                   <i class="fa-solid fa-dollar-sign"></i>
                 </template>
@@ -354,6 +355,25 @@
       </section>
     </main>
 
+    <!-- modal de inmpresión -->
+    <DialogModal :show="showPrintingModal" @close="showPrintingModal = false" max-width="md">
+      <template #title> Impresión de ticket </template>
+      <template #content>
+        <div class="flex items-start space-x-4">
+          <figure class="h-24">
+            <img src="@/../../public/images/ticket.png" :draggable="false" class="select-none object-contain h-full"
+              alt="Imagen de ticket de venta">
+          </figure>
+          <p class="w-2/3 text-base text-gray37">¿Desea imprimir el ticket de la venta?</p>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex items-center space-x-2">
+          <CancelButton @click="showPrintingModal = false">No</CancelButton>
+          <PrimaryButton @click="openPrintingTemplate" :disabled="clientForm.processing">Si, imprimir</PrimaryButton>
+        </div>
+      </template>
+    </DialogModal>
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
@@ -682,7 +702,7 @@
         </form>
       </div>
     </Modal>
-     <!-- buscar por nombre -->
+    <!-- buscar por nombre -->
     <DialogModal :show="showSearchModal" @close="showSearchModal = false" max-width="xl">
       <template #title> Buscar producto </template>
       <template #content>
@@ -750,7 +770,8 @@
               </p>
               <!-- input de cantidad si el producto no es a granel -->
               <el-input-number ref="quantitySelector" @keydown="handleKeydownQuantitySelector" v-model="quantity"
-                :min="0" :max="isInventoryOn ? productFoundSelected.current_stock : undefined" :precision="2" size="small" class="!w-[110px]">
+                :min="0" :max="isInventoryOn ? productFoundSelected.current_stock : undefined" :precision="2"
+                size="small" class="!w-[110px]">
                 <template #suffix>
                   <span v-if="productFoundSelected.measure_unit?.trim() === 'Kilogramo'">
                     {{ productFoundSelected.measure_unit?.trim() === 'Kilogramo' ? 'Kg' :
@@ -766,9 +787,9 @@
                 No te quedan existencias de este producto.
               </p>
               <div class="flex items-center justify-end">
-                <PrimaryButton ref="addButton" @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
-                  class="px-5 py-1 flex items-center space-x-2"
-                  :disabled="quantity == 0">
+                <PrimaryButton ref="addButton"
+                  @click="addSaleProduct(productFoundSelected); productFoundSelected = null"
+                  class="px-5 py-1 flex items-center space-x-2" :disabled="quantity == 0">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-4">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -1058,6 +1079,7 @@ export default {
       showClientConfirmModal: false, //muestra u oculta el modal de peticion de cliente para venta a crédito
       showCreateProductModal: false, //muestra u oculta el modal de creación rápida de producto
       showPaymentModal: false, //muestra u oculta el modal de pago al finalizar la venta
+      showPrintingModal: false,
 
       // generales
       paymentMethod: '', //Método de pago seleccionado
@@ -1093,6 +1115,9 @@ export default {
       creatingProduct: false,
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
+
+      //impresión
+      folioToPrint: null,
 
       //buscador
       searchQuery: null,
@@ -1164,16 +1189,31 @@ export default {
     cash_registers: Array,
     clients: Array
   },
+  computed: {
+    isShowingExpirationMessage() {
+      const nextPayment = this.$page.props.auth.user.store.next_payment;
+      const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
+      const startDate = new Date(nextPayment);
+      const currentDate = new Date();
+
+      // Calcula la diferencia en días
+      const diffDays = Math.round((startDate - currentDate) / oneDay);
+
+      return diffDays <= 7 || this.$page.props.auth.user.store.suscription_period == 'Periodo de prueba';
+    },
+    getHeightClass() {
+      const hasProducts = !!this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length;
+      if (this.isShowingExpirationMessage) {
+        return hasProducts ? 'h-[calc(74vh)]' : 'h-[calc(89vh)]';
+      } else {
+        return hasProducts ? 'h-[calc(77vh)]' : 'h-[calc(92vh)]';
+      }
+    },
+  },
   methods: {
     handleFastProductSelection(item) {
-      if (item.bulk_product) {
-        this.productFoundSelected = item; //asigna el producto seleccionado a la variable productFoundSelected
-        this.quantity = 1; //asigna la cantidad por defecto a 1
-        this.handleScale(); //ejecuta el manejador de bascula si el producto es a granel
-      } else {
-        item.imageUrl = item.image_url
-        this.addSaleProduct(item); //agrega el producto a la lista de venta
-      }
+      item.imageUrl = item.image_url
+      this.addSaleProduct(item); //agrega el producto a la lista de venta
     },
     filterNoCodeProducts() {
       if (this.searchNoCodeProducts) {
@@ -1273,14 +1313,20 @@ export default {
 
           localStorage.setItem('pendentProcess', false);
 
-          //se imprime el ticket automáticamente cuando esta la opción activada en config/impresora
+          //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
           if (this.automaticPrinting) {
-            window.open(route('sales.print-ticket', response.data.folio_stored), '_blank');
+            this.showPrintingModal = true;
+            this.folioToPrint = response.data.folio_stored;
           }
         }
       } catch (error) {
         console.error(error);
       }
+    },
+    openPrintingTemplate() {
+      window.open(route('sales.print-ticket', this.folioToPrint), '_blank');
+      this.showPrintingModal = false;
+      this.folioToPrint = null;
     },
     processOfflineSale() {
       this.saveToLocalStorage();

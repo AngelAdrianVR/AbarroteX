@@ -1,10 +1,10 @@
 <template>
     <AppLayout title="Nueva orden de servicio">
-        <div class="px-3 md:px-10 py-7">
+        <div class="px-3 md:px-10 py-5">
             <Back />
 
             <form @submit.prevent="store"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-2/3 xl:w-1/2 mx-auto mt-7 lg:grid lg:grid-cols-2 gap-3">
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-2/3 xl:w-[58%] mx-auto mt-1 lg:grid lg:grid-cols-2 gap-3">
                 <div class="flex items-center justify-between col-span-full mb-3">
                     <h1 class="font-bold ml-2 col-span-full">Crear orden de servicio</h1>
                     <div class="text-sm text-right">
@@ -27,12 +27,12 @@
                     <InputError :message="form.errors.client_name" />
                 </div>
                 <div>
-                    <InputLabel value="Teléfono*" />
-                    <el-input v-model="form.phone_number"
+                    <InputLabel value="Número de Teléfono del cliente*" />
+                    <el-input v-model="form.client_phone_number"
                         :formatter="(value) => `${value}`.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')"
                         :parser="(value) => value.replace(/\D/g, '')" maxlength="10" clearable
                         placeholder="Escribe el número de teléfono" />
-                    <InputError :message="form.errors.phone_number" />
+                    <InputError :message="form.errors.client_phone_number" />
                 </div>
                 <h1 class="font-semibold text-gray37 ml-2 col-span-full mt-3">Datos del equipo</h1>
                 <div>
@@ -47,15 +47,21 @@
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="IMEI" />
-                    <el-input v-model="form.product_details.imei" class="!w-1/2" placeholder="Escribe el códio IMEI del equipo" clearable />
+                    <el-input
+                    v-model="formattedImei"
+                    class="!w-1/2"
+                    placeholder="Escribe el código IMEI del equipo"
+                    clearable
+                    maxlength="18"
+                    />
                     <InputError :message="form.errors['product_details.imei']" />
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="Estado previo y características del equipo*" />
-                    <el-input v-model="form.product_details.description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
+                    <el-input v-model="form.description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
                         placeholder="Describe el estado del equipo" :maxlength="1000" show-word-limit
                         clearable />
-                    <InputError :message="form.errors['product_details.description']" />
+                    <InputError :message="form.errors.description" />
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="Servicios a realizar*" />
@@ -73,85 +79,137 @@
                 </div>
                 
                 <h1 class="font-semibold text-gray37 ml-2 col-span-full mt-3">Refacciones</h1>
-
-                <div class="col-span-full">
-                    <InputLabel value="Servicio realizado" />
-                    <el-input v-model="form.description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
-                        placeholder="Describe lo que se realizo en el servicio" :maxlength="1000" show-word-limit
-                        clearable />
-                    <InputError :message="form.errors.description" />
-                </div>
-                <h1 class="font-semibold text-gray37 ml-2 col-span-full">Refacciones referencias</h1>
-                <article v-for="(item, index) in form.spare_parts" :key="index" class="col-span-full">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-[35%]">
-                            <InputLabel v-if="index == 0" value="No. De Parte *" />
-                            <el-select v-model="item.product_id" @change="handleChangeProduct(index)" placeholder="Busca producto">
-                                <el-option v-for="(product, index) in products" :key="index"
-                                    :label="`${product.name} (${product.code ?? 'sin No. de parte'})`"
-                                    :value="product.id">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-gray37">{{ product.name }}</span>
-                                        <span class="text-gray9A text-xs">{{ product.code ?? 'sin No. de parte'
-                                            }}</span>
-                                    </div>
-                                </el-option>
-                            </el-select>
-                        </div>
-                        <div class="w-[47%]">
-                            <InputLabel v-if="index == 0" value="Descripción *" />
-                            <el-input v-model="item.description" placeholder="..." clearable />
-                        </div>
-                        <div class="w-[11%]">
-                            <InputLabel v-if="index == 0" value="Cantidad *" />
-                            <el-input v-model="item.quantity" :placeholder="`Ej. ${index + 1}`" clearable />
-                        </div>
-                        <div :class="index == 0 ? '!mt-5' : null">
-                            <el-popconfirm v-if="form.spare_parts.length > 1" confirm-button-text="Si"
-                                cancel-button-text="No" class="w-[5%]" icon-color="#373737" :title="'¿Desea eliminar?'"
-                                @confirm="deleteSparePart(index)">
-                                <template #reference>
-                                    <button type="button"
-                                        class="size-6 flex items-center justify-center rounded-full">
-                                        <i class="fa-regular fa-trash-can text-sm text-primary"></i>
-                                    </button>
-                                </template>
-                            </el-popconfirm>
-                        </div>
+                
+                <SparePartInput @syncItems="syncItems" class="col-span-full" />
+                
+                <section class="grid grid-cols-3 gap-3 col-span-full mt-5">
+                    <div>
+                        <InputLabel value="Costo del servicio*" />
+                        <el-input
+                            v-model="form.service_cost"
+                            placeholder="Ej. 2,500"
+                            clearable
+                            :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
+                            :parser="(value) => value.replace(/[^\d.]/g, '')"
+                            >
+                            <template #prepend>
+                                $
+                            </template>
+                        </el-input>
+                        <InputError :message="form.errors.service_cost" />
                     </div>
-                </article>
-                <div class="col-span-full text-sm">
-                    <button @click="addSparePart" type="button" class="text-primary">
-                        + Agregar refacción
-                    </button>
-                </div>
-                <h1 class="font-semibold text-gray37 ml-2 col-span-full">Observaciones</h1>
-                <h1 class="font-semibold text-gray37 ml-2 col-span-full">Registro del servicio</h1>
+                    <div>
+                        <InputLabel value="Anticipo (opcional)" />
+                        <el-input
+                            v-model="form.advance_payment"
+                            placeholder="Ej. 500"
+                            clearable
+                            :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
+                            :parser="(value) => value.replace(/[^\d.]/g, '')"
+                            >
+                            <template #prepend>
+                                $
+                            </template>
+                        </el-input>
+                        <InputError :message="form.errors.advance_payment" />
+                    </div>
+                    <div>
+                        <InputLabel value="Método de pago" />
+                        <el-select v-model="form.payment_method" clearable placeholder="Selecciona el método de pago"
+                            no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                            <el-option v-for="payment_method in payment_methods" :key="payment_method"
+                                :label="payment_method"
+                                :value="payment_method" />
+                        </el-select>
+                    </div>
+                </section>
+
                 <div>
                     <InputLabel value="Responsable del servicio*" />
                     <el-input v-model="form.technician_name" placeholder="Ej. Luis García" clearable />
                     <InputError :message="form.errors.technician_name" />
                 </div>
                 <div>
-                    <InputLabel value="Persona que recibio el servicio*" />
-                    <el-input v-model="form.receiver_name" placeholder="Ej. Ernesto Ramírez" clearable />
-                    <InputError :message="form.errors.receiver_name" />
-                </div>
-                <div>
-                    <InputLabel value="Costo del servicio" />
-                    <el-input
-                        v-model="form.service_cost"
-                        placeholder="Ej. 2,500"
+                    <div class="flex space-x-2">
+                        <InputLabel value="Porcentage de comisión" />
+                        <el-tooltip placement="top">
+                            <template #content>
+                                <p>Al cambiar la orden al estatus "Pagado", se <br>
+                                    registrará automáticamente un gasto con <br>
+                                    el concepto "Comisión", incluyendo el <br>
+                                    nombre del responsable del servicio.</p>
+                            </template>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            </svg>
+                        </el-tooltip>
+                    </div>
+                   <el-input
+                        v-model="form.comision_percentage"
+                        placeholder="Ej. 10"
                         clearable
-                        :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
-                        :parser="(value) => value.replace(/\$\s?|(,*)/g, '')"
-                        >
-                        <template #append>
-                            $
-                        </template>
+                        @input="onPercentageInput"
+                    >
+                        <template #append>%</template>
                     </el-input>
-                    <InputError :message="form.errors.service_cost" />
+                    <InputError :message="form.errors.comision_percentage" />
                 </div>
+
+                <section class="col-span-full grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <InputLabel value="Evidencias (max. 5 imágenes)" />
+                        <el-upload
+                            class="upload-demo"
+                            drag
+                            :on-change="handleChange"
+                            :on-remove="handleRemoveImage"
+                            :on-exceed="handleExceed"
+                            :on-preview="handlePictureCardPreview"
+                            v-model:file-list="fileList"
+                            :before-upload="beforeUpload"
+                            :multiple="true"
+                            :limit="5"
+                            list-type="picture-card"
+                            :auto-upload="false"
+                            >
+                            <i class="el-icon-upload"></i>
+                            <div class="el-upload__text">Arrastra o haz clic para subir</div>
+                        </el-upload>
+                    </div>
+
+                    <div class="mt-3 ml-4">
+                        <p>Accesorios</p>
+                        <el-checkbox-group v-model="form.aditionals.accessories">
+                            <el-checkbox label="SIM"></el-checkbox>
+                            <el-checkbox label="Cargador"></el-checkbox>
+                            <el-checkbox label="Memoria"></el-checkbox>
+                            <el-checkbox label="Batería"></el-checkbox>
+                        </el-checkbox-group>
+                    </div>
+                </section>
+
+                <section class="grid grid-cols-3 col-span-full mt-5"> 
+                    <PatronMobil @syncPattern="syncPattern" @syncPassword="syncPassword" class="col-span-2" />
+                    <article class="mt-24 text-sm space-y-1">
+                        <p class="flex">
+                            <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span class="w-24 text-right">{{ form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                        </p>
+                        <p class="flex">
+                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-24 text-right">{{ form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                        </p>
+                        <p class="flex">
+                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span class="w-24 text-right">{{ totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p>
+                        <p class="flex font-bold">
+                            <span class="w-32">Total restante</span><span class="ml-3">$</span><span class="w-24 text-right">{{ total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p>
+                    </article>
+                </section>
+
+                <el-dialog v-model="dialogVisible">
+                    <img class="mx-auto" w-full :src="dialogImageUrl" alt="Preview Image" />
+                </el-dialog>
+
                 <div class="col-span-full text-right mt-5">
                     <PrimaryButton :disabled="form.processing">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
@@ -165,7 +223,8 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
+import SparePartInput from "@/Components/MyComponents/SparePartInput.vue";
+import PatronMobil from "@/Components/MyComponents/PatronMobil.vue";
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -178,89 +237,175 @@ export default {
         const form = useForm({
             service_date: format(new Date(), "yyyy-MM-dd"), // Establece la fecha de hoy por defecto,
             client_name: null,
-            client_department: null,
+            client_phone_number: null,
             product_details: {
                 brand: null,
                 model: null,
-                serie: null,
-                capacity: null,
-                worked_hours: null,
-                maintenance_type: null,
-                charge_hours: null,
-                oil_type: null,
-                chiller_type: null,
-                voltage: null,
-                motor_brand: null,
-                fan_brand: null,
-                fan_hp: null,
             },
             spare_parts: [
                 {
-                    product_id: null,
-                    code: null,
-                    name: null,
-                    description: null,
+                    name: '',
+                    unitPrice: null,
                     quantity: null,
                 },
             ],
             observations: null,
-            technician_name: this.$page.props.auth.user.name,
-            receiver_name: null,
+            technician_name: null,
             description: null,
-            service_cost: null,
+            service_cost: null, // costo unicamente de mano de obra
+            total_cost: null, // costo total
+            service_description: null, //descripcion de los servicios que se harán
+            payment_method: null,
+            advance_payment: null, // anticipo
+            comision_percentage: null, // comisión de la persona que realizó el servicio
+            media: [], //imagenes de evidencia
+            aditionals:{
+                unlockPattern: null, //patrton de desbloqueo
+                unlockPassword: null, //contraseña o pin de desbloqueo
+                accessories: [], // Arreglo con los accesorios seleccionados
+            }
         });
 
         return {
             form,
+            payment_methods: ['Efectivo', 'Tarjeta'],
+
+            //uploader
+            uploading: false,
+            uploadPercentage: 0,
+            fileList: [], // archivos
+            dialogVisible: false, //imagen element-plus
+            dialogImageUrl: '', //imagen element-plus
         }
     },
     components: {
-        AppLayout,
-        InputFilePreview,
+        SparePartInput,
         PrimaryButton,
+        PatronMobil,
         InputLabel,
         InputError,
+        AppLayout,
         Back
     },
     props: {
-        products: Array,
         folio: Number
+    },
+    watch: {
+        'form.service_cost'(val) {
+            this.form.service_cost = Number(val);
+        },
+        'form.advance_payment'(val) {
+            this.form.advance_payment = Number(val);
+        }
+    },
+    computed: {
+        formattedImei: {
+            get() {
+                const raw = this.form.product_details?.imei || '';
+                return raw.replace(/\D/g, '').slice(0, 15).replace(/(.{4})/g, '$1 ').trim();
+            },
+            set(value) {
+                const clean = value.replace(/\D/g, '').slice(0, 15);
+                if (!this.form.product_details) {
+                    this.form.product_details = {};
+                }
+                    this.form.product_details.imei = clean;
+            },
+        },
+        total() {
+            this.form.total_cost = this.form.service_cost + this.totalSpareParts;
+            return this.form.service_cost - this.form.advance_payment + this.totalSpareParts;
+        },
+        totalSpareParts() {
+            return this.form.spare_parts.reduce((total, sp) => {
+                return total + (Number(sp.quantity) * Number(sp.unitPrice));
+            }, 0);
+        }
+
     },
     methods: {
         store() {
-            this.form.post(route("service-reports.store"), {
+            this.form.post(route("service-reports.store-phones"), {
                 onSuccess: () => {
                     this.$notify({
                         title: "Correcto",
                         message: "",
                         type: "success",
                     });
+
                 },
             });
         },
-        handleChangeProduct(index) {
-            const productId = this.form.spare_parts[index].product_id;
-            const product = this.products.find(i => i.id == productId);
-            const description = product?.description ?? 'Sin descripción';
+        onPercentageInput(value) {
+            // Elimina cualquier carácter no numérico (excepto punto decimal si quieres permitirlo)
+            let cleanValue = value.replace(/[^\d]/g, '');
 
-            this.form.spare_parts[index].description = description;
-            this.form.spare_parts[index].code = product.code;
-            this.form.spare_parts[index].name = product.name;
-        },
-        deleteSparePart(index) {
-            this.form.spare_parts.splice(index, 1);
-        },
-        addSparePart() {
-            const newSparePart = {
-                product_id: null,
-                code: null,
-                name: null,
-                description: null,
-                quantity: null,
+            // Limita entre 0 y 100
+            let numericValue = parseInt(cleanValue);
+            if (isNaN(numericValue)) {
+            numericValue = '';
+            } else if (numericValue > 100) {
+            numericValue = 100;
             }
 
-            this.form.spare_parts.push(newSparePart);
+            this.form.comision_percentage = numericValue;
         },
-    }
+        // sincroniza los items de refacciones
+        syncItems(spareParts) {
+            this.form.spare_parts = spareParts;
+        },
+        // sincroniza los puntos seleccionados del patron
+        syncPattern(unlockItem){
+            this.form.aditionals.unlockPattern = unlockItem;
+        },
+        syncPassword(unlockItem){
+            this.form.aditionals.unlockPassword = unlockItem;
+        },
+        // uploader
+        beforeUpload(file) {
+            const isImage = file.type.startsWith('image/');
+            if (!isImage) {
+                ElMessage.error('Solo se permiten imágenes.');
+            }
+            return isImage;
+        },
+        handleChange(file, fileList) {
+            this.form.media = fileList.map(item => item.raw); // Actualiza form.media con los archivos
+        },
+        handleSuccess(response, file, fileList) {
+            ElMessage.success('Archivo subido correctamente');
+            this.uploading = false;
+            this.uploadPercentage = 0;
+        },
+        handleRemoveImage(file, fileList) {
+            // Remover de form.media
+            const mediaIndex = this.form.media.indexOf(file.raw);
+            if (mediaIndex !== -1) {
+                this.form.media.splice(mediaIndex, 1); // Elimina el archivo de form.media
+            }
+            // Remover del componente
+            const mediaUploadIndex = this.fileList.indexOf(file);
+            if (mediaUploadIndex !== -1) {
+                this.fileList.splice(mediaUploadIndex, 1); // Elimina el archivo de form.media
+            }
+        },
+        handleExceed() {
+            ElMessage.warning('Has alcanzado el límite de archivos');
+        },
+        handlePictureCardPreview(file) {
+            this.dialogImageUrl = file.url;
+            this.dialogVisible = true;
+        },
+        
+    },
+    
 }
 </script>
+<style scoped>
+.upload-demo {
+  border: 2px dashed #d9d9d9;
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+}
+</style>

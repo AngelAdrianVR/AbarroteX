@@ -5,21 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class ServiceReport extends Model
+class ServiceReport extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
+
+    //el id 6 es de dm compresores.
+    //el id * es para reparacion de celulares.
 
     protected $fillable = [
         'folio',
         'service_date',
         'client_name',
         'client_department',
-        'phone_number',
+        'client_phone_number',
         'service_description',
         'service_cost',
+        'total_cost',
+        'cancellation_reason',
+        'status',
         'advance_payment',
+        'paid_at',
         'payment_method',
+        'comision_percentage',
         'product_details',
         'spare_parts',
         'observations',
@@ -32,6 +42,7 @@ class ServiceReport extends Model
 
     protected $casts = [
         'service_date' => 'date',
+        'paid_at' => 'date',
         'product_details' => 'array',
         'spare_parts' => 'array',
         'observations' => 'array',
