@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Service;
 use App\Models\ServiceReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
+use App\Services\TinifyService;
 
 class ServiceReportController extends Controller
 {
+    public function __construct(protected TinifyService $tinifyService) {}
+
     public function index()
     {
         $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(50);
@@ -69,8 +74,6 @@ class ServiceReportController extends Controller
         ]);
 
         $this->finalStepStore($request);
-
-        return to_route('service-reports.index');
     }
 
     public function finalStepStore($request)
@@ -86,7 +89,24 @@ class ServiceReportController extends Controller
 
         // Subir y asociar las imagenes
         if ( $request->media ) {
-            $service_order->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+            $service_order->addAllMediaFromRequest()->each(function ($fileAdder) {
+                // Guarda el archivo en la colección y obtiene el modelo Media
+                $media = $fileAdder->toMediaCollection();
+
+                // Ahora sí puedes acceder a getPath()
+                $path = $media->getPath();
+
+                // Validar tamaño, entorno y compresiones disponibles
+                if (
+                    filesize($path) > 400 * 1024 &&
+                    app()->environment() === 'production' &&
+                    $this->tinifyService->totalCompressions() < 500
+                ) {
+                    $this->tinifyService->optimizeImage($path);
+                } else {
+                    // Otra lógica para imágenes pequeñas o fuera de producción
+                }
+            });
         }
     }
 
@@ -169,9 +189,9 @@ class ServiceReportController extends Controller
         return to_route('service-reports.index');
     }
 
-    public function destroy(ServiceReport $serviceReport)
+    public function destroy(ServiceReport $service_report)
     {
-        //
+        $service_report->delete();
     }
 
     public function searchServiceReport(Request $request)
@@ -180,8 +200,12 @@ class ServiceReportController extends Controller
 
         $reports = ServiceReport::where('store_id', auth()->user()->store_id)
             ->where(function ($q) use ($query) {
+                // Normaliza el query para comparar también sin ceros a la izquierda
+                $queryNormalized = ltrim($query, '0');
+
                 $q->where('client_name', 'like', "%$query%")
-                    ->orWhere('folio', 'like', "%$query%")
+                    ->orWhere(DB::raw('CAST(folio AS CHAR)'), 'like', "%$query%")
+                    ->orWhere(DB::raw('CAST(folio AS UNSIGNED)'), 'like', "%$queryNormalized%")
                     ->orWhere('service_date', 'like', "%$query%");
             })
             ->get();
@@ -200,9 +224,26 @@ class ServiceReportController extends Controller
 
     public function changeStatus(Request $request, ServiceReport $service_report)
     {
-        $service_report->update([
-            'status' => $request->status
-        ]);
+        $data = [
+            'status' => $request->status,
+        ];
+
+        if ($request->status === 'Cancelada') {
+            $aditionals = $service_report->aditionals ?? [];
+
+            $aditionals['review_amount'] = $request->reviewAmount;
+            $aditionals['advance_amount'] = $request->advanceAmount;
+
+            $data['cancellation_reason'] = $request->cancellation_reason;
+            $data['aditionals'] = $aditionals;
+        } elseif ($request->status === 'Entregado/Pagado') {
+            $data['payment_method'] = $request->paymentMethod;
+            // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden
+            $data['paid_at'] = now(); // Fecha y hora del pago
+        }
+
+        $service_report->update($data);
+
     }
 
     public function massiveDelete(Request $request)
@@ -224,6 +265,12 @@ class ServiceReportController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    // abre la plantilla de comprobante de servicio para imprimir de reparacion de celulares (apontephone)
+    public function printTemplate(ServiceReport $report)
+    {
+        return inertia('ServiceReport/PrintTemplate1', compact('report'));
     }
 
 }

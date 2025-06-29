@@ -395,6 +395,7 @@ Route::post('services-reports-store-phones-stores', [ServiceReportController::cl
 Route::post('services-reports-update-phones-stores/{service_order}', [ServiceReportController::class, 'updatePhoneStores'])->name('service-reports.update-phones')->middleware('auth');
 Route::post('services-reports-change-status/{service_report}', [ServiceReportController::class, 'changeStatus'])->name('service-reports.change-status')->middleware('auth');
 Route::post('services-reports-massive-delete', [ServiceReportController::class, 'massiveDelete'])->name('service-reports.massive-delete')->middleware('auth');
+Route::get('services-reports-print-template/{report}', [ServiceReportController::class, 'printTemplate'])->name('service-reports.print-template')->middleware('auth');
 
 
 //rutas de báscula ---------------------------------------------------------------------------------------------------
