@@ -166,7 +166,7 @@
   </div>
 
   <!-- vista movil -->
-  <div :class="saleProducts.length ? 'max-h-[390px]' : 'min-h-[40px]'" class="overflow-y-auto lg:hidden text-[11px]">
+  <div :class="saleProducts.length ? 'max-h-[420px]' : 'min-h-[40px]'" class="overflow-y-auto lg:hidden text-[11px]">
     <div v-for="(sale, index) in saleProducts" :key="index"
       class="mb-2 grid grid-cols-3 gap-x-4 gap-y-1 items-start relative">
       <figure class="border border-grayD9 rounded-[10px] h-28 flex items-center justify-center">

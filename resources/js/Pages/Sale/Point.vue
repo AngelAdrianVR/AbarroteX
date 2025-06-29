@@ -68,7 +68,7 @@
         Por favor, evita recargar la página y espera a que los datos se carguen a la nube.
       </p>
     </div>
-    <main class="pt-2 h-[calc(94vh-4px)]"><!--mover altura para productos sin codigo -->
+    <main class="pt-2 h-[calc(94vh-4px)]" :class="getHeightClass"><!--mover altura para productos sin codigo -->
       <section class="overflow-auto px-2 lg:px-6" :class="showNoCodeProducts ? 'h-[70%]' : 'h-[94%]'">
         <!-- header botones -->
         <header class="lg:flex justify-between items-center mt-1 mx-3">
@@ -563,10 +563,10 @@
       </section>
       <!-- lista de productos sin codigo -->
       <section v-if="isQuickNoCodeSelectionOn && noCodeProducts.length"
-        class="border rounded-md mx-2 border-[#D9D9D9] bg-grayF2" :class="showNoCodeProducts ? 'h-[30%]' : 'h-[6%]'">
+        class="border rounded-md mx-2 border-[#BCBCBC] bg-[#EDEDED]" :class="showNoCodeProducts ? 'h-[30%]' : 'h-[6%]'">
         <div class="mx-4">
           <button @click="showNoCodeProducts = !showNoCodeProducts" type="button"
-            class="flex items-center justify-between text-primary w-full pt-3 text-xs lg:text-sm">
+            class="flex items-center justify-between text-gray37 w-full pt-3 text-xs lg:text-sm">
             <h1 class="text-black">Selección rápida para productos sin código</h1>
             <p class="flex items-center space-x-2 font-semibold">
               <span>{{ showNoCodeProducts ? 'Ocultar' : 'Mostrar' }}</span>
@@ -578,7 +578,7 @@
           <div class="mb-2 relative">
             <input v-model="searchNoCodeProducts" @input="filterNoCodeProducts" placeholder="Buscar producto"
               ref="noCodeProductsInput" type="search"
-              class="lg:w-1/3 h-8 pl-8 rounded-md bg-transparent text-gray-400 border border-gray-300 focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
+              class="lg:w-1/3 h-8 pl-8 rounded-md bg-transparent border border-[#BCBCBC] focus:ring-0 focus:border-primary transition-all ease-in-out duration-200 text-sm placeholder:text-sm">
             <i class="absolute left-2 top-2 fa-solid fa-magnifying-glass text-gray-400"></i>
           </div>
           <el-skeleton v-if="syncingIDB"
@@ -1403,6 +1403,27 @@ export default {
     cash_registers: Array,
     clients: Array
   },
+  computed: {
+    isShowingExpirationMessage() {
+      const nextPayment = this.$page.props.auth.user.store.next_payment;
+      const oneDay = 24 * 60 * 60 * 1000; // Horas * minutos * segundos * milisegundos
+      const startDate = new Date(nextPayment);
+      const currentDate = new Date();
+
+      // Calcula la diferencia en días
+      const diffDays = Math.round((startDate - currentDate) / oneDay);
+
+      return diffDays <= 7 || this.$page.props.auth.user.store.suscription_period == 'Periodo de prueba';
+    },
+    getHeightClass() {
+      const hasProducts = !!this.editableTabs[this.editableTabsValue - 1]?.saleProducts?.length;
+      if (this.isShowingExpirationMessage) {
+        return 'h-[calc(91vh+1px)]';
+      } else {
+        return 'h-[calc(94vh-4px)]';
+      }
+    },
+  },
   methods: {
     handleFastProductSelection(item) {
       if (item.bulk_product) {
@@ -1411,7 +1432,7 @@ export default {
         this.handleScale(); //ejecuta el manejador de bascula si el producto es a granel
       } else {
         item.imageUrl = item.image_url;
-        focuseInputAfterAdd = false;
+        let focuseInputAfterAdd = false;
         this.addSaleProduct(item, focuseInputAfterAdd); //agrega el producto a la lista de venta
       }
     },
