@@ -802,25 +802,21 @@ onUnmounted(() => {
                     <!-- mensaje de suscripcion a punto de expirar-->
                     <section
                         v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) <= 7 || $page.props.auth.user.store.suscription_period == 'Periodo de prueba'"
-                        class="space-x-1 bg-[#ededed] text-gray37 px-2 py-1 text-[11px] md:text-xs lg:px-10">
+                        class="flex justify-between items-center bg-[#ededed] text-gray37 px-2 py-px text-[10px] lg:text-xs lg:px-10">
                         <div v-if="calculateRemainingDays($page.props.auth.user.store.next_payment) > 0">
                             Tu suscripción expira en
                             <strong>
                                 {{ calculateRemainingDays($page.props.auth.user.store.next_payment) }} días.
-                            </strong> <br>
-                            Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción.
+                            </strong>
                         </div>
                         <p v-else>
-                            Tu suscripción <strong>ha expirado.</strong> <br>
-                            Para continuar disfrutando de los beneficios, te invitamos a realizar el pago de
-                            tu suscripción.
+                            Tu suscripción <strong>ha expirado.</strong>
                         </p>
-                        <div v-if="$page.props.auth.user.rol == 'Administrador'" class="flex justify-end mt-1">
+                        <div v-if="$page.props.auth.user.rol == 'Administrador'">
                             <button type="button" @click="$inertia.visit(route('profile.show'))"
                                 class="underline text-primary">
                                 Pagar suscripción
-                                <i class="fa-solid fa-arrow-right-long ml-1 text-[10px]"></i>
+                                <i class="fa-solid fa-arrow-right-long ml-1 text-[9px]"></i>
                             </button>
                         </div>
                     </section>
@@ -900,7 +896,7 @@ onUnmounted(() => {
                                     </div>
                                 </td>
                                 <td>{{ (product.global_product_id ? product.global_product?.code : product.code) ?? '-'
-                                    }}
+                                }}
                                 </td>
                                 <td>{{ product.global_product_id ? product.global_product?.name : product.name }}</td>
                                 <td>{{ (product.global_product_id ? product.global_product?.brand?.name :

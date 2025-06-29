@@ -66,28 +66,35 @@
         Imprimir ticket de nuevo (Bluetooth)
       </PrimaryButton>
 
-      <ThirthButton v-if="!printTicket" @click="conectarUSB" class="!py-1 !bg-green-100 !text-green-600 mr-2">
-        <i class="fa-solid fa-usb text-lg mr-2"></i>
-        Conectar impresora (USB)
+      <ThirthButton v-if="!printTicket && qzTrayLoaded" @click="getPrinters"
+        class="!py-1 !bg-green-100 !text-green-600 mr-2">
+        <i class="fa-solid fa-list-ul text-lg mr-2"></i>
+        Buscar Impresoras (PC)
       </ThirthButton>
 
-      <ThirthButton @click="imprimir" class="!py-1 !bg-green-100 !text-green-600 mr-2">
-        <i class="fa-solid fa-usb text-lg mr-2"></i>
-        imprimir (USB)
-      </ThirthButton>
-
-      <PrimaryButton v-if="usbDevice && !printTicket" class="mr-2" @click="enviarDatosImpresionUSB()">
-        <i class="fa-solid fa-print"></i>
-        Imprimir ticket de nuevo (USB)
-      </PrimaryButton>
+      <div v-if="showPrinterSelector && availablePrinters.length > 0" class="mt-4">
+        <label for="printer-select" class="block text-sm font-medium text-gray-700">Selecciona impresora:</label>
+        <select id="printer-select" v-model="selectedPrinter"
+          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+          <option v-for="printer in availablePrinters" :key="printer" :value="printer">{{ printer }}</option>
+        </select>
+        <PrimaryButton v-if="!printTicket" @click="printWithQZ" :disabled="!selectedPrinter"
+          class="mt-4 !bg-emerald-600">
+          <i class="fa-solid fa-print"></i>
+          Imprimir con QZ Tray
+        </PrimaryButton>
+      </div>
+      <p v-if="showPrinterSelector && availablePrinters.length === 0" class="text-sm text-center text-gray-500 mt-4">
+        No se encontraron impresoras. Asegúrate de que QZ Tray esté en ejecución.
+      </p>
 
       <PrimaryButton v-if="!printTicket" @click="print" class="!bg-[#EDEDED] !text-[#373737]">
         <i class="fa-solid fa-display"></i>
         Guardar en PDF
       </PrimaryButton>
     </section>
-    <p v-if="!UUIDService && !UUIDCharacteristic" class="text-sm text-center text-red-600 mt-4">
-      No tienes ninguna impresora configurada para Bluetooth.
+    <p v-if="!UUIDService && !UUIDCharacteristic && !qzTrayLoaded" class="text-sm text-center text-red-600 mt-4">
+      No tienes ninguna impresora configurada para Bluetooth y QZ Tray no se ha cargado.
       Para conectar con una impresora térmica vía bluetooth
       <strong @click="$inertia.get(route('settings.index', { tab: 3 }))"
         class="text-primary underline cursor-pointer">configurala aquí</strong>
@@ -102,18 +109,20 @@ import { Head } from '@inertiajs/vue3';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import CancelButton from '@/Components/MyComponents/CancelButton.vue';
-import axios from 'axios';
+// import qz from 'qz-tray'; // Importar qz-tray
 
 export default {
   data() {
     return {
       printTicket: false,
-      device: null, // Dispositivo de impresora Bluetooth guardada al hacer vínculo
-      usbDevice: null, // Dispositivo de impresora USB
+      device: null, //Dispositivo de impresora guardada al hacer vínculo
       UUIDService: this.$page.props.auth.user.printer_config?.UUIDService,
       UUIDCharacteristic: this.$page.props.auth.user.printer_config?.UUIDCharacteristic,
 
-      usbDeviceSerial: null,
+      showPrinterSelector: false,
+      availablePrinters: [],
+      selectedPrinter: null,
+      qzTrayLoaded: false,
     }
   },
   components: {
@@ -127,12 +136,14 @@ export default {
   },
   methods: {
     closeTab() {
+      // Cerrar la pestaña actual
       window.close();
     },
     conectarBluetooth() {
+      // Solicitar al usuario que seleccione la impresora vía Bluetooth
       navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: [this.UUIDService]
+        acceptAllDevices: true, // Aceptar cualquier dispositivo Bluetooth
+        optionalServices: [this.UUIDService] // UUID del servicio de la impresora
       })
         .then(device => {
           this.device = device;
@@ -140,7 +151,6 @@ export default {
         })
         .catch(error => {
           console.error('Error al conectar con dispositivo Bluetooth:', error);
-          alert('Error al conectar con la impresora Bluetooth. Asegúrate de que esté encendida y visible.');
         });
     },
     truncatedProductName(name) {
@@ -171,7 +181,6 @@ export default {
       const ALINEAR_DERECHA = ESC + 'a' + '\x02';
       const MODO_CONDENSADO_ON = '\x0F';
       const MODO_CONDENSADO_OFF = '\x12';
-      const CORTAR_PAPEL = GS + 'V' + '\x00' + '\x00'; // Corta el papel completo
 
       // --- Construcción del Ticket ---
       let ticket = INICIALIZAR_IMPRESORA;
@@ -189,7 +198,7 @@ export default {
 
       // Cuerpo (Productos) - Usaremos la fuente pequeña para que quepa todo
       ticket += TEXTO_PEQUENO; // Activar modo condensado para ahorrar espacio
-      ticket += 'Producto          Cant. Total   Precio\n'; // Encabezado de la tabla manual
+      ticket += 'Producto          Cant.  Total   Precio\n'; // Encabezado de la tabla manual
       ticket += '--------------------------------\n'; // Separador para 32 caracteres (fuente pequeña)
 
 
@@ -218,38 +227,26 @@ export default {
 
       // Pie de página
       ticket += ALINEAR_IZQUIERDA;
-      ticket += 'Metodo de pago: ' + this.sales[0].payment_method + '\n\n'; // Asegúrate de que esto siempre tenga un valor
+      ticket += 'Metodo de pago: Efectivo\n\n';
       ticket += ALINEAR_CENTRO;
       ticket += 'GRACIAS POR SU COMPRA\n\n\n\n'; // Agregamos saltos de línea para que el papel avance
 
-      ticket += CORTAR_PAPEL; // Comando para cortar el papel
-
       return ticket;
     },
-    generarComandosEscPos() {
-      // Comandos básicos ESC/POS (hexadecimal)
-      const commands = [
-        '\x1B\x40',         // Inicializar
-        '\x1B\x61\x01',     // Centrar texto
-        'TICKET DE VENTA\n',
-        '\x1B\x45\x01',     // Negrita
-        'Producto       Total\n',
-        '\x1B\x45\x00',     // Fin negrita
-        'Coca Cola     $10.00\n',
-        '\x1D\x56\x41\x10'  // Cortar papel
-      ];
-
-      return commands.join('');
-    },
-    async enviarDatosImpresion() { // Para Bluetooth
+    async enviarDatosImpresion() {
       try {
         const service = await this.device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
         const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
 
+        // Generamos el ticket con los comandos justo antes de imprimir
         const datosParaImprimir = this.generarTicketConComandos();
+
+        // Es importante usar un codificador que soporte los caracteres de control
+        // 'utf-8' es una buena opción.
         const encodedData = new TextEncoder('utf-8').encode(datosParaImprimir);
 
-        const fragmentSize = 50; // Ajusta este valor si experimentas problemas
+        // Dividir los datos si son muy grandes (tu función chunkText es buena para esto)
+        const fragmentSize = 20; // Este valor puede que necesites ajustarlo. 50 o 100 a veces funciona mejor.
         const fragments = this.chunkData(encodedData, fragmentSize);
 
         for (const fragment of fragments) {
@@ -257,156 +254,8 @@ export default {
         }
 
         console.log('Datos de impresión enviados correctamente (Bluetooth)');
-        alert('Ticket impreso exitosamente por Bluetooth.');
       } catch (error) {
         console.error('Error al enviar datos de impresión (Bluetooth):', error);
-        alert('Error al imprimir por Bluetooth. Asegúrate de que la impresora esté conectada y que el servicio y característica UUID sean correctos.');
-      }
-    },
-    async imprimir() {
-      const datos = this.generarComandosEscPos(); // Tus comandos ESC/POS en formato hexadecimal
-
-      try {
-        // Opción 1: Envío directo al backend
-        await axios.post('/api/print', {
-          data: datos,
-          printer: 'POS-58'
-        }, {
-          headers: {
-            'Content-Type': 'application/octet-stream' // Para datos binarios
-          }
-        });
-
-        alert('Ticket enviado a la impresora');
-
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    },
-    // Modifica tu función con esta versión de emergencia:
-    async conectarUSB() {
-      try {
-        // Filtros específicos para tu impresora (POS-58)
-        const filters = [
-          {
-            vendorId: 0x0416,  // 1046 en hexadecimal
-            productId: 0x5011, // 20497 en hexadecimal
-            classCode: 0x07    // Clase de impresora
-          }
-        ];
-
-        // Paso 1: Solicitar dispositivo (evita caché problemático)
-        const device = await navigator.usb.requestDevice({ filters });
-
-        // Paso 2: Almacenar serial para persistencia
-        this.usbDeviceSerial = device.serialNumber;
-        console.log("Dispositivo seleccionado:", device);
-
-        // Paso 3: Abrir y configurar inmediatamente
-        await device.open();
-
-        if (device.configuration === null) {
-          await device.selectConfiguration(1); // Configuración por defecto
-        }
-
-        // Paso 4: Buscar interfaz de impresora (clase 7)
-        const interfaceNumber = device.configuration.interfaces.find(
-          iface => iface.alternates.some(alt => alt.interfaceClass === 7)
-        )?.interfaceNumber;
-
-        if (interfaceNumber === undefined) {
-          throw new Error("Interfaz de impresora no encontrada");
-        }
-
-        // Paso 5: Reclamar interfaz
-        await device.claimInterface(interfaceNumber);
-        this.usbDevice = device; // Almacenar dispositivo configurado
-
-        console.log("Impresora lista:", device);
-        alert("✅ Impresora conectada. Ahora puedes imprimir.");
-
-      } catch (error) {
-        console.error("Error en conectarUSB:", error);
-
-        // Manejo específico de errores
-        if (error.name === "NotFoundError") {
-          alert("🔌 No se encontró la impresora. Conéctala y vuelve a intentar.");
-        } else if (error.message.includes("Access denied")) {
-          alert("🔒 Permiso denegado. Reinicia la impresora y el navegador.");
-        } else {
-          alert(`❌ Error: ${error.message}`);
-        }
-      }
-    },
-    async enviarDatosImpresionUSB() {
-      // Validación inicial
-      if (!this.usbDevice && !this.usbDeviceSerial) {
-        alert("⚠️ Primero conecta la impresora USB");
-        return;
-      }
-
-      try {
-        // Reconexión segura si es necesario
-        if (!this.usbDevice?.opened) {
-          const devices = await navigator.usb.getDevices();
-          this.usbDevice = devices.find(d => d.serialNumber === this.usbDeviceSerial);
-
-          if (!this.usbDevice) throw new Error("Impresora desconectada");
-
-          await this.usbDevice.open();
-          await this.usbDevice.selectConfiguration(1);
-
-          const interfaceNumber = this.usbDevice.configuration.interfaces.find(
-            iface => iface.alternates.some(alt => alt.interfaceClass === 7)
-          )?.interfaceNumber;
-
-          if (interfaceNumber !== undefined) {
-            await this.usbDevice.claimInterface(interfaceNumber);
-          }
-        }
-
-        // Buscar endpoint de salida
-        const endpoint = this.usbDevice.configuration.interfaces
-          .flatMap(iface => iface.alternates)
-          .flatMap(alt => alt.endpoints)
-          .find(ep => ep.direction === "out" && ["bulk", "interrupt"].includes(ep.type));
-
-        if (!endpoint) {
-          throw new Error("Endpoint de impresión no encontrado");
-        }
-
-        // Generar y enviar datos (con codificación Windows-1252)
-        const datosParaImprimir = this.generarTicketConComandos(); // Reemplaza con tu función
-        const encodedData = new TextEncoder("windows-1252").encode(datosParaImprimir);
-        const chunkSize = endpoint.packetSize || 64; // Tamaño de paquete óptimo
-
-        // Envío por fragmentos
-        for (let i = 0; i < encodedData.length; i += chunkSize) {
-          const chunk = encodedData.slice(i, i + chunkSize);
-          await this.usbDevice.transferOut(endpoint.endpointNumber, chunk);
-          await new Promise(resolve => setTimeout(resolve, 10)); // Pequeña pausa
-        }
-
-        alert("🖨️ Ticket impreso correctamente");
-
-      } catch (error) {
-        console.error("Error en enviarDatosImpresionUSB:", error);
-
-        if (error.message.includes("device disconnected")) {
-          alert("🚫 Impresora desconectada. Reconéctala y vuelve a intentar.");
-        } else {
-          alert(`❌ Error al imprimir: ${error.message}`);
-        }
-
-        // Limpieza en caso de error
-        if (this.usbDevice?.opened) {
-          try {
-            await this.usbDevice.close();
-          } catch (e) {
-            console.warn("Error al cerrar dispositivo:", e);
-          }
-          this.usbDevice = null;
-        }
       }
     },
     chunkData(data, size) {
@@ -433,12 +282,76 @@ export default {
         return total + item.current_price * item.quantity;
       }, 0);
     },
+    // --- Métodos para QZ Tray ---
+    async loadQZTray() {
+      try {
+        // Establecer la ruta a qz-tray.js si no está en la raíz o CDN
+        await qz.websocket.connect();
+        this.qzTrayLoaded = true;
+        console.log('Conectado a QZ Tray');
+      } catch (error) {
+        console.error('Error al conectar con QZ Tray:', error);
+        alert('No se pudo conectar con QZ Tray. Asegúrate de que esté ejecutándose.');
+      }
+    },
+    async getPrinters() {
+      try {
+        if (!this.qzTrayLoaded) {
+          await this.loadQZTray(); // Intentar cargar si no está cargado
+          if (!this.qzTrayLoaded) return; // Si no se pudo cargar, salir
+        }
+
+        this.availablePrinters = await qz.printers.find();
+        if (this.availablePrinters.length > 0) {
+          // Seleccionar la impresora "POS-58" si está disponible, de lo contrario, la primera.
+          this.selectedPrinter = this.availablePrinters.includes('POS-58') ? 'POS-58' : this.availablePrinters[0];
+        }
+        this.showPrinterSelector = true;
+        console.log('Impresoras disponibles:', this.availablePrinters);
+      } catch (error) {
+        console.error('Error al obtener impresoras:', error);
+        alert('Error al obtener la lista de impresoras. Asegúrate de que QZ Tray esté ejecutándose.');
+      }
+    },
+    async printWithQZ() {
+      if (!this.selectedPrinter) {
+        alert('Por favor, selecciona una impresora.');
+        return;
+      }
+
+      try {
+        if (!this.qzTrayLoaded) {
+          await this.loadQZTray(); // Intentar cargar si no está cargado
+          if (!this.qzTrayLoaded) return; // Si no se pudo cargar, salir
+        }
+
+        const config = qz.configs.create(this.selectedPrinter);
+        const data = [
+          {
+            type: 'raw', // Usar 'raw' para comandos ESC/POS
+            format: 'command', // Indica que son comandos de impresora
+            data: this.generarTicketConComandos()
+          }
+        ];
+
+        await qz.print(config, data);
+        console.log('Ticket enviado a impresora (QZ Tray):', this.selectedPrinter);
+        alert('Ticket enviado a la impresora ' + this.selectedPrinter + ' correctamente.');
+      } catch (error) {
+        console.error('Error al imprimir con QZ Tray:', error);
+        alert('Error al imprimir con QZ Tray. Asegúrate de que la impresora esté conectada y QZ Tray en ejecución.');
+      }
+    }
   },
   mounted() {
     window.addEventListener('afterprint', this.handleAfterPrint);
+    // Cargar QZ Tray al montar el componente.
+    // this.loadQZTray();
   },
-  beforeUnmount() {
+  beforeUnmount() { // Cambiado de beforeDestroy a beforeUnmount para Vue 3
     window.removeEventListener('afterprint', this.handleAfterPrint);
+    // Desconectar de QZ Tray al salir del componente.
+    // qz.websocket.disconnect().catch(error => console.error('Error al desconectar de QZ Tray:', error));
   }
 }
 </script>
