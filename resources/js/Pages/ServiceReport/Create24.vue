@@ -334,11 +334,10 @@ export default {
         closePrintingModal() {
             this.$inertia.visit(route('service-reports.index'));
         },
-        /**
-         * --- AJUSTADO PARA 58mm: Genera el string del ticket de servicio con comandos ESC/POS. ---
-         * @param {boolean} hasCut - Si es true, añade el comando para cortar el papel al final.
-         * @returns {string} El texto formateado para la impresora de tickets.
-         */
+        removeAccents(text = '') {
+            if (!text) return '';
+            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        },
         generateServiceTicketCommands(hasCut = true) {
             const ESC = '\x1B';
             const GS = '\x1D';
@@ -368,7 +367,7 @@ export default {
 
             // Datos del Cliente y Equipo
             ticket += ALINEAR_IZQUIERDA;
-            ticket += 'Fecha: ' + this.formatDate(new Date()) + '\n';
+            ticket += 'Fecha: ' + this.formatDate() + '\n';
             ticket += 'Cliente: ' + (this.form.client_name || 'N/A') + '\n';
             ticket += 'Telefono: ' + (this.form.client_phone_number || 'N/A') + '\n\n';
 
@@ -407,7 +406,7 @@ export default {
 
                     let linea = '';
                     linea += cantidad.padEnd(3, ' ');
-                    linea += ' ' + nombre.padEnd(17, ' ');
+                    linea += ' ' + this.removeAccents(nombre).padEnd(17, ' ');
                     linea += ('$' + totalProducto).padStart(11, ' ');
                     ticket += ALINEAR_IZQUIERDA + linea + '\n';
                 });
@@ -450,8 +449,7 @@ export default {
 
             return ticket;
         },
-        formatDate(dateString) {
-            if (!dateString) return;
+        formatDate(dateString = new Date().toISOString()) {
             return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
         },
         onPercentageInput(value) {
