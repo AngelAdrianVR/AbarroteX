@@ -30,15 +30,16 @@ class ServiceReportController extends Controller
         $last_report = ServiceReport::where('store_id', $store_id)->latest('id')->first();
         $folio = $last_report ? intval($last_report->folio) + 1 : 1;
 
-        // Ruta a la vista de Inertia (ej: 'ServiceReport/Create14.vue')
-        $customViewPath = resource_path("js/Pages/ServiceReport/Create{$store_id}.vue");
+        // // Ruta a la vista de Inertia (ej: 'ServiceReport/Create14.vue')
+        // $customViewPath = resource_path("js/Pages/ServiceReport/Create{$store_id}.vue");
 
-        // Usar la vista personalizada si existe, sino la predeterminada
-        $view = File::exists($customViewPath)
-            ? "ServiceReport/Create{$store_id}"
-            : "PageNotFound"; // 404 not found vista
+        // // Usar la vista personalizada si existe, sino la predeterminada
+        // $view = File::exists($customViewPath)
+        //     ? "ServiceReport/Create{$store_id}"
+        //     : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('products', 'folio'));
+        // return inertia($view, compact('products', 'folio'));
+        return inertia('ServiceReport/Create24', compact('products', 'folio'));
     }
 
     //para guardar la orden de dm compresores.
@@ -89,7 +90,7 @@ class ServiceReportController extends Controller
         ]);
 
         // Subir y asociar las imagenes
-        if ( $request->media ) {
+        if ($request->media) {
             $service_order->addAllMediaFromRequest()->each(function ($fileAdder) {
                 // Guarda el archivo en la colección y obtiene el modelo Media
                 $media = $fileAdder->toMediaCollection();
@@ -122,12 +123,12 @@ class ServiceReportController extends Controller
         $customViewPath = resource_path("js/Pages/ServiceReport/Show{$store_id}.vue");
 
         // Usar la vista personalizada si existe, sino la predeterminada
-        $view = File::exists($customViewPath)
-            ? "ServiceReport/Show{$store_id}"
-            : "PageNotFound"; // 404 not found vista
+        // $view = File::exists($customViewPath)
+        //     ? "ServiceReport/Show{$store_id}"
+        //     : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('report'));
-        
+        // return inertia($view, compact('report'));
+        return inertia("ServiceReport/Show24", compact('report'));
     }
 
     public function edit($encoded_report_id)
@@ -143,11 +144,12 @@ class ServiceReportController extends Controller
         $customViewPath = resource_path("js/Pages/ServiceReport/Edit{$store_id}.vue");
 
         // Usar la vista personalizada si existe, sino la predeterminada
-        $view = File::exists($customViewPath)
-            ? "ServiceReport/Edit{$store_id}"
-            : "PageNotFound"; // 404 not found vista
+        // $view = File::exists($customViewPath)
+        //     ? "ServiceReport/Edit{$store_id}"
+        //     : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('report', 'products'));
+        // return inertia($view, compact('report', 'products'));
+        return inertia("ServiceReport/Edit24", compact('report', 'products'));
     }
 
     public function update(Request $request, ServiceReport $serviceReport)
@@ -184,8 +186,8 @@ class ServiceReportController extends Controller
         $service_order->update($request->all());
 
         // Subir y asociar las imagenes
-        if ( $request->media ) {
-            $service_order->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+        if ($request->media) {
+            $service_order->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection());
         }
 
         return to_route('service-reports.index');
@@ -285,5 +287,4 @@ class ServiceReportController extends Controller
     {
         return inertia('ServiceReport/PrintTemplate24', compact('report'));
     }
-
 }

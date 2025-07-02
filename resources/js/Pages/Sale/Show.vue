@@ -98,7 +98,8 @@
                         <span class="w-1/4"></span>
                         <span class="w-1/4">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ (Object.values(day_sales)[0]?.total_day_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ (Object.values(day_sales)[0]?.total_day_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                            ",") }}
                         </span>
                     </p>
                 </div>
@@ -158,9 +159,10 @@
                     <el-tab-pane v-if="hasQuotes" label="Ordenes de servicio" name="4">
                         <template #label>
                             <div class="flex items-center space-x-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
                                 </svg>
                                 <p>Ordenes de servicio</p>
                             </div>
@@ -171,6 +173,7 @@
             </main>
         </div>
 
+        <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
         <DialogModal :show="showInstallmentModal" @close="closeInstallmentModal()">
             <template #title>
                 <h1>Abonos</h1>
@@ -184,7 +187,7 @@
                     </div>
                     <div class="flex items-center justify-between mt-2 pb-2 border-b border-grayD9">
                         <p class="text-gray99">Folio de venta: <span class="text-gray37">{{ saleToSeeInstallments.folio
-                        }}</span></p>
+                                }}</span></p>
                         <span class="text-grayD9">|</span>
                         <p class="text-gray99">Total de venta: <span class="text-gray37">
                                 ${{ saleToSeeInstallments.total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -285,7 +288,7 @@
                                     <p>
                                         {{ item.name }}
                                         <span>({{ item.additional?.color.name }}-{{ item.additional?.size.name
-                                        }})</span>
+                                            }})</span>
                                     </p>
                                 </el-option>
                             </el-select>
@@ -362,6 +365,7 @@ import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import QuoteSales from './Tabs/QuoteSales.vue';
 import ServiceSales from './Tabs/ServiceSales.vue';
+import PrintingModal from '@/Components/MyComponents/Sale/PrintingModal.vue';
 
 export default {
     data() {
@@ -386,6 +390,7 @@ export default {
             saleToSeeInstallments: null,
             saleFolioToRefund: null,
             addInstallment: false,
+            showPrintingModal: false,
             saleType: 'Normal',
             // cargas
             addingInstallment: false,
@@ -415,6 +420,7 @@ export default {
         OnlineSales,
         QuoteSales,
         ServiceSales,
+        PrintingModal,
     },
     props: {
         day_sales: Object,
@@ -549,11 +555,19 @@ export default {
                 this.saleToSeeInstallments = this.getGroupedSales.find(item => item.folio == saleFolio);
             }
         },
+        openPrintingModal(saleFolio) {
+            this.$refs.printingModal.saleFolio = saleFolio;
+            this.showPrintingModal = true;
+            if (!this.$page.props.auth.user.printer_config?.name) {
+                this.$refs.printingModal.getAvailablePrinters();
+            }
+        },
         handleShowModal(modal, saleFolio, type = 'Normal') {
             this.saleType = type;
             if (modal == 'edit') this.openEditModal(saleFolio);
             else if (modal == 'refund') this.openRefundModal(saleFolio);
             else if (modal == 'installment') this.openInstallmentModal(saleFolio);
+            else if (modal == 'printing') this.openPrintingModal(saleFolio);
         },
         update() {
             this.editing = true;

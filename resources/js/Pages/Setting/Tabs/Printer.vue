@@ -37,7 +37,7 @@
                                 :label="printer" />
                         </el-select>
                     </div>
-                    <p v-if="loadingSevice" class="text-gray-400 text-end text-xs">Guardando...</p>
+                    <p v-if="loadingName" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
             </article>
         </section>
@@ -128,6 +128,7 @@ export default {
             form,
             availablePrinters: [],
             // cargas
+            loadingName: false,
             loadingSevice: false,
             loadingCharacteristic: false,
         }
@@ -143,10 +144,10 @@ export default {
         updatePrinterName() {
             // enviar solicitud solo si hubo algun cambio en campo
             if (this.form.printer_config.name !== this.$page.props.auth.user.printer_config?.name) {
-                this.loadingSevice = true;
+                this.loadingName = true;
                 this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
                     onFinish: () => {
-                        this.loadingSevice = false;
+                        this.loadingName = false;
                     },
                 });
             }

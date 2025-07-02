@@ -66,6 +66,7 @@ export default {
             availablePrinters: [],
             saleFolio: null,
             serial: null,
+            customData: null,
             printing: false,
             sales: [], // ventas relacionadas al folio
             device: null, // Dispositivo de impresora Bluetooth guardada al hacer vínculo
@@ -186,24 +187,27 @@ export default {
             }
             return chunks;
         },
-        async initialize() {
-            await this.getParzibyteSerial();
-            await this.getSalesByFolio();
-        },
         async printByUSB() {
             this.printing = true;
 
-            if (!this.serial || !this.sales.length) {
-                await this.initialize();
+            if (!this.sales.length && this.saleFolio) {
+                await this.getSalesByFolio();
             }
-            // Generamos el ticket SIN el comando de corte, ya que el plugin lo hará por nosotros.
-            const ticketTexto = this.generateTicketCommands(false);
+
+            let ticketText = '';
+            if (this.customData) {
+                // Si se proporciona customData, lo usamos directamente
+                ticketText = this.customData;
+            } else {
+                // Generamos el ticket para venta de productos
+                ticketText = this.generateTicketCommands(false);
+            }
 
             // Lista de operaciones para el plugin
             const listaDeOperaciones = [
                 {
                     nombre: "EscribirTexto",
-                    argumentos: [ticketTexto],
+                    argumentos: [ticketText],
                 },
                 // {
                 //   nombre: "CorteCompleto", // El plugin se encarga del corte
@@ -227,10 +231,7 @@ export default {
                     },
                 });
                 const respuesta = await respuestaHttp.json();
-                if (respuesta.ok) {
-                    console.log("Impreso correctamente vía USB");
-                } else {
-                    console.error("Error del plugin:", respuesta.message);
+                if (!respuesta.ok) {
                     alert(`Error al imprimir por USB: ${respuesta.message}\nAsegúrate que el nombre de la impresora "${this.printerName}" es correcto.`);
                 }
             } catch (error) {
@@ -247,8 +248,15 @@ export default {
                 const service = await this.device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
                 const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
 
-                const datosParaImprimir = this.generateTicketCommands(false);
-                const encodedData = new TextEncoder('utf-8').encode(datosParaImprimir);
+                let ticketText = '';
+                if (this.customData) {
+                    // Si se proporciona customData, lo usamos directamente
+                    ticketText = this.customData;
+                } else {
+                    // Generamos el ticket para venta de productos
+                    ticketText = this.generateTicketCommands(false);
+                }
+                const encodedData = new TextEncoder('utf-8').encode(ticketText);
 
                 const fragmentSize = 50;
                 const fragments = this.chunkData(encodedData, fragmentSize);
@@ -298,6 +306,15 @@ export default {
                 console.error('Error al obtener ventas: ', error);
             }
         },
+    },
+    async mounted() {
+        if (this.printerName) {
+            this.availablePrinters.push(this.printerName);
+        }
+
+        if (!this.serial) {
+            await this.getParzibyteSerial();
+        }
     },
 };
 </script>
