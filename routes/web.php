@@ -390,6 +390,7 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('service-reports', ServiceReportController::class);
 Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
+Route::get('services-fetch-spare-parts', [ServiceReportController::class, 'fetchSpareParts'])->name('service-reports.fetch-spare-parts')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
 Route::post('services-reports-store-phones-stores', [ServiceReportController::class, 'storePhoneStores'])->name('service-reports.store-phones')->middleware('auth');
 Route::post('services-reports-update-phones-stores/{service_order}', [ServiceReportController::class, 'updatePhoneStores'])->name('service-reports.update-phones')->middleware('auth');

@@ -7,7 +7,10 @@
           :key="index"
           >
             <div class="col-span-3">
-                <InputLabel value="Nombre de la refacción" />
+                <div class="flex items-center justify-between">
+                  <InputLabel value="Nombre de la refacción" />
+                  <p @click="changeTypeOfSelection" class="cursor-pointer text-primary underline text-sm">Cambiar a {{ typeOfSelection === 'texto' ? 'lista' : 'texto' }}</p>
+                </div>
                 <el-input
                 v-model="part.name"
                 placeholder="Nombre de la refacción"
@@ -70,6 +73,7 @@
 
 <script>
 import InputLabel from "@/Components/InputLabel.vue";
+import axios from 'axios';
 
 export default {
   name: 'PartsForm',
@@ -86,6 +90,8 @@ export default {
 
   data() {
     return {
+      typeOfSelection: 'texto',
+      spareParts: [], // refacciones disponibles para seleccionar en lista
       parts: [
         {
           name: '',
@@ -122,6 +128,22 @@ export default {
     removePart(index) {
       this.parts.splice(index, 1);
     },
+    changeTypeOfSelection() {
+      // Cambia entre modo de texto y lista
+      this.typeOfSelection = this.typeOfSelection === 'texto' ? 'lista' : 'texto';
+
+      // Si cambia a lista, verifica si ya se han cargado las refacciones
+      if ( !this.spareParts.length ) {
+        this.fetchSpareParts();
+      } 
+    },
+    async fetchSpareParts() {
+      try {
+        const response = await axios.get(route('service-reports.fetch-spare-parts'));
+      } catch (error) {
+        console.error('Error fetching spare parts:', error);
+      }
+    }
   },
   mounted() {
     if ( this.initialData ) {
