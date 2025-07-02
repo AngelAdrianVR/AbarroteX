@@ -181,7 +181,7 @@
                                 <p class="flex">
                                     <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-24 text-right">{{ report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                                 </p>
-                                <p v-if="report.advance_payment > 0" class="flex">
+                                <p v-if="report.aditionals?.review_amount < report.advance_payment" class="flex">
                                     <span class="w-40">Total devuelto</span><span class="ml-3">$</span><span class="w-24 text-right">{{ (report.advance_payment - parseFloat(report.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                                 </p>
                                 <p v-else class="flex">
@@ -312,7 +312,7 @@
                     </div>
 
                     <!-- Devolver anticipo -->
-                    <el-checkbox v-model="returnAdvance">Devolver anticipo al cliente</el-checkbox>
+                    <el-checkbox v-if="report.advance_payment" v-model="returnAdvance">Devolver anticipo al cliente</el-checkbox>
                     <div v-if="returnAdvance">
                         <InputLabel value="Monto a devolver" class="ml-3 mb-1" />
                         <el-input
@@ -330,16 +330,16 @@
                     <!-- Resumen -->
                     <div v-if="returnAdvance || chargeReview" class="mt-2 text-[15px] space-y-1 flex flex-col items-end">
                         <p class="flex">
-                            <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span class="w-24 text-right">{{ parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                            <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span class="w-24 text-right">{{ reviewAmount ? parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0.00' }}</span>
                         </p>
                         <p class="flex">
                             <span class="w-[170px]">Anticipo</span><span class="ml-[2px]">$</span><span class="w-24 text-right">{{ report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
-                        <p v-if="report.advance_payment > 0" class="flex">
-                            <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span class="w-24 text-right">{{ (report.advance_payment - parseFloat(reviewAmount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        <p v-if="report.aditionals?.review_amount < report.advance_payment" class="flex">
+                            <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span class="w-24 text-right">{{ reviewAmount ? ((report.advance_payment - parseFloat(reviewAmount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) : '0.00' }}</span>
                         </p>
                         <p v-else class="flex">
-                            <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span class="w-24 text-right">{{ parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span class="w-24 text-right">{{ reviewAmount ? (parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) : '0.00' }}</span>
                         </p>
 
                     </div>

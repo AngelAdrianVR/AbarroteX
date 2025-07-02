@@ -12,6 +12,7 @@ use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Sale;
+use App\Models\ServiceReport;
 use App\Notifications\BasicNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -100,11 +101,20 @@ class SaleController extends Controller
         $installments = Installment::whereIn('user_id', $storeUsers)
             ->whereDate('created_at', $date)
             ->get();
+        
+        // Obtener los servicios entregados y pagados en la fecha especificada
+        $order_services = ServiceReport::where(function ($query) {
+            $query->where('status', 'Entregado/Pagado')
+                ->orWhere('status', 'Cancelada');
+        })
+        ->where('store_id', auth()->user()->store_id)
+        ->latest()
+        ->get();
 
         $this->addCreditDataToSales($sales);
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, $installments, true);
+        $day_sales = $this->getGroupedSalesByDate($sales, $online_sales, $installments, true, $order_services);
 
         $date = Carbon::parse($date)->startOfDay(); // Comienza el día actual para la comparación
 
@@ -401,8 +411,17 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
+        $order_services = ServiceReport::where(function ($query) {
+            $query->where('status', 'Entregado/Pagado')
+                ->orWhere('status', 'Cancelada');
+        })
+        ->where('store_id', auth()->user()->store_id)
+        ->latest()
+        ->get(['id', 'folio', 'total_cost', 'paid_at', 'created_at']);
+
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->take(30);
+        $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales, null, false, $order_services)->take(30);
+        // $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->take(30);
 
         // Retornar los datos agrupados
         return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);
@@ -657,34 +676,48 @@ class SaleController extends Controller
         $sales = null,
         $onlineSales = null,
         $installments = null,
-        bool $returnSales = false
+        bool $returnSales = false,
+        $serviceOrders = null, // 👈 ordenes de servicio para apontephone
     ): Collection {
         // Asegurarse de que las colecciones no sean nulas
         $sales = collect($sales);
         $onlineSales = collect($onlineSales);
         $installments = collect($installments);
-
+        $serviceOrders = collect($serviceOrders);
         // 1. Filtrar ventas en línea (solo las entregadas o reembolsadas)
         $filteredOnlineSales = $onlineSales->filter(function ($onlineSale) {
             return $onlineSale->delivered_at || $onlineSale->refunded_at;
         });
-
+        
         // 2. Combinar todas las ventas para agruparlas por fecha
-        $allSales = $sales->merge($filteredOnlineSales);
+        $allSales = $sales->merge($filteredOnlineSales)->merge($serviceOrders);
 
         return $allSales->groupBy(function ($sale) {
-            // Determinar la fecha de agrupación según el tipo de venta
-            $date = isset($sale->current_price) ? $sale->created_at : ($sale->delivered_at ?? $sale->refunded_at);
-            return Carbon::parse($date)->toDateString();
-        })->map(function ($dailySales) use ($returnSales, $installments) {
+            if (isset($sale->current_price)) {
+                return Carbon::parse($sale->created_at)->toDateString(); // Venta normal o cotización
+            } elseif ($sale instanceof OnlineSale) { // Venta en linea
+                if ($sale->delivered_at) {
+                    return Carbon::parse($sale->delivered_at)->toDateString();
+                } elseif ($sale->refunded_at) {
+                    return Carbon::parse($sale->refunded_at)->toDateString();
+                } else {
+                    return Carbon::parse($sale->created_at)->toDateString(); // fallback
+                }
+            } else {
+                return Carbon::parse($sale->paid_at)->toDateString(); // Orden de servicio
+            }
+         })->map(function ($dailySales) use ($returnSales, $installments) {
             // 3. Clasificar las ventas del día
             $normalSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
             $quoteSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
-            $onlineSales = $dailySales->filter(fn($sale) => !isset($sale->current_price));
+            $onlineSales = $dailySales->filter(fn($sale) => $sale instanceof OnlineSale);
+            $serviceOrdersGroup = $dailySales->filter(fn($sale) => $sale instanceof \App\Models\ServiceReport);
+
 
             // 4. Calcular totales y cantidades
             $totalSale = $normalSales->sum(fn($sale) => $this->calculateSaleAmount($sale));
             $totalQuotesSale = $quoteSales->sum(fn($sale) => $this->calculateQuoteSaleAmount($sale));
+            $totalServiceOrders = $serviceOrdersGroup->sum('total_cost'); // total_cost + advance_payment
             $totalOnlineSale = $onlineSales->sum(function ($onlineSale) {
                 return ($onlineSale->status == 'Entregado' || $onlineSale->status == 'Reembolsado')
                     ? $onlineSale->total + $onlineSale->delivery_price
@@ -694,12 +727,14 @@ class SaleController extends Controller
             // 5. Calcular cantidades de productos
             $totalQuantityNormalSale = $normalSales->sum('quantity');
             $totalQuantityQuoteSale = $quoteSales->sum('quantity');
-            $totalQuantityOnlineSale = $onlineSales->sum(fn($onlineSale) => count($onlineSale->products));
+            $totalQuantityOnlineSale = $onlineSales->sum(fn($onlineSale) => count($onlineSale->products ?? []));
+            $totalServiceFolios = $serviceOrdersGroup->unique('folio')->count();
 
             // 6. Calcular folios únicos
             $normalFolios = $normalSales->unique('folio')->count();
             $quoteFolios = $quoteSales->unique('folio')->count();
             $onlineFolios = $onlineSales->count();
+            
 
             // 7. Agrupar ventas por folio si returnSales es true
             $normalSalesByFolio = $returnSales ? $normalSales->groupBy('folio')->map(fn($folioSales) => $this->formatNormalSaleByFolio($folioSales)) : [];
@@ -720,6 +755,10 @@ class SaleController extends Controller
                 'quote_sales' => $quoteSalesByFolio,
                 'online_sales' => $returnSales ? $onlineSales->values() : [],
                 'installments' => $returnSales ? $installments->values() : [],
+                'total_service_orders' => $totalServiceOrders,
+                'service_folios' => $totalServiceFolios,
+                'total_day_sale' => $totalSale + $totalQuotesSale + $totalOnlineSale + $totalServiceOrders,
+                'service_orders' => $returnSales ? $serviceOrdersGroup->values() : [],
             ];
         });
     }
