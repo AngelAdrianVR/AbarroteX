@@ -451,6 +451,7 @@ export default {
             return ticket;
         },
         formatDate(dateString) {
+            if (!dateString) return;
             return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
         },
         onPercentageInput(value) {
