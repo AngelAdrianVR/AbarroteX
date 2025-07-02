@@ -692,24 +692,7 @@
     </main>
 
     <!-- modal de inmpresión -->
-    <DialogModal :show="showPrintingModal" @close="showPrintingModal = false" max-width="md">
-      <template #title> Impresión de ticket </template>
-      <template #content>
-        <div class="flex items-start space-x-4">
-          <figure class="h-24">
-            <img src="@/../../public/images/ticket.png" :draggable="false" class="select-none object-contain h-full"
-              alt="Imagen de ticket de venta">
-          </figure>
-          <p class="w-2/3 text-base text-gray37">¿Desea imprimir el ticket de la venta?</p>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex items-center space-x-2">
-          <CancelButton @click="showPrintingModal = false">No</CancelButton>
-          <PrimaryButton @click="openPrintingTemplate" :disabled="clientForm.processing">Si, imprimir</PrimaryButton>
-        </div>
-      </template>
-    </DialogModal>
+    <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" />
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
@@ -1213,6 +1196,7 @@ import {
   syncIDBProducts,
   addOrUpdateItem
 } from '@/dbService.js';
+import PrintingModal from '@/Components/MyComponents/Sale/PrintingModal.vue';
 
 export default {
   data() {
@@ -1396,6 +1380,7 @@ export default {
     SaleTable,
     Modal,
     InputFilePreview,
+    PrintingModal,
   },
   props: {
     products_quantity: Number,

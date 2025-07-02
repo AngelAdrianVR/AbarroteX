@@ -156,6 +156,7 @@ class UserController extends Controller
     public function updatePrinterConfig(Request $request, User $user)
     {
         $request->validate([
+            'printer_config.name' => 'nullable|string|min:1|max:255',
             'printer_config.UUIDService' => 'nullable|string|min:1|max:255',
             'printer_config.UUIDCharacteristic' => 'nullable|string|min:1|max:255',
         ]);
@@ -168,5 +169,10 @@ class UserController extends Controller
         $user->update([
             'printer_config.printer' => $request->printer
         ]);
+    }
+
+    public function getParzibyteSerial()
+    {
+        return response()->json(['serial' => env('PARZIBYTE_API_SERIAL', null)]);
     }
 }
