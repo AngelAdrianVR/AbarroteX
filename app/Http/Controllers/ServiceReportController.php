@@ -127,6 +127,7 @@ class ServiceReportController extends Controller
             : "PageNotFound"; // 404 not found vista
 
         return inertia($view, compact('report'));
+        
     }
 
     public function edit($encoded_report_id)
@@ -255,6 +256,7 @@ class ServiceReportController extends Controller
 
         $service_report->update($data);
 
+        return response()->json(['report' => $service_report]);
     }
 
     public function massiveDelete(Request $request)
@@ -281,7 +283,7 @@ class ServiceReportController extends Controller
     // abre la plantilla de comprobante de servicio para imprimir de reparacion de celulares (apontephone)
     public function printTemplate(ServiceReport $report)
     {
-        return inertia('ServiceReport/PrintTemplate1', compact('report'));
+        return inertia('ServiceReport/PrintTemplate24', compact('report'));
     }
 
 }
