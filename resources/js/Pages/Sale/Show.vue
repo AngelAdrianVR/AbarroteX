@@ -44,7 +44,21 @@
                             <span class="w-1/4">$</span>
                             <span class="w-2/3 ml-3 text-gray37 text-end">
                                 {{
-                                    Object.values(day_sales)[0].online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    Object.values(day_sales)[0]?.online_sales_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",") }}
+                            </span>
+                        </p>
+                    </div>
+                </section>
+                <section>
+                    <div v-if="hasOrderServices" class="flex items-center space-x-3">
+                        <span class="w-2/3">Total Ordenes de servicio: </span>
+                        <p class="flex text-gray37 w-1/3 font-bold">
+                            <span class="w-1/4"></span>
+                            <span class="w-1/4">$</span>
+                            <span class="w-2/3 ml-3 text-gray37 text-end">
+                                {{
+                                    Object.values(day_sales)[0]?.total_service_orders.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",") }}
                             </span>
                         </p>
@@ -58,7 +72,7 @@
                             <span class="w-1/4">$</span>
                             <span class="w-2/3 ml-3 text-gray37 text-end">
                                 {{
-                                    Object.values(day_sales)[0].total_quotes_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    Object.values(day_sales)[0]?.total_quotes_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",") }}
                             </span>
                         </p>
@@ -71,7 +85,7 @@
                             <span class="w-1/4"></span>
                             <span class="w-1/4">$</span>
                             <span class="w-2/3 ml-3 text-gray37 text-end">
-                                {{ Object.values(day_sales)[0].total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                {{ Object.values(day_sales)[0]?.total_sale.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                     ",")
                                 }}
                             </span>
@@ -84,7 +98,7 @@
                         <span class="w-1/4"></span>
                         <span class="w-1/4">$</span>
                         <span class="w-2/3 ml-3 text-gray37 text-end">
-                            {{ (Object.values(day_sales)[0].total_day_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ (Object.values(day_sales)[0]?.total_day_sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </p>
                 </div>
@@ -151,7 +165,7 @@
                                 <p>Ordenes de servicio</p>
                             </div>
                         </template>
-                        <ServiceSales @show-modal="handleShowModal" :sales="getGroupedQuoteSales" />
+                        <ServiceSales @show-modal="handleShowModal" :sales="getGroupedServiceSales" />
                     </el-tab-pane>
                 </el-tabs>
             </main>
@@ -382,6 +396,7 @@ export default {
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             hasOnlineSales: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
             hasQuotes: this.$page.props.auth.user.store.activated_modules.includes('Cotizaciones'),
+            hasOrderServices: this.$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio'),
             // tabs
             activeTab: '1',
         }
@@ -419,6 +434,12 @@ export default {
 
             return Object.values(sales);
         },
+        getGroupedServiceSales() {
+            // Obtener las ventas por ordenes de venta del primer día (si hay múltiples días, se debe ajustar esta parte)
+            const sales = Object.values(this.day_sales)[0].service_orders;
+
+            return Object.values(sales);
+        },
         statusStyles() {
             const status = this.saleToSeeInstallments?.credit_data?.status;
             if (status === 'Pendiente') {
@@ -435,7 +456,7 @@ export default {
         SeePrevDaySales() {
             this.changingDay = true;
             const params = {
-                date: this.previous_sale_date.split('T')[0],
+                date: this.previous_sale_date?.split('T')[0],
                 cashRegisterId: this.$page.props.auth.user.cash_register_id
             };
 
@@ -444,7 +465,7 @@ export default {
         SeeNextDaySales() {
             this.changingDay = true;
             const params = {
-                date: this.next_sale_date.split('T')[0],
+                date: this.next_sale_date?.split('T')[0],
                 cashRegisterId: this.$page.props.auth.user.cash_register_id
             };
 
@@ -554,9 +575,11 @@ export default {
             });
         },
         formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '';
             return format(parseISO(dateTimeString), 'dd MMM yy, hh:mm a', { locale: es });
         },
         formatDate(dateString) {
+            if (!dateString) return '';
             return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });
         },
         storeInstallment() {

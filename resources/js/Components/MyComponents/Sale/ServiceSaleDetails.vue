@@ -5,22 +5,20 @@
             <div class="flex items-center space-x-1 lg:space-x-3">
                 <p class="text-gray99">
                     Cotización:
-                    <a as="button" :href="route('quotes.show', encodeId(groupedSales.products[0].quote_id))"
+                    <a as="button" :href="route('service-reports.show', encodeId(groupedSales.id))"
                         target="_blank" class="text-primary hover:underline">
-                        C-{{ String(groupedSales.quote.folio).padStart(4, '0') }}
+                        Folio:{{ String(groupedSales.folio).padStart(4, '0') }}
                     </a>
                 </p>
                 <span class="text-gray99">•</span>
-                <p class="text-gray99">Folio: <span class="text-gray37">{{ groupedSales.folio }}</span></p>
-                <span class="text-gray99">•</span>
                 <p class="text-gray99">Hora de la venta: <span class="text-gray37">{{
-                    formatHour(groupedSales.products[0].created_at) }}</span></p>
-                <span class="text-gray99">•</span>
-                <p class="text-gray99">Vendedor: <span class="text-gray37">{{ groupedSales.user_name }}</span>
-                </p>
+                    formatHour(groupedSales.created_at) }}</span></p>
                 <span class="text-gray99">•</span>
                 <p class="text-gray99">Cliente: <span class="text-gray37">{{ groupedSales.client_name }}</span>
                 </p>
+                <span class="text-gray99">•</span>
+                <!-- <p class="text-gray99">Vendedor: <span class="text-gray37">{{ groupedSales.client_name }}</span>
+                </p> -->
             </div>
             <div class="flex items-center space-x-2">
                 <!-- Se agregó el true para que de siempre verdadero porque se agregó la opción de imprimir ticket -->
@@ -31,7 +29,7 @@
                     </button>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item v-if="canEdit && !isOutOfCashCut && !wasRefunded && !isPaid"
+                            <!-- <el-dropdown-item v-if="canEdit && !isOutOfCashCut && !wasCancelled && !isPaid"
                                 :command="'edit|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -40,7 +38,7 @@
                                 </svg>
                                 <span class="text-xs">Editar</span>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="canRefund && !isOutOfCashCut && !wasRefunded && !isPaid"
+                            <el-dropdown-item v-if="canRefund && !isOutOfCashCut && !wasCancelled && !isPaid"
                                 :command="'refund|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
@@ -48,8 +46,8 @@
                                         d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                                 </svg>
                                 <span class="text-xs">Reembolso</span>
-                            </el-dropdown-item>
-                            <el-dropdown-item v-if="!wasRefunded" :command="'print|' + groupedSales.folio">
+                            </el-dropdown-item> -->
+                            <el-dropdown-item v-if="!wasCancelled" :command="'print|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -57,15 +55,6 @@
                                 </svg>
 
                                 <span class="text-xs">Imprimir ticket</span>
-                            </el-dropdown-item>
-                            <el-dropdown-item v-if="canInstallment && groupedSales.credit_data"
-                                :command="'installment|' + groupedSales.folio">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-                                </svg>
-                                <span class="text-xs">Ver abonos</span>
                             </el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
@@ -80,174 +69,132 @@
                     </button>
                 </template>
                 <template #content>
-                    <div class="overflow-x-scroll text-xs lg:text-sm">
+                    <div class="overflow-x-scroll text-xs lg:text-sm space-y-5">
                         <table class="w-full">
                             <thead>
-                                <tr class="*:px-2">
-                                    <th class="w-[50%] text-start">Producto</th>
+                                <tr class="*:px-2 text-[#999999]">
+                                    <th class="w-[50%] text-start">Servicio realizado</th>
                                     <th class="w-[10%] text-start">Precio</th>
                                     <th class="w-[10%] text-start">Cantidad</th>
-                                    <th class="w-[30%] text-end">
-                                        Total
-                                        <span v-if="groupedSales.quote.iva_included != null">
-                                            {{
-                                                groupedSales.quote.iva_included
-                                                    ? '(IVA incluido)'
-                                                    : '(+ IVA)'
-                                            }}
-                                        </span>
-                                    </th>
+                                    <th class="w-[30%] text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y-[1px]">
-                                <template v-for="(sale, index) in groupedSales.products" :key="index">
-                                    <!-- Fila principal del producto -->
-                                    <tr class="*:px-2 *:py-[6px] *:align-top border-grayD9">
-                                        <td>
-                                            <button v-if="sale.product_id" @click="viewProduct(sale)"
-                                                class="text-start text-primary underline">
-                                                {{ sale.product_name }}
-                                            </button>
-                                            <el-tooltip v-else content="El producto fue eliminado" placement="right">
-                                                <span class="text-red-700">{{ sale.product_name }}</span>
-                                            </el-tooltip>
-                                        </td>
-                                        <td v-if="sale.original_price">
-                                            <el-tooltip
-                                                :content="'El precio fue modificado de $' + sale.original_price + ' a $' + sale.current_price"
-                                                placement="bottom">
-                                                <span class="border-b border-dashed border-primary cursor-default">${{
-                                                    sale.current_price }}</span>
-                                            </el-tooltip>
-                                        </td>
-                                        <td v-else>
-                                            ${{ sale.current_price }}
-                                        </td>
-                                        <td>{{ sale.quantity.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                                        <td class="text-end pb-1">
-                                            ${{ (sale.current_price *
-                                                sale.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                                        </td>
-                                    </tr>
-                                    <!-- Fila de promociones (ocupa todas las columnas) -->
-                                    <tr v-if="sale.promotions_applied || (sale.discounted_price != null && !sale.promotions_applied)"
-                                        class="*:px-2 *:py-[6px] border-grayD9 italic">
-                                        <td colspan="4" class="!p-0">
-                                            <div v-if="sale.promotions_applied" class="px-2 py-1 bg-gray-50">
-                                                <div v-for="promo in sale.promotions_applied"
-                                                    class="flex items-center justify-end gap-4 w-full">
-                                                    <span class="flex items-center gap-2 text-[#AE080B] max-w-[70%]">
-                                                        <svg width="10" height="16" viewBox="0 0 10 16" fill="none"
-                                                            class="shrink-0" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M4.28948 0C6.61872 2.72141 7.63037 4.40864 8.101 8.09863C8.68078 7.68803 8.88761 7.19526 8.93401 5.7168C11.7333 11.4332 8.45922 15.0058 5.54143 15.1846C5.18415 15.2064 4.52916 15.2602 4.11175 15.125C-0.11532 13.7553 -1.60454 10.0634 2.14593 5.24023C4.57877 2.25049 4.74345 1.28434 4.28948 0ZM4.82464 7.44531C2.74274 10.1809 2.08633 12.5065 5.00335 14.0547C6.92271 13.584 7.62449 12.4474 7.80315 10.4824C7.42276 11.0129 7.17113 11.2542 6.49261 11.375C6.6711 9.76745 6.13689 8.64469 4.82464 7.44531Z"
-                                                                fill="currentColor" />
-                                                        </svg>
-                                                        <span class="truncate" :title="promo.description">{{
-                                                            promo.description }}</span>
-                                                    </span>
-                                                    <span class="shrink-0">-${{ promo.discount }}</span>
-                                                </div>
-                                            </div>
-                                            <div v-else-if="sale.discounted_price != null && !sale.promotions_applied"
-                                                class="px-2 py-1 bg-gray-50 flex items-center justify-end gap-4">
-                                                <span class="flex items-center gap-2 text-[#AE080B]">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="size-4">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                                                    </svg>
-                                                    <span>Regalo por promoción</span>
-                                                </span>
-                                                <span class="shrink-0">
-                                                    -${{
-                                                        calculateTotalDiscount(sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                            ",") }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </template>
+                                <!-- Fila principal del producto -->
+                                <tr class="*:px-2 *:py-[6px] *:align-top border-grayD9 text-[#373737]">
+                                    <td><p>{{ groupedSales.service_description }}</p></td>
+                                    <td>${{ groupedSales.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                    <td>1</td>
+                                    <td class="text-end pb-1">${{ groupedSales.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Refacciones -->
+                        <table class="w-full">
+                            <thead>
+                                <tr class="*:px-2 text-[#999999]">
+                                    <th class="w-[50%] text-start">Refacción</th>
+                                    <th class="w-[10%] text-start">Precio</th>
+                                    <th class="w-[10%] text-start">Cantidad</th>
+                                    <th class="w-[30%] text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y-[1px]">
+                                <tr v-for="(part, index) in groupedSales.spare_parts" :key="index" class="*:px-2 *:py-[6px] *:align-top border-grayD9">
+                                    <td><p>{{ part.name }}</p></td>
+                                    <td>${{ parseFloat(part.unitPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                    <td>{{ part.quantity }}</td>
+                                    <td class="text-end pb-1">${{ (parseFloat(part.unitPrice) * parseFloat(part.quantity))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </template>
             </Accordion>
         </main>
-        <footer class="text-end md:flex text-xs lg:text-sm"
-            :class="groupedSales.credit_data ? 'justify-between' : 'justify-end'">
-            <div v-if="groupedSales.credit_data"
-                class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
-                <span class="text-gray99">Fecha de vencimiento:</span>
-                <p :class="expiredDateClass" class="flex items-center space-x-2">
-                    <span v-if="wasRefunded" class="text-gray99">
-                        <i class="fa-solid fa-minus"></i>
-                    </span>
-                    <span v-else>
-                        {{ groupedSales.credit_data.expired_date ? formatDate(groupedSales.credit_data.expired_date)
-                            : 'No especificada' }}
-                    </span>
-                    <svg v-if="isExpired" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor" class="size-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                    </svg>
-                </p>
-            </div>
-            <div v-if="groupedSales.products[0].payment_method === 'Tarjeta'"
-                class="py-1 flex items-center justify-start space-x-2 self-end">
-                <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
-                <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
-            </div>
-            <div v-else class="py-1 flex items-center justify-start space-x-2 self-end">
-                <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
-                <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
-            </div>
+        <footer class="text-end md:flex text-xs lg:text-sm">
+            <section class="w-[80%]">
+                <div v-if="groupedSales.payment_method === 'Tarjeta'"
+                    class="py-1 flex items-center justify-start space-x-2 self-end">
+                    <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                    <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
+                </div>
+                <div v-else class="py-1 flex items-center justify-start space-x-2 self-end">
+                    <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                    <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
+                </div>
+            </section>
             <div class="font-black flex flex-col space-y-1 px-1 md:px-7 py-1">
-                <div class="flex items-center justify-end"
-                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
+                <div class="flex items-center justify-end text-gray37">
                     <span class="text-start w-40">
                         Subtotal:
                     </span>
                     <span class="w-12">$</span>
                     <span class="w-12">
-                        {{ subtotal?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ groupedSales.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </span>
                 </div>
-                <div v-if="groupedSales.quote.iva_included !== null" class="flex items-center justify-end"
-                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <span class="text-start w-40">
-                        IVA:
-                    </span>
-                    <span class="w-12">$</span>
-                    <span class="w-12">
-                        {{
-                            (subtotal * 0.16)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}
-                    </span>
-                </div>
-                <div v-if="groupedSales.quote.delivery_cost" class="flex items-center justify-end"
-                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <span class="text-start w-40">
-                        {{ groupedSales.quote.delivery_type }}:
-                    </span>
-                    <span class="w-12">$</span>
-                    <span class="w-12">
-                        {{ groupedSales.quote.delivery_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    </span>
-                </div>
-                <div v-if="groupedSales.quote.is_percentage_discount != null" class="flex items-center justify-end"
-                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <span class="text-start w-40">Descuento:</span>
+                <div class="flex items-center justify-end text-gray37">
+                    <span class="text-start w-40">Anticipo recibido:</span>
                     <span class="w-12">-$</span>
                     <span class="w-12">
-                        {{ discounted.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        {{ groupedSales.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
                     </span>
                 </div>
-                <div class="flex items-center justify-end"
-                    :class="wasRefunded && !groupedSales.credit_data ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <el-tooltip v-if="wasRefunded && !groupedSales.credit_data" placement="top">
+                <div class="flex items-center justify-end text-gray37">
+                    <span class="text-start w-40">Total restante:</span>
+                    <span class="w-12">$</span>
+                    <span class="w-12">
+                        {{ (groupedSales.total_cost - groupedSales.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </span>
+                </div>
+                <div v-if="wasCancelled" class="flex items-center text-red-600 text-xs md:text-base italic my-1">
+                    <svg class="size-[14px] mr-2" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.97288 4.41695L6.69492 6.69492M4.41695 8.97288L6.69492 6.69492M6.69492 6.69492L4.41695 4.41695M6.69492 6.69492L8.97288 8.97288M12.3898 6.69492C12.3898 9.84013 9.84013 12.3898 6.69492 12.3898C3.5497 12.3898 1 9.84013 1 6.69492C1 3.5497 3.5497 1 6.69492 1C9.84013 1 12.3898 3.5497 12.3898 6.69492Z" stroke="currentColor" stroke-width="1.13898" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Orden cancelada
+                </div>
+                <section v-if="wasCancelled">
+                    <div class="flex items-center justify-end text-gray37">
+                        <span class="text-start w-40">Monto de revisión:</span>
+                        <span class="w-12">$</span>
+                        <span class="w-12">
+                            {{ parseFloat(groupedSales.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-end text-gray37">
+                        <span class="text-start w-40">Anticipo recibido:</span>
+                        <span class="w-12">$</span>
+                        <span class="w-12">
+                            {{ groupedSales.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
+                        </span>
+                    </div>
+                    <div v-if="groupedSales.aditionals?.review_amount < groupedSales.advance_payment" class="flex items-center justify-end relative"
+                        :class="wasCancelled ? 'text-[#8C3DE4]' : 'text-gray37'">
+                        <span class="text-start w-40">Total devuelto:</span>
+                        <span class="w-12">$</span>
+                        <span class="w-12">
+                            {{ (groupedSales.advance_payment - parseFloat(groupedSales.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        </span>
+
+                        <!-- <el-tooltip class="absolute left-0" placement="top"> -->
+                            <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end absolute -left-28">
+                                Reembolsado
+                            </p>
+                        <!-- </el-tooltip> -->
+                    </div>
+                    <div v-else class="flex items-center justify-end text-gray37">
+                        <span class="text-start w-40">Total pagado:</span>
+                        <span class="w-12">$</span>
+                        <span class="w-12">
+                            {{ parseFloat(groupedSales.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        </span>
+                    </div>
+                </section>
+                <!-- <div class="flex items-center justify-end"
+                    :class="wasCancelled ? 'text-[#8C3DE4]' : 'text-gray37'">
+                    <el-tooltip v-if="wasCancelled" placement="top">
                         <template #content>
                             <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
                             </p>
@@ -256,39 +203,7 @@
                             Reembolsado
                         </p>
                     </el-tooltip>
-                    <span class="text-start w-40">Total de la venta:</span>
-                    <span class="w-12">$</span>
-                    <span class="w-12">
-                        {{ grandTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    </span>
-                </div>
-                <div v-if="groupedSales.credit_data" class="flex items-center justify-end"
-                    :class="wasRefunded ? 'text-[#8C3DE4]' : 'text-gray37'">
-                    <el-tooltip v-if="wasRefunded" placement="top">
-                        <template #content>
-                            <p>El reembolso se realizó el {{ formatDateHour(groupedSales.products[0].refunded_at) }}
-                            </p>
-                        </template>
-                        <p class="bg-[#EBEBEB] rounded-[5px] px-2 py-1 mr-2 self-end">
-                            Reembolsado</p>
-                    </el-tooltip>
-                    <span class="text-start w-40">Total abonado:</span>
-                    <span class="w-12">$</span>
-                    <span class="w-12">
-                        {{ calcTotalInstallments.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    </span>
-                </div>
-                <div v-if="groupedSales.credit_data && !wasRefunded" class="flex rounded-[5px] py-1"
-                    :class="statusStyles.bg">
-                    <span class="w-24 text-start" :class="statusStyles.text">
-                        {{ groupedSales.credit_data.status }}</span>
-                    <span class="text-start w-40">Deuda restante:</span>
-                    <span class="w-12">$</span>
-                    <span class="w-12">
-                        {{ (grandTotal - calcTotalInstallments).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                            ",") }}
-                    </span>
-                </div>
+                </div> -->
             </div>
         </footer>
     </article>
@@ -320,77 +235,11 @@ export default {
     computed: {
         hasOptions() {
             return (
-                (this.canEdit && !this.isOutOfCashCut && !this.wasRefunded) ||
-                (this.canRefund && !this.isOutOfCashCut && !this.wasRefunded) ||
-                (this.canInstallment && this.groupedSales.credit_data)
+                !this.isOutOfCashCut && !this.wasCancelled
             );
         },
-        wasRefunded() {
-            return this.groupedSales.products.some(item => item?.refunded_at);
-        },
-        isExpired() {
-            if (!this.groupedSales.credit_data.expired_date) {
-                return false;
-            }
-            const expiredDate = parseISO(this.groupedSales.credit_data.expired_date);
-            const today = new Date();
-            return isBefore(expiredDate, today) && this.groupedSales.credit_data.status !== 'Pagado' && !this.wasRefunded;
-        },
-        isPaid() {
-            // Verifica si existe la propiedad 'credit_data' y su propiedad 'status'
-            if (!this.groupedSales.credit_data || !this.groupedSales.credit_data.status) {
-                return false;
-            }
-            // Retorna true si el status es 'Pagado'
-            return this.groupedSales.credit_data.status === 'Pagado';
-        },
-        expiredDateClass() {
-            if (!this.groupedSales.credit_data.expired_date) {
-                return 'text-gray37';
-            }
-
-            return this.isExpired ? 'text-[#DD0808]' : 'text-gray37';
-        },
-        statusStyles() {
-            const status = this.groupedSales.credit_data?.status;
-            if (status === 'Pendiente') {
-                return { bg: 'bg-[#FAFFDD]', text: 'text-[#EFCE21]' };
-            } else if (status === 'Parcial') {
-                return { bg: 'bg-[#F1F2FE]', text: 'text-[#2D29FF]' };
-            } else if (status === 'Pagado') {
-                return { bg: 'bg-[#E6FDDB]', text: 'text-[#08B91A]' };
-            }
-            return { bg: 'bg-[#C4FBAA]', text: 'text-[#0AA91A]' };
-        },
-        calcTotalInstallments() {
-            return this.groupedSales.credit_data.installments.reduce((accumulator, currentValue) => {
-                return accumulator + currentValue.amount;
-            }, 0);
-        },
-        // para ventas con cotizacion
-        subtotal() {
-            if (this.groupedSales.quote.iva_included) {
-                return (this.groupedSales.quote.total / 1.16);
-            }
-
-            return this.groupedSales.quote.total;
-        },
-        grandTotal() {
-            if (this.groupedSales.quote.iva_included === false) {
-                return (this.groupedSales.quote.total * 1.16) + this.groupedSales.quote.delivery_cost - this.discounted;
-            }
-
-            return this.groupedSales.quote.total + this.groupedSales.quote.delivery_cost - this.discounted;
-        },
-        discounted() {
-            let discounted = 0;
-            if (this.groupedSales.quote.is_percentage_discount != null) {
-                discounted = this.groupedSales.quote.is_percentage_discount
-                    ? this.percentageDiscount()
-                    : this.groupedSales.quote.discount;
-            }
-
-            return discounted;
+        wasCancelled() {
+            return this.groupedSales.status === 'Cancelada';
         },
     },
     methods: {

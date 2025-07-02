@@ -13,8 +13,8 @@ class Expense extends Model
 
     protected $fillable = [
         'concept',
-        'quantity',
-        'current_price',
+        'quantity', // cantidad del gasto
+        'current_price', // costo del gasto
         'store_id',
         'amount_from_cash_register', //para saber si se retiro dinero de caja y cuanto
         'created_at', // para poderponer cambiar la fecha desde el registro

@@ -52,6 +52,11 @@
                                                 Adelanto regresado: <span class="text-white">${{ report.aditionals?.advance_amount ?? '0.00' }}</span>
                                             </p>
                                         </div>
+                                        <div v-if="report.status === 'Entregado/Pagado'">
+                                            <p class="text-green-300">
+                                                Pagado el: <span class="text-white">{{ formatDate(report.paid_at) ?? '-' }}</span>
+                                            </p>
+                                        </div>
                                     </div>
                                 </template>
 
@@ -270,6 +275,7 @@ export default {
             // window.open(url, '_blank');
         },
         formatDate(dateString) {
+            if (!dateString) return '';
             return format(parseISO(dateString), 'dd MMM yyyy', { locale: es });
         },
         handleCommand(command) {
