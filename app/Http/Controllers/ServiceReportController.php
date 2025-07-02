@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\ServiceReport;
@@ -126,6 +127,7 @@ class ServiceReportController extends Controller
             : "PageNotFound"; // 404 not found vista
 
         return inertia($view, compact('report'));
+        
     }
 
     public function edit($encoded_report_id)
@@ -240,10 +242,21 @@ class ServiceReportController extends Controller
             $data['payment_method'] = $request->paymentMethod;
             // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden
             $data['paid_at'] = now(); // Fecha y hora del pago
+
+            // crear gasto de comision del técnico si la comision es mayor a 0
+            if ($service_report->comision_percentage > 0) {
+                Expense::create([
+                    'concept' => 'Comision de servicio técnico a ' . $service_report->technician_name,
+                    'quantity' => 1,
+                    'current_price' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
+                    'store_id' => $service_report->store_id,
+                ]);
+            }
         }
 
         $service_report->update($data);
 
+        return response()->json(['report' => $service_report]);
     }
 
     public function massiveDelete(Request $request)
@@ -270,7 +283,7 @@ class ServiceReportController extends Controller
     // abre la plantilla de comprobante de servicio para imprimir de reparacion de celulares (apontephone)
     public function printTemplate(ServiceReport $report)
     {
-        return inertia('ServiceReport/PrintTemplate1', compact('report'));
+        return inertia('ServiceReport/PrintTemplate24', compact('report'));
     }
 
 }

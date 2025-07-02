@@ -207,7 +207,7 @@ export default {
                     active: route().current('service-reports.*'),
                     options: [],
                     dropdown: false,
-                    show: this.$page.props.auth.user.store.id == 6 || this.$page.props.auth.user.store.id == 1 //solo para DM compresores por el momento
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio') //solo para DM compresores por el momento
                 },
                 {
                     label: 'Clientes',
