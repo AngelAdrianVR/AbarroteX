@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\ServiceReport;
@@ -38,6 +39,7 @@ class ServiceReportController extends Controller
             : "PageNotFound"; // 404 not found vista
 
         return inertia($view, compact('products', 'folio'));
+        // return inertia('ServiceReport/Create24', compact('products', 'folio')); Para hacer pruebas con la vista deseada
     }
 
     //para guardar la orden de dm compresores.
@@ -88,7 +90,7 @@ class ServiceReportController extends Controller
         ]);
 
         // Subir y asociar las imagenes
-        if ( $request->media ) {
+        if ($request->media) {
             $service_order->addAllMediaFromRequest()->each(function ($fileAdder) {
                 // Guarda el archivo en la colección y obtiene el modelo Media
                 $media = $fileAdder->toMediaCollection();
@@ -126,6 +128,7 @@ class ServiceReportController extends Controller
             : "PageNotFound"; // 404 not found vista
 
         return inertia($view, compact('report'));
+        // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
@@ -146,6 +149,7 @@ class ServiceReportController extends Controller
             : "PageNotFound"; // 404 not found vista
 
         return inertia($view, compact('report', 'products'));
+        // return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
     }
 
     public function update(Request $request, ServiceReport $serviceReport)
@@ -182,8 +186,8 @@ class ServiceReportController extends Controller
         $service_order->update($request->all());
 
         // Subir y asociar las imagenes
-        if ( $request->media ) {
-            $service_order->addAllMediaFromRequest()->each(fn ($file) => $file->toMediaCollection());
+        if ($request->media) {
+            $service_order->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection());
         }
 
         return to_route('service-reports.index');
@@ -240,10 +244,21 @@ class ServiceReportController extends Controller
             $data['payment_method'] = $request->paymentMethod;
             // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden
             $data['paid_at'] = now(); // Fecha y hora del pago
+
+            // crear gasto de comision del técnico si la comision es mayor a 0
+            if ($service_report->comision_percentage > 0) {
+                Expense::create([
+                    'concept' => 'Comision de servicio técnico a ' . $service_report->technician_name,
+                    'quantity' => 1,
+                    'current_price' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
+                    'store_id' => $service_report->store_id,
+                ]);
+            }
         }
 
         $service_report->update($data);
 
+        return response()->json(['report' => $service_report]);
     }
 
     public function massiveDelete(Request $request)
@@ -270,7 +285,15 @@ class ServiceReportController extends Controller
     // abre la plantilla de comprobante de servicio para imprimir de reparacion de celulares (apontephone)
     public function printTemplate(ServiceReport $report)
     {
-        return inertia('ServiceReport/PrintTemplate1', compact('report'));
+        return inertia('ServiceReport/PrintTemplate24', compact('report'));
     }
 
+    // carga los productos (refacciones) a la vista create o edit ara seleccionarlos (apontephone)
+    public function fetchSpareParts()
+    {
+        $store_id = auth()->user()->store_id;
+        $spare_parts = Product::where('store_id', $store_id)->get(['id', 'name', 'public_price', 'current_stock', 'min_stock', 'store_id']);
+
+        return response()->json(['spare_parts' => $spare_parts]);
+    }
 }

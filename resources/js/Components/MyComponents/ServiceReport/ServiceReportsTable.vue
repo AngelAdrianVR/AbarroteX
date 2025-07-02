@@ -1,7 +1,7 @@
 <template>
     <div class="overflow-auto">
-        <div class="flex justify-end">
-            <el-button :disabled="!selectedReports.length" type="danger" @click="deleteSelected">Eliminar ({{ selectedReports.length }})</el-button>
+        <div class="flex justify-end h-5">
+            <el-button v-show="selectedReports.length" :disabled="!selectedReports.length" type="danger" @click="deleteSelected">Eliminar ({{ selectedReports.length }})</el-button>
         </div>
         <table v-if="reports?.length" class="w-full table-fixed">
             <thead>
@@ -50,6 +50,11 @@
                                             </p>
                                             <p class="text-blue-300">
                                                 Adelanto regresado: <span class="text-white">${{ report.aditionals?.advance_amount ?? '0.00' }}</span>
+                                            </p>
+                                        </div>
+                                        <div v-if="report.status === 'Entregado/Pagado'">
+                                            <p class="text-green-300">
+                                                Pagado el: <span class="text-white">{{ formatDate(report.paid_at) ?? '-' }}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -193,7 +198,7 @@ export default {
         CancelButton,
     },
     props: {
-        reports: Array
+        reports: Object,
     },
     computed: {
         isIndeterminate() {
@@ -270,6 +275,7 @@ export default {
             // window.open(url, '_blank');
         },
         formatDate(dateString) {
+            if (!dateString) return '';
             return format(parseISO(dateString), 'dd MMM yyyy', { locale: es });
         },
         handleCommand(command) {

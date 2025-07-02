@@ -69,6 +69,9 @@
                         <th v-if="$page.props.auth.user.store.activated_modules.includes('Cotizaciones')">
                             Cotizaciones
                         </th>
+                        <th v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')">
+                            Servicios
+                        </th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -91,6 +94,9 @@
                             {{ sale.quote_folios != 1 ? sale.quote_folios + ' ventas' : sale.quote_folios + ' venta'
                             }}
                             ({{ sale.total_quote_quantity }} productos en total)
+                        </td>
+                        <td v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')">
+                            {{ sale.service_folios != 1 ? sale.service_folios + ' ventas' : sale.service_folios + ' venta' }}
                         </td>
                         <td>
                             ${{ sale.total_day_sale?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}

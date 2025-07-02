@@ -179,7 +179,7 @@ Route::get('sales/{date}/{cashRegisterId}', [SaleController::class, 'show'])->na
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
 Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
-Route::get('sales-print-ticket/{folio}', [SaleController::class, 'printTicket'])->middleware('auth')->name('sales.print-ticket');
+Route::get('sales-get-by-folio/{folio}', [SaleController::class, 'getByFolio'])->middleware('auth')->name('sales.get-by-folio');
 Route::get('sales-fetch-cash-register-sales/{cash_register_id}', [SaleController::class, 'fetchCashRegisterSales'])->middleware('auth')->name('sales.fetch-cash-register-sales');
 Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage'])->middleware('auth')->name('sales.sync-localstorage');
 Route::post('sales/refund/{saleFolio}', [SaleController::class, 'refund'])->middleware('auth')->name('sales.refund');
@@ -233,9 +233,10 @@ Route::post('/stores/update-settings', [StoreController::class, 'updateSettings'
 //-----------------------------------------------------------------------------------------------------
 Route::resource('users', UserController::class)->middleware('auth');
 Route::get('users-get-notifications', [UserController::class, 'getNotifications'])->middleware('auth')->name('users.get-notifications');
+Route::get('users-get-online-sales-notifications', [UserController::class, 'getOnlineSalesNotifications'])->middleware('auth')->name('users.get-online-sales-notifications');
+Route::get('users-get-parzibyte-serial', [UserController::class, 'getParzibyteSerial'])->middleware('auth')->name('users.get-parzibyte-serial');
 Route::post('users-read-notifications', [UserController::class, 'readNotifications'])->middleware('auth')->name('users.read-user-notifications');
 Route::post('users-delete-notifications', [UserController::class, 'deleteNotifications'])->middleware('auth')->name('users.delete-user-notifications');
-Route::get('users-get-online-sales-notifications', [UserController::class, 'getOnlineSalesNotifications'])->middleware('auth')->name('users.get-online-sales-notifications');
 Route::post('users-read-online-sales-notifications', [UserController::class, 'readOnlineSalesNotifications'])->middleware('auth')->name('users.read-user-online-sales-notifications');
 Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword'])->middleware('auth')->name('users.reset-password');
 Route::put('tutorials-completed', [UserController::class, 'tutorialsCompleted'])->name('users.tutorials-completed')->middleware('auth');
@@ -390,6 +391,7 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('service-reports', ServiceReportController::class);
 Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
+Route::get('services-fetch-spare-parts', [ServiceReportController::class, 'fetchSpareParts'])->name('service-reports.fetch-spare-parts')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
 Route::post('services-reports-store-phones-stores', [ServiceReportController::class, 'storePhoneStores'])->name('service-reports.store-phones')->middleware('auth');
 Route::post('services-reports-update-phones-stores/{service_order}', [ServiceReportController::class, 'updatePhoneStores'])->name('service-reports.update-phones')->middleware('auth');

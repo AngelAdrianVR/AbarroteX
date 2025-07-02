@@ -1,15 +1,15 @@
 <template>
-    <AppLayout title="Nueva orden de servicio">
+    <AppLayout title="Editar orden de servicio">
         <div class="px-3 md:px-10 py-5">
             <Back />
 
-            <form @submit.prevent="store"
+            <form @submit.prevent="update"
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-2/3 xl:w-[58%] mx-auto mt-1 lg:grid lg:grid-cols-2 gap-3">
                 <div class="flex items-center justify-between col-span-full mb-3">
-                    <h1 class="font-bold ml-2 col-span-full">Crear orden de servicio</h1>
+                    <h1 class="font-bold ml-2 col-span-full">Editar orden de servicio</h1>
                     <div class="text-sm text-right">
                         <p>Orden de servicio</p>
-                        <p>No. {{ String(folio).padStart(4, '0') }}</p>
+                        <p>No. {{ String(report.folio).padStart(4, '0') }}</p>
                     </div>
                 </div>
                 <div class="col-span-full">
@@ -80,7 +80,7 @@
                 
                 <h1 class="font-semibold text-gray37 ml-2 col-span-full mt-3">Refacciones</h1>
                 
-                <SparePartInput @syncItems="syncItems" class="col-span-full" />
+                <SparePartInput @syncItems="syncItems" :initialData="report.spare_parts" class="col-span-full" />
                 
                 <section class="grid grid-cols-3 gap-3 col-span-full mt-5">
                     <div>
@@ -113,7 +113,7 @@
                         </el-input>
                         <InputError :message="form.errors.advance_payment" />
                     </div>
-                    <div>
+                    <!-- <div>
                         <InputLabel value="Método de pago" />
                         <el-select v-model="form.payment_method" clearable placeholder="Selecciona el método de pago"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
@@ -121,7 +121,7 @@
                                 :label="payment_method"
                                 :value="payment_method" />
                         </el-select>
-                    </div>
+                    </div> -->
                 </section>
 
                 <div>
@@ -154,7 +154,12 @@
                     </el-input>
                     <InputError :message="form.errors.comision_percentage" />
                 </div>
-
+                <div v-if="report.media.length" class="mt-4 col-span-full">
+                    <InputLabel value="Archivos adjuntos" />
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        <FileView v-for="file in report.media" :key="file" :file="file" :deletable="true" @delete-file="deleteFile($event)" />
+                    </div>
+                </div>
                 <section class="col-span-full grid grid-cols-3 gap-4">
                     <div class="col-span-2">
                         <InputLabel value="Evidencias (max. 5 imágenes)" />
@@ -168,7 +173,7 @@
                             v-model:file-list="fileList"
                             :before-upload="beforeUpload"
                             :multiple="true"
-                            :limit="5"
+                            :limit="5 - report.media?.length"
                             list-type="picture-card"
                             :auto-upload="false"
                             >
@@ -180,16 +185,17 @@
                     <div class="mt-3 ml-4">
                         <p>Accesorios</p>
                         <el-checkbox-group v-model="form.aditionals.accessories">
-                            <el-checkbox label="SIM"></el-checkbox>
-                            <el-checkbox label="Cargador"></el-checkbox>
-                            <el-checkbox label="Memoria"></el-checkbox>
-                            <el-checkbox label="Batería"></el-checkbox>
+                            <el-checkbox value="SIM"></el-checkbox>
+                            <el-checkbox value="Cargador"></el-checkbox>
+                            <el-checkbox value="Memoria"></el-checkbox>
+                            <el-checkbox value="Batería"></el-checkbox>
                         </el-checkbox-group>
                     </div>
                 </section>
 
                 <section class="grid grid-cols-3 col-span-full mt-5"> 
-                    <PatronMobil @syncPattern="syncPattern" @syncPassword="syncPassword" class="col-span-2" />
+                    <PatronMobil @syncPattern="syncPattern" @syncPassword="syncPassword" :initialData="report.aditionals" class="col-span-2" />
+
                     <article class="mt-24 text-sm space-y-1">
                         <p class="flex">
                             <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span class="w-24 text-right">{{ form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
@@ -213,7 +219,7 @@
                 <div class="col-span-full text-right mt-5">
                     <PrimaryButton :disabled="form.processing">
                         <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                        Crear reporte
+                        Guardar cambios
                     </PrimaryButton>
                 </div>
             </form>
@@ -223,6 +229,7 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import FileView from "@/Components/MyComponents/FileView.vue";
 import SparePartInput from "@/Components/MyComponents/SparePartInput.vue";
 import PatronMobil from "@/Components/MyComponents/PatronMobil.vue";
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -235,35 +242,22 @@ import { format } from "date-fns";
 export default {
     data() {
         const form = useForm({
-            service_date: format(new Date(), "yyyy-MM-dd"), // Establece la fecha de hoy por defecto,
-            client_name: null,
-            client_phone_number: null,
-            product_details: {
-                brand: null,
-                model: null,
-            },
-            spare_parts: [
-                {
-                    name: '',
-                    unitPrice: null,
-                    quantity: null,
-                },
-            ],
-            observations: null,
-            technician_name: null,
-            description: null,
-            service_cost: null, // costo unicamente de mano de obra
-            total_cost: null, // costo total
-            service_description: null, //descripcion de los servicios que se harán
-            payment_method: null,
-            advance_payment: null, // anticipo
-            comision_percentage: null, // comisión de la persona que realizó el servicio
+            service_date: format(this.report.service_date, "yyyy-MM-dd"),
+            client_name: this.report.client_name,
+            client_phone_number: this.report.client_phone_number,
+            product_details: this.report.product_details,
+            spare_parts: [... this.report.spare_parts],
+            observations: this.report.observations,
+            technician_name: this.report.technician_name,
+            description: this.report.description,
+            service_cost: this.report.service_cost, // costo unicamente de mano de obra
+            total_cost: this.report.total_cost, // costo total
+            service_description: this.report.service_description, //descripcion de los servicios que se harán
+            // payment_method: this.report.payment_method,
+            advance_payment: this.report.advance_payment, // anticipo
+            comision_percentage: this.report.comision_percentage, // comisión de la persona que realizó el servicio
             media: [], //imagenes de evidencia
-            aditionals:{
-                unlockPattern: null, //patrton de desbloqueo
-                unlockPassword: null, //contraseña o pin de desbloqueo
-                accessories: [], // Arreglo con los accesorios seleccionados
-            }
+            aditionals: this.report.aditionals
         });
 
         return {
@@ -285,10 +279,11 @@ export default {
         InputLabel,
         InputError,
         AppLayout,
+        FileView,
         Back
     },
     props: {
-        folio: Number
+        report: Array
     },
     watch: {
         'form.service_cost'(val) {
@@ -324,15 +319,15 @@ export default {
 
     },
     methods: {
-        store() {
-            this.form.post(route("service-reports.store-phones"), {
+        update() {
+            this.form.post(route("service-reports.update-phones", this.report.id), {
+                method: '_put',
                 onSuccess: () => {
                     this.$notify({
-                        title: "Correcto",
+                        title: "Orden actualizada",
                         message: "",
                         type: "success",
                     });
-
                 },
             });
         },
@@ -396,6 +391,9 @@ export default {
             this.dialogImageUrl = file.url;
             this.dialogVisible = true;
         },
+        deleteFile(fileId) {
+            this.report.media = this.report.media.filter(m => m.id !== fileId);
+        }
         
     },
     

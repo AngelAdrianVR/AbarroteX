@@ -25,7 +25,10 @@
         <p v-if="localReports.length" class="text-gray66 text-[11px]">
           {{ localReports.length }} de {{ total_reports }} elementos
         </p>
-        <ServiceReportsTable :reports="localReports" />
+        <!-- Index para dm compresores -->
+        <ServiceReportsTable6 v-if="$page.props.auth.user.store.id == 6" :reports="localReports" />
+        <!-- Index para dm apontephone -->
+        <ServiceReportsTable v-else :reports="localReports" />
         <p v-if="localReports.length" class="text-gray66 text-[11px] mt-3">
           {{ localReports.length }} de {{ total_reports }} elementos
         </p>
@@ -50,6 +53,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import ThirthButton from "@/Components/MyComponents/ThirthButton.vue";
 import ServiceReportsTable from "@/Components/MyComponents/ServiceReport/ServiceReportsTable.vue";
+import ServiceReportsTable6 from "@/Components/MyComponents/ServiceReport/ServiceReportsTable6.vue";
 import axios from "axios";
 
 export default {
@@ -66,9 +70,10 @@ export default {
   },
   components: {
     AppLayout,
-    PrimaryButton,
-    ServiceReportsTable,
     ThirthButton,
+    PrimaryButton,
+    ServiceReportsTable, // para apontephone
+    ServiceReportsTable6, //para dm compresores
   },
   props: {
     service_reports: Array,
