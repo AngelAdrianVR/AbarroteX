@@ -185,10 +185,10 @@
                     <div class="mt-3 ml-4">
                         <p>Accesorios</p>
                         <el-checkbox-group v-model="form.aditionals.accessories">
-                            <el-checkbox label="SIM"></el-checkbox>
-                            <el-checkbox label="Cargador"></el-checkbox>
-                            <el-checkbox label="Memoria"></el-checkbox>
-                            <el-checkbox label="Batería"></el-checkbox>
+                            <el-checkbox value="SIM"></el-checkbox>
+                            <el-checkbox value="Cargador"></el-checkbox>
+                            <el-checkbox value="Memoria"></el-checkbox>
+                            <el-checkbox value="Batería"></el-checkbox>
                         </el-checkbox-group>
                     </div>
                 </section>

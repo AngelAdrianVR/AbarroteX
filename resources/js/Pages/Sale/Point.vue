@@ -692,24 +692,7 @@
     </main>
 
     <!-- modal de inmpresión -->
-    <DialogModal :show="showPrintingModal" @close="showPrintingModal = false" max-width="md">
-      <template #title> Impresión de ticket </template>
-      <template #content>
-        <div class="flex items-start space-x-4">
-          <figure class="h-24">
-            <img src="@/../../public/images/ticket.png" :draggable="false" class="select-none object-contain h-full"
-              alt="Imagen de ticket de venta">
-          </figure>
-          <p class="w-2/3 text-base text-gray37">¿Desea imprimir el ticket de la venta?</p>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex items-center space-x-2">
-          <CancelButton @click="showPrintingModal = false">No</CancelButton>
-          <PrimaryButton @click="openPrintingTemplate" :disabled="clientForm.processing">Si, imprimir</PrimaryButton>
-        </div>
-      </template>
-    </DialogModal>
+    <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
@@ -1213,6 +1196,7 @@ import {
   syncIDBProducts,
   addOrUpdateItem
 } from '@/dbService.js';
+import PrintingModal from '@/Components/MyComponents/Sale/PrintingModal.vue';
 
 export default {
   data() {
@@ -1331,9 +1315,6 @@ export default {
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
 
-      //impresión
-      folioToPrint: null,
-
       //buscador
       searchQuery: null,
       searchFocus: false,
@@ -1396,6 +1377,7 @@ export default {
     SaleTable,
     Modal,
     InputFilePreview,
+    PrintingModal,
   },
   props: {
     products_quantity: Number,
@@ -1537,17 +1519,15 @@ export default {
           //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
           if (this.automaticPrinting) {
             this.showPrintingModal = true;
-            this.folioToPrint = response.data.folio_stored;
+            this.$refs.printingModal.saleFolio = response.data.folio_stored;
+            if (!this.$page.props.auth.user.printer_config?.name) {
+              this.$refs.printingModal.getAvailablePrinters();
+            }
           }
         }
       } catch (error) {
         console.error(error);
       }
-    },
-    openPrintingTemplate() {
-      window.open(route('sales.print-ticket', this.folioToPrint), '_blank');
-      this.showPrintingModal = false;
-      this.folioToPrint = null;
     },
     processOfflineSale() {
       this.saveToLocalStorage();

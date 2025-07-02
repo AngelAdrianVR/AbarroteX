@@ -49,7 +49,7 @@
                                 </svg>
                                 <span class="text-xs">Reembolso</span>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="!wasRefunded" :command="'print|' + groupedSales.folio">
+                            <el-dropdown-item v-if="!wasRefunded" :command="'printing|' + groupedSales.folio">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -434,11 +434,6 @@ export default {
         handleCommand(command) {
             const modalName = command.split('|')[0];
             const saleFolio = command.split('|')[1];
-
-            if (modalName === 'print') {
-                this.print(saleFolio);
-            }
-
             this.$emit('show-modal', modalName, saleFolio);
         },
     },
