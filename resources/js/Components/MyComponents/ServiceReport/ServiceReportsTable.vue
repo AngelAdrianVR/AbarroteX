@@ -198,7 +198,7 @@ export default {
         CancelButton,
     },
     props: {
-        reports: Array
+        reports: Object,
     },
     computed: {
         isIndeterminate() {
