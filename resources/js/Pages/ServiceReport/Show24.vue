@@ -302,6 +302,7 @@
                         <el-input
                             class="!w-1/2"
                             v-model="reviewAmount"
+                            @input="onReviewInput"
                             placeholder="Ej. $300"
                             :disabled="!chargeReview"
                         >
@@ -312,19 +313,22 @@
                     </div>
 
                     <!-- Devolver anticipo -->
-                    <el-checkbox v-if="report.advance_payment" v-model="returnAdvance">Devolver anticipo al cliente</el-checkbox>
-                    <div v-if="returnAdvance">
-                        <InputLabel value="Monto a devolver" class="ml-3 mb-1" />
-                        <el-input
-                            class="!w-1/2"
-                            v-model="advanceAmount"
-                            placeholder="Ej. $100"
-                            :disabled="!returnAdvance"
-                        >
-                            <template #prepend>
-                                <span class="text-gray-500">$</span>
-                            </template>
-                        </el-input>
+                    <div v-if="report.advance_payment && reviewAmount < report.advance_payment">
+                        <el-checkbox v-model="returnAdvance">Devolver anticipo al cliente</el-checkbox>
+                        <div v-if="returnAdvance">
+                            <InputLabel value="Monto a devolver" class="ml-3 mb-1" />
+                            <el-input
+                                class="!w-1/2"
+                                v-model="advanceAmount"
+                                placeholder="Ej. $100"
+                                :disabled="!returnAdvance"
+                                @input="onAdvanceInput"
+                                >
+                                <template #prepend>
+                                    <span class="text-gray-500">$</span>
+                                </template>
+                            </el-input>
+                        </div>
                     </div>
 
                     <!-- Resumen -->
@@ -335,8 +339,8 @@
                         <p class="flex">
                             <span class="w-[170px]">Anticipo</span><span class="ml-[2px]">$</span><span class="w-24 text-right">{{ report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
-                        <p v-if="report.aditionals?.review_amount < report.advance_payment" class="flex">
-                            <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span class="w-24 text-right">{{ reviewAmount ? ((report.advance_payment - parseFloat(reviewAmount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) : '0.00' }}</span>
+                        <p v-if="reviewAmount < report.advance_payment" class="flex">
+                            <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span class="w-24 text-right">{{ reviewAmount ? (report.advance_payment - parseFloat(reviewAmount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </p>
                         <p v-else class="flex">
                             <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span class="w-24 text-right">{{ reviewAmount ? (parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) : '0.00' }}</span>
@@ -560,6 +564,10 @@ computed:{
         return this.report.spare_parts.reduce((total, sp) => {
             return total + (Number(sp.quantity) * Number(sp.unitPrice));
         }, 0);
+    },
+    maxAdvanceAmount() {
+      const max = this.report.advance_payment - parseFloat(this.reviewAmount || 0)
+      return max > 0 ? max : 0
     }
 },
 methods:{
@@ -574,6 +582,24 @@ methods:{
 
         // Divide en grupos de 2 dígitos
         return cleaned.match(/.{1,2}/g).join(' ');
+    },
+    onAdvanceInput(value) {
+      // Solo permite números y punto decimal
+      const numeric = value.replace(/[^\d.]/g, '')
+
+      const num = parseFloat(numeric)
+      if (!isNaN(num) && num > this.maxAdvanceAmount) {
+        this.advanceAmount = this.maxAdvanceAmount.toFixed(2)
+      } else {
+        this.advanceAmount = numeric
+      }
+    },
+    onReviewInput() {
+        if ( this.reviewAmount < this.report.advance_payment ) {
+            this.advanceAmount = (this.report.advance_payment - this.reviewAmount).toFixed(2);
+        } else {
+            this.advanceAmount = 0; // Si el monto de revisión es mayor o igual al anticipo, no hay devolución
+        }
     },
     encodeId(id) {
         const encodedId = btoa(id.toString());
@@ -640,7 +666,9 @@ methods:{
                         this.showPaymentModal = false; // ajusta este método a tu implementación
                         this.paymentModalStep = 1; //reinicia el paso del modal de pago
                     }, 1000);
-                    }
+                } else if ( newStatus === 'Cancelada' ) {
+                    this.report.aditionals = this.report.aditionals || {};
+                }
             } else {
                 this.$notify({
                     title: "Error al actualizar status",
