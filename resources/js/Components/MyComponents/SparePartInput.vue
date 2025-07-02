@@ -7,11 +7,48 @@
           :key="index"
           >
             <div class="col-span-3">
-                <InputLabel value="Nombre de la refacción" />
-                <el-input
-                v-model="part.name"
-                placeholder="Nombre de la refacción"
-                />
+                <div class="flex items-center justify-between">
+                  <InputLabel value="Nombre de la refacción" />
+                  <p v-if="index === (parts.length - 1)" @click="changeTypeOfSelection" class="cursor-pointer text-primary underline text-sm">Cambiar a {{ typeOfSelection === 'texto' ? 'lista' : 'texto' }}</p>
+                </div>
+                <SmallLoading v-if="loadingSpareParts" class="ml-12" />
+                <div v-else>
+                  <template v-if="index === parts.length - 1">
+                    <!-- Mostrar input o select solo en el último -->
+                    <el-input
+                      v-if="typeOfSelection === 'texto'"
+                      v-model="part.name"
+                      placeholder="Nombre de la refacción"
+                    />
+                    <el-select
+                      v-else
+                      v-model="part.name"
+                      @change="handleSparePartSelected(index, $event)"
+                      clearable
+                      placeholder="Selecciona la refacción"
+                      no-data-text="No hay opciones registradas"
+                      no-match-text="No se encontraron coincidencias"
+                    >
+                      <el-option
+                        v-for="option in spareParts"
+                        :key="option.id"
+                        :label="option.name"
+                        :value="option.name"
+                      />
+                    </el-select>
+                    <p
+                      v-if="index === parts.length - 1 && nameError"
+                      class="text-xs text-red-500"
+                    >
+                      Agrega una refacción
+                    </p>
+                  </template>
+
+                  <template v-else>
+                    <!-- Mostrar nombre de la refacción como texto en los demás -->
+                    <p class="text-gray-600 text-sm ml-4">{{ part.name }}</p>
+                  </template>
+                </div>
             </div>
 
             <div class="col-span-2">
@@ -22,20 +59,21 @@
                 >
                 <template #prepend>$</template>
                 </el-input>
+                <p v-if="index === (parts.length - 1) && priceError" class="text-xs text-red-500">El precio no puede ser 0</p>
             </div>
 
             <div class="col-span-2">
                 <InputLabel value="Cantidad" />
                 <div class="flex items-center gap-1">
-                <el-button size="" @click="decreaseQuantity(index)" :disabled="part.quantity <= 1">-</el-button>
-                <el-input-number
-                    v-model="part.quantity"
-                    @change="syncItems()"
-                    :min="1"
-                    :controls="false"
-                    class="w-16"
-                />
-                <el-button size="" @click="increaseQuantity(index)">+</el-button>
+                  <el-button size="" @click="decreaseQuantity(index)" :disabled="part.quantity <= 1">-</el-button>
+                  <el-input-number
+                      v-model="part.quantity"
+                      @change="syncItems()"
+                      :min="1"
+                      :controls="false"
+                      class="w-16"
+                  />
+                  <el-button size="" @click="increaseQuantity(index)">+</el-button>
                 </div>
             </div>
 
@@ -70,12 +108,15 @@
 
 <script>
 import InputLabel from "@/Components/InputLabel.vue";
+import SmallLoading from "@/Components/MyComponents/SmallLoading.vue";
+import axios from 'axios';
 
 export default {
   name: 'PartsForm',
 
   components: {
     InputLabel,
+    SmallLoading
   },
 
   props:{
@@ -86,6 +127,11 @@ export default {
 
   data() {
     return {
+      nameError: false, // indica si hay un error en el nombre de la refacción
+      priceError: false, // indica si hay un error en el precio de la refacción
+      loadingSpareParts: false, // indica si se están cargando las refacciones
+      typeOfSelection: 'texto',
+      spareParts: [], // refacciones disponibles para seleccionar en lista
       parts: [
         {
           name: '',
@@ -113,6 +159,26 @@ export default {
       return part.unitPrice * part.quantity;
     },
     addPart() {
+      const lastPart = this.parts[this.parts.length - 1];
+
+      // Validar si no hay partes o si el nombre está vacío
+      if (!this.parts.length || lastPart.name.trim() === '') {
+        this.nameError = true;
+        this.priceError = false;
+        return;
+      }
+
+      // Validar si el precio es 0
+      if (lastPart.unitPrice === 0) {
+        this.priceError = true;
+        this.nameError = false;
+        return;
+      }
+
+      // Si todo está bien
+      this.nameError = false;
+      this.priceError = false;
+
       this.parts.push({
         name: '',
         unitPrice: 0,
@@ -122,6 +188,37 @@ export default {
     removePart(index) {
       this.parts.splice(index, 1);
     },
+    changeTypeOfSelection() {
+      // Cambia entre modo de texto y lista
+      this.typeOfSelection = this.typeOfSelection === 'texto' ? 'lista' : 'texto';
+
+      // Si cambia a lista, verifica si ya se han cargado las refacciones
+      if ( !this.spareParts.length ) {
+        this.fetchSpareParts();
+      } 
+    },
+    handleSparePartSelected(index, selectedName) {
+      const selectedPart = this.spareParts.find(p => p.name === selectedName);
+      if (selectedPart) {
+        this.parts[index].unitPrice = selectedPart.public_price;
+        // Puedes también guardar el id si es necesario:
+        // this.parts[index].partId = selectedPart.id;
+      }
+    },
+    async fetchSpareParts() {
+      this.loadingSpareParts = true;
+      try {
+        const response = await axios.get(route('service-reports.fetch-spare-parts'));
+
+        if ( response.status === 200 ) {
+            this.spareParts = response.data.spare_parts;
+        }
+      } catch (error) {
+        console.error('Error fetching spare parts:', error);
+      } finally {
+        this.loadingSpareParts = false;
+      }
+    }
   },
   mounted() {
     if ( this.initialData ) {

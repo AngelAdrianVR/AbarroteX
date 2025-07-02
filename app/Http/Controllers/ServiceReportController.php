@@ -30,16 +30,16 @@ class ServiceReportController extends Controller
         $last_report = ServiceReport::where('store_id', $store_id)->latest('id')->first();
         $folio = $last_report ? intval($last_report->folio) + 1 : 1;
 
-        // // Ruta a la vista de Inertia (ej: 'ServiceReport/Create14.vue')
-        // $customViewPath = resource_path("js/Pages/ServiceReport/Create{$store_id}.vue");
+        // Ruta a la vista de Inertia (ej: 'ServiceReport/Create14.vue')
+        $customViewPath = resource_path("js/Pages/ServiceReport/Create{$store_id}.vue");
 
-        // // Usar la vista personalizada si existe, sino la predeterminada
-        // $view = File::exists($customViewPath)
-        //     ? "ServiceReport/Create{$store_id}"
-        //     : "PageNotFound"; // 404 not found vista
+        // Usar la vista personalizada si existe, sino la predeterminada
+        $view = File::exists($customViewPath)
+            ? "ServiceReport/Create{$store_id}"
+            : "PageNotFound"; // 404 not found vista
 
-        // return inertia($view, compact('products', 'folio'));
-        return inertia('ServiceReport/Create24', compact('products', 'folio'));
+        return inertia($view, compact('products', 'folio'));
+        // return inertia('ServiceReport/Create24', compact('products', 'folio')); Para hacer pruebas con la vista deseada
     }
 
     //para guardar la orden de dm compresores.
@@ -123,12 +123,12 @@ class ServiceReportController extends Controller
         $customViewPath = resource_path("js/Pages/ServiceReport/Show{$store_id}.vue");
 
         // Usar la vista personalizada si existe, sino la predeterminada
-        // $view = File::exists($customViewPath)
-        //     ? "ServiceReport/Show{$store_id}"
-        //     : "PageNotFound"; // 404 not found vista
+        $view = File::exists($customViewPath)
+            ? "ServiceReport/Show{$store_id}"
+            : "PageNotFound"; // 404 not found vista
 
-        // return inertia($view, compact('report'));
-        return inertia("ServiceReport/Show24", compact('report'));
+        return inertia($view, compact('report'));
+        // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
@@ -144,12 +144,12 @@ class ServiceReportController extends Controller
         $customViewPath = resource_path("js/Pages/ServiceReport/Edit{$store_id}.vue");
 
         // Usar la vista personalizada si existe, sino la predeterminada
-        // $view = File::exists($customViewPath)
-        //     ? "ServiceReport/Edit{$store_id}"
-        //     : "PageNotFound"; // 404 not found vista
+        $view = File::exists($customViewPath)
+            ? "ServiceReport/Edit{$store_id}"
+            : "PageNotFound"; // 404 not found vista
 
-        // return inertia($view, compact('report', 'products'));
-        return inertia("ServiceReport/Edit24", compact('report', 'products'));
+        return inertia($view, compact('report', 'products'));
+        // return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
     }
 
     public function update(Request $request, ServiceReport $serviceReport)
@@ -286,5 +286,14 @@ class ServiceReportController extends Controller
     public function printTemplate(ServiceReport $report)
     {
         return inertia('ServiceReport/PrintTemplate24', compact('report'));
+    }
+
+    // carga los productos (refacciones) a la vista create o edit ara seleccionarlos (apontephone)
+    public function fetchSpareParts()
+    {
+        $store_id = auth()->user()->store_id;
+        $spare_parts = Product::where('store_id', $store_id)->get(['id', 'name', 'public_price', 'current_stock', 'min_stock', 'store_id']);
+
+        return response()->json(['spare_parts' => $spare_parts]);
     }
 }
