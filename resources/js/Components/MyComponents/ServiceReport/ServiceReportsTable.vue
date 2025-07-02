@@ -1,7 +1,7 @@
 <template>
     <div class="overflow-auto">
-        <div class="flex justify-end">
-            <el-button :disabled="!selectedReports.length" type="danger" @click="deleteSelected">Eliminar ({{ selectedReports.length }})</el-button>
+        <div class="flex justify-end h-5">
+            <el-button v-show="selectedReports.length" :disabled="!selectedReports.length" type="danger" @click="deleteSelected">Eliminar ({{ selectedReports.length }})</el-button>
         </div>
         <table v-if="reports?.length" class="w-full table-fixed">
             <thead>

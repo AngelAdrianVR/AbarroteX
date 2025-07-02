@@ -16,7 +16,7 @@ export default {
 /* Inspired by: m3.material.io/components/progress-indicators/overview */
 
 .loader {
-    width: 32px;
+    width: 28px;
     /* Subpixels get cut off */
     overflow: visible;
     transform: rotate(-90deg);
