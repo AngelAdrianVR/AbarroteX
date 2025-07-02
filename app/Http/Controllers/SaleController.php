@@ -141,7 +141,7 @@ class SaleController extends Controller
         // Obtener la fecha de la venta siguiente más cercana
         $next_sale = $next_sales->first();
         $next_sale_date = $next_sale ? $next_sale->created_at->toDateString() : null;
-        
+
         // return $day_sales;
         return inertia('Sale/Show', compact('day_sales', 'previous_sale_date', 'next_sale_date'));
     }
@@ -213,16 +213,20 @@ class SaleController extends Controller
         return response()->json(['items' => $groupedSales]);
     }
 
-    public function printTicket($folio)
+    public function getByFolio($folio)
     {
         // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::where('store_id', auth()->user()->store_id)->where('folio', $folio)->get();
+        $sales = Sale::where([
+            'store_id' => auth()->user()->store_id,
+            'folio' => $folio,
+        ])->get();
 
+        return response()->json(['sales' => $sales]);
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         // $day_sales = $this->getGroupedSalesByDate($sales, true);
 
         // return $sales;
-        return inertia('Sale/PrintTicket', compact('sales'));
+        // return inertia('Sale/PrintTicket', compact('sales'));
     }
 
     public function syncLocalstorage(Request $request)

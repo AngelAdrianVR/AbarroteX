@@ -240,26 +240,7 @@ export default {
       ticket += '\n\n';
 
       return ticket;
-    },
-    async enviarDatosImpresion() { // Para Bluetooth
-      try {
-        const service = await this.device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
-        const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
-
-        // --- MODIFICADO: Se llama a la función con `incluirCorte = true` ---
-        const datosParaImprimir = this.generarTicketConComandos(true);
-        const encodedData = new TextEncoder('utf-8').encode(datosParaImprimir);
-
-        const fragmentSize = 50;
-        const fragments = this.chunkData(encodedData, fragmentSize);
-
-        for (const fragment of fragments) {
-          await characteristic.writeValue(fragment);
-        }
-      } catch (error) {
-        alert('Error al imprimir por Bluetooth. Asegúrate de que la impresora esté conectada.');
-      }
-    },
+    }, 
     async imprimirTicketUsb() {
       // Generamos el ticket SIN el comando de corte, ya que el plugin lo hará por nosotros.
       const ticketTexto = this.generarTicketConComandos(false);
@@ -302,6 +283,25 @@ export default {
       } catch (error) {
         console.error("Error de conexión con el plugin:", error);
         alert("No se pudo conectar con el plugin de impresión. Verifica que el programa esté ejecutándose en tu computadora y no esté bloqueado por un firewall.");
+      }
+    },
+    async enviarDatosImpresion() { // Para Bluetooth
+      try {
+        const service = await this.device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
+        const characteristic = await service.getCharacteristic(this.UUIDCharacteristic);
+
+        // --- MODIFICADO: Se llama a la función con `incluirCorte = true` ---
+        const datosParaImprimir = this.generarTicketConComandos(true);
+        const encodedData = new TextEncoder('utf-8').encode(datosParaImprimir);
+
+        const fragmentSize = 50;
+        const fragments = this.chunkData(encodedData, fragmentSize);
+
+        for (const fragment of fragments) {
+          await characteristic.writeValue(fragment);
+        }
+      } catch (error) {
+        alert('Error al imprimir por Bluetooth. Asegúrate de que la impresora esté conectada.');
       }
     },
     async getParzibyteSerial() {

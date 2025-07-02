@@ -692,7 +692,7 @@
     </main>
 
     <!-- modal de inmpresión -->
-    <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" />
+    <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
     <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
     <Modal :show="showPaymentModal" @close="showPaymentModal = false">
       <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
@@ -1315,9 +1315,6 @@ export default {
       cutLoading: false, //cargando monto total esperado para corte
       scannerQuery: null, //input para scanear el codigo de producto
 
-      //impresión
-      folioToPrint: null,
-
       //buscador
       searchQuery: null,
       searchFocus: false,
@@ -1522,17 +1519,15 @@ export default {
           //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
           if (this.automaticPrinting) {
             this.showPrintingModal = true;
-            this.folioToPrint = response.data.folio_stored;
+            this.$refs.printingModal.saleFolio = response.data.folio_stored;
+            if (!this.$page.props.auth.user.printer_config?.name) {
+              this.$refs.printingModal.getAvailablePrinters();
+            }
           }
         }
       } catch (error) {
         console.error(error);
       }
-    },
-    openPrintingTemplate() {
-      window.open(route('sales.print-ticket', this.folioToPrint), '_blank');
-      this.showPrintingModal = false;
-      this.folioToPrint = null;
     },
     processOfflineSale() {
       this.saveToLocalStorage();
