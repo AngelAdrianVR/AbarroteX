@@ -23,7 +23,7 @@
                                         stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 Comprobante de servicio</el-dropdown-item>
-                            <el-dropdown-item :disabled="report.status === 'Cancelada'">
+                            <el-dropdown-item :disabled="report.status === 'Cancelada'" @click="handleTicketPrinting">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -205,7 +205,7 @@
                                 <span class="w-40">Costo del servicio</span><span class="ml-3">$</span><span
                                     class="w-24 text-right">{{
                                         report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                    ?? '0.00' }}</span>
+                                        ?? '0.00' }}</span>
                             </p>
                             <p class="flex">
                                 <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
@@ -241,25 +241,25 @@
                                     <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span
                                         class="w-24 text-right">{{
                                             parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                        ",") ?? '0.00' }}</span>
+                                                ",") ?? '0.00' }}</span>
                                 </p>
                                 <p class="flex">
                                     <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
                                         class="w-24 text-right">{{
                                             report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
-                                        '0.00' }}</span>
+                                            '0.00' }}</span>
                                 </p>
                                 <p v-if="report.aditionals?.review_amount < report.advance_payment" class="flex">
                                     <span class="w-40">Total devuelto</span><span class="ml-3">$</span><span
                                         class="w-24 text-right">{{ (report.advance_payment -
                                             parseFloat(report.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                        ",") }}</span>
+                                                ",") }}</span>
                                 </p>
                                 <p v-else class="flex">
                                     <span class="w-40">Total pagado</span><span class="ml-3">$</span><span
                                         class="w-24 text-right">{{
                                             parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                        ",") }}</span>
+                                                ",") }}</span>
                                 </p>
                             </div>
                         </div>
@@ -339,6 +339,8 @@
             </body>
         </main>
 
+        <!-- modal de impresión -->
+        <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
         <!-- -------------- Modal de cancelacion ----------------------- -->
         <Modal :show="confirmCancelModal" @close="confirmCancelModal = false" maxWidth="2xl">
             <div class="p-5 relative">
@@ -357,7 +359,7 @@
                             <span class="w-40">Costo del servicio</span><span class="ml-3">$</span><span
                                 class="w-24 text-right">{{
                                     report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                ?? '0.00' }}</span>
+                                    ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
                             <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
@@ -424,7 +426,7 @@
                             <span class="w-[170px]">Anticipo</span><span class="ml-[2px]">$</span><span
                                 class="w-24 text-right">{{
                                     report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                ",") ?? '0.00' }}</span>
+                                        ",") ?? '0.00' }}</span>
                         </p>
                         <p v-if="reviewAmount < report.advance_payment" class="flex">
                             <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span
@@ -436,8 +438,8 @@
                             <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span
                                 class="w-24 text-right">{{
                                     reviewAmount ? (parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                ",")) :
-                                '0.00' }}</span>
+                                        ",")) :
+                                        '0.00' }}</span>
                         </p>
 
                     </div>
@@ -450,8 +452,7 @@
 
             </div>
         </Modal>
-
-        <!-- -------------- Modal finalizar venta (pago) starts----------------------- -->
+        <!-- ------------- Modal finalizar venta (pago) starts----------------------- -->
         <Modal :show="showPaymentModal" @close="showPaymentModal = false">
             <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
                 <ThirthButton class="absolute right-3 !py-1 flex items-center space-x-2 !text-red-600 !bg-[#FFB8B8]"
@@ -595,23 +596,21 @@
                 </section>
             </div>
         </Modal>
+        <ConfirmationModal :show="confirmDeleteModal" @close="confirmDeleteModal = false">
+            <template #title>
+                Eliminar Orden de Servicio
+            </template>
+            <template #content>
+                ¿Desea continuar con la eliminación?
+            </template>
+            <template #footer>
+                <div>
+                    <CancelButton @click="confirmDeleteModal = false" class="mr-2">Cancelar</CancelButton>
+                    <PrimaryButton @click="deleteItem">Eliminar</PrimaryButton>
+                </div>
+            </template>
+        </ConfirmationModal>
     </AppLayout>
-
-
-    <ConfirmationModal :show="confirmDeleteModal" @close="confirmDeleteModal = false">
-        <template #title>
-            Eliminar Orden de Servicio
-        </template>
-        <template #content>
-            ¿Desea continuar con la eliminación?
-        </template>
-        <template #footer>
-            <div>
-                <CancelButton @click="confirmDeleteModal = false" class="mr-2">Cancelar</CancelButton>
-                <PrimaryButton @click="deleteItem">Eliminar</PrimaryButton>
-            </div>
-        </template>
-    </ConfirmationModal>
 </template>
 
 <script>
@@ -627,6 +626,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import StatusStep from '@/Components/MyComponents/StatusStep.vue';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import PrintingModal from "@/Components/MyComponents/Sale/PrintingModal.vue";
 
 export default {
     data() {
@@ -646,6 +646,7 @@ export default {
             paymentMethod: '', //Método de pago seleccionado
             paymentConfirmed: false, //indica si el pago ha sido confirmado
             moneyReceived: null, // Monto recibido en efectivo
+            showPrintingModal: false,
         }
     },
     components: {
@@ -658,7 +659,8 @@ export default {
         InputLabel,
         AppLayout,
         Modal,
-        Back
+        Back,
+        PrintingModal,
     },
     props: {
         report: Object,
@@ -675,6 +677,131 @@ export default {
         }
     },
     methods: {
+        handleTicketPrinting() {
+            // enviar comandos al componente de impresión
+            this.$refs.printingModal.customData = this.generateServiceTicketCommands(false);
+            this.showPrintingModal = true;
+            if (!this.$page.props.auth.user.printer_config?.name) {
+                this.$refs.printingModal.getAvailablePrinters();
+            }
+        },
+        removeAccents(text = '') {
+            if (!text) return '';
+            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        },
+        generateServiceTicketCommands(hasCut = true) {
+            const ESC = '\x1B';
+            const GS = '\x1D';
+            const INICIALIZAR_IMPRESORA = ESC + '@';
+            const NEGRITA_ON = ESC + 'E' + '\x01';
+            const NEGRITA_OFF = ESC + 'E' + '\x00';
+            const ALINEAR_IZQUIERDA = ESC + 'a' + '\x00';
+            const ALINEAR_CENTRO = ESC + 'a' + '\x01';
+            const ALINEAR_DERECHA = ESC + 'a' + '\x02';
+            const CORTAR_PAPEL = GS + 'V' + '\x00' + '\x00';
+            const ANCHO_TICKET = 32;
+
+            let ticket = INICIALIZAR_IMPRESORA;
+
+            // Encabezado
+            ticket += ALINEAR_CENTRO;
+            // Asumiendo que la información de la tienda está disponible de forma similar
+            if (this.$page.props.auth.user.store) {
+                ticket += NEGRITA_ON + this.$page.props.auth.user.store.name + NEGRITA_OFF + '\n';
+                if (this.$page.props.auth.user.store.address) {
+                    ticket += this.$page.props.auth.user.store.address + '\n';
+                }
+            }
+            ticket += '--------------------------------\n';
+            ticket += NEGRITA_ON + 'ORDEN DE SERVICIO' + NEGRITA_OFF + '\n';
+            ticket += '--------------------------------\n';
+
+            // Datos del Cliente y Equipo
+            ticket += ALINEAR_IZQUIERDA;
+            ticket += 'Fecha: ' + this.formatDateTime() + '\n';
+            ticket += 'Cliente: ' + (this.report.client_name || 'N/A') + '\n';
+            ticket += 'Telefono: ' + (this.report.client_phone_number || 'N/A') + '\n\n';
+
+            ticket += NEGRITA_ON + 'Detalles del Equipo:' + NEGRITA_OFF + '\n';
+            ticket += 'Marca: ' + (this.report.product_details.brand || 'N/A') + '\n';
+            ticket += 'Modelo: ' + (this.report.product_details.model || 'N/A') + '\n';
+            ticket += '--------------------------------\n';
+
+            // Descripción del Servicio y Observaciones
+            if (this.report.service_description) {
+                ticket += NEGRITA_ON + 'Descripcion del Servicio:' + NEGRITA_OFF + '\n';
+                ticket += this.report.service_description + '\n\n';
+            }
+            if (this.report.description) {
+                ticket += NEGRITA_ON + 'Falla reportada:' + NEGRITA_OFF + '\n';
+                ticket += this.report.description + '\n\n';
+            }
+            if (this.report.observations) {
+                ticket += NEGRITA_ON + 'Observaciones:' + NEGRITA_OFF + '\n';
+                ticket += this.report.observations + '\n';
+            }
+            ticket += '--------------------------------\n';
+
+            // Refacciones si existen
+            if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
+                ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
+                let header = 'Cant  Concepto'.padEnd(21);
+                header += 'Importe'.padStart(11);
+                ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
+                ticket += '--------------------------------\n';
+
+                this.report.spare_parts.forEach(part => {
+                    const cantidad = part.quantity.toString();
+                    const nombre = part.name.substring(0, 15);
+                    const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
+
+                    let linea = '';
+                    linea += cantidad.padEnd(3, ' ');
+                    linea += ' ' + this.removeAccents(nombre).padEnd(17, ' ');
+                    linea += ('$' + totalProducto).padStart(11, ' ');
+                    ticket += ALINEAR_IZQUIERDA + linea + '\n';
+                });
+                ticket += '--------------------------------\n';
+            }
+
+            // Costos
+            const formatCurrency = (value) => {
+                return '$' + parseFloat(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            };
+
+            let subtotalRefacciones = 0;
+            if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
+                subtotalRefacciones = this.report.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
+                let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
+                ticket += ALINEAR_DERECHA + subtotalStr + '\n';
+            }
+
+            let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.report.service_cost);
+            ticket += ALINEAR_DERECHA + costoServicioStr + '\n';
+
+            let totalStr = 'Total: ' + formatCurrency(this.report.total_cost);
+            ticket += ALINEAR_DERECHA + NEGRITA_ON + totalStr + NEGRITA_OFF + '\n';
+
+            if (this.report.advance_payment > 0) {
+                let anticipoStr = 'Anticipo: ' + formatCurrency(this.report.advance_payment);
+                ticket += ALINEAR_DERECHA + anticipoStr + '\n';
+                let restanteStr = 'Resta: ' + formatCurrency(this.report.total_cost - this.report.advance_payment);
+                ticket += ALINEAR_DERECHA + NEGRITA_ON + restanteStr + NEGRITA_OFF + '\n';
+            }
+
+            // Pie de página
+            ticket += '\n' + ALINEAR_CENTRO;
+            ticket += 'GRACIAS POR SU PREFERENCIA\n\n\n';
+
+            if (hasCut) {
+                ticket += CORTAR_PAPEL;
+            }
+
+            return ticket;
+        },
+        formatDateTime(dateString = new Date().toISOString()) {
+            return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
+        },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
