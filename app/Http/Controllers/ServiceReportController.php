@@ -38,8 +38,8 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Create{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('products', 'folio'));
-        // return inertia('ServiceReport/Create24', compact('products', 'folio')); Para hacer pruebas con la vista deseada
+        // return inertia($view, compact('products', 'folio'));
+        return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
     }
 
     //para guardar la orden de dm compresores.
@@ -127,8 +127,8 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Show{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('report'));
-        // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
+        // return inertia($view, compact('report'));
+        return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)

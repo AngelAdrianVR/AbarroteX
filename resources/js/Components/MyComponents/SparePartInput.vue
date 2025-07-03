@@ -84,7 +84,7 @@
                 </div>
             </div>
 
-            <div class="absolute top-5 right-3 text-right">
+            <div v-if="index !== 0" class="absolute top-5 right-3 text-right">
                 <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#373737"
                     :title="'¿Continuar?'" @confirm="removePart(index)">
                     <template #reference>

@@ -8,7 +8,7 @@
             <div class="md:flex justify-between mt-3 mb-5">
                 <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
                     formatDate(report.service_date) }}</span></p>
-                <el-dropdown :disabled="report.status === 'Cancelada'" split-button trigger="click" type="primary"
+                <el-dropdown v-if="report.status !== 'Cancelada'" :disabled="report.status === 'Cancelada'" split-button trigger="click" type="primary"
                     @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
@@ -157,6 +157,10 @@
                             <p class="text-red-500 w-56">Razón de cancelación: </p>
                             <p class="lg:w-1/2">{{ report.cancellation_reason ?? '-' }}</p>
                         </div>
+                        <div v-if="report.observations" class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
+                            <p class="text-[#373737] w-56">Problema reportado: </p>
+                            <p class="lg:w-1/2">{{ report.observations }}</p>
+                        </div>
                         <div class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
                             <p class="text-[#373737] w-56">Estado previo y características del equipo: </p>
                             <p class="lg:w-1/2">{{ report.description }}</p>
@@ -182,7 +186,7 @@
 
                         <h2 class="font-bold text-lg text-[#373737] mt-5 mb-2">Detalles del pago</h2>
 
-                        <div class="pb-2 border-b border-[#D9D9D9]">
+                        <div v-if="report.spare_parts?.length" class="pb-2 border-b border-[#D9D9D9]">
                             <div class="flex justify-between text-[#999999] font-bold">
                                 <p class="text-lg">Refacciones</p>
                                 <p class="text-lg">Total</p>
@@ -208,20 +212,20 @@
                                         ?? '0.00' }}</span>
                             </p>
                             <p class="flex">
+                                <span class="w-40">Refacciones</span><span class="ml-3">$</span><span
+                                    class="w-24 text-right">{{
+                                        totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            </p>
+                            <p class="flex">
                                 <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
                                     class="w-24 text-right">{{
                                         report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00'
                                     }}</span>
                             </p>
-                            <p class="flex">
-                                <span class="w-40">Refacciones</span><span class="ml-3">$</span><span
-                                    class="w-24 text-right">{{
-                                        totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                            </p>
                             <p class="flex font-bold">
                                 <span class="w-40">Total restante</span><span class="ml-3">$</span><span
                                     class="w-24 text-right">{{
-                                        report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                                        (report.total_cost - report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span>
                             </p>
 
                             <!-- Información de cancelación -->
@@ -240,8 +244,8 @@
                                 <p class="flex">
                                     <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span
                                         class="w-24 text-right">{{
-                                            parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                ",") ?? '0.00' }}</span>
+                                            report.aditionals.review_amount ? parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                                ",") : '0.00' }}</span>
                                 </p>
                                 <p class="flex">
                                     <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
@@ -251,15 +255,15 @@
                                 </p>
                                 <p v-if="report.aditionals?.review_amount < report.advance_payment" class="flex">
                                     <span class="w-40">Total devuelto</span><span class="ml-3">$</span><span
-                                        class="w-24 text-right">{{ (report.advance_payment -
-                                            parseFloat(report.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                ",") }}</span>
+                                        class="w-24 text-right">{{ 
+                                            report.aditionals.review_amount ?
+                                            (report.advance_payment - parseFloat(report.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                            : report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span>
                                 </p>
                                 <p v-else class="flex">
                                     <span class="w-40">Total pagado</span><span class="ml-3">$</span><span
                                         class="w-24 text-right">{{
-                                            parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                ",") }}</span>
+                                            (parseFloat(report.aditionals.review_amount) - report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",") }}</span>
                                 </p>
                             </div>
                         </div>
@@ -898,7 +902,8 @@ export default {
                             this.paymentModalStep = 1; //reinicia el paso del modal de pago
                         }, 1000);
                     } else if (newStatus === 'Cancelada') {
-                        this.report.aditionals = this.report.aditionals || {};
+                        window.location.reload(); // Recarga la página para reflejar el cambio de estado
+                        // this.report.aditionals = this.report.aditionals || {};
                     }
                 } else {
                     this.$notify({
