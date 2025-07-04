@@ -8,7 +8,7 @@
         <div v-for="(i, index) in 1" :key="i">
             <div class="flex justify-between items-center">
                 <figure class="w-40">
-                    <img class="w-full" :src="$page.props.auth.user.store.media[0].original_url" alt="">
+                    <img class="w-full" :src="$page.props.auth.user.store?.media[0]?.original_url" alt="">
                 </figure>
                 <p class="font-bold">SERVICIO AVANZADO DE REPARACIÓN DE CELULARES</p>
                 <p class="text-[#373737] text-base">Orden No. {{ String(report.folio).padStart(4, '0') }}</p>

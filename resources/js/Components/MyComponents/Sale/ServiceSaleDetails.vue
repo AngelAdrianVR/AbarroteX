@@ -4,7 +4,7 @@
             class="flex items-center justify-between border-b border-grayD9 text-end px-1 lg:px-5 py-1 text-white bg-gray-200">
             <div class="flex items-center space-x-1 lg:space-x-3">
                 <p class="text-gray99">
-                    Cotización:
+                    Orden:
                     <a as="button" :href="route('service-reports.show', encodeId(groupedSales.id))"
                         target="_blank" class="text-primary hover:underline">
                         Folio:{{ String(groupedSales.folio).padStart(4, '0') }}
@@ -16,7 +16,7 @@
                 <span class="text-gray99">•</span>
                 <p class="text-gray99">Cliente: <span class="text-gray37">{{ groupedSales.client_name }}</span>
                 </p>
-                <span class="text-gray99">•</span>
+                <!-- <span class="text-gray99">•</span> -->
                 <!-- <p class="text-gray99">Vendedor: <span class="text-gray37">{{ groupedSales.client_name }}</span>
                 </p> -->
             </div>
@@ -160,7 +160,7 @@
                         <span class="text-start w-40">Monto de revisión:</span>
                         <span class="w-12">$</span>
                         <span class="w-12">
-                            {{ parseFloat(groupedSales.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
+                            {{ (parseFloat(groupedSales?.aditionals?.review_amount) || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </div>
                     <div class="flex items-center justify-end text-gray37">
@@ -175,7 +175,7 @@
                         <span class="text-start w-40">Total devuelto:</span>
                         <span class="w-12">$</span>
                         <span class="w-12">
-                            {{ (groupedSales.advance_payment - parseFloat(groupedSales.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ (groupedSales.advance_payment - (parseFloat(groupedSales?.aditionals?.review_amount) || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
 
                         <!-- <el-tooltip class="absolute left-0" placement="top"> -->
@@ -188,7 +188,7 @@
                         <span class="text-start w-40">Total pagado:</span>
                         <span class="w-12">$</span>
                         <span class="w-12">
-                            {{ parseFloat(groupedSales.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            {{ ((parseFloat(groupedSales?.aditionals?.review_amount) || 0) - groupedSales.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                         </span>
                     </div>
                 </section>
