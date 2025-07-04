@@ -181,10 +181,11 @@
                         </div>
                         <div class="flex space-x-4 py-2 px-1">
                             <p class="text-[#373737] w-56">Porcentaje de comisión: </p>
-                            <p v-if="report.comision_percentage" class="lg:w-1/2">{{ report.comision_percentage ?? '-' }}% => ${{
-                                ((report.comision_percentage / 100)
-                                    * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                            <p v-else class="lg:w-1/2">No aplica</p>                        
+                            <p v-if="report.comision_percentage" class="lg:w-1/2">{{ report.comision_percentage ?? '-'
+                                }}% => ${{
+                                    ((report.comision_percentage / 100)
+                                        * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            <p v-else class="lg:w-1/2">No aplica</p>
                         </div>
 
                         <h2 class="font-bold text-lg text-[#373737] mt-5 mb-2">Detalles del pago</h2>
@@ -453,8 +454,9 @@
                         <p v-else class="flex">
                             <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span
                                 class="w-24 text-right">{{
-                                    reviewAmount ? ((parseFloat(reviewAmount) - report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                        ",")) :
+                                    reviewAmount ? ((parseFloat(reviewAmount) -
+                                        report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                            ",")) :
                                         '0.00' }}</span>
                         </p>
 
@@ -699,6 +701,7 @@ export default {
                 this.$refs.printingModal.printType = 'Etiqueta';
                 this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
             } else if (type === 'ESC/POS') {
+                this.$refs.printingModal.printType = 'Ticket';
                 this.$refs.printingModal.customData = this.generateESCPOSTicketCommands(false);
             }
             this.showPrintingModal = true;
@@ -707,96 +710,112 @@ export default {
             }
         },
         generateTSPLLabelCommands() {
-            // --- Definiciones de la Etiqueta (se mantienen) ---
-            // const labelWidthMM = 97;  // 9.7 cm
-            // const labelHeightMM = 48; // 4.8 cm
-            // Asumiendo 8 dots/mm para cálculo de coordenadas.
-            // Ancho total aprox: 97mm * 8 dots/mm = 776 dots
-            // Alto total aprox: 48mm * 8 dots/mm = 384 dots
+            // --- 1. Configuración de la Etiqueta ---
+            // Define aquí las dimensiones de tu etiqueta en milímetros.
+            const labelConfig = {
+                // widthMM: 97,  // Ancho de la etiqueta en mm
+                // heightMM: 48, // Alto de la etiqueta en mm
+                widthMM: 53,  // Ancho de la etiqueta en mm
+                heightMM: 30, // Alto de la etiqueta en mm
+                gapMM: 3,     // Espacio entre etiquetas en mm
+                dotsPerMM: 8  // Resolución de la impresora (203 dpi = 8 dots/mm)
+            };
 
-            // --- Comandos Fundamentales de TSPL ---
-            const CLS = 'CLS\n';
-            const PRINT = 'PRINT 1\n';
-
+            // --- 2. Comandos Iniciales (¡La parte más importante!) ---
+            // SIZE: Define el tamaño de la etiqueta.
+            // GAP: Define la separación entre etiquetas. Esto corrige el problema de sobreimpresión.
+            // CODEPAGE: Define la tabla de caracteres. 1252 es para Latin-1 (incluye acentos, ñ).
+            // CLS: Limpia el búfer de la impresora antes de empezar a dibujar.
             let commands = '';
+            commands += `SIZE ${labelConfig.widthMM} mm, ${labelConfig.heightMM} mm\n`;
+            commands += `GAP ${labelConfig.gapMM} mm, 0 mm\n`;
+            commands += `CODEPAGE 1252\n`;
+            commands += `CLS\n`;
 
-            // Inicializamos la impresora y limpiamos el búfer.
-            commands += CLS;
+            // --- 3. Coordenadas y Diseño ---
+            let currentY = 15; // Posición Y inicial (margen superior en dots)
+            const startX = 15; // Posición X inicial (margen izquierdo en dots)
+            const rightMargin = 15;
+            const lineHeight = 22; // Espacio entre líneas
+            // const font = '"TSS24.BF2"'; // Fuente a utilizar. Las comillas dobles son importantes.
+            const font = '"1"'; // Fuente a utilizar. Las comillas dobles son importantes.
+            const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
 
-            // --- Contenido de la Etiqueta ---
-            // El formato es: COMANDO X, Y, "FUENTE", ROTACIÓN, ESCALA_X, ESCALA_Y, "TEXTO"
-            // Las coordenadas (X, Y) se miden en "dots" (puntos) desde la esquina superior izquierda.
-            // Una resolución común es 8 dots/mm (203 dpi).
+            /**
+             * Función auxiliar para añadir texto y manejar saltos de línea automáticos.
+             * @param {string} label - La etiqueta del campo (ej. "Nombre:").
+             * @param {string} value - El valor del campo.
+             */
+            const addTextLine = (label, value) => {
+                if (!value) return; // No añadir si el valor está vacío
 
-            // Puedes ajustar la fuente ("1" es una fuente común de 24x24 dots.
-            // Otras opciones podrían ser "0" para fuente por defecto, "2", "3", etc.,
-            // o nombres específicos si la impresora los soporta).
+                let fullText = `${label} ${value}`;
 
-            let currentY = 40; // Punto de inicio Y para el primer elemento.
-            const startX = 60; // Punto de inicio X para todos los elementos de texto.
-            const lineHeight = 30; // Espaciado entre líneas, ajusta según el tamaño de la fuente.
-            const font = 'TSS24.BF2'
+                // --- CÁLCULO DINÁMICO DEL MÁXIMO DE CARACTERES ---
+                // 1. Calcula el ancho total disponible para el texto en dots.
+                const availableWidth = (labelConfig.widthMM * labelConfig.dotsPerMM) - startX - rightMargin;
+                // 2. Calcula cuántos caracteres caben en ese espacio. Usamos Math.floor para redondear hacia abajo.
+                const maxLength = Math.floor(availableWidth / fontAvgCharWidth);
 
-            // 1. Nombre del Cliente
-            if (this.report.client_name) {
-                commands += `TEXT ${startX},${currentY},${font},0,1,1,"Nombre: ${this.report.client_name}"\n`;
-                currentY += lineHeight;
-            }
+                const textParts = [];
+                while (fullText.length > maxLength) {
+                    let chunk = fullText.substring(0, maxLength);
+                    let lastSpace = chunk.lastIndexOf(' ');
+                    if (lastSpace > 0) {
+                        chunk = chunk.substring(0, lastSpace);
+                    }
+                    textParts.push(chunk);
+                    fullText = fullText.substring(chunk.length).trim();
+                }
+                textParts.push(fullText);
 
-            // 2. Recepción
-            if (this.report.service_date) {
-                commands += `TEXT ${startX},${currentY},${font},0,1,1,"Recepcion: ${this.formatDate(this.report.service_date)}"\n`;
-                currentY += lineHeight;
-            }
+                // Imprime cada parte del texto
+                textParts.forEach(part => {
+                    // Se usa TEXT y se escapa el contenido para evitar conflictos con comillas
+                    commands += `TEXT ${startX},${currentY},${font},0,1,1,"${part.replace(/"/g, '\\"')}"\n`;
+                    currentY += lineHeight;
+                });
+            };
 
-            // 3. Modelo
-            if (this.report.product_details && this.report.product_details.model) {
-                commands += `TEXT ${startX},${currentY},${font},0,1,1,"Modelo: ${this.report.product_details.model}"\n`;
-                currentY += lineHeight;
-            }
+            // --- 4. Contenido de la Etiqueta ---
+            addTextLine("Nombre:", this.removeAccents(this.report.client_name));
+            addTextLine("Recepcion:", this.report.service_date.split('T')[1]);
+            addTextLine("Equipo:", this.removeAccents(this.report.product_details?.brand) + ' ' + this.removeAccents(this.report.product_details?.model));
+            addTextLine("Desbloqueo:", this.report.aditionals?.unlockPassword ?? 'Por patron');
+            addTextLine("Problemas:", this.removeAccents(this.report.observations));
+            addTextLine("Servicio:", this.removeAccents(this.report.service_description));
+            addTextLine("Tecnico:", this.removeAccents(this.report.technician_name));
 
-            // 4. Contraseña (solo si no es nula)
-            if (this.report.aditionals && this.report.aditionals.unlockPassword) {
-                commands += `TEXT ${startX},${currentY},${font},0,1,1,"Contrasena: ${this.report.aditionals.unlockPassword}"\n`;
-                currentY += lineHeight;
-            }
-
-            // 5. Problemas reportados
-            if (this.report.observations) {
-                commands += `TEXT ${startX},${currentY},${font},0,1,1,"Problemas: ${this.report.observations}"\n`;
-                currentY += lineHeight;
-            }
-
-            // 6. Servicio
-            if (this.report.service_description) {
-                commands += `TEXT ${startX},${currentY},${font},0,1,1,"Servicio: ${this.report.service_description}"\n`;
-                currentY += lineHeight;
-            }
-
-            // 7. Técnico
-            if (this.report.technician_name) {
-                commands += `TEXT ${startX},${currentY},${font},0,1,1,"Tecnico: ${this.report.technician_name}"\n`;
-                currentY += lineHeight;
-            }
-
-            // 8. Código de barras con this.report.folio (añadiendo ceros al principio para 5 dígitos)
+            // --- 5. Código de Barras ---
             if (this.report.folio) {
-                // Aseguramos que el folio sea un string y lo rellenamos con ceros.
+                currentY += 10; // Espacio extra antes del código de barras
                 const folioPadded = String(this.report.folio).padStart(5, '0');
-                // BARCODE X,Y,"TIPO",ALTURA,HUMAN_READABLE,ROTACION,FACTOR_ANCHO,FACTOR_ALTO,"CONTENIDO"
-                // Ajusta la altura (ej. 120 dots) y el factor de ancho/alto (ej. 2,2) según necesites.
-                // X e Y deben ajustarse para que el código de barras no se salga de la etiqueta.
-                commands += `BARCODE ${startX},${currentY},"128",80,1,0,2,2,"${folioPadded}"\n`;
-                currentY += 80 + 10; // Sumar la altura del barcode más un pequeño margen.
+
+                // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
+                const barcodeHeight = 30;    // Altura del código en dots
+                const narrowWidth = 2;     // Ancho de la barra más estrecha
+                const wideWidth = 5;       // Ancho de la barra más ancha
+
+                // Centrar el código de barras (opcional)
+                const barcodeX = startX;
+
+                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},0,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
+                currentY += barcodeHeight + 20; // Actualizar Y después del barcode
             }
 
-            // Finalizamos con la orden de imprimir.
-            commands += PRINT;
+            // --- 6. Comando de Impresión ---
+            // PRINT N, M -> Imprime N copias de la etiqueta M veces.
+            // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
+            commands += 'PRINT 1\n';
 
+            console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
             return commands;
         },
         removeAccents(text = '') {
             if (!text) return '';
+            // cambiar ñ por n
+            text = text.replace(/ñ/g, 'n').replace(/Ñ/g, 'N');
+            // Normalizar el texto y eliminar los acentos
             return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         },
         generateESCPOSTicketCommands(hasCut = true) {

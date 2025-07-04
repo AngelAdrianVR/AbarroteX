@@ -54,7 +54,8 @@
                 <div class="col-span-full">
                     <InputLabel value="Problema reportado*" />
                     <el-input v-model="form.observations" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
-                        placeholder="Describe el problema mencionado por el cliente" :maxlength="1000" show-word-limit clearable />
+                        placeholder="Describe el problema mencionado por el cliente" :maxlength="1000" show-word-limit
+                        clearable />
                     <InputError :message="form.errors.observations" />
                 </div>
                 <div class="col-span-full">
@@ -331,11 +332,14 @@ export default {
             });
         },
         closePrintingModal() {
-            this.$inertia.visit(route('service-reports.index'));
-        },
-        removeAccents(text = '') {
-            if (!text) return '';
-            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (this.$refs.printingModal.printType == 'Etiqueta') {
+                this.$inertia.visit(route('service-reports.index'));
+            } else {
+                // this.showPrintingModal = false;
+                this.$refs.printingModal.printType = 'Etiqueta';
+                this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
+                // this.showPrintingModal = true;
+            }
         },
         generateServiceTicketCommands(hasCut = true) {
             const ESC = '\x1B';
@@ -447,6 +451,115 @@ export default {
             }
 
             return ticket;
+        },
+        generateTSPLLabelCommands() {
+            // --- 1. Configuración de la Etiqueta ---
+            // Define aquí las dimensiones de tu etiqueta en milímetros.
+            const labelConfig = {
+                // widthMM: 97,  // Ancho de la etiqueta en mm
+                // heightMM: 48, // Alto de la etiqueta en mm
+                widthMM: 53,  // Ancho de la etiqueta en mm
+                heightMM: 30, // Alto de la etiqueta en mm
+                gapMM: 3,     // Espacio entre etiquetas en mm
+                dotsPerMM: 8  // Resolución de la impresora (203 dpi = 8 dots/mm)
+            };
+
+            // --- 2. Comandos Iniciales (¡La parte más importante!) ---
+            // SIZE: Define el tamaño de la etiqueta.
+            // GAP: Define la separación entre etiquetas. Esto corrige el problema de sobreimpresión.
+            // CODEPAGE: Define la tabla de caracteres. 1252 es para Latin-1 (incluye acentos, ñ).
+            // CLS: Limpia el búfer de la impresora antes de empezar a dibujar.
+            let commands = '';
+            commands += `SIZE ${labelConfig.widthMM} mm, ${labelConfig.heightMM} mm\n`;
+            commands += `GAP ${labelConfig.gapMM} mm, 0 mm\n`;
+            commands += `CODEPAGE 1252\n`;
+            commands += `CLS\n`;
+
+            // --- 3. Coordenadas y Diseño ---
+            let currentY = 15; // Posición Y inicial (margen superior en dots)
+            const startX = 15; // Posición X inicial (margen izquierdo en dots)
+            const rightMargin = 15;
+            const lineHeight = 22; // Espacio entre líneas
+            // const font = '"TSS24.BF2"'; // Fuente a utilizar. Las comillas dobles son importantes.
+            const font = '"1"'; // Fuente a utilizar. Las comillas dobles son importantes.
+            const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
+
+            /**
+             * Función auxiliar para añadir texto y manejar saltos de línea automáticos.
+             * @param {string} label - La etiqueta del campo (ej. "Nombre:").
+             * @param {string} value - El valor del campo.
+             */
+            const addTextLine = (label, value) => {
+                if (!value) return; // No añadir si el valor está vacío
+
+                let fullText = `${label} ${value}`;
+
+                // --- CÁLCULO DINÁMICO DEL MÁXIMO DE CARACTERES ---
+                // 1. Calcula el ancho total disponible para el texto en dots.
+                const availableWidth = (labelConfig.widthMM * labelConfig.dotsPerMM) - startX - rightMargin;
+                // 2. Calcula cuántos caracteres caben en ese espacio. Usamos Math.floor para redondear hacia abajo.
+                const maxLength = Math.floor(availableWidth / fontAvgCharWidth);
+
+                const textParts = [];
+                while (fullText.length > maxLength) {
+                    let chunk = fullText.substring(0, maxLength);
+                    let lastSpace = chunk.lastIndexOf(' ');
+                    if (lastSpace > 0) {
+                        chunk = chunk.substring(0, lastSpace);
+                    }
+                    textParts.push(chunk);
+                    fullText = fullText.substring(chunk.length).trim();
+                }
+                textParts.push(fullText);
+
+                // Imprime cada parte del texto
+                textParts.forEach(part => {
+                    // Se usa TEXT y se escapa el contenido para evitar conflictos con comillas
+                    commands += `TEXT ${startX},${currentY},${font},0,1,1,"${part.replace(/"/g, '\\"')}"\n`;
+                    currentY += lineHeight;
+                });
+            };
+
+            // --- 4. Contenido de la Etiqueta ---
+            addTextLine("Nombre:", this.removeAccents(this.form.client_name));
+            addTextLine("Recepcion:", this.form.service_date.split('T')[1]);
+            addTextLine("Equipo:", this.removeAccents(this.form.product_details?.brand) + ' ' + this.removeAccents(this.form.product_details?.model));
+            addTextLine("Desbloqueo:", this.form.aditionals?.unlockPassword ?? 'Por patron');
+            addTextLine("Problemas:", this.removeAccents(this.form.observations));
+            addTextLine("Servicio:", this.removeAccents(this.form.service_description));
+            addTextLine("Tecnico:", this.removeAccents(this.form.technician_name));
+
+            // --- 5. Código de Barras ---
+            if (this.folio) {
+                currentY += 10; // Espacio extra antes del código de barras
+                const folioPadded = String(this.folio).padStart(5, '0');
+
+                // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
+                const barcodeHeight = 30;    // Altura del código en dots
+                const narrowWidth = 2;     // Ancho de la barra más estrecha
+                const wideWidth = 5;       // Ancho de la barra más ancha
+
+                // Centrar el código de barras (opcional)
+                const barcodeX = startX;
+
+                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},0,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
+                currentY += barcodeHeight + 20; // Actualizar Y después del barcode
+            }
+
+            // --- 6. Comando de Impresión ---
+            // PRINT N, M -> Imprime N copias de la etiqueta M veces.
+            // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
+            commands += 'PRINT 1\n';
+
+            // console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
+            return commands;
+        },
+        removeAccents(text = '') {
+            if (!text) return '';
+            // cambiar ñ por n
+            text = text.replace(/ñ/g, 'n').replace(/Ñ/g, 'N');
+            // Normalizar el texto y eliminar los acentos
+            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         },
         formatDate(dateString = new Date().toISOString()) {
             return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });

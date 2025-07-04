@@ -1,6 +1,10 @@
 <template>
     <DialogModal :show="show" @close="$emit('close')" max-width="md">
-        <template #title> Impresión de ticket </template>
+        <template #title>
+            {{ printType === 'Ticket'
+                ? 'Impresión de ticket'
+                : 'Impresión de etiqueta' }}
+        </template>
         <template #content>
             <div v-if="printType === 'Ticket'" class="flex items-start space-x-4">
                 <figure class="h-24">
