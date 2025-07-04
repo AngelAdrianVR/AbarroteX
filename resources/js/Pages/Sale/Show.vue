@@ -156,7 +156,7 @@
                         </template>
                         <QuoteSales @show-modal="handleShowModal" :sales="getGroupedQuoteSales" />
                     </el-tab-pane>
-                    <el-tab-pane v-if="hasQuotes" label="Ordenes de servicio" name="4">
+                    <el-tab-pane v-if="hasOrderServices" label="Ordenes de servicio" name="4">
                         <template #label>
                             <div class="flex items-center space-x-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

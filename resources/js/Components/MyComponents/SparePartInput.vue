@@ -201,6 +201,7 @@ export default {
       const selectedPart = this.spareParts.find(p => p.name === selectedName);
       if (selectedPart) {
         this.parts[index].unitPrice = selectedPart.public_price;
+        this.syncItems();
         // Puedes también guardar el id si es necesario:
         // this.parts[index].partId = selectedPart.id;
       }
