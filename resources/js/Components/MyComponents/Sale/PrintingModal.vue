@@ -200,17 +200,16 @@ export default {
         },
         async printByUSB() {
             this.printing = true;
-
-            // obtenemos las ventas si no se han cargado
-            if (!this.sales.length && this.saleFolio) {
-                await this.getSalesByFolio();
-            }
-
+            
             let ticketText = '';
             if (this.customData) {
                 // Si se proporciona customData, lo usamos directamente
                 ticketText = this.customData;
             } else {
+                // obtenemos las ventas si no se han cargado
+                if (!this.sales.length && this.saleFolio) {
+                    await this.getSalesByFolio();
+                }
                 // Generamos el ticket para venta de productos
                 ticketText = this.generateTicketCommands(false);
             }
