@@ -346,6 +346,7 @@
 
         <!-- modal de impresión -->
         <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
+
         <!-- -------------- Modal de cancelacion ----------------------- -->
         <Modal :show="confirmCancelModal" @close="confirmCancelModal = false" maxWidth="2xl">
             <div class="p-5 relative">
@@ -442,7 +443,7 @@
                         <p v-else class="flex">
                             <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span
                                 class="w-24 text-right">{{
-                                    reviewAmount ? (parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    reviewAmount ? ((parseFloat(reviewAmount) - report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",")) :
                                         '0.00' }}</span>
                         </p>
