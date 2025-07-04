@@ -569,8 +569,8 @@ onUnmounted(() => {
                                 </svg>
                                 <span>Servicios</span>
                             </ResponsiveNavLink>
-                            <!-- solo para DM compresores por el momento -->
-                            <ResponsiveNavLink v-if="$page.props.auth.user.store.id == 6"
+                            <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Ordenes de servicio') &&
+                                $page.props.auth.user.permissions?.includes('Ordenes de servicio')"
                                 :href="route('service-reports.index')" :active="route().current('service-reports.*')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.5 -0.5 22 22"
                                     id="Website-Build--Streamline-Ultimate" height="17" width="19">
@@ -609,7 +609,7 @@ onUnmounted(() => {
                                             stroke-width="1.5"></path>
                                     </g>
                                 </svg>
-                                <span>Reportes de servicio</span>
+                                <span>Ordenes de servicio</span>
                             </ResponsiveNavLink>
                             <ResponsiveNavLink v-if="$page.props.auth.user.store.activated_modules?.includes('Clientes') &&
                                 $page.props.auth.user.permissions?.includes('Clientes')" :href="route('clients.index')"
@@ -896,7 +896,7 @@ onUnmounted(() => {
                                     </div>
                                 </td>
                                 <td>{{ (product.global_product_id ? product.global_product?.code : product.code) ?? '-'
-                                }}
+                                    }}
                                 </td>
                                 <td>{{ product.global_product_id ? product.global_product?.name : product.name }}</td>
                                 <td>{{ (product.global_product_id ? product.global_product?.brand?.name :

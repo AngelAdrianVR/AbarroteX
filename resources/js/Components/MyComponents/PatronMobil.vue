@@ -9,46 +9,27 @@
 
     <!-- Password Input -->
     <div v-if="selectedMethod === 'password'">
-      <el-input
-        @input="syncUnlockPassword"
-        v-model="password"
-        placeholder="Escribe la contraseña"
-        show-password
-        autocomplete="off"
-        class="mt-2"
-      />
+      <el-input @input="syncUnlockPassword" v-model="password" placeholder="Escribe la contraseña" type="text" clearable
+        class="mt-2" />
     </div>
 
     <!-- Pattern Lock -->
     <div v-if="selectedMethod === 'pattern'" class="p-4 border rounded-lg">
       <p class="text-sm font-medium mb-3">Dibujar patrón (Selecciona punto por punto)</p>
       <div class="size-28 relative mx-auto">
-        <div
-          v-for="(point, index) in 9"
-          :key="index"
+        <div v-for="(point, index) in 9" :key="index"
           class="size-6 rounded-full border-2 border-gray-600 mx-auto my-auto relative cursor-pointer z-50"
           :class="{ 'bg-gray-500 !border-gray-700': selectedPoints.includes(index) }"
-          @click="selectPoint(index, $event)"
-          :style="getPointStyle(index)"
-        >
-          <span
-            v-if="selectedPoints.includes(index)"
-            class="absolute text-base text-white font-bold inset-0 flex items-center justify-center"
-          >{{ selectedPoints.indexOf(index) + 1 }}</span>
+          @click="selectPoint(index, $event)" :style="getPointStyle(index)">
+          <span v-if="selectedPoints.includes(index)"
+            class="absolute text-base text-white font-bold inset-0 flex items-center justify-center">{{
+              selectedPoints.indexOf(index) + 1 }}</span>
         </div>
 
         <!-- SVG para las líneas -->
         <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
-          <line
-            v-for="(line, i) in lines"
-            :key="i"
-            :x1="line.x1"
-            :y1="line.y1"
-            :x2="line.x2"
-            :y2="line.y2"
-            stroke="#8C4FF5"
-            stroke-width="2"
-          />
+          <line v-for="(line, i) in lines" :key="i" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2"
+            stroke="#8C4FF5" stroke-width="2" />
         </svg>
       </div>
 
@@ -72,10 +53,10 @@ export default {
       lines: [],
     };
   },
-  props:{
+  props: {
     initialData: Object
   },
-  emits:['syncPattern', 'syncPassword'],
+  emits: ['syncPattern', 'syncPassword'],
   methods: {
     getPointCoords(index) {
       const col = index % 3;
@@ -134,7 +115,7 @@ export default {
         const point = parseInt(pointStr);
         this.selectPoint(point);
       });
-    } else if ( savedPassword ) {
+    } else if (savedPassword) {
       this.selectedMethod = "password";
       this.password = savedPassword;
     }
