@@ -521,8 +521,8 @@ export default {
             };
 
             // --- 4. Contenido de la Etiqueta ---
-            addTextLine("Nombre:", this.removeAccents(this.form.client_name));
-            addTextLine("Recepcion:", this.form.service_date.split('T')[1]);
+            addTextLine("Nombre:", this.removeAccents(this.form.client_name.slice(0, 20)));
+            // addTextLine("Recepcion:", this.report.service_date.split('T')[0]);
             addTextLine("Equipo:", this.removeAccents(this.form.product_details?.brand) + ' ' + this.removeAccents(this.form.product_details?.model));
             addTextLine("Desbloqueo:", this.form.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.form.observations));
@@ -535,7 +535,7 @@ export default {
                 const folioPadded = String(this.folio).padStart(5, '0');
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
-                const barcodeHeight = 30;    // Altura del código en dots
+                const barcodeHeight = 25;    // Altura del código en dots
                 const narrowWidth = 2;     // Ancho de la barra más estrecha
                 const wideWidth = 5;       // Ancho de la barra más ancha
 
