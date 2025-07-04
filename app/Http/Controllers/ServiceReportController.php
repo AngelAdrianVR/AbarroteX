@@ -128,8 +128,8 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Show{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('report'));
-        // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
+            return inertia($view, compact('report'));
+            // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
