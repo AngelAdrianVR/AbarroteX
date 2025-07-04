@@ -172,19 +172,15 @@
                             <p class="lg:w-1/2">{{ report.service_description }}</p>
                         </div>
                         <div class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
-                            <p class="text-[#373737] w-56">Comentarios adicionales: </p>
-                            <p class="lg:w-1/2">{{ report.observations ?? '-' }}</p>
-                        </div>
-                        <div class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
                             <p class="text-[#373737] w-56">Responsable del servicio: </p>
                             <p class="lg:w-1/2">{{ report.technician_name ?? '-' }}</p>
                         </div>
                         <div class="flex space-x-4 py-2 px-1">
                             <p class="text-[#373737] w-56">Porcentaje de comisión: </p>
                             <p v-if="report.comision_percentage" class="lg:w-1/2">{{ report.comision_percentage ?? '-'
-                                }}% => ${{
+                                }}% (${{
                                     ((report.comision_percentage / 100)
-                                        * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                        * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }})</p>
                             <p v-else class="lg:w-1/2">No aplica</p>
                         </div>
 
@@ -778,8 +774,8 @@ export default {
             };
 
             // --- 4. Contenido de la Etiqueta ---
-            addTextLine("Nombre:", this.removeAccents(this.report.client_name));
-            addTextLine("Recepcion:", this.report.service_date.split('T')[1]);
+            addTextLine("Nombre:", this.removeAccents(this.report.client_name.slice(0, 20)));
+            // addTextLine("Recepcion:", this.report.service_date.split('T')[0]);
             addTextLine("Equipo:", this.removeAccents(this.report.product_details?.brand) + ' ' + this.removeAccents(this.report.product_details?.model));
             addTextLine("Desbloqueo:", this.report.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.report.observations));
@@ -792,7 +788,7 @@ export default {
                 const folioPadded = String(this.report.folio).padStart(5, '0');
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
-                const barcodeHeight = 30;    // Altura del código en dots
+                const barcodeHeight = 25;    // Altura del código en dots
                 const narrowWidth = 2;     // Ancho de la barra más estrecha
                 const wideWidth = 5;       // Ancho de la barra más ancha
 
