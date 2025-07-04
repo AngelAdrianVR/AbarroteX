@@ -84,7 +84,7 @@
                 </div>
             </div>
 
-            <div class="absolute top-5 right-3 text-right">
+            <div v-if="index !== 0" class="absolute top-5 right-3 text-right">
                 <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#373737"
                     :title="'¿Continuar?'" @confirm="removePart(index)">
                     <template #reference>
@@ -201,6 +201,7 @@ export default {
       const selectedPart = this.spareParts.find(p => p.name === selectedName);
       if (selectedPart) {
         this.parts[index].unitPrice = selectedPart.public_price;
+        this.syncItems();
         // Puedes también guardar el id si es necesario:
         // this.parts[index].partId = selectedPart.id;
       }

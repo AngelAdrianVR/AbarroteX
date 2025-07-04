@@ -14,6 +14,7 @@
         v-model="password"
         placeholder="Escribe la contraseña"
         show-password
+        autocomplete="off"
         class="mt-2"
       />
     </div>

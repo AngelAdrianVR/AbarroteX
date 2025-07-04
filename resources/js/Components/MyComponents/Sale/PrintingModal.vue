@@ -1,13 +1,24 @@
 <template>
     <DialogModal :show="show" @close="$emit('close')" max-width="md">
-        <template #title> Impresión de ticket </template>
+        <template #title>
+            {{ printType === 'Ticket'
+                ? 'Impresión de ticket'
+                : 'Impresión de etiqueta' }}
+        </template>
         <template #content>
-            <div class="flex items-start space-x-4">
+            <div v-if="printType === 'Ticket'" class="flex items-start space-x-4">
                 <figure class="h-24">
                     <img src="@/../../public/images/ticket.png" :draggable="false"
                         class="select-none object-contain h-full" alt="Imagen de ticket de venta">
                 </figure>
                 <p class="w-2/3 text-base text-gray37">¿Desea imprimir el ticket de la venta?</p>
+            </div>
+            <div v-else class="flex items-start space-x-4">
+                <figure class="h-24">
+                    <img src="@/../../public/images/label.png" :draggable="false"
+                        class="select-none object-contain h-full" alt="Imagen de ticket de venta">
+                </figure>
+                <p class="w-2/3 text-base text-gray37">¿Desea imprimir la etiqueta del servicio?</p>
             </div>
             <div class="mt-3">
                 <div>
@@ -63,6 +74,7 @@ export default {
     data() {
         return {
             printerName: this.$page.props.auth.user.printer_config?.name ?? null,
+            printType: 'Ticket',
             availablePrinters: [],
             saleFolio: null,
             serial: null,
@@ -90,11 +102,6 @@ export default {
     computed: {
     },
     methods: {
-        /**
-        * --- AJUSTADO PARA 58mm: Genera el string del ticket con comandos ESC/POS. ---
-        * @param {boolean} hasCut - Si es true, añade el comando para cortar el papel al final.
-        * @returns {string} El texto formateado para la impresora.
-        */
         generateTicketCommands(hasCut = true) {
             const ESC = '\x1B';
             const GS = '\x1D';
@@ -135,7 +142,7 @@ export default {
                 // Alineamos las columnas manualmente con padEnd y padStart
                 let linea = '';
                 linea += cantidad.padEnd(2, ' ');
-                linea += ' ' + nombre.padEnd(18, ' '); // 2 + 1 + 18 = 21 caracteres
+                linea += ' ' + this.removeAccents(nombre).padEnd(18, ' '); // 2 + 1 + 18 = 21 caracteres
                 linea += totalProducto.padStart(11, ' '); // Alineado a la derecha, 11 caracteres
                 ticket += linea + '\n';
             });
@@ -173,7 +180,7 @@ export default {
             })
                 .then(device => {
                     this.device = device;
-                    this.printByBluetooh();
+                    this.printByBluetooth();
                 })
             // .catch(error => {
             //     console.error('Error al conectar con dispositivo Bluetooth:', error);
@@ -187,9 +194,14 @@ export default {
             }
             return chunks;
         },
+        removeAccents(text = '') {
+            if (!text) return '';
+            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        },
         async printByUSB() {
             this.printing = true;
 
+            // obtenemos las ventas si no se han cargado
             if (!this.sales.length && this.saleFolio) {
                 await this.getSalesByFolio();
             }
@@ -242,7 +254,7 @@ export default {
                 this.$emit('close'); // Cerrar el modal después de imprimir
             }
         },
-        async printByBluetooh() {
+        async printByBluetooth() {
             this.printing = true;
             try {
                 const service = await this.device.gatt.connect().then(server => server.getPrimaryService(this.UUIDService));
@@ -253,6 +265,10 @@ export default {
                     // Si se proporciona customData, lo usamos directamente
                     ticketText = this.customData;
                 } else {
+                    // obtenemos las ventas si no se han cargado
+                    if (!this.sales.length && this.saleFolio) {
+                        await this.getSalesByFolio();
+                    }
                     // Generamos el ticket para venta de productos
                     ticketText = this.generateTicketCommands(false);
                 }
@@ -265,7 +281,7 @@ export default {
                     await characteristic.writeValue(fragment);
                 }
             } catch (error) {
-                alert('Error al imprimir por Bluetooth. Asegúrate de que la impresora esté conectada.');
+                alert('Error al imprimir por Bluetooth. Asegúrate de que la impresora esté conectada. ' + error.message);
             } finally {
                 this.printing = false;
                 this.$emit('close');

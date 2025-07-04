@@ -4,7 +4,7 @@
             <Back />
 
             <form @submit.prevent="update"
-                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-2/3 xl:w-[58%] mx-auto mt-1 lg:grid lg:grid-cols-2 gap-3">
+                class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[75%] xl:w-[65%] mx-auto mt-1 lg:grid lg:grid-cols-2 gap-3">
                 <div class="flex items-center justify-between col-span-full mb-3">
                     <h1 class="font-bold ml-2 col-span-full">Editar orden de servicio</h1>
                     <div class="text-sm text-right">
@@ -57,7 +57,13 @@
                     <InputError :message="form.errors['product_details.imei']" />
                 </div>
                 <div class="col-span-full">
-                    <InputLabel value="Estado previo y características del equipo*" />
+                    <InputLabel value="Problema reportado*" />
+                    <el-input v-model="form.observations" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
+                        placeholder="Describe el problema mencionado por el cliente" :maxlength="1000" show-word-limit clearable />
+                    <InputError :message="form.errors.observations" />
+                </div>
+                <div class="col-span-full">
+                    <InputLabel value="Estado previo y características del equipo" />
                     <el-input v-model="form.description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
                         placeholder="Describe el estado del equipo" :maxlength="1000" show-word-limit
                         clearable />
@@ -69,13 +75,6 @@
                         placeholder="Describe el trabajo a realizar" :maxlength="1000" show-word-limit
                         clearable />
                     <InputError :message="form.errors.service_description" />
-                </div>
-                <div class="col-span-full">
-                    <InputLabel value="Comentarios adicionales" />
-                    <el-input v-model="form.observations" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
-                        placeholder="Escribe comentarios que consideres necesarios" :maxlength="1000" show-word-limit
-                        clearable />
-                    <InputError :message="form.errors.observations" />
                 </div>
                 
                 <h1 class="font-semibold text-gray37 ml-2 col-span-full mt-3">Refacciones</h1>
@@ -185,10 +184,10 @@
                     <div class="mt-3 ml-4">
                         <p>Accesorios</p>
                         <el-checkbox-group v-model="form.aditionals.accessories">
-                            <el-checkbox value="SIM"></el-checkbox>
-                            <el-checkbox value="Cargador"></el-checkbox>
-                            <el-checkbox value="Memoria"></el-checkbox>
-                            <el-checkbox value="Batería"></el-checkbox>
+                            <el-checkbox label="SIM"></el-checkbox>
+                            <el-checkbox label="Cargador"></el-checkbox>
+                            <el-checkbox label="Memoria"></el-checkbox>
+                            <el-checkbox label="Batería"></el-checkbox>
                         </el-checkbox-group>
                     </div>
                 </section>
@@ -198,16 +197,16 @@
 
                     <article class="mt-24 text-sm space-y-1">
                         <p class="flex">
-                            <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span class="w-24 text-right">{{ form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                            <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span class="w-16 text-right">{{ form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-24 text-right">{{ form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-16 text-right">{{ form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span class="w-24 text-right">{{ totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span class="w-16 text-right">{{ totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </p>
                         <p class="flex font-bold">
-                            <span class="w-32">Total restante</span><span class="ml-3">$</span><span class="w-24 text-right">{{ total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            <span class="w-32">Total restante</span><span class="ml-3">$</span><span class="w-16 text-right">{{ total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </p>
                     </article>
                 </section>

@@ -101,6 +101,13 @@ class CreateNewUser implements CreatesNewUsers
             'max_cash' => 5000,
             'store_id' => $store->id,
         ]);
+        
+        // Asigna la caja registradora a la tienda en las propiedades de la tienda en linea para que no haya error en corte automatico
+        $properties = $store->online_store_properties ?? []; // Copia actual del array o array vacío
+        $properties['online_sales_cash_register'] = $cash_register->id;
+
+        $store->online_store_properties = $properties; // Asignas el array completo de vuelta
+        $store->save();
 
         //crea al usuario relacionado a esta tienda con el rol de administrador
         $user = User::create([

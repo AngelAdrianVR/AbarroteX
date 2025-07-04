@@ -8,8 +8,8 @@
             <div class="md:flex justify-between mt-3 mb-5">
                 <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
                     formatDate(report.service_date) }}</span></p>
-                <el-dropdown :disabled="report.status === 'Cancelada'" split-button trigger="click" type="primary"
-                    @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
+                <el-dropdown v-if="report.status !== 'Cancelada'" :disabled="report.status === 'Cancelada'" split-button
+                    trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
                     Editar
@@ -23,7 +23,8 @@
                                         stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 Comprobante de servicio</el-dropdown-item>
-                            <el-dropdown-item :disabled="report.status === 'Cancelada'" @click="handleTicketPrinting">
+                            <el-dropdown-item :disabled="report.status === 'Cancelada'"
+                                @click="handleTicketPrinting('ESC/POS')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -32,7 +33,8 @@
                                 </svg>
                                 Imprimir ticket
                             </el-dropdown-item>
-                            <el-dropdown-item :disabled="report.status === 'Cancelada'">
+                            <el-dropdown-item :disabled="report.status === 'Cancelada'"
+                                @click="handleTicketPrinting('TSPL')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -157,6 +159,10 @@
                             <p class="text-red-500 w-56">Razón de cancelación: </p>
                             <p class="lg:w-1/2">{{ report.cancellation_reason ?? '-' }}</p>
                         </div>
+                        <div v-if="report.observations" class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
+                            <p class="text-[#373737] w-56">Problema reportado: </p>
+                            <p class="lg:w-1/2">{{ report.observations }}</p>
+                        </div>
                         <div class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
                             <p class="text-[#373737] w-56">Estado previo y características del equipo: </p>
                             <p class="lg:w-1/2">{{ report.description }}</p>
@@ -175,14 +181,16 @@
                         </div>
                         <div class="flex space-x-4 py-2 px-1">
                             <p class="text-[#373737] w-56">Porcentaje de comisión: </p>
-                            <p class="lg:w-1/2">{{ report.comision_percentage ?? '-' }}% => ${{
-                                ((report.comision_percentage / 100)
-                                    * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            <p v-if="report.comision_percentage" class="lg:w-1/2">{{ report.comision_percentage ?? '-'
+                                }}% => ${{
+                                    ((report.comision_percentage / 100)
+                                        * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            <p v-else class="lg:w-1/2">No aplica</p>
                         </div>
 
                         <h2 class="font-bold text-lg text-[#373737] mt-5 mb-2">Detalles del pago</h2>
 
-                        <div class="pb-2 border-b border-[#D9D9D9]">
+                        <div v-if="report.spare_parts?.length" class="pb-2 border-b border-[#D9D9D9]">
                             <div class="flex justify-between text-[#999999] font-bold">
                                 <p class="text-lg">Refacciones</p>
                                 <p class="text-lg">Total</p>
@@ -208,20 +216,22 @@
                                         ?? '0.00' }}</span>
                             </p>
                             <p class="flex">
+                                <span class="w-40">Refacciones</span><span class="ml-3">$</span><span
+                                    class="w-24 text-right">{{
+                                        totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            </p>
+                            <p class="flex">
                                 <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
                                     class="w-24 text-right">{{
                                         report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00'
                                     }}</span>
                             </p>
-                            <p class="flex">
-                                <span class="w-40">Refacciones</span><span class="ml-3">$</span><span
-                                    class="w-24 text-right">{{
-                                        totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                            </p>
                             <p class="flex font-bold">
                                 <span class="w-40">Total restante</span><span class="ml-3">$</span><span
                                     class="w-24 text-right">{{
-                                        report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                                        (report.total_cost -
+                                            report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                    }}</span>
                             </p>
 
                             <!-- Información de cancelación -->
@@ -240,8 +250,9 @@
                                 <p class="flex">
                                     <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span
                                         class="w-24 text-right">{{
-                                            parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                ",") ?? '0.00' }}</span>
+                                            report.aditionals.review_amount ?
+                                                parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                                    ",") : '0.00' }}</span>
                                 </p>
                                 <p class="flex">
                                     <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
@@ -251,15 +262,20 @@
                                 </p>
                                 <p v-if="report.aditionals?.review_amount < report.advance_payment" class="flex">
                                     <span class="w-40">Total devuelto</span><span class="ml-3">$</span><span
-                                        class="w-24 text-right">{{ (report.advance_payment -
-                                            parseFloat(report.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                ",") }}</span>
+                                        class="w-24 text-right">{{
+                                            report.aditionals.review_amount ?
+                                                (report.advance_payment -
+                                                    parseFloat(report.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                                        ",")
+                                                : report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                        }}</span>
                                 </p>
                                 <p v-else class="flex">
                                     <span class="w-40">Total pagado</span><span class="ml-3">$</span><span
                                         class="w-24 text-right">{{
-                                            parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                ",") }}</span>
+                                            (parseFloat(report.aditionals.review_amount) -
+                                                report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                        }}</span>
                                 </p>
                             </div>
                         </div>
@@ -341,6 +357,7 @@
 
         <!-- modal de impresión -->
         <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
+
         <!-- -------------- Modal de cancelacion ----------------------- -->
         <Modal :show="confirmCancelModal" @close="confirmCancelModal = false" maxWidth="2xl">
             <div class="p-5 relative">
@@ -423,7 +440,7 @@
                                 }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-[170px]">Anticipo</span><span class="ml-[2px]">$</span><span
+                            <span class="w-[162px]">Anticipo</span><span class="ml-[2px]">-$</span><span
                                 class="w-24 text-right">{{
                                     report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",") ?? '0.00' }}</span>
@@ -437,8 +454,9 @@
                         <p v-else class="flex">
                             <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span
                                 class="w-24 text-right">{{
-                                    reviewAmount ? (parseFloat(reviewAmount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                        ",")) :
+                                    reviewAmount ? ((parseFloat(reviewAmount) -
+                                        report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                            ",")) :
                                         '0.00' }}</span>
                         </p>
 
@@ -677,19 +695,130 @@ export default {
         }
     },
     methods: {
-        handleTicketPrinting() {
-            // enviar comandos al componente de impresión
-            this.$refs.printingModal.customData = this.generateServiceTicketCommands(false);
+        handleTicketPrinting(type) {
+            // enviar comandos al componente de impresión dependiendo del tipo de ticket
+            if (type === 'TSPL') {
+                this.$refs.printingModal.printType = 'Etiqueta';
+                this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
+            } else if (type === 'ESC/POS') {
+                this.$refs.printingModal.printType = 'Ticket';
+                this.$refs.printingModal.customData = this.generateESCPOSTicketCommands(false);
+            }
             this.showPrintingModal = true;
             if (!this.$page.props.auth.user.printer_config?.name) {
                 this.$refs.printingModal.getAvailablePrinters();
             }
         },
+        generateTSPLLabelCommands() {
+            // --- 1. Configuración de la Etiqueta ---
+            // Define aquí las dimensiones de tu etiqueta en milímetros.
+            const labelConfig = {
+                // widthMM: 97,  // Ancho de la etiqueta en mm
+                // heightMM: 48, // Alto de la etiqueta en mm
+                widthMM: 53,  // Ancho de la etiqueta en mm
+                heightMM: 30, // Alto de la etiqueta en mm
+                gapMM: 3,     // Espacio entre etiquetas en mm
+                dotsPerMM: 8  // Resolución de la impresora (203 dpi = 8 dots/mm)
+            };
+
+            // --- 2. Comandos Iniciales (¡La parte más importante!) ---
+            // SIZE: Define el tamaño de la etiqueta.
+            // GAP: Define la separación entre etiquetas. Esto corrige el problema de sobreimpresión.
+            // CODEPAGE: Define la tabla de caracteres. 1252 es para Latin-1 (incluye acentos, ñ).
+            // CLS: Limpia el búfer de la impresora antes de empezar a dibujar.
+            let commands = '';
+            commands += `SIZE ${labelConfig.widthMM} mm, ${labelConfig.heightMM} mm\n`;
+            commands += `GAP ${labelConfig.gapMM} mm, 0 mm\n`;
+            commands += `CODEPAGE 1252\n`;
+            commands += `CLS\n`;
+
+            // --- 3. Coordenadas y Diseño ---
+            let currentY = 15; // Posición Y inicial (margen superior en dots)
+            const startX = 15; // Posición X inicial (margen izquierdo en dots)
+            const rightMargin = 15;
+            const lineHeight = 22; // Espacio entre líneas
+            // const font = '"TSS24.BF2"'; // Fuente a utilizar. Las comillas dobles son importantes.
+            const font = '"1"'; // Fuente a utilizar. Las comillas dobles son importantes.
+            const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
+
+            /**
+             * Función auxiliar para añadir texto y manejar saltos de línea automáticos.
+             * @param {string} label - La etiqueta del campo (ej. "Nombre:").
+             * @param {string} value - El valor del campo.
+             */
+            const addTextLine = (label, value) => {
+                if (!value) return; // No añadir si el valor está vacío
+
+                let fullText = `${label} ${value}`;
+
+                // --- CÁLCULO DINÁMICO DEL MÁXIMO DE CARACTERES ---
+                // 1. Calcula el ancho total disponible para el texto en dots.
+                const availableWidth = (labelConfig.widthMM * labelConfig.dotsPerMM) - startX - rightMargin;
+                // 2. Calcula cuántos caracteres caben en ese espacio. Usamos Math.floor para redondear hacia abajo.
+                const maxLength = Math.floor(availableWidth / fontAvgCharWidth);
+
+                const textParts = [];
+                while (fullText.length > maxLength) {
+                    let chunk = fullText.substring(0, maxLength);
+                    let lastSpace = chunk.lastIndexOf(' ');
+                    if (lastSpace > 0) {
+                        chunk = chunk.substring(0, lastSpace);
+                    }
+                    textParts.push(chunk);
+                    fullText = fullText.substring(chunk.length).trim();
+                }
+                textParts.push(fullText);
+
+                // Imprime cada parte del texto
+                textParts.forEach(part => {
+                    // Se usa TEXT y se escapa el contenido para evitar conflictos con comillas
+                    commands += `TEXT ${startX},${currentY},${font},0,1,1,"${part.replace(/"/g, '\\"')}"\n`;
+                    currentY += lineHeight;
+                });
+            };
+
+            // --- 4. Contenido de la Etiqueta ---
+            addTextLine("Nombre:", this.removeAccents(this.report.client_name));
+            addTextLine("Recepcion:", this.report.service_date.split('T')[1]);
+            addTextLine("Equipo:", this.removeAccents(this.report.product_details?.brand) + ' ' + this.removeAccents(this.report.product_details?.model));
+            addTextLine("Desbloqueo:", this.report.aditionals?.unlockPassword ?? 'Por patron');
+            addTextLine("Problemas:", this.removeAccents(this.report.observations));
+            addTextLine("Servicio:", this.removeAccents(this.report.service_description));
+            addTextLine("Tecnico:", this.removeAccents(this.report.technician_name));
+
+            // --- 5. Código de Barras ---
+            if (this.report.folio) {
+                currentY += 10; // Espacio extra antes del código de barras
+                const folioPadded = String(this.report.folio).padStart(5, '0');
+
+                // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
+                const barcodeHeight = 30;    // Altura del código en dots
+                const narrowWidth = 2;     // Ancho de la barra más estrecha
+                const wideWidth = 5;       // Ancho de la barra más ancha
+
+                // Centrar el código de barras (opcional)
+                const barcodeX = startX;
+
+                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},0,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
+                currentY += barcodeHeight + 20; // Actualizar Y después del barcode
+            }
+
+            // --- 6. Comando de Impresión ---
+            // PRINT N, M -> Imprime N copias de la etiqueta M veces.
+            // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
+            commands += 'PRINT 1\n';
+
+            console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
+            return commands;
+        },
         removeAccents(text = '') {
             if (!text) return '';
+            // cambiar ñ por n
+            text = text.replace(/ñ/g, 'n').replace(/Ñ/g, 'N');
+            // Normalizar el texto y eliminar los acentos
             return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         },
-        generateServiceTicketCommands(hasCut = true) {
+        generateESCPOSTicketCommands(hasCut = true) {
             const ESC = '\x1B';
             const GS = '\x1D';
             const INICIALIZAR_IMPRESORA = ESC + '@';
@@ -898,7 +1027,8 @@ export default {
                             this.paymentModalStep = 1; //reinicia el paso del modal de pago
                         }, 1000);
                     } else if (newStatus === 'Cancelada') {
-                        this.report.aditionals = this.report.aditionals || {};
+                        window.location.reload(); // Recarga la página para reflejar el cambio de estado
+                        // this.report.aditionals = this.report.aditionals || {};
                     }
                 } else {
                     this.$notify({
