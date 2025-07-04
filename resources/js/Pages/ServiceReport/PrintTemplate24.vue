@@ -45,8 +45,8 @@
                 <section class="grid grid-cols-3 gap-x-1 text-xs">
                     <article class="col-span-2 pt-2 space-y-1">
                         <div class="border border-[#D9D9D9] rounded-xl py-1 px-4">
-                            <p>Estado previo y características del equipo:</p>
-                            <span class="font-semibold">{{ report.description ?? '-' }}</span>
+                            <p>Problema reportado:</p>
+                            <span class="font-semibold">{{ report.observations ?? '-' }}</span>
                         </div>
                         <div class="border border-[#D9D9D9] rounded-xl py-1 px-4">
                             <p>Servicios a realizar:</p>
