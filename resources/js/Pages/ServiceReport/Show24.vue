@@ -181,9 +181,10 @@
                         </div>
                         <div class="flex space-x-4 py-2 px-1">
                             <p class="text-[#373737] w-56">Porcentaje de comisión: </p>
-                            <p class="lg:w-1/2">{{ report.comision_percentage ?? '-' }}% => ${{
+                            <p v-if="report.comision_percentage" class="lg:w-1/2">{{ report.comision_percentage ?? '-' }}% => ${{
                                 ((report.comision_percentage / 100)
                                     * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            <p v-else class="lg:w-1/2">No aplica</p>                        
                         </div>
 
                         <h2 class="font-bold text-lg text-[#373737] mt-5 mb-2">Detalles del pago</h2>
@@ -437,7 +438,7 @@
                                 }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-[170px]">Anticipo</span><span class="ml-[2px]">$</span><span
+                            <span class="w-[162px]">Anticipo</span><span class="ml-[2px]">-$</span><span
                                 class="w-24 text-right">{{
                                     report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                         ",") ?? '0.00' }}</span>

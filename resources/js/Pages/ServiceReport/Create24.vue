@@ -52,13 +52,13 @@
                     <InputError :message="form.errors['product_details.imei']" />
                 </div>
                 <div class="col-span-full">
-                    <InputLabel value="Problema reportado" />
+                    <InputLabel value="Problema reportado*" />
                     <el-input v-model="form.observations" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
                         placeholder="Describe el problema mencionado por el cliente" :maxlength="1000" show-word-limit clearable />
                     <InputError :message="form.errors.observations" />
                 </div>
                 <div class="col-span-full">
-                    <InputLabel value="Estado previo y características del equipo*" />
+                    <InputLabel value="Estado previo y características del equipo" />
                     <el-input v-model="form.description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
                         placeholder="Describe el estado del equipo" :maxlength="1000" show-word-limit clearable />
                     <InputError :message="form.errors.description" />
@@ -131,7 +131,7 @@
                         </el-tooltip>
                     </div>
                     <el-input v-model="form.comision_percentage" placeholder="Ej. 10" clearable
-                        @input="onPercentageInput">
+                        @input="onPercentageInput" autocomplete="off">
                         <template #append>%</template>
                     </el-input>
                     <InputError :message="form.errors.comision_percentage" />

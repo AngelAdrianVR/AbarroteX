@@ -203,5 +203,6 @@ return [
         'service_description' => 'descripción de servicios',
         'service_cost' => 'costo de servicio',
         'payment_method' => 'método de pago',
+        'observations' => '',
     ],
 ];
