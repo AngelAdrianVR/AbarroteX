@@ -159,6 +159,25 @@ export default {
                 linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
                 linea += ('$' + totalProducto).padStart(colAnchoTotal); // Añadimos '$' y alineamos
                 ticket += linea + '\n';
+
+                if (sale.promotions_applied && sale.promotions_applied.length > 0) {
+                    sale.promotions_applied.forEach(promo => {
+                        // 1. Reinicia la variable 'linea' en CADA iteración para no acumular texto.
+                        let lineaPromo = '';
+
+                        // 2. Indenta la descripción para mayor claridad y ajústala al ancho de las primeras dos columnas.
+                        const textoPromo = 'Descuento por promo';
+                        // lineaPromo += textoPromo.padEnd(colAnchoCant + colAnchoNombre);
+                        lineaPromo += textoPromo.padEnd(colAnchoCant + colAnchoNombre - 1);
+
+                        // 3. Ajusta el descuento al ancho EXACTO de la columna de total.
+                        const discounted = promo.discount.toFixed(2);
+                        const textoDescuento = '-$' + discounted;
+                        lineaPromo += textoDescuento.padStart(colAnchoTotal);
+
+                        ticket += lineaPromo + '\n';
+                    });
+                }
             });
 
             ticket += separador;
@@ -185,7 +204,10 @@ export default {
         },
         totalSale() {
             return this.sales.reduce((total, item) => {
-                return total + item.current_price * item.quantity;
+                const priceToUse = item.discounted_price !== null
+                    ? item.discounted_price
+                    : item.current_price;
+                return total + priceToUse * item.quantity;
             }, 0);
         },
         connectBluetooth() {

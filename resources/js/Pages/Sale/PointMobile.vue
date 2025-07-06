@@ -1299,9 +1299,6 @@ export default {
           if (this.automaticPrinting) {
             this.showPrintingModal = true;
             this.$refs.printingModal.saleFolio = response.data.folio_stored;
-            if (!this.$page.props.auth.user.printer_config?.name) {
-              this.$refs.printingModal.getAvailablePrinters();
-            }
           }
         }
       } catch (error) {
