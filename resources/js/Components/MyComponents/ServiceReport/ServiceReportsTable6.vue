@@ -95,8 +95,8 @@ export default {
         return {
             showDeleteConfirm: false,
             itemIdToDelete: null,
-            canEdit: true,
-            canDelete: true,
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar ordenes de servicio'),
+            canDelete: this.$page.props.auth.user.permissions.includes('Eliminar ordenes de servicio'),
         }
     },
     components: {

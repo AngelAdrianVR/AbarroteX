@@ -8,7 +8,7 @@
             <div class="md:flex justify-between mt-3 mb-5">
                 <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
                     formatDate(report.service_date) }}</span></p>
-                <el-dropdown v-if="report.status !== 'Cancelada'" :disabled="report.status === 'Cancelada'" split-button
+                <el-dropdown v-if="report.status !== 'Cancelada' && canEdit" :disabled="report.status === 'Cancelada'" split-button
                     trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
@@ -46,7 +46,7 @@
                                 </svg>
                                 Generar etiqueta
                             </el-dropdown-item>
-                            <el-dropdown-item @click="confirmDeleteModal = true">
+                            <el-dropdown-item @click="confirmDeleteModal = true" v-if="$page.props.auth.user.permissions.includes('Eliminar ordenes de servicio')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -96,7 +96,7 @@
                                     fill="#373737" />
                             </svg>
                         </template>
-                        <template #label-2>Listo para entrega</template>
+                        <template #label-2>Listo para entregar</template>
 
                         <template #icon-3>
                             <svg class="size-[14px] mr-2" width="13" height="13" viewBox="0 0 13 13" fill="none"
@@ -122,20 +122,20 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-between my-2 ml-4">
-                        <button v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada'"
+                    <div class="flex items-start justify-between my-2 ml-4">
+                        <button v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit"
                             @click="confirmCancelModal = true"
-                            class="flex items-center hover:underline text-red-600 text-xs md:text-base">
-                            <svg class="size-[14px] mr-2" width="13" height="13" viewBox="0 0 13 13" fill="none"
+                            class="flex items-center space-x-2 text-gray37 text-[11px] md:text-[13px] border-b border-gray37">
+                            <svg class="size-[12px]" width="12" height="12" viewBox="0 0 13 13" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M8.97288 4.41695L6.69492 6.69492M4.41695 8.97288L6.69492 6.69492M6.69492 6.69492L4.41695 4.41695M6.69492 6.69492L8.97288 8.97288M12.3898 6.69492C12.3898 9.84013 9.84013 12.3898 6.69492 12.3898C3.5497 12.3898 1 9.84013 1 6.69492C1 3.5497 3.5497 1 6.69492 1C9.84013 1 12.3898 3.5497 12.3898 6.69492Z"
                                     stroke="currentColor" stroke-width="1.13898" stroke-linecap="round"
                                     stroke-linejoin="round" />
                             </svg>
-                            Cancelar orden de servicio
+                            <span>Cancelar orden de servicio</span>
                         </button>
-                        <el-popconfirm v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada'"
+                        <el-popconfirm v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit"
                             confirm-button-text="Si" cancel-button-text="No" icon-color="#6F6E72"
                             :title="'Cambiar estatus?'"
                             @confirm="handleChangeStatus(statuses[statuses.findIndex(status => status === report.status) + 1])">
@@ -353,7 +353,6 @@
 
         <!-- modal de impresión -->
         <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
-
         <!-- -------------- Modal de cancelacion ----------------------- -->
         <Modal :show="confirmCancelModal" @close="confirmCancelModal = false" maxWidth="2xl">
             <div class="p-5 relative">
@@ -645,7 +644,7 @@ import PrintingModal from "@/Components/MyComponents/Sale/PrintingModal.vue";
 export default {
     data() {
         return {
-            statuses: ['Recibida', 'En proceso', 'Listo para entrega', 'Entregado/Pagado'],
+            statuses: ['Recibida', 'En proceso', 'Listo para entregar', 'Entregado/Pagado'],
             allAccessories: ['SIM', 'Cargador', 'Memoria', 'Bateria'],
             updatingStatus: false, // Estado para indicar si se está actualizando el estado
             confirmDeleteModal: false, // Estado para el modal de confirmación de eliminación
@@ -661,6 +660,7 @@ export default {
             paymentConfirmed: false, //indica si el pago ha sido confirmado
             moneyReceived: null, // Monto recibido en efectivo
             showPrintingModal: false,
+            canEdit: this.$page.props.auth.user.permissions.includes('Editar ordenes de servicio')
         }
     },
     components: {
@@ -694,25 +694,20 @@ export default {
         handleTicketPrinting(type) {
             // enviar comandos al componente de impresión dependiendo del tipo de ticket
             if (type === 'TSPL') {
-                this.$refs.printingModal.printType = 'Etiqueta';
+                this.$refs.printingModal.setLabelMode();
                 this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
             } else if (type === 'ESC/POS') {
-                this.$refs.printingModal.printType = 'Ticket';
+                this.$refs.printingModal.seTicketMode();
                 this.$refs.printingModal.customData = this.generateESCPOSTicketCommands(false);
             }
             this.showPrintingModal = true;
-            if (!this.$page.props.auth.user.printer_config?.name) {
-                this.$refs.printingModal.getAvailablePrinters();
-            }
         },
         generateTSPLLabelCommands() {
             // --- 1. Configuración de la Etiqueta ---
             // Define aquí las dimensiones de tu etiqueta en milímetros.
             const labelConfig = {
-                // widthMM: 97,  // Ancho de la etiqueta en mm
-                // heightMM: 48, // Alto de la etiqueta en mm
-                widthMM: 53,  // Ancho de la etiqueta en mm
-                heightMM: 30, // Alto de la etiqueta en mm
+                widthMM: this.$page.props.auth.user.printer_config?.labelWidth,  // Ancho de la etiqueta en mm
+                heightMM: this.$page.props.auth.user.printer_config?.labelHeight, // Alto de la etiqueta en mm
                 gapMM: 3,     // Espacio entre etiquetas en mm
                 dotsPerMM: 8  // Resolución de la impresora (203 dpi = 8 dots/mm)
             };
@@ -732,7 +727,7 @@ export default {
             let currentY = 15; // Posición Y inicial (margen superior en dots)
             const startX = 15; // Posición X inicial (margen izquierdo en dots)
             const rightMargin = 15;
-            const lineHeight = 22; // Espacio entre líneas
+            const lineHeight = this.$page.props.auth.user.printer_config?.labelLineHeight; // Espacio entre líneas
             // const font = '"TSS24.BF2"'; // Fuente a utilizar. Las comillas dobles son importantes.
             const font = '"1"'; // Fuente a utilizar. Las comillas dobles son importantes.
             const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
@@ -777,6 +772,7 @@ export default {
             addTextLine("Nombre:", this.removeAccents(this.report.client_name.slice(0, 20)));
             // addTextLine("Recepcion:", this.report.service_date.split('T')[0]);
             addTextLine("Equipo:", this.removeAccents(this.report.product_details?.brand) + ' ' + this.removeAccents(this.report.product_details?.model));
+            addTextLine("Total:", '$' + (this.totalSpareParts + this.report.service_cost));
             addTextLine("Desbloqueo:", this.report.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.report.observations));
             addTextLine("Servicio:", this.removeAccents(this.report.service_description));
@@ -784,18 +780,18 @@ export default {
 
             // --- 5. Código de Barras ---
             if (this.report.folio) {
-                currentY += 10; // Espacio extra antes del código de barras
+                currentY += 5; // Espacio extra antes del código de barras
                 const folioPadded = String(this.report.folio).padStart(5, '0');
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
-                const barcodeHeight = 25;    // Altura del código en dots
+                const barcodeHeight = 22;    // Altura del código en dots
                 const narrowWidth = 2;     // Ancho de la barra más estrecha
                 const wideWidth = 5;       // Ancho de la barra más ancha
 
                 // Centrar el código de barras (opcional)
                 const barcodeX = startX;
 
-                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},0,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
+                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},1,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
                 currentY += barcodeHeight + 20; // Actualizar Y después del barcode
             }
 

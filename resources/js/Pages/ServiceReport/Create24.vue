@@ -324,9 +324,6 @@ export default {
                     //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
                     if (this.automaticPrinting) {
                         this.showPrintingModal = true;
-                        if (!this.$page.props.auth.user.printer_config?.name) {
-                            this.$refs.printingModal.getAvailablePrinters();
-                        }
                     }
                 }
             });
@@ -335,10 +332,8 @@ export default {
             if (this.$refs.printingModal.printType == 'Etiqueta') {
                 this.$inertia.visit(route('service-reports.index'));
             } else {
-                // this.showPrintingModal = false;
-                this.$refs.printingModal.printType = 'Etiqueta';
+                this.$refs.printingModal.setLabelMode();
                 this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
-                // this.showPrintingModal = true;
             }
         },
         generateServiceTicketCommands(hasCut = true) {
@@ -456,10 +451,8 @@ export default {
             // --- 1. Configuración de la Etiqueta ---
             // Define aquí las dimensiones de tu etiqueta en milímetros.
             const labelConfig = {
-                // widthMM: 97,  // Ancho de la etiqueta en mm
-                // heightMM: 48, // Alto de la etiqueta en mm
-                widthMM: 53,  // Ancho de la etiqueta en mm
-                heightMM: 30, // Alto de la etiqueta en mm
+                widthMM: this.$page.props.auth.user.printer_config?.labelWidth,  // Ancho de la etiqueta en mm
+                heightMM: this.$page.props.auth.user.printer_config?.labelHeight, // Alto de la etiqueta en mm
                 gapMM: 3,     // Espacio entre etiquetas en mm
                 dotsPerMM: 8  // Resolución de la impresora (203 dpi = 8 dots/mm)
             };
@@ -479,7 +472,7 @@ export default {
             let currentY = 15; // Posición Y inicial (margen superior en dots)
             const startX = 15; // Posición X inicial (margen izquierdo en dots)
             const rightMargin = 15;
-            const lineHeight = 22; // Espacio entre líneas
+            const lineHeight = this.$page.props.auth.user.printer_config?.labelLineHeight; // Espacio entre líneas
             // const font = '"TSS24.BF2"'; // Fuente a utilizar. Las comillas dobles son importantes.
             const font = '"1"'; // Fuente a utilizar. Las comillas dobles son importantes.
             const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
@@ -524,6 +517,7 @@ export default {
             addTextLine("Nombre:", this.removeAccents(this.form.client_name.slice(0, 20)));
             // addTextLine("Recepcion:", this.report.service_date.split('T')[0]);
             addTextLine("Equipo:", this.removeAccents(this.form.product_details?.brand) + ' ' + this.removeAccents(this.form.product_details?.model));
+            addTextLine("Total:", '$' + (this.totalSpareParts + this.form.service_cost));
             addTextLine("Desbloqueo:", this.form.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.form.observations));
             addTextLine("Servicio:", this.removeAccents(this.form.service_description));
@@ -531,18 +525,18 @@ export default {
 
             // --- 5. Código de Barras ---
             if (this.folio) {
-                currentY += 10; // Espacio extra antes del código de barras
+                currentY += 5; // Espacio extra antes del código de barras
                 const folioPadded = String(this.folio).padStart(5, '0');
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
-                const barcodeHeight = 25;    // Altura del código en dots
+                const barcodeHeight = 22;    // Altura del código en dots
                 const narrowWidth = 2;     // Ancho de la barra más estrecha
                 const wideWidth = 5;       // Ancho de la barra más ancha
 
                 // Centrar el código de barras (opcional)
                 const barcodeX = startX;
 
-                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},0,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
+                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},1,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
                 currentY += barcodeHeight + 20; // Actualizar Y después del barcode
             }
 
