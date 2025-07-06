@@ -35,7 +35,7 @@ export default {
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '45%', // Columnas más delgadas
+                        columnWidth: '55%', // Columnas más delgadas
                         endingShape: 'rounded'
                     },
                 },
@@ -121,7 +121,7 @@ export default {
     },
     methods: {
         areSeriesEmpty() {
-            const allZeroValues = this.options.series.every(series => {
+            const allZeroValues = this.options?.series?.every(series => {
                 return series.data.every(value => {
                     return parseInt(value) === 0;
                 });

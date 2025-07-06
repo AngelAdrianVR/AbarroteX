@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Expense;
 use App\Models\OnlineSale;
 use App\Models\Sale;
+use App\Models\ServiceReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,28 +20,40 @@ class DashboardController extends Controller
     public function getDayData($date)
     {
         $prev_date = Carbon::parse($date)->subDay()->toDateString();
+
         $sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
         $last_period_sales = Sale::where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
+
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
         $last_period_expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $prev_date)->get();
-        // activar solo si la tienda tiene el paquete para hacer ventas en linea
+
         $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
             ->whereNotNull('delivered_at')
             ->whereDate('created_at', $date)
             ->get();
-            
+
         $last_period_online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
             ->whereNotNull('delivered_at')
             ->whereDate('created_at', $prev_date)
             ->get();
 
-        // Obtener los productos más vendidos para la tienda del usuario autenticado en la fecha seleccionada
         $top_products = Sale::where('store_id', auth()->user()->store_id)
-            ->whereDate('created_at', $date) // Filtrar por la fecha seleccionada
-            ->select('product_name', DB::raw('SUM(quantity) as total_quantity')) // Seleccionar el nombre del producto y la suma de cantidades
-            ->groupBy('product_name') // Agrupar por nombre del producto
-            ->orderByDesc('total_quantity') // Ordenar por la cantidad total en orden descendente
-            ->take(5) // Limitar a los 5 más vendidos
+            ->whereDate('created_at', $date)
+            ->select('product_name', DB::raw('SUM(quantity) as total_quantity'))
+            ->groupBy('product_name')
+            ->orderByDesc('total_quantity')
+            ->take(5)
+            ->get();
+
+        // órdenes de servicio completadas
+        $completed_service_orders = ServiceReport::where('store_id', auth()->user()->store_id)
+            ->whereDate('paid_at', $date)
+            ->where('status', 'Entregado/Pagado')
+            ->get();
+
+        $last_period_completed_service_orders = ServiceReport::where('store_id', auth()->user()->store_id)
+            ->whereDate('paid_at', $prev_date)
+            ->where('status', 'Entregado/Pagado')
             ->get();
 
         return response()->json(compact(
@@ -51,8 +64,11 @@ class DashboardController extends Controller
             'last_period_expenses',
             'online_sales',
             'last_period_online_sales',
+            'completed_service_orders',
+            'last_period_completed_service_orders',
         ));
     }
+
 
     public function getWeekData($date)
     {
@@ -104,7 +120,29 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return response()->json(compact('sales', 'last_period_sales', 'online_sales', 'last_period_online_sales', 'top_products', 'expenses', 'last_period_expenses'));
+        // órdenes de servicio completadas
+        $completed_service_orders = ServiceReport::where('store_id', auth()->user()->store_id)
+            ->whereBetween('paid_at', [$startOfWeek, $endOfWeek])
+            ->where('status', 'Entregado/Pagado')
+            ->get();
+
+        $last_period_completed_service_orders = ServiceReport::where('store_id', auth()->user()->store_id)
+            ->whereBetween('paid_at', [
+                Carbon::parse($prev_date)->startOfWeek(Carbon::SUNDAY)->toDateString(),
+                Carbon::parse($prev_date)->endOfWeek(Carbon::SATURDAY)->toDateString()
+            ])
+            ->where('status', 'Entregado/Pagado')
+            ->get();
+
+        return response()->json(compact('sales', 
+            'last_period_sales', 
+            'online_sales', 
+            'last_period_online_sales', 
+            'top_products', 'expenses', 
+            'last_period_expenses',
+            'completed_service_orders',
+            'last_period_completed_service_orders',
+        ));
     }
 
 
@@ -153,8 +191,30 @@ class DashboardController extends Controller
             ->orderByDesc('total_quantity')
             ->take(5)
             ->get();
+
+        // órdenes de servicio completadas
+        $completed_service_orders = ServiceReport::where('store_id', auth()->user()->store_id)
+            ->whereYear('paid_at', $current_month->year)
+            ->whereMonth('paid_at', $current_month->month)
+            ->where('status', 'Entregado/Pagado')
+            ->get();
+
+        $last_period_completed_service_orders = ServiceReport::where('store_id', auth()->user()->store_id)
+            ->whereYear('paid_at', $prev_month->year)
+            ->whereMonth('paid_at', $prev_month->month)
+            ->where('status', 'Entregado/Pagado')
+            ->get();
         
 
-        return response()->json(compact('sales', 'last_period_sales', 'online_sales', 'last_period_online_sales', 'top_products', 'expenses', 'last_period_expenses'));
+        return response()->json(compact('sales', 
+            'last_period_sales', 
+            'online_sales', 
+            'last_period_online_sales', 
+            'top_products', 
+            'expenses', 
+            'last_period_expenses',
+            'completed_service_orders',
+            'last_period_completed_service_orders',
+        ));
     }
 }
