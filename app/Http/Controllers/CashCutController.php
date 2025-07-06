@@ -8,6 +8,7 @@ use App\Models\CashRegisterMovement;
 use App\Models\CreditSaleData;
 use App\Models\OnlineSale;
 use App\Models\Sale;
+use App\Models\ServiceReport;
 use App\Models\Store;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,7 +32,10 @@ class CashCutController extends Controller
     {
         $request->validate([
             'withdrawn_cash' => 'nullable|numeric|min:0|max:' . $request->counted_cash,
+            'withdrawn_card' => 'nullable|numeric|min:0|max:' . $request->counted_card,
         ]);
+
+        // return $request;
 
         // obtiene la caja registradora de la tienda a la cual se hará el corte
         $cash_register = CashRegister::with(['movements'])->find($request->cash_register_id);
@@ -40,19 +44,31 @@ class CashCutController extends Controller
         $expected_cash = $cash_register->started_cash
             + $request->totalCashMovements
             + $request->totalStoreSale['cash']
-            // + $request->totalStoreSale['card'] // las ventas con tarjeta no se suman al corte de caja, ya que no se cuentan en efectivo.
-            + $request->totalOnlineSale;
+            + $request->totalOnlineSale['cash']
+            + $request->totalServiceOrders['cash'];
+
+        $expected_card = $request->totalStoreSale['card']
+            + $request->totalOnlineSale['card']
+            + $request->totalServiceOrders['card'];
 
         //Crea el registro de corte de caja
         CashCut::create([
             'started_cash' => $cash_register->started_cash,
-            'expected_cash' => $expected_cash, //suma de ventas, ingresos, retiros de caja y dinero inicial.
+            'started_card' => $cash_register->started_card,
+            'expected_cash' => $expected_cash, // suma de ventas, ingresos, retiros de caja y dinero inicial.
+            'expected_card' => $expected_card, // suma de ventas, ingresos, retiros de tarjeta y dinero inicial.
             'store_sales_cash' => $request->totalStoreSale['cash'], //ventas de tienda en efectivo
             'store_sales_card' => $request->totalStoreSale['card'], //ventas de tienda con tarjeta
-            'online_sales_cash' => $request->totalOnlineSale, //ventas en línea
+            'online_sales_cash' => $request->totalOnlineSale['cash'], //ventas en línea pago en efectivo
+            'online_sales_card' => $request->totalOnlineSale['card'], //ventas en línea pago con tarjeta
+            'service_orders_cash' => $request->totalServiceOrders['cash'], //ventas de ordenes de servicio en efectivo
+            'service_orders_card' => $request->totalServiceOrders['card'], //ventas de
             'counted_cash' => $request->counted_cash, //dinero contado manualmente
-            'difference' => $request->difference * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
-            'withdrawn_cash' => $request->withdrawn_cash, 
+            'counted_card' => $request->counted_card, //dinero contado en tarjeta
+            'difference_cash' => $request->difference_cash * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
+            'difference_card' => $request->difference_card * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
+            'withdrawn_cash' => $request->withdrawn_cash, //dinero retirado de caja en efectivo
+            'withdrawn_card' => $request->withdrawn_card, //dinero retirado de tarjeta
             'notes' => $request->notes,
             'cash_register_id' => $cash_register->id,
             'store_id' => auth()->user()->store_id,
@@ -82,15 +98,17 @@ class CashCutController extends Controller
             ->map(function ($group) {
                 $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
                 $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
-                $total_difference = $group->sum('difference');
+                $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+                $total_difference = $group->sum('difference_cash') + $group->sum('difference_card');
                 $amount_sales_products = $group->count();
 
                 return [
                     'cuts' => $group,
                     'total_store_sales' => $total_store_sales,
                     'total_online_sales' => $total_online_sales,
-                    'total_sales' => $total_store_sales + $total_online_sales,
-                    'total_difference' => $total_difference,
+                    'total_service_orders' => $total_service_orders,
+                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
+                    'total_difference' => $total_difference ,
                     'amount_sales_products' => $amount_sales_products
                 ];
             });
@@ -151,61 +169,67 @@ class CashCutController extends Controller
         return inertia('CashRegister/Print', compact('groupedCashCuts'));
     }
 
-
-    //METODO PARA RECUPERAR VENTAS PARA CORTE SIN TOMAR EN CUENTA PAGOS CON TARJETA
+    // Metodo para realizar cortes de caja tomando en cuenta 2 metodos de pago, solo tiene ventas en linea y en tienda (falta ordenes de servicio y cotizaciones)
     // public function fetchTotalSaleForCashCut($cash_register_id)
     // {
-    //     //recupera el último corte realizado
+    //     $store_id = auth()->user()->store_id;
     //     $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
-
-    //     //recupera las configuraciones de la tienda en linea.
     //     $online_store_properties = auth()->user()->store->online_store_properties;
     //     $online_sales = null;
 
-    //     // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
+    //     $has_online_sales_cash_register = is_array($online_store_properties)
+    //         && array_key_exists('online_sales_cash_register', $online_store_properties)
+    //         && intval($online_store_properties['online_sales_cash_register']) === intval($cash_register_id);
+
     //     if ($last_cash_cut !== null) {
     //         $sales = Sale::where('cash_register_id', $cash_register_id)
     //             ->where('created_at', '>', $last_cash_cut->created_at)
-    //             ->where('payment_method', 'Efectivo')
     //             ->get();
-            
-    //         //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-    //         if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === intval($cash_register_id)) {
+
+    //         if ($has_online_sales_cash_register) {
     //             $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
     //                 ->whereIn('status', ['Entregado', 'Reembolsado'])
     //                 ->where('created_at', '>', $last_cash_cut->created_at)
     //                 ->get();
     //         }
     //     } else {
-    //         //recupera las ventas en línea si la caja registradora configurada para esas ventas es la misma enviada por parametro.
-    //         if ($online_store_properties && $online_store_properties['online_sales_cash_register'] === intval($cash_register_id)) {
-
+    //         $sales = Sale::where('cash_register_id', $cash_register_id)->get();
+            
+    //         if ($has_online_sales_cash_register) {
     //             $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
-    //                 ->whereIn('status', ['Entregado', 'Reembolsado'])
-    //                 ->get();
+    //             ->whereIn('status', ['Entregado', 'Reembolsado'])
+    //             ->get();
     //         }
-    //         $sales = Sale::where('cash_register_id', $cash_register_id)->where('payment_method', 'Efectivo')->get();
     //     }
-
-    //     // Filtra las ventas a crédito por folio
-    //     $credit_sales_folios = CreditSaleData::pluck('folio')->toArray();
+        
+    //     // Filtra las ventas a crédito
+    //     $credit_sales_folios = CreditSaleData::where('store_id', $store_id)->pluck('folio')->toArray();
     //     $filtered_sales = $sales->reject(function ($sale) use ($credit_sales_folios) {
     //         return in_array($sale->folio, $credit_sales_folios);
     //     });
-
-    //     // Calcula el total de ventas
-    //     $total_sales = $filtered_sales->sum(function ($sale) {
+        
+    //     // Separa ventas por método de pago
+    //     $cash_sales = $filtered_sales->where('payment_method', 'Efectivo');
+    //     $card_sales = $filtered_sales->where('payment_method', 'Tarjeta');
+        
+    //     // Calcula los totales
+    //     $total_cash_sales = $cash_sales->sum(function ($sale) {
     //         return $sale->quantity * $sale->current_price;
     //     });
 
-    //     // Suma todos los totales de las ventas en línea más el costo de envío en caso de haber
+    //     $total_card_sales = $card_sales->sum(function ($sale) {
+    //         return $sale->quantity * $sale->current_price;
+    //     });
+
     //     $total_online_sales = $online_sales?->sum(function ($online_sale) {
     //         return $online_sale->total + $online_sale->delivery_price;
     //     });
-        
 
     //     return response()->json([
-    //         'store_sales' => $total_sales ?? 0,
+    //         'store_sales' => [
+    //             'cash' => $total_cash_sales,
+    //             'card' => $total_card_sales,
+    //         ],
     //         'online_sales' => $total_online_sales ?? 0,
     //     ]);
     // }
@@ -215,7 +239,8 @@ class CashCutController extends Controller
         $store_id = auth()->user()->store_id;
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
         $online_store_properties = auth()->user()->store->online_store_properties;
-        $online_sales = null;
+        $online_sales = collect();
+        $service_orders = collect();
 
         $has_online_sales_cash_register = is_array($online_store_properties)
             && array_key_exists('online_sales_cash_register', $online_store_properties)
@@ -227,50 +252,65 @@ class CashCutController extends Controller
                 ->get();
 
             if ($has_online_sales_cash_register) {
-                $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
+                $online_sales = OnlineSale::where('store_id', $store_id)
                     ->whereIn('status', ['Entregado', 'Reembolsado'])
                     ->where('created_at', '>', $last_cash_cut->created_at)
                     ->get();
             }
+
+            $service_orders = ServiceReport::where('store_id', $store_id)
+                ->whereIn('status', ['Entregado/Pagado', 'Cancelada'])
+                ->where('paid_at', '>', $last_cash_cut->created_at)
+                ->get();
         } else {
             $sales = Sale::where('cash_register_id', $cash_register_id)->get();
-            
+
             if ($has_online_sales_cash_register) {
-                $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
-                ->whereIn('status', ['Entregado', 'Reembolsado'])
-                ->get();
+                $online_sales = OnlineSale::where('store_id', $store_id)
+                    ->whereIn('status', ['Entregado', 'Reembolsado'])
+                    ->get();
             }
+
+            $service_orders = ServiceReport::where('store_id', $store_id)
+                ->whereIn('status', ['Entregado/Pagado', 'Cancelada'])
+                ->get();
         }
-        
+
         // Filtra las ventas a crédito
         $credit_sales_folios = CreditSaleData::where('store_id', $store_id)->pluck('folio')->toArray();
         $filtered_sales = $sales->reject(function ($sale) use ($credit_sales_folios) {
             return in_array($sale->folio, $credit_sales_folios);
         });
-        
+
         // Separa ventas por método de pago
         $cash_sales = $filtered_sales->where('payment_method', 'Efectivo');
         $card_sales = $filtered_sales->where('payment_method', 'Tarjeta');
-        
-        // Calcula los totales
-        $total_cash_sales = $cash_sales->sum(function ($sale) {
-            return $sale->quantity * $sale->current_price;
-        });
 
-        $total_card_sales = $card_sales->sum(function ($sale) {
-            return $sale->quantity * $sale->current_price;
-        });
+        // Calcula totales de ventas en tienda
+        $total_cash_sales = $cash_sales->sum(fn($sale) => $sale->quantity * $sale->current_price);
+        $total_card_sales = $card_sales->sum(fn($sale) => $sale->quantity * $sale->current_price);
 
-        $total_online_sales = $online_sales?->sum(function ($online_sale) {
-            return $online_sale->total + $online_sale->delivery_price;
-        });
+        // Ventas en línea por método de pago
+        $online_cash_sales = $online_sales->where('payment_method', 'Efectivo')->sum(fn($o) => $o->total + $o->delivery_price);
+        $online_card_sales = $online_sales->where('payment_method', 'Tarjeta')->sum(fn($o) => $o->total + $o->delivery_price);
+
+        // Órdenes de servicio por método de pago
+        $service_cash_sales = $service_orders->where('payment_method', 'Efectivo')->sum('service_cost');
+        $service_card_sales = $service_orders->where('payment_method', 'Tarjeta')->sum('service_cost');
 
         return response()->json([
             'store_sales' => [
                 'cash' => $total_cash_sales,
                 'card' => $total_card_sales,
             ],
-            'online_sales' => $total_online_sales ?? 0,
+            'online_sales' => [
+                'cash' => $online_cash_sales,
+                'card' => $online_card_sales,
+            ],
+            'service_orders' => [
+                'cash' => $service_cash_sales,
+                'card' => $service_card_sales,
+            ],
         ]);
     }
 
