@@ -47,50 +47,40 @@
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="IMEI" />
-                    <el-input
-                    v-model="formattedImei"
-                    class="!w-1/2"
-                    placeholder="Escribe el código IMEI del equipo"
-                    clearable
-                    maxlength="18"
-                    />
+                    <el-input v-model="formattedImei" class="!w-1/2" placeholder="Escribe el código IMEI del equipo"
+                        clearable maxlength="18" />
                     <InputError :message="form.errors['product_details.imei']" />
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="Problema reportado*" />
                     <el-input v-model="form.observations" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
-                        placeholder="Describe el problema mencionado por el cliente" :maxlength="1000" show-word-limit clearable />
+                        placeholder="Describe el problema mencionado por el cliente" :maxlength="1000" show-word-limit
+                        clearable />
                     <InputError :message="form.errors.observations" />
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="Estado previo y características del equipo" />
                     <el-input v-model="form.description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
-                        placeholder="Describe el estado del equipo" :maxlength="1000" show-word-limit
-                        clearable />
+                        placeholder="Describe el estado del equipo" :maxlength="1000" show-word-limit clearable />
                     <InputError :message="form.errors.description" />
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="Servicios a realizar*" />
                     <el-input v-model="form.service_description" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
-                        placeholder="Describe el trabajo a realizar" :maxlength="1000" show-word-limit
-                        clearable />
+                        placeholder="Describe el trabajo a realizar" :maxlength="1000" show-word-limit clearable />
                     <InputError :message="form.errors.service_description" />
                 </div>
-                
+
                 <h1 class="font-semibold text-gray37 ml-2 col-span-full mt-3">Refacciones</h1>
-                
+
                 <SparePartInput @syncItems="syncItems" :initialData="report.spare_parts" class="col-span-full" />
-                
+
                 <section class="grid grid-cols-3 gap-3 col-span-full mt-5">
                     <div>
                         <InputLabel value="Costo del servicio*" />
-                        <el-input
-                            v-model="form.service_cost"
-                            placeholder="Ej. 2,500"
-                            clearable
+                        <el-input v-model="form.service_cost" placeholder="Ej. 2,500" clearable
                             :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
-                            :parser="(value) => value.replace(/[^\d.]/g, '')"
-                            >
+                            :parser="(value) => value.replace(/[^\d.]/g, '')">
                             <template #prepend>
                                 $
                             </template>
@@ -99,13 +89,9 @@
                     </div>
                     <div>
                         <InputLabel value="Anticipo (opcional)" />
-                        <el-input
-                            v-model="form.advance_payment"
-                            placeholder="Ej. 500"
-                            clearable
+                        <el-input v-model="form.advance_payment" placeholder="Ej. 500" clearable
                             :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
-                            :parser="(value) => value.replace(/[^\d.]/g, '')"
-                            >
+                            :parser="(value) => value.replace(/[^\d.]/g, '')">
                             <template #prepend>
                                 $
                             </template>
@@ -138,17 +124,15 @@
                                     el concepto "Comisión", incluyendo el <br>
                                     nombre del responsable del servicio.</p>
                             </template>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-4 text-primary">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                             </svg>
                         </el-tooltip>
                     </div>
-                   <el-input
-                        v-model="form.comision_percentage"
-                        placeholder="Ej. 10"
-                        clearable
-                        @input="onPercentageInput"
-                    >
+                    <el-input v-model="form.comision_percentage" placeholder="Ej. 10" clearable
+                        @input="onPercentageInput">
                         <template #append>%</template>
                     </el-input>
                     <InputError :message="form.errors.comision_percentage" />
@@ -156,26 +140,17 @@
                 <div v-if="report.media.length" class="mt-4 col-span-full">
                     <InputLabel value="Archivos adjuntos" />
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                        <FileView v-for="file in report.media" :key="file" :file="file" :deletable="true" @delete-file="deleteFile($event)" />
+                        <FileView v-for="file in report.media" :key="file" :file="file" :deletable="true"
+                            @delete-file="deleteFile($event)" />
                     </div>
                 </div>
                 <section class="col-span-full grid grid-cols-3 gap-4">
                     <div class="col-span-2">
                         <InputLabel value="Evidencias (max. 5 imágenes)" />
-                        <el-upload
-                            class="upload-demo"
-                            drag
-                            :on-change="handleChange"
-                            :on-remove="handleRemoveImage"
-                            :on-exceed="handleExceed"
-                            :on-preview="handlePictureCardPreview"
-                            v-model:file-list="fileList"
-                            :before-upload="beforeUpload"
-                            :multiple="true"
-                            :limit="5 - report.media?.length"
-                            list-type="picture-card"
-                            :auto-upload="false"
-                            >
+                        <el-upload class="upload-demo" drag :on-change="handleChange" :on-remove="handleRemoveImage"
+                            :on-exceed="handleExceed" :on-preview="handlePictureCardPreview"
+                            v-model:file-list="fileList" :before-upload="beforeUpload" :multiple="true"
+                            :limit="5 - report.media?.length" list-type="picture-card" :auto-upload="false">
                             <i class="el-icon-upload"></i>
                             <div class="el-upload__text">Arrastra o haz clic para subir</div>
                         </el-upload>
@@ -192,21 +167,31 @@
                     </div>
                 </section>
 
-                <section class="grid grid-cols-3 col-span-full mt-5"> 
-                    <PatronMobil @syncPattern="syncPattern" @syncPassword="syncPassword" :initialData="report.aditionals" class="col-span-2" />
+                <section class="grid grid-cols-3 col-span-full mt-5">
+                    <PatronMobil @syncPattern="syncPattern" @syncPassword="syncPassword"
+                        :initialData="report.aditionals" class="col-span-2" />
 
                     <article class="mt-24 text-sm space-y-1">
                         <p class="flex">
-                            <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span class="w-16 text-right">{{ form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                            <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span
+                                class="w-16 text-right">{{
+                                    form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span class="w-16 text-right">{{ form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
+                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span
+                                class="w-16 text-right">{{
+                                    form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00'
+                                }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span class="w-16 text-right">{{ totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span
+                                class="w-16 text-right">{{
+                                    totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </p>
                         <p class="flex font-bold">
-                            <span class="w-32">Total restante</span><span class="ml-3">$</span><span class="w-16 text-right">{{ total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            <span class="w-32">Total restante</span><span class="ml-3">$</span><span
+                                class="w-16 text-right">{{
+                                    total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </p>
                     </article>
                 </section>
@@ -282,7 +267,7 @@ export default {
         Back
     },
     props: {
-        report: Array
+        report: Object
     },
     watch: {
         'form.service_cost'(val) {
@@ -303,7 +288,7 @@ export default {
                 if (!this.form.product_details) {
                     this.form.product_details = {};
                 }
-                    this.form.product_details.imei = clean;
+                this.form.product_details.imei = clean;
             },
         },
         total() {
@@ -337,9 +322,9 @@ export default {
             // Limita entre 0 y 100
             let numericValue = parseInt(cleanValue);
             if (isNaN(numericValue)) {
-            numericValue = '';
+                numericValue = '';
             } else if (numericValue > 100) {
-            numericValue = 100;
+                numericValue = 100;
             }
 
             this.form.comision_percentage = numericValue;
@@ -349,10 +334,10 @@ export default {
             this.form.spare_parts = spareParts;
         },
         // sincroniza los puntos seleccionados del patron
-        syncPattern(unlockItem){
+        syncPattern(unlockItem) {
             this.form.aditionals.unlockPattern = unlockItem;
         },
-        syncPassword(unlockItem){
+        syncPassword(unlockItem) {
             this.form.aditionals.unlockPassword = unlockItem;
         },
         // uploader
@@ -393,16 +378,16 @@ export default {
         deleteFile(fileId) {
             this.report.media = this.report.media.filter(m => m.id !== fileId);
         }
-        
+
     },
-    
+
 }
 </script>
 <style scoped>
 .upload-demo {
-  border: 2px dashed #d9d9d9;
-  border-radius: 6px;
-  padding: 20px;
-  text-align: center;
+    border: 2px dashed #d9d9d9;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
 }
 </style>

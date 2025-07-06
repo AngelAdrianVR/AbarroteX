@@ -558,9 +558,6 @@ export default {
         openPrintingModal(saleFolio) {
             this.$refs.printingModal.saleFolio = saleFolio;
             this.showPrintingModal = true;
-            if (!this.$page.props.auth.user.printer_config?.name) {
-                this.$refs.printingModal.getAvailablePrinters();
-            }
         },
         handleShowModal(modal, saleFolio, type = 'Normal') {
             this.saleType = type;
