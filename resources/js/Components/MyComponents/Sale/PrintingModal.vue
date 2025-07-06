@@ -76,7 +76,7 @@ export default {
             ticketPrinterName: this.$page.props.auth.user.printer_config?.ticketPrinterName ?? null,
             labelPrinterName: this.$page.props.auth.user.printer_config?.labelPrinterName ?? null,
             selectedPrinter: null, // Impresora seleccionada por el usuario
-            printType: 'Ticket',
+            printType: null, // Tipo de impresión: 'Ticket' o 'Etiqueta'
             availablePrinters: [],
             saleFolio: null,
             serial: null,
@@ -112,8 +112,13 @@ export default {
             const NEGRITA_OFF = ESC + 'E' + '\x00';
             const ALINEAR_IZQUIERDA = ESC + 'a' + '\x00';
             const ALINEAR_CENTRO = ESC + 'a' + '\x01';
-            const ALINEAR_DERECHA = ESC + 'a' + '\x02';
             const CORTAR_PAPEL = GS + 'V' + '\x00' + '\x00';
+
+            // --- 1. Determinar el ancho del ticket y separador dinámicamente ---
+            const ticketWidthSetting = this.$page.props.auth.user.printer_config?.ticketWidth;
+            // Ancho en caracteres: 48 para 80mm, 32 para 58mm (o por defecto)
+            const anchoTicket = ticketWidthSetting === '80mm' ? 48 : 32;
+            const separador = '-'.repeat(anchoTicket) + '\n';
 
             let ticket = INICIALIZAR_IMPRESORA;
 
@@ -126,34 +131,61 @@ export default {
             ticket += ALINEAR_IZQUIERDA;
             ticket += 'Folio: ' + this.sales[0].folio + '\n';
             ticket += this.formatDate(this.sales[0]?.created_at) + '\n';
-            // Ancho para impresora de 58mm (aprox. 32 caracteres)
-            ticket += '--------------------------------\n';
+            ticket += separador;
 
-            // Cuerpo (Productos) - Formato para 32 caracteres
-            // Se ha rediseñado la tabla para que quepa
-            let header = 'Cant Producto'.padEnd(24) + 'Total\n';
-            ticket += NEGRITA_ON + header + NEGRITA_OFF;
-            ticket += '--------------------------------\n';
+            // --- 2. Cuerpo (Productos) con columnas dinámicas ---
+            // Definir anchos de columna
+            const colAnchoTotal = 12; // Espacio para "$1,234.56"
+            const colAnchoCant = 4;   // Espacio para "Cant"
+            const colAnchoNombre = anchoTicket - colAnchoTotal - colAnchoCant;
+
+            // Crear encabezado dinámico
+            let header = 'Pzs'.padEnd(colAnchoCant);
+            header += 'Producto'.padEnd(colAnchoNombre);
+            header += 'Total'.padStart(colAnchoTotal);
+
+            ticket += NEGRITA_ON + header + '\n' + NEGRITA_OFF;
+            ticket += separador;
 
             this.sales.forEach(sale => {
                 const cantidad = sale.quantity.toString();
-                // Truncamos el nombre del producto para que quepa
-                const nombre = sale.product_name.substring(0, 15);
+                // Truncar el nombre del producto dinámicamente
+                const nombre = sale.product_name.substring(0, colAnchoNombre - 1); // -1 para un espacio de margen
                 const totalProducto = (sale.quantity * sale.current_price).toFixed(2);
 
-                // Alineamos las columnas manualmente con padEnd y padStart
+                // Alineamos las columnas manualmente con los anchos dinámicos
                 let linea = '';
-                linea += cantidad.padEnd(2, ' ');
-                linea += ' ' + this.removeAccents(nombre).padEnd(18, ' '); // 2 + 1 + 18 = 21 caracteres
-                linea += totalProducto.padStart(11, ' '); // Alineado a la derecha, 11 caracteres
+                linea += cantidad.padEnd(colAnchoCant);
+                linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
+                linea += ('$' + totalProducto).padStart(colAnchoTotal); // Añadimos '$' y alineamos
                 ticket += linea + '\n';
+
+                if (sale.promotions_applied && sale.promotions_applied.length > 0) {
+                    sale.promotions_applied.forEach(promo => {
+                        // 1. Reinicia la variable 'linea' en CADA iteración para no acumular texto.
+                        let lineaPromo = '';
+
+                        // 2. Indenta la descripción para mayor claridad y ajústala al ancho de las primeras dos columnas.
+                        const textoPromo = 'Descuento por promo';
+                        // lineaPromo += textoPromo.padEnd(colAnchoCant + colAnchoNombre);
+                        lineaPromo += textoPromo.padEnd(colAnchoCant + colAnchoNombre - 1);
+
+                        // 3. Ajusta el descuento al ancho EXACTO de la columna de total.
+                        const discounted = promo.discount.toFixed(2);
+                        const textoDescuento = '-$' + discounted;
+                        lineaPromo += textoDescuento.padStart(colAnchoTotal);
+
+                        ticket += lineaPromo + '\n';
+                    });
+                }
             });
 
-            ticket += '--------------------------------\n';
+            ticket += separador;
 
-            // Total
+            // --- 3. Total alineado a la derecha con padStart ---
             const totalStr = 'Total: $' + this.totalSale().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            ticket += ALINEAR_DERECHA + NEGRITA_ON + totalStr + NEGRITA_OFF + '\n';
+            // Usamos padStart en lugar de ALINEAR_DERECHA para un control preciso
+            ticket += NEGRITA_ON + totalStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
             // Pie de página
             ticket += ALINEAR_IZQUIERDA;
@@ -172,7 +204,10 @@ export default {
         },
         totalSale() {
             return this.sales.reduce((total, item) => {
-                return total + item.current_price * item.quantity;
+                const priceToUse = item.discounted_price !== null
+                    ? item.discounted_price
+                    : item.current_price;
+                return total + priceToUse * item.quantity;
             }, 0);
         },
         connectBluetooth() {
@@ -210,7 +245,7 @@ export default {
         },
         async printByUSB() {
             this.printing = true;
-            
+
             let ticketText = '';
             if (this.customData) {
                 // Si se proporciona customData, lo usamos directamente
@@ -333,6 +368,7 @@ export default {
         },
     },
     async mounted() {
+        this.setTicketMode();
         if (this.selectedPrinter) {
             this.availablePrinters.push(this.selectedPrinter);
         }

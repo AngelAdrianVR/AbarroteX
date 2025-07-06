@@ -11,6 +11,7 @@
                         <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="toggleSelectAll" />
                     </th>
                     <th>Orden</th>
+                    <th>Equipo</th>
                     <th>Fecha del servicio</th>
                     <th>Cliente</th>
                     <th>Servicio</th>
@@ -64,6 +65,12 @@
 
                             <span>{{ String(report.folio).padStart(3, '0') }}</span>
                         </div>
+                    </td>
+                    <td>
+                        <p>
+                            <span v-if="report.product_details?.brand">{{ report.product_details?.brand }}</span>
+                            <span v-if="report.product_details?.model">{{ ' ' + report.product_details?.model }}</span>
+                        </p>
                     </td>
                     <td>{{ formatDate(report.service_date) }}</td>
                     <td>{{ report.client_name ?? 'No especificado' }}</td>

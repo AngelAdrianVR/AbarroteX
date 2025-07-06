@@ -11,10 +11,18 @@
                 <p class="text-[#575757] text-sm mt-2">
                     Para configurar tu impresora de tickets utilizando un cable USB, sigue estos pasos:
                 <ol class="*:list-decimal list-inside mt-2 ml-2">
-                    <li class="">Conecta el cable USB desde la impresora al dispositivo donde tengas tu sistema de punto
+                    <li>Conecta el cable USB desde la impresora al dispositivo donde tengas tu sistema de punto
                         de venta (computadora).</li>
-                    <li class="">Asegúrate de que la impresora esté encendida y reconocida por el sistema.</li>
-                    <li class="">Selecciona la impresora para registrarla.</li>
+                    <li>Asegúrate de que la impresora esté encendida.</li>
+                    <li>Da click en
+                        <button @click="getAvailablePrinters" type="button" class="text-primary underline">
+                            Buscar impresoras
+                        </button>. Espera a que la ventana emergente se cierre automáticamente.
+                    </li>
+                    <li>
+                        Selecciona la impresora correspondiente para usarlas como predeterminadas.
+                        <i class="fa-regular fa-hand-point-down"></i>
+                    </li>
                 </ol>
                 </p>
             </article>
@@ -27,7 +35,7 @@
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                        <p class="">Impresora de tickets:</p>
+                        <p>Impresora de tickets:</p>
                         <el-select v-model="form.printer_config.ticketPrinterName" @change="updatePrinterName"
                             class="!w-72" placeholder="Selecciona la impresora"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
@@ -47,7 +55,7 @@
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                        <p class="">Impresora de etiquetas:</p>
+                        <p>Impresora de etiquetas:</p>
                         <el-select v-model="form.printer_config.labelPrinterName" @change="updateLabelPrinterName"
                             class="!w-72" placeholder="Selecciona la impresora"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
@@ -88,7 +96,7 @@
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                        <p class="">UUID Service:</p>
+                        <p>UUID Service:</p>
                         <el-input v-model="form.printer_config.UUIDService" @blur="updateUUIDService"
                             @keyup.enter="updateUUIDService" maxlength="255" class="!w-72" clearable
                             placeholder="Escribe el UUID Service de tu impresora" />
@@ -107,7 +115,7 @@
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                        <p class="">UUID Characteristic:</p>
+                        <p>UUID Characteristic:</p>
                         <el-input v-model="form.printer_config.UUIDCharacteristic" @blur="updateUUIDCharacteristic"
                             @keyup.enter="updateUUIDCharacteristic" maxlength="255" class="!w-72" clearable
                             placeholder="Escribe el UUID Service de tu impresora" />
@@ -130,7 +138,7 @@
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0">
-                        <p class="">Ancho de ticket:</p>
+                        <p>Ancho de ticket:</p>
                         <el-select v-model="form.printer_config.ticketWidth" @change="updateTicketWidth" class="!w-72"
                             placeholder="Selecciona el ancho" no-data-text="No hay opciones registradas"
                             no-match-text="No se encontraron coincidencias">
@@ -160,14 +168,14 @@
                         <el-select v-model="form.printer_config.labelResolution" @change="updateLabelResolution"
                             class="!w-72" placeholder="Selecciona la resolución"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
-                            <el-option v-for="resolution in ['203 DPI', '300 DPI', '600 DPI']" :key="resolution"
-                                :value="resolution" :label="resolution" />
+                            <el-option v-for="resolution in ['203', '300', '600']" :key="resolution" :value="resolution"
+                                :label="resolution" />
                         </el-select>
                     </div>
                     <p v-if="loadingLabelResolution" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
             </article>
-            <article class="text-sm p-4 lg:flex items-center justify-between">
+            <!-- <article class="text-sm p-4 lg:flex items-center justify-between">
                 <div class="lg:w-1/2">
                     <p class="text-[#575757]">
                         Fuente: Elige entre las tipografías preinstaladas en tu impresora. <br>
@@ -187,20 +195,20 @@
                     </div>
                     <p v-if="loadingLabelFont" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
-            </article>
+            </article> -->
             <article class="text-sm p-4 lg:flex items-center justify-between">
                 <div class="lg:w-1/2">
                     <p class="text-[#575757]">
-                        Mostrar texto de código de barras: 
+                        Mostrar texto de código de barras:
                         Controla si se muestra el valor bajo el código y su alineación
                     </p>
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Ver código:</p>
-                        <el-select v-model="form.printer_config.labelBarCodeHumanReadable" @change="updateBarCodeHumanReadable" class="!w-72"
-                            placeholder="Selecciona una opción" no-data-text="No hay opciones registradas"
-                            no-match-text="No se encontraron coincidencias">
+                        <el-select v-model="form.printer_config.labelBarCodeHumanReadable"
+                            @change="updateBarCodeHumanReadable" class="!w-72" placeholder="Selecciona una opción"
+                            no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                             <el-option v-for='barCode in barCodeOption' :key="barCode.value" :value="barCode.value"
                                 :label="barCode.label" />
                         </el-select>
@@ -248,6 +256,23 @@
                     <p v-if="loadingLabelLineHeight" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
             </article>
+            <article class="text-sm p-4 lg:flex items-center justify-between">
+                <div class="lg:w-1/2">
+                    <p class="text-[#575757]">
+                        Espacio físico entre cada etiqueta en el rollo (en milimetros) <br>
+                        Ajuste típico: 2-3mm (verificar en el rollo). <br>
+                        Un valor de 0 significa que no hay espacio.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
+                        <p>Espacio entre etiquetas (mm):</p>
+                        <el-input-number v-model="form.printer_config.labelGap" @blur="updateLabelGap"
+                            @keyup.enter="updateLabelGap" :min="0" :max="5000" class="!w-24" size="small" clearable />
+                    </div>
+                    <p v-if="loadingLabelGap" class="text-gray-400 text-end text-xs">Guardando...</p>
+                </div>
+            </article>
         </section>
         <p class="flex items-center text-[10px] lg:text-sm mx-6">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -280,7 +305,7 @@ export default {
                 labelLineHeight: this.$page.props.auth.user.printer_config?.labelLineHeight ?? null,
                 labelFont: this.$page.props.auth.user.printer_config?.labelFont ?? null,
                 labelBarCodeHumanReadable: this.$page.props.auth.user.printer_config?.labelBarCodeHumanReadable ?? null,
-                //GAP
+                labelGap: this.$page.props.auth.user.printer_config?.labelGap ?? null,
             }
         });
 
@@ -304,6 +329,7 @@ export default {
             loadingLabelLineHeight: false,
             loadingLabelFont: false,
             loadingLabelBarCodeHumanReadable: false,
+            loadingLabelGap: false,
         }
     },
     components: {
@@ -321,6 +347,17 @@ export default {
                 this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
                     onFinish: () => {
                         this.loadingLabelBarCodeHumanReadable = false;
+                    },
+                });
+            }
+        },
+        updateLabelGap() {
+            // enviar solicitud solo si hubo algun cambio en campo
+            if (this.form.printer_config.labelGap !== this.$page.props.auth.user.printer_config?.labelGap) {
+                this.loadingLabelGap = true;
+                this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
+                    onFinish: () => {
+                        this.loadingLabelGap = false;
                     },
                 });
             }
@@ -436,8 +473,5 @@ export default {
             }
         },
     },
-    mounted() {
-        this.getAvailablePrinters();
-    }
 }
 </script>

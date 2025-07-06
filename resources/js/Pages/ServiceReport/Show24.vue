@@ -8,8 +8,8 @@
             <div class="md:flex justify-between mt-3 mb-5">
                 <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
                     formatDate(report.service_date) }}</span></p>
-                <el-dropdown v-if="report.status !== 'Cancelada' && canEdit" :disabled="report.status === 'Cancelada'" split-button
-                    trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
+                <el-dropdown v-if="report.status !== 'Cancelada' && canEdit" :disabled="report.status === 'Cancelada'"
+                    split-button trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
                     Editar
@@ -46,7 +46,8 @@
                                 </svg>
                                 Generar etiqueta
                             </el-dropdown-item>
-                            <el-dropdown-item @click="confirmDeleteModal = true" v-if="$page.props.auth.user.permissions.includes('Eliminar ordenes de servicio')">
+                            <el-dropdown-item @click="confirmDeleteModal = true"
+                                v-if="$page.props.auth.user.permissions.includes('Eliminar ordenes de servicio')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -135,7 +136,8 @@
                             </svg>
                             <span>Cancelar orden de servicio</span>
                         </button>
-                        <el-popconfirm v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit"
+                        <el-popconfirm
+                            v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit"
                             confirm-button-text="Si" cancel-button-text="No" icon-color="#6F6E72"
                             :title="'Cambiar estatus?'"
                             @confirm="handleChangeStatus(statuses[statuses.findIndex(status => status === report.status) + 1])">
@@ -158,6 +160,13 @@
                             class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
                             <p class="text-red-500 w-56">Razón de cancelación: </p>
                             <p class="lg:w-1/2">{{ report.cancellation_reason ?? '-' }}</p>
+                        </div>
+                        <div class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
+                            <p class="text-[#373737] w-56">Equipo: </p>
+                            <p class="lg:w-1/2">
+                                <span v-if="report.product_details?.brand">{{ report.product_details?.brand }}</span>
+                                <span v-if="report.product_details?.model">{{ ' ' + report.product_details?.model }}</span>
+                            </p>
                         </div>
                         <div v-if="report.observations" class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
                             <p class="text-[#373737] w-56">Problema reportado: </p>
@@ -314,11 +323,11 @@
                         <div class="text-sm space-y-2">
                             <div class="flex items-center">
                                 <p class="w-14">Marca: </p>
-                                <p class="ml-3">{{ report.product_details?.brand }}</p>
+                                <p class="ml-3">{{ report.product_details?.brand ?? '-' }}</p>
                             </div>
                             <div class="flex items-center">
                                 <p class="w-14">Modelo: </p>
-                                <span class="ml-3">{{ report.product_details?.model }}</span>
+                                <span class="ml-3">{{ report.product_details?.model ?? '-' }}</span>
                             </div>
                             <div class="flex items-center">
                                 <p class="w-14">IMEI: </p>
@@ -681,7 +690,7 @@ export default {
     },
     computed: {
         totalSpareParts() {
-            return this.report.spare_parts.reduce((total, sp) => {
+            return this.report.spare_parts?.reduce((total, sp) => {
                 return total + (Number(sp.quantity) * Number(sp.unitPrice));
             }, 0);
         },
@@ -697,7 +706,7 @@ export default {
                 this.$refs.printingModal.setLabelMode();
                 this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
             } else if (type === 'ESC/POS') {
-                this.$refs.printingModal.seTicketMode();
+                this.$refs.printingModal.setTicketMode();
                 this.$refs.printingModal.customData = this.generateESCPOSTicketCommands(false);
             }
             this.showPrintingModal = true;
@@ -708,8 +717,8 @@ export default {
             const labelConfig = {
                 widthMM: this.$page.props.auth.user.printer_config?.labelWidth,  // Ancho de la etiqueta en mm
                 heightMM: this.$page.props.auth.user.printer_config?.labelHeight, // Alto de la etiqueta en mm
-                gapMM: 3,     // Espacio entre etiquetas en mm
-                dotsPerMM: 8  // Resolución de la impresora (203 dpi = 8 dots/mm)
+                gapMM: this.$page.props.auth.user.printer_config?.labelGap,     // Espacio entre etiquetas en mm
+                dotsPerMM: Math.round(this.$page.props.auth.user.printer_config?.labelResolution / 25.4)  // Resolución de la impresora (203 dpi = 8 dots/mm)
             };
 
             // --- 2. Comandos Iniciales (¡La parte más importante!) ---
@@ -780,8 +789,9 @@ export default {
 
             // --- 5. Código de Barras ---
             if (this.report.folio) {
-                currentY += 5; // Espacio extra antes del código de barras
+                // currentY += 5; // Espacio extra antes del código de barras
                 const folioPadded = String(this.report.folio).padStart(5, '0');
+                const humanReadable = this.$page.props.auth.user.printer_config?.labelBarCodeHumanReadable || 0;
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
                 const barcodeHeight = 22;    // Altura del código en dots
@@ -791,7 +801,7 @@ export default {
                 // Centrar el código de barras (opcional)
                 const barcodeX = startX;
 
-                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},1,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
+                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},${humanReadable},0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
                 currentY += barcodeHeight + 20; // Actualizar Y después del barcode
             }
 
@@ -800,7 +810,7 @@ export default {
             // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
             commands += 'PRINT 1\n';
 
-            console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
+            // console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
             return commands;
         },
         removeAccents(text = '') {
@@ -820,72 +830,84 @@ export default {
             const ALINEAR_CENTRO = ESC + 'a' + '\x01';
             const ALINEAR_DERECHA = ESC + 'a' + '\x02';
             const CORTAR_PAPEL = GS + 'V' + '\x00' + '\x00';
-            const ANCHO_TICKET = 32;
+
+            // --- 1. Determinar el ancho del ticket dinámicamente ---
+            const ticketWidthSetting = this.$page.props.auth.user.printer_config?.ticketWidth;
+            // Ancho en caracteres: 48 para 80mm, 32 para 58mm (o por defecto)
+            const anchoTicket = ticketWidthSetting === '80mm' ? 48 : 32;
+            const separador = '-'.repeat(anchoTicket) + '\n';
 
             let ticket = INICIALIZAR_IMPRESORA;
 
             // Encabezado
             ticket += ALINEAR_CENTRO;
-            // Asumiendo que la información de la tienda está disponible de forma similar
             if (this.$page.props.auth.user.store) {
                 ticket += NEGRITA_ON + this.$page.props.auth.user.store.name + NEGRITA_OFF + '\n';
                 if (this.$page.props.auth.user.store.address) {
                     ticket += this.$page.props.auth.user.store.address + '\n';
                 }
             }
-            ticket += '--------------------------------\n';
+            ticket += separador;
             ticket += NEGRITA_ON + 'ORDEN DE SERVICIO' + NEGRITA_OFF + '\n';
-            ticket += '--------------------------------\n';
+            ticket += separador;
 
             // Datos del Cliente y Equipo
             ticket += ALINEAR_IZQUIERDA;
-            ticket += 'Fecha: ' + this.formatDateTime() + '\n';
+            ticket += 'Fecha: ' + this.formatDate(this.report.service_date) + '\n';
             ticket += 'Cliente: ' + (this.report.client_name || 'N/A') + '\n';
             ticket += 'Telefono: ' + (this.report.client_phone_number || 'N/A') + '\n\n';
 
             ticket += NEGRITA_ON + 'Detalles del Equipo:' + NEGRITA_OFF + '\n';
             ticket += 'Marca: ' + (this.report.product_details.brand || 'N/A') + '\n';
             ticket += 'Modelo: ' + (this.report.product_details.model || 'N/A') + '\n';
-            ticket += '--------------------------------\n';
+            ticket += separador;
 
-            // Descripción del Servicio y Observaciones
-            if (this.report.service_description) {
-                ticket += NEGRITA_ON + 'Descripcion del Servicio:' + NEGRITA_OFF + '\n';
-                ticket += this.report.service_description + '\n\n';
-            }
-            if (this.report.description) {
-                ticket += NEGRITA_ON + 'Falla reportada:' + NEGRITA_OFF + '\n';
-                ticket += this.report.description + '\n\n';
-            }
+            // Descripción del Servicio y problemas (se ajustan automáticamente al saltar de línea)
             if (this.report.observations) {
-                ticket += NEGRITA_ON + 'Observaciones:' + NEGRITA_OFF + '\n';
-                ticket += this.report.observations + '\n';
+                ticket += NEGRITA_ON + 'Problemas reportados:' + NEGRITA_OFF + '\n';
+                ticket += this.report.observations + '\n\n';
             }
-            ticket += '--------------------------------\n';
+            if (this.report.service_description) {
+                ticket += NEGRITA_ON + 'Servicio:' + NEGRITA_OFF + '\n';
+                ticket += this.report.service_description + '\n';
+            }
+            ticket += separador;
 
-            // Refacciones si existen
+            // --- 2. Ajustar sección de refacciones con columnas dinámicas ---
             if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
                 ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
-                let header = 'Cant  Concepto'.padEnd(21);
-                header += 'Importe'.padStart(11);
+
+                // Definir anchos de columna
+                const colAnchoPrecio = 10; // " $1,234.56"
+                const colAnchoCant = 4;    // "Cant "
+                const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
+
+                // Crear encabezado dinámico
+                let header = 'Pzs'.padEnd(colAnchoCant);
+                header += 'Concepto'.padEnd(colAnchoNombre);
+                header += 'Importe'.padStart(colAnchoPrecio);
+
                 ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
-                ticket += '--------------------------------\n';
+                ticket += separador;
+                ticket += ALINEAR_IZQUIERDA;
 
                 this.report.spare_parts.forEach(part => {
                     const cantidad = part.quantity.toString();
-                    const nombre = part.name.substring(0, 15);
+                    // Trunca el nombre del producto para que quepa en su columna
+                    const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
                     const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
 
                     let linea = '';
-                    linea += cantidad.padEnd(3, ' ');
-                    linea += ' ' + this.removeAccents(nombre).padEnd(17, ' ');
-                    linea += ('$' + totalProducto).padStart(11, ' ');
-                    ticket += ALINEAR_IZQUIERDA + linea + '\n';
+                    linea += cantidad.padEnd(colAnchoCant);
+                    linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
+                    linea += ('$' + totalProducto).padStart(colAnchoPrecio);
+
+                    ticket += linea + '\n';
                 });
-                ticket += '--------------------------------\n';
+                ticket += separador;
             }
 
-            // Costos
+            // --- 3. Ajustar sección de costos para alineación derecha ---
             const formatCurrency = (value) => {
                 return '$' + parseFloat(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             };
@@ -894,20 +916,21 @@ export default {
             if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
                 subtotalRefacciones = this.report.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
                 let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
-                ticket += ALINEAR_DERECHA + subtotalStr + '\n';
+                ticket += subtotalStr.padStart(anchoTicket) + '\n';
             }
 
             let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.report.service_cost);
-            ticket += ALINEAR_DERECHA + costoServicioStr + '\n';
+            ticket += costoServicioStr.padStart(anchoTicket) + '\n';
 
             let totalStr = 'Total: ' + formatCurrency(this.report.total_cost);
-            ticket += ALINEAR_DERECHA + NEGRITA_ON + totalStr + NEGRITA_OFF + '\n';
+            ticket += NEGRITA_ON + totalStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
             if (this.report.advance_payment > 0) {
                 let anticipoStr = 'Anticipo: ' + formatCurrency(this.report.advance_payment);
-                ticket += ALINEAR_DERECHA + anticipoStr + '\n';
+                ticket += NEGRITA_OFF + anticipoStr.padStart(anchoTicket) + '\n';
+
                 let restanteStr = 'Resta: ' + formatCurrency(this.report.total_cost - this.report.advance_payment);
-                ticket += ALINEAR_DERECHA + NEGRITA_ON + restanteStr + NEGRITA_OFF + '\n';
+                ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
             }
 
             // Pie de página
