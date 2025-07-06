@@ -39,6 +39,9 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Create{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
+        if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
+            return inertia('ServiceReport/Create24', compact('products', 'folio'));
+        }
         // return inertia($view, compact('products', 'folio'));
         return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
     }
@@ -69,7 +72,7 @@ class ServiceReportController extends Controller
             'service_date' => 'required',
             'client_name' => 'required|string|max:255',
             'client_phone_number' => 'required|string|max:10',
-            'spare_parts' => 'nullable|array|min:1',
+            'spare_parts' => 'nullable|array|min:0',
             'technician_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'service_description' => 'required|string|max:1000',
@@ -129,8 +132,11 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Show{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-            // return inertia($view, compact('report'));
-            return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
+        if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
+            return inertia('ServiceReport/Show24', compact('report'));
+        }
+        // return inertia($view, compact('report'));
+        return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
@@ -148,6 +154,10 @@ class ServiceReportController extends Controller
         $view = File::exists($customViewPath)
             ? "ServiceReport/Edit{$store_id}"
             : "PageNotFound"; // 404 not found vista
+
+        if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
+            return inertia('ServiceReport/Edit24', compact('report', 'products'));
+        }
 
         // return inertia($view, compact('report', 'products'));
         return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
@@ -177,7 +187,7 @@ class ServiceReportController extends Controller
             'service_date' => 'required',
             'client_name' => 'required|string|max:255',
             'client_phone_number' => 'required|string|max:10',
-            'spare_parts' => 'nullable|array|min:1',
+            'spare_parts' => 'nullable|array|min:0',
             'technician_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'service_description' => 'required|string|max:1000',

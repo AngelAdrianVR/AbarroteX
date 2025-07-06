@@ -161,12 +161,13 @@ class UserController extends Controller
             'printer_config.ticketPrinterName' => 'nullable|string|min:1|max:255',
             'printer_config.labelPrinterName' => 'nullable|string|min:1|max:255',
             'printer_config.ticketWidth' => 'nullable|string|min:1|max:255',
-            'printer_config.labelResolution' => 'nullable|string|min:1|max:255',
-            'printer_config.labelWidth' => 'nullable|string|min:1|max:255',
-            'printer_config.labelHeight' => 'nullable|string|min:1|max:255',
-            'printer_config.labelLineHeight' => 'nullable|string|min:1|max:255',
-            'printer_config.labelFont' => 'nullable|string|min:1|max:255',
+            'printer_config.labelResolution' => 'nullable|numeric|min:1|max:5000',
+            'printer_config.labelWidth' => 'nullable|numeric|min:0|max:5000',
+            'printer_config.labelHeight' => 'nullable|numeric|min:0|max:5000',
+            'printer_config.labelLineHeight' => 'nullable|numeric|min:0|max:5000',
+            // 'printer_config.labelFont' => 'nullable|string|min:1|max:255',
             'printer_config.labelBarCodeHumanReadable' => 'nullable|string|min:1|max:255',
+            'printer_config.labelGap' => 'nullable|numeric|min:0|max:5000',
         ]);
 
         $user->update($request->all());

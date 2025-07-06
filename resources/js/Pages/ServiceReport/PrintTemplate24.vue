@@ -59,7 +59,7 @@
                             <div class="border border-[#D9D9D9] rounded-xl py-1 px-4">
                                 <p>Accesorios:</p>
                                 <div v-for="item in allAccessories" :key="item" class="flex items-center gap-2 pl-2">
-                                    <i v-if="report.aditionals?.accessories.includes(item)" class="fa-solid fa-check text-green-500"></i>
+                                    <i v-if="report.aditionals?.accessories?.includes(item)" class="fa-solid fa-check text-green-500"></i>
                                     <i v-else class="fa-solid fa-xmark text-red-500"></i>
                                     <p>{{ item }}</p>
                                 </div>
