@@ -24,7 +24,7 @@
                 <div>
                     <p>Impresora conectada por USB:</p>
                     <div class="flex items-center space-x-2">
-                        <el-select v-model="printerName" placeholder="Selecciona la impresora"
+                        <el-select v-model="selectedPrinter" placeholder="Selecciona la impresora"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                             <el-option v-for="printer in availablePrinters" :key="printer" :value="printer"
                                 :label="printer" />
@@ -51,7 +51,7 @@
         <template #footer>
             <div class="flex items-center space-x-2">
                 <CancelButton @click="$emit('close')" :disabled="printing">No</CancelButton>
-                <PrimaryButton @click="printByUSB" :disabled="!printerName || printing">
+                <PrimaryButton @click="printByUSB" :disabled="!selectedPrinter || printing">
                     <i v-if="printing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                     Si, imprimir
                 </PrimaryButton>
@@ -73,7 +73,9 @@ export default {
     name: 'PrintingModal',
     data() {
         return {
-            printerName: this.$page.props.auth.user.printer_config?.name ?? null,
+            ticketPrinterName: this.$page.props.auth.user.printer_config?.ticketPrinterName ?? null,
+            labelPrinterName: this.$page.props.auth.user.printer_config?.labelPrinterName ?? null,
+            selectedPrinter: null, // Impresora seleccionada por el usuario
             printType: 'Ticket',
             availablePrinters: [],
             saleFolio: null,
@@ -198,6 +200,14 @@ export default {
             if (!text) return '';
             return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         },
+        setTicketMode() {
+            this.printType = 'Ticket';
+            this.selectedPrinter = this.ticketPrinterName;
+        },
+        setLabelMode() {
+            this.printType = 'Etiqueta';
+            this.selectedPrinter = this.labelPrinterName;
+        },
         async printByUSB() {
             this.printing = true;
             
@@ -230,7 +240,7 @@ export default {
             const cargaUtil = {
                 serial: this.serial, // Serial del plugin
                 operaciones: listaDeOperaciones,
-                nombreImpresora: this.printerName,
+                nombreImpresora: this.selectedPrinter,
                 // 'serial' no es necesario si usas 'nombreImpresora'
             };
             try {
@@ -243,7 +253,7 @@ export default {
                 });
                 const respuesta = await respuestaHttp.json();
                 if (!respuesta.ok) {
-                    alert(`Error al imprimir por USB: ${respuesta.message}\nAsegúrate que el nombre de la impresora "${this.printerName}" es correcto.`);
+                    alert(`Error al imprimir por USB: ${respuesta.message}\nAsegúrate que el nombre de la impresora "${this.selectedPrinter}" es correcto.`);
                 }
             } catch (error) {
                 console.error("Error de conexión con el plugin:", error);
@@ -292,7 +302,7 @@ export default {
                 const listaDeImpresoras = await respuestaHttp.json();
                 this.availablePrinters = listaDeImpresoras;
                 if (this.availablePrinters.length > 0) {
-                    this.printerName = this.availablePrinters[0];
+                    this.selectedPrinter = this.availablePrinters[0];
                 }
             } catch (e) {
                 // El plugin no respondió
@@ -323,8 +333,8 @@ export default {
         },
     },
     async mounted() {
-        if (this.printerName) {
-            this.availablePrinters.push(this.printerName);
+        if (this.selectedPrinter) {
+            this.availablePrinters.push(this.selectedPrinter);
         }
 
         if (!this.serial) {

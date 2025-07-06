@@ -27,7 +27,7 @@
         </p>
         <!-- Index para dm compresores -->
         <ServiceReportsTable6 v-if="$page.props.auth.user.store.id == 6" :reports="localReports" />
-        <!-- Index para dm apontephone -->
+        <!-- Index para apontephone -->
         <ServiceReportsTable v-else :reports="localReports" />
         <p v-if="localReports.length" class="text-gray66 text-[11px] mt-3">
           {{ localReports.length }} de {{ total_reports }} elementos
@@ -65,7 +65,7 @@ export default {
       loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
       loading: false, //estado de carga cuando se busca a un servicio por medio del buscador
       currentPage: 1, //para paginación
-      canCreate: true,
+      canCreate: this.$page.props.auth.user.permissions.includes('Crear ordenes de servicio'),
     };
   },
   components: {

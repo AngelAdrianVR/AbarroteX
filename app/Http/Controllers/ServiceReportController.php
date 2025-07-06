@@ -38,8 +38,8 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Create{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('products', 'folio'));
-        // return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
+        // return inertia($view, compact('products', 'folio'));
+        return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
     }
 
     //para guardar la orden de dm compresores.
@@ -128,8 +128,8 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Show{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-            return inertia($view, compact('report'));
-            // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
+            // return inertia($view, compact('report'));
+            return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
@@ -140,7 +140,6 @@ class ServiceReportController extends Controller
         $store_id = auth()->user()->store_id;
         $products = Product::where('store_id', $store_id)->get(['id', 'name', 'code', 'description']);
 
-
         // Ruta a la vista de Inertia (ej: 'ServiceReport/Edit1.vue')
         $customViewPath = resource_path("js/Pages/ServiceReport/Edit{$store_id}.vue");
 
@@ -149,8 +148,8 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Edit{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-        return inertia($view, compact('report', 'products'));
-        // return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
+        // return inertia($view, compact('report', 'products'));
+        return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
     }
 
     public function update(Request $request, ServiceReport $serviceReport)
