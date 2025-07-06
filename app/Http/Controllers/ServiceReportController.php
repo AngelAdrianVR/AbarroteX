@@ -178,9 +178,10 @@ class ServiceReportController extends Controller
             'client_phone_number' => 'required|string|max:10',
             'spare_parts' => 'nullable|array|min:1',
             'technician_name' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'service_description' => 'required|string|max:1000',
             'service_cost' => 'required|numeric|min:0|max:999999',
+            'observations' => 'required',
         ]);
 
         $service_order->update($request->all());
