@@ -133,37 +133,18 @@
 </template>
 
 <script>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import PrintButton from '@/Components/MyComponents/PrintButton.vue';
 import DrawPatternMobil from '@/Components/MyComponents/DrawPatternMobil.vue';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 
 export default {
-data() {
-    return {
-        printing: false,
-        allAccessories: ['SIM', 'Cargador', 'Memoria', 'Bateria'],
-    }
-},
-components:{
-    DrawPatternMobil,
-    PrintButton,
-    Head,
-},
-props:{
-    report: Array
-},
-computed:{
-    totalSpareParts() {
-        return this.report.spare_parts?.reduce((total, sp) => {
-            return total + (Number(sp.quantity) * Number(sp.unitPrice));
-        }, 0);
-    }
-},
-methods:{
-    formatDate(dateString) {
-        return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+    data() {
+        return {
+            printing: false,
+            allAccessories: ['SIM', 'Cargador', 'Memoria', 'Bateria'],
+        }
     },
     components: {
         DrawPatternMobil,
