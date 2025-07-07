@@ -7,10 +7,10 @@
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[75%] xl:w-[65%] mx-auto mt-1 lg:grid lg:grid-cols-2 gap-3">
                 <div class="flex items-center justify-between col-span-full mb-3">
                     <h1 class="font-bold ml-2 col-span-full">Crear orden de servicio</h1>
-                    <div class="text-sm text-right">
+                    <!-- <div class="text-sm text-right">
                         <p>Orden de servicio</p>
                         <p>No. {{ String(folio).padStart(4, '0') }}</p>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="col-span-full">
                     <InputLabel value="Fecha del servicio*" />
@@ -256,6 +256,7 @@ export default {
             form,
             payment_methods: ['Efectivo', 'Tarjeta'],
             showPrintingModal: false,
+            newFolio: null,
             //uploader
             uploading: false,
             uploadPercentage: 0,
@@ -314,21 +315,29 @@ export default {
     },
     methods: {
         store() {
-            this.$refs.printingModal.customData = this.generateServiceTicketCommands(false);
             this.form.transform((data) => ({
                 ...data,
-                spare_parts: data.spare_parts[0].name ? data.spare_parts : [],
+                spare_parts: data.spare_parts[0]?.name ? data.spare_parts : [],
             })).post(route("service-reports.store-phones"), {
-                onSuccess: () => {
+                onSuccess: (page) => {
                     this.$notify({
                         title: "Correcto",
-                        message: "",
                         type: "success",
                     });
 
-                    //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
+                    // Abrir modal de impresión automáticamente
                     if (this.automaticPrinting) {
-                        this.showPrintingModal = true;
+                        const newFolio = page.props.folio - 1;
+                        if (newFolio) {
+                            this.showPrintingModal = true;
+                            this.newFolio = newFolio;
+                            // Ejecutar código DESPUÉS de que el DOM se actualice.
+                            this.$nextTick(() => {
+                                this.$refs.printingModal.customData = this.generateServiceTicketCommands(false);
+                            });
+                        } else {
+                            console.error("No se recibió el folio para la impresión automática.");
+                        }
                     }
                 },
                 onError: (err) => {
@@ -544,9 +553,9 @@ export default {
             addTextLine("Tecnico:", this.removeAccents(this.form.technician_name));
 
             // --- 5. Código de Barras ---
-            if (this.folio) {
+            if (this.newFolio) {
                 // currentY += 5; // Espacio extra antes del código de barras
-                const folioPadded = String(this.folio).padStart(5, '0');
+                const folioPadded = String(this.newFolio).padStart(3, '0');
                 const humanReadable = this.$page.props.auth.user.printer_config?.labelBarCodeHumanReadable || 0;
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
@@ -566,7 +575,7 @@ export default {
             // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
             commands += 'PRINT 1\n';
 
-            // console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
+            console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
             return commands;
         },
         removeAccents(text = '') {
@@ -642,6 +651,7 @@ export default {
             this.dialogImageUrl = file.url;
             this.dialogVisible = true;
         },
+        // async getLastFolio
     },
 }
 </script>
