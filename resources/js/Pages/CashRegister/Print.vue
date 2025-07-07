@@ -12,20 +12,20 @@
             <span class="font-bold">Caja: <span class="font-thin ml-1">{{ cut.cash_register.name }}</span></span><br>
             <span class="font-bold">Usuario: <span class="font-thin">{{ cut.user.name }}</span></span><br>
             <span class="font-bold">Efectivo inicial: <span class="font-thin">${{ cut.started_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
-            <span class="font-bold">Venta efectivo: <span class="font-thin">${{ ((cut.store_sales_cash || 0) + (cut.online_sales_cash || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
-            <span class="font-bold">Venta tarjeta: <span class="font-thin">${{ ((cut.store_sales_card || 0) + (cut.online_sales_card || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
+            <span class="font-bold">Venta efectivo: <span class="font-thin">${{ ((cut.store_sales_cash || 0) + (cut.online_sales_cash || 0) + (cut.service_orders_cash || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
+            <span class="font-bold">Venta tarjeta: <span class="font-thin">${{ ((cut.store_sales_card || 0) + (cut.online_sales_card || 0) + (cut.service_orders_card || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
             <span class="font-bold">Venta total: <span class="font-thin">${{ calculateTotal(cut)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
             <span class="font-bold">Total en movimientos: <span class="font-thin">${{ calcularTotalMovimientos(index).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
             <span class="font-bold">Esperado en caja: <span class="font-thin">${{ cut.expected_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
             <span class="font-bold">Conteo manual de caja: <span class="font-thin">${{ cut.counted_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
-            <span class="font-bold">Diferencia: <span class="font-thin">${{ cut.difference?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
+            <span class="font-bold">Diferencia: <span class="font-thin">${{ cut.difference_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span></span><br>
             <p class="mx-auto">--------------------------------</p>
         </div>
 
         <div class="totals">
-            <span><strong>Total pago en efectivo:</strong> ${{ groupedCashCuts[date].total_store_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span><br>
-            <span><strong>Total pago con tarjeta:</strong> ${{ groupedCashCuts[date].total_store_sales_card?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span><br>
+            <span><strong>Total venta en tienda:</strong> ${{ groupedCashCuts[date].total_store_sales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span><br>
             <span v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')"><strong>Total ventas en línea:</strong> ${{ groupedCashCuts[date].total_online_sales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span><br v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')">
+            <span v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"><strong>Total ordenes de servicio:</strong> ${{ groupedCashCuts[date].total_service_orders?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span><br v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')">
             <span><strong>Total general:</strong> ${{ groupedCashCuts[date].total_sales?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span><br>
             <span><strong>Diferencia total:</strong> ${{ groupedCashCuts[date].total_difference?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span><br>
 
@@ -129,7 +129,9 @@ export default {
             (cut.store_sales_cash || 0) +
             (cut.store_sales_card || 0) +
             (cut.online_sales_cash || 0) +
-            (cut.online_sales_card || 0)
+            (cut.online_sales_card || 0) +
+            (cut.service_orders_cash || 0) +
+            (cut.service_orders_card || 0)
         );
         },
         conectarBluetooth() {
