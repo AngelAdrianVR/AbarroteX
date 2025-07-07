@@ -17,7 +17,7 @@ class ServiceReportController extends Controller
 
     public function index()
     {
-        $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(50);
+        $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(100);
         $total_reports = ServiceReport::where('store_id', auth()->user()->store_id)->get()->count();
 
         return inertia('ServiceReport/Index', compact('service_reports', 'total_reports'));
