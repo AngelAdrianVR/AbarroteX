@@ -690,6 +690,8 @@ export default {
     },
     computed: {
         totalSpareParts() {
+            if (!this.report.spare_parts?.length) return 0;
+
             return this.report.spare_parts?.reduce((total, sp) => {
                 return total + (Number(sp.quantity) * Number(sp.unitPrice));
             }, 0);
@@ -778,10 +780,10 @@ export default {
             };
 
             // --- 4. Contenido de la Etiqueta ---
+            addTextLine("Fecha:", this.formatDateTime(this.report.created_at));
             addTextLine("Nombre:", this.removeAccents(this.report.client_name.slice(0, 20)));
-            // addTextLine("Recepcion:", this.report.service_date.split('T')[0]);
             addTextLine("Equipo:", this.removeAccents(this.report.product_details?.brand) + ' ' + this.removeAccents(this.report.product_details?.model));
-            addTextLine("Total:", '$' + (this.totalSpareParts + this.report.service_cost));
+            addTextLine("Total:", '$' + (this.totalSpareParts + parseFloat(this.report.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             addTextLine("Desbloqueo:", this.report.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.report.observations));
             addTextLine("Servicio:", this.removeAccents(this.report.service_description));
