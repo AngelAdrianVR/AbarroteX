@@ -35,7 +35,7 @@ export default {
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '55%', // Columnas más delgadas
+                        columnWidth: '95%', // Columnas más delgadas
                         endingShape: 'rounded'
                     },
                 },

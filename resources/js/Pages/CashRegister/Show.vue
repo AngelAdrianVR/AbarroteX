@@ -55,7 +55,7 @@
                         </div>
                         <div class="md:p-4 p-2 flex space-x-4 text-sm">
                             <!-- Columna de etiquetas -->
-                            <div class="w-3/4 space-y-1">
+                            <div class="w-[65%] md:w-3/4 space-y-1 ">
                                 <!-- Encabezado -->
                                 <div class="flex items-center space-x-2 pb-2">
                                     <img class="w-7" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
@@ -95,7 +95,7 @@
                                 <p class="text-[#373737] text-right font-semibold">Total en tarjeta</p>
                             </div>
                                 <!-- Columna de valores parte derecha -->
-                                <div class="w-1/4 space-y-1 mt-8">
+                                <div class="w-[35%] md:w-1/4 xl:w-[20%] space-y-1 mt-8">
                                     <!-- Valores en orden -->
                                     <p v-for="(value, i) in [
                                         cash_cut.started_cash,
@@ -148,8 +148,8 @@
                             </div>
 
                         <footer class="bg-[#F2F2F2] rounded-xl text-black font-bold py-2 flex px-2">
-                            <p class="w-3/4 text-right pr-7">Total efectivo + tarjeta</p>
-                            <p class="w-1/4 pl-4">
+                            <p class="w-[70%] text-right pr-7">Total efectivo + tarjeta</p>
+                            <p class="w-[30%] pl-4">
                                 <span class="mr-3">
                                     $
                                 </span>
@@ -165,7 +165,7 @@
                             <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
                             <p class="text-[#37672B] font-semibold">Efectivo</p>
                         </div>
-                        <div class="flex justify-between space-x-1 px-5 pt-1">
+                        <div class="flex justify-between space-x-1 px-5 pt-1 text-sm">
                             <div class="font-semibold space-y-1 w-40">
                                 <p>Efectivo al iniciar</p>
                                 <p>Esperado en caja</p>
@@ -196,7 +196,7 @@
                             <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
                             <p class="text-[#05394F] font-semibold">Tarjeta</p>
                         </div>
-                        <div class="flex justify-between space-x-1 px-5 pt-1">
+                        <div class="flex justify-between space-x-1 px-5 pt-1 text-sm">
                             <div class="font-semibold space-y-1 w-40">
                                 <p>Esperado</p>
                                 <p>Reportado</p>
