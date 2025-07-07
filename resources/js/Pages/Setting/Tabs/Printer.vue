@@ -226,12 +226,12 @@
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Ancho (milimetros):</p>
                         <el-input-number v-model="form.printer_config.labelWidth" @blur="updateLabelSize"
-                            @keyup.enter="updateLabelSize" :min="1" :max="5000" class="!w-24" size="small" clearable />
+                            @keyup.enter="updateLabelSize" @change="updateLabelSize" :min="1" :max="5000" class="!w-24" size="small" clearable />
                     </div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-1 justify-self-end">
                         <p>Alto (milimetros):</p>
                         <el-input-number v-model="form.printer_config.labelHeight" @blur="updateLabelSize"
-                            @keyup.enter="updateLabelSize" :min="1" :max="5000" class="!w-24" size="small" clearable />
+                            @keyup.enter="updateLabelSize" @change="updateLabelSize" :min="1" :max="5000" class="!w-24" size="small" clearable />
                     </div>
                     <p v-if="loadingLabelSize" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
@@ -250,7 +250,7 @@
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Espacio (en puntos):</p>
                         <el-input-number v-model="form.printer_config.labelLineHeight" @blur="updateLabelLineHeight"
-                            @keyup.enter="updateLabelLineHeight" :min="1" :max="5000" class="!w-24" size="small"
+                            @keyup.enter="updateLabelLineHeight" @change="updateLabelLineHeight" :min="1" :max="5000" class="!w-24" size="small"
                             clearable />
                     </div>
                     <p v-if="loadingLabelLineHeight" class="text-gray-400 text-end text-xs">Guardando...</p>
@@ -268,7 +268,7 @@
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Espacio entre etiquetas (mm):</p>
                         <el-input-number v-model="form.printer_config.labelGap" @blur="updateLabelGap"
-                            @keyup.enter="updateLabelGap" :min="0" :max="5000" class="!w-24" size="small" clearable />
+                            @keyup.enter="updateLabelGap" @change="updateLabelGap" :min="0" :max="5000" class="!w-24" size="small" clearable />
                     </div>
                     <p v-if="loadingLabelGap" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
