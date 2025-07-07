@@ -792,7 +792,7 @@ export default {
             // --- 5. Código de Barras ---
             if (this.report.folio) {
                 // currentY += 5; // Espacio extra antes del código de barras
-                const folioPadded = String(this.report.folio).padStart(5, '0');
+                const folioPadded = String(this.report.folio).padStart(3, '0');
                 const humanReadable = this.$page.props.auth.user.printer_config?.labelBarCodeHumanReadable || 0;
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
@@ -812,7 +812,7 @@ export default {
             // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
             commands += 'PRINT 1\n';
 
-            // console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
+            console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
             return commands;
         },
         removeAccents(text = '') {
