@@ -149,90 +149,25 @@ class CashCutController extends Controller
             return $date->created_at->format('Y-m-d');
         })
         ->map(function ($group) {
-            $total_store_sales_cash = $group->sum('store_sales_cash');
-            $total_store_sales_card = $group->sum('store_sales_card');
+            $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
             $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
-            $total_difference = $group->sum('difference');
+            $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+            $total_difference = $group->sum('difference_cash') + $group->sum('difference_card');
             $amount_sales_products = $group->count();
 
             return [
                 'cuts' => $group,
-                'total_store_sales_cash' => $total_store_sales_cash,
-                'total_store_sales_card' => $total_store_sales_card,
+                'total_store_sales' => $total_store_sales,
                 'total_online_sales' => $total_online_sales,
-                'total_sales' => $total_store_sales_cash + $total_store_sales_card + $total_online_sales,
-                'total_difference' => $total_difference,
+                'total_service_orders' => $total_service_orders,
+                'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
+                'total_difference' => $total_difference ,
                 'amount_sales_products' => $amount_sales_products
             ];
         });
-
+        //  return $groupedCashCuts;
         return inertia('CashRegister/Print', compact('groupedCashCuts'));
     }
-
-    // Metodo para realizar cortes de caja tomando en cuenta 2 metodos de pago, solo tiene ventas en linea y en tienda (falta ordenes de servicio y cotizaciones)
-    // public function fetchTotalSaleForCashCut($cash_register_id)
-    // {
-    //     $store_id = auth()->user()->store_id;
-    //     $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
-    //     $online_store_properties = auth()->user()->store->online_store_properties;
-    //     $online_sales = null;
-
-    //     $has_online_sales_cash_register = is_array($online_store_properties)
-    //         && array_key_exists('online_sales_cash_register', $online_store_properties)
-    //         && intval($online_store_properties['online_sales_cash_register']) === intval($cash_register_id);
-
-    //     if ($last_cash_cut !== null) {
-    //         $sales = Sale::where('cash_register_id', $cash_register_id)
-    //             ->where('created_at', '>', $last_cash_cut->created_at)
-    //             ->get();
-
-    //         if ($has_online_sales_cash_register) {
-    //             $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
-    //                 ->whereIn('status', ['Entregado', 'Reembolsado'])
-    //                 ->where('created_at', '>', $last_cash_cut->created_at)
-    //                 ->get();
-    //         }
-    //     } else {
-    //         $sales = Sale::where('cash_register_id', $cash_register_id)->get();
-            
-    //         if ($has_online_sales_cash_register) {
-    //             $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
-    //             ->whereIn('status', ['Entregado', 'Reembolsado'])
-    //             ->get();
-    //         }
-    //     }
-        
-    //     // Filtra las ventas a crédito
-    //     $credit_sales_folios = CreditSaleData::where('store_id', $store_id)->pluck('folio')->toArray();
-    //     $filtered_sales = $sales->reject(function ($sale) use ($credit_sales_folios) {
-    //         return in_array($sale->folio, $credit_sales_folios);
-    //     });
-        
-    //     // Separa ventas por método de pago
-    //     $cash_sales = $filtered_sales->where('payment_method', 'Efectivo');
-    //     $card_sales = $filtered_sales->where('payment_method', 'Tarjeta');
-        
-    //     // Calcula los totales
-    //     $total_cash_sales = $cash_sales->sum(function ($sale) {
-    //         return $sale->quantity * $sale->current_price;
-    //     });
-
-    //     $total_card_sales = $card_sales->sum(function ($sale) {
-    //         return $sale->quantity * $sale->current_price;
-    //     });
-
-    //     $total_online_sales = $online_sales?->sum(function ($online_sale) {
-    //         return $online_sale->total + $online_sale->delivery_price;
-    //     });
-
-    //     return response()->json([
-    //         'store_sales' => [
-    //             'cash' => $total_cash_sales,
-    //             'card' => $total_card_sales,
-    //         ],
-    //         'online_sales' => $total_online_sales ?? 0,
-    //     ]);
-    // }
 
     public function fetchTotalSaleForCashCut($cash_register_id)
     {
@@ -254,12 +189,12 @@ class CashCutController extends Controller
             if ($has_online_sales_cash_register) {
                 $online_sales = OnlineSale::where('store_id', $store_id)
                     ->whereIn('status', ['Entregado', 'Reembolsado'])
-                    ->where('created_at', '>', $last_cash_cut->created_at)
+                    ->where('delivered_at', '>', $last_cash_cut->created_at)
                     ->get();
             }
 
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->whereIn('status', ['Entregado/Pagado', 'Cancelada'])
+                ->where('status', 'Entregado/Pagado') // no se toman en cuenta las canceladas pero revisar si se tienen que tomar en cuenta
                 ->where('paid_at', '>', $last_cash_cut->created_at)
                 ->get();
         } else {
@@ -272,7 +207,7 @@ class CashCutController extends Controller
             }
 
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->whereIn('status', ['Entregado/Pagado', 'Cancelada'])
+                ->whereIn('status', ['Entregado/Pagado'])
                 ->get();
         }
 

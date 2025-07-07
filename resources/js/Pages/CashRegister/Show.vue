@@ -58,8 +58,8 @@
                             <div class="w-3/4 space-y-1">
                                 <!-- Encabezado -->
                                 <div class="flex items-center space-x-2 pb-2">
-                                <img class="w-7" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
-                                <p class="font-bold text-gray-600">Efectivo en caja</p>
+                                    <img class="w-7" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                                    <p class="font-bold text-gray-600">Efectivo en caja</p>
                                 </div>
 
                                 <!-- Etiquetas fijas -->
@@ -138,7 +138,7 @@
                                             cash_cut.store_sales_card,
                                             hasModule('Tienda en línea') ? cash_cut.online_sales_card : null,
                                             hasModule('Ordenes de servicio') ? cash_cut.service_orders_card : null,
-                                            cash_cut.counted_card
+                                            (cash_cut.store_sales_card + cash_cut.online_sales_card + cash_cut.service_orders_card)
                                             ]" :key="i" v-if="value !== null" class="text-[#373737] ml-[18px] pb-1" :class="i === 3 ? 'font-semibold' : ''">
                                             <span class="text-[#373737] mr-3">$</span>{{ value?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
                                         </p>

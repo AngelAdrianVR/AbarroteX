@@ -29,12 +29,12 @@ class DashboardController extends Controller
 
         $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
             ->whereNotNull('delivered_at')
-            ->whereDate('created_at', $date)
+            ->whereDate('delivered_at', $date)
             ->get();
 
         $last_period_online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
             ->whereNotNull('delivered_at')
-            ->whereDate('created_at', $prev_date)
+            ->whereDate('delivered_at', $prev_date)
             ->get();
 
         $top_products = Sale::where('store_id', auth()->user()->store_id)
@@ -91,13 +91,13 @@ class DashboardController extends Controller
             ])->get();
 
         $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
-            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->whereBetween('delivered_at', [$startOfWeek, $endOfWeek])
             ->whereNotNull('delivered_at')
             ->get();
 
         $last_period_online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
             ->whereNotNull('delivered_at')
-            ->whereBetween('created_at', [
+            ->whereBetween('delivered_at', [
                 Carbon::parse($prev_date)->startOfWeek(Carbon::SUNDAY)->toDateString(),
                 Carbon::parse($prev_date)->endOfWeek(Carbon::SATURDAY)->toDateString()
             ])->get();
@@ -164,13 +164,13 @@ class DashboardController extends Controller
         $online_sales = OnlineSale::whereYear('created_at', $current_month->year)
             ->where('store_id', auth()->user()->store_id)
             ->whereNotNull('delivered_at')
-            ->whereMonth('created_at', $current_month->month)
+            ->whereMonth('delivered_at', $current_month->month)
             ->get();
 
         $last_period_online_sales = OnlineSale::whereYear('created_at', $prev_month->year)
             ->where('store_id', auth()->user()->store_id)
             ->whereNotNull('delivered_at')
-            ->whereMonth('created_at', $prev_month->month)
+            ->whereMonth('delivered_at', $prev_month->month)
             ->get();
 
         $expenses = Expense::whereYear('created_at', $current_month->year)
