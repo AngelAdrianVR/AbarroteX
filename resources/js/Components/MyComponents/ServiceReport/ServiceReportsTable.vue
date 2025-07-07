@@ -4,7 +4,7 @@
             <el-button v-show="selectedReports.length" :disabled="!selectedReports.length" type="danger"
                 @click="deleteSelected">Eliminar ({{ selectedReports.length }})</el-button>
         </div>
-        <table v-if="reports?.length" class="w-full table-fixed">
+        <!-- <table v-if="reports?.length" class="w-full table-fixed">
             <thead>
                 <tr class="*:text-left *:pb-2 *:px-4 *:text-sm border-b border-primary">
                     <th class="w-5">
@@ -58,32 +58,29 @@
                                         </div>
                                     </div>
                                 </template>
-
-                                <!-- Ícono fuera del tooltip, visible en todo momento -->
-                                <span v-html="getStatusIcon(report.status)"></span>
-                            </el-tooltip>
-
-                            <span>{{ String(report.folio).padStart(3, '0') }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <p>
-                            <span v-if="report.product_details?.brand">{{ report.product_details?.brand }}</span>
-                            <span v-if="report.product_details?.model">{{ ' ' + report.product_details?.model }}</span>
-                        </p>
-                    </td>
-                    <td>{{ formatDate(report.service_date) }}</td>
-                    <td>{{ report.client_name ?? 'No especificado' }}</td>
-                    <td>{{ report.service_description ?? '-' }}</td>
-                    <td>${{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
-                        report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
-                    <td class="rounded-e-full text-end">
-                        <el-dropdown trigger="click" @command="handleCommand">
-                            <button @click.stop
-                                class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <template #dropdown>
+<span v-html="getStatusIcon(report.status)"></span>
+</el-tooltip>
+<span>{{ String(report.folio).padStart(3, '0') }}</span>
+</div>
+</td>
+<td>
+    <p>
+        <span v-if="report.product_details?.brand">{{ report.product_details?.brand }}</span>
+        <span v-if="report.product_details?.model">{{ ' ' + report.product_details?.model }}</span>
+    </p>
+</td>
+<td>{{ formatDate(report.service_date) }}</td>
+<td>{{ report.client_name ?? 'No especificado' }}</td>
+<td>{{ report.service_description ?? '-' }}</td>
+<td>${{ report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
+    report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+<td class="rounded-e-full text-end">
+    <el-dropdown trigger="click" @command="handleCommand">
+        <button @click.stop
+            class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+        <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item :command="'see|' + encodeId(report.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -165,21 +162,188 @@
                                             </svg>
                                             <span class="text-xs">Entregado/Pagado</span>
                                         </el-dropdown-item>
-                                        <!-- <el-dropdown-item v-if="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'" :command="'changeStatus|' + report.id + '|Cancelada'">
-                                            <svg class="size-[14px] mr-2" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M8.97288 4.41695L6.69492 6.69492M4.41695 8.97288L6.69492 6.69492M6.69492 6.69492L4.41695 4.41695M6.69492 6.69492L8.97288 8.97288M12.3898 6.69492C12.3898 9.84013 9.84013 12.3898 6.69492 12.3898C3.5497 12.3898 1 9.84013 1 6.69492C1 3.5497 3.5497 1 6.69492 1C9.84013 1 12.3898 3.5497 12.3898 6.69492Z" stroke="#373737" stroke-width="1.13898" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                            <span class="text-xs">Cancelada</span>
-                                        </el-dropdown-item> -->
                                     </div>
                                 </el-dropdown-menu>
                             </template>
-                        </el-dropdown>
+    </el-dropdown>
+</td>
+</tr>
+</tbody>
+</table>
+<el-empty v-else description="No hay ordenes de servicios registrados" /> -->
+        <el-table ref="tableRef" :data="internalReports" @row-click="handleRowClick" max-height="670"
+            :row-class-name="tableRowClassName" :default-sort="{ prop: 'folio', order: 'descending' }"
+            class="!w-full mx-auto">
+            <el-table-column prop="folio" sortable label="Orden" width="110" :filters="[
+                { text: 'Recibida', value: 'Recibida' },
+                { text: 'En proceso', value: 'En proceso' },
+                { text: 'Listo para entregar', value: 'Listo para entregar' },
+                { text: 'Entregado/Pagado', value: 'Entregado/Pagado' },
+            ]" :filter-method="filterStatus">
+                <template #default="scope">
+                    <td class="mt-[5px]">
+                        <div class="flex items-center space-x-2">
+                            <el-tooltip placement="top">
+                                <template #content>
+                                    <div class="text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-sm">
+                                                {{ scope.row.status }}
+                                            </span>
+                                        </div>
+                                        <div v-if="scope.row.status === 'Cancelada'">
+                                            <p class="text-blue-300">
+                                                Razón: <span class="text-white">{{ scope.row.cancellation_reason ?? '-'
+                                                }}</span>
+                                            </p>
+                                            <p class="text-blue-300">
+                                                Monto de revisión: <span class="text-white">${{
+                                                    scope.row.aditionals?.review_amount ?? '0.00' }}</span>
+                                            </p>
+                                            <p class="text-blue-300">
+                                                Adelanto regresado: <span class="text-white">${{
+                                                    scope.row.aditionals?.advance_amount ?? '0.00' }}</span>
+                                            </p>
+                                        </div>
+                                        <div v-if="scope.row.status === 'Entregado/Pagado'">
+                                            <p class="text-green-300">
+                                                Pagado el: <span class="text-white">{{ formatDate(scope.row.paid_at) ??
+                                                    '-'
+                                                }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </template>
+                                <span v-html="getStatusIcon(scope.row.status)"></span>
+                            </el-tooltip>
+                            <span>{{ String(scope.row.folio).padStart(3, '0') }}</span>
+                        </div>
                     </td>
-                </tr>
-            </tbody>
-        </table>
-        <el-empty v-else description="No hay ordenes de servicios registrados" />
+                </template>
+            </el-table-column>
+            <el-table-column label="Equipo" width="150">
+                <template #default="scope">
+                    <p>
+                        <span v-if="scope.row.product_details?.brand">{{ scope.row.product_details?.brand }}</span>
+                        <span v-if="scope.row.product_details?.model">{{ ' ' + scope.row.product_details?.model
+                            }}</span>
+                    </p>
+                </template>
+            </el-table-column>
+            <el-table-column label="Fecha del servicio">
+                <template #default="scope">
+                    <p>{{ formatDate(scope.row.service_date) }}</p>
+                </template>
+            </el-table-column>
+            <el-table-column label="Cliente">
+                <template #default="scope">
+                    <p>{{ scope.row.client_name ?? 'No especificado' }}</p>
+                </template>
+            </el-table-column>
+            <el-table-column prop="service_description" label="Servicio" />
+            <el-table-column label="Total a pagar">
+                <template #default="scope">
+                    <p>
+                        ${{ scope.row.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            ?? scope.row.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </p>
+                </template>
+            </el-table-column>
+            <el-table-column align="right">
+                <template #default="scope">
+                    <el-dropdown trigger="click" @command="handleCommand">
+                        <button @click.stop
+                            class="el-dropdown-link justify-center items-center size-6 hover:bg-primary hover:text-primarylight rounded-full text-primary transition-all duration-200 ease-in-out">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item :command="'see|' + encodeId(scope.row.id)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                    <span class="text-xs">Ver</span>
+                                </el-dropdown-item>
+                                <el-dropdown-item
+                                    v-if="canEdit && scope.row.status !== 'Cancelada' && scope.row.status !== 'Entregado/Pagado'"
+                                    :command="'edit|' + encodeId(scope.row.id)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                    </svg>
+                                    <span class="text-xs">Editar</span>
+                                </el-dropdown-item>
+                                <el-dropdown-item v-if="canDelete" :command="'delete|' + scope.row.id">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-[14px] mr-2 text-red-600">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                    <span class="text-xs text-red-600">Eliminar</span>
+                                </el-dropdown-item>
+                                <div v-if="canEdit">
+                                    <p v-if="scope.row.status !== 'Cancelada' && scope.row.status !== 'Entregado/Pagado'"
+                                        class="text-gray-400 text-xs text-center px-3 my-1">Cambiar estatus</p>
+                                    <el-dropdown-item
+                                        v-if="scope.row.status !== 'Cancelada' && scope.row.status !== 'Entregado/Pagado'"
+                                        :command="'changeStatus|' + scope.row.id + '|Recibida'">
+                                        <svg class="size-[14px] mr-2" width="17" height="13" viewBox="0 0 17 13"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M5.99232 8.28937C6.49168 11.3688 10.4533 11.5186 11.219 8.28937H16.5766L13.72 6.63869C13.5993 6.56894 13.4785 6.51799 13.4328 6.51799H12.0013C11.8692 6.51799 11.8692 6.39728 12.0013 6.39181H13.4328C13.5826 6.39181 13.7324 6.49117 13.8489 6.55826C15.136 7.2993 15.5913 7.54833 16.8784 8.28937V11.6517C16.8784 12.1511 16.6453 13 15.9629 13H1.38156C0.516005 13 0 12.3841 0 12.0845V8.28937L3.44558 6.44174C3.50845 6.40803 3.66134 6.39181 3.82228 6.39181C4.20512 6.39181 4.92702 6.37516 5.3598 6.39181C5.47189 6.39728 5.4773 6.51799 5.3598 6.51799H3.82228C3.70157 6.51799 3.6211 6.51547 3.54063 6.55822L0.281641 8.28937H5.99232Z"
+                                                fill="currentColor" />
+                                            <path
+                                                d="M8.03969 5.01024V0H9.18822V5.01024H10.8028L8.50576 7.27401L6.242 5.01024H8.03969Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        <span class="text-xs">Recibida</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-if="scope.row.status !== 'Cancelada' && scope.row.status !== 'Entregado/Pagado'"
+                                        :command="'changeStatus|' + scope.row.id + '|En proceso'">
+                                        <svg class="size-[14px] mr-2" width="13" height="16" viewBox="0 0 13 16"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M7.57423 8.04782L6.69533 8.83421L4.42867 6.66007C2.16201 10.4995 6.16502 13.5988 8.83423 11.1471C9.64555 10.4019 10.3652 8.83421 9.23953 6.66007L10.7171 5.31857C11.6085 6.27663 12.1538 7.56113 12.1538 8.97298C12.1538 11.9365 9.75138 14.3389 6.78784 14.3389C3.8243 14.3389 1.42188 11.9365 1.42188 8.97298C1.42188 6.00944 3.8243 3.60702 6.78784 3.60702V1.52539M6.78784 1.52539H4.42867M6.78784 1.52539H8.83423"
+                                                stroke="currentColor" stroke-width="1.38775" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        <span class="text-xs">En proceso</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-if="scope.row.status !== 'Cancelada' && scope.row.status !== 'Entregado/Pagado'"
+                                        :command="'changeStatus|' + scope.row.id + '|Listo para entregar'">
+                                        <svg class="size-[14px] mr-2" width="14" height="13" viewBox="0 0 14 13"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M6.05078 0C7.55666 0 8.93423 0.549765 9.99316 1.45996C10.9763 0.695148 11.5787 0.424377 12.6973 0.0917969C12.8806 0.0372847 13.0214 0.0457867 13.2021 0.0917969C13.2938 0.137854 13.4287 0.335015 13.5225 0.503906C13.5988 0.641428 13.6068 0.807884 13.5225 0.871094C12.573 1.58285 12.0774 2.0335 11.21 2.8877C11.7754 3.80807 12.1016 4.89139 12.1016 6.05078C12.1015 9.39261 9.39262 12.1016 6.05078 12.1016C2.70898 12.1015 2.75663e-05 9.39258 0 6.05078C0 2.70895 2.70896 4.42574e-05 6.05078 0ZM12.9268 0.273438C9.06853 1.70435 7.93919 3.53397 5.50098 6.50781C4.89269 5.61383 3.84319 4.7846 3.62207 4.6748C3.34619 4.53804 2.9344 4.5602 2.79688 4.6748L1.97168 5.3623C1.88146 5.44078 3.95789 7.5615 5.73047 9.0293C5.82127 9.10449 6.31822 9.12083 6.37207 9.0293C8.72076 4.99999 10.7269 2.52085 13.2939 0.640625C13.3617 0.594925 13.0184 0.239662 12.9268 0.273438Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        <span class="text-xs">Listo para entregar</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-if="scope.row.status !== 'Cancelada' && scope.row.status !== 'Entregado/Pagado'"
+                                        :command="'changeStatus|' + scope.row.id + '|Entregado/Pagado'">
+                                        <svg class="size-[14px] mr-2" width="13" height="13" viewBox="0 0 13 13"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M6.40723 0.1875C9.94524 0.187741 12.8132 3.05574 12.8135 6.59375C12.8135 10.132 9.94539 13.0007 6.40723 13.001C2.86886 13.001 0 10.1321 0 6.59375C0.000241568 3.05559 2.86901 0.1875 6.40723 0.1875ZM5.39062 2.17383C5.30076 2.17383 5.22465 2.25239 5.22461 2.37598V2.92676C5.15226 2.94346 5.08157 2.96237 5.0127 2.98242C4.87109 3.02365 4.73687 3.07186 4.61035 3.12598C4.45527 3.19231 4.31115 3.2677 4.17969 3.35059C4.02829 3.44608 3.89299 3.55199 3.77441 3.66504C3.61844 3.81377 3.49146 3.97588 3.39551 4.14551C3.31392 4.28981 3.25448 4.43958 3.21875 4.5918C3.19214 4.70535 3.17871 4.82081 3.17871 4.93555C3.17871 4.99099 3.17798 4.93565 3.18457 5.10449C3.19118 5.27394 3.23233 5.44728 3.29395 5.62109C3.33807 5.7455 3.39662 5.86975 3.47168 5.99219C3.55228 6.12365 3.77441 6.37793 3.77441 6.37793C3.78219 6.38515 3.99397 6.58161 4.125 6.6748C4.24214 6.7581 4.37287 6.83781 4.51758 6.91309C4.64679 6.9803 4.78742 7.0441 4.94043 7.10352C5.06309 7.15114 5.19406 7.19545 5.33301 7.2373C5.42943 7.26635 5.53013 7.29433 5.63477 7.32031L5.74512 7.34863C5.92466 7.39383 6.0829 7.43506 6.2207 7.47461C6.91937 7.67514 7.11354 7.8289 7.13477 8.19922C7.1609 8.65721 6.4355 9.07803 5.63477 8.82715C5.61678 8.82151 5.5478 8.80571 5.5293 8.7998C5.38084 8.75152 5.2483 8.70013 5.13086 8.64453C5.01725 8.59072 4.91656 8.53218 4.82715 8.46777C4.74231 8.40662 4.66683 8.33956 4.59961 8.26562C4.58007 8.24412 4.56124 8.22197 4.54297 8.19922L4.00684 8.46777L3.25879 8.84375C3.16568 8.89076 3.13186 9.08011 3.25879 9.23047C3.28036 9.25602 3.30243 9.28123 3.32422 9.30566C3.42222 9.41555 3.52316 9.51421 3.63184 9.60449C3.74171 9.69577 3.85969 9.77892 3.99121 9.85547C4.12628 9.93407 4.27588 10.0064 4.44531 10.0752C4.56237 10.1227 4.68898 10.1687 4.82715 10.2139C4.94997 10.254 5.08223 10.2933 5.22461 10.333V10.792C5.22461 10.9043 5.33403 10.9608 5.44629 10.9609H6.91895C7.05182 10.9634 7.13477 10.9267 7.13477 10.792V10.333C8.73553 9.95277 9.3183 9.07786 9.31836 8.19922C9.31836 7.32054 8.67094 6.3315 7.13477 6.06543C7.07268 6.05467 7.0122 6.04282 6.95312 6.03125C6.79834 6.00093 6.65368 5.9686 6.51953 5.93262C6.3521 5.8877 6.20073 5.83812 6.06543 5.78418C5.91946 5.72598 5.7922 5.66175 5.68359 5.59277C5.55819 5.51309 5.45743 5.42649 5.38184 5.33203C5.315 5.24851 5.26814 5.15887 5.24023 5.06348C5.22809 5.02196 5.21962 4.97935 5.21484 4.93555C5.21134 4.90334 5.20948 4.87037 5.20996 4.83691C5.21069 4.78765 5.21525 4.73657 5.22461 4.68457C5.22875 4.66159 5.23462 4.63941 5.24023 4.61816C5.24669 4.59378 5.25341 4.57003 5.26172 4.54785C5.27123 4.52249 5.28216 4.49817 5.29395 4.47559C5.30856 4.44764 5.32494 4.42133 5.34277 4.39746C5.36803 4.36368 5.39672 4.33377 5.42773 4.30762C5.4443 4.29366 5.46146 4.28047 5.47949 4.26855C5.50172 4.25386 5.52556 4.24124 5.5498 4.22949C5.59181 4.20915 5.63652 4.19287 5.68359 4.18066C5.71695 4.17202 5.75173 4.16511 5.78711 4.16016C5.83049 4.15409 5.87522 4.15047 5.9209 4.14941C5.96815 4.14832 6.01658 4.1497 6.06543 4.15332C6.13013 4.15812 6.19603 4.167 6.26172 4.17871C6.30646 4.18669 6.35111 4.19645 6.39551 4.20703C6.45485 4.22118 6.51393 4.23708 6.57129 4.25488C6.6241 4.27127 6.67572 4.28908 6.72559 4.30762C6.74639 4.31536 6.76751 4.32363 6.78809 4.33203C6.87173 4.3662 6.95416 4.40604 7.03613 4.45215C7.12141 4.50014 7.20669 4.55555 7.29395 4.61816C7.3742 4.67577 7.45594 4.74015 7.54102 4.81152C7.66957 4.91938 7.80594 5.04336 7.9541 5.18652L9.14355 4.4209C9.23344 4.36301 9.23344 4.19178 9.14355 4.08203C8.87033 3.74846 8.61086 3.52295 8.30469 3.35059C8.19481 3.28875 8.07906 3.23323 7.9541 3.18262C7.84482 3.13835 7.72843 3.09789 7.60352 3.05859C7.52103 3.03265 7.43444 3.00742 7.34375 2.98242C7.2767 2.96394 7.20682 2.94518 7.13477 2.92676V2.37598C7.13471 2.22994 7.01956 2.17383 6.90723 2.17383H5.39062Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        <span class="text-xs">Entregado/Pagado</span>
+                                    </el-dropdown-item>
+                                </div>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                </template>
+            </el-table-column>
+        </el-table>
 
         <Modal :show="showPaymentModal" @close="showPaymentModal = false">
             <div v-if="paymentModalStep === 1" class="py-4 px-7 relative">
@@ -325,7 +489,6 @@
                 </section>
             </div>
         </Modal>
-
         <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
             <template #title>
                 <h1>Eliminar servicio</h1>
@@ -403,6 +566,15 @@ export default {
         },
     },
     methods: {
+        filterStatus(status, row) {
+            return row.status == status;
+        },
+        handleRowClick(row) {
+            this.$inertia.get(route('service-reports.show', this.encodeId(row.id)));
+        },
+        tableRowClassName({ row, rowIndex }) {
+            return 'cursor-pointer text-xs';
+        },
         getStatusIcon(status) {
             if (status === 'Recibida') {
                 return '<svg width="17" height="13" viewBox="0 0 17 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.99232 8.28937C6.49168 11.3688 10.4533 11.5186 11.219 8.28937H16.5766L13.72 6.63869C13.5993 6.56894 13.4785 6.51799 13.4328 6.51799H12.0013C11.8692 6.51799 11.8692 6.39728 12.0013 6.39181H13.4328C13.5826 6.39181 13.7324 6.49117 13.8489 6.55826C15.136 7.2993 15.5913 7.54833 16.8784 8.28937V11.6517C16.8784 12.1511 16.6453 13 15.9629 13H1.38156C0.516005 13 0 12.3841 0 12.0845V8.28937L3.44558 6.44174C3.50845 6.40803 3.66134 6.39181 3.82228 6.39181C4.20512 6.39181 4.92702 6.37516 5.3598 6.39181C5.47189 6.39728 5.4773 6.51799 5.3598 6.51799H3.82228C3.70157 6.51799 3.6211 6.51547 3.54063 6.55822L0.281641 8.28937H5.99232Z" fill="#008796"/><path d="M8.03969 5.01024V0H9.18822V5.01024H10.8028L8.50576 7.27401L6.242 5.01024H8.03969Z" fill="#008796"/></svg>';
@@ -462,11 +634,6 @@ export default {
                     type: 'error',
                 });
             }
-        },
-        openTemplate(reportId) {
-            this.$inertia.get(route('service-reports.show', this.encodeId(reportId)));
-            // const url = route('service-reports.show', this.encodeId(reportId));
-            // window.open(url, '_blank');
         },
         formatDate(dateString) {
             if (!dateString) return '';

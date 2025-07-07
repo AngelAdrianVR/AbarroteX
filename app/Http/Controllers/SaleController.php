@@ -101,15 +101,15 @@ class SaleController extends Controller
         $installments = Installment::whereIn('user_id', $storeUsers)
             ->whereDate('created_at', $date)
             ->get();
-        
+
         // Obtener los servicios entregados y pagados en la fecha especificada
         $order_services = ServiceReport::where(function ($query) {
             $query->where('status', 'Entregado/Pagado')
                 ->orWhere('status', 'Cancelada');
         })
-        ->where('store_id', auth()->user()->store_id)
-        ->latest()
-        ->get();
+            ->where('store_id', auth()->user()->store_id)
+            ->latest()
+            ->get();
 
         $this->addCreditDataToSales($sales);
 
@@ -419,9 +419,9 @@ class SaleController extends Controller
             $query->where('status', 'Entregado/Pagado')
                 ->orWhere('status', 'Cancelada');
         })
-        ->where('store_id', auth()->user()->store_id)
-        ->latest()
-        ->get(['id', 'folio', 'total_cost', 'paid_at', 'created_at']);
+            ->where('store_id', auth()->user()->store_id)
+            ->latest()
+            ->get(['id', 'folio', 'total_cost', 'paid_at', 'created_at']);
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales, null, false, $order_services)->take(30);
@@ -692,7 +692,7 @@ class SaleController extends Controller
         $filteredOnlineSales = $onlineSales->filter(function ($onlineSale) {
             return $onlineSale->delivered_at || $onlineSale->refunded_at;
         });
-        
+
         // 2. Combinar todas las ventas para agruparlas por fecha
         $allSales = $sales->merge($filteredOnlineSales)->merge($serviceOrders);
 
@@ -710,7 +710,7 @@ class SaleController extends Controller
             } else {
                 return Carbon::parse($sale->paid_at)->toDateString(); // Orden de servicio
             }
-         })->map(function ($dailySales) use ($returnSales, $installments) {
+        })->map(function ($dailySales) use ($returnSales, $installments) {
             // 3. Clasificar las ventas del día
             $normalSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
             $quoteSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
@@ -738,7 +738,7 @@ class SaleController extends Controller
             $normalFolios = $normalSales->unique('folio')->count();
             $quoteFolios = $quoteSales->unique('folio')->count();
             $onlineFolios = $onlineSales->count();
-            
+
 
             // 7. Agrupar ventas por folio si returnSales es true
             $normalSalesByFolio = $returnSales ? $normalSales->groupBy('folio')->map(fn($folioSales) => $this->formatNormalSaleByFolio($folioSales)) : [];
@@ -929,13 +929,9 @@ class SaleController extends Controller
             if (!$promo['applied']) continue;
 
             // calcular descuento
-            if ($promo['type'] == 'Producto gratis al comprar otro') {
-                $total_discounted = 0.0;
-            } else {
-                $original_price_total = $product['public_price'] * $sale['quantity'];
-                $discount_price_total = $product['discounted_price'] * $sale['quantity'];
-                $total_discounted = (float) number_format(($original_price_total - $discount_price_total), 1);
-            }
+            $original_price_total = $product['public_price'] * $sale['quantity'];
+            $discount_price_total = $product['discounted_price'] * $sale['quantity'];
+            $total_discounted = (float) number_format(($original_price_total - $discount_price_total), 1);
 
             if ($promo['type'] == 'Descuento en precio fijo') {
                 $promotions_applied[] = [
@@ -961,10 +957,14 @@ class SaleController extends Controller
                 if ($promo['giftable_type'] == Product::class) {
                     $giftable = Product::find($promo['giftable_id']);
                     $gift_name = $giftable->name;
+                    $public_price = $giftable->public_price;
                 } else {
                     $giftable = GlobalProductStore::with(['globalProduct'])->find($promo['giftable_id']);
                     $gift_name = $giftable->globalProduct->name;
+                    $public_price = $giftable->globalProduct->public_price;
                 }
+                // recalcular descueto para el caso de producto gratis
+                $total_discounted = $public_price * $promo['quantity_to_gift'];
 
                 $promotions_applied[] = [
                     'discount' => $total_discounted,

@@ -133,19 +133,14 @@
                                             </div>
                                             <div v-else-if="sale.discounted_price != null && !sale.promotions_applied"
                                                 class="px-2 py-1 bg-gray-50 flex items-center justify-end gap-4">
-                                                <span class="flex items-center gap-2 text-[#AE080B]">
+                                                <span class="flex items-center gap-2 text-[#AE080B] mr-14">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                         class="size-4">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                                     </svg>
-                                                    <span>Regalo por promoción</span>
-                                                </span>
-                                                <span class="shrink-0">
-                                                    -${{
-                                                        calculateTotalDiscount(sale).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                            ",") }}
+                                                    <span>Regalo de producto por promoción</span>
                                                 </span>
                                             </div>
                                         </td>
@@ -315,12 +310,6 @@ export default {
         encodeId(id) {
             const encodedId = btoa(id.toString());
             return encodedId;
-        },
-        calculateTotalDiscount(sale) {
-            const originalTotal = sale.current_price * sale.quantity;
-            const discountTotal = sale.discounted_price * sale.quantity;
-
-            return originalTotal - discountTotal;
         },
         formatDate(dateString) {
             return format(parseISO(dateString), 'dd MMMM, yyyy', { locale: es });

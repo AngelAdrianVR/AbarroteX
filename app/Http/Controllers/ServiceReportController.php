@@ -18,7 +18,7 @@ class ServiceReportController extends Controller
 
     public function index()
     {
-        $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(50);
+        $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(100);
         $total_reports = ServiceReport::where('store_id', auth()->user()->store_id)->get()->count();
 
         return inertia('ServiceReport/Index', compact('service_reports', 'total_reports'));
@@ -42,8 +42,8 @@ class ServiceReportController extends Controller
         if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
             return inertia('ServiceReport/Create24', compact('products', 'folio'));
         }
-        // return inertia($view, compact('products', 'folio'));
-        return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
+        return inertia($view, compact('products', 'folio'));
+        // return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
     }
 
     //para guardar la orden de dm compresores.
@@ -135,8 +135,8 @@ class ServiceReportController extends Controller
         if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
             return inertia('ServiceReport/Show24', compact('report'));
         }
-        // return inertia($view, compact('report'));
-        return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
+        return inertia($view, compact('report'));
+        // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
@@ -159,8 +159,8 @@ class ServiceReportController extends Controller
             return inertia('ServiceReport/Edit24', compact('report', 'products'));
         }
 
-        // return inertia($view, compact('report', 'products'));
-        return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
+        return inertia($view, compact('report', 'products'));
+        // return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
     }
 
     public function update(Request $request, ServiceReport $serviceReport)
