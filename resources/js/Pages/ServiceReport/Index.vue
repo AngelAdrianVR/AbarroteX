@@ -6,7 +6,7 @@
         <article class="flex items-center flex-col space-y-2 lg:flex-row lg:space-x-2 lg:space-y-0 lg:w-1/3">
           <div class="w-full relative">
             <input v-model="searchQuery" @keydown.enter="searchReports" class="input w-full pl-9"
-              placeholder="Buscar por cliente, N° orden o fecha" type="search" />
+              placeholder="Buscar por cliente o N° orden" type="search" />
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <el-tag @close="closedTag" v-if="searchedWord" closable type="primary">

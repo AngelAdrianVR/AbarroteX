@@ -144,7 +144,7 @@ props:{
 },
 computed:{
     totalSpareParts() {
-        return this.report.spare_parts.reduce((total, sp) => {
+        return this.report.spare_parts?.reduce((total, sp) => {
             return total + (Number(sp.quantity) * Number(sp.unitPrice));
         }, 0);
     }

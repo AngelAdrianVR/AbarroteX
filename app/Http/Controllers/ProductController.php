@@ -555,7 +555,7 @@ class ProductController extends Controller
 
         // productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with([
-            'globalProduct' => ['media', 'category'],
+            'globalProduct' => ['media', 'category:id,name','brand:id,name',],
             'promotions.giftable' => function ($query) {
                 $query->morphWith([
                     Product::class => ['media'],
