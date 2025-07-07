@@ -305,7 +305,9 @@ export default {
             return this.form.service_cost - this.form.advance_payment + this.totalSpareParts;
         },
         totalSpareParts() {
-            return this.form.spare_parts.reduce((total, sp) => {
+            if (!this.form.spare_parts[0].name) return 0;
+
+            return this.form.spare_parts?.reduce((total, sp) => {
                 return total + (Number(sp.quantity) * Number(sp.unitPrice));
             }, 0);
         }
@@ -532,10 +534,10 @@ export default {
             };
 
             // --- 4. Contenido de la Etiqueta ---
+            addTextLine("Fecha:", this.formatDateTime());
             addTextLine("Nombre:", this.removeAccents(this.form.client_name.slice(0, 20)));
-            // addTextLine("Recepcion:", this.report.service_date.split('T')[0]);
             addTextLine("Equipo:", this.removeAccents(this.form.product_details?.brand) + ' ' + this.removeAccents(this.form.product_details?.model));
-            addTextLine("Total:", '$' + (this.totalSpareParts + this.form.service_cost));
+            addTextLine("Total:", '$' + (this.totalSpareParts + parseFloat(this.form.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             addTextLine("Desbloqueo:", this.form.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.form.observations));
             addTextLine("Servicio:", this.removeAccents(this.form.service_description));
@@ -575,6 +577,9 @@ export default {
             return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         },
         formatDate(dateString = new Date().toISOString()) {
+            return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
+        },
+        formatDateTime(dateString = new Date().toISOString()) {
             return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
         },
         onPercentageInput(value) {
