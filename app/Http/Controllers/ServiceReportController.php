@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashRegisterMovement;
 use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Service;
@@ -17,7 +18,7 @@ class ServiceReportController extends Controller
 
     public function index()
     {
-        $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(50);
+        $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(100);
         $total_reports = ServiceReport::where('store_id', auth()->user()->store_id)->get()->count();
 
         return inertia('ServiceReport/Index', compact('service_reports', 'total_reports'));
@@ -38,6 +39,9 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Create{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
+        if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
+            return inertia('ServiceReport/Create24', compact('products', 'folio'));
+        }
         return inertia($view, compact('products', 'folio'));
         // return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
     }
@@ -68,7 +72,7 @@ class ServiceReportController extends Controller
             'service_date' => 'required',
             'client_name' => 'required|string|max:255',
             'client_phone_number' => 'required|string|max:10',
-            'spare_parts' => 'nullable|array|min:1',
+            'spare_parts' => 'nullable|array|min:0',
             'technician_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'service_description' => 'required|string|max:1000',
@@ -128,8 +132,11 @@ class ServiceReportController extends Controller
             ? "ServiceReport/Show{$store_id}"
             : "PageNotFound"; // 404 not found vista
 
-            return inertia($view, compact('report'));
-            // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
+        if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
+            return inertia('ServiceReport/Show24', compact('report'));
+        }
+        return inertia($view, compact('report'));
+        // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
@@ -140,7 +147,6 @@ class ServiceReportController extends Controller
         $store_id = auth()->user()->store_id;
         $products = Product::where('store_id', $store_id)->get(['id', 'name', 'code', 'description']);
 
-
         // Ruta a la vista de Inertia (ej: 'ServiceReport/Edit1.vue')
         $customViewPath = resource_path("js/Pages/ServiceReport/Edit{$store_id}.vue");
 
@@ -148,6 +154,10 @@ class ServiceReportController extends Controller
         $view = File::exists($customViewPath)
             ? "ServiceReport/Edit{$store_id}"
             : "PageNotFound"; // 404 not found vista
+
+        if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
+            return inertia('ServiceReport/Edit24', compact('report', 'products'));
+        }
 
         return inertia($view, compact('report', 'products'));
         // return inertia("ServiceReport/Edit24", compact('report', 'products')); // Para hacer pruebas con la vista deseada
@@ -177,11 +187,12 @@ class ServiceReportController extends Controller
             'service_date' => 'required',
             'client_name' => 'required|string|max:255',
             'client_phone_number' => 'required|string|max:10',
-            'spare_parts' => 'nullable|array|min:1',
+            'spare_parts' => 'nullable|array|min:0',
             'technician_name' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'service_description' => 'required|string|max:1000',
             'service_cost' => 'required|numeric|min:0|max:999999',
+            'observations' => 'required',
         ]);
 
         $service_order->update($request->all());
@@ -243,16 +254,26 @@ class ServiceReportController extends Controller
             $data['aditionals'] = $aditionals;
         } elseif ($request->status === 'Entregado/Pagado') {
             $data['payment_method'] = $request->paymentMethod;
-            // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden
+            // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden por si se quiere guardar en base de datos
             $data['paid_at'] = now(); // Fecha y hora del pago
 
             // crear gasto de comision del técnico si la comision es mayor a 0
             if ($service_report->comision_percentage > 0) {
-                Expense::create([
+                $expense = Expense::create([
                     'concept' => 'Comision de servicio técnico a ' . $service_report->technician_name,
                     'quantity' => 1,
                     'current_price' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
                     'store_id' => $service_report->store_id,
+                ]);
+                
+                // Registrar el movimiento de caja para el gasto de comision
+                $cash_register = auth()->user()->cashRegister;
+                CashRegisterMovement::create([
+                    'amount' =>($service_report->comision_percentage / 100) * $service_report->service_cost,
+                    'type' => 'Retiro',
+                    'notes' => 'Registro. Comisión ' . $service_report->comision_percentage .'% ' . $service_report->technician_name . '. Venta folio ' . $service_report->folio,
+                    'cash_register_id' => $cash_register->id,
+                    'expense_id' => $expense->id,
                 ]);
             }
         }

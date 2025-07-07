@@ -70,12 +70,17 @@ export default {
             onlineSalesCurrentPeriod: [],
             onlineSalesLastPeriod: [],
 
+            // ordenes de servicio
+            completedServiceOrdersCurrentPeriod: [],
+            lastPeriodCompletedServiceOrders: [],
+
             // expenses
             expensesCurrentPeriod: [],
             expensesLastPeriod: [],
 
             // top products
             topProductsCurrentPeriod: [],
+
             // Permisos de rol
             canSeeDashboard: this.$page.props.auth.user.store.activated_modules?.includes('Reportes'),
 
@@ -122,6 +127,11 @@ export default {
                 }, 0);
             }, 0);
         },
+        calculateTotalServiceOrders() {
+            return this.completedServiceOrdersCurrentPeriod?.reduce((acumulador, current) => {
+                return acumulador + current.service_cost;
+            }, 0);
+        },
         calculateTotalProductsExpense() {
             return this.expensesCurrentPeriod?.length;
             // return this.expensesCurrentPeriod?.reduce((acumulador, current) => {
@@ -152,6 +162,18 @@ export default {
                     title: "Unidades vendidas en linea",
                     icon: "fa-solid fa-clipboard-list",
                     value: this.calculateTotalProductsSoldOnline?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
+                },
+                {
+                    title: "Ventas en ordenes de servicio (ingresos)",
+                    icon: "fa-solid fa-dollar-sign",
+                    value: "$" + this.calculateTotalServiceOrders?.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio'),
+                },
+                {
+                    title: "Ordenes de servicio completadas",
+                    icon: "fa-solid fa-clipboard-list",
+                    value: this.completedServiceOrdersCurrentPeriod?.length,
                     show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
                 },
                 {
@@ -191,17 +213,17 @@ export default {
         },
         getTimeLine() {
             let timeLine = ['6AM', '7AM', '8AM', '9PM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM'];
-            let last = { name: "Día anterior", data: { sales: this.calculateHourlySales(this.salesLastPeriod), onlineSales: this.calculateHourlySales(this.onlineSalesLastPeriod, true), expenses: this.calculateHourlySales(this.expensesLastPeriod) } };
-            let current = { name: "Día seleccionado", data: { sales: this.calculateHourlySales(this.salesCurrentPeriod), onlineSales: this.calculateHourlySales(this.onlineSalesCurrentPeriod, true), expenses: this.calculateHourlySales(this.expensesCurrentPeriod) } };
+            let last = { name: "Día anterior", data: { sales: this.calculateHourlySales(this.salesLastPeriod), onlineSales: this.calculateHourlySales(this.onlineSalesLastPeriod, true), serviceOrders: this.calculateHourlySales(this.lastPeriodCompletedServiceOrders, false, true), expenses: this.calculateHourlySales(this.expensesLastPeriod) } };
+            let current = { name: "Día seleccionado", data: { sales: this.calculateHourlySales(this.salesCurrentPeriod), onlineSales: this.calculateHourlySales(this.onlineSalesCurrentPeriod, true), serviceOrders: this.calculateHourlySales(this.completedServiceOrdersCurrentPeriod, false, true), expenses: this.calculateHourlySales(this.expensesCurrentPeriod) } };
 
             if (this.period == 'Semanal') {
                 timeLine = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
-                last = { name: "Semana anterior", data: { sales: this.calculateDailySales(this.salesLastPeriod), onlineSales: this.calculateDailySales(this.onlineSalesLastPeriod, true), expenses: this.calculateDailySales(this.expensesLastPeriod) } };
-                current = { name: "Semana seleccionada", data: { sales: this.calculateDailySales(this.salesCurrentPeriod), onlineSales: this.calculateDailySales(this.onlineSalesCurrentPeriod, true), expenses: this.calculateDailySales(this.expensesCurrentPeriod) } };
+                last = { name: "Semana anterior", data: { sales: this.calculateDailySales(this.salesLastPeriod), onlineSales: this.calculateDailySales(this.onlineSalesLastPeriod, true), serviceOrders: this.calculateDailySales(this.lastPeriodCompletedServiceOrders, false, true), expenses: this.calculateDailySales(this.expensesLastPeriod) } };
+                current = { name: "Semana seleccionada", data: { sales: this.calculateDailySales(this.salesCurrentPeriod), onlineSales: this.calculateDailySales(this.onlineSalesCurrentPeriod, true), serviceOrders: this.calculateDailySales(this.completedServiceOrdersCurrentPeriod, false, true), expenses: this.calculateDailySales(this.expensesCurrentPeriod) } };
             } else if (this.period == 'Mensual') {
                 timeLine = ['Del 1 al 7', 'Del 8 al 14', 'Del 15 al 21', 'Del 22 al 28', 'Del 29 al 31'];
-                last = { name: "Mes anterior", data: { sales: this.calculateWeeklySales(this.salesLastPeriod), onlineSales: this.calculateWeeklySales(this.onlineSalesLastPeriod, true), expenses: this.calculateWeeklySales(this.expensesLastPeriod) } };
-                current = { name: "Mes seleccionado", data: { sales: this.calculateWeeklySales(this.salesCurrentPeriod), onlineSales: this.calculateWeeklySales(this.onlineSalesCurrentPeriod, true), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod) } };
+                last = { name: "Mes anterior", data: { sales: this.calculateWeeklySales(this.salesLastPeriod), onlineSales: this.calculateWeeklySales(this.onlineSalesLastPeriod, true), serviceOrders: this.calculateWeeklySales(this.lastPeriodCompletedServiceOrders, false, true), expenses: this.calculateWeeklySales(this.expensesLastPeriod) } };
+                current = { name: "Mes seleccionado", data: { sales: this.calculateWeeklySales(this.salesCurrentPeriod), onlineSales: this.calculateWeeklySales(this.onlineSalesCurrentPeriod, true), serviceOrders: this.calculateWeeklySales(this.completedServiceOrdersCurrentPeriod, false, true), expenses: this.calculateWeeklySales(this.expensesCurrentPeriod) } };
             }
 
             return { timeline: timeLine, last: last, current: current };
@@ -236,6 +258,20 @@ export default {
                         data: timeline.current.data.onlineSales,
                     }],
                     show: this.$page.props.auth.user.store.activated_modules.includes('Tienda en línea'),
+                },
+                {
+                    title: 'Ingresos (ordenes de servicio)',
+                    colors: ['#C9A383', '#A7770C'],
+                    categories: timeline.timeline,
+                    series: [{
+                        name: timeline.last.name,
+                        data: timeline.last.data.serviceOrders,
+                    },
+                    {
+                        name: timeline.current.name,
+                        data: timeline.current.data.serviceOrders,
+                    }],
+                    show: this.$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio'),
                 },
                 {
                     title: 'Gastos (compras)',
@@ -273,8 +309,8 @@ export default {
         setElementsWithNumberFormat(set) {
             return set.map(item => item.toFixed(2));
         },
-        calculateHourlySales(data, isOnline = false) {
-            // Inicializa el array hourlyData con ceros para cada hora del día
+        calculateHourlySales(data, isOnline = false, isServiceOrder = false) {
+            // Inicializa el array hourlyData con ceros para cada hora del día (de 6 AM a 11 PM, por ejemplo)
             let hourlyData = Array(18).fill(0);
 
             // Define la zona horaria local de la máquina
@@ -282,62 +318,97 @@ export default {
 
             // Recorre las ventas y suma el total por hora
             data.forEach((sale) => {
-                const saleDateTime = new Date(sale.created_at);
+                const rawDate = isServiceOrder ? sale.paid_at : sale.created_at;
+
+                // Verificar si la fecha es válida
+                const timestamp = Date.parse(rawDate);
+                if (isNaN(timestamp)) {
+                    console.warn('Fecha inválida:', rawDate, sale);
+                    return; // Omitir esta venta
+                }
+
+                const saleDateTime = new Date(timestamp);
 
                 // Ajusta la fecha y hora a la zona horaria local
                 const localSaleDateTime = subHours(saleDateTime, new Date().getTimezoneOffset() / 60);
 
                 // Convierte la fecha y hora a la hora del día en la zona horaria local
-                const saleHour = format(localSaleDateTime, 'H', { timeZone });
+                const saleHour = parseInt(format(localSaleDateTime, 'H', { timeZone }));
+
+                // Validación por si saleHour está fuera del rango de hourlyData
+                if (saleHour < 6 || saleHour > 23) return; // fuera del rango de 6 AM a 11 PM
+
+                const index = saleHour - 6; // index 0 = 6 AM, index 17 = 11 PM
 
                 if (isOnline) {
-                    hourlyData[saleHour] += sale.total;
+                    hourlyData[index] += sale.total;
+                } else if (isServiceOrder) {
+                    hourlyData[index] += sale.service_cost;
                 } else {
-                    hourlyData[saleHour] += sale.quantity * sale.current_price;
+                    hourlyData[index] += sale.quantity * sale.current_price;
                 }
             });
+
             hourlyData = this.setElementsWithNumberFormat(hourlyData);
 
             return hourlyData;
         },
-        calculateDailySales(data, isOnline = false) {
+        calculateDailySales(data, isOnline = false, isServiceOrder = false) {
             let dailyData = Array(7).fill(0);
 
             data.forEach((sale) => {
-                const saleDayOfWeek = new Date(sale.created_at).getDay();
+                const rawDate = isServiceOrder ? sale.paid_at : sale.created_at;
+                const saleDayOfWeek = new Date(rawDate).getDay();
 
-                // Incrementa el total por día de la semana correspondiente
                 if (isOnline) {
                     dailyData[saleDayOfWeek] += sale.total;
+                } else if (isServiceOrder) {
+                    dailyData[saleDayOfWeek] += sale.service_cost;
                 } else {
                     dailyData[saleDayOfWeek] += sale.quantity * sale.current_price;
                 }
             });
 
-            dailyData = this.setElementsWithNumberFormat(dailyData);
-
             return dailyData;
         },
-        calculateWeeklySales(data, isOnline = false) {
+        calculateWeeklySales(data, isOnline = false, isServiceOrder = false) {
             // Inicializa el array weeklyData con ceros para cada rango semanal
             let weeklyData = Array(5).fill(0);
 
+            // Definir intervalos semanales del mes (puedes ajustar si trabajas con semanas reales)
+            const intervals = [
+                { start: 1, end: 7 },
+                { start: 8, end: 14 },
+                { start: 15, end: 21 },
+                { start: 22, end: 28 },
+                { start: 29, end: 31 }
+            ];
+
             // Recorre las ventas y suma el total por rango semanal
-            data.forEach((sale) => {
-                const saleDay = new Date(sale.created_at).getDate();
+            data.forEach((sale, i) => {
+                const rawDate = isServiceOrder ? sale.paid_at : sale.created_at;
 
-                const intervals = [
-                    { start: 1, end: 7 },
-                    { start: 8, end: 14 },
-                    { start: 15, end: 21 },
-                    { start: 22, end: 28 },
-                    { start: 29, end: 31 }
-                ];
+                if (!rawDate) {
+                    console.warn(`Venta #${i} sin fecha`, sale);
+                    return;
+                }
 
+                const timestamp = Date.parse(rawDate);
+                if (isNaN(timestamp)) {
+                    console.warn(`Venta #${i} con fecha inválida:`, rawDate, sale);
+                    return;
+                }
+
+                const saleDate = new Date(timestamp);
+                const saleDay = saleDate.getDate(); // Día del mes (1-31)
+
+                // Encontrar a qué semana pertenece y sumar
                 intervals.forEach((interval, index) => {
                     if (saleDay >= interval.start && saleDay <= interval.end) {
                         if (isOnline) {
                             weeklyData[index] += sale.total;
+                        } else if (isServiceOrder) {
+                            weeklyData[index] += sale.service_cost;
                         } else {
                             weeklyData[index] += sale.quantity * sale.current_price;
                         }
@@ -347,6 +418,7 @@ export default {
 
             weeklyData = this.setElementsWithNumberFormat(weeklyData);
 
+            console.log('weeklyData final:', weeklyData);
             return weeklyData;
         },
         calculateProfit(period) {
@@ -356,6 +428,10 @@ export default {
 
             let onlineSales = this.onlineSalesLastPeriod.reduce((acumulador, current) => {
                 return acumulador + current.total;
+            }, 0);
+
+            let serviceOrders = this.lastPeriodCompletedServiceOrders.reduce((acumulador, current) => {
+                return acumulador + current.service_cost;
             }, 0);
 
             let expenses = this.expensesLastPeriod.reduce((acumulador, current) => {
@@ -371,12 +447,16 @@ export default {
                     return acumulador + current.total;
                 }, 0);
 
+                serviceOrders = this.completedServiceOrdersCurrentPeriod.reduce((acumulador, current) => {
+                    return acumulador + current.service_cost;
+                }, 0);
+
                 expenses = this.expensesCurrentPeriod.reduce((acumulador, current) => {
                     return acumulador + current.quantity * current.current_price;
                 }, 0);
             }
 
-            return sales + onlineSales - expenses;
+            return sales + onlineSales + serviceOrders - expenses;
         },
         handleChangePeriodRange() {
             if (this.period == 'Semanal') {
@@ -422,6 +502,8 @@ export default {
                     this.expensesCurrentPeriod = response.data.expenses;
                     this.expensesLastPeriod = response.data.last_period_expenses;
                     this.topProductsCurrentPeriod = response.data.top_products;
+                    this.completedServiceOrdersCurrentPeriod = response.data.completed_service_orders;
+                    this.lastPeriodCompletedServiceOrders = response.data.last_period_completed_service_orders;
                 }
             } catch (error) {
                 console.error(error);
@@ -442,6 +524,8 @@ export default {
                     this.expensesCurrentPeriod = response.data.expenses;
                     this.expensesLastPeriod = response.data.last_period_expenses;
                     this.topProductsCurrentPeriod = response.data.top_products;
+                    this.completedServiceOrdersCurrentPeriod = response.data.completed_service_orders;
+                    this.lastPeriodCompletedServiceOrders = response.data.last_period_completed_service_orders;
                 }
             } catch (error) {
                 console.error(error);
@@ -462,6 +546,8 @@ export default {
                     this.expensesCurrentPeriod = response.data.expenses;
                     this.expensesLastPeriod = response.data.last_period_expenses;
                     this.topProductsCurrentPeriod = response.data.top_products;
+                    this.completedServiceOrdersCurrentPeriod = response.data.completed_service_orders;
+                    this.lastPeriodCompletedServiceOrders = response.data.last_period_completed_service_orders;
                 }
             } catch (error) {
                 console.error(error);

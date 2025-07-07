@@ -313,7 +313,10 @@ export default {
     methods: {
         store() {
             this.$refs.printingModal.customData = this.generateServiceTicketCommands(false);
-            this.form.post(route("service-reports.store-phones"), {
+            this.form.transform((data) => ({
+                ...data,
+                spare_parts: data.spare_parts[0].name ? data.spare_parts : [],
+            })).post(route("service-reports.store-phones"), {
                 onSuccess: () => {
                     this.$notify({
                         title: "Correcto",
@@ -324,10 +327,10 @@ export default {
                     //abrir modal de impresión automáticamente cuando esta la opción activada en config/impresora
                     if (this.automaticPrinting) {
                         this.showPrintingModal = true;
-                        if (!this.$page.props.auth.user.printer_config?.name) {
-                            this.$refs.printingModal.getAvailablePrinters();
-                        }
                     }
+                },
+                onError: (err) => {
+                    console.log(err);
                 }
             });
         },
@@ -335,10 +338,8 @@ export default {
             if (this.$refs.printingModal.printType == 'Etiqueta') {
                 this.$inertia.visit(route('service-reports.index'));
             } else {
-                // this.showPrintingModal = false;
-                this.$refs.printingModal.printType = 'Etiqueta';
+                this.$refs.printingModal.setLabelMode();
                 this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
-                // this.showPrintingModal = true;
             }
         },
         generateServiceTicketCommands(hasCut = true) {
@@ -351,22 +352,26 @@ export default {
             const ALINEAR_CENTRO = ESC + 'a' + '\x01';
             const ALINEAR_DERECHA = ESC + 'a' + '\x02';
             const CORTAR_PAPEL = GS + 'V' + '\x00' + '\x00';
-            const ANCHO_TICKET = 32;
+
+            // --- 1. Determinar el ancho del ticket dinámicamente ---
+            const ticketWidthSetting = this.$page.props.auth.user.printer_config?.ticketWidth;
+            // Ancho en caracteres: 48 para 80mm, 32 para 58mm (o por defecto)
+            const anchoTicket = ticketWidthSetting === '80mm' ? 48 : 32;
+            const separador = '-'.repeat(anchoTicket) + '\n';
 
             let ticket = INICIALIZAR_IMPRESORA;
 
             // Encabezado
             ticket += ALINEAR_CENTRO;
-            // Asumiendo que la información de la tienda está disponible de forma similar
             if (this.$page.props.auth.user.store) {
                 ticket += NEGRITA_ON + this.$page.props.auth.user.store.name + NEGRITA_OFF + '\n';
                 if (this.$page.props.auth.user.store.address) {
                     ticket += this.$page.props.auth.user.store.address + '\n';
                 }
             }
-            ticket += '--------------------------------\n';
+            ticket += separador;
             ticket += NEGRITA_ON + 'ORDEN DE SERVICIO' + NEGRITA_OFF + '\n';
-            ticket += '--------------------------------\n';
+            ticket += separador;
 
             // Datos del Cliente y Equipo
             ticket += ALINEAR_IZQUIERDA;
@@ -377,46 +382,54 @@ export default {
             ticket += NEGRITA_ON + 'Detalles del Equipo:' + NEGRITA_OFF + '\n';
             ticket += 'Marca: ' + (this.form.product_details.brand || 'N/A') + '\n';
             ticket += 'Modelo: ' + (this.form.product_details.model || 'N/A') + '\n';
-            ticket += '--------------------------------\n';
+            ticket += separador;
 
-            // Descripción del Servicio y Observaciones
-            if (this.form.service_description) {
-                ticket += NEGRITA_ON + 'Descripcion del Servicio:' + NEGRITA_OFF + '\n';
-                ticket += this.form.service_description + '\n\n';
-            }
-            if (this.form.description) {
-                ticket += NEGRITA_ON + 'Falla reportada:' + NEGRITA_OFF + '\n';
-                ticket += this.form.description + '\n\n';
-            }
+            // Descripción del Servicio y problemas reportados (se ajustan automáticamente al saltar de línea)
             if (this.form.observations) {
-                ticket += NEGRITA_ON + 'Observaciones:' + NEGRITA_OFF + '\n';
-                ticket += this.form.observations + '\n';
+                ticket += NEGRITA_ON + 'Problemas reportados:' + NEGRITA_OFF + '\n';
+                ticket += this.form.observations + '\n\n';
             }
-            ticket += '--------------------------------\n';
+            if (this.form.service_description) {
+                ticket += NEGRITA_ON + 'Servicio:' + NEGRITA_OFF + '\n';
+                ticket += this.form.service_description + '\n';
+            }
+            ticket += separador;
 
-            // Refacciones si existen
+            // --- 2. Ajustar sección de refacciones con columnas dinámicas ---
             if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
                 ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
-                let header = 'Cant  Concepto'.padEnd(21);
-                header += 'Importe'.padStart(11);
+
+                // Definir anchos de columna
+                const colAnchoPrecio = 10; // " $1,234.56"
+                const colAnchoCant = 4;    // "Cant "
+                const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
+
+                // Crear encabezado dinámico
+                let header = 'Pzs'.padEnd(colAnchoCant);
+                header += 'Concepto'.padEnd(colAnchoNombre);
+                header += 'Importe'.padStart(colAnchoPrecio);
+
                 ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
-                ticket += '--------------------------------\n';
+                ticket += separador;
+                ticket += ALINEAR_IZQUIERDA;
 
                 this.form.spare_parts.forEach(part => {
                     const cantidad = part.quantity.toString();
-                    const nombre = part.name.substring(0, 15);
+                    // Trunca el nombre del producto para que quepa en su columna
+                    const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
                     const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
 
                     let linea = '';
-                    linea += cantidad.padEnd(3, ' ');
-                    linea += ' ' + this.removeAccents(nombre).padEnd(17, ' ');
-                    linea += ('$' + totalProducto).padStart(11, ' ');
-                    ticket += ALINEAR_IZQUIERDA + linea + '\n';
+                    linea += cantidad.padEnd(colAnchoCant);
+                    linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
+                    linea += ('$' + totalProducto).padStart(colAnchoPrecio);
+
+                    ticket += linea + '\n';
                 });
-                ticket += '--------------------------------\n';
+                ticket += separador;
             }
 
-            // Costos
+            // --- 3. Ajustar sección de costos para alineación derecha ---
             const formatCurrency = (value) => {
                 return '$' + parseFloat(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             };
@@ -425,22 +438,22 @@ export default {
             if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
                 subtotalRefacciones = this.form.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
                 let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
-                ticket += ALINEAR_DERECHA + subtotalStr + '\n';
+                ticket += subtotalStr.padStart(anchoTicket) + '\n';
             }
 
             let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.form.service_cost);
-            ticket += ALINEAR_DERECHA + costoServicioStr + '\n';
+            ticket += costoServicioStr.padStart(anchoTicket) + '\n';
 
             let totalStr = 'Total: ' + formatCurrency(this.form.total_cost);
-            ticket += ALINEAR_DERECHA + NEGRITA_ON + totalStr + NEGRITA_OFF + '\n';
+            ticket += NEGRITA_ON + totalStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
             if (this.form.advance_payment > 0) {
                 let anticipoStr = 'Anticipo: ' + formatCurrency(this.form.advance_payment);
-                ticket += ALINEAR_DERECHA + anticipoStr + '\n';
-                let restanteStr = 'Resta: ' + formatCurrency(this.form.total_cost - this.form.advance_payment);
-                ticket += ALINEAR_DERECHA + NEGRITA_ON + restanteStr + NEGRITA_OFF + '\n';
-            }
+                ticket += NEGRITA_OFF + anticipoStr.padStart(anchoTicket) + '\n';
 
+                let restanteStr = 'Resta: ' + formatCurrency(this.form.total_cost - this.form.advance_payment);
+                ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
+            }
 
             // Pie de página
             ticket += '\n' + ALINEAR_CENTRO;
@@ -456,12 +469,10 @@ export default {
             // --- 1. Configuración de la Etiqueta ---
             // Define aquí las dimensiones de tu etiqueta en milímetros.
             const labelConfig = {
-                // widthMM: 97,  // Ancho de la etiqueta en mm
-                // heightMM: 48, // Alto de la etiqueta en mm
-                widthMM: 53,  // Ancho de la etiqueta en mm
-                heightMM: 30, // Alto de la etiqueta en mm
-                gapMM: 3,     // Espacio entre etiquetas en mm
-                dotsPerMM: 8  // Resolución de la impresora (203 dpi = 8 dots/mm)
+                widthMM: this.$page.props.auth.user.printer_config?.labelWidth,  // Ancho de la etiqueta en mm
+                heightMM: this.$page.props.auth.user.printer_config?.labelHeight, // Alto de la etiqueta en mm
+                gapMM: this.$page.props.auth.user.printer_config?.labelGap,     // Espacio entre etiquetas en mm
+                dotsPerMM: Math.round(this.$page.props.auth.user.printer_config?.labelResolution / 25.4)  // Resolución de la impresora (203 dpi = 8 dots/mm)
             };
 
             // --- 2. Comandos Iniciales (¡La parte más importante!) ---
@@ -479,7 +490,7 @@ export default {
             let currentY = 15; // Posición Y inicial (margen superior en dots)
             const startX = 15; // Posición X inicial (margen izquierdo en dots)
             const rightMargin = 15;
-            const lineHeight = 22; // Espacio entre líneas
+            const lineHeight = this.$page.props.auth.user.printer_config?.labelLineHeight; // Espacio entre líneas
             // const font = '"TSS24.BF2"'; // Fuente a utilizar. Las comillas dobles son importantes.
             const font = '"1"'; // Fuente a utilizar. Las comillas dobles son importantes.
             const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
@@ -524,6 +535,7 @@ export default {
             addTextLine("Nombre:", this.removeAccents(this.form.client_name.slice(0, 20)));
             // addTextLine("Recepcion:", this.report.service_date.split('T')[0]);
             addTextLine("Equipo:", this.removeAccents(this.form.product_details?.brand) + ' ' + this.removeAccents(this.form.product_details?.model));
+            addTextLine("Total:", '$' + (this.totalSpareParts + this.form.service_cost));
             addTextLine("Desbloqueo:", this.form.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.form.observations));
             addTextLine("Servicio:", this.removeAccents(this.form.service_description));
@@ -531,18 +543,19 @@ export default {
 
             // --- 5. Código de Barras ---
             if (this.folio) {
-                currentY += 10; // Espacio extra antes del código de barras
+                // currentY += 5; // Espacio extra antes del código de barras
                 const folioPadded = String(this.folio).padStart(5, '0');
+                const humanReadable = this.$page.props.auth.user.printer_config?.labelBarCodeHumanReadable || 0;
 
                 // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
-                const barcodeHeight = 25;    // Altura del código en dots
+                const barcodeHeight = 22;    // Altura del código en dots
                 const narrowWidth = 2;     // Ancho de la barra más estrecha
                 const wideWidth = 5;       // Ancho de la barra más ancha
 
                 // Centrar el código de barras (opcional)
                 const barcodeX = startX;
 
-                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},0,0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
+                commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},${humanReadable},0,${narrowWidth},${wideWidth},"${folioPadded}"\n`;
                 currentY += barcodeHeight + 20; // Actualizar Y después del barcode
             }
 

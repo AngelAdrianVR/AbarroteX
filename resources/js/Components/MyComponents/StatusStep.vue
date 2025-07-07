@@ -5,23 +5,17 @@
       <template v-for="(step, index) in steps" :key="index">
         <div class="flex-1 flex-col items-center">
           <div class="flex flex-col md:flex-row justify-center items-center space-x-2">
-            <div
-              :class="'mb-1'"
-            >
+            <div :class="'mb-1'">
               <slot :name="'icon-' + index" />
             </div>
-            <span
-              :class="'text-[#373737] text-xs text-center mb-1 font-medium'"
-            >
+            <span :class="'text-[#373737] text-xs text-center mb-1 font-medium'">
               <slot :name="'label-' + index" />
             </span>
           </div>
           <!-- Line connector -->
-          <div
-            v-if="index < steps.length"
-            class="flex-1 h-[5px] mx-2 rounded-full"
-            :class="index < activeStep ? 'bg-gradient-to-r from-[#751F8B] via-[#56345f] to-[#1F0825]' : 'bg-gray-300'"
-          ></div>
+          <div v-if="index < steps.length" class="flex-1 h-[5px] mx-2 rounded-full"
+            :class="index < activeStep ? 'bg-gradient-to-r from-[#751F8B] via-[#56345f] to-[#1F0825]' : 'bg-gray-300'">
+          </div>
         </div>
       </template>
     </div>

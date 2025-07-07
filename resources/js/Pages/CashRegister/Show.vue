@@ -15,102 +15,145 @@
                 <PrintButton @click="handlePrint" />
             </div>
 
-            <div class="flex mt-8 mb-10 text-sm">
-                <div class="w-44 space-y-2">
-                    <p>Total de cortes</p>
-                    <p>Total de ventas</p>
-                    <p>Total de diferencias</p>
-                </div>
-                <div class="space-y-2">
+            <div class="mt-8 mb-10 space-y-1 text-sm rounded-xl border border-grayD9 p-4 w-80">
+                <div class="flex justify-between items-center space-x-2 border-b border-grayD9 pb-1 pr-2">
+                    <p class="font-semibold">Total de cortes</p>
                     <p class="ml-4 font-bold">{{ Object.values(groupedCashCuts)[0].cuts?.length }}</p>
-                    <p class="ml-4 font-bold">${{ Object.values(groupedCashCuts)[0].total_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                    <p :class="getTextColorClass(Object.values(groupedCashCuts)[0].total_difference)" class="ml-4 font-bold">${{ Object.values(groupedCashCuts)[0].total_difference.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <p class="w-40">Ventas en tienda</p>
+                    <p class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_store_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <p class="w-40">Pedidos en linea</p>
+                    <p class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_online_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <p class="w-40">Ordenes de servicio</p>
+                    <p class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_service_orders.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                </div>
+                <div class="flex items-center space-x-2 font-semibold border-b border-grayD9 pb-1">
+                    <p class="w-40">Total de ventas</p>
+                    <p class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+                </div>
+                <div class="flex items-center space-x-2 font-semibold">
+                    <p class="w-40">Total de diferencias</p>
+                    <p :class="getTextColorClass(Object.values(groupedCashCuts)[0].total_difference)" class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_difference.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                 </div>
             </div>
 
             <section v-for="(cash_cut, index) in Object.values(groupedCashCuts)[0].cuts" :key="cash_cut" 
                 class="xl:w-[90%] text-xs md:text-sm">
                 <p class="mb-2 ml-2">Notas de corte: <strong class="ml-2">{{ cash_cut.notes ?? 'Sin notas' }}</strong></p>
+
                 <article class="lg:flex lg:space-x-7 mx-auto">
                     <div class="w-full border border-gray-300 rounded-2xl shadow-lg bg-white p-1 self-start transition-all ease-linear duration-200">
                         <div class="flex justify-between border-b border-grayD9 py-2 md:px-4 px-2">
-                            <p>{{ cash_cut.cash_register.name + ' • ' + cash_cut.user.name }}</p>
+                            <!-- <p>{{ cash_cut.cash_register.name + ' • ' + cash_cut.user.name }}</p> -->
+                            <p>Corte realizado por: {{ cash_cut.user.name }}</p>
                             <p class="text-gray99">{{ formatDateHour(cash_cut.created_at) }}</p>
                         </div>
-                        <div class="md:p-4 p-2 flex items-center space-x-2">
+                        <div class="md:p-4 p-2 flex space-x-4 text-sm">
+                            <!-- Columna de etiquetas -->
                             <div class="w-3/4 space-y-1">
-                                <!-- <p class="font-bold mb-3">Recuento manual de efectivo</p> -->
-                                <p class="text-gray99">Efectivo inicial</p>
-                                <p class="text-gray99">Ventas pago en efectivo</p>
-                                <p class="text-gray99">Ventas pago con tarjeta</p>
-                                <p v-if="this.$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" class="text-gray99">Ventas en línea</p>
-                                <div class="flex items-center space-x-2">
-                                    <p class="text-black font-semibold">Total en ventas</p>
-                                    <el-tooltip
-                                        content="" placement="top">
-                                        <template #content>
-                                            <p class="">Ventas con pago en efectivo + <br> Ventas pago con tarjeta + <br> Ventas en línea (si cuentas con el módulo).</p>
-                                        </template>
-                                        <div class="rounded-full border border-primary size-3 flex items-center justify-center px-1">
-                                            <i class="fa-solid fa-info text-primary text-[7px]"></i>
-                                        </div>
-                                    </el-tooltip>
+                                <!-- Encabezado -->
+                                <div class="flex items-center space-x-2 pb-2">
+                                    <img class="w-7" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
+                                    <p class="font-bold text-gray-600">Efectivo en caja</p>
                                 </div>
 
-                                <p v-if="cashCutMovements[index]?.length"
-                                    class="text-primary flex items-center pt-5">Movimientos de caja 
-                                </p>
-
-                                <div v-if="loadingMovements">
-                                    <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-                                </div>
-                                <p v-else-if="showcashRegisterMovements" v-for="cashRegisterMovement in cashCutMovements[index]"
-                                    :key="cashRegisterMovement"
-                                    :title="cashRegisterMovement.type + ' -  Motivo: ' + (cashRegisterMovement.notes ?? 'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at)"
-                                    class="text-gray99 truncate w-64 md:w-auto">
-                                    {{ cashRegisterMovement.type + ' - Motivo: ' + (cashRegisterMovement.notes ??
-                                        'no registrado') + ' • ' + formatDateHour(cashRegisterMovement.created_at) }}
-                                </p>
-                            </div>
-
-                            <div class="w-1/4 space-y-1">
-                                <!-- <p class="font-bold mb-3 pl-4"><span class="mr-3">$</span>{{
-                                    cash_cut.counted_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p> -->
-                                <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
-                                    cash_cut.started_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
-                                <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
-                                    cash_cut.store_sales_cash?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
-                                <p class="text-gray99 ml-[18px]"><span class="text-gray99 mr-3">$</span>{{
-                                    cash_cut.store_sales_card?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
-                                <p v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-gray99"><span class="text-gray99 mr-3 ml-[17px]">$</span>{{
-                                    cash_cut.online_sales_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-                                <p class="text-black font-bold ml-[18px]"><span class="text-black mr-3">$</span>{{
-                                    (cash_cut.store_sales_cash + cash_cut.store_sales_card + cash_cut.online_sales_cash)?.toLocaleString('en-US', {minimumFractionDigits: 2}) ?? '0.00' }}</p>
+                                <!-- Etiquetas fijas -->
+                                <p class="text-[#373737]">Efectivo inicial</p>
+                                <p class="text-[#373737]">Ventas en tienda</p>
+                                <p v-if="hasModule('Tienda en línea')" class="text-[#373737]">Pedidos en línea</p>
+                                <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">Órdenes de servicio</p>
+                                <p class="text-gray99 text-right font-semibold">Subtotal de ventas</p>
 
                                 <!-- Movimientos de caja -->
-                                <div v-if="loadingMovements">
-                                    <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                                <p v-if="cashCutMovements[index]?.length" class="text-primary flex items-center pt-3">Movimientos de caja</p>
+                                <div v-if="loadingMovements" class="text-primary">
+                                    <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2"></i>
                                 </div>
-                                
-                                <div v-if="showcashRegisterMovements" :class="cashCutMovements[index]?.length ? 'pt-5 space-y-1' : ''">
-                                    <p v-for="cashRegisterMovement in cashCutMovements[index]"
+                                <p v-else-if="showcashRegisterMovements" v-for="movement in cashCutMovements[index]" :key="movement"
+                                :title="`${movement.type} - Motivo: ${movement.notes ?? 'no registrado'} • ${formatDateHour(movement.created_at)}`"
+                                class="text-gray99 truncate w-64 md:w-auto">
+                                {{ movement.type }} - Motivo: {{ movement.notes ?? 'no registrado' }} • {{ formatDateHour(movement.created_at) }}
+                                </p>
 
-                                        :key="cashRegisterMovement" class="text-gray99">
-                                        <i :class="cashRegisterMovement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"
-                                            class="fa-solid text-xs px-1"></i>
-                                        <span class="text-gray99 mr-3">$</span>{{
-                                            cashRegisterMovement.amount?.toLocaleString('en-US', {minimumFractionDigits: 2}) }}
-                                    </p>
+                                <!-- Total -->
+                                <p class="text-[#373737] font-bold text-right py-2">Total en efectivo</p>
+
+                                <!-- Monto en tarjeta -->
+                                <div class="flex items-center space-x-2 col-span-full py-2 border-t border-[#D9D9D9]">
+                                    <img class="w-7" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
+                                    <p class="font-bold text-gray-600">Monto esperado en tarjeta</p>
                                 </div>
+
+                                <p class="text-[#373737]">Ventas en tienda</p>
+                                <p v-if="hasModule('Tienda en línea')" class="text-[#373737]">Pedidos en línea</p>
+                                <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">Órdenes de servicio</p>
+                                <p class="text-[#373737] text-right font-semibold">Total en tarjeta</p>
                             </div>
-                        </div>
+                                <!-- Columna de valores parte derecha -->
+                                <div class="w-1/4 space-y-1 mt-8">
+                                    <!-- Valores en orden -->
+                                    <p v-for="(value, i) in [
+                                        cash_cut.started_cash,
+                                        cash_cut.store_sales_cash,
+                                        hasModule('Tienda en línea') ? cash_cut.online_sales_cash : null,
+                                        hasModule('Ordenes de servicio') ? cash_cut.service_orders_cash : null
+                                        ]" :key="i" v-if="value !== null" class="text-[#373737] ml-[18px]">
+                                        <span class="text-[#373737] mr-3">$</span>{{ value?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                                    </p>
+
+                                    <!-- Subtotal -->
+                                    <p class="text-gray99 font-semibold ml-[18px]">
+                                    <span class="text-gray99 mr-3">$</span>{{
+                                        (cash_cut.store_sales_cash + cash_cut.online_sales_cash + cash_cut.service_orders_cash + cash_cut.started_cash)
+                                        ?.toLocaleString('en-US', { minimumFractionDigits: 2 })
+                                    }}
+                                    </p>
+
+                                    <!-- Movimientos de caja -->
+                                    <div v-if="loadingMovements">
+                                        <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+                                    </div>
+
+                                    <div v-if="showcashRegisterMovements" :class="cashCutMovements[index]?.length ? 'pt-9 space-y-1' : ''">
+                                        <p v-for="movement in cashCutMovements[index]" :key="movement" class="text-gray99">
+                                            <i :class="movement.type === 'Ingreso' ? 'ml-[10px]' : 'fa-minus text-red-500'"
+                                            class="fa-solid text-xs px-1"></i>
+                                            <span class="text-gray99 mr-3">$</span>{{ movement.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Total esperado -->
+                                    <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737] font-bold py-2">
+                                        <span class="text-[#373737] mr-3 ml-[17px]">$</span>
+                                        {{ cash_cut.expected_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 }) ?? '0.00' }}
+                                    </p>
+
+                                    <div class="pt-10">
+                                        <p v-for="(value, i) in [
+                                            cash_cut.store_sales_card,
+                                            hasModule('Tienda en línea') ? cash_cut.online_sales_card : null,
+                                            hasModule('Ordenes de servicio') ? cash_cut.service_orders_card : null,
+                                            (cash_cut.store_sales_card + cash_cut.online_sales_card + cash_cut.service_orders_card)
+                                            ]" :key="i" v-if="value !== null" class="text-[#373737] ml-[18px] pb-1" :class="i === 3 ? 'font-semibold' : ''">
+                                            <span class="text-[#373737] mr-3">$</span>{{ value?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+
                         <footer class="bg-[#F2F2F2] rounded-xl text-black font-bold py-2 flex px-2">
-                            <p class="w-3/4 text-right pr-7">Efectivo esperado en caja</p>
+                            <p class="w-3/4 text-right pr-7">Total efectivo + tarjeta</p>
                             <p class="w-1/4 pl-4">
                                 <span class="mr-3">
                                     $
                                 </span>
-                                <b>{{ cash_cut.expected_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</b>
+                                <b>{{ (cash_cut.expected_cash + cash_cut.expected_card)?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</b>
                             </p>
                         </footer>
                     </div>
@@ -155,18 +198,18 @@
                         </div>
                         <div class="flex justify-between space-x-1 px-5 pt-1">
                             <div class="font-semibold space-y-1 w-40">
-                                <p class="pb-2">Esperado</p>
-                                <!-- <p>Reportado</p> -->
-                                <!-- <p class="pb-5">Diferencia</p> -->
+                                <p>Esperado</p>
+                                <p>Reportado</p>
+                                <p class="pb-5">Diferencia</p>
                             </div>
                             <div class="space-y-1 font-semibold">
-                                <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.store_sales_card?.toLocaleString('en-US',
+                                <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.expected_card?.toLocaleString('en-US',
                                     {minimumFractionDigits: 2}) ?? '0.00' }}</p>
-                                <!-- <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.store_sales_card?.toLocaleString('en-US', -->
-                                    <!-- {minimumFractionDigits: 2}) }}</p> -->
-                                <!-- <p class="pb-5" :class="differenceStyles(cash_cut)"><span class="pr-3">$</span>{{ -->
-                                    <!-- (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US', -->
-                                    <!-- {minimumFractionDigits: 2}) }}</p> -->
+                                 <p><span class="text-gray99 pr-3">$</span>{{ cash_cut.counted_card?.toLocaleString('en-US',
+                                     {minimumFractionDigits: 2}) }}</p>
+                                 <p class="pb-5" :class="differenceCardStyles(cash_cut)"><span class="pr-3">$</span>{{
+                                     (cash_cut.counted_card - cash_cut.expected_card)?.toLocaleString('en-US',
+                                     {minimumFractionDigits: 2}) }}</p>
                             </div>
                         </div>
                         <!-- mensaje de diferencia de efectivo -->
@@ -234,6 +277,9 @@ export default {
                 alert('No se encontró una fecha válida para imprimir.');
             }
         },
+        hasModule(moduleName) {
+            return this.$page.props.auth.user.store.activated_modules?.includes(moduleName);
+        },
         formatDateHour(dateString) {
             return format(parseISO(dateString), 'h:mm a', { locale: es });
         },
@@ -246,6 +292,15 @@ export default {
             } else if (cash_cut.counted_cash - cash_cut.expected_cash === 0) {
                 return 'text-green-500';
             } else if (cash_cut.counted_cash - cash_cut.expected_cash > 0) {
+                return 'text-blue-600';
+            }
+        },
+        differenceCardStyles(cash_cut) {
+            if (cash_cut.counted_card - cash_cut.expected_card < 0) {
+                return 'text-red-600';
+            } else if (cash_cut.counted_card - cash_cut.expected_card === 0) {
+                return 'text-green-500';
+            } else if (cash_cut.counted_card - cash_cut.expected_card > 0) {
                 return 'text-blue-600';
             }
         },
