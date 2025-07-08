@@ -317,7 +317,7 @@ export default {
         store() {
             this.form.transform((data) => ({
                 ...data,
-                spare_parts: data.spare_parts[0]?.name ? data.spare_parts : [],
+                spare_parts: data.spare_parts[0]?.unitPrice ? data.spare_parts : [],
             })).post(route("service-reports.store-phones"), {
                 onSuccess: (page) => {
                     this.$notify({
