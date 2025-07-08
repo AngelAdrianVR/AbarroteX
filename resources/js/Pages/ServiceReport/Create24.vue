@@ -467,8 +467,9 @@ export default {
             }
 
             // Pie de página
+            const finalWhiteLines = '\n'.repeat(this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines);
             ticket += '\n' + ALINEAR_CENTRO;
-            ticket += 'GRACIAS POR SU PREFERENCIA\n\n\n';
+            ticket += 'GRACIAS POR SU PREFERENCIA' + finalWhiteLines;
 
             if (hasCut) {
                 ticket += CORTAR_PAPEL;
@@ -494,7 +495,8 @@ export default {
             let commands = '';
             commands += `SIZE ${labelConfig.widthMM} mm, ${labelConfig.heightMM} mm\n`;
             commands += `GAP ${labelConfig.gapMM} mm, 0 mm\n`;
-            commands += `CODEPAGE 1252\n`;
+            // commands += `COUNTRY 003\n`;
+            // commands += `CODEPAGE 1252\n`;
             commands += `CLS\n`;
 
             // --- 3. Coordenadas y Diseño ---
@@ -502,8 +504,7 @@ export default {
             const startX = 15; // Posición X inicial (margen izquierdo en dots)
             const rightMargin = 15;
             const lineHeight = this.$page.props.auth.user.printer_config?.labelLineHeight; // Espacio entre líneas
-            // const font = '"TSS24.BF2"'; // Fuente a utilizar. Las comillas dobles son importantes.
-            const font = '"1"'; // Fuente a utilizar. Las comillas dobles son importantes.
+            const font = `"${this.$page.props.auth.user.printer_config?.labelFont}"`; // Fuente a utilizar. Las comillas dobles son importantes.
             const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
 
             /**
@@ -575,7 +576,7 @@ export default {
             // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
             commands += 'PRINT 1\n';
 
-            console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
+            // console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
             return commands;
         },
         removeAccents(text = '') {

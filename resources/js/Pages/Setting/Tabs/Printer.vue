@@ -148,6 +148,25 @@
                     <p v-if="loadingTicketWidth" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
             </article>
+            <article class="text-sm p-4 lg:flex items-center justify-between">
+                <div class="lg:w-1/2">
+                    <p class="text-[#575757]">
+                        Añade líneas en blanco al final para expulsar el ticket completamente. <br>
+                        Si ves que el ticket está incompleto, añade mas lineas. Por el contrario si el ticket
+                        sale con mucho espacio en blanco al final, reduce las lineas. <br>
+                        Valor típico: 3-5 líneas. 
+                    </p>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
+                        <p>Cantidad de líneas:</p>
+                        <el-input-number v-model="form.printer_config.ticketFinalWhiteLines" @blur="updateTicketFinalWhiteLines"
+                            @keyup.enter="updateTicketFinalWhiteLines" @change="updateTicketFinalWhiteLines" :min="1" :max="10"
+                            class="!w-24" size="small" clearable />
+                    </div>
+                    <p v-if="loadingTicketFinalWhiteLines" class="text-gray-400 text-end text-xs">Guardando...</p>
+                </div>
+            </article>
         </section>
         <section class="my-5 divide-y-[1px] border border-grayD9 rounded-[5px]">
             <article class="text-sm rounded-t-md p-4">
@@ -175,7 +194,7 @@
                     <p v-if="loadingLabelResolution" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
             </article>
-            <!-- <article class="text-sm p-4 lg:flex items-center justify-between">
+            <article class="text-sm p-4 lg:flex items-center justify-between">
                 <div class="lg:w-1/2">
                     <p class="text-[#575757]">
                         Fuente: Elige entre las tipografías preinstaladas en tu impresora. <br>
@@ -189,13 +208,13 @@
                         <el-select v-model="form.printer_config.labelFont" @change="updateLabelFont" class="!w-72"
                             placeholder="Selecciona la fuente" no-data-text="No hay opciones registradas"
                             no-match-text="No se encontraron coincidencias">
-                            <el-option v-for='font in ["1", "2", "3", "4", "5"]' :key="font" :value="font"
+                            <el-option v-for='font in ["1", "2", "3", "4", "5", "TSS24.BF2"]' :key="font" :value="font"
                                 :label="font" />
                         </el-select>
                     </div>
                     <p v-if="loadingLabelFont" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
-            </article> -->
+            </article>
             <article class="text-sm p-4 lg:flex items-center justify-between">
                 <div class="lg:w-1/2">
                     <p class="text-[#575757]">
@@ -226,12 +245,14 @@
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Ancho (milimetros):</p>
                         <el-input-number v-model="form.printer_config.labelWidth" @blur="updateLabelSize"
-                            @keyup.enter="updateLabelSize" @change="updateLabelSize" :min="1" :max="5000" class="!w-24" size="small" clearable />
+                            @keyup.enter="updateLabelSize" @change="updateLabelSize" :min="1" :max="5000" class="!w-24"
+                            size="small" clearable />
                     </div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-1 justify-self-end">
                         <p>Alto (milimetros):</p>
                         <el-input-number v-model="form.printer_config.labelHeight" @blur="updateLabelSize"
-                            @keyup.enter="updateLabelSize" @change="updateLabelSize" :min="1" :max="5000" class="!w-24" size="small" clearable />
+                            @keyup.enter="updateLabelSize" @change="updateLabelSize" :min="1" :max="5000" class="!w-24"
+                            size="small" clearable />
                     </div>
                     <p v-if="loadingLabelSize" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
@@ -250,8 +271,8 @@
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Espacio (en puntos):</p>
                         <el-input-number v-model="form.printer_config.labelLineHeight" @blur="updateLabelLineHeight"
-                            @keyup.enter="updateLabelLineHeight" @change="updateLabelLineHeight" :min="1" :max="5000" class="!w-24" size="small"
-                            clearable />
+                            @keyup.enter="updateLabelLineHeight" @change="updateLabelLineHeight" :min="1" :max="5000"
+                            class="!w-24" size="small" clearable />
                     </div>
                     <p v-if="loadingLabelLineHeight" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
@@ -268,7 +289,8 @@
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Espacio entre etiquetas (mm):</p>
                         <el-input-number v-model="form.printer_config.labelGap" @blur="updateLabelGap"
-                            @keyup.enter="updateLabelGap" @change="updateLabelGap" :min="0" :max="5000" class="!w-24" size="small" clearable />
+                            @keyup.enter="updateLabelGap" @change="updateLabelGap" :min="0" :max="5000" class="!w-24"
+                            size="small" clearable />
                     </div>
                     <p v-if="loadingLabelGap" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
@@ -299,6 +321,7 @@ export default {
                 ticketPrinterName: this.$page.props.auth.user.printer_config?.ticketPrinterName ?? null,
                 labelPrinterName: this.$page.props.auth.user.printer_config?.labelPrinterName ?? null,
                 ticketWidth: this.$page.props.auth.user.printer_config?.ticketWidth ?? null,
+                ticketFinalWhiteLines: this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines ?? null,
                 labelResolution: this.$page.props.auth.user.printer_config?.labelResolution ?? null,
                 labelWidth: this.$page.props.auth.user.printer_config?.labelWidth ?? null,
                 labelHeight: this.$page.props.auth.user.printer_config?.labelHeight ?? null,
@@ -324,6 +347,7 @@ export default {
             loadingSevice: false,
             loadingCharacteristic: false,
             loadingTicketWidth: false,
+            loadingTicketFinalWhiteLines: false,
             loadingLabelResolution: false,
             loadingLabelSize: false,
             loadingLabelLineHeight: false,
@@ -403,6 +427,17 @@ export default {
                 this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
                     onFinish: () => {
                         this.loadingLabelResolution = false;
+                    },
+                });
+            }
+        },
+        updateTicketFinalWhiteLines() {
+            // enviar solicitud solo si hubo algun cambio en campo
+            if (this.form.printer_config.ticketFinalWhiteLines !== this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines) {
+                this.loadingTicketFinalWhiteLines = true;
+                this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
+                    onFinish: () => {
+                        this.loadingTicketFinalWhiteLines = false;
                     },
                 });
             }
