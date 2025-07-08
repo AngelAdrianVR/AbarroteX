@@ -28,7 +28,7 @@ return new class extends Migration
             $table->unsignedFloat('comision_percentage')->nullable(); // porcentage de comision de la persona que lo reparó
             $table->string('payment_method')->nullable(); // metodo de pago (nuevo)
             $table->json('product_details')->nullable(); // todos los detalles del producto como marca, modelo, IMEI, etc
-            $table->json('spare_parts')->nullable();
+            $table->json('spare_parts')->nullable()->default("[]");
             $table->json('observations')->nullable();
             $table->json('aditionals')->nullable(); // caracteristicas unicas del tipo de servicio, por ejemplo: metodo de desbloqueo.(nuevo)
             $table->string('technician_name')->nullable(); // Responsable del servicio
