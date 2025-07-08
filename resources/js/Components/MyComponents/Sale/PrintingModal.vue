@@ -188,10 +188,11 @@ export default {
             ticket += NEGRITA_ON + totalStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
             // Pie de página
+            const finalWhiteLines = '\n'.repeat(this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines);
             ticket += ALINEAR_IZQUIERDA;
             ticket += 'Metodo de pago: ' + this.sales[0].payment_method + '\n';
             ticket += ALINEAR_CENTRO;
-            ticket += 'GRACIAS POR SU COMPRA\n\n\n';
+            ticket += 'GRACIAS POR SU COMPRA' + finalWhiteLines;
 
             if (hasCut) {
                 ticket += CORTAR_PAPEL;
