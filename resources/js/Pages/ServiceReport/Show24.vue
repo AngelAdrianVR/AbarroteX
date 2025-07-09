@@ -786,8 +786,9 @@ export default {
             addTextLine("Total:", '$' + (this.totalSpareParts + parseFloat(this.report.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             addTextLine("Desbloqueo:", this.report.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.report.observations));
-            addTextLine("Servicio:", this.removeAccents(this.report.service_description));
-            addTextLine("Tecnico:", this.removeAccents(this.report.technician_name));
+            // addTextLine("Servicio:", this.removeAccents(this.report.service_description));
+            // addTextLine("Tecnico:", this.removeAccents(this.report.technician_name));
+            addTextLine("Telefono cliente:", this.report.client_phone_number);
 
             // --- 5. Código de Barras ---
             if (this.report.folio) {

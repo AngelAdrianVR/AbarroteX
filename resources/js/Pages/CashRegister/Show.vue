@@ -24,11 +24,11 @@
                     <p class="w-40">Ventas en tienda</p>
                     <p class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_store_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div v-if="hasModule('Tienda en línea')" class="flex items-center space-x-2">
                     <p class="w-40">Pedidos en linea</p>
                     <p class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_online_sales.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div v-if="hasModule('Ordenes de servicio')" class="flex items-center space-x-2">
                     <p class="w-40">Ordenes de servicio</p>
                     <p class="ml-4"><span class="mr-4">$</span>{{ Object.values(groupedCashCuts)[0].total_service_orders.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
                 </div>
