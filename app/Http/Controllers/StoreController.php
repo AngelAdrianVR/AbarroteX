@@ -72,6 +72,17 @@ class StoreController extends Controller
         // guardar nuevo logo
         $store->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('logo'));
     }
+
+    public function storeTicketLogo(Request $request)
+    {
+        $store = auth()->user()->store;
+
+        // borrar logo anterior
+        $store->clearMediaCollection('ticketLogo');
+
+        // guardar nuevo logo
+        $store->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('ticketLogo'));
+    }
     
     public function storeBanner(Request $request)
     {
