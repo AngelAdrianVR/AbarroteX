@@ -42,8 +42,8 @@ class ServiceReportController extends Controller
         if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
             return inertia('ServiceReport/Create24', compact('products', 'folio'));
         }
-        return inertia($view, compact('products', 'folio'));
-        // return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
+        //return inertia($view, compact('products', 'folio'));
+         return inertia('ServiceReport/Create24', compact('products', 'folio')); // Para hacer pruebas con la vista deseada
     }
 
     //para guardar la orden de dm compresores.
@@ -135,8 +135,8 @@ class ServiceReportController extends Controller
         if (auth()->user()->store_id == 24 || auth()->user()->store_id == 25) {
             return inertia('ServiceReport/Show24', compact('report'));
         }
-        return inertia($view, compact('report'));
-        // return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
+        // return inertia($view, compact('report'));
+        return inertia("ServiceReport/Show24", compact('report')); // Para hacer pruebas con la vista deseada
     }
 
     public function edit($encoded_report_id)
