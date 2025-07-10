@@ -183,6 +183,25 @@
                     <p v-if="loadingTicketTerms" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
             </article>
+            <article class="text-sm p-4 lg:flex items-center justify-between">
+                <div class="lg:w-1/2">
+                    <p class="text-[#575757]">
+                        Logo de ticket: procura que sea blanco y negro para que se imprima bien en el ticket.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex flex-col">
+                        <div>
+                            <InputFilePreview @imagen="storeLogo($event)" width="w-32" height="h-24"
+                                :imageUrl="storeLogoUrl" @cleared="storeLogo()" />
+                            <p v-if="logoTicketForm.processing" class="text-gray-400 text-xs col-span-full">
+                                Guardando...
+                            </p>
+                        </div>
+                    </div>
+                    <!-- <p v-if="loadingTicketLogo" class="text-gray-400 text-end text-xs">Guardando...</p> -->
+                </div>
+            </article>
         </section>
         <section class="my-5 divide-y-[1px] border border-grayD9 rounded-[5px]">
             <article class="text-sm rounded-t-md p-4">
@@ -326,6 +345,7 @@
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputFilePreview from '@/Components/MyComponents/InputFilePreview.vue';
 import { useForm, Link } from "@inertiajs/vue3";
 
 export default {
@@ -349,8 +369,13 @@ export default {
             }
         });
 
+        const logoTicketForm = useForm({
+            img: null,
+        });
+
         return {
             form,
+            logoTicketForm,
             availablePrinters: [],
             barCodeOption: [
                 { value: '0', label: 'No mostrar' },
@@ -372,14 +397,21 @@ export default {
             loadingLabelBarCodeHumanReadable: false,
             loadingLabelGap: false,
             loadingTicketTerms: false,
+            loadingTicketLogo: false,
         }
     },
     components: {
+        InputFilePreview,
         PrimaryButton,
         Link,
     },
     props: {
         store: Object,
+    },
+    computed: {
+        storeLogoUrl() {
+            return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'ticketLogo')?.original_url;
+        },
     },
     methods: {
         updateBarCodeHumanReadable() {
@@ -525,6 +557,10 @@ export default {
                     },
                 });
             }
+        },
+        storeLogo(img = null) {
+            this.logoTicketForm.img = img;
+            this.logoTicketForm.post(route("stores.store-ticket-logo"));
         },
         async getAvailablePrinters() {
             try {
