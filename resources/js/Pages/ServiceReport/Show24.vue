@@ -2,13 +2,13 @@
     <AppLayout :title="'Orden-' + String(report.folio).padStart(3, '0')">
 
         <main class="py-4 px-1 lg:px-8">
-            <Back />
+            <Back :to="route('service-reports.index')" />
             <h1 class="text-lg md:text-2xl font-bold">Orden de servicio No. {{ String(report.folio).padStart(3, '0') }}
             </h1>
             <div class="md:flex justify-between mt-3 mb-5">
                 <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
                     formatDate(report.service_date) }}</span></p>
-                <el-dropdown v-if="report.status !== 'Cancelada' && canEdit" :disabled="report.status === 'Cancelada'"
+                <el-dropdown v-if="report.status !== 'Cancelada' && canEdit || true" :disabled="report.status === 'Cancelada'"
                     split-button trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
@@ -936,14 +936,15 @@ export default {
                 ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
             }
 
-            // Pie de página
-            const finalWhiteLines = '\n'.repeat(this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines);
-            ticket += '\n' + ALINEAR_CENTRO;
-            ticket += 'GRACIAS POR SU PREFERENCIA' + finalWhiteLines;
+             // terminos y condiciones
+            ticket += '\n' + this.$page.props.auth.user.printer_config?.ticketTerms + '\n\n';
+            // firma
+            ticket += '_______________________________\n';
+            ticket += 'Firma de cliente acepta condiciones\n';
 
-            if (hasCut) {
-                ticket += CORTAR_PAPEL;
-            }
+            // Pie de página
+            ticket += '\n' + ALINEAR_CENTRO;
+            ticket += 'GRACIAS POR SU PREFERENCIA';
 
             return ticket;
         },

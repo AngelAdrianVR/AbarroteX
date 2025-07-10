@@ -466,14 +466,15 @@ export default {
                 ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
             }
 
-            // Pie de página
-            const finalWhiteLines = '\n'.repeat(this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines);
-            ticket += '\n' + ALINEAR_CENTRO;
-            ticket += 'GRACIAS POR SU PREFERENCIA' + finalWhiteLines;
+            // terminos y condiciones
+            ticket += '\n' + this.$page.props.auth.user.printer_config?.ticketTerms + '\n\n';
+            // firma
+            ticket += '_______________________________\n';
+            ticket += 'Firma de cliente acepta condiciones\n';
 
-            if (hasCut) {
-                ticket += CORTAR_PAPEL;
-            }
+            // Pie de página
+            ticket += '\n' + ALINEAR_CENTRO;
+            ticket += 'GRACIAS POR SU PREFERENCIA';
 
             return ticket;
         },
