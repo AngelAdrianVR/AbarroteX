@@ -167,6 +167,41 @@
                     <p v-if="loadingTicketFinalWhiteLines" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
             </article>
+            <article class="text-sm p-4 lg:flex items-center justify-between">
+                <div class="lg:w-1/2">
+                    <p class="text-[#575757]">
+                        Agreaga los términos y condiciones que se mostrarán al final del ticket.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
+                        <p>Términos y condiciones:</p>
+                        <el-input v-model="form.printer_config.ticketTerms" @blur="updateTicketTerms" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
+                        placeholder="" :maxlength="800" show-word-limit class="!w-72"
+                        clearable />
+                    </div>
+                    <p v-if="loadingTicketTerms" class="text-gray-400 text-end text-xs">Guardando...</p>
+                </div>
+            </article>
+            <article class="text-sm p-4 lg:flex items-center justify-between">
+                <div class="lg:w-1/2">
+                    <p class="text-[#575757]">
+                        Logo de ticket: procura que sea blanco y negro para que se imprima bien en el ticket.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex flex-col">
+                        <div>
+                            <InputFilePreview @imagen="storeLogo($event)" width="w-32" height="h-24"
+                                :imageUrl="storeLogoUrl" @cleared="storeLogo()" />
+                            <p v-if="logoTicketForm.processing" class="text-gray-400 text-xs col-span-full">
+                                Guardando...
+                            </p>
+                        </div>
+                    </div>
+                    <!-- <p v-if="loadingTicketLogo" class="text-gray-400 text-end text-xs">Guardando...</p> -->
+                </div>
+            </article>
         </section>
         <section class="my-5 divide-y-[1px] border border-grayD9 rounded-[5px]">
             <article class="text-sm rounded-t-md p-4">
@@ -310,6 +345,7 @@
 
 <script>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputFilePreview from '@/Components/MyComponents/InputFilePreview.vue';
 import { useForm, Link } from "@inertiajs/vue3";
 
 export default {
@@ -321,6 +357,7 @@ export default {
                 ticketPrinterName: this.$page.props.auth.user.printer_config?.ticketPrinterName ?? null,
                 labelPrinterName: this.$page.props.auth.user.printer_config?.labelPrinterName ?? null,
                 ticketWidth: this.$page.props.auth.user.printer_config?.ticketWidth ?? null,
+                ticketTerms: this.$page.props.auth.user.printer_config?.ticketTerms ?? null,
                 ticketFinalWhiteLines: this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines ?? null,
                 labelResolution: this.$page.props.auth.user.printer_config?.labelResolution ?? null,
                 labelWidth: this.$page.props.auth.user.printer_config?.labelWidth ?? null,
@@ -332,8 +369,13 @@ export default {
             }
         });
 
+        const logoTicketForm = useForm({
+            img: null,
+        });
+
         return {
             form,
+            logoTicketForm,
             availablePrinters: [],
             barCodeOption: [
                 { value: '0', label: 'No mostrar' },
@@ -354,14 +396,22 @@ export default {
             loadingLabelFont: false,
             loadingLabelBarCodeHumanReadable: false,
             loadingLabelGap: false,
+            loadingTicketTerms: false,
+            loadingTicketLogo: false,
         }
     },
     components: {
+        InputFilePreview,
         PrimaryButton,
         Link,
     },
     props: {
         store: Object,
+    },
+    computed: {
+        storeLogoUrl() {
+            return this.$page.props.auth.user.store.media?.find(media => media.collection_name === 'ticketLogo')?.original_url;
+        },
     },
     methods: {
         updateBarCodeHumanReadable() {
@@ -431,6 +481,17 @@ export default {
                 });
             }
         },
+        updateTicketTerms() {
+            // enviar solicitud solo si hubo algun cambio en campo
+            if (this.form.printer_config.ticketTerms !== this.$page.props.auth.user.printer_config?.ticketTerms) {
+                this.loadingTicketTerms = true;
+                this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
+                    onFinish: () => {
+                        this.loadingTicketTerms = false;
+                    },
+                });
+            }
+        },
         updateTicketFinalWhiteLines() {
             // enviar solicitud solo si hubo algun cambio en campo
             if (this.form.printer_config.ticketFinalWhiteLines !== this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines) {
@@ -496,6 +557,10 @@ export default {
                     },
                 });
             }
+        },
+        storeLogo(img = null) {
+            this.logoTicketForm.img = img;
+            this.logoTicketForm.post(route("stores.store-ticket-logo"));
         },
         async getAvailablePrinters() {
             try {

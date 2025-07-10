@@ -161,6 +161,7 @@ class UserController extends Controller
             'printer_config.ticketPrinterName' => 'nullable|string|min:1|max:255',
             'printer_config.ticketWidth' => 'nullable|string|min:1|max:255',
             'printer_config.ticketFinalWhiteLines' => 'nullable|numeric|min:1|max:255',
+            'printer_config.ticketTerms' => 'nullable|string|max:1000',
             'printer_config.labelPrinterName' => 'nullable|string|min:1|max:255',
             'printer_config.labelResolution' => 'nullable|numeric|min:1|max:5000',
             'printer_config.labelWidth' => 'nullable|numeric|min:0|max:5000',

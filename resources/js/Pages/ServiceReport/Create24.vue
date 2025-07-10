@@ -466,14 +466,15 @@ export default {
                 ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
             }
 
-            // Pie de página
-            const finalWhiteLines = '\n'.repeat(this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines);
-            ticket += '\n' + ALINEAR_CENTRO;
-            ticket += 'GRACIAS POR SU PREFERENCIA' + finalWhiteLines;
+            // terminos y condiciones
+            ticket += '\n' + this.$page.props.auth.user.printer_config?.ticketTerms + '\n\n';
+            // firma
+            ticket += '_______________________________\n';
+            ticket += 'Firma de cliente acepta condiciones\n';
 
-            if (hasCut) {
-                ticket += CORTAR_PAPEL;
-            }
+            // Pie de página
+            ticket += '\n' + ALINEAR_CENTRO;
+            ticket += 'GRACIAS POR SU PREFERENCIA';
 
             return ticket;
         },
@@ -550,8 +551,9 @@ export default {
             addTextLine("Total:", '$' + (this.totalSpareParts + parseFloat(this.form.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             addTextLine("Desbloqueo:", this.form.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.form.observations));
-            addTextLine("Servicio:", this.removeAccents(this.form.service_description));
-            addTextLine("Tecnico:", this.removeAccents(this.form.technician_name));
+            // addTextLine("Servicio:", this.removeAccents(this.form.service_description));
+            // addTextLine("Tecnico:", this.removeAccents(this.form.technician_name));
+            addTextLine("Telefono cliente:", this.form.client_phone_number);
 
             // --- 5. Código de Barras ---
             if (this.newFolio) {
