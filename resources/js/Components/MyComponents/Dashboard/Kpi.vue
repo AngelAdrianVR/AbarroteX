@@ -1,7 +1,7 @@
 <template>
     <div
-        class="min-h-[100px] self-start border border-gray3 rounded-[10px] lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
-        <h1 class="font-bold text-center">{{ title }} <span v-html="icon"></span></h1>
+        class="min-h-[100px] self-start rounded-lg shadow-lg text-center lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
+        <h1 class="font-bold text-center">{{ title }}<span v-html="icon"></span></h1>
         <main class="flex items-center space-x-4 pt-4">
             <section class="flex flex-col items-center space-y-1 w-2/3">
                 <el-tooltip :content="options.tooltipCurrentVal" placement="left">
@@ -17,8 +17,7 @@
             </section>
             <section :class="options.currentVal - options.refVal < 0 ? 'text-red-600' : 'text-green-600'"
                 class="w-1/3 flex flex-col items-center text-xl">
-                <span>{{
-                    calcPercentage() }}%</span>
+                <span>{{ calcPercentage() }}%</span>
                 <svg v-if="options.currentVal - options.refVal >= 0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round"

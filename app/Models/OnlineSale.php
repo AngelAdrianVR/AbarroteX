@@ -18,16 +18,24 @@ class OnlineSale extends Model
         'street',
         'ext_number',
         'int_number',
+        'town',
+        'polity_state',
+        'postal_code',
+        'address_references',
         'payment_method',
         'status',
         'products',
+        'delivery_price',
         'total',
         'delivered_at',
+        'refunded_at',
         'store_id'
     ];
 
     protected $casts = [
-        'products' => 'array'
+        'products' => 'array',
+        'delivered_at' => 'datetime',
+        'refunded_at' => 'datetime',
     ];
 
     //relationships

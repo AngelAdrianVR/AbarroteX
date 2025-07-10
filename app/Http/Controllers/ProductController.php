@@ -8,100 +8,151 @@ use App\Models\Brand;
 use App\Models\CashRegisterMovement;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
+use App\Models\OnlineSale;
 use App\Models\Product;
 use App\Models\ProductHistory;
+use App\Services\TinifyService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductController extends Controller
 {
+    public function __construct(protected TinifyService $tinifyService) {}
+
     public function index()
     {
-        $all_products = $this->getAllProducts();
-        $total_products = $all_products->count();
+        // revisar si para el tipo de tienda existe un catalogo global
+        $exist_global_products = GlobalProduct::where('type', auth()->user()->store->type)->get(['id', 'name'])->count();
 
-        //tomar solo primeros 30 productos
-        $products = $all_products->take(30);
-
-        return inertia('Product/Index', compact('products', 'total_products'));
+        return inertia('Product/Index', compact('exist_global_products'));
     }
-
 
     public function create()
     {
-        $products_quantity = Product::all()->count();
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $products_quantity = Product::where('store_id', $store->id)->get()->count();
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('Product/Create', compact('products_quantity', 'categories', 'brands'));
     }
 
-
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . auth()->user()->store_id,
-            'code' => 'nullable|unique:products,code,NULL,id,store_id,' . auth()->user()->store_id . '|string|max:100',
-            'public_price' => 'required|numeric|min:0|max:9999',
-            'cost' => 'nullable|numeric|min:0|max:9999',
+        $store_id = auth()->user()->store_id;
+        $vailidated = $request->validate([
+            'name' => 'required|string|max:100|unique:products,name,NULL,id,store_id,' . $store_id,
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode()],
+            'public_price' => 'required|numeric|min:0|max:9999999',
+            'currency' => 'nullable|string',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
             'current_stock' => 'nullable|numeric|min:0|max:9999',
+            'description' => 'nullable|string|max:800',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'product_on_request' => 'boolean',
+            'show_in_online_store' => 'boolean',
+            'bulk_product' => 'boolean',
+            'measure_unit' => $request->bulk_product ? 'required|string' : 'nullable|string',
+            'days_for_delivery' => $request->product_on_request ? 'required|numeric|min:1|max:255' : 'nullable|numeric|min:1|max:255',
+            'brand_id' => 'nullable',
         ]);
 
-        $product = Product::create($request->except('imageCover') + ['store_id' => auth()->user()->store_id]);
+        // forzar default de 1 en stock
+        $vailidated['current_stock'] = $vailidated['current_stock'] ?? 1;
+        $product = Product::create($vailidated + ['store_id' => $store_id]);
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
-            $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            $mediaItem = $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            // Ruta del archivo guardado
+            $path = $mediaItem->getPath();
+            // Verificar el tamaño del archivo y si estamos en entorno de producción
+            if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                $this->tinifyService->optimizeImage($path);
+            } else {
+                // comprimir de otra forma  
+            }
         }
 
-        return to_route('products.show', $product->id);
+        //codifica el id del producto
+        $encoded_product_id = base64_encode($product->id);
+
+        if (!request('stayInView')) {
+            return to_route('products.show', $encoded_product_id);
+        }
     }
 
-
-    public function show($product_id)
+    public function show($encoded_product_id)
     {
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
         $cash_register = auth()->user()->cashRegister;
-        $product = ProductResource::make(Product::with('category', 'brand')
+        $product = Product::with(['category', 'brand', 'media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($product_id));
+            ->findOrFail($decoded_product_id);
+        // $product = ProductResource::make(Product::with(['category', 'brand', 'promotions.giftable' => function ($query) {
+        //     $query->morphWith([
+        //         Product::class => ['media'],
+        //         GlobalProductStore::class => ['globalProduct.media']
+        //     ]);
+        // }])
+        //     ->where('store_id', auth()->user()->store_id)
+        //     ->findOrFail($decoded_product_id));
 
         return inertia('Product/Show', compact('product', 'cash_register'));
     }
 
-
-    public function edit($product_id)
+    public function edit($encoded_product_id)
     {
+        // Decodificar el ID
+        $decoded_product_id = base64_decode($encoded_product_id);
+
         $product = ProductResource::make(Product::with('category', 'brand')
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($product_id));
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+            ->findOrFail($decoded_product_id));
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
+        // return $product;
         return inertia('Product/Edit', compact('product', 'categories', 'brands'));
     }
-
 
     public function update(Request $request, Product $product)
     {
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
-            'code' => 'nullable|string|max:100|unique:products,code,' . $product->id,
-            'public_price' => 'required|numeric|min:0|max:9999',
-            'cost' => 'nullable|numeric|min:0|max:9999',
-            'current_stock' => 'nullable|numeric|min:0|max:9999',
-            'min_stock' => 'nullable|numeric|min:0|max:9999',
-            'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
+            'public_price' => 'required|numeric|min:0|max:9999999',
+            'currency' => 'required|string',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
+            'description' => 'nullable|string|max:800',
+            'current_stock' => 'nullable|numeric|min:0|max:9999999',
+            'min_stock' => 'nullable|numeric|min:0|max:9999999',
+            'max_stock' => 'nullable|numeric|min:0|max:9999999',
+            'category_id' => 'nullable',
+            'product_on_request' => 'boolean',
+            'show_in_online_store' => 'boolean',
+            'bulk_product' => 'boolean',
+            'measure_unit' => $request->bulk_product ? 'required|string' : 'nullable|string',
+            'days_for_delivery' => $request->product_on_request ? 'required|numeric|min:1|max:255' : 'nullable|numeric|min:1|max:255',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -109,8 +160,9 @@ class ProductController extends Controller
 
         if ($current_price != $request->public_price) {
             ProductHistory::create([
-                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'description' => 'Cambio de precio de $' . $current_price . ' a $' . $request->public_price,
                 'type' => 'Precio',
+                'user_id' => auth()->id(),
                 'historicable_id' => $product->id,
                 'historicable_type' => Product::class
             ]);
@@ -124,29 +176,40 @@ class ProductController extends Controller
             $product->clearMediaCollection('imageCover');
         }
 
-        return to_route('products.show', $product->id);
+        //codifica el id del producto
+        $encoded_product_id = base64_encode($product->id);
+
+        return to_route('products.show', ['product' => $encoded_product_id]);
     }
 
     public function updateWithMedia(Request $request, Product $product)
     {
         $request->validate([
             'name' => 'required|string|max:100|unique:products,name,' . $product->id,
-            'code' => 'nullable|string|max:100|unique:products,code,' . $product->id,
-            'public_price' => 'required|numeric|min:0|max:9999',
-            'cost' => 'nullable|numeric|min:0|max:9999',
-            'current_stock' => 'nullable|numeric|min:0|max:9999',
-            'min_stock' => 'nullable|numeric|min:0|max:9999',
-            'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'code' => ['nullable', 'string', 'max:100', new \App\Rules\UniqueProductCode($product->id)],
+            'public_price' => 'required|numeric|min:0|max:9999999',
+            'currency' => 'required|string',
+            'cost' => 'nullable|numeric|min:0|max:9999999',
+            'description' => 'nullable|string|max:800',
+            'current_stock' => 'nullable|numeric|min:0|max:9999999',
+            'min_stock' => 'nullable|numeric|min:0|max:9999999',
+            'max_stock' => 'nullable|numeric|min:0|max:9999999',
+            'category_id' => 'nullable',
+            'product_on_request' => 'boolean',
+            'show_in_online_store' => 'boolean',
+            'bulk_product' => 'boolean',
+            'measure_unit' => $request->bulk_product ? 'required|string' : 'nullable|string',
+            'days_for_delivery' => $request->product_on_request ? 'required|numeric|min:1|max:255' : 'nullable|numeric|min:1|max:255',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
         $current_price = $product->public_price;
         if ($current_price != $request->public_price) {
             ProductHistory::create([
-                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'description' => 'Cambio de precio de $' . $current_price . ' a $' . $request->public_price,
                 'type' => 'Precio',
+                'user_id' => auth()->id(),
                 'historicable_id' => $product->id,
                 'historicable_type' => Product::class
             ]);
@@ -158,16 +221,24 @@ class ProductController extends Controller
         // Eliminar imágenes antiguas solo si se proporcionan nuevas imágenes
         if ($request->hasFile('imageCover')) {
             $product->clearMediaCollection('imageCover');
+            $mediaItem = $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
+            // Ruta del archivo guardado
+            $path = $mediaItem->getPath();
+
+            // Verificar el tamaño del archivo y si estamos en entorno de producción
+            if (filesize($path) > 400 * 1024 && app()->environment() == 'production' && $this->tinifyService->totalCompressions() < 500) {
+                // Comprimir la imagen directamente en su ubicación original si supera los 600KB
+                $this->tinifyService->optimizeImage($path);
+            } else {
+                // comprimir de otra forma  
+            }
         }
 
-        // Guardar el archivo en la colección 'imageCover'
-        if ($request->hasFile('imageCover')) {
-            $product->addMediaFromRequest('imageCover')->toMediaCollection('imageCover');
-        }
+        //codifica el id del producto
+        $encoded_product_id = base64_encode($product->id);
 
-        return to_route('products.show', $product->id);
+        return to_route('products.show', ['product' => $encoded_product_id]);
     }
-
 
     public function destroy(Product $product)
     {
@@ -176,13 +247,20 @@ class ProductController extends Controller
         $product->delete();
     }
 
-
+    // Buscar productos locales y globales. Se usa en varias partes de la aplicación, como en el buscador de productos del carrito de ventas,
+    //en el buscador de productos del carrito de compras y en el buscador de productos del inventario.
+    // TENER CUIDADO SI SE MODIFICA, PUEDE AFECTAR A OTRAS PARTES DE LA APLICACIÓN.
     public function searchProduct(Request $request)
     {
         $query = $request->input('query');
 
         // Realiza la búsqueda en la base de datos local
-        $local_products = Product::with(['category', 'brand', 'media'])
+        $local_products = Product::with(['category', 'brand', 'media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
             ->where('store_id', auth()->user()->store_id)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%$query%")
@@ -190,10 +268,15 @@ class ProductController extends Controller
             })
             ->get();
 
-        $global_products = GlobalProductStore::with(['globalProduct.media'])
+        $global_products = GlobalProductStore::with(['globalProduct.media', 'globalProduct.brand', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
             ->whereHas('globalProduct', function ($queryBuilder) use ($query) {
                 $queryBuilder->where('name', 'like', "%$query%")
-                    ->orWhere('code', $query);
+                    ->orWhere('code', 'like', "%$query%");
             })
             ->where('store_id', auth()->user()->store_id)
             ->get();
@@ -207,49 +290,106 @@ class ProductController extends Controller
         return response()->json(['items' => $products]);
     }
 
+    // Filtrar productos por proveedor (marca)
+    // Se usa en el filtro de productos del inventario que se encuentra en el applayout
+    public function filterByProvider(Request $request)
+    {
+        $providerIds = $request->input('providers', []);
 
-    // *******borrar
-    // public function getProductScaned($product_id)
-    // {
-    //     $is_local_product = request()->boolean('is_local_product');
+        $storeId = auth()->user()->store_id;
 
-    //     // si es producto local busca en la tabla de productos locales, si no, en la tabla de productos transferidos del catálogo
-    //     if ($is_local_product == '1') {
-    //         $product = Product::with(['category', 'brand', 'media'])->find($product_id);
-    //     } else {
-    //         $product = GlobalProductStore::whereHas('globalProduct', function ($query) use ($product_id) {
-    //             $query->where('id', $product_id);
-    //         })->with(['globalProduct.category', 'globalProduct.brand', 'globalProduct.media'])->first();
-    //     }
+        $local_products = Product::with(['category', 'brand', 'media', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
+            ->where('store_id', $storeId)
+            ->whereIn('brand_id', $providerIds)
+            ->get();
 
-    //     return response()->json(['item' => $product]);
-    // }
+        $global_products = GlobalProductStore::with(['globalProduct.media', 'globalProduct.brand', 'promotions.giftable' => function ($query) {
+            $query->morphWith([
+                Product::class => ['media'],
+                GlobalProductStore::class => ['globalProduct.media']
+            ]);
+        }])
+            ->whereHas('globalProduct', function ($query) use ($providerIds) {
+                $query->whereIn('brand_id', $providerIds);
+            })
+            ->where('store_id', $storeId)
+            ->get();
 
+        $products = $local_products->merge($global_products);
+
+        return response()->json(['items' => $products]);
+    }
+
+
+    public function outStock(Request $request, $product_id)
+    {
+        $product = Product::find($product_id);
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.001|max:' . $product->current_stock,
+            'concept' => 'required',
+        ], [
+            'quantity.max' => 'La cantidad a retirar no puede ser mayor al stock actual (' . $product->current_stock . ').',
+        ]);
+
+        $old_quantity = $product->current_stock;
+        // Asegúrate de convertir la cantidad a un número antes de restar
+        $product->current_stock -= floatval($request->quantity);
+        // Guarda el producto
+        $product->save();
+
+        // Crear salida
+        ProductHistory::create([
+            'description' => "Salida de producto. de $old_quantity a $product->current_stock ($request->quantity unidades) por $request->concept",
+            'type' => 'Salida',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product->id,
+            'historicable_type' => Product::class
+        ]);
+    }
 
     public function entryStock(Request $request, $product_id)
     {
-        $product = Product::find($product_id);
+        $messages = [
+            'cash_amount.required_if' => 'El monto a retirar es obligatorio cuando el pago se realiza mediante la caja registradora.',
+            'cash_amount.numeric' => 'El monto a retirar debe ser un número.',
+            'cash_amount.min' => 'El monto a retirar debe ser al menos 1.',
+        ];
 
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.001',
+            'is_paid_by_cash_register' => 'boolean',
+            'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
+        ], $messages);
+
+        $product = Product::find($product_id);
+        $old_quantity = $product->current_stock;
         // Asegúrate de convertir la cantidad a un número antes de sumar
-        $product->current_stock += intval($request->quantity);
+        $product->current_stock += floatval($request->quantity);
 
         // Guarda el producto
         $product->save();
 
         // Crear entrada
         ProductHistory::create([
-            'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
+            'description' => "Entrada de producto. de $old_quantity a $product->current_stock ($request->quantity unidades)",
             'type' => 'Entrada',
+            'user_id' => auth()->id(),
             'historicable_id' => $product_id,
             'historicable_type' => Product::class
         ]);
 
         // Crear gasto
-        Expense::create([
+        $expense = Expense::create([
             'concept' => 'Compra de producto: ' . $product->name,
-            'current_price' => $product->cost,
+            'current_price' => $product->cost ?? 0,
             'quantity' => $request->quantity,
             'store_id' => auth()->user()->store_id,
+            'amount_from_cash_register' => $request->cash_amount,
         ]);
 
         // restar de caja en caso de que el usuario asi lo haya especificado
@@ -264,14 +404,90 @@ class ProductController extends Controller
                 'type' => 'Retiro',
                 'notes' => "Compra de $product->name ($request->quantity $unit)",
                 'cash_register_id' => $cash_register->id,
+                'expense_id' => $expense->id,
             ]);
         }
+    }
+
+    // Actualizar inventario de un producto
+    public function inventoryUpdate(Request $request, $product_id)
+    {
+        $request->validate([
+            'quantity' => 'required|numeric|min:0|max:9999999',
+        ]);
+
+        $product = Product::find($product_id);
+        $old_quantity = $product->current_stock;
+        $new_quantity = floatval($request->quantity);
+
+        $product->current_stock = $new_quantity;
+        // Guarda el producto
+        $product->save();
+
+        // Crear ajuste
+        ProductHistory::create([
+            'description' => 'Ajuste de producto. De ' . $old_quantity . ' a ' . $new_quantity . ' unidades',
+            'type' => 'Ajuste',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product_id,
+            'historicable_type' => Product::class
+        ]);
+    }
+
+    // Actualizar el stock de varios productos (desde la opcion del AppLayout)
+    public function massiveUpdateStock(Request $request)
+    {
+        $updates = $request->input('updates', []);
+        
+        foreach ($updates as $item) {
+            if ( $item['global_product_id'] ) {
+                // Si el producto es global, buscarlo en GlobalProductStore
+                $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->find($item['id']);
+                if (!$product) {
+                    continue; // Si no se encuentra el producto, continuar con el siguiente
+                } 
+            } else {
+                // Si el producto es local, buscarlo en Product
+                $product = Product::where('store_id', auth()->user()->store_id)->find($item['id']);
+                if (!$product) {
+                    continue; // Si no se encuentra el producto, continuar con el siguiente
+                }
+            }
+
+            // Actualizar el stock actual del producto
+            if ($product) {
+                $product->current_stock += intval($item['quantity']);
+                $product->save();
+            }
+        }
+
+        return response()->json(['message' => 'Stock actualizado correctamente.']);
+    }
+    // Actualizar el precio de un producto
+    public function priceUpdate(Request $request, $product_id)
+    {
+        $request->validate([
+            'public_price' => 'required|numeric|min:0|max:9999999',
+        ]);
+
+        $product = Product::find($product_id);
+        $old_price = $product->public_price;
+        $product->public_price = $request->public_price;
+        $product->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->public_price,
+            'type' => 'Precio',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product_id,
+            'historicable_type' => Product::class
+        ]);
     }
 
     public function fetchHistory($product_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('historicable_id', $product_id)
+        $query = ProductHistory::with(['user:id,name'])->where('historicable_id', $product_id)
             ->where('historicable_type', Product::class);
 
         if ($month && $year) {
@@ -322,13 +538,32 @@ class ProductController extends Controller
     public function getAllProducts()
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::with(['category:id,name', 'brand:id,name', 'media'])
+        $local_products = Product::with([
+            'category:id,name',
+            'brand:id,name',
+            'media',
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct.media']
+                ]);
+            }
+        ])
             ->where('store_id', auth()->user()->store_id)
             ->latest('id')
             ->get(['id', 'name', 'public_price', 'code', 'store_id', 'category_id', 'brand_id', 'min_stock', 'max_stock', 'current_stock']);
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::with(['globalProduct' => ['media', 'category']])->where('store_id', auth()->user()->store_id)->get();
+        $transfered_products = GlobalProductStore::with([
+            'globalProduct' => ['media', 'category'],
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct.media']
+                ]);
+            }
+        ])
+            ->where('store_id', auth()->user()->store_id)->get();
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $merged = array_merge($local_products->toArray(), $transfered_products->toArray());
@@ -415,8 +650,8 @@ class ProductController extends Controller
             $sheet->setCellValue('E' . $row, $product->min_stock);
             $sheet->setCellValue('F' . $row, $product->max_stock);
             $sheet->setCellValue('G' . $row, $product->current_stock);
-            $sheet->setCellValue('H' . $row, $product->category->name);
-            $sheet->setCellValue('I' . $row, $product->brand->name);
+            $sheet->setCellValue('H' . $row, $product->category?->name);
+            $sheet->setCellValue('I' . $row, $product->brand?->name);
             $sheet->setCellValue('J' . $row, $product->created_at->isoFormat('DD MMMM YYYY'));
             $row++;
         }
@@ -437,10 +672,127 @@ class ProductController extends Controller
         ]);
     }
 
+    public function getByIdForIndexedDB($product)
+    {
+        $product_id = explode('_', $product)[1]; // separar el id del tipo de producto (local o global)
+        $product_type = explode('_', $product)[0]; // obtener el tipo de producto (local o global)
+
+        if ($product_type === 'local') {
+            $product = Product::with([
+                'media',
+                'promotions.giftable' => function ($query) {
+                    $query->morphWith([
+                        Product::class => ['media'],
+                        GlobalProductStore::class => ['globalProduct' => function ($query) {
+                            $query->select('id', 'name', 'code')->with('media');
+                        }]
+                    ]);
+                }
+            ])
+                ->where('store_id', auth()->user()->store_id)
+                ->findOrFail($product_id);
+            // mapear el producto local
+            $product = [
+                'id' => 'local_' . $product->id,
+                'name' => $product->name,
+                'code' => $product->code,
+                'additional' => $product->additional,
+                'public_price' => $product->public_price,
+                'current_stock' => $product->current_stock,
+                'bulk_product' => $product->bulk_product,
+                'measure_unit' => $product->measure_unit,
+                'image_url' => $product->getFirstMediaUrl('imageCover'),
+                'promotions' => $product->promotions->map(function ($promotion) {
+                    if (!$promotion->giftable) {
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => null]
+                        );
+                    }
+
+                    $giftable = $promotion->giftable_type == Product::class
+                        ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                        : [
+                            'public_price' => $promotion->giftable->public_price,
+                            'current_stock' => $promotion->giftable->current_stock,
+                            'name' => $promotion->giftable->globalProduct->name ?? null,
+                            'code' => $promotion->giftable->globalProduct->code ?? null,
+                            // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                            // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                        ];
+
+                    return array_merge(
+                        $promotion->toArray(),
+                        ['giftable' => $giftable]
+                    );
+                })->toArray(),
+            ];
+        } else {
+            $product = GlobalProductStore::with([
+                'promotions.giftable' => function ($query) {
+                    $query->morphWith([
+                        Product::class => ['media'],
+                        GlobalProductStore::class => ['globalProduct' => function ($query) {
+                            $query->select('id', 'name', 'code')->with('media');
+                        }]
+                    ]);
+                }
+            ])
+                ->where('store_id', auth()->user()->store_id)
+                ->findOrFail($product_id);
+            // mapear el producto global
+            $product = [
+                'id' => 'global_' . $product->id,
+                'name' => $product->name,
+                'code' => $product->code,
+                'public_price' => $product->public_price,
+                'current_stock' => $product->current_stock,
+                'image_url' => $product->globalProduct->getFirstMediaUrl('imageCover'),
+                'promotions' => $product->promotions->map(function ($promotion) {
+                    if (!$promotion->giftable) {
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => null]
+                        );
+                    }
+
+                    $giftable = $promotion->giftable_type == Product::class
+                        ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                        : [
+                            'public_price' => $promotion->giftable->public_price,
+                            'current_stock' => $promotion->giftable->current_stock,
+                            'name' => $promotion->giftable->globalProduct->name ?? null,
+                            'code' => $promotion->giftable->globalProduct->code ?? null,
+                            // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                            // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                        ];
+
+                    return array_merge(
+                        $promotion->toArray(),
+                        ['giftable' => $giftable]
+                    );
+                })->toArray(),
+            ];
+        }
+
+        return response()->json(compact('product'));
+    }
+
     public function getAllForIndexedDB()
     {
         // productos creados localmente en la tienda que no están en el catálogo base o global
-        $local_products = Product::where('store_id', auth()->user()->store_id)
+        $local_products = Product::with([
+            'media',
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct' => function ($query) {
+                        $query->select('id', 'name', 'code')->with('media');
+                    }]
+                ]);
+            }
+        ])
+            ->where('store_id', auth()->user()->store_id)
             ->latest()
             ->get()
             ->map(function ($product) {
@@ -448,14 +800,50 @@ class ProductController extends Controller
                     'id' => 'local_' . $product->id,
                     'name' => $product->name,
                     'code' => $product->code,
+                    'additional' => $product->additional,
                     'public_price' => $product->public_price,
                     'current_stock' => $product->current_stock,
-                    'image_url' => $product->image_url = $product->getFirstMediaUrl('imageCover'),
+                    'bulk_product' => $product->bulk_product,
+                    'measure_unit' => $product->measure_unit,
+                    'image_url' => $product->getFirstMediaUrl('imageCover'),
+                    'promotions' => $product->promotions->map(function ($promotion) {
+                        if (!$promotion->giftable) {
+                            return array_merge(
+                                $promotion->toArray(),
+                                ['giftable' => null]
+                            );
+                        }
+
+                        $giftable = $promotion->giftable_type == Product::class
+                            ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                            : [
+                                'public_price' => $promotion->giftable->public_price,
+                                'current_stock' => $promotion->giftable->current_stock,
+                                'name' => $promotion->giftable->globalProduct->name ?? null,
+                                'code' => $promotion->giftable->globalProduct->code ?? null,
+                                // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                                // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                            ];
+
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => $giftable]
+                        );
+                    })->toArray(),
                 ];
             })->toArray();
 
         // productos transferidos desde el catálogo base
-        $transfered_products = GlobalProductStore::query()
+        $transfered_products = GlobalProductStore::with([
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct' => function ($query) {
+                        $query->select('id', 'name', 'code')->with('media');
+                    }]
+                ]);
+            }
+        ])
             ->where('store_id', auth()->user()->store_id)
             ->get()
             ->map(function ($tp) {
@@ -466,14 +854,50 @@ class ProductController extends Controller
                     'public_price' => $tp->public_price,
                     'current_stock' => $tp->current_stock,
                     'image_url' => $tp->globalProduct->getFirstMediaUrl('imageCover'),
+                    'promotions' => $tp->promotions->map(function ($promotion) {
+                        if (!$promotion->giftable) {
+                            return array_merge(
+                                $promotion->toArray(),
+                                ['giftable' => null]
+                            );
+                        }
+
+                        $giftable = $promotion->giftable_type == Product::class
+                            ? $promotion->giftable->only(['name', 'code', 'public_price', 'current_stock'])
+                            : [
+                                'public_price' => $promotion->giftable->public_price,
+                                'current_stock' => $promotion->giftable->current_stock,
+                                'name' => $promotion->giftable->globalProduct->name ?? null,
+                                'code' => $promotion->giftable->globalProduct->code ?? null,
+                                // si en un futuro queremos mostrar la imagen del producto gratis (tambien ponerlo en el only de arriba)
+                                // 'image_url' => $promotion->giftable->globalProduct->getFirstMediaUrl('imageCover')
+                            ];
+
+                        return array_merge(
+                            $promotion->toArray(),
+                            ['giftable' => $giftable]
+                        );
+                    })->toArray(),
                 ];
             })->toArray();
-
 
         // Creamos un nuevo arreglo combinando los dos conjuntos de datos
         $products = collect(array_merge($local_products, $transfered_products));
 
         return response()->json(compact('products', 'local_products', 'transfered_products'));
+    }
+
+    public function getDataForProductsView()
+    {
+        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
+        $all_products = $this->getAllProducts();
+        $total_products = $all_products->count();
+        $total_local_products = $all_products->whereNull('global_product_id')->count();
+
+        //tomar solo primeros 30 productos
+        $products = $all_products->take($page);
+
+        return response()->json(compact('products', 'total_products', 'total_local_products'));
     }
 
     private function validateProductsFromFile($worksheet)
@@ -484,15 +908,15 @@ class ProductController extends Controller
         $columnNames = [];
         // Obtener datos y guardar en la base de datos
         foreach ($worksheet->getRowIterator() as $row) {
-            if ($row->getRowIndex() < 3) {
-                continue; // Saltar las primeras 2 filas
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
             }
 
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
 
-            if ($row->getRowIndex() == 3) {
-                // Obtener los nombres de columna de la tercera fila del archivo Excel
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la fila 4 del archivo Excel
                 foreach ($cellIterator as $cell) {
                     $columnNames[] = $cell->getValue();
                 }
@@ -509,12 +933,14 @@ class ProductController extends Controller
             // Validar los datos
             $validator = Validator::make($data, [
                 $columnNames[0] => 'required|string|max:120|unique:products,name',
-                $columnNames[1] => 'required|numeric|min:0|max:999999',
-                $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[3] => $data[$columnNames[3]] ? 'unique:products,code' : '',
-                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:999999' : '',
-                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:999999' : '',
+                $columnNames[1] => 'required|numeric|min:0|max:9999999',
+                $columnNames[2] => $data[$columnNames[2]] ? 'numeric|min:0|max:9999999' : '',
+                $columnNames[3] => $data[$columnNames[3]]
+                    ?  ['max:100', new \App\Rules\UniqueProductCode()]
+                    : '',
+                $columnNames[4] => $data[$columnNames[4]] ? 'numeric|min:0|max:9999999' : '',
+                $columnNames[5] => $data[$columnNames[5]] ? 'numeric|min:0|max:9999999' : '',
+                $columnNames[6] => $data[$columnNames[6]] ? 'numeric|min:0|max:9999999' : '',
             ]);
 
             // Si la validación falla, almacenar los errores
@@ -532,15 +958,15 @@ class ProductController extends Controller
     private function storeProductsFromFile($worksheet)
     {
         foreach ($worksheet->getRowIterator() as $row) {
-            if ($row->getRowIndex() < 3) {
-                continue; // Saltar las primeras 2 filas
+            if ($row->getRowIndex() < 4) {
+                continue; // Saltar las primeras 3 filas
             }
 
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
 
-            if ($row->getRowIndex() == 3) {
-                // Obtener los nombres de columna de la tercera fila del archivo Excel
+            if ($row->getRowIndex() == 4) {
+                // Obtener los nombres de columna de la cuarta fila del archivo Excel
                 foreach ($cellIterator as $cell) {
                     $columnNames[] = $cell->getValue();
                 }
@@ -561,9 +987,26 @@ class ProductController extends Controller
                 'max_stock' => $data[5] ?? 1,
                 'current_stock' => $data[6] ?? 1,
                 'store_id' => auth()->user()->store_id,
-                'category_id' => 1, //Abarrotes por defecto
-                'brand_id' => 1, //Generico por defecto
+                // 'category_id' => 1, //Abarrotes por defecto
+                // 'brand_id' => 1, //Generico por defecto
             ]);
         }
+    }
+
+    public function changePrice(Request $request)
+    {
+        $product_id = explode('_', $request->product['id'])[1]; 
+        $product = Product::where('store_id', auth()->user()->store_id)->where('id', $product_id)->first();
+        $old_price = $product->public_price;
+        $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
+        $product->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice,
+            'type' => 'Precio',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product->id,
+            'historicable_type' => Product::class
+        ]);
     }
 }

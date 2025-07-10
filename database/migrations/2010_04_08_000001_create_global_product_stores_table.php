@@ -18,6 +18,9 @@ return new class extends Migration
             $table->unsignedFloat('min_stock')->nullable();
             $table->unsignedFloat('max_stock')->nullable();
             $table->unsignedFloat('current_stock')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('has_inventory_control')->default(true);
+            $table->boolean('show_in_online_store')->default(true);
             $table->foreignId('global_product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

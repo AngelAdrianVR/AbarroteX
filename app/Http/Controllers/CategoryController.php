@@ -23,10 +23,11 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' =>'required|string|max:100|unique:categories,name',
+            'name' =>'required|string|max:150',
         ]);
 
-        $category = Category::create($request->all());
+        // guardar business_line_name con el id de la tienda para que solo ella pueda verlo
+        $category = Category::create($request->all() + ['business_line_name' => auth()->user()->store->id]);
 
         return response()->json(['item' => $category]);
     }

@@ -31,7 +31,7 @@ class CashRegisterMovementController extends Controller
             'cashRegisterMovementType' => 'required|string',
             //En caso de retirar dinero de la caja el monto máximo es lo que se tenga registrado en current_cash, es decir lo que hay en caja
             'registerAmount' => $request->cashRegisterMovementType == 'Ingreso'
-                ? 'required|numeric|min:0|max:10000'
+                ? 'required|numeric|min:0|max:500000'
                 : 'required|numeric|min:0|max:' . $cash_register->current_cash,
             'registerNotes' => 'nullable|string|max:255',
         ]);
@@ -85,7 +85,7 @@ class CashRegisterMovementController extends Controller
         //recupera el último corte realizado
         $last_cash_cut = CashCut::where('cash_register_id', $cash_register_id)->latest()->first();
 
-         // Si existe el último corte, recupera todas las ventas desde la fecha del último corte hasta ahora
+         // Si existe el último corte, recupera todos los movimientos desde la fecha del último corte hasta ahora
         if ($last_cash_cut !== null) {
             $movements = CashRegisterMovement::where('cash_register_id', $cash_register_id)
                         ->where('created_at', '>', $last_cash_cut->created_at)

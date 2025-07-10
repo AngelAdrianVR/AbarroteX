@@ -17,6 +17,9 @@ class GlobalProductStore extends Model
         'min_stock',
         'max_stock',
         'current_stock',
+        'description',
+        'has_inventory_control',
+        'show_in_online_store',
         'global_product_id',
         'store_id',
     ];
@@ -37,6 +40,12 @@ class GlobalProductStore extends Model
         return $this->hasMany(ProductHistory::class);
     }
 
+    // obtener promociones del producto morph
+    public function promotions()
+    {
+        return $this->morphMany(Promotions::class, 'promotionable');
+    }
+    
     // events
     protected static function boot()
     {
@@ -48,6 +57,24 @@ class GlobalProductStore extends Model
             Sale::where('product_id', $globalProductStore->id)
                 ->where('is_global_product', true)
                 ->update(['product_id' => null]);
+
+            // modifica tambien las ventas en linea ------------------------------------------
+            // Obtener todas las ventas en línea relacionadas
+            $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)->get();
+
+            foreach ($online_sales as $sale) {
+                // Iterar sobre los productos en cada venta
+                $products = $sale->products;
+                foreach ($products as &$online_product) {
+                    if ($online_product['product_id'] === $globalProductStore->id) {
+                        // Cambiar el valor del product_id a null para indicar que el producto fue eliminado
+                        $online_product['product_id'] = null;
+                    }
+                }
+                // Guardar los cambios en los productos de la venta
+                $sale->products = $products;
+                $sale->save();
+            }
         });
     }
 }

@@ -10,7 +10,7 @@ defineProps({
     },
     maxWidth: {
         type: String,
-        default: '2xl',
+        default: '3xl',
     },
     closeable: {
         type: Boolean,
@@ -30,7 +30,7 @@ const close = () => {
         :closeable="closeable"
         @close="close"
     >
-        <div class="px-6 py-4">
+        <div class="px-6 pt-4 pb-2">
             <div class="font-medium text-gray-900 flex items-center justify-between">
                 <slot name="title" />
                 <button @click="close">
@@ -43,7 +43,7 @@ const close = () => {
             </div>
         </div>
 
-        <div class="flex flex-row justify-end px-6 py-4 text-end">
+        <div class="flex flex-row justify-end px-6 pb-4 text-end">
             <slot name="footer" />
         </div>
     </Modal>

@@ -5,15 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\GlobalProduct;
-use App\Models\GlobalProductStore;
-use App\Models\Product;
 use Illuminate\Http\Request;
 
 class GlobalProductController extends Controller
 {
     public function index()
     {
-        $global_products = GlobalProduct::with(['media', 'category'])->get()->take(30);
+        $global_products = GlobalProduct::with(['media', 'category'])->get()->take(50);
         $total_products = GlobalProduct::all()->count();
 
         return inertia('GlobalProduct/Index', compact('global_products', 'total_products'));
@@ -22,8 +20,9 @@ class GlobalProductController extends Controller
 
     public function create()
     {
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProduct/Create', compact('categories', 'brands'));
     }
@@ -34,12 +33,13 @@ class GlobalProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:global_products,name',
             'code' => 'nullable|string|max:100|unique:global_products,code',
+            'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|string|max:200',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
-        $global_product = GlobalProduct::create($request->except('imageCover'));
+        $global_product = GlobalProduct::create($request->except('imageCover') + ['type' => auth()->user()->store->type]);
 
         // Guardar el archivo en la colección 'imageCover'
         if ($request->hasFile('imageCover')) {
@@ -60,8 +60,9 @@ class GlobalProductController extends Controller
     public function edit($global_product_id)
     {
         $global_product = GlobalProduct::with('media')->findOrFail($global_product_id);
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProduct/Edit', compact('global_product', 'categories', 'brands'));
     }
@@ -72,9 +73,10 @@ class GlobalProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:global_products,name,' . $global_product->id,
             'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
+            'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|max:200',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         $global_product->update($request->except('imageCover'));
@@ -94,9 +96,10 @@ class GlobalProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:global_products,name,' . $global_product->id,
             'code' => 'nullable|string|max:100|unique:global_products,code,' . $global_product->id,
+            'descrition' => 'nullable|string|max:255',
             'public_price' => 'required|max:200',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         $global_product->update($request->except('imageCover'));
@@ -124,12 +127,12 @@ class GlobalProductController extends Controller
 
     public function getItemsByPage($currentPage)
     {
-        $offset = $currentPage * 30;
+        $offset = $currentPage * 50;
         $global_products = GlobalProduct::with('category', 'media', 'brand')
             ->latest()
             ->get()
             ->splice($offset)
-            ->take(30);
+            ->take(50);
 
         return response()->json(['items' => $global_products]);
     }
@@ -145,40 +148,45 @@ class GlobalProductController extends Controller
 
     public function filter(Request $request)
     {
-        // Obtener los parámetros de la solicitud
-        $category_id = request('category_id');
-        $brand_id = request('brand_id');
+        $category_ids = $request->input('category_ids', []);
+        $brand_ids = $request->input('brand_ids', []);
 
-        // Consultar los productos globales con los filtros aplicados
-        $filtered_global_products = GlobalProduct::query();
+        $query = GlobalProduct::query();
 
-        // Aplicar el filtro por categoría si está presente
-        if ($category_id !== null) {
-            $filtered_global_products->where('category_id', $category_id);
+        // Filtro por múltiples categorías
+        if (!empty($category_ids)) {
+            $query->whereIn('category_id', $category_ids);
         }
 
-        // Aplicar el filtro por marca si está presente
-        if ($brand_id !== null) {
-            $filtered_global_products->where('brand_id', $brand_id);
+        // Filtro por múltiples marcas
+        if (!empty($brand_ids)) {
+            $query->whereIn('brand_id', $brand_ids);
         }
 
-        // Obtener los resultados filtrados
-        $filtered_global_products = $filtered_global_products->get();
+        $filtered_global_products = $query->get();
 
-        // Devolver los resultados como una respuesta JSON
         return response()->json(['items' => $filtered_global_products]);
     }
 
     public function searchProduct(Request $request)
     {
         $query = $request->input('query');
+        $bussiness_line = auth()->user()->store->type;
 
-        // Realiza la búsqueda en la base de datos local
-        $global_products = GlobalProduct::with(['category', 'brand', 'media'])
-            ->where('name', 'like', "%$query%")
-            ->orWhere('code', $query)
-            ->take(20)
-            ->get();
+        if ( $request->input('module') === 'base_catalog' ) {
+            // Realiza la búsqueda en la base de datos para catalogo base
+            $global_products = GlobalProduct::where('name', 'like', "%$query%")
+                ->where('type', $bussiness_line)
+                ->orWhere('code', $query)
+                ->get();
+        } else {
+            // Realiza la búsqueda en la base de datos local con media, categoría y marca para index de catalogo de productos
+            $global_products = GlobalProduct::with(['category', 'brand', 'media'])
+                ->where('name', 'like', "%$query%")
+                ->orWhere('code', $query)
+                ->take(20)
+                ->get();
+        }
 
         return response()->json(['items' => $global_products]);
     }

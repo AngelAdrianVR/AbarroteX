@@ -8,11 +8,21 @@
         </p>
 
         <section class="mt-5 *:flex *:items-start">
-            <div v-for="(item, index) in settings" :key="item.id" class="mb-3">
-                <p class="w-[20%] md:w-[15%]">{{ item.key }}</p>
+            <div v-for="(item, index) in settings" :key="item.id" class="border border-[#D9D9D9] rounded-sm p-4 flex items-center justify-between space-x-2">
+                <figure class="w-20 h-auto flex justify-center items-center">
+                    <!-- Busca la imagen que coincida con el key de la configracion -->
+                    <img class="object-contain select-none" :draggable="false" :src="configImages.find(img => img.key === item.key)?.path">
+                </figure>
+                <div class="w-full">
+                    <p>{{ item.key }}</p>
+                    <p v-html="item.description" class="text-[#575757] text-[9px] md:text-[13px] w-[79%]"></p>
+                    <p v-if="item.key === 'Impresión automática de tickets'" class="text-[#575757]">
+                        Para configurar tu impresora, ve a la pestaña de Impresora o da clic 
+                        <Link href="/settings?tab=3" class="text-primary underline">aquí.</Link>
+                    </p>
+                </div>
                 <el-switch @change="updateSettingValue(index)" v-model="values[index]" :loading="settingLoading[index]"
                     size="small" class="w-[12%] md:w-[6%] justify-center" />
-                <p class="text-gray99 text-[9px] md:text-[11px] w-[79%]">{{ item.description }}</p>
             </div>
         </section>
     </div>
@@ -20,7 +30,17 @@
 
 <script>
 import Loading from '@/Components/MyComponents/Loading.vue';
+import { Link } from "@inertiajs/vue3";
 import axios from 'axios';
+//images
+import scanner from '@/../../public/images/config_scanner.png';
+import discount from '@/../../public/images/config_discount.png';
+import inventory from '@/../../public/images/config_inventory.png';
+import currentMoney from '@/../../public/images/config_currentMoney.png';
+import max_money from '@/../../public/images/config_max_money.png';
+import noCodeProduct from '@/../../public/images/config_noCodeProduct.png';
+import email from '@/../../public/images/config_email.png';
+import printer from '@/../../public/images/config_printer.png';
 
 export default {
     data() {
@@ -28,11 +48,51 @@ export default {
             loading: false,
             settingLoading: [],
             settings: [],
-            values: [],
+            values: [], 
+
+            // config images
+            configImages:[
+                {
+                    path: scanner,
+                    key:'Escanear productos'
+                },
+
+                {
+                    path: discount,
+                    key: 'Hacer descuentos'
+                },
+                {
+                    path: inventory,
+                    key: 'Control de inventario'
+                },
+                {
+                    path: currentMoney,
+                    key: 'Mostrar dinero en caja'
+                },
+                {
+                    path: max_money,
+                    key: 'Aviso de monto máximo en caja'
+                },
+                {
+                    path: noCodeProduct,
+                    key: 'Selección rápida de productos sin código'
+                },
+                {
+                    path: email,
+                    key: 'Notificaciones por correo'
+                },
+                {
+                    path: printer,
+                    key: 'Impresión automática de tickets'
+                },
+            ]
+
+
         }
     },
     components: {
         Loading,
+        Link
     },
     methods: {
         async updateSettingValue(index) {

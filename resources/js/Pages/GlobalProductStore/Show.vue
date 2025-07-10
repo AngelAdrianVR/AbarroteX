@@ -4,10 +4,88 @@
             <!-- header botones -->
             <div class="lg:flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Productos</h1>
-                <div class="flex items-center space-x-3 my-2 lg:my-0">
-                    <ThirthButton @click="openEntryModal">Entrada de producto</ThirthButton>
-                    <PrimaryButton @click="$inertia.get(route('global-product-store.edit', global_product_store.id))"
-                        class="!rounded-full">Editar</PrimaryButton>
+                <div class="flex items-center space-x-1 my-2 lg:my-0">
+                    <PrimaryButton @click="openEntryModal">Inventario</PrimaryButton>
+                    <el-dropdown trigger="click">
+                        <button @click.stop title="Promociones"
+                            class="flex items-center justify-center bg-[#EDEDED] text-primary size-8 rounded-full">
+                            <svg width="16" height="20" viewBox="0 0 11 16" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M4.28948 0C5.57479 1.07312 8.30838 3.47788 8.101 8.09863C8.68078 7.68803 8.88761 7.19526 8.93401 5.7168C12.1304 10.8078 8.65989 14.7059 5.54143 15.1846C5.18762 15.2389 4.52916 15.2602 4.11175 15.125C-0.11532 13.7553 -1.60454 10.0634 2.14593 5.24023C4.57877 2.25049 4.74345 1.28434 4.28948 0ZM4.82464 7.44336C2.74274 10.1789 2.08633 12.5045 5.00335 14.0527C6.92271 13.5821 7.62449 12.4455 7.80315 10.4805C7.42276 11.011 7.17113 11.2522 6.49261 11.373C6.6711 9.7655 6.13689 8.64274 4.82464 7.44336Z"
+                                    fill="#F68C0F" />
+                            </svg>
+                        </button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <main class="px-3 py-2 w-72 lg:w-[410px]">
+                                    <section class="space-y-1">
+                                        <div v-if="global_product_store.promotions.length"
+                                            class="flex items-center justify-between mb-2">
+                                            <h1 class="font-semibold lg:text-sm ml-2">
+                                                Producto con promoción
+                                            </h1>
+                                            <button type="button" title="Editar promociones"
+                                                class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
+                                                @click="handleEditPromo(global_product_store)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div v-else class="flex items-center justify-between mb-2">
+                                            <h1 class="flex items-center space-x-2 font-semibold lg:text-sm ml-2">
+                                                <span>Sin promociones aún. Crea una</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="size-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                                                </svg>
+                                            </h1>
+                                            <button type="button" title="Agregar promociones"
+                                                class="flex items-center justify-center size-[22px] rounded-full bg-[#F2F2F2] text-primary"
+                                                @click="handleCreatePromo(global_product_store)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="size-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <PromotionCard
+                                            v-for="(promo, index) in global_product_store.promotions.filter(p => !isExpired(p.expiration_date))"
+                                            :key="index" :promo="promo" :product="global_product_store" />
+                                    </section>
+                                    <section v-if="global_product_store.promotions.filter(p => isExpired(p.expiration_date)).length"
+                                        class="mt-4 space-y-1">
+                                        <h1 class="text-[#6E6E6E] font-semibold lg:text-sm ml-2">
+                                            Promociones vencidas
+                                        </h1>
+                                        <PromotionCard
+                                            v-for="(promo, index) in global_product_store.promotions.filter(p => isExpired(p.expiration_date))"
+                                            :key="index" :promo="promo" :product="global_product_store" />
+                                    </section>
+                                </main>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                    <button @click="$inertia.get(route('global-product-store.edit', encodedId))" title="Editar producto"
+                        class="flex items-center justify-center bg-[#EDEDED] text-primary size-8 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                        </svg>
+                    </button>
+                    <button @click="goToCreate()" title="Crear producto"
+                        class="flex items-center justify-center bg-[#EDEDED] text-primary size-8 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                    </button>
                 </div>
             </div>
             <div class="lg:w-1/4 relative">
@@ -16,8 +94,8 @@
                 <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
                 <!-- Resultados de la búsqueda -->
                 <div v-if="searchFocus && searchQuery"
-                    class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">
-                    <Loading2 v-if="searchLoading" class="my-3" />
+                    class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg w-full z-10">
+                    <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
                     <ul v-else-if="productsFound?.length > 0">
                         <li @click.stop="handleProductSelected(product)" v-for="(product, index) in productsFound"
                             :key="index" class="hover:bg-gray-200 cursor-default text-sm px-5 py-2">{{
@@ -27,16 +105,15 @@
                 </div>
             </div>
             <div class="mt-5">
-                <Back :to="route('products.index')" />
+                <Back :to="getRoute()" />
             </div>
-
             <!-- Info de producto -->
-            <div class="lg:grid grid-cols-3 gap-x-12 mx-10">
+            <div class="md:grid grid-cols-2 xl:grid-cols-3 gap-x-10 mx-2 md:mx-6">
                 <!-- fotografia de producto -->
                 <section class="mt-7">
-                    <figure class="size-96 border border-grayD9 rounded-lg flex justify-center items-center">
+                    <figure class="border h-64 md:h-96 border-grayD9 rounded-lg flex justify-center items-center">
                         <img v-if="global_product_store.global_product.media?.length"
-                            class="h-[380px] mx-auto object-contain"
+                            class="h-52 md:h-80 mx-auto object-contain"
                             :src="global_product_store.global_product.media[0]?.original_url" alt="">
                         <div v-else>
                             <i class="fa-regular fa-image text-9xl text-gray-200"></i>
@@ -44,227 +121,154 @@
                         </div>
                     </figure>
                 </section>
-
                 <!-- informacion de producto -->
-                <section class="col-span-2 my-3 lg:my-0">
-                    <!-- Pestañas -->
-                    <div
-                        class="lg:w-3/4 w-full flex items-center space-x-7 text-sm border-b border-gray4 lg:mx-16 mx-2 mb-5 contenedor transition-colors ease-linear duration-200">
-                        <div @click="currentTab = 1"
-                            :class="currentTab == 1 ? 'text-primary border-b-2 border-primary pb-1 px-3 font-bold' : 'px-3 pb-1 text-gray66 font-semibold'"
-                            class="flex items-center space-x-2 cursor-pointer text-base">
-                            <i class="fa-regular fa-file-lines"></i>
-                            <p>Información del producto</p>
-                        </div>
-                        <div @click="currentTab = 2"
-                            :class="currentTab == 2 ? 'text-primary border-b-2 border-primary pb-1 px-3 font-bold' : 'px-3 pb-1 text-gray66 font-semibold'"
-                            class="flex items-center space-x-2 cursor-pointer text-base">
-                            <i class="fa-regular fa-calendar-check"></i>
-                            <p>Historial de movimientos</p>
-                        </div>
-                    </div>
-
-                    <!-- pestaña 1 Informacion de producto -->
-                    <div v-if="currentTab == 1" class="mt-7 md:mx-16 text-sm lg:text-base">
-                        <div class="lg:flex justify-between items-center">
-                            <div class="flex space-x-4 items-center">
-                                <p class="text-gray37 flex items-center">
-                                    <span class="mr-2">Código</span>
-                                    <span class="font-bold">{{ global_product_store.global_product?.code ?? 'N/A'
-                                        }}</span>
-                                    <el-tooltip v-if="global_product_store.global_product?.code" content="Copiar código"
-                                        placement="right">
-                                        <button @click="copyToClipboard"
-                                            class="flex items-center justify-center ml-3 text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-6 transition-all ease-in-out duration-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="size-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-                                            </svg>
-                                        </button>
-                                    </el-tooltip>
-                                </p>
-                                <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Categoría: <span class="font-bold">{{
-                                    global_product_store.global_product?.category?.name }}</span></p>
-                                <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Proveedor: <span class="font-bold">{{
-                                    global_product_store.global_product?.brand?.name }}</span></p>
-                            </div>
-                        </div>
-                        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{
-                            formatDate(global_product_store.created_at) }}</strong></p>
-                        <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{
-                            global_product_store.global_product?.name }}</h1>
-
-                        <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
-                            <div v-if="canSeeCost" class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Precio de compra:</p>
-                                <p class="text-right font-bold">{{ global_product_store.cost ?
-                                    '$' + global_product_store.cost : '-' }}</p>
-                            </div>
-                            <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Precio de venta: </p>
-                                <p class="text-right font-bold">${{ global_product_store.public_price }}</p>
-                            </div>
-                            <div v-if="global_product_store.current_stock >= global_product_store.min_stock || !isInventoryOn"
-                                class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-[#5FCB1F]">{{ global_product_store.current_stock ??
-                                    '-' }}
-                                </p>
-                            </div>
-                            <div v-else class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1 relative">
-                                <p class="text-gray37">Existencias: </p>
-                                <p class="text-right font-bold text-redDanger">
-                                    <span>{{ global_product_store.current_stock ?? '-' }}</span>
-                                    <i class="fa-solid fa-arrow-down text-xs ml-2"></i>
-                                </p>
-                                <p class="absolute top-2 -right-16 text-xs font-bold text-redDanger">Bajo stock</p>
-                            </div>
-                            <h2 class="pt-5 ml-5 font-bold text-lg">Cantidades de stock permitidas</h2>
-
-                            <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Cantidad mínima:</p>
-                                <p class="text-right font-bold">{{ global_product_store.min_stock ?? '-' }}</p>
-                            </div>
-                            <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
-                                <p class="text-gray37">Cantidad máxima:</p>
-                                <p class="text-right font-bold">{{ global_product_store.max_stock ?? '-' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- ---------------------------------- -->
-
-
-                    <!-- pestaña 2 historial de producto -->
-                    <div v-if="currentTab == 2" class="mt-7 mx-16">
-                        <!-- estado de carga -->
-                        <div v-if="loading" class="flex justify-center items-center py-10">
-                            <i class="fa-solid fa-square fa-spin text-4xl text-primary"></i>
-                        </div>
-                        <div v-else>
-                            <div class="flex items-center justify-center space-x-3">
-                                <PrimaryButton @click="loadPreviousMonth"><i
-                                        class="fa-solid fa-chevron-left text-[9px] py-1"></i></PrimaryButton>
-                                <PrimaryButton @click="loadNextMonth"><i
-                                        class="fa-solid fa-chevron-right text-[9px] py-1"></i></PrimaryButton>
-                            </div>
-                            <div v-if="Object?.keys(productHistory)?.length">
-                                <div v-for="(history, index) in productHistory" :key="history">
-
-                                    <h2 class="rounded-full text-sm bg-grayD9 font-bold px-3 py-1 my-4 w-36">{{
-                                        translateMonth(index) }}</h2>
-                                    <p class="mt-1 ml-4 text-sm" v-for="activity in history" :key="activity"><span
-                                            class="mr-2" v-html="getIcon(activity.type)"></span>{{ activity.description
-                                                + ' ' +
-                                                activity.created_at }}
-                                    </p>
-                                </div>
-                            </div>
-                            <p v-else class="text-xs text-gray-500 mt-5 text-center">No hay actividad en esta fecha</p>
-                        </div>
-                    </div>
-                    <!-- ---------------------------------- -->
+                <section class="xl:col-span-2 my-3 lg:my-0">
+                    <el-tabs class="" v-model="activeTab" @tab-click="updateURL">
+                        <el-tab-pane label="Información del producto" name="1">
+                            <ProductInfo :product="global_product_store" />
+                        </el-tab-pane>
+                        <el-tab-pane label="Historial de movimientos" name="2">
+                            <ProductHistorical ref="historyTab" :product="global_product_store" />
+                        </el-tab-pane>
+                    </el-tabs>
                 </section>
             </div>
         </div>
-
-        <!-- -------------- Modal starts----------------------- -->
-        <Modal :show="entryProductModal" @close="entryProductModal = false">
-            <div class="p-4 relative">
-                <i @click="entryProductModal = false"
-                    class="fa-solid fa-xmark cursor-pointer w-5 h-5 rounded-full border border-black flex items-center justify-center absolute right-3"></i>
-
-                <h1 class="font-bold my-4">Ingresar producto a almacén</h1>
-                <section class="text-center mt-5 mb-2 mx-5">
-                    <div class="mt-3">
-                        <InputLabel value="Cantidad" class="ml-3 mb-1 text-sm" />
-                        <el-input v-model="form.quantity" ref="quantityInput" @keydown.enter="entryProduct"
-                            placeholder="Cantidad que entra a almacén"
-                            :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                            :parser="(value) => value.replace(/\D/g, '')">
-                        </el-input>
-                        <InputError :message="form.errors.quantity" />
-                    </div>
-                    <div v-if="form.quantity && global_product_store.cost" class="text-sm mt-2">
-                        Total de compra: {{ form.quantity }} x ${{ global_product_store.cost }} => ${{
-                            (global_product_store.cost * form.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
-                    </div>
-                    <div class="text-left mt-4 ml-6">
-                        <p v-if="!global_product_store.cost" class="text-xs text-redDanger flex items-center space-x-2">
-                            <i class="fa-regular fa-hand-point-down"></i>
-                            <span>Para poder descontar de caja, primero se debe especificar un precio de compra al
-                                producto.</span>
-                        </p>
-                        <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register"
-                            label="Se paga con dinero de caja" size="small" :disabled="!global_product_store.cost" />
-                        <div v-if="form.is_paid_by_cash_register" class="w-1/3 mt-3">
-                            <InputLabel value="Dinero a retirar de caja" class="ml-3 mb-1 text-sm" />
-                            <el-input v-model="form.cash_amount" @keyup="handleChangeCashAmount" placeholder="Ej. $575"
-                                :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value) => value.replace(/[^\d.]/g, '')">
+        <DialogModal :show="entryProductModal" @close="entryProductModal = false">
+            <template #title>
+                <h1 class="font-bold">Inventario de producto</h1>
+            </template>
+            <template #content>
+                <el-tabs v-model="inventoryActiveTab" @tab-click="handleInventoryTabClick">
+                    <el-tab-pane label="Entrada" name="1">
+                        <div class="mt-3">
+                            <InputLabel value="Cantidad" />
+                            <el-input v-model="form.quantity" ref="quantityInput" @keydown.enter="entryProduct"
+                                placeholder="Cantidad que entra a almacén">
                             </el-input>
-                            <InputError :message="form.errors.cash_amount || cashAmountMessage" />
+                            <InputError :message="form.errors.quantity" />
                         </div>
-                    </div>
-
-                    <div class="flex justify-end space-x-2 pt-7 pb-1 py-2">
-                        <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
-                        <PrimaryButton :disabled="form.processing || !form.quantity || cashAmountMessage"
-                            @click="entryProduct" class="!rounded-full">Ingresar
-                            producto
-                        </PrimaryButton>
-                    </div>
-                </section>
-            </div>
-        </Modal>
-        <!-- --------------------------- Modal ends ------------------------------------ -->
+                        <div v-if="form.quantity && global_product_store.cost" class="text-sm mt-2">
+                            Total de compra: {{ form.quantity }} x ${{ global_product_store.cost }} => ${{
+                                (global_product_store.cost * form.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }}
+                        </div>
+                        <div class="text-left mt-4 ml-6">
+                            <p v-if="!global_product_store.cost"
+                                class="text-xs text-redDanger flex items-center space-x-2">
+                                <i class="fa-regular fa-hand-point-down"></i>
+                                <span>
+                                    Para poder descontar de caja, primero se debe especificar un
+                                    <Link :href="route('global-product-store.edit', encodedId)" class="underline">
+                                    precio de
+                                    compra al producto dando click aqui </Link>.
+                                </span>
+                            </p>
+                            <el-checkbox v-model="form.is_paid_by_cash_register" name="is_paid_by_cash_register"
+                                label="Se paga con dinero de caja" size="small"
+                                :disabled="!global_product_store.cost" />
+                            <div v-if="form.is_paid_by_cash_register" class="w-1/3 mt-3">
+                                <InputLabel value="Dinero a retirar de caja" />
+                                <el-input v-model="form.cash_amount" @keyup="handleChangeCashAmount"
+                                    placeholder="Ej. $575"
+                                    :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                    :parser="(value) => value.replace(/[^\d.]/g, '')">
+                                </el-input>
+                                <InputError :message="form.errors.cash_amount || cashAmountMessage" />
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="Salida" name="2">
+                        <div class="mt-3">
+                            <InputLabel value="Cantidad" />
+                            <el-input v-model="form.quantity" ref="quantityInput" @keydown.enter="entryProduct"
+                                placeholder="Cantidad que sale de almacén">
+                            </el-input>
+                            <InputError :message="form.errors.quantity" />
+                        </div>
+                        <div v-if="form.quantity && global_product_store.cost" class="text-sm mt-2">
+                            Total de pérdida: {{ form.quantity }} x ${{ global_product_store.cost }} => ${{
+                                (global_product_store.cost * form.quantity).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }}
+                        </div>
+                        <div class="mt-3">
+                            <InputLabel value="Motivo" />
+                            <el-select filterable v-model="form.concept" clearable placeholder="Seleccione"
+                                no-data-text="No hay opciones registradas"
+                                no-match-text="No se encontraron coincidencias">
+                                <el-option v-for="item in outConcepts" :key="item" :label="item" :value="item" />
+                            </el-select>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+            <template #footer>
+                <div class="flex space-x-1">
+                    <CancelButton @click="entryProductModal = false">Cancelar</CancelButton>
+                    <PrimaryButton :disabled="form.processing || !form.quantity || cashAmountMessage"
+                        @click="sendInventoryMovement" class="!rounded-full">
+                        Continuar
+                    </PrimaryButton>
+                </div>
+            </template>
+        </DialogModal>
     </AppLayout>
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import ProductInfo from './Tabs/ProductInfo.vue';
+import ProductHistorical from './Tabs/ProductHistorical.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
-import Loading2 from '@/Components/MyComponents/Loading2.vue';
+import SmallLoading from '@/Components/MyComponents/SmallLoading.vue';
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
-import Modal from "@/Components/Modal.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import axios from 'axios';
-import { useForm } from "@inertiajs/vue3";
-import { format, parseISO } from 'date-fns';
-import es from 'date-fns/locale/es';
+import { useForm, Link } from "@inertiajs/vue3";
+// import { addOrUpdateItem } from '@/dbService.js';
+import DialogModal from '@/Components/DialogModal.vue';
+import PromotionCard from '@/Components/MyComponents/Promotions/PromotionCard.vue';
+import { isPast, parseISO } from 'date-fns';
 
 export default {
     data() {
         const form = useForm({
             quantity: null,
+            concept: 'Ajuste de inventario', // concepto por defecto
             cash_amount: null,
             is_paid_by_cash_register: false //es pagado con dinero de caja? para hacer el registro de movimiento
         });
         return {
             form,
-            currentTab: 1,
+            encodedId: null, //id codificado
             searchQuery: this.global_product_store.global_product.name,
             searchFocus: false,
             productsFound: [this.global_product_store],
             entryProductModal: false,
-            productHistory: null,
-            currentMonth: new Date().getMonth() + 1, // El mes actual
-            currentYear: new Date().getFullYear(), // El año actual
             // loading
-            loading: false,
             entryLoading: false,
             searchLoading: false,
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
-            // Permisos de rol actual
-            canSeeCost: ['Administrador', 'Almacenista'].includes(this.$page.props.auth.user.rol),
             // validaciones
             cashAmountMessage: null,
+            // tabs
+            activeTab: '1',
+            //inventario
+            inventoryActiveTab: '1',
+            outConcepts: [
+                'Ajuste de inventario',
+                'Caducidad o vencimiento',
+                'Consumo del negocio',
+                'Devolución a proveedor',
+                'Mal estado',
+                'Muestra gratis',
+                'Regalo por compra',
+                'Otro'
+            ]
         };
     },
     components: {
@@ -274,20 +278,68 @@ export default {
         ThirthButton,
         InputLabel,
         InputError,
-        Loading2,
-        Modal,
-        Back
+        SmallLoading,
+        DialogModal,
+        Back,
+        ProductInfo,
+        ProductHistorical,
+        Link,
+        PromotionCard,
     },
     props: {
         global_product_store: Object,
         cash_register: Object,
     },
     methods: {
+        isExpired(date) {
+            if (!date) return false; // Si no hay fecha, no está vencida
+            // Convierte la fecha a objeto Date si es string
+            const dateObj = typeof date === 'string' ? parseISO(date) : date;
+            return isPast(dateObj);
+        },
+        handleEditPromo(product) {
+            const encodedId = btoa(product.id.toString());
+            this.$inertia.get(route('promotions.global.edit', encodedId));
+        },
+        handleCreatePromo(product) {
+            const encodedId = btoa(product.id.toString());
+            this.$inertia.get(route('promotions.global.create', encodedId));
+        },
+        sendInventoryMovement() {
+            if (this.inventoryActiveTab == '1') {
+                this.entryProduct();
+            } else {
+                this.outProduct();
+            }
+        },
+        handleInventoryTabClick(tab) {
+
+        },
+        getRoute() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                return route('boutique-products.index');
+            } else {
+                return route('products.index');
+            }
+        },
+        goToCreate() {
+            if (this.$page.props.auth.user.store.type == 'Boutique / Tienda de Ropa / Zapatería') {
+                this.$inertia.get(route('boutique-products.create'));
+            } else {
+                this.$inertia.get(route('products.create'));
+            }
+        },
+        updateURL(tab) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tab.props.name);
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        },
         handleChangeCashAmount() {
-            const total = this.global_product_store.cost * this.form.quantity;
+            // total redondeado a 2 decimales
+            const total = Math.round((this.global_product_store.cost * this.form.quantity + Number.EPSILON) * 100) / 100;
             if (this.form.cash_amount > this.cash_register.current_cash) {
                 this.cashAmountMessage =
-                    'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
+                    'El monto no debe superar lo disponible en caja ($' + this.cash_register.current_cash.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
             } else if (this.form.cash_amount > total) {
                 this.cashAmountMessage =
                     'El monto no debe superar el total del gasto ($' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ')';
@@ -295,28 +347,100 @@ export default {
                 this.cashAmountMessage = null;
             }
         },
-        copyToClipboard() {
-            const textToCopy = this.global_product_store.global_product?.code;
-
-            // Create a temporary input element
-            const input = document.createElement("input");
-            input.value = textToCopy;
-            document.body.appendChild(input);
-
-            // Select the content of the input element
-            input.select();
-
-            // Try to copy the text to the clipboard
-            document.execCommand("copy");
-
-            // Remove the temporary input element
-            document.body.removeChild(input);
-
-            this.$notify({
-                title: "Éxito",
-                message: this.global_product_store.global_product?.code + " copiado",
-                type: "success",
+        handleBlur() {
+            // Introducir un retraso para dar tiempo al evento click de ejecutarse antes del blur
+            setTimeout(() => {
+                this.searchFocus = false;
+            }, 100);
+        },
+        openEntryModal() {
+            this.entryProductModal = true;
+            this.$nextTick(() => {
+                this.$refs.quantityInput.focus(); // Enfocar el input de código cuando se abre el modal
             });
+        },
+        outProduct() {
+            if (!this.entryLoading) {
+                this.entryLoading = true;
+                this.form.put(route('global-product-store.out', this.global_product_store.id), {
+                    onSuccess: () => {
+                        // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
+                        // // if (this.isInventoryOn) {
+                        // const product = {
+                        //     id: 'global_' + this.global_product_store.id,
+                        //     name: this.global_product_store.global_product.name,
+                        //     code: this.global_product_store.global_product.code,
+                        //     public_price: this.global_product_store.public_price,
+                        //     current_stock: this.global_product_store.current_stock - this.form.quantity,
+                        //     image_url: this.global_product_store.global_product.media[0]?.original_url,
+                        // };
+                        // addOrUpdateItem('products', product);
+                        // // }
+
+                        this.form.reset();
+                        this.entryProductModal = false;
+                        this.$notify({
+                            title: 'Correcto',
+                            message: '',
+                            type: 'success',
+                        });
+                        this.$refs.historyTab.fetchHistory();
+
+                    },
+                    onFinish: () => this.entryLoading = false,
+                });
+            }
+        },
+        entryProduct() {
+            if (!this.entryLoading) {
+                this.entryLoading = true;
+                this.form.put(route('global-product-store.entry', this.global_product_store.id), {
+                    onSuccess: () => {
+                        // actualizar current stock de producto en indexedDB si el seguimiento de iventario esta activo
+                        // // if (this.isInventoryOn) {
+                        // const product = {
+                        //     id: 'global_' + this.global_product_store.id,
+                        //     name: this.global_product_store.global_product.name,
+                        //     code: this.global_product_store.global_product.code,
+                        //     public_price: this.global_product_store.public_price,
+                        //     current_stock: this.global_product_store.current_stock + this.form.quantity,
+                        //     image_url: this.global_product_store.global_product.media[0]?.original_url,
+                        // };
+                        // addOrUpdateItem('products', product);
+                        // // }
+
+                        this.form.reset();
+                        this.entryProductModal = false;
+                        this.$notify({
+                            title: 'Correcto',
+                            message: '',
+                            type: 'success',
+                        });
+                        this.$refs.historyTab.fetchHistory();
+
+                    },
+                    onFinish: () => this.entryLoading = false,
+                });
+            }
+        },
+        setActiveTabFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if (tab) {
+                this.activeTab = tab;
+            }
+        },
+        handleProductSelected(product) {
+            const encodedId = btoa(product.id.toString());
+            if (product.global_product_id) {
+                this.$inertia.get(route('global-product-store.show', encodedId))
+            } else {
+                this.$inertia.get(route('products.show', encodedId))
+            }
+        },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            this.encodedId = encodedId;
         },
         async searchProducts() {
             this.searchLoading = true;
@@ -332,115 +456,10 @@ export default {
                 this.searchLoading = false;
             }
         },
-        handleBlur() {
-            // Introducir un retraso para dar tiempo al evento click de ejecutarse antes del blur
-            setTimeout(() => {
-                this.searchFocus = false;
-            }, 100);
-        },
-        openEntryModal() {
-            this.entryProductModal = true;
-            this.$nextTick(() => {
-                this.$refs.quantityInput.focus(); // Enfocar el input de código cuando se abre el modal
-            });
-        },
-        entryProduct() {
-            if (!this.entryLoading) {
-                this.entryLoading = true;
-                this.form.put(route('global-product-store.entry', this.global_product_store.id), {
-                    onSuccess: () => {
-                        this.form.reset();
-                        this.entryProductModal = false;
-                        this.$notify({
-                            title: 'Correcto',
-                            text: 'Se ha ingresado ' + this.form.quantity + ' unidades',
-                            type: 'success',
-                        });
-                        this.fetchHistory();
-                        this.entryLoading = false;
-                    },
-                });
-            }
-        },
-        async fetchHistory() {
-            this.loading = true;
-            try {
-                const response = await axios.get(route("global-product-store.fetch-history", {
-                    global_product_store_id: this.global_product_store.id,
-                    month: this.currentMonth,
-                    year: this.currentYear,
-                }));
-                if (response.status === 200) {
-                    this.productHistory = response.data.items;
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        async loadPreviousMonth() {
-            if (this.currentMonth === 1) {
-                this.currentMonth = 12;
-                this.currentYear -= 1;
-            } else {
-                this.currentMonth -= 1;
-            }
-            await this.fetchHistory();
-        },
-        async loadNextMonth() {
-            if (this.currentMonth === 12) {
-                this.currentMonth = 1;
-                this.currentYear += 1;
-            } else {
-                this.currentMonth += 1;
-            }
-            await this.fetchHistory();
-        },
-        getIcon(type) {
-            if (type === 'Precio') {
-                return '<i class="fa-solid fa-dollar-sign"></i>';
-            } else if (type === 'Entrada') {
-                return '<i class="fa-regular fa-square-plus"></i>';
-            } else if (type === 'Venta') {
-                return '<i class="fa-solid fa-hand-holding-dollar"></i>';
-            }
-        },
-        translateMonth(dateString) {
-            const [month, year] = dateString.split(' ');
-
-            const monthsTranslation = {
-                'January': 'Enero',
-                'February': 'Febrero',
-                'March': 'Marzo',
-                'April': 'Abril',
-                'May': 'Mayo',
-                'June': 'Junio',
-                'July': 'Julio',
-                'August': 'Agosto',
-                'September': 'Septiembre',
-                'October': 'Octubre',
-                'November': 'Noviembre',
-                'December': 'Diciembre',
-            };
-
-            const translatedMonth = monthsTranslation[month] || month;
-
-            return `${translatedMonth} ${year}`;
-        },
-        handleProductSelected(product) {
-            if (product.global_product_id) {
-                this.$inertia.get(route('global-product-store.show', product.id))
-            } else {
-                this.$inertia.get(route('products.show', product.id))
-            }
-        },
-        formatDate(dateString) {
-            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
-        },
     },
     mounted() {
-        this.fetchHistory();
+        this.setActiveTabFromURL();
+        this.encodeId(this.global_product_store.id);
     }
 }
 </script>

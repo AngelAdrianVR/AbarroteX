@@ -6,20 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Store extends Model
+class Store extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'name',
+        'slug',
         'type',
         'contact_name',
         'contact_phone',
-        'whatsapp',
-        'delivery_price',
-        'delivery_conditions',
-        'min_free_delivery',
+        'online_store_properties', //json
+        // 'printer_config', //json
+        'activated_modules', //json
         'address',
         'plan',
         'is_active',
@@ -28,10 +30,16 @@ class Store extends Model
         'seller_id',
         'suscription_period',
         'default_card_id', //tarjata para pagar
+        'colors',
+        'partner_cupon',
     ];
 
     protected $casts = [
         'next_payment' => 'date',
+        'online_store_properties' => 'array',
+        'activated_modules' => 'array',
+        'colors' => 'array',
+        // 'printer_config' => 'array',
     ];
 
     //relationships
@@ -99,5 +107,20 @@ class Store extends Model
     public function onlineSales() :HasMany
     {
         return $this->hasMany(OnlineSale::class);
+    }
+
+    public function clients() :HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
+
+    public function services() :HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
+
+    public function internalInvoices() :HasMany
+    {
+        return $this->hasMany(InternalInvoice::class);
     }
 }

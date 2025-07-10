@@ -1,7 +1,7 @@
 <template>
     <Dropdown @click="readNotifications()" align="right" width="notifications" class="mt-2 mr-2" :closeInClick="false">
         <template #trigger>
-            <button class="ml-6 relative text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150" :class="getUnreadMessages.length ? 'text-primary' : 'text-[#97989A]'">
+            <button class="mx-2 relative text-gray-500 bg-white hover:text-gray-700 focus:outline-none rounded-[5px] p-1 mb-2 focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150" :class="getUnreadMessages.length ? 'text-primary' : 'text-[#97989A]'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-4">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -9,7 +9,7 @@
                 </svg>
             </button>
             <span v-if="getUnreadMessages.length"
-                class="size-4 bg-primary text-white text-[9px] rounded-full absolute -top-1 -right-2 flex items-center justify-center border border-white">
+                class="size-4 bg-primary text-white text-[9px] rounded-full absolute top-0 -right-1 flex items-center justify-center border border-white">
                 {{ getUnreadMessages.length }}
             </span>
         </template>
@@ -57,7 +57,7 @@
                                 </p>
                             </section>
                         </div>
-                        <p class="text-right text-gray2 text-[10px]">{{ item.created_at_for_humans }}</p>
+                        <p class="text-right text-gray99 text-[10px]">{{ item.created_at_for_humans }}</p>
                     </div>
                 </DropdownLink>
             </main>

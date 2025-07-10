@@ -14,7 +14,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría*" class="ml-3 mb-1" />
+                        <InputLabel value="Categoría" class="ml-3 mb-1" />
                         <button
                             @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -31,7 +31,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor *" class="ml-3 mb-1" />
+                        <InputLabel value="Proveedor" class="ml-3 mb-1" />
                         <button
                             @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -57,6 +57,14 @@
                     <InputError :message="form.errors.public_price" />
                 </div>
 
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Descripción del producto (opcional)" class="ml-3 mb-1 text-sm" />
+                    <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255" show-word-limit
+                        clearable />
+                    <InputError :message="form.errors.description" />
+                </div>
+
                 <div class="col-span-full mt-3">
                     <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
                     <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
@@ -75,7 +83,10 @@
                 </div>
 
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar cambios</PrimaryButton>
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Guardar cambios
+                    </PrimaryButton>
                 </div>
             </form>
         </div>
@@ -141,6 +152,7 @@ export default {
             category_id: this.global_product.category_id,
             brand_id: this.global_product.brand_id,
             code: this.global_product.code,
+            description: this.global_product.description,
             public_price: this.global_product.public_price,
             imageCover: null,
             imageCoverCleared: false

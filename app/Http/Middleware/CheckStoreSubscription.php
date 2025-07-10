@@ -17,10 +17,10 @@ class CheckStoreSubscription
     {
         $store = auth()->user()->store;
 
-        // Obtener la diferencia en días de la fecha de siguiente pago a hoy
+        // Obtener la diferencia en días de la fecha de siguiente pago a hoy con signo
         $days = now()->diffInDays($store->next_payment, false);
 
-        if (!$store->is_active) {
+        if ($days < 0) {
             return redirect()->route('profile.show'); // Redirige a la ruta de pago de suscripción
         }
 

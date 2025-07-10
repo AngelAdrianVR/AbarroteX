@@ -1,6 +1,6 @@
 <template>
     <div
-        class="min-h-[100px] border border-gray3 rounded-[10px] lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
+        class="min-h-[100px] rounded-lg shadow-xl text-center lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
         <h1 class="font-bold text-center">{{ title }} <span v-html="icon"></span></h1>
         <div v-if="!areSeriesEmpty()" id="chart">
             <apexchart type="bar" height="180" :options="chartOptions" :series="series"></apexchart>
@@ -24,44 +24,91 @@ export default {
             chartOptions: {
                 chart: {
                     type: 'bar',
-                    height: 145
+                    height: 180, // Un poco más grande para mejor visibilidad
+                    toolbar: { show: false },
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800
+                    }
                 },
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '55%',
+                        columnWidth: '95%', // Columnas más delgadas
                         endingShape: 'rounded'
                     },
                 },
                 dataLabels: {
                     enabled: false
                 },
-                colors: this.options.colors,
+                colors: this.options.colors, // Mantiene los colores originales
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: 'light',
+                        type: "vertical",
+                        gradientToColors: this.options.colors.map(color => color), // Usa el mismo color base
+                        stops: [0, 100],
+                        opacityFrom: 0.9, // Un poco más de transparencia al inicio
+                        opacityTo: 1
+                    }
+                },
                 stroke: {
                     show: true,
-                    width: 2,
-                    colors: ['transparent']
+                    width: 3, // Un poco más grueso para mayor contraste
+                    colors: ['#fff']
                 },
                 xaxis: {
                     categories: this.options.categories,
+                    labels: {
+                        style: {
+                            colors: '#666',
+                            fontSize: '12px',
+                            fontWeight: 600
+                        }
+                    }
                 },
                 yaxis: {
                     title: {
-                        text: '$ pesos'
+                        text: '$ Pesos',
+                        style: {
+                            color: '#333',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            colors: '#666',
+                            fontSize: '12px'
+                        }
                     }
                 },
-                fill: {
-                    opacity: 1
-                },
                 tooltip: {
+                    theme: 'dark',
                     y: {
                         formatter: function (val) {
                             return "$ " + val.toLocaleString('en-US', { minimumFractionDigits: 2 })
                         }
                     }
+                },
+                grid: {
+                    borderColor: "#ddd",
+                    strokeDashArray: 4, // Líneas punteadas para un look más moderno
+                    yaxis: {
+                        lines: { show: true }
+                    }
+                },
+                shadow: {
+                    enabled: true,
+                    color: '#000',
+                    top: 10,
+                    left: 0,
+                    blur: 5,
+                    opacity: 0.2
                 }
             },
-
         };
     },
     props: {
@@ -74,7 +121,7 @@ export default {
     },
     methods: {
         areSeriesEmpty() {
-            const allZeroValues = this.options.series.every(series => {
+            const allZeroValues = this.options?.series?.every(series => {
                 return series.data.every(value => {
                     return parseInt(value) === 0;
                 });

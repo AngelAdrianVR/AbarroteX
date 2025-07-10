@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('stores:check-suscriptions')->dailyAt('00:00');
+        $schedule->command('stores:check-suscriptions')->daily();
+        $schedule->command('stores:create-cashcut')->daily()->at('23:55');
     }
 
     /**

@@ -5,15 +5,16 @@
             <div class="flex justify-between items-center mx-3">
                 <h1 class="font-bold text-lg">Catálogo base</h1>
                 <div class="flex items-center space-x-3 my-2 lg:my-0">
-                    <PrimaryButton @click="$inertia.get(route('global-products.edit', global_product.id))" class="!rounded-full">Editar</PrimaryButton>
+                    <PrimaryButton @click="$inertia.get(route('global-products.edit', global_product.id))"
+                        class="!rounded-full">Editar</PrimaryButton>
                 </div>
             </div>
 
             <!-- selector de producto global -->
             <div class="md:w-1/3 mt-2">
-                <el-select @change="$inertia.get(route('global-products.show', global_product_id))" v-model="global_product_id" clearable
-                    placeholder="Seleccione" no-data-text="No hay opciones registradas"
-                    no-match-text="No se encontraron coincidencias">
+                <el-select @change="$inertia.get(route('global-products.show', global_product_id))"
+                    v-model="global_product_id" clearable placeholder="Seleccione"
+                    no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                     <el-option v-for="item in global_products" :key="item" :label="item.name" :value="item.id" />
                 </el-select>
             </div>
@@ -27,7 +28,8 @@
                 <!-- fotografia de producto -->
                 <section class="mt-7">
                     <figure class="border border-grayD9 rounded-lg">
-                        <img class="size-60 lg:size-96 mx-auto object-contain" :src="global_product.media[0]?.original_url" alt="">
+                        <img class="size-60 lg:size-96 mx-auto object-contain"
+                            :src="global_product.media[0]?.original_url" alt="">
                     </figure>
                 </section>
 
@@ -63,18 +65,28 @@
                                     </el-tooltip>
                                 </p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Categoría: <span class="font-bold">{{ global_product.category?.name }}</span></p>
+                                <p class="text-gray37">Categoría: <span class="font-bold">{{
+                                        global_product.category?.name }}</span></p>
                                 <i class="fa-solid fa-circle text-[7px] text-[#9A9A9A]"></i>
-                                <p class="text-gray37">Proveedor: <span class="font-bold">{{ global_product.brand?.name }}</span></p>
+                                <p class="text-gray37">Proveedor: <span class="font-bold">{{ global_product.brand?.name
+                                        }}</span></p>
                             </div>
                         </div>
-                            <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{ formatDate(global_product.created_at)}}</strong></p>
+                        <p class="text-gray37 mt-3">Fecha de alta: <strong class="ml-5">{{
+                            formatDate(global_product.created_at)}}</strong></p>
                         <h1 class="font-bold text-lg lg:text-xl my-2 lg:my-4">{{ global_product.name }}</h1>
 
                         <div class="lg:w-1/2 mt-3 lg:mt-10 -ml-7 space-y-2">
                             <div class="grid grid-cols-2 border border-grayD9 rounded-full px-5 py-1">
                                 <p class="text-gray37">Precio de venta: </p>
                                 <p class="text-right font-bold">${{ global_product.public_price }}</p>
+                            </div>
+                            <!-- Descripción del producto -->
+                            <div v-if="global_product.description">
+                                <h2 class="pt-5 ml-5 font-bold text-lg">Sobre el producto</h2>
+                                <div>
+                                    <p class="whitespace-break-spaces">{{ formattedDescription }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -93,23 +105,24 @@ import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 
 export default {
-data() {
-    return {
-        global_product_id: null,
-        currentTab: 1,
-    }
-},
-components:{
-AppLayout,
-PrimaryButton,
-Back
-},
-props:{
-global_product: Object,
-global_products: Array
-},
-methods:{
-    copyToClipboard() {
+    data() {
+        return {
+            global_product_id: null,
+            currentTab: 1,
+            formattedDescription: null, //descripción del producto formateado con viñetas
+        }
+    },
+    components: {
+        AppLayout,
+        PrimaryButton,
+        Back
+    },
+    props: {
+        global_product: Object,
+        global_products: Array
+    },
+    methods: {
+        copyToClipboard() {
             const textToCopy = this.global_product.code;
 
             // Create a temporary input element
@@ -133,8 +146,26 @@ methods:{
             });
         },
         formatDate(dateString) {
-            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
+            return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
-}
+        formatDescription() {
+            if (this.global_product.description != null) {
+                const text = this.global_product.description;
+                const lines = text.split('\n');
+                const formattedLines = lines.map(line => `• ${line.trim()}`);
+                this.formattedDescription = formattedLines.join('\n');
+            }
+        }
+    },
+    mounted() {
+        this.formatDescription();
+    }
 }
 </script>
+
+<style scoped>
+.whitespace-break-spaces {
+    white-space: pre-wrap;
+    /* Respect line breaks */
+}
+</style>

@@ -9,8 +9,8 @@ use App\Models\Category;
 use App\Models\Expense;
 use App\Models\GlobalProduct;
 use App\Models\GlobalProductStore;
+use App\Models\Product;
 use App\Models\ProductHistory;
-use App\Models\Sale;
 use Illuminate\Http\Request;
 
 class GlobalProductStoreController extends Controller
@@ -34,28 +34,42 @@ class GlobalProductStoreController extends Controller
     }
 
 
-    public function show($global_product_store_id)
+    public function show($encoded_global_product_store_id)
     {
+        // Decodificar el ID
+        $decoded_global_product_id = base64_decode($encoded_global_product_store_id);
+
         $cash_register = auth()->user()->cashRegister;
-        $global_product_store = GlobalProductStore::with(['globalProduct' => ['media', 'category', 'brand']])
+        $global_product_store = GlobalProductStore::with([
+            'globalProduct' => ['media', 'category', 'brand'],
+            'promotions.giftable' => function ($query) {
+                $query->morphWith([
+                    Product::class => ['media'],
+                    GlobalProductStore::class => ['globalProduct.media']
+                ]);
+            }
+        ])
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($global_product_store_id);
+            ->findOrFail($decoded_global_product_id);
 
         return inertia('GlobalProductStore/Show', compact('global_product_store', 'cash_register'));
     }
 
 
-    public function edit($global_product_store_id)
+    public function edit($encoded_global_product_store_id)
     {
+        // Decodificar el ID
+        $decoded_global_product_id = base64_decode($encoded_global_product_store_id);
+
         $global_product_store = GlobalProductStore::with('globalProduct.media')
             ->where('store_id', auth()->user()->store_id)
-            ->findOrFail($global_product_store_id);
-        $categories = Category::all();
-        $brands = Brand::all(['id', 'name']);
+            ->findOrFail($decoded_global_product_id);
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
 
         return inertia('GlobalProductStore/Edit', compact('global_product_store', 'categories', 'brands'));
     }
-
 
     public function update(Request $request, GlobalProductStore $global_product_store)
     {
@@ -64,11 +78,13 @@ class GlobalProductStoreController extends Controller
             'code' => 'nullable|string|max:100',
             'public_price' => 'required|numeric|min:0|max:9999',
             'cost' => 'nullable|numeric|min:0|max:9999',
+            'description' => 'nullable|string|max:255',
             'current_stock' => 'required|numeric|min:0|max:9999',
+            'show_in_online_store' => 'boolean',
             'min_stock' => 'nullable|numeric|min:0|max:9999',
             'max_stock' => 'nullable|numeric|min:0|max:9999',
-            'category_id' => 'required',
-            'brand_id' => 'required',
+            'category_id' => 'nullable',
+            'brand_id' => 'nullable',
         ]);
 
         //precio actual para checar si se cambió el precio y registrarlo
@@ -76,8 +92,9 @@ class GlobalProductStoreController extends Controller
 
         if ($current_price != $request->public_price) {
             ProductHistory::create([
-                'description' => 'Cambio de precio de $' . $current_price . 'MXN a $ ' . $request->public_price . 'MXN.',
+                'description' => 'Cambio de precio de $' . $current_price . ' a $' . $request->public_price,
                 'type' => 'Precio',
+                'user_id' => auth()->id(),
                 'historicable_id' => $global_product_store->id,
                 'historicable_type' => GlobalProductStore::class
             ]);
@@ -85,10 +102,11 @@ class GlobalProductStoreController extends Controller
 
         $global_product_store->update($request->except('imageCover'));
 
-        // return to_route('global-product-store.show', $global_product_store->id); descomentar cuando este listo el show de global product store
-        return to_route('products.index');
-    }
+        //codifica el id del producto
+        $encoded_global_product_id = base64_encode($global_product_store->id);
 
+        return to_route('global-product-store.show', $encoded_global_product_id);
+    }
 
     public function destroy(GlobalProductStore $global_product_store)
     {
@@ -97,30 +115,69 @@ class GlobalProductStoreController extends Controller
         $global_product_store->delete();
     }
 
+    public function outStock(Request $request, $global_product_store_id)
+    {
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.001|max:' . $global_product_store->current_stock,
+            'concept' => 'required',
+        ], [
+            'quantity.max' => 'La cantidad a retirar no puede ser mayor al stock actual (' . $global_product_store->current_stock . ').',
+        ]);
+
+        $old_quantity = $global_product_store->current_stock;
+        // Asegúrate de convertir la cantidad a un número antes de restar
+        $global_product_store->current_stock -= floatval($request->quantity);
+        // Guarda el producto
+        $global_product_store->save();
+
+        // Crear salida
+        ProductHistory::create([
+            'description' => "Salida de producto. de $old_quantity a $global_product_store->current_stock ($request->quantity unidades) por $request->concept",
+            'type' => 'Salida',
+            'user_id' => auth()->id(),
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
+    }
 
     public function entryStock(Request $request, $global_product_store_id)
     {
-        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $messages = [
+            'cash_amount.required_if' => 'El monto a retirar es obligatorio cuando el pago se realiza mediante la caja registradora.',
+            'cash_amount.numeric' => 'El monto a retirar debe ser un número.',
+            'cash_amount.min' => 'El monto a retirar debe ser al menos 1.',
+        ];
 
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.001',
+            'is_paid_by_cash_register' => 'boolean',
+            'cash_amount' => 'required_if:is_paid_by_cash_register,true|nullable|numeric|min:1',
+        ], $messages);
+
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $old_quantity = $global_product_store->current_stock;
         // Asegúrate de convertir la cantidad a un número antes de sumar
-        $global_product_store->current_stock += intval($request->quantity);
+        $global_product_store->current_stock += floatval($request->quantity);
 
         // Guarda el producto
         $global_product_store->save();
 
         // Crear entrada
         ProductHistory::create([
-            'description' => 'Entrada de producto. ' . $request->quantity . ' unidades',
+            'description' => "Entrada de producto. de $old_quantity a $global_product_store->current_stock ($request->quantity unidades)",
             'type' => 'Entrada',
+            'user_id' => auth()->id(),
             'historicable_id' => $global_product_store->id,
             'historicable_type' => GlobalProductStore::class
         ]);
 
         // Crear gasto
-        Expense::create([
+        $expense = Expense::create([
             'concept' => 'Compra de producto: ' . $global_product_store->globalProduct->name,
-            'current_price' => $global_product_store->cost,
+            'current_price' => $global_product_store->cost ?? 0,
             'quantity' => $request->quantity,
+            'amount_from_cash_register' => $request->cash_amount,
             'store_id' => auth()->user()->store_id,
         ]);
 
@@ -136,14 +193,59 @@ class GlobalProductStoreController extends Controller
                 'type' => 'Retiro',
                 'notes' => "Compra de {$global_product_store->globalProduct->name} ($request->quantity $unit)",
                 'cash_register_id' => $cash_register->id,
+                'expense_id' => $expense->id,
             ]);
         }
+    }
+
+    public function inventoryUpdate(Request $request, $global_product_store_id)
+    {
+        $request->validate([
+            'quantity' => 'required|numeric|min:0|max:9999999',
+        ]);
+
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $old_quantity = $global_product_store->current_stock;
+        $new_quantity = floatval($request->quantity);
+
+        $global_product_store->current_stock = $new_quantity;
+        // Guarda el producto
+        $global_product_store->save();
+
+        // Crear ajuste
+        ProductHistory::create([
+            'description' => 'Ajuste de producto. De ' . $old_quantity . ' a ' . $new_quantity . ' unidades',
+            'type' => 'Ajuste',
+            'user_id' => auth()->id(),
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
+    }
+
+    public function priceUpdate(Request $request, $global_product_store_id)
+    {
+        $request->validate([
+            'public_price' => 'required|numeric|min:0|max:9999999',
+        ]);
+
+        $global_product_store = GlobalProductStore::with('globalProduct')->find($global_product_store_id);
+        $old_price = $global_product_store->public_price;
+        $global_product_store->public_price = $request->public_price;
+        $global_product_store->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->public_price,
+            'type' => 'Precio',
+            'user_id' => auth()->id(),
+            'historicable_id' => $global_product_store->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
     }
 
     public function fetchHistory($global_product_store_id, $month = null, $year = null)
     {
         // Obtener el historial filtrado por el mes y el año proporcionados, o el mes y el año actuales si no se proporcionan
-        $query = ProductHistory::where('historicable_id', $global_product_store_id)
+        $query = ProductHistory::with(['user:id,name'])->where('historicable_id', $global_product_store_id)
             ->where('historicable_type', GlobalProductStore::class);
 
         if ($month && $year) {
@@ -169,20 +271,36 @@ class GlobalProductStoreController extends Controller
         return response()->json(['items' => $groupedHistoryArray]);
     }
 
-    public function selectGlobalProducts()
+    public function getDataForBaseCatalogView()
     {
-        $global_products = GlobalProduct::all(['id', 'name']);
-        $my_products = GlobalProductStore::with('globalProduct:id,name')->where('store_id', auth()->user()->store_id)->get(['id', 'global_product_id']);
-        $categories = Category::all(['id', 'name']);
-        $brands = Brand::all(['id', 'name']);
+        //Guardar el tipo de tienda seleccionada en la vista en una variable
+        $type_store = request()->store_type;
 
-        return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
+        // recupera todos los productos globales del tipo seleccionado
+        $global_products = GlobalProduct::where('type', $type_store)->get(['id', 'name', 'brand_id', 'category_id', 'type']);
+        
+        // recupera todos los productos de mi tienda con el tipo seleccionado
+        $my_products = GlobalProductStore::with('globalProduct:id,name,type,brand_id,category_id')
+            ->where('store_id', auth()->user()->store_id)
+            ->whereHas('globalProduct', function ($query) use ($type_store) {
+                $query->where('type', $type_store);
+            })
+            ->get(['id', 'global_product_id']);
+
+        $store = auth()->user()->store;
+        $categories = Category::whereIn('business_line_name', [$store->type, $store->id])->get();
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get();
+
+        return response()->json(compact('global_products', 'my_products', 'categories', 'brands'));
+        // return inertia('GlobalProductStore/SelectGlobalProducts', compact('global_products', 'my_products', 'categories', 'brands'));
     }
 
     public function transfer(Request $request)
     {
+        $store = auth()->user()->store;
+
         // Mis productos ya registrados
-        $my_products = GlobalProductStore::where('store_id', auth()->user()->store_id)
+        $my_products = GlobalProductStore::where('store_id', $store->id)
             ->pluck('global_product_id'); // Obtenemos solo los ids de los productos registrados
 
         // Obtener el arreglo de productos del cuerpo de la solicitud
@@ -190,10 +308,10 @@ class GlobalProductStoreController extends Controller
 
         // eliminar productos de la tienda que se regresaron a catalogo base
         // automaticamente con un evento registrado en el modelo se actualizan las ventas relacionadas
-        GlobalProductStore::where('store_id', auth()->user()->store_id)
+        GlobalProductStore::where('store_id', $store->id)
             ->whereNotIn('global_product_id', $product_ids)
             ->get()
-            ->each(fn ($prd) => $prd->delete());
+            ->each(fn($prd) => $prd->delete());
 
         // Filtrar los productos del catálogo para excluir aquellos que ya existen en mi tienda
         $new_product_ids = collect($product_ids)->reject(function ($productId) use ($my_products) {
@@ -202,21 +320,52 @@ class GlobalProductStoreController extends Controller
             });
         });
 
+        // obtener prouductos totales en la tienda para establecer limite de 3000 (paquete basico)
+        $total_local_products = Product::where('store_id', $store->id)->get(['id'])->count();
+        $total_global_products = GlobalProductStore::where('store_id', $store->id)->get(['id'])->count();
+        $total_products = $total_local_products + $total_global_products;
+        $rejected_products = [];
         // agregar nuevos productos
         foreach ($new_product_ids as $productId) {
-            // Se obtiene el producto global con el id recibido
             $product = GlobalProduct::with(['category', 'brand'])->find($productId);
+            // fijar un limite para paquete basico
+            if ($total_products < 3000) {
+                // Se obtiene el producto global con el id recibido
+                if ($product) {
+                    GlobalProductStore::create([
+                        'public_price' => $product->public_price,
+                        'cost' => 0,
+                        'current_stock' => 1,
+                        'min_stock' => 1,
+                        'global_product_id' => $productId,
+                        'store_id' => auth()->user()->store_id,
+                    ]);
+                }
 
-            if ($product) {
-                GlobalProductStore::create([
-                    'public_price' => $product->public_price,
-                    'cost' => 0,
-                    'current_stock' => 1,
-                    'min_stock' => 1,
-                    'global_product_id' => $productId,
-                    'store_id' => auth()->user()->store_id,
-                ]);
+                // agregar el producto recien creado
+                $total_products++;
+            } else {
+                $rejected_products[] = $product->name;
             }
         }
+
+        return response()->json(compact('rejected_products', 'total_products'));
+    }
+
+    public function changePrice(Request $request)
+    {
+        $product_id = explode('_', $request->product['id'])[1]; 
+        $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->where('id', $product_id)->first();
+        $old_price = $product->public_price;
+        $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera
+        $product->save();
+
+        ProductHistory::create([
+            'description' => 'Cambio de precio. De $' . $old_price . ' a $' . $request->newPrice,
+            'type' => 'Precio',
+            'user_id' => auth()->id(),
+            'historicable_id' => $product->id,
+            'historicable_type' => GlobalProductStore::class
+        ]);
     }
 }

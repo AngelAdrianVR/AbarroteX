@@ -148,7 +148,7 @@ import Back from "@/Components/MyComponents/Back.vue";
 import Loading from '@/Components/MyComponents/Loading.vue';
 import axios from 'axios';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { addOrUpdateItem, clearObjectStore, addOrupdateBatchOfItems } from '@/dbService.js';
+// import { addOrUpdateBatchOfItems } from '@/dbService.js';
 
 export default {
   name: 'SelectGlobalProduct',
@@ -296,27 +296,32 @@ export default {
     async transferProducts() {
       try {
         this.processing = true;
-        const response = await axios.post(route('global-product-store.transfer'), { products: this.products });
+        let response = await axios.post(route('global-product-store.transfer'), { products: this.products });
 
         if (response.status === 200) {
-          this.$notify({
-            title: "Éxito",
-            message: "¡Se han transferido los productos a tu tienda!",
-            type: "success",
-          });
+          if (response.data.rejected_products.length) {
+            this.$notify({
+              title: "Límite de productos alcanzado",
+              message: "Los siguientes productos no se puedieron transferir a tu tienda debido a que llegaste al limite para tu paquete actual: " + response.data.rejected_products.join(', '),
+              type: "warning",
+            });
+          } else {
+            this.$notify({
+              title: "Éxito",
+              message: "¡Se han transferido los productos a tu tienda!",
+              type: "success",
+            });
+          }
 
           this.showConfirmModal = false;
           this.initialProducts = this.products;
 
-          // Limpiar tabla
-          // await clearObjectStore('products');
-
           // Obtener productos
-          const response = await axios.get(route('products.get-all-for-indexedDB'));
-          const products = response.data.products;
+          // response = await axios.get(route('products.get-all-for-indexedDB'));
+          // const products = response.data.products;
 
-          // Descargar y almacenar imágenes
-          addOrupdateBatchOfItems('products', products);
+          // // Descargar y almacenar imágenes
+          // addOrUpdateBatchOfItems('products', products);
 
           // resetear variable de local storage a false
           localStorage.setItem('pendentProcess', false);

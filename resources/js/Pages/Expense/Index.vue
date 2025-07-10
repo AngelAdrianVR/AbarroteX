@@ -30,12 +30,23 @@
                     </button>
                     <div v-if="showFilter"
                         class="absolute top-9 right-0 lg:-left-40 border border[#D9D9D9] rounded-md p-4 bg-white shadow-lg z-10 w-80">
-                        <div class="mb-3">
-                            <InputLabel value="Rango de fechas" class="ml-3 mb-1" />
+                        <div v-if="isMobile" class="flex items-center space-x-2">
+                            <el-date-picker @change="handleStartDateChange" :disabled-date="disabledPrevDays"
+                                v-model="startDate" type="date" class="!w-1/2" placeholder="Inicio" size="small" />
+                            <el-date-picker @change="handleFinishDateChange" :disabled-date="disabledNextDays"
+                                v-model="finishDate" type="date" class="!w-1/2" placeholder="Final" size="small" />
+                        </div>
+                        <div v-else>
                             <el-date-picker v-model="searchDate" type="daterange" range-separator="A"
                                 start-placeholder="Fecha de inicio" end-placeholder="Fecha de fin" class="!w-full" />
                         </div>
-                        <PrimaryButton @click="filterExpenses" class="!py-1">Aplicar</PrimaryButton>
+                        <div class="flex space-x-2 mt-3">
+                            <PrimaryButton @click="filterExpenses" class="!py-1"
+                                :disabled="isMobile ? !(startDate && finishDate) : !searchDate">
+                                Aplicar
+                            </PrimaryButton>
+                            <ThirthButton @click="cleanFilter" class="!py-1">Limpiar</ThirthButton>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -65,6 +76,7 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import RegisteredExpensesTable from '@/Components/MyComponents/Expense/RegisteredExpensesTable.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from "@/Components/InputLabel.vue";
@@ -76,14 +88,17 @@ export default {
         return {
             loading: false,
             localExpenses: this.groupedExpenses,
-            showFilter: false, //filtro opciones
-            searchDate: null, //filtro fechas
+            // filtro
+            showFilter: false,
+            searchDate: null,
+            startDate: null, //vista movil
+            finishDate: null, //vista movil
             searchClient: null, //filtro cliente
             loadingItems: false, //para paginación
             currentPage: 1, //para paginación
             filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
             // Permisos de rol actual
-            canCreate: ['Administrador', 'Cajero'].includes(this.$page.props.auth.user.rol),
+            canCreate: this.$page.props.auth.user.permissions.includes('Crear gastos'),
         }
     },
     components: {
@@ -91,33 +106,74 @@ export default {
         RegisteredExpensesTable,
         // SaleMobileIndex, 
         PrimaryButton,
+        ThirthButton,
         InputLabel,
-        Loading
+        Loading,
     },
     props: {
         groupedExpenses: Object,
         total_expenses: Number
     },
+    computed: {
+        isMobile() {
+            return window.innerWidth < 768;
+        }
+    },
     methods: {
+        handleStartDateChange(value) {
+            this.startDate = value;
+            // Si finishDate es nulo, aplica la regla de deshabilitación
+            if (!this.finishDate) {
+                this.disabledPrevDays();
+            }
+        },
+        handleFinishDateChange(value) {
+            this.finishDate = value;
+            // Si startDate es nulo, aplica la regla de deshabilitación
+            if (!this.startDate) {
+                this.disabledNextDays();
+            }
+        },
+        disabledPrevDays(date) {
+            if (this.finishDate) {
+                return date.getTime() > new Date(this.finishDate).getTime();
+            }
+            return false;
+        },
+        disabledNextDays(date) {
+            if (this.startDate) {
+                return date.getTime() < new Date(this.startDate).getTime();
+            }
+            return false;
+        },
+        cleanFilter() {
+            this.localExpenses = this.groupedExpenses;
+            this.searchDate = null;
+            this.startDate = null;
+            this.finishDate = null;
+            this.showFilter = false;
+            this.filtered = false;
+            this.currentPage = 1;
+        },
         async filterExpenses() {
-            //si hay fecha de filtro hace la peticion, si no, muestra todos los gastos
-            if (this.searchDate != null) {
-                this.loading = true;
-                try {
-                    const response = await axios.get(route('expenses.filter'), { params: { queryDate: this.searchDate } });
-                    if (response.status == 200) {
-                        this.localExpenses = response.data.items;
-                        this.filtered = true;
-                    }
+            let range = this.searchDate;
+            if (this.isMobile) {
+                range = [this.startDate, this.finishDate];
+            }
 
-                } catch (error) {
-                    console.log(error);
-                } finally {
-                    this.loading = false;
-                    this.showFilter = false;
+            this.loading = true;
+            try {
+                const response = await axios.get(route('expenses.filter'), { params: { queryDate: range } });
+                if (response.status == 200) {
+                    this.localExpenses = response.data.items;
+                    this.filtered = true;
                 }
-            } else {
-                this.localExpenses = this.groupedExpenses;
+
+            } catch (error) {
+                console.log(error);
+            } finally {
+                this.loading = false;
+                this.showFilter = false;
             }
         },
         async fetchItemsByPage() {

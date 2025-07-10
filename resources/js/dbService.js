@@ -113,6 +113,23 @@ function getItemByAttributes(storeName, attributes) {
   });
 }
 
+function getItemsByNullAttribute(storeName, attributeName) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const filteredResults = request.result.filter(item => item[attributeName] === null);
+      resolve(filteredResults);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
 function getItemByPartialAttributes(storeName, attributes) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readonly');
@@ -148,7 +165,7 @@ function getItemByPartialAttributes(storeName, attributes) {
 async function addOrUpdateItem(storeName, item) {
   // revisar si el elemento tiene imagen para guardarla tambien
   await prepareImageToStore(item);
-  
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite');
     const store = transaction.objectStore(storeName);
@@ -255,24 +272,93 @@ function tableExists(storeName) {
   return db.objectStoreNames.contains(storeName);
 }
 
-async function initializeProducts() {
-  await openDatabase();
+async function syncIDBProducts() {
+  if (!db) {
+    await openDatabase();
+  }
 
   // Descarga inicial de productos en servidor
   const response = await axios.get(route('products.get-all-for-indexedDB'));
   const serverProducts = response.data.products;
 
   const indexedDBProducts = await getAll('products');
-  // revisar si hay mas productos en la base de datos del servidor que en indexedDB
-  if (indexedDBProducts.length < serverProducts.length) {
-    console.log('Sincronizando indexedDB');
-    // actualizar BDD local
-    addOrupdateBatchOfItems('products', serverProducts);
-    console.log('indexedDB sincronizada!!');
-  }
+
+  console.log('Sincronizando productos', new Date().toLocaleTimeString());
+
+  const serverProductMap = new Map();
+  serverProducts.forEach(product => serverProductMap.set(product.id, product));
+
+  const productsToAddOrUpdate = [];
+  const productsToDelete = [];
+
+  indexedDBProducts.forEach(localProduct => {
+    const serverProduct = serverProductMap.get(localProduct.id);
+
+    if (!serverProduct) {
+      // Producto local que no existe en el servidor
+      productsToDelete.push(localProduct.id);
+    } else {
+      // Producto existe en ambos lados, comparar propiedades
+      if (
+        localProduct.name !== serverProduct.name ||
+        localProduct.code !== serverProduct.code ||
+        localProduct.public_price !== serverProduct.public_price ||
+        localProduct.current_stock !== serverProduct.current_stock ||
+        localProduct.image_url !== serverProduct.image_url ||
+        localProduct.promotions?.length != serverProduct.promotions?.length
+      ) {
+        productsToAddOrUpdate.push(serverProduct);
+      }
+      serverProductMap.delete(localProduct.id);
+    }
+  });
+
+  // Agregar los productos que existen en el servidor pero no en IndexedDB
+  serverProductMap.forEach(product => {
+    productsToAddOrUpdate.push(product);
+  });
+
+  // Realizar las actualizaciones en IndexedDB
+  await updateLocalProducts(productsToAddOrUpdate, productsToDelete);
 }
 
-async function addOrupdateBatchOfItems(storeName, items) {
+async function updateLocalProducts(productsToAddOrUpdate, productsToDelete) {
+  if (!db) {
+    await openDatabase();
+  }
+
+  // Preparar las imágenes fuera de la transacción
+  for (let product of productsToAddOrUpdate) {
+    await prepareImageToStore(product);
+  }
+
+  // Ejecutar las operaciones de IndexedDB dentro de una transacción
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['products'], 'readwrite');
+    const store = transaction.objectStore('products');
+
+    // Eliminar productos que ya no están en el servidor
+    productsToDelete.forEach(id => {
+      store.delete(id);
+    });
+
+    // Agregar o actualizar productos
+    productsToAddOrUpdate.forEach(product => {
+      store.put(product);
+    });
+
+    transaction.oncomplete = () => {
+      console.log('Sincronización de productos completada', new Date().toLocaleTimeString());
+      resolve();
+    };
+
+    transaction.onerror = (event) => {
+      reject(event.target.error);
+    };
+  });
+}
+
+async function addOrUpdateBatchOfItems(storeName, items) {
   const promises = items.map((item) => addOrUpdateItem(storeName, item));
   await Promise.all(promises);
 }
@@ -287,11 +373,22 @@ function closeDatabaseConnection() {
 
 async function prepareImageToStore(item) {
   if (item.image_url) {
-    const imageResponse = await axios.get(item.image_url, { responseType: 'blob' });
-    const imageBlob = imageResponse.data;
-    item.image = imageBlob;
+    try {
+      const imageResponse = await axios.get(item.image_url, { responseType: 'blob' });
+      const imageBlob = imageResponse.data;
+      item.image = imageBlob;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn(`Imagen no encontrada para el producto ${item.id}, continuando sin imagen.`);
+      } else {
+        console.error(`Error al obtener la imagen para el producto ${item.id}:`, error);
+      }
+      // No agregar la imagen al item si hay un error
+      item.image = null;
+    }
   }
 }
+
 
 export {
   openDatabase,
@@ -299,13 +396,14 @@ export {
   getAll,
   getItemByAttributes,
   getItemByPartialAttributes,
+  getItemsByNullAttribute,
   addOrUpdateItem,
   deleteItem,
   deleteObjectStore,
   deleteDatabase,
   clearObjectStore,
   tableExists,
-  initializeProducts,
-  addOrupdateBatchOfItems,
-  prepareImageToStore
+  addOrUpdateBatchOfItems,
+  prepareImageToStore,
+  syncIDBProducts,
 };

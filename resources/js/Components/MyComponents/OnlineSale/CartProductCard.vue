@@ -3,17 +3,17 @@
     <div v-if="loading" class="flex justify-center items-center py-10">
         <i class="fa-sharp fa-solid fa-circle-notch text-4xl fa-spin ml-2 text-primary"></i>
     </div>
-    <section class="text-sm" v-else>
-        <div v-if="cartProduct" class="flex space-x-4">
+    <section class="text-sm mt-2" v-else>
+        <div class="flex space-x-4">
             <!-- Imagen del producto -->
-            <figure class="border border-grayD9 rounded-md p-3 w-28">
+            <figure class="border border-grayD9 rounded-md p-2 size-24">
                 <img v-if="product?.global_product_id ? product?.global_product.media?.length : product?.media?.length" 
                         :src="product?.global_product_id ? product?.global_product.media[0]?.original_url : product?.media[0]?.original_url" 
-                        alt="producto" class="h-full mx-auto">
-                    <div class="flex flex-col items-center justify-center" v-else>
-                        <i class="fa-regular fa-image text-3xl text-gray-200"></i>
-                        <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>
-                    </div>
+                        alt="producto" class="h-full w-full mx-auto object-contain">
+                <div class="flex flex-col items-center justify-center" v-else>
+                    <i class="fa-regular fa-image text-3xl text-gray-200"></i>
+                    <p class="text-xs text-gray-300 text-center">Imagen no disponible</p>
+                </div>
             </figure>
 
             <!-- Detalles del producto -->
@@ -21,23 +21,30 @@
                 <h1 class="font-bold">{{ product?.global_product_id ? product?.global_product.name : product?.name }}</h1>
                 <p class="font-bold">${{ product?.public_price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                 <div v-if="actions" class="flex justify-between">
-                    <el-input-number :disabled="product?.global_product?.current_stock < 1 || product?.current_stock < 1"
-                        v-model="quantity" size="small" :min="0" :max="product?.current_stock" :precision="2" />
+                    <div class="flex items-center space-x-2">
+                        <!-- Toma en cuenta el stock disponible si está activada la configuración de la tienda -->
+                        <el-input-number v-if="store?.online_store_properties?.inventory && !product?.product_on_request" :disabled="product?.current_stock < 1"
+                            v-model="quantity" size="small" :min="0" :max="product?.current_stock" :precision="2" />
+
+                        <!-- No toma en cuenta el stock disponible si no está activada esa configuración -->
+                        <el-input-number v-else v-model="quantity" size="small" :min="0" :max="999" :precision="2" />
+                        <div>
+                            <p v-if="store?.online_store_properties?.inventory" class="text-xs text-gray99">disponibles: {{ product?.current_stock ?? 0 }}</p>
+                        <p v-if="product?.product_on_request" class="text-xs text-gray99">Producto bajo pedido.</p>
+                        <p v-if="product?.product_on_request" class="text-xs text-gray99">Entrega: {{ product.days_for_delivery }} días hábiles</p>
+                        </div>
+                    </div>
                     <!-- Eliminar producto de carrito -->
                     <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
                     title="¿Deseas continuar?" @confirm="deleteCartProduct()">
                     <template #reference>
                         <i
-                        class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-[#F2F2F2] rounded-full py-1 px-[7px] cursor-pointer"></i>
+                        class="fa-regular fa-trash-can mr-3 text-primary text-sm bg-[#F2F2F2] rounded-full py-1 px-[7px] cursor-pointer self-start"></i>
                     </template>
                     </el-popconfirm>
                 </div>
                 <p v-else>cantidad: {{ quantity }}</p>
             </div>
-        </div>
-
-        <div v-else>
-            <p class="text-center text-sm text-gray-400">No hay productos en tu carrito</p>
         </div>
     </section>
 </template>
@@ -54,6 +61,7 @@ data() {
 },
 props:{
     cartProduct: Object,
+    store: Object,
     actions: { //acciones de borrar y editar cantidad
         type: Boolean,
         default: true
@@ -69,7 +77,7 @@ methods:{
     async fetchProductInfo() {
         this.loading = true;
         try {
-            const response = await axios.get(route('online-sales.fetch-product', [this.cartProduct.id, this.cartProduct.isLocal]));
+            const response = await axios.get(route('online-sales.fetch-product', [this.cartProduct.product_id, this.cartProduct.isLocal]));
             if ( response.status === 200 ) {
                 this.product = response.data.item;
             }
@@ -82,7 +90,7 @@ methods:{
     updateCartQuantity(newQuantity) {
         // Encuentra el producto en el carrito y actualiza su cantidad
         const cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
-        const productIndex = cart.findIndex(item => item.id === this.cartProduct.id);
+        const productIndex = cart.findIndex(item => item.product_id === this.cartProduct.product_id);
 
         if (productIndex !== -1) {
             cart[productIndex].quantity = newQuantity;
@@ -90,16 +98,16 @@ methods:{
 
             // //recupera el nuvo carrito actualizado para mandarlo en el emit
             // const newCart = JSON.parse(localStorage.getItem('Ezycart')) || [];
-            this.$emit('updateCart', { id: this.cartProduct.id, quantity: this.quantity });
+            this.$emit('updateCart', { id: this.cartProduct.product_id, quantity: this.quantity });
         }
     },
     deleteCartProduct() {
         // Eliminar el producto del carrito
         const cart = JSON.parse(localStorage.getItem('Ezycart')) || [];
-        const updatedCart = cart.filter(item => item.id !== this.cartProduct.id);
+        const updatedCart = cart.filter(item => item.product_id !== this.cartProduct.product_id);
         localStorage.setItem('Ezycart', JSON.stringify(updatedCart));
 
-        this.$emit('productRemoved', this.cartProduct.id); // Emitir un evento para notificar al padre
+        this.$emit('productRemoved', this.cartProduct.product_id); // Emitir un evento para notificar al padre
     }
 },
 mounted() {

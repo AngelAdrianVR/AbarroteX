@@ -1,10 +1,10 @@
 <template>
     <div
-        class="min-h-[100px] max-h-[420px] border-gray3 border rounded-[10px] lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
-        <h1 class="font-bold text-center">{{ title }} <span v-html="icon"></span></h1>
+        class="min-h-[100px] max-h-[420px] rounded-lg shadow-xl text-center lg:rounded-xl lg:p-5 py-2 px-4 text-xs lg:text-sm relative">
+        <h1 class="font-bold text-center flex items-center justify-center">{{ title }} <span class="ml-3" v-html="icon"></span></h1>
 
         <div v-if="this.options.series.length" id="chart">
-            <apexchart type="pie" width="300" :options="chartOptions" :series="series"></apexchart>
+            <apexchart type="donut" width="500" :options="chartOptions" :series="series"></apexchart>
         </div>
         <p v-else class="flex flex-col items-center space-y-1 text-gray99 text-xs text-center my-5">
             <span>No hay información</span>
@@ -25,8 +25,17 @@ export default {
             series: this.options.series,
             chartOptions: {
                 chart: {
-                    width: 300,
-                    type: 'pie',
+                    width: 500,
+                    type: 'donut',
+                },
+                plotOptions: {
+                    pie: {
+                        startAngle: -90,
+                        endAngle: 270
+                    }
+                },
+                fill: {
+                    type: 'gradient',
                 },
                 colors: this.options.colors,
                 labels: this.options.labels,

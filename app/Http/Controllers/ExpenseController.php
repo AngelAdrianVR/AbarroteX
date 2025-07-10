@@ -59,12 +59,16 @@ class ExpenseController extends Controller
     {
         // Itera sobre cada gasto recibido en la lista
         foreach ($request->expenses as $expenseData) {
-            Expense::create([
+
+            // Convierte el campo 'creado el' a un objeto Carbon y resta 6 horas
+            // $created_at = Carbon::parse($expenseData['date'])->subHours(6);
+            $expense = Expense::create([
                 'concept' => $expenseData['concept'],
                 'quantity' => $expenseData['quantity'],
                 'current_price' => $expenseData['current_price'],
-                'created_at' => $expenseData['date'],
+                'amount_from_cash_register' => $expenseData['from_cash_register'] ? $expenseData['current_price'] : null,
                 'store_id' => auth()->user()->store_id,
+                // 'created_at' => now(),
             ]);
 
             // crear retiro de dinero en caja si el dinero se toma de ahi
@@ -75,8 +79,9 @@ class ExpenseController extends Controller
                 CashRegisterMovement::create([
                     'amount' => $expenseData['current_price'],
                     'type' => 'Retiro',
-                    'notes' => 'Registro de gasto',
+                    'notes' => 'Registro de gasto: ' . $expenseData['concept'] ?? 'Sin concepto',
                     'cash_register_id' => $cash_register->id,
+                    'expense_id' => $expense->id,
                 ]);
                 //actualizar el dinero actual de la caja
                 $cash_register->decrement('current_cash', $expenseData['current_price']);
@@ -85,9 +90,12 @@ class ExpenseController extends Controller
         return to_route('expenses.index');
     }
 
-    public function show($expense_id)
+    public function show($encoded_expense_id)
     {
-        $expense = Expense::find($expense_id);
+        // Decodificar el ID
+        $decoded_expense_id = base64_decode($encoded_expense_id);
+
+        $expense = Expense::find($decoded_expense_id);
 
         // Parsear la fecha recibida para obtener solo la parte de la fecha
         $date = Carbon::parse($expense->created_at)->toDateString();
@@ -105,10 +113,30 @@ class ExpenseController extends Controller
 
     public function update(Request $request, Expense $expense)
     {
-        //
+        $validated = $request->validate([
+            'concept' => 'required|string|max:255',
+            'quantity' => 'required|numeric|min:1',
+            'current_price' => 'required|numeric|min:0',
+        ]);
+
+        $expense->update($validated);
+
+        // actualizar movimiento de caja relacionada si es que la hay
+        $expense->cashRegisterMovement?->update([
+            'notes' => $expense->concept,
+            'amount' => $expense->current_price * $expense->quantity,
+        ]);
     }
 
     public function destroy(Expense $expense)
+    {
+        // eliminar movimiento de caja si es que lo tiene
+        $expense->cashRegisterMovement?->delete();
+        // Eliminar el registro de gasto enviado como referencia
+        $expense->delete();
+    }
+
+    public function destroyDayExpenses(Expense $expense)
     {
         // Obtener la fecha de creación del registro de gasto
         $expenseDate = $expense->created_at->toDateString();
@@ -177,7 +205,7 @@ class ExpenseController extends Controller
                 'expenses' => $expenses,
             ];
         })->skip($offset)
-        ->take(30);
+            ->take(30);
 
         return response()->json(['items' => $groupedExpenses]);
     }

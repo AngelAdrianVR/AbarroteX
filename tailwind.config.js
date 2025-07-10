@@ -31,6 +31,7 @@ export default {
                 gray77: '#777777',
                 gray37: '#373737',
                 black1: '#1A1A1A',
+                black2: '#0D0D0D',
             },
         },
     },

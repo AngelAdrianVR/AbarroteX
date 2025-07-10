@@ -17,12 +17,14 @@ class Payment extends Model implements HasMedia
         'amount',
         'suscription_period',
         'store_id',
-        'status',
+        'status', //En revisión, Aprobado, Rechazado (status del pago)
+        'invoice_status', //No solicitada, Solicitada, Enviada (status de la factura)
         'rejected_reason',
         'notes',
         'days_gifted',
         'validated_at',
         'validated_by_id',
+        'created_at',
     ];
 
     protected $casts = ['validated_at' => 'datetime'];

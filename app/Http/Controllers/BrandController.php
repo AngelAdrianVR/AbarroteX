@@ -26,7 +26,8 @@ class BrandController extends Controller
             'name' =>'required|string|max:100|unique:brands,name',
         ]);
 
-        $brand = Brand::create($request->all());
+        // guardar business_line_name con el id de la tienda para que solo ella pueda verlo
+        $brand = Brand::create($request->all() + ['business_line_name' => auth()->user()->store->id]);
 
         return response()->json(['item' => $brand]);
     }
@@ -53,5 +54,12 @@ class BrandController extends Controller
     public function destroy(Brand $brand)
     {
         //
+    }
+
+    public function fetchAll()
+    {   
+        $store = auth()->user()->store;
+        $brands = Brand::whereIn('business_line_name', [$store->type, $store->id])->get(['id','name']);
+        return response()->json($brands);
     }
 }

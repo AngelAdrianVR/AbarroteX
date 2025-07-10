@@ -15,11 +15,17 @@ class CashRegisterMovement extends Model
         'type',
         'notes',
         'cash_register_id',
+        'expense_id',
     ];
 
     //relationships
     public function cashRegister() :BelongsTo
     {
         return $this->belongsTo(CashRegister::class);
+    }
+    
+    public function expense() :BelongsTo
+    {
+        return $this->belongsTo(Expense::class);
     }
 }

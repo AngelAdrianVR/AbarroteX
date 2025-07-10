@@ -13,14 +13,15 @@
                     <InputError :message="form.errors.name" />
                 </div>
                 <div v-if="canSeeCost" class="mt-3">
-                    <div class="flex items-center ml-3 mb-1">
-                        <InputLabel value="Precio de compra" class="text-sm" />
+                    <div class="flex items-center">
+                        <InputLabel value="Precio de compra" />
                         <el-tooltip content="Precio pagado por el producto al proveedor " placement="right">
                             <i class="fa-regular fa-circle-question ml-2 text-primary text-xs"></i>
                         </el-tooltip>
                     </div>
                     <el-input v-model="form.cost" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -28,9 +29,10 @@
                     <InputError :message="form.errors.cost" />
                 </div>
                 <div class="mt-3">
-                    <InputLabel value="Precio de venta al público*" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Precio de venta al público*" />
                     <el-input v-model="form.public_price" placeholder="ingresa el precio"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')">
                         <template #prefix>
                             <i class="fa-solid fa-dollar-sign"></i>
                         </template>
@@ -38,15 +40,16 @@
                     <InputError :message="form.errors.public_price" />
                 </div>
                 <div class="mt-3 col-span-full w-1/2">
-                    <InputLabel value="Existencia actual" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Existencia actual" />
                     <el-input v-model="form.current_stock" placeholder="ingresa la cantidad actual en stock"
-                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" />
+                        :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.current_stock" />
                 </div>
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Categoría*" class="ml-3 mb-1" />
+                        <InputLabel value="Categoría" class="ml-3 mb-1" />
                         <!-- <button
                             @click="showCategoryFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -63,7 +66,7 @@
 
                 <div class="mt-3">
                     <div class="flex items-center justify-between">
-                        <InputLabel value="Proveedor *" class="ml-3 mb-1" />
+                        <InputLabel value="Proveedor" class="ml-3 mb-1" />
                         <!-- <button
                             @click="showBrandFormModal = true" type="button"
                             class="rounded-full border border-primary size-4 flex items-center justify-center">
@@ -80,30 +83,33 @@
                 <h2 class="font-bold col-span-full text-sm mt-3 mb-2">Cantidades de stock permitidas</h2>
 
                 <div class="mt-3">
-                    <InputLabel value="Cantidad mínima" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Cantidad mínima" />
                     <el-input v-model="form.min_stock" placeholder="Cantidad mínima permitida en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/\D/g, '')" />
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.min_stock" />
                 </div>
 
                 <div class="mt-3">
-                    <InputLabel value="Cantidad máxima" class="ml-3 mb-1 text-sm" />
+                    <InputLabel value="Cantidad máxima" />
                     <el-input v-model="form.max_stock" placeholder="Cantidad máxima permitida en stock"
                         :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                        :parser="(value) => value.replace(/\D/g, '')" />
+                        :parser="(value) => value.replace(/[^\d.]/g, '')" />
                     <InputError :message="form.errors.max_stock" />
                 </div>
-
-                <h2 class="font-bold col-span-full text-sm my-5">Cantidades de stock permitidas</h2>
-
-                <div>
+                <div class="mt-3 col-span-full">
+                    <InputLabel value="Descripción del producto (opcional)" />
+                    <el-input v-model="form.description" :autosize="{ minRows: 3, maxRows: 5 }" type="textarea"
+                        placeholder="Escribe una descripción o características separadas en renglones" :maxlength="255"
+                        show-word-limit clearable />
+                    <InputError :message="form.errors.description" />
+                </div>
+                <div class="mt-3">
                     <InputLabel value="Agregar imagen" class="ml-3 mb-1" />
                     <InputFilePreview @imagen="saveImage($event); form.imageCoverCleared = false"
                         @cleared="form.imageCover = null; form.imageCoverCleared = true"
                         :imageUrl="global_product_store.global_product?.media[0]?.original_url" :disabled="true" />
                 </div>
-
                 <div class="mt-3 col-span-2">
                     <InputLabel value="Código del producto (en caso de tener)" class="ml-3 mb-1" />
                     <el-input disabled v-model="form.code" placeholder="Escribe el código del producto" :maxlength="100"
@@ -114,9 +120,28 @@
                     </el-input>
                     <InputError :message="form.errors.code" />
                 </div>
-
+                <div v-if="$page.props.auth.user.store.activated_modules?.includes('Tienda en línea')" class="mt-3">
+                    <div class="flex items-center w-[50%] lg:w-[30%]">
+                        <el-checkbox v-model="form.show_in_online_store" label="Mostrar en tienda en línea" />
+                        <el-tooltip placement="top">
+                            <template #content>
+                                <div>
+                                    <p>
+                                        Desactivar esta opción si no quieres que <br>
+                                        este produco se muestre en tu tienda en <br>
+                                        linea.
+                                    </p>
+                                </div>
+                            </template>
+                            <i class="fa-regular fa-circle-question ml-2 text-primary text-[10px]"></i>
+                        </el-tooltip>
+                    </div>
+                </div>
                 <div class="col-span-2 text-right mt-3">
-                    <PrimaryButton class="!rounded-full" :disabled="form.processing">Guardar cambios</PrimaryButton>
+                    <PrimaryButton class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Guardar cambios
+                    </PrimaryButton>
                 </div>
             </form>
         </div>
@@ -173,7 +198,8 @@ import InputError from "@/Components/InputError.vue";
 import InputFilePreview from "@/Components/MyComponents/InputFilePreview.vue";
 import Back from "@/Components/MyComponents/Back.vue";
 import { useForm } from "@inertiajs/vue3";
-import { addOrUpdateItem } from "@/dbService.js";
+// import { addOrUpdateItem } from "@/dbService.js";
+import axios from 'axios';
 
 export default {
     data() {
@@ -182,11 +208,13 @@ export default {
             code: this.global_product_store.global_product?.code,
             public_price: this.global_product_store.public_price,
             cost: this.global_product_store.cost,
+            description: this.global_product_store.description,
             current_stock: this.global_product_store.current_stock,
             category_id: this.global_product_store.global_product?.category_id,
             brand_id: this.global_product_store.global_product?.brand_id,
             min_stock: this.global_product_store.min_stock,
             max_stock: this.global_product_store.max_stock,
+            show_in_online_store: !!this.global_product_store.show_in_online_store,
             imageCover: null,
             imageCoverCleared: false
         });
@@ -231,19 +259,18 @@ export default {
             try {
                 this.form.put(route("global-product-store.update", this.global_product_store.id), {
                     onSuccess: async () => {
-                        // guardar nuevo producto a IndexedDB
-                        // Obtener producto que coincida con el id editado
-                        const response = await axios.get(route('products.get-all-for-indexedDB'));
-                        const product = response.data.transfered_products.find(item => item.id == this.global_product_store.id);
-
-                        // actualizar a indexedDB
-                        if (product) {
-                            await addOrUpdateItem('products', product);
-                        }
+                        // guardar a IndexedDB
+                        // Obtener producto mas reciente agregado
+                        // const productId = `global_${this.global_product_store.id}`;
+                        // const response = await axios.get(route('products.get-by-id-for-indexedDB', productId));
+                        // const product = response.data.product;
+                        // // actualizar a indexedDB
+                        // if (product) {
+                        //     addOrUpdateItem('products', product);
+                        // }
 
                         this.$notify({
-                            title: "Correcto",
-                            message: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
+                            title: 'Se ha editado el producto ' + this.global_product_store.global_product?.name,
                             type: "success",
                         });
                     },

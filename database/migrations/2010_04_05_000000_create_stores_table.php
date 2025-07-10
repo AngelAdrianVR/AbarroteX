@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug')->unique();
             $table->string('type'); // tipo de tienda ej. ropa, carniceria, abarrotes
             $table->string('contact_name');
+            $table->json('online_store_properties')->nullable(); //whatsapp,delivery_price,delivery_conditions,min_free_delivery, metodos de pago
+            $table->json('printer_config')->nullable(); //información de configuración de impresora
+            $table->json('activated_modules')->nullable(); //modulos activados para la suscripción
             $table->string('contact_phone')->nullable(); // telefono de contacto
-            $table->string('whatsapp')->nullable(); //wp para pedidos online
-            $table->unsignedFloat('delivery_price')->nullable(); //precio de envío para pedidos online
-            $table->text('delivery_conditions')->nullable(); //condiciones de envio para pedidos online
             $table->string('address')->nullable();
             $table->string('plan')->default('Plan Básico');
             $table->string('suscription_period')->default('Periodo de prueba');
@@ -30,6 +31,8 @@ return new class extends Migration
             // porque al migrar las tablas tiene que ir en primer lugar
             $table->foreignId('seller_id')->nullable()->constrained('admins')->cascadeOnDelete(); 
             $table->string('status')->default('Pagado');
+            $table->string('partner_cupon')->nullable(); // cupon de partner
+            $table->json('colors')->nullable();
             $table->timestamps();
         });
     }

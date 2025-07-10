@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Expense extends Model
 {
@@ -12,9 +13,10 @@ class Expense extends Model
 
     protected $fillable = [
         'concept',
-        'quantity',
-        'current_price',
+        'quantity', // cantidad del gasto
+        'current_price', // costo del gasto
         'store_id',
+        'amount_from_cash_register', //para saber si se retiro dinero de caja y cuanto
         'created_at', // para poderponer cambiar la fecha desde el registro
     ];
 
@@ -23,5 +25,9 @@ class Expense extends Model
     {
         return $this->belongsTo(Store::class);
     }
-
+    
+    public function cashRegisterMovement() :HasOne
+    {
+        return $this->hasOne(CashRegisterMovement::class);
+    }
 }

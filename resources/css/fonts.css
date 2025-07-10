@@ -1,0 +1,111 @@
+/* Krub Regular */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-Regular.ttf') format('truetype');
+    font-weight: 400; /* Regular */
+    font-style: normal;
+}
+
+/* Krub Italic */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-Italic.ttf') format('truetype');
+    font-weight: 400; /* Regular */
+    font-style: italic;
+}
+
+/* Krub Bold */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-Bold.ttf') format('truetype');
+    font-weight: 700; /* Bold */
+    font-style: normal;
+}
+
+/* Krub Bold Italic */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-BoldItalic.ttf') format('truetype');
+    font-weight: 700; /* Bold */
+    font-style: italic;
+}
+
+/* Krub ExtraLight */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-ExtraLight.ttf') format('truetype');
+    font-weight: 200; /* ExtraLight */
+    font-style: normal;
+}
+
+/* Krub ExtraLight Italic */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-ExtraLightItalic.ttf') format('truetype');
+    font-weight: 200; /* ExtraLight */
+    font-style: italic;
+}
+
+/* Krub Light */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-Light.ttf') format('truetype');
+    font-weight: 300; /* Light */
+    font-style: normal;
+}
+
+/* Krub Light Italic */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-LightItalic.ttf') format('truetype');
+    font-weight: 300; /* Light */
+    font-style: italic;
+}
+
+/* Krub Medium */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-Medium.ttf') format('truetype');
+    font-weight: 500; /* Medium */
+    font-style: normal;
+}
+
+/* Krub Medium Italic */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-MediumItalic.ttf') format('truetype');
+    font-weight: 500; /* Medium */
+    font-style: italic;
+}
+
+/* Krub SemiBold */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-SemiBold.ttf') format('truetype');
+    font-weight: 600; /* SemiBold */
+    font-style: normal;
+}
+
+/* Krub SemiBold Italic */
+@font-face {
+    font-family: 'Krub';
+    src: url('/fonts/Krub/Krub-SemiBoldItalic.ttf') format('truetype');
+    font-weight: 600; /* SemiBold */
+    font-style: italic;
+}
+
+/* Licorice Regular */
+@font-face {
+    font-family: 'Licorice';
+    src: url('/fonts/Licorice/Licorice-Regular.ttf') format('truetype');
+    font-weight: 400; /* Regular */
+    font-style: normal;
+}
+
+/* LeagueGothic Regular */
+@font-face {
+    font-family: 'LeagueGothic';
+    src: url('/fonts/League_Gothic/LeagueGothic-Regular.ttf') format('truetype');
+    font-weight: 400; /* Regular */
+    font-style: normal;
+}

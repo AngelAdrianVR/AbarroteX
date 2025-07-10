@@ -12,7 +12,7 @@ Utilizamos la información recopilada para gestionar su cuenta, personalizar su 
 
 **Seguridad de la Información**
 
-En Ezy Ventas, garantizamos la privacidad y seguridad de la información de nuestros Usuarios mediante tecnologías avanzadas de encriptación y medidas de seguridad en la transmisión, almacenamiento y mantenimiento de los datos.Tomamos medidas de seguridad razonables para proteger la información personal de nuestros usuarios contra el acceso no autorizado, la alteración, la divulgación o la destrucción. Esto incluye el uso de tecnologías de cifrado y la implementación de políticas y procedimientos de seguridad.
+En Ezy Ventas, garantizamos la privacidad y seguridad de la información de nuestros Usuarios mediante tecnologías avanzadas de encriptación y medidas de seguridad en la transmisión, almacenamiento y mantenimiento de los datos. Tomamos medidas de seguridad razonables para proteger la información personal de nuestros usuarios contra el acceso no autorizado, la alteración, la divulgación o la destrucción. Esto incluye el uso de tecnologías de cifrado y la implementación de políticas y procedimientos de seguridad.
 
 **Derechos del Usuario**
 

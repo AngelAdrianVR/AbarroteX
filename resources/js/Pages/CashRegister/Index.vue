@@ -2,7 +2,7 @@
     <AppLayout title="Caja">
         <section class="mt-5 mx-2 lg:mx-8">
         <div v-if="canCreate" class="text-right">
-            <ThirthButton @click="$inertia.get(route('cash-registers.create'))">Crear caja</ThirthButton>
+            <ThirthButton v-if="cash_registers.length < 1" @click="$inertia.get(route('cash-registers.create'))">Crear caja</ThirthButton>
         </div>
             <el-tabs class="mx-3" v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane v-for="(item, index) in cash_registers" :key="item" :label="item.name" :name="String(index + 1)">
@@ -10,7 +10,7 @@
                 </el-tab-pane>
 
                 <!-- Historial de cortes -->
-                <el-tab-pane label="Historial de cortes" :name="String(cash_registers.length + 1)">
+                <el-tab-pane v-if="canSeeHistorical" label="Historial de cortes" :name="String(cash_registers.length + 1)">
                     <section class="flex justify-between">
                         <div></div>
                         <div class="relative">
@@ -49,7 +49,7 @@
                     </section>
 
                     <Loading v-if="loading" class="mt-20" />
-                    <div v-else class="mt-8">
+                    <div v-else>
                         <p v-if="Object.keys(localCashCuts)?.length" class="text-gray66 text-[11px] mb-3">{{ Object.keys(localCashCuts)?.length }} de {{ total_cash_cuts }}
                             elementos
                         </p>
@@ -90,7 +90,8 @@ export default {
             currentPage: 1, //para paginación
             filtered: false, //bandera para saber si ya se filtró y deshabilitar la carga de elementos ya que hay un error.
             // Permisos de rol
-            canCreate: ['Administrador'].includes(this.$page.props.auth.user.rol),
+            canCreate: this.$page.props.auth.user.permissions.includes('Crear cajas'),
+            canSeeHistorical: this.$page.props.auth.user.permissions.includes('Ver historial de cortes'),
         }
     },
     components: {

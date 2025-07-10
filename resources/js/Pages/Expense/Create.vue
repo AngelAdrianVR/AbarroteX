@@ -7,16 +7,17 @@
                 class="rounded-lg border border-grayD9 lg:p-5 p-3 lg:w-[80%] mx-auto mt-7 lg:grid lg:grid-cols-2 gap-5">
                 <section class="ml-2 col-span-full flex justify-between items-center">
                     <h1 class="font-bold">Agregar gasto</h1>
-                    <el-tooltip v-if="isShowCahsOn"
+                    <!-- <el-tooltip v-if="isShowCahsOn && cash_register"
                         content="Para cambiar de caja, ve al punto de venta, click al botón movimientos de caja > cambiar de caja"
                         placement="top">
                         <p class="text-gray99 text-xs">
                             Efectivo en "{{ cash_register?.name }}":
                             <b class="ml-2">
-                                ${{ cash_register?.current_cash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                ${{ cash_register?.current_cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                             </b>
                         </p>
                     </el-tooltip>
+                    <p v-else class="text-xs text-gray99">No tienes caja asignada.</p> -->
                 </section>
                 <p class="text-xs col-span-full">
                     Aqui no se registran las compras de tus productos para la venta. Esta sección es para registrar
@@ -36,11 +37,11 @@
                             :maxlength="100" clearable />
                         <InputError :message="expense.errors.concept" />
                     </div>
-                    <div class="mt-3">
+                    <!-- <div class="mt-3">
                         <InputLabel :value="'Fecha ' + (index + 1) + '*'" class="ml-3 mb-1" />
                         <el-date-picker v-model="expense.date" type="date" placeholder="Selecciona una fecha"
                             :disabled-date="disabledDate" />
-                    </div>
+                    </div> -->
                     <!-- <div class="mt-3">
                         <InputLabel :value="'Cantidad ' + (index + 1) + '*'" class="ml-3 mb-1" />
                         <el-input v-model="expense.quantity" required type="text"
@@ -60,17 +61,21 @@
                         <InputError :message="expense.errors.current_price" />
                     </div>
                     <div class="mt-3">
-                        <el-checkbox v-model="expense.from_cash_register" :label="getCheckboxLabel(index)" size="small"
-                            :disabled="!hasEnoughCash(index)" />
+                        <el-checkbox v-model="expense.from_cash_register" size="small"
+                            :disabled="!hasEnoughCash(index)">
+                            <span v-html="getCheckboxLabel(index)"></span>
+                        </el-checkbox>
                     </div>
                 </div>
                 <div @click="addExpense"
-                    class="flex justify-center items-center cursor-pointer rounded-md border border-dashed border-primary">
+                    class="flex justify-center items-center cursor-pointer rounded-md border border-dashed border-grayD9">
                     <p class="text-primary text-sm my-3">+ Agregar otro gasto</p>
                 </div>
 
                 <div class="col-span-full text-right mt-3">
-                    <PrimaryButton v-if="!exceededCashAmount()" class="!rounded-full" :disabled="form.processing">Crear
+                    <PrimaryButton v-if="!exceededCashAmount()" class="!rounded-full" :disabled="form.processing">
+                        <i v-if="form.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                        Crear
                     </PrimaryButton>
                     <p v-else class="text-xs">
                         Has excedido el monto disponible en caja.
@@ -81,7 +86,6 @@
                 </div>
             </form>
         </div>
-
     </AppLayout>
 </template>
 
@@ -155,7 +159,7 @@ export default {
                 },
             ],
             // mostrar dinero en caja activado
-            isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
+            // isShowCahsOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Mostrar dinero en caja')?.value,
         };
     },
     components: {
@@ -173,12 +177,12 @@ export default {
             this.form.expenses.forEach(item => item.from_cash_register = false);
         },
         exceededCashAmount() {
-            return this.getTotalFromCashRegister() > this.cash_register.current_cash;
+            return this.getTotalFromCashRegister() > this.cash_register?.current_cash;
         },
         getCheckboxLabel(index) {
             let label = 'Dinero tomado de caja para el pago';
             if (!this.hasEnoughCash(index)) {
-                label += ' (No hay suficiente dinero en caja)';
+                label += '<br> (No hay suficiente dinero en caja)';
             }
 
             return label;
@@ -188,7 +192,7 @@ export default {
                 ? parseFloat(this.form.expenses[index].current_price)
                 : 0;
             const newTotal = this.getTotalFromCashRegister(index) + newAmount;
-            return (this.cash_register.current_cash - newTotal) >= 0;
+            return (this.cash_register?.current_cash - newTotal) >= 0;
         },
         getTotalFromCashRegister(index = null) { //si index es nulo,
             const total = this.form.expenses.reduce((acc, expense, currentIndex) => {

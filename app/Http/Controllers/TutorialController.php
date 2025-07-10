@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Store;
 use App\Models\Tutorial;
 use Illuminate\Http\Request;
 
@@ -11,7 +10,9 @@ class TutorialController extends Controller
     
     public function index()
     {   
-        return inertia('Tutorial/Index');
+        $videos = Tutorial::where('status', true)->get();
+
+        return inertia('Tutorial/Index', compact('videos'));
     }
 
     
@@ -41,7 +42,7 @@ class TutorialController extends Controller
     
     public function update(Request $request, Tutorial $tutorial)
     {
-        //
+
     }
 
     
@@ -49,4 +50,12 @@ class TutorialController extends Controller
     {
         //
     }
+
+    public function incrementViews(Tutorial $tutorial)
+    {
+        $tutorial->increment('views');
+        return response()->json(['views' => $tutorial->views]);
+    }
+
+
 }
