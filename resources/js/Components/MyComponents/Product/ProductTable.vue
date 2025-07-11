@@ -1,10 +1,14 @@
 <template>
     <div class="overflow-auto">
-        <el-pagination @current-change="handlePagination" layout="total, prev, pager, next" :total="totalItems"
-            hide-on-single-pag />
-        <el-table ref="tableRef" :data="products" @row-click="handleRowClick" max-height="640"
+        <div class="lg:flex items-center lg:space-x-2">
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
+                @size-change="handleSizeChange" @current-change="handlePagination" layout="total, sizes, prev, pager, next"
+                :page-sizes="[100, 200, 400, 800]" :total="pagination.total" size="small" />
+                <p class="text-xs text-gray37 mt-1 lg:mt-0">{{ products.length }} elementos en la tabla</p>
+        </div>
+        <el-table ref="tableRef" :data="products" @row-click="handleRowClick" max-height="500"
             :row-class-name="tableRowClassName" class="!w-full mx-auto">
-            <el-table-column label="Imagen" width="80">
+            <el-table-column fixed label="Imagen" width="75">
                 <template #default="scope">
                     <img v-if="scope.row.global_product_id ? scope.row.global_product?.media[0]?.original_url : scope.row.media[0]?.original_url"
                         class="size-10 bg-white object-contain rounded-md"
@@ -19,17 +23,17 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column label="Código" width="110">
-                <template #default="scope">
-                    <p>
-                        {{ scope.row.global_product_id ? scope.row.global_product?.code : scope.row.code ?? '-' }}
-                    </p>
-                </template>
-            </el-table-column>
-            <el-table-column label="Nombre del producto" width="190">
+            <el-table-column fixed label="Nombre del producto" width="120">
                 <template #default="scope">
                     <p>
                         {{ scope.row.global_product_id ? scope.row.global_product?.name : scope.row.name ?? '-' }}
+                    </p>
+                </template>
+            </el-table-column>
+            <el-table-column label="Código" width="118">
+                <template #default="scope">
+                    <p>
+                        {{ scope.row.global_product_id ? scope.row.global_product?.code : scope.row.code ?? '-' }}
                     </p>
                 </template>
             </el-table-column>
@@ -207,10 +211,8 @@ export default {
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // Permisos de rol actual
             canDelete: ['Administrador'].includes(this.$page.props.auth.user.rol),
-            // pagination
-            itemsPerPage: 30,
-            start: 0,
-            end: 30,
+            currentPage: parseInt(this.pagination.current_page),
+            pageSize: parseInt(this.pagination.per_page),
         };
     },
     components: {
@@ -221,7 +223,7 @@ export default {
     },
     props: {
         products: Object,
-        totalItems: Number,
+        pagination: Object,
     },
     computed: {
         categoryFilters() {
@@ -238,9 +240,11 @@ export default {
         },
     },
     methods: {
+        handleSizeChange() {
+            this.$inertia.visit(route('products.index', { page: this.currentPage, pageSize: this.pageSize }));
+        },
         handlePagination(val) {
-            this.start = (val - 1) * this.itemsPerPage;
-            this.end = val * this.itemsPerPage;
+            this.$inertia.visit(route('products.index', { page: val, pageSize: this.pageSize }));
         },
         filterCategory(category, row) {
             let productCategory = row.global_product_id ? row.global_product?.category?.name : row.category?.name;
@@ -260,7 +264,7 @@ export default {
             this.handleShow(row);
         },
         tableRowClassName({ row, rowIndex }) {
-            return 'cursor-pointer text-xs';
+            return 'cursor-pointer text-[10px] lg:text-xs';
         },
         isExpired(date) {
             if (!date) return false; // Si no hay fecha, no está vencida

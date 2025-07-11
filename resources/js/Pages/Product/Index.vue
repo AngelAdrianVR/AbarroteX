@@ -9,7 +9,7 @@
 
             <section v-if="activeTab === 'Mis productos'">
                 <i v-show="showScrollButton" @click="scrollToTop" class="fa-solid animate-bounce fa-arrow-up rounded-full bg-[#F2F2F2] text-gray9A py-3 px-[14px] fixed bottom-8 right-8 cursor-pointer transition-opacity duration-300"></i>
-                <MyProducts />
+                <MyProducts :data="data" />
             </section>
             <section v-else>
                 <BaseCatalog />
@@ -40,6 +40,7 @@ export default {
         BaseCatalog,
     },
     props: {
+        data: Object,
     },
     methods: {
         handleToggle(active) {

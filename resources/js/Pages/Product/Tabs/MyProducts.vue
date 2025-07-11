@@ -33,33 +33,8 @@
                 </el-dropdown>
             </div>
         </section>
-
-        <!-- <section v-if="isInventoryOn">
-            costo de almacén: {{ products }}
-        </section> -->
-
         <div class="mt-8">
-            <!-- <p v-if="searchedWord" class="text-gray66 text-[11px]">
-                {{ localProducts.length }} elementos encontrados
-            </p>
-            <p v-else-if="localProducts.length" class="text-gray66 text-[11px]">{{ localProducts.length }} de {{
-                totalProducts }} elementos
-            </p> -->
-            <ProductTable :products="localProducts" :totalItems="localProducts.length" />
-            <!-- <p v-if="searchedWord" class="text-gray66 text-[11px]">
-                {{ localProducts.length }} elementos encontrados
-            </p> -->
-            <!-- <p v-else-if="localProducts.length" class="text-gray66 text-[11px] mt-3">{{ localProducts.length }} de {{
-                totalProducts }} elementos
-            </p>
-            <p v-if="loadingItems" class="text-xs my-4 text-center">
-                Cargando <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-            </p> -->
-            <!-- <button
-                v-else-if="!searchedWord && totalProducts > 30 && localProducts.length < totalProducts && localProducts.length"
-                @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">
-                Cargar más elementos
-            </button> -->
+            <ProductTable :products="data.products" :pagination="data.pagination" />
         </div>
 
         <!-- modal de importacion -->
@@ -387,6 +362,7 @@ export default {
         SmallLoading,
     },
     props: {
+        data: Object,
     },
     methods: {
         handleCommand(command) {
