@@ -1,10 +1,13 @@
 <template>
     <div class="overflow-auto">
         <div class="lg:flex items-center lg:space-x-2">
-            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
-                @size-change="handleSizeChange" @current-change="handlePagination" layout="total, sizes, prev, pager, next"
-                :page-sizes="[100, 200, 400, 800]" :total="pagination.total" size="small" />
-                <p class="text-xs text-gray37 mt-1 lg:mt-0">{{ products.length }} elementos en la tabla</p>
+            <el-pagination v-if="showPagination" v-model:current-page="currentPage" v-model:page-size="pageSize"
+                @size-change="handleSizeChange" @current-change="handlePagination"
+                layout="total, sizes, prev, pager, next" :page-sizes="[100, 200, 400, 800]" :total="pagination.total"
+                size="small" />
+            <p class="text-xs text-gray37 mt-1 lg:mt-0">
+                {{ products.length }} {{ products.length == 1 ? 'elemento' : 'elementos' }} en la tabla
+            </p>
         </div>
         <el-table ref="tableRef" :data="products" @row-click="handleRowClick" max-height="500"
             :row-class-name="tableRowClassName" class="!w-full mx-auto">
@@ -224,6 +227,10 @@ export default {
     props: {
         products: Object,
         pagination: Object,
+        showPagination: {
+            type: Boolean,
+            default: true,
+        },
     },
     computed: {
         categoryFilters() {

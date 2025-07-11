@@ -1,10 +1,8 @@
 <template>
-    <Loading v-if="loading" class="mt-20" />
-    <div v-else>
+    <div>
         <div class="lg:flex justify-between items-center mx-3 mt-5">
             <h1 class="font-bold text-lg">Productos</h1>
         </div>
-
         <section class="md:flex justify-between items-center">
             <article class="flex items-center space-x-5 lg:w-1/3">
                 <div class="lg:w-full relative">
@@ -17,9 +15,6 @@
                 </el-tag>
             </article>
             <div class="my-4 lg:my-0 flex items-center justify-end space-x-3">
-                <!-- <ThirthButton v-if="isInventoryOn" @click="openInventoryModal">
-                        Entrada de producto
-                    </ThirthButton> -->
                 <el-dropdown split-button type="primary" @click="$inertia.get(route('products.create'))" trigger="click"
                     @command="handleCommand">
                     Nuevo producto
@@ -33,8 +28,9 @@
                 </el-dropdown>
             </div>
         </section>
-        <div class="mt-8">
-            <ProductTable :products="data.products" :pagination="data.pagination" />
+        <Loading v-if="loading" class="mt-20" />
+        <div v-else-if="data" class="mt-8">
+            <ProductTable :products="data.products" :pagination="data.pagination" :showPagination="!searchedWord" />
         </div>
 
         <!-- modal de importacion -->
@@ -150,10 +146,10 @@
                     <span class="text-gray99">Nota: Los productos que Ezy ventas te facilita como catálogo base, no
                         serán exportados.</span>
                 </p>
-                <p v-if="totalLocalProducts" class="mt-2">
+                <p v-if="data.total_local_products" class="mt-2">
                     Hay
                     <b class="text-primary">
-                        {{ totalLocalProducts }}
+                        {{ data.total_local_products }}
                     </b>
                     producto(s) disponible(s) para exportar
                 </p>
@@ -164,7 +160,7 @@
                     <CancelButton @click="showExportModal = false">
                         Cancelar
                     </CancelButton>
-                    <a v-if="totalLocalProducts" :href="route('products.export')"
+                    <a v-if="data.total_local_products" :href="route('products.export')"
                         class="cursor-pointer text-center px-4 py-2 bg-primary border border-transparent rounded-full text-xs text-white tracking-widest active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:text-white disabled:bg-[#999999] focus:outline-none focus:ring-0 transition ease-in-out duration-100">
                         Exportar
                     </a>
@@ -172,7 +168,7 @@
             </template>
         </DialogModal>
         <!-- modal de entrada/salida de producto -->
-        <DialogModal :show="showInventoryModal" @close="showInventoryModal = false">
+        <DialogModal :show="showInventoryModal" @close="showInventoryModal = false" maxWidth="2xl">
             <template #title>Ajuste de inventario</template>
             <template #content>
                 <p class="text-gray99">
@@ -246,7 +242,8 @@
                             </div>
                             <div v-else class="col-span-3 flex items-center space-x-2">
                                 <strong>
-                                    ${{ productEntryFound[0]?.public_price?.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                    ${{ productEntryFound[0]?.public_price?.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    ",") }}
                                 </strong>
                                 <button
                                     @click="priceForm.public_price = productEntryFound[0]?.public_price; editPrice = true"
@@ -292,7 +289,6 @@ import Modal from "@/Components/Modal.vue";
 import DialogModal from "@/Components/DialogModal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
-// import { addOrUpdateBatchOfItems } from '@/dbService.js';
 import emitter from '@/eventBus.js';
 import SmallLoading from '@/Components/MyComponents/SmallLoading.vue';
 
@@ -313,6 +309,7 @@ export default {
 
         return {
             form,
+            data: null,
             priceForm,
             importForm,
             loading: false,
@@ -339,10 +336,6 @@ export default {
             // control de inventario activado
             isInventoryOn: this.$page.props.auth.user.store.settings.find(item => item.name == 'Control de inventario')?.value,
             // datos para la vista
-            products: [],
-            localProducts: [],
-            totalProducts: null,
-            totalLocalProducts: null,
             searchedWord: null, //palabra con la que se hizo la última busqueda.
             // carga
             loading: false,
@@ -362,7 +355,6 @@ export default {
         SmallLoading,
     },
     props: {
-        data: Object,
     },
     methods: {
         handleCommand(command) {
@@ -397,9 +389,9 @@ export default {
                 onSuccess: () => {
                     if (product.global_product_id) {
                         // Actualiza el precio en la lista local mostrados en la tabla de productos
-                        const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
+                        const IndexProductEntry = this.data.products.findIndex(item => item.global_product?.name === product.global_product?.name);
                         if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].current_stock = parseInt(this.form.quantity);
+                            this.data.products[IndexProductEntry].current_stock = parseInt(this.form.quantity);
                         }
                         this.$notify({
                             title: "Correcto",
@@ -408,9 +400,9 @@ export default {
                         });
                     } else {
                         // Actualiza el precio en la lista local mostrados en la tabla de productos
-                        const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
+                        const IndexProductEntry = this.data.products.findIndex(item => item.code === product.code);
                         if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].current_stock = parseInt(this.form.quantity);
+                            this.data.products[IndexProductEntry].current_stock = parseInt(this.form.quantity);
                         }
                         this.$notify({
                             title: "Correcto",
@@ -445,9 +437,9 @@ export default {
                 onSuccess: () => {
                     if (product.global_product_id) {
                         // Actualiza el precio en la lista local mostrados en la tabla de productos
-                        const IndexProductEntry = this.localProducts.findIndex(item => item.global_product?.name === product.global_product?.name);
+                        const IndexProductEntry = this.data.products.findIndex(item => item.global_product?.name === product.global_product?.name);
                         if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].public_price = parseFloat(this.priceForm.public_price);
+                            this.data.products[IndexProductEntry].public_price = parseFloat(this.priceForm.public_price);
                         }
                         product.public_price = parseFloat(this.priceForm.public_price);
                         this.$notify({
@@ -457,9 +449,9 @@ export default {
                         });
                     } else {
                         // Actualiza el precio en la lista local mostrados en la tabla de productos
-                        const IndexProductEntry = this.localProducts.findIndex(item => item.code === product.code);
+                        const IndexProductEntry = this.data.products.findIndex(item => item.code === product.code);
                         if (IndexProductEntry !== -1) {
-                            this.localProducts[IndexProductEntry].public_price = parseFloat(this.priceForm.public_price);
+                            this.data.products[IndexProductEntry].public_price = parseFloat(this.priceForm.public_price);
                         }
                         product.public_price = parseFloat(this.priceForm.public_price);
                         this.$notify({
@@ -481,16 +473,6 @@ export default {
             this.productEntryFound = null;
             this.showInventoryModal = false;
         },
-        resetLocalProducts() {
-            return new Promise((resolve) => {
-                // Simulamos una operación asíncrona con un setTimeout que puede ajustarse al tiempo esperado
-                // En tu caso, puedes reemplazar este setTimeout con una llamada real si es necesario
-                setTimeout(() => {
-                    this.localProducts = this.products;
-                    resolve();
-                }, 500); // Cambia este tiempo si es necesario
-            });
-        },
         getPageFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const page = params.get('page');
@@ -499,24 +481,21 @@ export default {
             }
         },
         closedTag() {
-            this.localProducts = this.products;
             this.searchedWord = null;
+            this.fetchData();
         },
         inputFocus() {
             this.$nextTick(() => {
                 this.$refs.scanInput.focus();
             });
         },
-        async fetchDataForProductsView() {
+        async fetchData() {
             try {
                 this.loading = true;
                 const response = await axios.post(route('products.get-data-for-products-view'), { page: this.currentPage });
 
                 if (response.status === 200) {
-                    this.products = response.data.products;
-                    this.totalProducts = response.data.total_products;
-                    this.totalLocalProducts = response.data.total_local_products;
-                    this.localProducts = this.products;
+                    this.data = response.data.data;
                 }
             } catch (error) {
                 console.error(error);
@@ -552,37 +531,13 @@ export default {
                 this.importErrors = error.response.data.errors;
             }
         },
-        async fetchItemsByPage() {
-            try {
-                this.loadingItems = true;
-                const response = await axios.get(route('products.get-by-page', this.currentPage));
-
-                if (response.status === 200) {
-                    this.localProducts = [...this.localProducts, ...response.data.items];
-                    this.currentPage++;
-
-                    // Actualiza la URL con la pagina
-                    if (this.currentPage > 1) {
-                        const currentURL = new URL(window.location.href);
-                        currentURL.searchParams.set('page', this.currentPage);
-                        window.history.replaceState({}, document.title, currentURL.href);
-                    }
-                    // location.reload(); se requiere recargar la pagina para guardar el parametro de page en la url
-                }
-            } catch (error) {
-                console.log(error)
-            } finally {
-                this.loadingItems = false;
-            }
-        },
         async searchProducts() {
-            this.loading = true;
-            if (this.searchQuery != '') {
+            if (this.searchQuery) {
                 try {
+                    this.loading = true;
                     const response = await axios.get(route('products.search'), { params: { query: this.searchQuery } });
                     if (response.status == 200) {
-                        // this.products = this.localProducts;
-                        this.localProducts = response.data.items;
+                        this.data.products = response.data.items;
                         this.searchedWord = this.searchQuery;
                         this.searchQuery = null;
                     }
@@ -593,14 +548,7 @@ export default {
                     this.loading = false;
                     this.inputFocus();
                 }
-            } else {
-                // Aquí podemos simular una operación asíncrona para mostrar el indicador de carga
-                try {
-                    await this.resetLocalProducts();
-                } finally {
-                    this.loading = false;
-                }
-            }
+            } 
         },
         async getProduct() {
             try {
@@ -633,7 +581,7 @@ export default {
                 const response = await axios.get(route('products.get-all-until-page', this.currentPage));
 
                 if (response.status === 200) {
-                    this.localProducts = response.data.items;
+                    this.data.products = response.data.items;
                 }
             } catch (error) {
                 console.log(error)
@@ -644,14 +592,14 @@ export default {
     },
     mounted() {
         this.getPageFromUrl(); //obtiene la variable page de la url.
-        this.fetchDataForProductsView();
+        this.fetchData();
 
         // Escucha el evento personalizado para actualizar carrito
-        emitter.on('product-deleted', this.fetchDataForProductsView);
+        emitter.on('product-deleted', this.fetchData);
     },
     beforeUnmount() {
         // Elimina el listener del evento cuando se desmonta el componente
-        emitter.off('product-deleted', this.fetchDataForProductsView);
+        emitter.off('product-deleted', this.fetchData);
     }
 }
 </script>

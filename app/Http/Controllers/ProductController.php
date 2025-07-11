@@ -28,25 +28,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $perPage = request('pageSize', 100);
-        $page = request('page', 1);
-
-        $allProducts = $this->getAllProducts(); // Obtienes la Collection
-
-        // Paginación manual
-        $paginatedProducts = $allProducts->forPage($page, $perPage);
-        $total = $allProducts->count();
-
-        $data = [
-            'products' => $paginatedProducts->values(),
-            'pagination' => [
-                'current_page' => $page,
-                'per_page' => $perPage,
-                'total' => $total,
-            ]
-        ];
-
-        return inertia('Product/Index', compact('data'));
+        return inertia('Product/Index');
     }
 
     public function create()
@@ -904,15 +886,26 @@ class ProductController extends Controller
 
     public function getDataForProductsView()
     {
-        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
-        $all_products = $this->getAllProducts();
-        $total_products = $all_products->count();
-        $total_local_products = $all_products->whereNull('global_product_id')->count();
+        $perPage = request('pageSize', 100);
+        $page = request('page', 1);
 
-        //tomar solo primeros 30 productos
-        $products = $all_products->take($page);
+        $allProducts = $this->getAllProducts(); // Obtienes la Collection
 
-        return response()->json(compact('products', 'total_products', 'total_local_products'));
+        // Paginación manual
+        $paginatedProducts = $allProducts->forPage($page, $perPage);
+        $total = $allProducts->count();
+
+        $data = [
+            'products' => $paginatedProducts->values(),
+            'total_local_products' => $allProducts->where('global_product_id', null)->count(),
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+            ]
+        ];
+
+        return response()->json(compact('data'));
     }
 
     private function validateProductsFromFile($worksheet)
