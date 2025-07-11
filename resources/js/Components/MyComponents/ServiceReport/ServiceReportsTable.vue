@@ -63,7 +63,7 @@
                     </td>
                 </template>
             </el-table-column>
-            <el-table-column label="Equipo" fixed width="150">
+            <el-table-column label="Equipo" fixed width="120">
                 <template #default="scope">
                     <p>
                         <span v-if="scope.row.product_details?.brand">{{ scope.row.product_details?.brand }}</span>
@@ -72,7 +72,7 @@
                     </p>
                 </template>
             </el-table-column>
-            <el-table-column prop="service_date" sortable label="Fecha del servicio">
+            <el-table-column prop="service_date" sortable label="Fecha del servicio" width="170">
                 <template #default="scope">
                     <p>{{ formatDate(scope.row.service_date) }}</p>
                 </template>
