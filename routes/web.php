@@ -100,7 +100,7 @@ Route::post('products/import', [ProductController::class, 'import'])->name('prod
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::get('products-get-by-id-for-indexedDB/{product}', [ProductController::class, 'getByIdForIndexedDB'])->name('products.get-by-id-for-indexedDB')->middleware('auth');
-Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
+Route::get('products-get-data-for-table', [ProductController::class, 'getDataForTable'])->name('products.get-data-for-table')->middleware('auth');
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
 Route::get('products-filter-by-provider', [ProductController::class, 'filterByProvider'])->name('products.filter-by-provider');
 
@@ -391,14 +391,14 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 //rutas de reportes de servicio --------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('service-reports', ServiceReportController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Ordenes de servicio', 'verified']);
-Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
 Route::get('services-fetch-spare-parts', [ServiceReportController::class, 'fetchSpareParts'])->name('service-reports.fetch-spare-parts')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
+Route::get('services-reports-print-template/{report}', [ServiceReportController::class, 'printTemplate'])->name('service-reports.print-template')->middleware('auth');
+Route::get('services-search-get-data-for-table', [ServiceReportController::class, 'getDataForTable'])->name('service-reports.get-data-for-table')->middleware('auth');
 Route::post('services-reports-store-phones-stores', [ServiceReportController::class, 'storePhoneStores'])->name('service-reports.store-phones')->middleware('auth');
 Route::post('services-reports-update-phones-stores/{service_order}', [ServiceReportController::class, 'updatePhoneStores'])->name('service-reports.update-phones')->middleware('auth');
 Route::post('services-reports-change-status/{service_report}', [ServiceReportController::class, 'changeStatus'])->name('service-reports.change-status')->middleware('auth');
 Route::post('services-reports-massive-delete', [ServiceReportController::class, 'massiveDelete'])->name('service-reports.massive-delete')->middleware('auth');
-Route::get('services-reports-print-template/{report}', [ServiceReportController::class, 'printTemplate'])->name('service-reports.print-template')->middleware('auth');
 
 
 //rutas de báscula ---------------------------------------------------------------------------------------------------

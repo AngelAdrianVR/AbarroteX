@@ -297,7 +297,7 @@ export default {
       // Lista de operaciones para el plugin
       if (this.printType == "Ticket") {
         const logo = this.$page.props.auth.user.store.media?.find(
-          (m) => m.collection_name == "logo"
+          (m) => m.collection_name == "ticketLogo"
         )?.original_url;
 
         if (logo) {
@@ -332,7 +332,6 @@ export default {
         serial: this.serial, // Serial del plugin
         operaciones: listaDeOperaciones,
         nombreImpresora: this.selectedPrinter,
-        // 'serial' no es necesario si usas 'nombreImpresora'
       };
       try {
         const respuestaHttp = await fetch("http://localhost:8000/imprimir", {
