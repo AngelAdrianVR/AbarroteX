@@ -332,7 +332,6 @@ export default {
         serial: this.serial, // Serial del plugin
         operaciones: listaDeOperaciones,
         nombreImpresora: this.selectedPrinter,
-        // 'serial' no es necesario si usas 'nombreImpresora'
       };
       try {
         const respuestaHttp = await fetch("http://localhost:8000/imprimir", {

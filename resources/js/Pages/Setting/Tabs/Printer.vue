@@ -51,6 +51,10 @@
                     <p class="text-[#575757]">
                         Elige el dispositivo que utilizarás para imprimir las etiquetas. Asegúrate de qué esté
                         correctamente conectado y configurado.
+                        <button v-if="form.printer_config.labelPrinterName" @click="selfTestLabel" type="button"
+                            class="text-primary underline">
+                            Prueba de impresión
+                        </button>
                     </p>
                 </div>
                 <div>
@@ -154,15 +158,16 @@
                         Añade líneas en blanco al final para expulsar el ticket completamente. <br>
                         Si ves que el ticket está incompleto, añade mas lineas. Por el contrario si el ticket
                         sale con mucho espacio en blanco al final, reduce las lineas. <br>
-                        Valor típico: 3-5 líneas. 
+                        Valor típico: 3-5 líneas.
                     </p>
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Cantidad de líneas:</p>
-                        <el-input-number v-model="form.printer_config.ticketFinalWhiteLines" @blur="updateTicketFinalWhiteLines"
-                            @keyup.enter="updateTicketFinalWhiteLines" @change="updateTicketFinalWhiteLines" :min="1" :max="10"
-                            class="!w-24" size="small" clearable />
+                        <el-input-number v-model="form.printer_config.ticketFinalWhiteLines"
+                            @blur="updateTicketFinalWhiteLines" @keyup.enter="updateTicketFinalWhiteLines"
+                            @change="updateTicketFinalWhiteLines" :min="1" :max="10" class="!w-24" size="small"
+                            clearable />
                     </div>
                     <p v-if="loadingTicketFinalWhiteLines" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
@@ -176,9 +181,9 @@
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Términos y condiciones:</p>
-                        <el-input v-model="form.printer_config.ticketTerms" @blur="updateTicketTerms" :autosize="{ minRows: 2, maxRows: 6 }" type="textarea"
-                        placeholder="" :maxlength="800" show-word-limit class="!w-72"
-                        clearable />
+                        <el-input v-model="form.printer_config.ticketTerms" @blur="updateTicketTerms"
+                            :autosize="{ minRows: 2, maxRows: 6 }" type="textarea" placeholder="" :maxlength="800"
+                            show-word-limit class="!w-72" clearable />
                     </div>
                     <p v-if="loadingTicketTerms" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
@@ -570,6 +575,54 @@ export default {
             } catch (e) {
                 // El plugin no respondió
                 console.log(e)
+            }
+        },
+        async getParzibyteSerial() {
+            try {
+                const response = await axios.get(route("users.get-parzibyte-serial"));
+                if (response.status === 200) {
+                    this.serial = response.data.serial;
+                } else {
+                    console.error("Error al obtener serial: ", response.status);
+                }
+            } catch (error) {
+                console.error("Error al obtener serial: ", error);
+            }
+        },
+        async selfTestLabel() {
+            let commands = '';
+            commands += `CLS\n`;
+            commands += `SELFTEST PRINTER\n`;
+
+            let listaDeOperaciones = [{
+                nombre: "EscribirTexto",
+                argumentos: [commands],
+            }];
+
+            // Payload para la petición HTTP
+            const cargaUtil = {
+                serial: await this.getParzibyteSerial(),
+                operaciones: listaDeOperaciones,
+                nombreImpresora: this.form.printer_config.labelPrinterName,
+            };
+            try {
+                const respuestaHttp = await fetch("http://localhost:8000/imprimir", {
+                    method: "POST",
+                    body: JSON.stringify(cargaUtil),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const respuesta = await respuestaHttp.json();
+                if (!respuesta.ok) {
+                    alert(
+                        `Error al imprimir por USB: ${respuesta.message}\nAsegúrate que la impresora "${this.selectedPrinter}" esté cpnectada y sea la impresora correcta.`
+                    );
+                }
+            } catch (error) {
+                alert(
+                    "No se pudo conectar con el plugin de impresión. Verifica que el programa esté ejecutándose en tu computadora y no esté bloqueado por un firewall."
+                );
             }
         },
     },
