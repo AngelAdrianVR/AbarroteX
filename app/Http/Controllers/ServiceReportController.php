@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use App\Services\TinifyService;
+use Illuminate\Support\Facades\Log;
 
 class ServiceReportController extends Controller
 {
@@ -18,10 +19,7 @@ class ServiceReportController extends Controller
 
     public function index()
     {
-        $service_reports = ServiceReport::latest('id')->where('store_id', auth()->user()->store_id)->get()->take(150);
-        $total_reports = ServiceReport::where('store_id', auth()->user()->store_id)->get()->count();
-
-        return inertia('ServiceReport/Index', compact('service_reports', 'total_reports'));
+        return inertia('ServiceReport/Index');
     }
 
     public function create()
@@ -229,13 +227,25 @@ class ServiceReportController extends Controller
         return response()->json(['items' => $reports]);
     }
 
-    public function getItemsByPage($currentPage)
+    public function getDataForTable()
     {
-        $offset = $currentPage * 50;
+        $perPage = request('pageSize', 100);
+        $page = request('page', 1);
 
-        $reports = ServiceReport::where('store_id', auth()->user()->store_id)->latest()->skip($offset)->take(50)->get();
+        $reports = ServiceReport::where('store_id', auth()->user()->store_id)
+            ->latest('id')
+            ->paginate($perPage, ['*'], 'page', $page);
 
-        return response()->json(['items' => $reports]);
+        $data = [
+            'reports' => $reports->items(),
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $reports->total(),
+            ]
+        ];
+
+        return response()->json(compact('data'));
     }
 
     public function changeStatus(Request $request, ServiceReport $service_report)
@@ -265,13 +275,13 @@ class ServiceReportController extends Controller
                     'current_price' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
                     'store_id' => $service_report->store_id,
                 ]);
-                
+
                 // Registrar el movimiento de caja para el gasto de comision
                 $cash_register = auth()->user()->cashRegister;
                 CashRegisterMovement::create([
-                    'amount' =>($service_report->comision_percentage / 100) * $service_report->service_cost,
+                    'amount' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
                     'type' => 'Retiro',
-                    'notes' => 'Registro. Comisión ' . $service_report->comision_percentage .'% ' . $service_report->technician_name . '. Venta folio ' . $service_report->folio,
+                    'notes' => 'Registro. Comisión ' . $service_report->comision_percentage . '% ' . $service_report->technician_name . '. Venta folio ' . $service_report->folio,
                     'cash_register_id' => $cash_register->id,
                     'expense_id' => $expense->id,
                 ]);

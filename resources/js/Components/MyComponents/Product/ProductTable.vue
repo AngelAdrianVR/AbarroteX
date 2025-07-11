@@ -218,6 +218,7 @@ export default {
             pageSize: parseInt(this.pagination.per_page),
         };
     },
+    emits: ['refresh-data'],
     components: {
         ConfirmationModal,
         PrimaryButton,
@@ -248,10 +249,12 @@ export default {
     },
     methods: {
         handleSizeChange() {
-            this.$inertia.visit(route('products.index', { page: this.currentPage, pageSize: this.pageSize }));
+            // reiniciar la pagina a 1
+            this.currentPage = 1;
+            this.$emit('refresh-data' , this.currentPage, this.pageSize);
         },
         handlePagination(val) {
-            this.$inertia.visit(route('products.index', { page: val, pageSize: this.pageSize }));
+            this.$emit('refresh-data' , val, this.pageSize);
         },
         filterCategory(category, row) {
             let productCategory = row.global_product_id ? row.global_product?.category?.name : row.category?.name;

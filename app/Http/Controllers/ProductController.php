@@ -884,7 +884,7 @@ class ProductController extends Controller
         return response()->json(compact('products', 'local_products', 'transfered_products'));
     }
 
-    public function getDataForProductsView()
+    public function getDataForTable()
     {
         $perPage = request('pageSize', 100);
         $page = request('page', 1);

@@ -7,7 +7,7 @@
             <article class="flex items-center space-x-5 lg:w-1/3">
                 <div class="lg:w-full relative">
                     <input v-model="searchQuery" @keydown.enter="searchProducts" class="input w-full pl-9"
-                        placeholder="Buscar código o nombre de producto" type="search" ref="scanInput" />
+                        placeholder="Buscar código o nombre de producto" type="search" ref="searchInput" />
                     <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
                 </div>
                 <el-tag @close="closedTag" v-if="searchedWord" closable type="primary">
@@ -30,7 +30,7 @@
         </section>
         <Loading v-if="loading" class="mt-20" />
         <div v-else-if="data" class="mt-8">
-            <ProductTable :products="data.products" :pagination="data.pagination" :showPagination="!searchedWord" />
+            <ProductTable @refresh-data="handleRefreshing" :products="data.products" :pagination="data.pagination" :showPagination="!searchedWord" />
         </div>
 
         <!-- modal de importacion -->
@@ -243,7 +243,7 @@
                             <div v-else class="col-span-3 flex items-center space-x-2">
                                 <strong>
                                     ${{ productEntryFound[0]?.public_price?.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                    ",") }}
+                                        ",") }}
                                 </strong>
                                 <button
                                     @click="priceForm.public_price = productEntryFound[0]?.public_price; editPrice = true"
@@ -322,8 +322,8 @@ export default {
             // tabs
             activeTab: 'Mis productos',
             // paginacion
-            loadingItems: false,
-            currentPage: 1,
+            currentPage: null,
+            pageSize: null,
             // importation
             showImportModal: false,
             isImporting: false,
@@ -357,6 +357,11 @@ export default {
     props: {
     },
     methods: {
+        handleRefreshing(page, pageSize) {
+            this.currentPage = page;
+            this.pageSize = pageSize;
+            this.fetchData();
+        },
         handleCommand(command) {
             if (command == 'import') {
                 this.showImportModal = true;
@@ -476,8 +481,16 @@ export default {
         getPageFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const page = params.get('page');
+            const pageSize = params.get('pageSize');
             if (page) {
                 this.currentPage = parseInt(page);
+            } else {
+                this.currentPage = 1;
+            }
+            if (pageSize) {
+                this.pageSize = parseInt(pageSize);
+            } else {
+                this.pageSize = 100;
             }
         },
         closedTag() {
@@ -486,13 +499,13 @@ export default {
         },
         inputFocus() {
             this.$nextTick(() => {
-                this.$refs.scanInput.focus();
+                this.$refs.searchInput.focus();
             });
         },
         async fetchData() {
             try {
                 this.loading = true;
-                const response = await axios.post(route('products.get-data-for-products-view'), { page: this.currentPage });
+                const response = await axios.get(route('products.get-data-for-table', { page: this.currentPage, pageSize: this.pageSize }));
 
                 if (response.status === 200) {
                     this.data = response.data.data;
@@ -548,7 +561,7 @@ export default {
                     this.loading = false;
                     this.inputFocus();
                 }
-            } 
+            }
         },
         async getProduct() {
             try {
@@ -573,20 +586,6 @@ export default {
                 console.log(error);
             } finally {
                 this.fetchingProduct = false;
-            }
-        },
-        async fetchAllItemsForCurrentPage() {
-            try {
-                this.loading = true;
-                const response = await axios.get(route('products.get-all-until-page', this.currentPage));
-
-                if (response.status === 200) {
-                    this.data.products = response.data.items;
-                }
-            } catch (error) {
-                console.log(error)
-            } finally {
-                this.loading = false;
             }
         },
     },
