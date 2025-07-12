@@ -11,10 +11,7 @@ class ClientController extends Controller
 {
     public function index()
     {
-        $clients = Client::where('store_id', auth()->user()->store_id)->get()->take(20);
-        $total_clients = Client::where('store_id', auth()->user()->store_id)->get()->count();
-
-        return inertia('Client/Index', compact('clients', 'total_clients'));
+        return inertia('Client/Index');
     }
 
     public function create()
@@ -97,15 +94,26 @@ class ClientController extends Controller
     }
 
 
-    public function getItemsByPage($currentPage)
+    public function getDataForTable()
     {
-        $offset = $currentPage * 20;
+        $perPage = request('pageSize', 100);
+        $page = request('page', 1);
 
-        $clients = Client::where('store_id', auth()->user()->store_id)->skip($offset)->take(20)->get();
+        $clients = Client::where('store_id', auth()->user()->store_id)
+            ->latest('id')
+            ->paginate($perPage, ['*'], 'page', $page);
 
-        return response()->json(['items' => $clients]);
+        $data = [
+            'clients' => $clients->items(),
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $clients->total(),
+            ]
+        ];
+
+        return response()->json(compact('data'));
     }
-
 
     public function searchClient(Request $request)
     {
@@ -121,7 +129,6 @@ class ClientController extends Controller
 
         return response()->json(['items' => $clients]);
     }
-
 
     public function PrintCreditHistorical(Client $client)
     {

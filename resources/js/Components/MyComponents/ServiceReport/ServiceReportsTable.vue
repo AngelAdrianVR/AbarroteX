@@ -1,9 +1,5 @@
 <template>
     <div class="overflow-auto">
-        <!-- <div class="flex justify-end h-5">
-            <el-button v-show="selectedReports.length" :disabled="!selectedReports.length" type="danger"
-                @click="deleteSelected">Eliminar ({{ selectedReports.length }})</el-button>
-        </div> -->
         <div class="lg:flex items-center lg:space-x-2">
             <el-pagination v-if="showPagination" v-model:current-page="currentPage" v-model:page-size="pageSize"
                 @size-change="handleSizeChange" @current-change="handlePagination"
@@ -36,7 +32,7 @@
                                         <div v-if="scope.row.status === 'Cancelada'">
                                             <p class="text-blue-300">
                                                 Razón: <span class="text-white">{{ scope.row.cancellation_reason ?? '-'
-                                                    }}</span>
+                                                }}</span>
                                             </p>
                                             <p class="text-blue-300">
                                                 Monto de revisión: <span class="text-white">${{
@@ -51,7 +47,7 @@
                                             <p class="text-green-300">
                                                 Pagado el: <span class="text-white">{{ formatDate(scope.row.paid_at) ??
                                                     '-'
-                                                    }}</span>
+                                                }}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -68,7 +64,7 @@
                     <p>
                         <span v-if="scope.row.product_details?.brand">{{ scope.row.product_details?.brand }}</span>
                         <span v-if="scope.row.product_details?.model">{{ ' ' + scope.row.product_details?.model
-                        }}</span>
+                            }}</span>
                     </p>
                 </template>
             </el-table-column>
@@ -388,11 +384,6 @@ export default {
             pageSize: parseInt(this.pagination.per_page),
         }
     },
-    // watch: {
-    //     reports(newReports) {
-    //         this.internalReports = [...newReports]
-    //     }
-    // },
     components: {
         ConfirmationModal,
         PrimaryButton,
@@ -410,14 +401,6 @@ export default {
         },
     },
     emits: ['refresh-data'],
-    // computed: {
-    //     isIndeterminate() {
-    //         return (
-    //             this.selectedReports.length > 0 &&
-    //             this.selectedReports.length < this.internalReports.length
-    //         )
-    //     },
-    // },
     methods: {
         handleSizeChange() {
             // reiniciar la pagina a 1
@@ -449,53 +432,6 @@ export default {
                 return '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.7 4.3L6.5 6.5M4.3 8.7L6.5 6.5M6.5 6.5L4.3 4.3M6.5 6.5L8.7 8.7M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#B80505" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             }
         },
-        // toggleSelectAll(val) {
-        //     this.selectedReports = val ? this.internalReports.map(r => r.id) : []
-        // },
-        // handleCheckChange() {
-        //     const total = this.internalReports.length
-        //     const checked = this.selectedReports.length
-        //     this.checkAll = checked === total
-        // },
-        // handleCheckboxChange(checked, id) {
-        //     if (checked) {
-        //         if (!this.selectedReports.includes(id)) {
-        //             this.selectedReports.push(id)
-        //         }
-        //     } else {
-        //         this.selectedReports = this.selectedReports.filter(rid => rid !== id)
-        //     }
-        //     this.handleCheckChange()
-        // },
-        // async deleteSelected() {
-        //     try {
-        //         const response = await axios.post(route('service-reports.massive-delete'), {
-        //             ids: this.selectedReports,
-        //         })
-
-        //         if (response.status === 200) {
-        //             // Filtrar los reportes eliminados
-        //             this.internalReports = this.internalReports.filter(
-        //                 report => !this.selectedReports.includes(report.id)
-        //             )
-        //             this.selectedReports = []
-        //             this.checkAll = false
-
-        //             this.$notify({
-        //                 title: 'Correcto',
-        //                 message: response.data.message,
-        //                 type: 'success',
-        //             });
-        //         }
-        //     } catch (error) {
-        //         console.error('Error al eliminar:', error)
-        //         this.$notify({
-        //             title: 'Error',
-        //             message: 'Hubo un error al eliminar las ordenes',
-        //             type: 'error',
-        //         });
-        //     }
-        // },
         formatDate(dateString) {
             if (!dateString) return '';
             return format(parseISO(dateString), 'dd MMM yyyy', { locale: es });
