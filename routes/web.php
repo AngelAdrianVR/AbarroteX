@@ -264,8 +264,8 @@ Route::resource('cards', CardController::class)->middleware('auth');
 //clients routes----------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
 Route::resource('clients', ClientController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Clientes', 'verified']);
-Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
 Route::get('clients-search', [ClientController::class, 'searchClient'])->name('clients.search')->middleware('auth');
+Route::get('clients-get-data-for-table', [ClientController::class, 'getDataForTable'])->name('clients.get-data-for-table')->middleware('auth');
 Route::get('clients-print-credit-historial/{client}', [ClientController::class, 'PrintCreditHistorical'])->name('clients.print-credit-historial')->middleware('auth');
 Route::get('clients-print-cash-historial/{client}', [ClientController::class, 'PrintCashHistorical'])->name('clients.print-cash-historial')->middleware('auth');
 Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getClientSales'])->name('clients.get-client-sales')->middleware('auth');
