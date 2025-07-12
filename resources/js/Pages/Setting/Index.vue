@@ -101,7 +101,7 @@
                     </template>
                     <OnlineSale />
                 </el-tab-pane>
-                <!-- <el-tab-pane v-if="this.$page.props.auth.user.store.activated_modules?.includes('Cotizaciones')"
+                <el-tab-pane v-if="this.$page.props.auth.user.store.activated_modules?.includes('Cotizaciones')"
                     label="Cotizaciones" name="6">
                     <template #label>
                         <div class="flex items-center space-x-1">
@@ -115,7 +115,7 @@
                         </div>
                     </template>
                     <Quotes />
-                </el-tab-pane> -->
+                </el-tab-pane>
             </el-tabs>
         </div>
     </AppLayout>

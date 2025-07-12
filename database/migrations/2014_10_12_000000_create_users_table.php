@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('profile_photo_path', 2048)->nullable();
             $table->json('scale_config')->nullable(); //configuraciones de báscula
             $table->json('printer_config')->nullable(); //configuraciones de impresora
+            $table->json('quote_config')->nullable(); //configuraciones de cotizacion
             $table->json('employee_properties')->nullable(); //propiedades de empleados (usuarios adicionales al administrador)
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->foreignId('cash_register_id')->nullable()->constrained();
