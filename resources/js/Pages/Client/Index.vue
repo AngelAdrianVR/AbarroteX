@@ -14,7 +14,6 @@
                     </el-tag>
                 </article>
                 <div v-if="canCreate" class="my-4 md:my-0 flex items-center justify-end space-x-3">
-                    <!-- <ThirthButton>Registrar abono</ThirthButton> -->
                     <PrimaryButton @click="$inertia.get(route('clients.create'))">Nuevo cliente</PrimaryButton>
                 </div>
             </div>

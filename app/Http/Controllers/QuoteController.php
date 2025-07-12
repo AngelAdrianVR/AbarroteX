@@ -25,10 +25,7 @@ class QuoteController extends Controller
 
     public function index()
     {
-        $quotes = Quote::where('store_id', auth()->user()->store_id)->latest()->get()->take(20);
-        $total_quotes = Quote::where('store_id', auth()->user()->store_id)->get()->count();
-
-        return inertia('Quote/Index', compact('quotes', 'total_quotes'));
+        return inertia('Quote/Index');
     }
 
     public function create()
@@ -342,6 +339,27 @@ class QuoteController extends Controller
         $client = Client::find($quote->client_id);
         $client->debt = max(0, ($client->debt ?? 0) - $installment);
         $client->save();
+    }
+
+    public function getDataForTable()
+    {
+        $perPage = request('pageSize', 100);
+        $page = request('page', 1);
+
+        $quotes = Quote::where('store_id', auth()->user()->store_id)
+            ->latest('id')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $data = [
+            'quotes' => $quotes->items(),
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $quotes->total(),
+            ]
+        ];
+
+        return response()->json(compact('data'));
     }
 
     private function storeEachProductSold($products_sold, $request, $quote, $installment)

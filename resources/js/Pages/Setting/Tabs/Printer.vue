@@ -411,7 +411,6 @@ export default {
         Link,
     },
     props: {
-        store: Object,
     },
     computed: {
         storeLogoUrl() {

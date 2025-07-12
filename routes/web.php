@@ -199,7 +199,7 @@ Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'p
 //----------------------------------------------------------------------------------------------------
 Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Cotizaciones', 'verified']);
 Route::get('quotes-search', [QuoteController::class, 'searchQuote'])->name('quotes.search')->middleware('auth');
-Route::get('quotes-get-by-page/{currentPage}', [QuoteController::class, 'getItemsByPage'])->name('quotes.get-by-page')->middleware('auth');
+Route::get('quotes-get-data-for-table', [QuoteController::class, 'getDataForTable'])->name('quotes.get-data-for-table')->middleware('auth');
 Route::post('quotes-update-status/{quote}', [QuoteController::class, 'updateStatus'])->name('quotes.update-status')->middleware('auth');
 
 
@@ -242,7 +242,7 @@ Route::post('users-read-online-sales-notifications', [UserController::class, 're
 Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword'])->middleware('auth')->name('users.reset-password');
 Route::put('tutorials-completed', [UserController::class, 'tutorialsCompleted'])->name('users.tutorials-completed')->middleware('auth');
 Route::put('users-update-printer-config/{user}', [UserController::class, 'updatePrinterConfig'])->middleware('auth')->name('users.update-printer-config');
-Route::put('users-save-printer-config/{user}', [UserController::class, 'savePrinter'])->middleware('auth')->name('users.save-printer-config');
+Route::put('users-update-quote-config/{user}', [UserController::class, 'updateQuoteConfig'])->middleware('auth')->name('users.update-quote-config');
 
 
 //settings routes-------------------------------------------------------------------------------------
