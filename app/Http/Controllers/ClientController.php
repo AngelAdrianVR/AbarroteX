@@ -87,12 +87,10 @@ class ClientController extends Controller
         return to_route('clients.index');
     }
 
-
     public function destroy(Client $client)
     {
         $client->delete();
     }
-
 
     public function getDataForTable()
     {
