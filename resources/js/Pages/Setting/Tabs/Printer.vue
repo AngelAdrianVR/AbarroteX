@@ -181,9 +181,9 @@
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Términos y condiciones:</p>
-                        <el-input v-model="form.printer_config.ticketTerms" @blur="updateTicketTerms"
-                            :autosize="{ minRows: 2, maxRows: 6 }" type="textarea" placeholder="" :maxlength="800"
-                            show-word-limit class="!w-72" clearable />
+                        <el-input v-model="form.printer_config.ticketTerms" @blur="updateTicketTerms" :autosize="{ minRows: 3, maxRows: 8 }" type="textarea"
+                        placeholder="" :maxlength="1500" show-word-limit class="!w-72"
+                        clearable />
                     </div>
                     <p v-if="loadingTicketTerms" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
