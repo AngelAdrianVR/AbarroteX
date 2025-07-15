@@ -1,13 +1,18 @@
 <template>
     <div class="overflow-auto">
-        <div class="flex justify-end h-5">
-            <el-button v-show="selectedReports.length" :disabled="!selectedReports.length" type="danger"
-                @click="deleteSelected">Eliminar ({{ selectedReports.length }})</el-button>
+        <div class="lg:flex items-center lg:space-x-2">
+            <el-pagination v-if="showPagination" v-model:current-page="currentPage" v-model:page-size="pageSize"
+                @size-change="handleSizeChange" @current-change="handlePagination"
+                layout="total, sizes, prev, pager, next" :page-sizes="[100, 200, 400, 800]" :total="pagination.total"
+                size="small" />
+            <p class="text-xs text-gray37 mt-1 lg:mt-0">
+                {{ reports.length }} {{ reports.length == 1 ? 'elemento' : 'elementos' }} en la tabla
+            </p>
         </div>
-        <el-table ref="tableRef" :data="internalReports" @row-click="handleRowClick" max-height="670"
+        <el-table ref="tableRef" :data="reports" @row-click="handleRowClick" max-height="500"
             :row-class-name="tableRowClassName" :default-sort="{ prop: 'folio', order: 'descending' }"
             class="!w-full mx-auto">
-            <el-table-column prop="folio" sortable label="Orden" width="110" :filters="[
+            <el-table-column prop="folio" fixed sortable label="Orden" width="110" :filters="[
                 { text: 'Recibida', value: 'Recibida' },
                 { text: 'En proceso', value: 'En proceso' },
                 { text: 'Listo para entregar', value: 'Listo para entregar' },
@@ -54,7 +59,7 @@
                     </td>
                 </template>
             </el-table-column>
-            <el-table-column label="Equipo" width="150">
+            <el-table-column label="Equipo" fixed width="120">
                 <template #default="scope">
                     <p>
                         <span v-if="scope.row.product_details?.brand">{{ scope.row.product_details?.brand }}</span>
@@ -63,7 +68,7 @@
                     </p>
                 </template>
             </el-table-column>
-            <el-table-column label="Fecha del servicio">
+            <el-table-column prop="service_date" sortable label="Fecha del servicio" width="170">
                 <template #default="scope">
                     <p>{{ formatDate(scope.row.service_date) }}</p>
                 </template>
@@ -364,7 +369,7 @@ export default {
             selectedReports: [],
             checkAll: false,
             showPaymentModal: false,
-            internalReports: [...this.reports], // copia local editable
+            // internalReports: [...this.reports], // copia local editable
             reportSelected: null, // Reporte seleccionado para pagar
 
             // modal de pago
@@ -373,11 +378,10 @@ export default {
             paymentConfirmed: false, //indica si el pago ha sido confirmado
             moneyReceived: null, // Monto recibido en efectivo
             updatingStatus: false, // Estado para indicar si se está actualizando el estado
-        }
-    },
-    watch: {
-        reports(newReports) {
-            this.internalReports = [...newReports]
+
+            //paginacion
+            currentPage: parseInt(this.pagination.current_page),
+            pageSize: parseInt(this.pagination.per_page),
         }
     },
     components: {
@@ -386,20 +390,26 @@ export default {
         ThirthButton,
         CancelButton,
         InputLabel,
-        Modal
+        Modal,
     },
     props: {
         reports: Object,
-    },
-    computed: {
-        isIndeterminate() {
-            return (
-                this.selectedReports.length > 0 &&
-                this.selectedReports.length < this.internalReports.length
-            )
+        pagination: Object,
+        showPagination: {
+            type: Boolean,
+            default: true,
         },
     },
+    emits: ['refresh-data'],
     methods: {
+        handleSizeChange() {
+            // reiniciar la pagina a 1
+            this.currentPage = 1;
+            this.$emit('refresh-data', this.currentPage, this.pageSize);
+        },
+        handlePagination(val) {
+            this.$emit('refresh-data', val, this.pageSize);
+        },
         filterStatus(status, row) {
             return row.status == status;
         },
@@ -420,53 +430,6 @@ export default {
                 return '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 0C10.0898 4.60442e-05 13 2.91022 13 6.5C12.9999 10.0897 10.0897 13 6.5 13C2.91023 13 5.05231e-05 10.0898 0 6.5C0 2.91019 2.91019 0 6.5 0ZM5.4707 2.01562C5.37968 2.01575 5.30286 2.09554 5.30273 2.2207V2.78027C5.22939 2.79721 5.15772 2.81561 5.08789 2.83594C4.94423 2.87775 4.80804 2.92656 4.67969 2.98145C4.52242 3.04871 4.37649 3.12494 4.24316 3.20898C4.08938 3.30595 3.95147 3.41352 3.83105 3.52832C3.67288 3.67915 3.5446 3.84361 3.44727 4.01562C3.36431 4.16228 3.30384 4.31502 3.26758 4.46973C3.24063 4.58479 3.22657 4.70112 3.22656 4.81738C3.22656 4.87389 3.2267 4.81759 3.2334 4.98926C3.2401 5.16108 3.28129 5.33645 3.34375 5.5127C3.38852 5.639 3.44821 5.76535 3.52441 5.88965C3.60438 6.02006 3.82144 6.26929 3.83105 6.28027C3.83105 6.28027 4.05208 6.48574 4.1875 6.58203C4.30631 6.6665 4.43821 6.74787 4.58496 6.82422C4.71609 6.89244 4.85935 6.9563 5.01465 7.0166C5.13899 7.06488 5.27127 7.11089 5.41211 7.15332C5.50996 7.1828 5.61257 7.21093 5.71875 7.2373L5.83105 7.26562C6.01306 7.31145 6.17278 7.35346 6.3125 7.39355C7.02167 7.59706 7.21967 7.75313 7.24121 8.12891C7.26757 8.59353 6.53111 9.02023 5.71875 8.76562C5.70037 8.75986 5.62946 8.74417 5.61133 8.73828C5.46072 8.68929 5.32715 8.63746 5.20801 8.58105C5.09254 8.52639 4.99026 8.4668 4.89941 8.40137C4.81334 8.33932 4.73715 8.2713 4.66895 8.19629C4.64909 8.17445 4.62989 8.15202 4.61133 8.12891L3.30859 8.78223C3.21397 8.82974 3.17972 9.02215 3.30859 9.1748C3.33042 9.20066 3.35198 9.22625 3.37402 9.25098C3.47354 9.36259 3.57616 9.463 3.68652 9.55469C3.79801 9.64731 3.91831 9.73092 4.05176 9.80859C4.18868 9.88827 4.33999 9.96152 4.51172 10.0312C4.63053 10.0795 4.75916 10.127 4.89941 10.1729C5.02405 10.2136 5.15825 10.2537 5.30273 10.2939V10.7598C5.30297 10.8735 5.41445 10.9307 5.52832 10.9307H7.02148C7.15628 10.9332 7.24106 10.8962 7.24121 10.7598V10.2939C8.86516 9.90819 9.45595 9.02028 9.45605 8.12891C9.45605 7.23747 8.79963 6.23384 7.24121 5.96387C7.17819 5.95295 7.11661 5.94143 7.05664 5.92969C6.89958 5.89893 6.75233 5.86562 6.61621 5.8291C6.44663 5.7836 6.29334 5.73335 6.15625 5.67871C6.00828 5.61971 5.87868 5.55526 5.76855 5.48535C5.64118 5.40446 5.53866 5.31564 5.46191 5.21973C5.3942 5.13504 5.34664 5.04397 5.31836 4.94727C5.30605 4.90515 5.29682 4.86182 5.29199 4.81738C5.28844 4.78464 5.28758 4.75081 5.28809 4.7168C5.28885 4.66686 5.29323 4.6152 5.30273 4.5625C5.30695 4.53918 5.31265 4.51668 5.31836 4.49512C5.32493 4.47031 5.33236 4.44638 5.34082 4.42383C5.3505 4.39804 5.36105 4.37353 5.37305 4.35059C5.38789 4.32219 5.40472 4.29573 5.42285 4.27148C5.44844 4.23729 5.47738 4.20714 5.50879 4.18066C5.52556 4.16653 5.54327 4.15367 5.56152 4.1416C5.58408 4.12669 5.60822 4.11348 5.63281 4.10156C5.67544 4.08093 5.72079 4.06414 5.76855 4.05176C5.80233 4.04301 5.83723 4.03627 5.87305 4.03125C5.91702 4.02509 5.96248 4.02159 6.00879 4.02051C6.05677 4.0194 6.10665 4.02074 6.15625 4.02441C6.22166 4.02928 6.28809 4.03798 6.35449 4.0498C6.39999 4.05791 6.44607 4.06736 6.49121 4.07812C6.55132 4.09247 6.61084 4.10892 6.66895 4.12695C6.72265 4.14362 6.77547 4.16181 6.82617 4.18066C6.84713 4.18846 6.86795 4.19662 6.88867 4.20508C6.97346 4.2397 7.05656 4.28043 7.13965 4.32715C7.2263 4.37589 7.31368 4.43149 7.40234 4.49512C7.48381 4.55358 7.56696 4.61895 7.65332 4.69141C7.78367 4.80077 7.92108 4.92712 8.07129 5.07227L9.27832 4.29492C9.36951 4.23619 9.36951 4.06349 9.27832 3.95215C9.0011 3.61369 8.73838 3.38484 8.42773 3.20996C8.31617 3.14716 8.19818 3.09144 8.07129 3.04004C7.9604 2.99513 7.84257 2.95295 7.71582 2.91309C7.6323 2.88682 7.54493 2.86125 7.45312 2.83594C7.38515 2.8172 7.31425 2.79895 7.24121 2.78027V2.2207C7.24105 2.07269 7.12368 2.01562 7.00977 2.01562H5.4707Z" fill="#3EA50E"/></svg>';
             } else if (status === 'Cancelada') {
                 return '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.7 4.3L6.5 6.5M4.3 8.7L6.5 6.5M6.5 6.5L4.3 4.3M6.5 6.5L8.7 8.7M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#B80505" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-            }
-        },
-        toggleSelectAll(val) {
-            this.selectedReports = val ? this.internalReports.map(r => r.id) : []
-        },
-        handleCheckChange() {
-            const total = this.internalReports.length
-            const checked = this.selectedReports.length
-            this.checkAll = checked === total
-        },
-        handleCheckboxChange(checked, id) {
-            if (checked) {
-                if (!this.selectedReports.includes(id)) {
-                    this.selectedReports.push(id)
-                }
-            } else {
-                this.selectedReports = this.selectedReports.filter(rid => rid !== id)
-            }
-            this.handleCheckChange()
-        },
-        async deleteSelected() {
-            try {
-                const response = await axios.post(route('service-reports.massive-delete'), {
-                    ids: this.selectedReports,
-                })
-
-                if (response.status === 200) {
-                    // Filtrar los reportes eliminados
-                    this.internalReports = this.internalReports.filter(
-                        report => !this.selectedReports.includes(report.id)
-                    )
-                    this.selectedReports = []
-                    this.checkAll = false
-
-                    this.$notify({
-                        title: 'Correcto',
-                        message: response.data.message,
-                        type: 'success',
-                    });
-                }
-            } catch (error) {
-                console.error('Error al eliminar:', error)
-                this.$notify({
-                    title: 'Error',
-                    message: 'Hubo un error al eliminar las ordenes',
-                    type: 'error',
-                });
             }
         },
         formatDate(dateString) {

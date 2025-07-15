@@ -6,7 +6,7 @@
         <article class="flex items-center flex-col space-y-2 lg:flex-row lg:space-x-2 lg:space-y-0 lg:w-1/3">
           <div class="w-full relative">
             <input v-model="searchQuery" @keydown.enter="searchReports" class="input w-full pl-9"
-              placeholder="Buscar por cliente, N° orden o fecha" type="search" />
+              placeholder="Buscar por cliente o N° orden" type="search" ref="searchInput" />
             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
           </div>
           <el-tag @close="closedTag" v-if="searchedWord" closable type="primary">
@@ -19,30 +19,14 @@
           </PrimaryButton>
         </div>
       </div>
-
-      <!-- tabla -->
-      <div class="mt-9">
-        <p v-if="localReports.length" class="text-gray66 text-[11px]">
-          {{ localReports.length }} de {{ total_reports }} elementos
-        </p>
+      <Loading v-if="loading" class="mt-20" />
+      <div v-else-if="data" class="mt-8">
         <!-- Index para dm compresores -->
-        <ServiceReportsTable6 v-if="$page.props.auth.user.store.id == 6" :reports="localReports" />
+        <ServiceReportsTable6 v-if="$page.props.auth.user.store.id == 6" :reports="data.reports"
+          :pagination="data.pagination" :showPagination="!searchedWord" />
         <!-- Index para apontephone -->
-        <ServiceReportsTable v-else :reports="localReports" />
-        <p v-if="localReports.length" class="text-gray66 text-[11px] mt-3">
-          {{ localReports.length }} de {{ total_reports }} elementos
-        </p>
-        <p v-if="loadingItems" class="text-xs my-4 text-center">
-          Cargando
-          <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
-        </p>
-        <button v-else-if="
-          total_reports > 30 &&
-          localReports.length < total_reports &&
-          localReports.length
-        " @click="fetchItemsByPage" class="w-full text-primary my-4 text-xs mx-auto underline ml-6">
-          Cargar más elementos
-        </button>
+        <ServiceReportsTable v-else @refresh-data="handleRefreshing" :reports="data.reports" :pagination="data.pagination"
+          :showPagination="!searchedWord" />
       </div>
     </div>
   </AppLayout>
@@ -55,17 +39,19 @@ import ThirthButton from "@/Components/MyComponents/ThirthButton.vue";
 import ServiceReportsTable from "@/Components/MyComponents/ServiceReport/ServiceReportsTable.vue";
 import ServiceReportsTable6 from "@/Components/MyComponents/ServiceReport/ServiceReportsTable6.vue";
 import axios from "axios";
+import Loading from "@/Components/MyComponents/Loading.vue";
 
 export default {
   data() {
     return {
       searchQuery: null, //buscador de servicio.
       searchedWord: null, //palabra con la que se hizo la última busqueda.
-      localReports: this.service_reports, //arreglo local de servicios
-      loadingItems: false, //cestado de carga al recuperar mas items en la tabla.
       loading: false, //estado de carga cuando se busca a un servicio por medio del buscador
-      currentPage: 1, //para paginación
       canCreate: this.$page.props.auth.user.permissions.includes('Crear ordenes de servicio'),
+      data: null,
+      //para paginación
+      currentPage: null,
+      pageSize: null,
     };
   },
   components: {
@@ -74,59 +60,76 @@ export default {
     PrimaryButton,
     ServiceReportsTable, // para apontephone
     ServiceReportsTable6, //para dm compresores
+    Loading,
   },
-  props: {
-    service_reports: Array,
-    total_reports: Number,
-  },
+  props: {},
   methods: {
+    handleRefreshing(page, pageSize) {
+      this.currentPage = page;
+      this.pageSize = pageSize;
+      this.fetchData();
+    },
+    getPageFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get('page');
+      const pageSize = params.get('pageSize');
+      if (page) {
+        this.currentPage = parseInt(page);
+      } else {
+        this.currentPage = 1;
+      }
+      if (pageSize) {
+        this.pageSize = parseInt(pageSize);
+      } else {
+        this.pageSize = 100;
+      }
+    },
+    closedTag() {
+      this.searchedWord = null;
+      this.fetchData();
+    },
+    inputFocus() {
+      this.$nextTick(() => {
+        this.$refs.searchInput.focus();
+      });
+    },
+    async fetchData() {
+      try {
+        this.loading = true;
+        const response = await axios.get(route('service-reports.get-data-for-table', { page: this.currentPage, pageSize: this.pageSize }));
+
+        if (response.status === 200) {
+          this.data = response.data.data;
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.loading = false;
+      }
+    },
     async searchReports() {
-      this.loading = true;
-      if (this.searchQuery != "") {
+      if (this.searchQuery) {
         try {
-          const response = await axios.get(route("service-reports.search"), {
-            params: { query: this.searchQuery },
-          });
+          this.loading = true;
+          const response = await axios.get(route('service-reports.search'), { params: { query: this.searchQuery } });
           if (response.status == 200) {
-            this.localReports = response.data.items;
+            this.data.reports = response.data.items;
             this.searchedWord = this.searchQuery;
             this.searchQuery = null;
           }
+
         } catch (error) {
           console.log(error);
         } finally {
           this.loading = false;
+          this.inputFocus();
         }
-      } else {
-        this.localReports = this.service_reports;
       }
     },
-    async fetchItemsByPage() {
-      try {
-        this.loadingItems = true;
-        const response = await axios.get(route("service-reports.get-by-page", this.currentPage));
-
-        if (response.status === 200) {
-          this.localReports = [...this.localReports, ...response.data.items];
-          this.currentPage++;
-
-          // Actualiza la URL con la pagina
-          if (this.currentPage > 1) {
-            const currentURL = new URL(window.location.href);
-            currentURL.searchParams.set("page", this.currentPage);
-            window.history.replaceState({}, document.title, currentURL.href);
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        this.loadingItems = false;
-      }
-    },
-    closedTag() {
-      this.localReports = this.service_reports;
-      this.searchedWord = null;
-    },
+  },
+  mounted() {
+    this.getPageFromUrl(); //obtiene la variable page de la url.
+    this.fetchData();
   },
 };
 </script>

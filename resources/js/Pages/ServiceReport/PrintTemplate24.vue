@@ -133,7 +133,7 @@
 </template>
 
 <script>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import PrintButton from '@/Components/MyComponents/PrintButton.vue';
 import DrawPatternMobil from '@/Components/MyComponents/DrawPatternMobil.vue';
 import { format, parseISO } from 'date-fns';

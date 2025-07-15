@@ -100,7 +100,7 @@ Route::post('products/import', [ProductController::class, 'import'])->name('prod
 Route::get('products-export', [ProductController::class, 'export'])->name('products.export')->middleware('auth');
 Route::get('products-get-all-for-indexedDB', [ProductController::class, 'getAllForIndexedDB'])->name('products.get-all-for-indexedDB')->middleware('auth');
 Route::get('products-get-by-id-for-indexedDB/{product}', [ProductController::class, 'getByIdForIndexedDB'])->name('products.get-by-id-for-indexedDB')->middleware('auth');
-Route::post('products-get-data-for-products-view', [ProductController::class, 'getDataForProductsView'])->name('products.get-data-for-products-view')->middleware('auth');
+Route::get('products-get-data-for-table', [ProductController::class, 'getDataForTable'])->name('products.get-data-for-table')->middleware('auth');
 Route::post('products-change-price', [ProductController::class, 'changePrice'])->name('products.change-price')->middleware('auth'); //cambia el precio del producto desde el punto de venta
 Route::get('products-filter-by-provider', [ProductController::class, 'filterByProvider'])->name('products.filter-by-provider');
 
@@ -199,7 +199,7 @@ Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'p
 //----------------------------------------------------------------------------------------------------
 Route::resource('quotes', QuoteController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Cotizaciones', 'verified']);
 Route::get('quotes-search', [QuoteController::class, 'searchQuote'])->name('quotes.search')->middleware('auth');
-Route::get('quotes-get-by-page/{currentPage}', [QuoteController::class, 'getItemsByPage'])->name('quotes.get-by-page')->middleware('auth');
+Route::get('quotes-get-data-for-table', [QuoteController::class, 'getDataForTable'])->name('quotes.get-data-for-table')->middleware('auth');
 Route::post('quotes-update-status/{quote}', [QuoteController::class, 'updateStatus'])->name('quotes.update-status')->middleware('auth');
 
 
@@ -242,7 +242,7 @@ Route::post('users-read-online-sales-notifications', [UserController::class, 're
 Route::put('users-reset-password/{user}', [UserController::class, 'resetPassword'])->middleware('auth')->name('users.reset-password');
 Route::put('tutorials-completed', [UserController::class, 'tutorialsCompleted'])->name('users.tutorials-completed')->middleware('auth');
 Route::put('users-update-printer-config/{user}', [UserController::class, 'updatePrinterConfig'])->middleware('auth')->name('users.update-printer-config');
-Route::put('users-save-printer-config/{user}', [UserController::class, 'savePrinter'])->middleware('auth')->name('users.save-printer-config');
+Route::put('users-update-quote-config/{user}', [UserController::class, 'updateQuoteConfig'])->middleware('auth')->name('users.update-quote-config');
 
 
 //settings routes-------------------------------------------------------------------------------------
@@ -264,8 +264,8 @@ Route::resource('cards', CardController::class)->middleware('auth');
 //clients routes----------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
 Route::resource('clients', ClientController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Clientes', 'verified']);
-Route::get('clients-get-by-page/{currentPage}', [ClientController::class, 'getItemsByPage'])->name('clients.get-by-page')->middleware('auth');
 Route::get('clients-search', [ClientController::class, 'searchClient'])->name('clients.search')->middleware('auth');
+Route::get('clients-get-data-for-table', [ClientController::class, 'getDataForTable'])->name('clients.get-data-for-table')->middleware('auth');
 Route::get('clients-print-credit-historial/{client}', [ClientController::class, 'PrintCreditHistorical'])->name('clients.print-credit-historial')->middleware('auth');
 Route::get('clients-print-cash-historial/{client}', [ClientController::class, 'PrintCashHistorical'])->name('clients.print-cash-historial')->middleware('auth');
 Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getClientSales'])->name('clients.get-client-sales')->middleware('auth');
@@ -391,14 +391,14 @@ Route::get('/stripe-error', [StripeController::class, 'error'])->name('stripe.er
 //rutas de reportes de servicio --------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 Route::resource('service-reports', ServiceReportController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Ordenes de servicio', 'verified']);
-Route::get('services-get-by-page/{currentPage}', [ServiceReportController::class, 'getItemsByPage'])->name('service-reports.get-by-page')->middleware('auth');
 Route::get('services-fetch-spare-parts', [ServiceReportController::class, 'fetchSpareParts'])->name('service-reports.fetch-spare-parts')->middleware('auth');
 Route::get('services-search', [ServiceReportController::class, 'searchServiceReport'])->name('service-reports.search')->middleware('auth');
+Route::get('services-reports-print-template/{report}', [ServiceReportController::class, 'printTemplate'])->name('service-reports.print-template')->middleware('auth');
+Route::get('services-search-get-data-for-table', [ServiceReportController::class, 'getDataForTable'])->name('service-reports.get-data-for-table')->middleware('auth');
 Route::post('services-reports-store-phones-stores', [ServiceReportController::class, 'storePhoneStores'])->name('service-reports.store-phones')->middleware('auth');
 Route::post('services-reports-update-phones-stores/{service_order}', [ServiceReportController::class, 'updatePhoneStores'])->name('service-reports.update-phones')->middleware('auth');
 Route::post('services-reports-change-status/{service_report}', [ServiceReportController::class, 'changeStatus'])->name('service-reports.change-status')->middleware('auth');
 Route::post('services-reports-massive-delete', [ServiceReportController::class, 'massiveDelete'])->name('service-reports.massive-delete')->middleware('auth');
-Route::get('services-reports-print-template/{report}', [ServiceReportController::class, 'printTemplate'])->name('service-reports.print-template')->middleware('auth');
 
 
 //rutas de báscula ---------------------------------------------------------------------------------------------------

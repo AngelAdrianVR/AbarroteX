@@ -28,10 +28,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        // revisar si para el tipo de tienda existe un catalogo global
-        $exist_global_products = GlobalProduct::where('type', auth()->user()->store->type)->get(['id', 'name'])->count();
-
-        return inertia('Product/Index', compact('exist_global_products'));
+        return inertia('Product/Index');
     }
 
     public function create()
@@ -438,14 +435,14 @@ class ProductController extends Controller
     public function massiveUpdateStock(Request $request)
     {
         $updates = $request->input('updates', []);
-        
+
         foreach ($updates as $item) {
-            if ( $item['global_product_id'] ) {
+            if ($item['global_product_id']) {
                 // Si el producto es global, buscarlo en GlobalProductStore
                 $product = GlobalProductStore::where('store_id', auth()->user()->store_id)->find($item['id']);
                 if (!$product) {
                     continue; // Si no se encuentra el producto, continuar con el siguiente
-                } 
+                }
             } else {
                 // Si el producto es local, buscarlo en Product
                 $product = Product::where('store_id', auth()->user()->store_id)->find($item['id']);
@@ -555,7 +552,7 @@ class ProductController extends Controller
 
         // productos transferidos desde el catálogo base
         $transfered_products = GlobalProductStore::with([
-            'globalProduct' => ['media', 'category'],
+            'globalProduct' => ['media', 'category:id,name', 'brand:id,name',],
             'promotions.giftable' => function ($query) {
                 $query->morphWith([
                     Product::class => ['media'],
@@ -887,17 +884,28 @@ class ProductController extends Controller
         return response()->json(compact('products', 'local_products', 'transfered_products'));
     }
 
-    public function getDataForProductsView()
+    public function getDataForTable()
     {
-        $page = request('page') * 30; //recibe el current page para cargar la cantidad de productos correspondiente
-        $all_products = $this->getAllProducts();
-        $total_products = $all_products->count();
-        $total_local_products = $all_products->whereNull('global_product_id')->count();
+        $perPage = request('pageSize', 100);
+        $page = request('page', 1);
 
-        //tomar solo primeros 30 productos
-        $products = $all_products->take($page);
+        $allProducts = $this->getAllProducts(); // Obtienes la Collection
 
-        return response()->json(compact('products', 'total_products', 'total_local_products'));
+        // Paginación manual
+        $paginatedProducts = $allProducts->forPage($page, $perPage);
+        $total = $allProducts->count();
+
+        $data = [
+            'products' => $paginatedProducts->values(),
+            'total_local_products' => $allProducts->where('global_product_id', null)->count(),
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+            ]
+        ];
+
+        return response()->json(compact('data'));
     }
 
     private function validateProductsFromFile($worksheet)
@@ -995,7 +1003,7 @@ class ProductController extends Controller
 
     public function changePrice(Request $request)
     {
-        $product_id = explode('_', $request->product['id'])[1]; 
+        $product_id = explode('_', $request->product['id'])[1];
         $product = Product::where('store_id', auth()->user()->store_id)->where('id', $product_id)->first();
         $old_price = $product->public_price;
         $product->public_price = floatval($request->newPrice); //$product->public_price = (float) $request->newPrice; tambien se puede de esa manera

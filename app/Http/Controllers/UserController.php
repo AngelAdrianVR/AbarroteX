@@ -174,13 +174,25 @@ class UserController extends Controller
 
         $user->update($request->all());
     }
-
-    public function savePrinter(Request $request, User $user)
+    
+    public function updateQuoteConfig(Request $request, User $user)
     {
-        $user->update([
-            'printer_config.printer' => $request->printer
+        $request->validate([
+            'quote_config.footer' => 'nullable|string|min:1|max:1000',
+            'quote_config.contact.name' => 'nullable|string|min:1|max:255',
+            'quote_config.contact.whatsapp' => 'nullable|string|min:1|max:10',
+            'quote_config.contact.email' => 'nullable|email',
         ]);
+
+        $user->update($request->all());
     }
+
+    // public function savePrinter(Request $request, User $user)
+    // {
+    //     $user->update([
+    //         'printer_config.printer' => $request->printer
+    //     ]);
+    // }
 
     public function getParzibyteSerial()
     {
