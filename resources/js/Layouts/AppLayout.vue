@@ -4,7 +4,7 @@ import { syncIDBProducts } from '@/dbService.js';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
-import Modal from '@/Components/Modal.vue';
+import DialogModal from '@/Components/DialogModal.vue';
 import SmallLoading from '@/Components/MyComponents/SmallLoading.vue';
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CancelButton from "@/Components/MyComponents/CancelButton.vue";
@@ -68,6 +68,10 @@ const handleOpenInventory = () => {
         fetchProviders();
         showInventoryModal.value = true;
     }
+};
+
+const tableRowClassName = ({ row, rowIndex }) => {
+    return 'cursor-pointer text-[11px] lg:text-xs';
 };
 
 const fetchProviders = async () => {
@@ -827,65 +831,46 @@ onUnmounted(() => {
     </div>
 
     <!-- -------------- Modal de actualizacion de inventario ----------------------- -->
-    <Modal :show="showInventoryModal" @close="showInventoryModal = false" maxWidth="5xl">
-        <div class="p-4 relative">
-            <i @click="showInventoryModal = false"
-                class="fa-solid fa-xmark cursor-pointer text-sm flex items-center justify-center absolute right-5"></i>
-
+    <DialogModal :show="showInventoryModal" @close="showInventoryModal = false" maxWidth="5xl">
+        <template #title>
             <h2 class="font-bold">Inventario</h2>
-
-            <p class="text-sm">Registra entradas de productos por proveedor o de forma individual. Ideal para capturar
-                surtidos y mantener actualizado tu inventario.</p>
-
-            <SmallLoading v-if="loadingProviders" class="my-3 mx-auto" />
-
-            <section v-else class="mt-5 py-2">
-                <article class="md:flex justify-between items-center space-y-2 md:space-y-0">
-                    <!-- Buscar por nombre o código del producto -->
-                    <div class="lg:w-1/4 relative">
-                        <input v-model="searchQuery" @keyup.enter="searchProducts" class="input w-full pl-9"
-                            placeholder="Buscar por nombre o código" type="search">
-                        <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
-                    </div>
-
-
-                    <div class="flex border max-w-lg rounded-lg">
-                        <el-select v-model="selectedProviders" multiple filterable allow-create default-first-option
-                            :reserve-keyword="false" placeholder="Selecciona proveedores" style="width: 100%">
-                            <el-option v-for="provider in providers" :key="provider.id" :label="provider.name"
-                                :value="provider.id" />
-                        </el-select>
-                        <button @click="filterByProvider" :disabled="!selectedProviders.length"
-                            class="px-3 bg-gray-300 rounded-r-md -ml-1 disabled:bg-gray-200 disabled:cursor-not-allowed">
-                            <i :class="!selectedProviders.length ? 'text-gray-400' : 'text-gray-700'"
-                                class="fa-solid fa-magnifying-glass text-xs"></i>
-                        </button>
-                    </div>
-                </article>
-
-                <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
-
-                <div v-else class="max-h-[500px] overflow-y-auto rounded mt-7">
-                    <table v-if="productsFound?.length" class="w-full table-fixed">
-                        <thead>
-                            <tr class="*:text-start *:pb-2 *:px-4 *:text-sm border-b border-primary">
-                                <th class="w-16 bg-white sticky top-0 z-10">Imagen</th>
-                                <th class="w-32 bg-white sticky top-0 z-10">Código</th>
-                                <th class="w-44 bg-white sticky top-0 z-10">Nombre de producto</th>
-                                <th class="w-28 bg-white sticky top-0 z-10">Proveedor</th>
-                                <th class="w-28 bg-white sticky top-0 z-10">Existencias</th>
-                                <th class="w-32 bg-white sticky top-0 z-10">Cant. a agregar</th>
-                                <th class="w-28 bg-white sticky top-0 z-10">Existencias mínimas</th>
-                                <th class="w-28 bg-white sticky top-0 z-10">Existencias Máximas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="product in productsFound" :key="product.id"
-                                class="*:text-xs *:py-2 *:px-4 hover:bg-primarylight">
-                                <td class="rounded-s-full">
-                                    <img v-if="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url"
+        </template>
+        <template #content>
+            <div class="p-4 relative">
+                <p class="text-sm">Registra entradas de productos por proveedor o de forma individual. Ideal para
+                    capturar
+                    surtidos y mantener actualizado tu inventario.</p>
+                <SmallLoading v-if="loadingProviders" class="my-3 mx-auto" />
+                <section v-else class="mt-5 py-2">
+                    <article class="md:flex justify-between items-center space-y-2 md:space-y-0">
+                        <!-- Buscar por nombre o código del producto -->
+                        <div class="lg:w-1/4 relative">
+                            <input v-model="searchQuery" @keyup.enter="searchProducts" class="input w-full pl-9"
+                                placeholder="Buscar por nombre o código" type="search">
+                            <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
+                        </div>
+                        <div class="flex border max-w-lg rounded-lg">
+                            <el-select v-model="selectedProviders" multiple filterable allow-create default-first-option
+                                :reserve-keyword="false" placeholder="Selecciona proveedores" style="width: 100%">
+                                <el-option v-for="provider in providers" :key="provider.id" :label="provider.name"
+                                    :value="provider.id" />
+                            </el-select>
+                            <button @click="filterByProvider" :disabled="!selectedProviders.length"
+                                class="px-3 bg-gray-300 rounded-r-md -ml-1 disabled:bg-gray-200 disabled:cursor-not-allowed">
+                                <i :class="!selectedProviders.length ? 'text-gray-400' : 'text-gray-700'"
+                                    class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </button>
+                        </div>
+                    </article>
+                    <SmallLoading v-if="searchLoading" class="my-3 mx-auto" />
+                    <div v-else class="max-h-[500px] overflow-y-auto rounded mt-7">
+                        <el-table ref="tableRef" :data="productsFound" max-height="380"
+                            :row-class-name="tableRowClassName" class="!w-full mx-auto">
+                            <el-table-column fixed label="Imagen" width="75">
+                                <template #default="scope">
+                                    <img v-if="scope.row.global_product_id ? scope.row.global_product?.media[0]?.original_url : scope.row.media[0]?.original_url"
                                         class="size-10 bg-white object-contain rounded-md"
-                                        :src="product.global_product_id ? product.global_product?.media[0]?.original_url : product.media[0]?.original_url">
+                                        :src="scope.row.global_product_id ? scope.row.global_product?.media[0]?.original_url : scope.row.media[0]?.original_url">
                                     <div v-else
                                         class="size-10 bg-white text-gray99 rounded-md text-sm flex items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -894,47 +879,70 @@ onUnmounted(() => {
                                                 d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                         </svg>
                                     </div>
-                                </td>
-                                <td>{{ (product.global_product_id ? product.global_product?.code : product.code) ?? '-'
+                                </template>
+                            </el-table-column>
+                            <el-table-column fixed label="Nombre" width="120">
+                                <template #default="scope">
+                                    {{ scope.row.global_product_id ? scope.row.global_product?.name : scope.row.name }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Código" width="90">
+                                <template #default="scope">
+                                    {{
+                                        (scope.row.global_product_id ? scope.row.global_product?.code : scope.row.code) ??
+                                        '-'
                                     }}
-                                </td>
-                                <td>{{ product.global_product_id ? product.global_product?.name : product.name }}</td>
-                                <td>{{ (product.global_product_id ? product.global_product?.brand?.name :
-                                    product.brand?.name) ?? '-' }}</td>
-                                <td>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Proveedor" width="150">
+                                <template #default="scope">
+                                    {{ (scope.row.global_product_id ? scope.row.global_product?.brand?.name :
+                                        scope.row.brand?.name) ?? '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Existencias" width="120">
+                                <template #default="scope">
                                     <p
-                                        :class="product.current_stock < product.min_stock && isInventoryOn ? 'text-redDanger' : ''">
-                                        {{ product.current_stock ?? '-' }}
-                                        <i v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                        :class="scope.row.current_stock < scope.row.min_stock && isInventoryOn ? 'text-redDanger' : ''">
+                                        {{ scope.row.current_stock ?? '-' }}
+                                        <i v-if="scope.row.current_stock < scope.row.min_stock && isInventoryOn"
                                             class="fa-solid fa-arrow-down mx-1 text-[11px]"></i>
-                                        <span v-if="product.current_stock < product.min_stock && isInventoryOn"
+                                        <span v-if="scope.row.current_stock < scope.row.min_stock && isInventoryOn"
                                             class="text-[11px]">Bajo
                                             stock</span>
                                     </p>
-                                </td>
-                                <td>
-                                    <el-input-number size="small" v-model="stockUpdates[product.id]" :min="0" :max="999"
-                                        :model-value="stockUpdates[product.id] ?? 0" />
-                                </td>
-                                <td>{{ product.min_stock ?? '-' }}</td>
-                                <td>{{ product.max_stock ?? '-' }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <el-empty v-else
-                        description="No hay productos para mostrar. Búscalos por nombre, código o proveedor" />
-                </div>
-
-
-                <div class="flex items-center justify-end mt-4 space-x-3">
-                    <CancelButton @click="showInventoryModal = false;">Cancelar</CancelButton>
-                    <PrimaryButton :disabled="!productsFound.length || searchLoading || updatingStorage || allStockZero"
-                        @click="updateProductStock">
-                        <i v-if="updatingStorage" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
-                        Registrar entradas
-                    </PrimaryButton>
-                </div>
-            </section>
-        </div>
-    </Modal>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Cant. a agregar" width="150">
+                                <template #default="scope">
+                                    <el-input-number size="small" class="!w-24" v-model="stockUpdates[scope.row.id]" :min="0"
+                                        :max="999" :model-value="stockUpdates[scope.row.id] ?? 0" />
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Existencias minimas" width="120">
+                                <template #default="scope">
+                                    {{ scope.row.min_stock ?? '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Existencias máximas" width="120">
+                                <template #default="scope">
+                                    {{ scope.row.max_stock ?? '-' }}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </section>
+            </div>
+        </template>
+        <template #footer>
+            <div class="flex items-center justify-end mt-4 space-x-3">
+                <CancelButton @click="showInventoryModal = false">Cancelar</CancelButton>
+                <PrimaryButton :disabled="!productsFound.length || searchLoading || updatingStorage || allStockZero"
+                    @click="updateProductStock">
+                    <i v-if="updatingStorage" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                    Registrar entradas
+                </PrimaryButton>
+            </div>
+        </template>
+    </DialogModal>
 </template>
