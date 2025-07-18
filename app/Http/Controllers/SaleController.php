@@ -60,12 +60,7 @@ class SaleController extends Controller
 
     public function index()
     {
-        // obtiene las cajas registradoras de la tienda
-        $cash_registers = CashRegister::where('store_id', auth()->user()->store_id)->get();
-        $groupedSales = null;
-        $total_sales = 1;
-
-        return inertia('Sale/Index', compact('groupedSales', 'total_sales', 'cash_registers'));
+        return inertia('Sale/Index');
     }
 
     public function create()
@@ -80,7 +75,7 @@ class SaleController extends Controller
         return response()->json(compact('folio_stored'));
     }
 
-    public function show($date, $cashRegisterId)
+    public function show($date)
     {
         $storeId = auth()->user()->store_id;
         $storeUsers = auth()->user()->store->users->pluck('id');
@@ -88,7 +83,6 @@ class SaleController extends Controller
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
             ->where('store_id', $storeId)
-            ->where('cash_register_id', $cashRegisterId) //recuperar solo las  ventas de la caja involucrada.
             ->whereDate('created_at', $date)
             ->get();
 
@@ -121,7 +115,6 @@ class SaleController extends Controller
         // Obtener todas las ventas anteriores de ambas tablas
         $previous_sales = collect([
             ...Sale::where('store_id', $storeId)
-                ->where('cash_register_id', $cashRegisterId)
                 ->where('created_at', '<', $date)
                 ->orderBy('created_at', 'desc')
                 ->get(),
@@ -138,7 +131,6 @@ class SaleController extends Controller
         // Obtener todas las ventas siguientes de ambas tablas
         $next_sales = collect([
             ...Sale::where('store_id', $storeId)
-                ->where('cash_register_id', $cashRegisterId)
                 ->where('created_at', '>', $date->endOfDay())
                 ->orderBy('created_at', 'asc')
                 ->get(),
@@ -151,8 +143,6 @@ class SaleController extends Controller
         // Obtener la fecha de la venta siguiente más cercana
         $next_sale = $next_sales->first();
         $next_sale_date = $next_sale ? $next_sale->created_at->toDateString() : null;
-
-        // return $day_sales;
         return inertia('Sale/Show', compact('day_sales', 'previous_sale_date', 'next_sale_date'));
     }
 
@@ -200,25 +190,6 @@ class SaleController extends Controller
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales);
-
-        return response()->json(['items' => $groupedSales]);
-    }
-
-    public function getItemsByPage($currentPage)
-    {
-        $offset = $currentPage * 30;
-        $sales = Sale::where('store_id', auth()->user()->store_id)
-            ->where('cash_register_id', request('cashRgisterId'))
-            ->latest()
-            ->get();
-
-        $online_sales = OnlineSale::where('store_id', auth()->user()->store_id)
-            ->latest()
-            ->get();
-
-        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->skip($offset)
-            ->take(30);
 
         return response()->json(['items' => $groupedSales]);
     }
@@ -395,19 +366,12 @@ class SaleController extends Controller
         return $folio;
     }
 
-    public function fetchCashRegisterSales($cash_register_id)
+    public function getDataForTable()
     {
-        // Obtener todas las ventas registradas y contar el número de agrupaciones por día
-        $total_sales = DB::table('sales')
-            ->select(DB::raw('DATE(created_at) as date'))
-            ->where('store_id', auth()->user()->store_id)
-            ->where('cash_register_id', $cash_register_id)
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get()
-            ->count();
-        // Filtrar las ventas por store_id y cash_register_id
+        $perPage = request('pageSize', 100);
+        $page = request('page', 1);
+
         $sales = Sale::where('store_id', auth()->user()->store_id)
-            ->where('cash_register_id', $cash_register_id)
             ->latest()
             ->get();
 
@@ -423,12 +387,22 @@ class SaleController extends Controller
             ->latest()
             ->get(['id', 'folio', 'total_cost', 'paid_at', 'created_at']);
 
-        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales, null, false, $order_services)->take(30);
-        // $groupedSales = $this->getGroupedSalesByDate($sales, $online_sales)->take(30);
+        $allSales = $this->getGroupedSalesByDate($sales, $online_sales, null, false, $order_services);
 
-        // Retornar los datos agrupados
-        return response()->json(['groupedSales' => $groupedSales, 'total_sales' => $total_sales]);
+        // Paginación manual
+        $paginatedItems = $allSales->forPage($page, $perPage);
+        $total = $allSales->count();
+
+        $data = [
+            'items' => $paginatedItems->values(),
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+            ]
+        ];
+
+        return response()->json(compact('data'));
     }
 
     public function refund($saleFolio)
@@ -681,7 +655,7 @@ class SaleController extends Controller
         $onlineSales = null,
         $installments = null,
         bool $returnSales = false,
-        $serviceOrders = null, // 👈 ordenes de servicio para apontephone
+        $serviceOrders = null,
     ): Collection {
         // Asegurarse de que las colecciones no sean nulas
         $sales = collect($sales);
@@ -712,6 +686,7 @@ class SaleController extends Controller
             }
         })->map(function ($dailySales) use ($returnSales, $installments) {
             // 3. Clasificar las ventas del día
+            $date = $dailySales[0]['created_at'];
             $normalSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
             $quoteSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
             $onlineSales = $dailySales->filter(fn($sale) => $sale instanceof OnlineSale);
@@ -745,6 +720,7 @@ class SaleController extends Controller
             $quoteSalesByFolio = $returnSales ? $quoteSales->groupBy('folio')->map(fn($folioSales) => $this->formatQuoteSaleByFolio($folioSales)) : [];
 
             return [
+                'date' => $date,
                 'total_normal_quantity' => $totalQuantityNormalSale,
                 'total_quote_quantity' => $totalQuantityQuoteSale,
                 'total_online_quantity' => $totalQuantityOnlineSale,

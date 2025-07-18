@@ -38,9 +38,9 @@ import Loading from "@/Components/MyComponents/Loading.vue";
 export default {
   data() {
     return {
-      searchQuery: null, //buscador de servicio.
+      searchQuery: null,
       searchedWord: null, //palabra con la que se hizo la última busqueda.
-      loading: false, //estado de carga cuando se busca a un servicio por medio del buscador
+      loading: false,
       data: null,
       //para paginación
       currentPage: null,

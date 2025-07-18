@@ -175,12 +175,13 @@ Route::get('brands-fetch-all', [BrandController::class, 'fetchAll'])->name('bran
 //sales routes-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 Route::resource('sales', SaleController::class)->except('show')->middleware('auth')->middleware(['auth', 'activeSuscription', 'hasModule:Ventas registradas', 'verified']);
-Route::get('sales/{date}/{cashRegisterId}', [SaleController::class, 'show'])->name('sales.show')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('sales/{date}', [SaleController::class, 'show'])->name('sales.show')->middleware(['auth', 'activeSuscription', 'verified']);
 Route::get('sales-point', [SaleController::class, 'pointIndex'])->name('sales.point')->middleware(['auth', 'activeSuscription', 'verified']);
-Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
-Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
+Route::get('sales-get-data-for-table', [SaleController::class, 'getDataForTable'])->middleware('auth')->name('sales.get-data-for-table');
+// Route::post('sales-get-by-page/{currentPage}', [SaleController::class, 'getItemsByPage'])->name('sales.get-by-page')->middleware('auth');
+// Route::get('sales-search', [SaleController::class, 'searchProduct'])->name('sales.search')->middleware('auth');
+// Route::get('sales-fetch-cash-register-sales/{cash_register_id}', [SaleController::class, 'fetchCashRegisterSales'])->middleware('auth')->name('sales.fetch-cash-register-sales');
 Route::get('sales-get-by-folio/{folio}', [SaleController::class, 'getByFolio'])->middleware('auth')->name('sales.get-by-folio');
-Route::get('sales-fetch-cash-register-sales/{cash_register_id}', [SaleController::class, 'fetchCashRegisterSales'])->middleware('auth')->name('sales.fetch-cash-register-sales');
 Route::post('sales-sync-localstorage', [SaleController::class, 'syncLocalstorage'])->middleware('auth')->name('sales.sync-localstorage');
 Route::post('sales/refund/{saleFolio}', [SaleController::class, 'refund'])->middleware('auth')->name('sales.refund');
 Route::post('sales/update-group-sale', [SaleController::class, 'updateGroupSale'])->middleware('auth')->name('sales.update-group-sale');
@@ -188,11 +189,10 @@ Route::post('sales/update-group-sale', [SaleController::class, 'updateGroupSale'
 
 //expenses routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Gastos', 'verified']);
+Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Gastos', 'verified'])->except('show');
+Route::get('expenses/{date}', [ExpenseController::class, 'show'])->name('expenses.show')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('expenses-get-data-for-table', [ExpenseController::class, 'getDataForTable'])->middleware('auth')->name('expenses.get-data-for-table');
 Route::delete('expenses/delete-day/{expense}', [ExpenseController::class, 'deleteDayExpenses'])->name('expenses.delete-day')->middleware('auth');
-Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
-Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
-Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
 
 
 //quotes routes-------------------------------------------------------------------------------------

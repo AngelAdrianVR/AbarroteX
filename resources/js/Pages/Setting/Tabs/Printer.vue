@@ -175,15 +175,31 @@
             <article class="text-sm p-4 lg:flex items-center justify-between">
                 <div class="lg:w-1/2">
                     <p class="text-[#575757]">
+                        Agreaga información de contacto como teléfonos, correo electrónico, sitio web, etc.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
+                        <p>Información de contacto:</p>
+                        <el-input v-model="form.printer_config.ticketContactInfo" @blur="updateTicketContactInfo"
+                            :autosize="{ minRows: 3, maxRows: 8 }" type="textarea" placeholder="Ej: Cel: 1234567890" :maxlength="1500"
+                            show-word-limit class="!w-72" clearable />
+                    </div>
+                    <p v-if="loadingTicketContactInfo" class="text-gray-400 text-end text-xs">Guardando...</p>
+                </div>
+            </article>
+            <article class="text-sm p-4 lg:flex items-center justify-between">
+                <div class="lg:w-1/2">
+                    <p class="text-[#575757]">
                         Agreaga los términos y condiciones que se mostrarán al final del ticket.
                     </p>
                 </div>
                 <div>
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Términos y condiciones:</p>
-                        <el-input v-model="form.printer_config.ticketTerms" @blur="updateTicketTerms" :autosize="{ minRows: 3, maxRows: 8 }" type="textarea"
-                        placeholder="" :maxlength="1500" show-word-limit class="!w-72"
-                        clearable />
+                        <el-input v-model="form.printer_config.ticketTerms" @blur="updateTicketTerms"
+                            :autosize="{ minRows: 3, maxRows: 8 }" type="textarea" placeholder="" :maxlength="1500"
+                            show-word-limit class="!w-72" clearable />
                     </div>
                     <p v-if="loadingTicketTerms" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
@@ -362,6 +378,7 @@ export default {
                 ticketPrinterName: this.$page.props.auth.user.printer_config?.ticketPrinterName ?? null,
                 labelPrinterName: this.$page.props.auth.user.printer_config?.labelPrinterName ?? null,
                 ticketWidth: this.$page.props.auth.user.printer_config?.ticketWidth ?? null,
+                ticketContactInfo: this.$page.props.auth.user.printer_config?.ticketContactInfo ?? null,
                 ticketTerms: this.$page.props.auth.user.printer_config?.ticketTerms ?? null,
                 ticketFinalWhiteLines: this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines ?? null,
                 labelResolution: this.$page.props.auth.user.printer_config?.labelResolution ?? null,
@@ -402,6 +419,7 @@ export default {
             loadingLabelBarCodeHumanReadable: false,
             loadingLabelGap: false,
             loadingTicketTerms: false,
+            loadingTicketContactInfo: false,
             loadingTicketLogo: false,
         }
     },
@@ -492,6 +510,17 @@ export default {
                 this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
                     onFinish: () => {
                         this.loadingTicketTerms = false;
+                    },
+                });
+            }
+        },
+        updateTicketContactInfo() {
+            // enviar solicitud solo si hubo algun cambio en campo
+            if (this.form.printer_config.ticketContactInfo !== this.$page.props.auth.user.printer_config?.ticketContactInfo) {
+                this.loadingTicketContactInfo = true;
+                this.form.put(route('users.update-printer-config', this.$page.props.auth.user.id), {
+                    onFinish: () => {
+                        this.loadingTicketContactInfo = false;
                     },
                 });
             }
