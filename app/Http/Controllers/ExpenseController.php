@@ -2,49 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CashRegister;
 use App\Models\CashRegisterMovement;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ExpenseController extends Controller
 {
-
     public function index()
     {
-        // Obtener todos los gastos registrados y contar el número de agrupaciones por día
-        $total_expenses = DB::table('expenses')
-            ->select(DB::raw('DATE(created_at) as date'))
-            ->where('store_id', auth()->user()->store_id)
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get()
-            ->count();
-
-        // Calcular la fecha hace x días para recuperar los gastos de x dias atras hasta la fecha de hoy
-        // $days_ago = Carbon::now()->subDays(30);
-        // Obtener los gastos registrados en los últimos 7 días
-        // $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->latest()->get();
-        $expenses = Expense::where('store_id', auth()->user()->store_id)->latest()->get();
-
-        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedExpenses = $expenses->groupBy(function ($expense) {
-            return Carbon::parse($expense->created_at)->format('d-F-Y');
-        })->map(function ($expenses) {
-            $totalQuantity = $expenses->sum('quantity');
-            $totalExpense = $expenses->sum(function ($expense) {
-                return $expense->quantity * $expense->current_price;
-            });
-
-            return [
-                'total_quantity' => $totalQuantity,
-                'total_expense' => $totalExpense,
-                'expenses' => $expenses,
-            ];
-        })->take(30);
-
-        return inertia('Expense/Index', compact('groupedExpenses', 'total_expenses'));
+        return inertia('Expense/Index');
     }
 
     public function create()
@@ -90,16 +57,8 @@ class ExpenseController extends Controller
         return to_route('expenses.index');
     }
 
-    public function show($encoded_expense_id)
+    public function show($date)
     {
-        // Decodificar el ID
-        $decoded_expense_id = base64_decode($encoded_expense_id);
-
-        $expense = Expense::find($decoded_expense_id);
-
-        // Parsear la fecha recibida para obtener solo la parte de la fecha
-        $date = Carbon::parse($expense->created_at)->toDateString();
-
         // Obtener las ventas registradas en la fecha recibida
         $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', $date)->get();
 
@@ -148,73 +107,44 @@ class ExpenseController extends Controller
         $expense->delete();
     }
 
-    public function filterExpenses(Request $request)
+    public function getDataForTable()
     {
-        $queryDate = $request->input('queryDate');
-        $startDate = Carbon::parse($queryDate[0])->startOfDay();
-        $endDate = Carbon::parse($queryDate[1])->endOfDay();
+        $perPage = request('pageSize', 100);
+        $page = request('page', 1);
 
-        // Obtener los gastos registrados en el rango de fechas requerido por el filtro
-        $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->latest()->get();
+        $expenses = Expense::where('store_id', auth()->user()->store_id)->latest()->get();
 
-        // Agrupar los gastos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
+        // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
         $groupedExpenses = $expenses->groupBy(function ($expense) {
             return Carbon::parse($expense->created_at)->format('d-F-Y');
         })->map(function ($expenses) {
+            $date = $expenses[0]['created_at'];
             $totalQuantity = $expenses->sum('quantity');
             $totalExpense = $expenses->sum(function ($expense) {
                 return $expense->quantity * $expense->current_price;
             });
 
             return [
+                'date' => $date,
                 'total_quantity' => $totalQuantity,
                 'total_expense' => $totalExpense,
                 'expenses' => $expenses,
             ];
         });
 
-        return response()->json(['items' => $groupedExpenses]);
-    }
+        // Paginación manual
+        $paginatedItems = $groupedExpenses->forPage($page, $perPage);
+        $total = $groupedExpenses->count();
 
-    public function getItemsByPage($currentPage)
-    {
-        $offset = $currentPage * 30;
-        // $offset = 30 + $currentPage * 30; //multiplica por 4 para traer de 4 dias en 4 dias. suma 4 dias porque son los que ya se cargaron
-        // $skip_days = $currentPage * 30; //multiplica por 4 para traer de 4 dias en 4 dias
-        // Calcular la fecha hace x días para recuperar las ventas de x dias atras hasta la fecha de hoy
-        // $days_ago = Carbon::now()->subDays($offset);
-        // ignorar esa cantidad de dias porque ya se cargaron.
-        // $days_befor = Carbon::now()->subDays($skip_days);
-        // Obtener las ventas registradas en los últimos 7 días
-        // $expenses = Expense::where('store_id', auth()->user()->store_id)->whereDate('created_at', '>=', $days_ago)->whereDate('created_at', '<=', $days_befor)->latest()->get();
+        $data = [
+            'items' => $paginatedItems->values(),
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+            ]
+        ];
 
-        $expenses = Expense::where('store_id', auth()->user()->store_id)->latest()->get();
-
-        // Agrupar los gastos por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha
-        $groupedExpenses = $expenses->groupBy(function ($expense) {
-            return Carbon::parse($expense->created_at)->format('d-F-Y');
-        })->map(function ($expenses) {
-            $totalQuantity = $expenses->sum('quantity');
-            $totalExpense = $expenses->sum(function ($expense) {
-                return $expense->quantity * $expense->current_price;
-            });
-
-            return [
-                'total_quantity' => $totalQuantity,
-                'total_expense' => $totalExpense,
-                'expenses' => $expenses,
-            ];
-        })->skip($offset)
-            ->take(30);
-
-        return response()->json(['items' => $groupedExpenses]);
-    }
-
-    public function printExpenses($expense_id)
-    {
-        // $expense = Expense::with('products')->find($expense_id);
-        $expense = null;
-
-        return inertia('Expense/PrintExpenses', compact('expense'));
+        return response()->json(compact('data'));
     }
 }

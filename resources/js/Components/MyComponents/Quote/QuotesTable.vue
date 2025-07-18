@@ -436,7 +436,7 @@ export default {
             window.open(route('quotes.show', this.encodeId(row.id), '_blank'));
         },
         tableRowClassName({ row, rowIndex }) {
-            return 'cursor-pointer text-xs';
+            return 'cursor-pointer text-[11px] lg:text-xs';
         },
         calculateRemaining() {
             if (this.quoteSelected.remaining) {
