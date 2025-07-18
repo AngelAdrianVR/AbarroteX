@@ -189,11 +189,10 @@ Route::post('sales/update-group-sale', [SaleController::class, 'updateGroupSale'
 
 //expenses routes-------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
-Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Gastos', 'verified']);
+Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'activeSuscription', 'hasModule:Gastos', 'verified'])->except('show');
+Route::get('expenses/{date}', [ExpenseController::class, 'show'])->name('expenses.show')->middleware(['auth', 'activeSuscription', 'verified']);
+Route::get('expenses-get-data-for-table', [ExpenseController::class, 'getDataForTable'])->middleware('auth')->name('expenses.get-data-for-table');
 Route::delete('expenses/delete-day/{expense}', [ExpenseController::class, 'deleteDayExpenses'])->name('expenses.delete-day')->middleware('auth');
-Route::get('expenses-get-by-page/{currentPage}', [ExpenseController::class, 'getItemsByPage'])->name('expenses.get-by-page')->middleware('auth');
-Route::get('expenses-filter', [ExpenseController::class, 'filterExpenses'])->name('expenses.filter')->middleware('auth');
-Route::get('expenses-print-expenses/{expense_id}', [ExpenseController::class, 'printExpenses'])->middleware('auth')->name('expenses.print-expenses');
 
 
 //quotes routes-------------------------------------------------------------------------------------

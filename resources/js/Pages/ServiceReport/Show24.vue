@@ -846,11 +846,12 @@ export default {
             ticket += ALINEAR_CENTRO;
             if (this.$page.props.auth.user.store) {
                 ticket += NEGRITA_ON + this.$page.props.auth.user.store.name + NEGRITA_OFF + '\n';
-                ticket += this.$page.props.auth.user.store.address + '\n';
-                ticket += 'Cel: 7531588059' + '\n';
-                ticket += 'Tel: 7535377261' + '\n';
                 if (this.$page.props.auth.user.store.address) {
                     ticket += this.$page.props.auth.user.store.address + '\n';
+                }
+
+                if (this.$page.props.auth.user.printer_config?.ticketContactInfo) {
+                    ticket += this.$page.props.auth.user.printer_config?.ticketContactInfo + '\n';
                 }
             }
             ticket += separador;

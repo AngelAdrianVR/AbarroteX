@@ -105,7 +105,6 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
-            
         $this->addCreditDataToSales($sales);
 
         // Agrupar las ventas por fecha con el nuevo formato de fecha y calcular el total de productos vendidos y el total de ventas para cada fecha

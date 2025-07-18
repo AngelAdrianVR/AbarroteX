@@ -10,7 +10,8 @@
             </p>
         </div>
         <el-table ref="tableRef" :data="items" @row-click="handleRowClick" max-height="500"
-            :row-class-name="tableRowClassName" class="!w-full mx-auto" :default-sort="{ prop: 'date', order: 'descending' }">
+            :row-class-name="tableRowClassName" class="!w-full mx-auto"
+            :default-sort="{ prop: 'date', order: 'descending' }">
             <el-table-column fixed sortable prop="date" label="Fecha" width="125">
                 <template #default="scope">
                     {{ formatDate(scope.row.date) }}
@@ -84,35 +85,18 @@
 </template>
 
 <script>
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
-import InputLabel from "@/Components/InputLabel.vue";
-import Loading from '@/Components/MyComponents/Loading.vue';
-import DangerButton from "@/Components/DangerButton.vue";
-import CancelButton from "@/Components/MyComponents/CancelButton.vue";
-import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 
 export default {
     data() {
         return {
-            loading: false,
-            sales: {},
             //paginacion
             currentPage: parseInt(this.pagination.current_page),
             pageSize: parseInt(this.pagination.per_page),
         };
     },
     components: {
-        ConfirmationModal,
-        PrimaryButton,
-        DangerButton,
-        CancelButton,
-        ThirthButton,
-        InputLabel,
-        Loading
     },
     emits: ['refresh-data'],
     props: {
@@ -145,7 +129,7 @@ export default {
         handleCommand(command) {
             const commandName = command.split('|')[0];
             const data = command.split('|')[1];
-            
+
             if (commandName == 'see') {
                 const date = format(parseISO(data), 'yyyy-MM-dd', { locale: es });
                 this.$inertia.get(route('sales.show', { date }));
