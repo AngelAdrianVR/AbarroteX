@@ -15,9 +15,19 @@
             <el-table-column fixed prop="company" label="Cliente/empresa" width="200" />
             <el-table-column prop="name" label="Contacto" width="200" />
             <el-table-column prop="phone" label="Teléfono" width="120" />
-            <el-table-column prop="debt" label="Deuda" sortable>
+            <el-table-column prop="debt" label="Deuda / Saldo positivo" sortable>
                 <template #default="scope">
-                    <p>${{ scope.row.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+                    <p v-if="scope.row.debt > 0" class="text-red-700">
+                        $ {{ scope.row.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        • Deuda
+                    </p>
+                    <p v-else-if="scope.row.debt < 0" class="text-green-700">
+                        $ {{ Math.abs(scope.row.debt)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        • A favor
+                    </p>
+                    <p v-else>
+                        $ {{ scope.row.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                    </p>
                 </template>
             </el-table-column>
             <el-table-column align="right">

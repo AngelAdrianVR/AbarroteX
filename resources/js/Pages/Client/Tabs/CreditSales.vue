@@ -19,6 +19,7 @@
                 @show-modal="handleShowModal" :folio="index" />
         </main>
 
+        <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
         <DialogModal :show="showInstallmentModal" @close="closeInstallmentModal()">
             <template #title>
                 <h1>Abonos</h1>
@@ -206,6 +207,7 @@ import { addOrUpdateBatchOfItems, getAll, getItemByAttributes } from '@/dbServic
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import PrintingModal from '@/Components/MyComponents/Sale/PrintingModal.vue';
 
 export default {
     data() {
@@ -230,6 +232,7 @@ export default {
             saleToSeeInstallments: null,
             saleFolioToRefund: null,
             addInstallment: false,
+            showPrintingModal: false,
             // carga
             loading: true,
             addingInstallment: false,
@@ -252,6 +255,7 @@ export default {
         CancelButton,
         ConfirmationModal,
         DialogModal,
+        PrintingModal,
     },
     props: {
         clientId: Number
@@ -259,6 +263,10 @@ export default {
     computed: {
         isMobile() {
             return window.innerWidth < 768;
+        },
+        openPrintingModal(saleFolio) {
+            this.$refs.printingModal.saleFolio = saleFolio;
+            this.showPrintingModal = true;
         },
         getCreditSales() {
             // Inicializar un arreglo para almacenar todas las ventas filtradas
@@ -364,9 +372,7 @@ export default {
             if (modal == 'edit') this.openEditModal(saleFolio);
             else if (modal == 'refund') this.openRefundModal(saleFolio);
             else if (modal == 'installment') this.openInstallmentModal(saleFolio);
-        },
-        print() {
-            window.open(route('clients.print-credit-historial', this.clientId), '_blank');
+            else if (modal == 'printing') this.openPrintingModal(saleFolio);
         },
         update() {
             this.editing = true;

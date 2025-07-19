@@ -272,6 +272,7 @@ Route::get('clients-get-client-sales/{client}', [ClientController::class, 'getCl
 Route::get('clients-get-client-quotes/{client}', [ClientController::class, 'getClientQuotes'])->name('clients.get-client-quotes')->middleware('auth');
 Route::get('clients-get-client-rentals/{client}', [ClientController::class, 'getClientRentals'])->name('clients.get-client-rentals')->middleware('auth');
 Route::get('clients-get-client-info/{client}', [ClientController::class, 'getClientInfo'])->name('clients.get-client-info')->middleware('auth');
+Route::post('clients-store-installment/{client}', [ClientController::class, 'storeInstallment'])->name('clients.store-installment')->middleware('auth');
 
 
 //ezy profile routes-------------------------------------------------------------------------------------

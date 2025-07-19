@@ -56,6 +56,11 @@ class Client extends Model
     {
         return $this->hasMany(CreditSaleData::class);
     }
+    
+    public function installments(): HasMany
+    {
+        return $this->hasMany(Installment::class);
+    }
 
     // methods
     public function calcTotalDebt()
