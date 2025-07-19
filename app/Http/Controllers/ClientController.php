@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashRegister;
+use App\Models\CashRegisterMovement;
 use App\Models\Client;
 use App\Models\CreditSaleData;
+use App\Models\Installment;
+use App\Models\OnlineSale;
+use App\Models\Sale;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ClientController extends Controller
 {
@@ -41,6 +49,119 @@ class ClientController extends Controller
         Client::create($request->all() + ['store_id' => auth()->user()->store_id]);
     }
 
+    /**
+     * Registra un abono de un cliente y lo distribuye entre sus deudas pendientes.
+     * usado en Pages/Client/Show, 
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Client  $client
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeInstallment(Request $request, Client $client)
+    {
+        // 1. Validar el monto del abono entrante
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+        ]);
+
+        $amountToApply = (float) $validated['amount'];
+        $originalAmount = $amountToApply;
+
+        // Usar una transacción para garantizar la integridad de los datos
+        return DB::transaction(function () use ($client, $amountToApply, $originalAmount) {
+
+            // 2. Obtener todas las ventas a crédito pendientes del cliente, de la más antigua a la más nueva
+            $pendingCreditSales = CreditSaleData::where('client_id', $client->id)
+                ->where('status', '!=', 'Pagado')
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $user = auth()->user();
+            $cashRegister = CashRegister::findOrFail($user->cash_register_id);
+
+            // 3. Iterar sobre cada deuda pendiente y aplicar el abono
+            foreach ($pendingCreditSales as $creditSale) {
+                if ($amountToApply <= 0) {
+                    break; // Terminar si ya no hay monto que aplicar
+                }
+
+                $sales = Sale::where([
+                    'folio' => $creditSale->folio,
+                    'store_id' => $user->store_id,
+                ])->get();
+
+                // Calcular el saldo restante de esta venta específica
+                $totalSaleAmount = $sales->sum(function ($sale) {
+                    $price_to_use = $sale->discounted_price !== null
+                        ? $sale->discounted_price
+                        : $sale->current_price;
+
+                    return $sale->quantity * $price_to_use;
+                });
+
+                $totalPaid = $creditSale->installments()->sum('amount');
+                $dueAmount = $totalSaleAmount - $totalPaid;
+
+                if ($dueAmount <= 0) {
+                    continue; // Omitir si por alguna razón esta deuda ya está saldada
+                }
+
+                // Determinar cuánto se pagará a esta deuda
+                $paymentForThisSale = min($amountToApply, $dueAmount);
+
+                // Registrar el abono (Installment)
+                Installment::create([
+                    'amount' => $paymentForThisSale,
+                    'credit_sale_data_id' => $creditSale->id,
+                    'user_id' => $user->id,
+                ]);
+
+                // Registrar el movimiento en caja
+                CashRegisterMovement::create([
+                    'amount' => $paymentForThisSale,
+                    'type' => 'Ingreso',
+                    'notes' => "Abono a venta con folio {$creditSale->folio}",
+                    'cash_register_id' => $cashRegister->id,
+                ]);
+
+                // Actualizar el estado de la venta a crédito
+                if (($totalPaid + $paymentForThisSale) >= $totalSaleAmount) {
+                    $creditSale->status = 'Pagado';
+                } else {
+                    $creditSale->status = 'Parcial';
+                }
+                $creditSale->save();
+
+                // Reducir el monto restante del abono
+                $amountToApply -= $paymentForThisSale;
+            }
+
+            // 4. Si queda un sobrante, registrarlo como saldo a favor del cliente
+            if ($amountToApply > 0) {
+                Installment::create([
+                    'amount' => $amountToApply,
+                    'client_id' => $client->id, // Se asocia directamente al cliente
+                    'credit_sale_data_id' => null, // Sin venta a crédito específica
+                    'user_id' => $user->id,
+                ]);
+
+                // Registrar también este ingreso en caja
+                CashRegisterMovement::create([
+                    'amount' => $amountToApply,
+                    'type' => 'Ingreso',
+                    'notes' => "Abono a saldo de cliente {$client->name}",
+                    'cash_register_id' => $cashRegister->id,
+                ]);
+            }
+
+            // 5. Actualizar la deuda total del cliente y el efectivo en caja
+            $client->debt -= $originalAmount;
+            $client->save();
+
+            $cashRegister->current_cash += $originalAmount;
+            $cashRegister->save();
+        });
+    }
+
     public function show($encoded_client_id)
     {
         // Decodificar el ID
@@ -48,9 +169,10 @@ class ClientController extends Controller
         $store_id = auth()->user()->store_id;
         $client = Client::find($decoded_client_id);
         $clients = Client::where('store_id', $store_id)->latest()->get(['id', 'name']);
-        $client_debt = $client->calcTotalDebt();
+        // $client_debt = $client->calcTotalDebt();
 
-        return inertia('Client/Show', compact('client', 'clients', 'client_debt'));
+        // return inertia('Client/Show', compact('client', 'clients', 'client_debt'));
+        return inertia('Client/Show', compact('client', 'clients'));
     }
 
     public function edit($encoded_client_id)
@@ -148,7 +270,7 @@ class ClientController extends Controller
 
         $this->addCreditDataToSales($sales);
 
-        $items = $this->getGroupedSalesByDate($sales, true);
+        $items = $this->getGroupedSalesByDate($sales, null, null, true, null);
 
         return response()->json(['items' => $items]);
     }
@@ -178,56 +300,273 @@ class ClientController extends Controller
     }
 
     // private
-    private function getGroupedSalesByDate($sales, $returnSales = false)
-    {
-        return $sales->groupBy(function ($sale) {
-            return Carbon::parse($sale->created_at)->toDateString();
-        })->map(function ($sales) use ($returnSales) {
-            $totalQuantity = $sales->sum('quantity');
-            $totalSale = $sales->sum(function ($sale) {
-                return $sale->quantity * $sale->current_price;
+    // private function getGroupedSalesByDate($sales, $returnSales = false)
+    // {
+    //     return $sales->groupBy(function ($sale) {
+    //         return Carbon::parse($sale->created_at)->toDateString();
+    //     })->map(function ($sales) use ($returnSales) {
+    //         $totalQuantity = $sales->sum('quantity');
+    //         $totalSale = $sales->sum(function ($sale) {
+    //             return $sale->quantity * $sale->current_price;
+    //         });
+    //         $uniqueFolios = $sales->unique('folio')->count();
+
+    //         $salesByFolio = $sales->groupBy('folio')->map(function ($folioSales) {
+    //             $firstSale = $folioSales->first();
+
+    //             // Calcular el total de todos los productos en la venta
+    //             $totalSale = $folioSales->sum(function ($sale) {
+    //                 return $sale->quantity * $sale->current_price;
+    //             });
+
+    //             return [
+    //                 'products' => $folioSales->map(function ($sale) {
+    //                     return [
+    //                         'id' => $sale->id,
+    //                         'current_price' => $sale->current_price,
+    //                         'product_name' => $sale->product_name,
+    //                         'product_id' => $sale->product_id,
+    //                         'is_global_product' => $sale->is_global_product,
+    //                         'quantity' => $sale->quantity,
+    //                         'refunded_at' => $sale->refunded_at,
+    //                         'cash_register_id' => $sale->cash_register_id,
+    //                         'store_id' => $sale->store_id,
+    //                         'created_at' => $sale->created_at,
+    //                         'updated_at' => $sale->updated_at,
+    //                     ];
+    //                 })->values(),
+    //                 'credit_data' => $firstSale->credit_data,
+    //                 'folio' => $firstSale->folio,
+    //                 'user_name' => $firstSale->user->name,
+    //                 'client_name' => $firstSale->client?->name ?? 'Público en general',
+    //                 'total_sale' => $totalSale,
+    //             ];
+    //         });
+
+    //         return [
+    //             'total_quantity' => $totalQuantity,
+    //             'total_sale' => $totalSale,
+    //             'unique_folios' => $uniqueFolios,
+    //             'sales' => $returnSales ? $salesByFolio : [],
+    //         ];
+    //     });
+    // }
+
+    /**
+     * Agrupa las ventas por fecha, incluyendo ventas normales, cotizaciones y ventas en línea.
+     *
+     * @param Collection|null $sales Ventas normales de tienda.
+     * @param Collection|null $onlineSales Ventas en línea.
+     * @param Collection|null $installments Ventas a plazos.
+     * @param bool $returnSales Indica si se deben retornar los detalles de las ventas agrupadas.
+     * @return Collection
+     */
+    private function getGroupedSalesByDate(
+        $sales = null,
+        $onlineSales = null,
+        $installments = null,
+        bool $returnSales = false,
+        $serviceOrders = null,
+    ): Collection {
+        // Asegurarse de que las colecciones no sean nulas
+        $sales = collect($sales);
+        $onlineSales = collect($onlineSales);
+        $installments = collect($installments);
+        $serviceOrders = collect($serviceOrders);
+        // 1. Filtrar ventas en línea (solo las entregadas o reembolsadas)
+        $filteredOnlineSales = $onlineSales->filter(function ($onlineSale) {
+            return $onlineSale->delivered_at || $onlineSale->refunded_at;
+        });
+
+        // 2. Combinar todas las ventas para agruparlas por fecha
+        $allSales = $sales->merge($filteredOnlineSales)->merge($serviceOrders);
+
+        return $allSales->groupBy(function ($sale) {
+            if (isset($sale->current_price)) {
+                return Carbon::parse($sale->created_at)->toDateString(); // Venta normal o cotización
+            } elseif ($sale instanceof OnlineSale) { // Venta en linea
+                if ($sale->delivered_at) {
+                    return Carbon::parse($sale->delivered_at)->toDateString();
+                } elseif ($sale->refunded_at) {
+                    return Carbon::parse($sale->refunded_at)->toDateString();
+                } else {
+                    return Carbon::parse($sale->created_at)->toDateString(); // fallback
+                }
+            } else {
+                return Carbon::parse($sale->paid_at)->toDateString(); // Orden de servicio
+            }
+        })->map(function ($dailySales) use ($returnSales, $installments) {
+            // 3. Clasificar las ventas del día
+            $date = $dailySales[0]['created_at'];
+            $normalSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
+            $quoteSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
+            $onlineSales = $dailySales->filter(fn($sale) => $sale instanceof OnlineSale);
+            $serviceOrdersGroup = $dailySales->filter(fn($sale) => $sale instanceof \App\Models\ServiceReport);
+
+
+            // 4. Calcular totales y cantidades
+            $totalSale = $normalSales->sum(fn($sale) => $this->calculateSaleAmount($sale));
+            $totalQuotesSale = $quoteSales->sum(fn($sale) => $this->calculateQuoteSaleAmount($sale));
+            $totalServiceOrders = $serviceOrdersGroup->sum('total_cost'); // total_cost + advance_payment
+            $totalOnlineSale = $onlineSales->sum(function ($onlineSale) {
+                return ($onlineSale->status == 'Entregado' || $onlineSale->status == 'Reembolsado')
+                    ? $onlineSale->total + $onlineSale->delivery_price
+                    : 0;
             });
-            $uniqueFolios = $sales->unique('folio')->count();
 
-            $salesByFolio = $sales->groupBy('folio')->map(function ($folioSales) {
-                $firstSale = $folioSales->first();
+            // 5. Calcular cantidades de productos
+            $totalQuantityNormalSale = $normalSales->sum('quantity');
+            $totalQuantityQuoteSale = $quoteSales->sum('quantity');
+            $totalQuantityOnlineSale = $onlineSales->sum(fn($onlineSale) => count($onlineSale->products ?? []));
+            $totalServiceFolios = $serviceOrdersGroup->unique('folio')->count();
 
-                // Calcular el total de todos los productos en la venta
-                $totalSale = $folioSales->sum(function ($sale) {
-                    return $sale->quantity * $sale->current_price;
-                });
+            // 6. Calcular folios únicos
+            $normalFolios = $normalSales->unique('folio')->count();
+            $quoteFolios = $quoteSales->unique('folio')->count();
+            $onlineFolios = $onlineSales->count();
 
-                return [
-                    'products' => $folioSales->map(function ($sale) {
-                        return [
-                            'id' => $sale->id,
-                            'current_price' => $sale->current_price,
-                            'product_name' => $sale->product_name,
-                            'product_id' => $sale->product_id,
-                            'is_global_product' => $sale->is_global_product,
-                            'quantity' => $sale->quantity,
-                            'refunded_at' => $sale->refunded_at,
-                            'cash_register_id' => $sale->cash_register_id,
-                            'store_id' => $sale->store_id,
-                            'created_at' => $sale->created_at,
-                            'updated_at' => $sale->updated_at,
-                        ];
-                    })->values(),
-                    'credit_data' => $firstSale->credit_data,
-                    'folio' => $firstSale->folio,
-                    'user_name' => $firstSale->user->name,
-                    'client_name' => $firstSale->client?->name ?? 'Público en general',
-                    'total_sale' => $totalSale,
-                ];
-            });
+
+            // 7. Agrupar ventas por folio si returnSales es true
+            $normalSalesByFolio = $returnSales ? $normalSales->groupBy('folio')->map(fn($folioSales) => $this->formatNormalSaleByFolio($folioSales)) : [];
+            $quoteSalesByFolio = $returnSales ? $quoteSales->groupBy('folio')->map(fn($folioSales) => $this->formatQuoteSaleByFolio($folioSales)) : [];
 
             return [
-                'total_quantity' => $totalQuantity,
+                'date' => $date,
+                'total_normal_quantity' => $totalQuantityNormalSale,
+                'total_quote_quantity' => $totalQuantityQuoteSale,
+                'total_online_quantity' => $totalQuantityOnlineSale,
                 'total_sale' => $totalSale,
-                'unique_folios' => $uniqueFolios,
-                'sales' => $returnSales ? $salesByFolio : [],
+                'total_quotes_sale' => $totalQuotesSale,
+                'online_sales_total' => $totalOnlineSale,
+                'total_day_sale' => $totalSale + $totalQuotesSale + $totalOnlineSale,
+                'normal_folios' => $normalFolios,
+                'quote_folios' => $quoteFolios,
+                'online_folios' => $onlineFolios,
+                'sales' => $normalSalesByFolio,
+                'quote_sales' => $quoteSalesByFolio,
+                'online_sales' => $returnSales ? $onlineSales->values() : [],
+                'installments' => $returnSales ? $installments->values() : [],
+                'total_service_orders' => $totalServiceOrders,
+                'service_folios' => $totalServiceFolios,
+                'total_day_sale' => $totalSale + $totalQuotesSale + $totalOnlineSale + $totalServiceOrders,
+                'service_orders' => $returnSales ? $serviceOrdersGroup->values() : [],
             ];
         });
+    }
+
+    /**
+     * Calcula el monto de una venta normal o de cotización.
+     *
+     * @param object $sale
+     * @return float
+     */
+    private function calculateSaleAmount(object $sale): float
+    {
+        $priceToUse = ($sale->discounted_price !== null && $sale->discounted_price >= 0)
+            ? $sale->discounted_price
+            : $sale->current_price;
+
+        return $sale->quantity * $priceToUse;
+    }
+
+    /**
+     * Calcula el monto de una venta de cotización, incluyendo descuentos e IVA.
+     *
+     * @param object $sale
+     * @return float
+     */
+    private function calculateQuoteSaleAmount(object $sale): float
+    {
+        $baseAmount = $this->calculateSaleAmount($sale);
+        $discounted = 0;
+
+        if (isset($sale->quote->is_percentage_discount)) {
+            $discounted = $sale->quote->is_percentage_discount
+                ? $sale->quote->percentage * 0.01 * $sale->quote->total
+                : $sale->quote->discount;
+        }
+
+        $iva = 0;
+        if (isset($sale->quote->iva_included) && $sale->quote->iva_included === false) {
+            $iva = $sale->quote->total * 0.16;
+        }
+
+        return $baseAmount + ($sale->quote->delivery_cost ?? 0) + $iva - $discounted;
+    }
+
+    /**
+     * Formatea los datos de una venta normal agrupada por folio.
+     *
+     * @param Collection $folioSales
+     * @return array
+     */
+    private function formatNormalSaleByFolio(Collection $folioSales): array
+    {
+        $firstSale = $folioSales->first();
+
+        return [
+            'products' => $folioSales->map(fn($sale) => $this->mapProductDetails($sale))->values(),
+            'credit_data' => $firstSale->credit_data,
+            'folio' => $firstSale->folio,
+            'user_name' => $firstSale->user->name,
+            'client_name' => $firstSale->client?->name ?? 'Público en general',
+            'total_sale' => $folioSales->sum(fn($sale) => $this->calculateSaleAmount($sale)),
+        ];
+    }
+
+    /**
+     * Formatea los datos de una venta de cotización agrupada por folio.
+     *
+     * @param Collection $folioSales
+     * @return array
+     */
+    private function formatQuoteSaleByFolio(Collection $folioSales): array
+    {
+        $firstSale = $folioSales->first();
+
+        return [
+            'products' => $folioSales->map(fn($sale) => $this->mapProductDetails($sale, true))->values(),
+            'credit_data' => $firstSale->credit_data,
+            'quote' => $firstSale->quote,
+            'folio' => $firstSale->folio,
+            'user_name' => $firstSale->user->name,
+            'client_name' => $firstSale->client?->name ?? 'Público en general',
+            'total_sale' => $folioSales->sum(fn($sale) => $this->calculateQuoteSaleAmount($sale)),
+        ];
+    }
+
+    /**
+     * Mapea los detalles de un producto de venta.
+     *
+     * @param object $sale
+     * @param bool $isQuote Indica si es una venta de cotización para incluir 'quote_id'.
+     * @return array
+     */
+    private function mapProductDetails(object $sale, bool $isQuote = false): array
+    {
+        $details = [
+            'id' => $sale->id,
+            'current_price' => $sale->current_price,
+            'discounted_price' => $sale->discounted_price,
+            'promotions_applied' => $sale->promotions_applied,
+            'product_name' => $sale->product_name,
+            'product_id' => $sale->product_id,
+            'is_global_product' => $sale->is_global_product,
+            'quantity' => $sale->quantity,
+            'original_price' => $sale->original_price,
+            'payment_method' => $sale->payment_method,
+            'refunded_at' => $sale->refunded_at,
+            'cash_register_id' => $sale->cash_register_id,
+            'store_id' => $sale->store_id,
+            'created_at' => $sale->created_at,
+            'updated_at' => $sale->updated_at,
+        ];
+
+        if ($isQuote) {
+            $details['quote_id'] = $sale->quote_id;
+        }
+
+        return $details;
     }
 
     private function addCreditDataToSales($sales)

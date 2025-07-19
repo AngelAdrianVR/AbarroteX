@@ -20,7 +20,7 @@
             <el-table-column label="Ventas en tienda" width="140">
                 <template #default="scope">
                     {{ scope.row.normal_folios != 1 ? scope.row.normal_folios + ' ventas' : scope.row.normal_folios +
-                        'venta'
+                        ' venta'
                     }}
                     ({{ scope.row.total_normal_quantity }} productos en total)
                 </template>
@@ -29,7 +29,7 @@
                 label="Ventas en línea" width="140">
                 <template #default="scope">
                     {{ scope.row.online_folios != 1 ? scope.row.online_folios + ' ventas' : scope.row.online_folios
-                        + 'venta'
+                        + ' venta'
                     }}
                     ({{ scope.row.total_online_quantity }} productos en total)
                 </template>
@@ -38,7 +38,7 @@
                 label="Cotizaciones" width="140">
                 <template #default="scope">
                     {{ scope.row.quote_folios != 1 ? scope.row.quote_folios + ' ventas' : scope.row.quote_folios
-                        + 'venta'
+                        + ' venta'
                     }}
                     ({{ scope.row.total_quote_quantity }} productos en total)
                 </template>
@@ -47,7 +47,7 @@
                 label="Servicios" width="140">
                 <template #default="scope">
                     {{ scope.row.service_folios != 1 ? scope.row.service_folios + ' ventas' : scope.row.service_folios
-                        + 'venta'
+                        + ' venta'
                     }}
                 </template>
             </el-table-column>

@@ -175,7 +175,7 @@
             <article class="text-sm p-4 lg:flex items-center justify-between">
                 <div class="lg:w-1/2">
                     <p class="text-[#575757]">
-                        Agreaga información de contacto como teléfonos, correo electrónico, sitio web, etc.
+                        Agrega información de contacto como teléfonos, correo electrónico, sitio web, etc.
                     </p>
                 </div>
                 <div>
@@ -191,7 +191,7 @@
             <article class="text-sm p-4 lg:flex items-center justify-between">
                 <div class="lg:w-1/2">
                     <p class="text-[#575757]">
-                        Agreaga los términos y condiciones que se mostrarán al final del ticket.
+                        Agrega los términos y condiciones que se mostrarán al final del ticket.
                     </p>
                 </div>
                 <div>

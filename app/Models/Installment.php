@@ -14,6 +14,7 @@ class Installment extends Model
         'payment_method',
         'notes',
         'credit_sale_data_id',
+        'client_id',
         'user_id',
     ];
 
@@ -21,6 +22,11 @@ class Installment extends Model
     public function creditSaleData()
     {
         return $this->belongsTo(CreditSaleData::class);
+    }
+    
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function user()

@@ -24,7 +24,7 @@
                         <i class="fa-solid fa-circle-notch fa-spin"></i>
                     </p>
                     <p v-else class="text-gray37">
-                        {{ formatDate(Object.keys(day_sales)[0]) }}
+                        {{ formatDate(Object.values(day_sales)[0].date) }}
                     </p>
                 </div>
                 <button @click="SeeNextDaySales()" type="button"

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedFloat('amount')->nullable();
             $table->string('payment_method')->default('Efectivo')->nullable();
             $table->text('notes')->nullable();
-            $table->unsignedInteger('credit_sale_data_id');
+            $table->unsignedInteger('credit_sale_data_id')->nullable(); // ventas
+            $table->unsignedInteger('client_id')->nullable(); // clientes sin venta
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

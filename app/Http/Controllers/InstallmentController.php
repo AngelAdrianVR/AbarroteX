@@ -49,7 +49,11 @@ class InstallmentController extends Controller
 
         // Calcular el monto total de la venta
         $totalSaleAmount = $sales->sum(function ($sale) {
-            return $sale->quantity * $sale->current_price;
+            $price_to_use = $sale->discounted_price !== null 
+            ? $sale->discounted_price
+            : $sale->current_price;
+
+            return $sale->quantity * $price_to_use;
         });
 
         // Calcular el monto total de todos los abonos realizados

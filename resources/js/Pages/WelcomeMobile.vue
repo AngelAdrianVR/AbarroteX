@@ -39,7 +39,7 @@ const handleScroll = () => {
 };
 
 const openWhatsapp = () => {
-    const url = 'https://api.whatsapp.com/send?phone=523322268824&text=¡Hola!%20vi%20tu%20página%20y%20me%20interesa%20el%20punto%20de%20venta'
+    const url = 'https://api.whatsapp.com/send?phone=523321705650&text=¡Hola!%20vi%20tu%20página%20y%20me%20interesa%20el%20punto%20de%20venta'
     window.open(url, '_blank');
 };
 
