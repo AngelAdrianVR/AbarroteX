@@ -38,16 +38,16 @@
             </header>
 
             <section class="text-center text-sm lg:text-base my-5">
-                <div v-if="client_debt > 0">
+                <div v-if="client.debt > 0">
                     <el-tag size="large" type="danger" style="font-size: 16px;">Deuda pendiente</el-tag>
                     <h3 class="font-bold">
-                        ${{ client_debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
+                        ${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
                     </h3>
                 </div>
                 <div v-else>
                     <el-tag size="large" type="success" style="font-size: 16px;">Saldo a favor</el-tag>
                     <h3 class="font-bold">
-                        ${{ Math.abs(client_debt)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                        ${{ Math.abs(client.debt)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                     </h3>
                 </div>
             </section>
@@ -55,7 +55,7 @@
             <!-- Pestañas -->
             <el-tabs class="mx-3 mb-6" v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane label="Ventas a crédito" name="1">
-                    <CreditSales :clientId="client.id" />
+                    <CreditSales :clientId="client.id" ref="creditSales" />
                 </el-tab-pane>
                 <el-tab-pane label="Ventas al contado" name="2">
                     <CashSales :clientId="client.id" />
@@ -75,8 +75,19 @@
             </template>
             <template #content>
                 <section>
-                    <p v-if="client_debt > 0">Deuda: ${{ client_debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
-                    <p v-else>Saldo a favor: $ {{ Math.abs(client_debt)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                    <ol class="mb-4 text-justify text-xs text-gray37 *:list-decimal list-inside space-y-1">
+                        <li> <b>Aplicación a deudas:</b> El pago se asignará primero a la deuda más antigua.</li>
+                        <li> <b>Saldo restante:</b> Si el pago excede el monto de esa deuda, el saldo sobrante se
+                            aplicará a la
+                            siguiente deuda pendiente (en orden cronológico), y así sucesivamente.</li>
+                        <li> <b>Saldo a favor:</b> Si el monto abonado supera el total de las deudas, el excedente se
+                            registrará
+                            como saldo a favor del cliente.</li>
+                    </ol>
+                    <p v-if="client.debt > 0">Deuda: ${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }}</p>
+                    <p v-else>Saldo a favor: $ {{ Math.abs(client.debt)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                        ",") }}</p>
                     <div class="mt-3">
                         <InputLabel value="Monto a abonar *" />
                         <el-input-number v-model="installmentForm.amount" placeholder="Ej: 1,000" />
@@ -86,9 +97,12 @@
             </template>
             <template #footer>
                 <div class="flex items-center space-x-1">
-                    <CancelButton @click="closeInstallmentModal" :disabled="addingInstallment">Cancelar</CancelButton>
-                    <PrimaryButton @click="storeInstallment" :disabled="!installmentForm.amount || installmentForm.processing">
-                         <i v-if="installmentForm.processing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                    <CancelButton @click="closeInstallmentModal" :disabled="installmentForm.processing">Cancelar
+                    </CancelButton>
+                    <PrimaryButton @click="storeInstallment"
+                        :disabled="!installmentForm.amount || installmentForm.processing">
+                        <i v-if="installmentForm.processing"
+                            class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
                         Registrar abono
                     </PrimaryButton>
                 </div>
@@ -143,7 +157,6 @@ export default {
     props: {
         client: Object,
         clients: Array,
-        client_debt: Number,
     },
     methods: {
         storeInstallment() {
@@ -153,7 +166,9 @@ export default {
                         title: "Abono registrado",
                         type: "success"
                     });
-
+                    // refrescar ventas a credito
+                    this.$refs.creditSales.fetchSales();
+                    //resetear formulario
                     this.installmentForm.reset();
                 },
                 onError: (err) => {
