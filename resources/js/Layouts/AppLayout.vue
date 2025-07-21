@@ -850,8 +850,9 @@ onUnmounted(() => {
                             <i class="fa-solid fa-magnifying-glass text-xs text-gray99 absolute top-[10px] left-4"></i>
                         </div>
                         <div class="flex border max-w-lg rounded-lg">
-                            <el-select v-model="selectedProviders" multiple filterable allow-create default-first-option
-                                :reserve-keyword="false" placeholder="Selecciona proveedores" style="width: 100%">
+                            <el-select v-model="selectedProviders" multiple collapse-tags collapse-tags-tooltip
+                                filterable allow-create default-first-option :reserve-keyword="false"
+                                placeholder="Selecciona proveedores" style="width: 100%">
                                 <el-option v-for="provider in providers" :key="provider.id" :label="provider.name"
                                     :value="provider.id" />
                             </el-select>
@@ -915,8 +916,8 @@ onUnmounted(() => {
                             </el-table-column>
                             <el-table-column label="Cant. a agregar" width="150">
                                 <template #default="scope">
-                                    <el-input-number size="small" class="!w-24" v-model="stockUpdates[scope.row.id]" :min="0"
-                                        :max="999" :model-value="stockUpdates[scope.row.id] ?? 0" />
+                                    <el-input-number size="small" class="!w-24" v-model="stockUpdates[scope.row.id]"
+                                        :min="0" :max="999" :model-value="stockUpdates[scope.row.id] ?? 0" />
                                 </template>
                             </el-table-column>
                             <el-table-column label="Existencias minimas" width="120">

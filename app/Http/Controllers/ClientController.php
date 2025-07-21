@@ -112,6 +112,7 @@ class ClientController extends Controller
                 Installment::create([
                     'amount' => $paymentForThisSale,
                     'credit_sale_data_id' => $creditSale->id,
+                    'client_id' => $client->id,
                     'user_id' => $user->id,
                 ]);
 
@@ -169,10 +170,11 @@ class ClientController extends Controller
         $store_id = auth()->user()->store_id;
         $client = Client::find($decoded_client_id);
         $clients = Client::where('store_id', $store_id)->latest()->get(['id', 'name']);
-        // $client_debt = $client->calcTotalDebt();
-
-        // return inertia('Client/Show', compact('client', 'clients', 'client_debt'));
-        return inertia('Client/Show', compact('client', 'clients'));
+        $installments = $client->installments()->latest('created_at')->get()->groupBy(function ($installment) {
+            return Carbon::parse($installment->created_at)->isoFormat('DD MMMM, YYYY h:mm a');
+        });
+        // return $installments;
+        return inertia('Client/Show', compact('client', 'clients', 'installments'));
     }
 
     public function edit($encoded_client_id)
@@ -300,58 +302,6 @@ class ClientController extends Controller
     }
 
     // private
-    // private function getGroupedSalesByDate($sales, $returnSales = false)
-    // {
-    //     return $sales->groupBy(function ($sale) {
-    //         return Carbon::parse($sale->created_at)->toDateString();
-    //     })->map(function ($sales) use ($returnSales) {
-    //         $totalQuantity = $sales->sum('quantity');
-    //         $totalSale = $sales->sum(function ($sale) {
-    //             return $sale->quantity * $sale->current_price;
-    //         });
-    //         $uniqueFolios = $sales->unique('folio')->count();
-
-    //         $salesByFolio = $sales->groupBy('folio')->map(function ($folioSales) {
-    //             $firstSale = $folioSales->first();
-
-    //             // Calcular el total de todos los productos en la venta
-    //             $totalSale = $folioSales->sum(function ($sale) {
-    //                 return $sale->quantity * $sale->current_price;
-    //             });
-
-    //             return [
-    //                 'products' => $folioSales->map(function ($sale) {
-    //                     return [
-    //                         'id' => $sale->id,
-    //                         'current_price' => $sale->current_price,
-    //                         'product_name' => $sale->product_name,
-    //                         'product_id' => $sale->product_id,
-    //                         'is_global_product' => $sale->is_global_product,
-    //                         'quantity' => $sale->quantity,
-    //                         'refunded_at' => $sale->refunded_at,
-    //                         'cash_register_id' => $sale->cash_register_id,
-    //                         'store_id' => $sale->store_id,
-    //                         'created_at' => $sale->created_at,
-    //                         'updated_at' => $sale->updated_at,
-    //                     ];
-    //                 })->values(),
-    //                 'credit_data' => $firstSale->credit_data,
-    //                 'folio' => $firstSale->folio,
-    //                 'user_name' => $firstSale->user->name,
-    //                 'client_name' => $firstSale->client?->name ?? 'Público en general',
-    //                 'total_sale' => $totalSale,
-    //             ];
-    //         });
-
-    //         return [
-    //             'total_quantity' => $totalQuantity,
-    //             'total_sale' => $totalSale,
-    //             'unique_folios' => $uniqueFolios,
-    //             'sales' => $returnSales ? $salesByFolio : [],
-    //         ];
-    //     });
-    // }
-
     /**
      * Agrupa las ventas por fecha, incluyendo ventas normales, cotizaciones y ventas en línea.
      *
@@ -397,7 +347,20 @@ class ClientController extends Controller
             }
         })->map(function ($dailySales) use ($returnSales, $installments) {
             // 3. Clasificar las ventas del día
-            $date = $dailySales[0]['created_at'];
+            $sale = $dailySales[0];
+            if (isset($sale['current_price'])) {
+                $date = Carbon::parse($sale['created_at'])->toDateString(); // Venta normal o cotización
+            } elseif ($sale instanceof OnlineSale) { // Venta en linea
+                if ($sale['delivered_at']) {
+                    $date = Carbon::parse($sale['delivered_at'])->toDateString();
+                } elseif ($sale['refunded_at']) {
+                    $date = Carbon::parse($sale['refunded_at'])->toDateString();
+                } else {
+                    $date = Carbon::parse($sale['created_at'])->toDateString(); // fallback
+                }
+            } else {
+                $date = Carbon::parse($sale['paid_at'])->toDateString(); // Orden de servicio
+            }
             $normalSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
             $quoteSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
             $onlineSales = $dailySales->filter(fn($sale) => $sale instanceof OnlineSale);

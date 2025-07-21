@@ -13,15 +13,11 @@
                     <el-option v-for="item in clients" :key="item" :label="item.name" :value="item.id" />
                 </el-select>
                 <div class="flex items-center space-x-2">
+                    <PrimaryButton @click="showGeneralInstallmentModal = true" title="Agregar abono"
+                        class="!bg-[#EDEDED] !text-gray37">
+                        Abonos
+                    </PrimaryButton>
                     <PrimaryButton @click="$inertia.get(route('clients.edit', encodedId))">Editar</PrimaryButton>
-                    <button @click="showGeneralInstallmentModal = true" title="Agregar abono"
-                        class="flex items-center justify-center bg-[#EDEDED] text-primary size-[34px] rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-4">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-                        </svg>
-                    </button>
                 </div>
             </article>
 
@@ -51,8 +47,6 @@
                     </h3>
                 </div>
             </section>
-
-            <!-- Pestañas -->
             <el-tabs class="mx-3 mb-6" v-model="activeTab" @tab-click="updateURL">
                 <el-tab-pane label="Ventas a crédito" name="1">
                     <CreditSales :clientId="client.id" ref="creditSales" />
@@ -69,34 +63,59 @@
                 </el-tab-pane>
             </el-tabs>
         </section>
-        <DialogModal :show="showGeneralInstallmentModal" @close="showGeneralInstallmentModal = false" max-width="md">
+        <DialogModal :show="showGeneralInstallmentModal" @close="showGeneralInstallmentModal = false" max-width="2xl">
             <template #title>
                 <h1 class="font-bold">Registrar abono</h1>
             </template>
             <template #content>
-                <section>
-                    <ol class="mb-4 text-justify text-xs text-gray37 *:list-decimal list-inside space-y-1">
-                        <li> <b>Aplicación a deudas:</b> El pago se asignará primero a la deuda más antigua.</li>
-                        <li> <b>Saldo restante:</b> Si el pago excede el monto de esa deuda, el saldo sobrante se
-                            aplicará a la
-                            siguiente deuda pendiente (en orden cronológico), y así sucesivamente.</li>
-                        <li> <b>Saldo a favor:</b> Si el monto abonado supera el total de las deudas, el excedente se
-                            registrará
-                            como saldo a favor del cliente.</li>
-                    </ol>
-                    <p v-if="client.debt > 0">Deuda: ${{ client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }}</p>
-                    <p v-else>Saldo a favor: $ {{ Math.abs(client.debt)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                        ",") }}</p>
-                    <div class="mt-3">
-                        <InputLabel value="Monto a abonar *" />
-                        <el-input-number v-model="installmentForm.amount" placeholder="Ej: 1,000" />
-                        <InputError :message="installmentForm.errors.amount" />
-                    </div>
-                </section>
+                <el-tabs class="mx-3" v-model="installmentActiveTab">
+                    <el-tab-pane label="Registrar abono" name="1">
+                        <section>
+                            <ol class="mb-4 text-justify text-xs text-gray37 *:list-decimal list-inside space-y-1">
+                                <li> <b>Aplicación a deudas:</b> El pago se asignará primero a la deuda más antigua.
+                                </li>
+                                <li> <b>Saldo restante:</b> Si el pago excede el monto de esa deuda, el saldo sobrante
+                                    se
+                                    aplicará a la
+                                    siguiente deuda pendiente (en orden cronológico), y así sucesivamente.</li>
+                                <li> <b>Saldo a favor:</b> Si el monto abonado supera el total de las deudas, el
+                                    excedente se
+                                    registrará
+                                    como saldo a favor del cliente.</li>
+                            </ol>
+                            <p v-if="client.debt > 0">Deuda: ${{
+                                client.debt?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}</p>
+                            <p v-else>Saldo a favor: $ {{
+                                Math.abs(client.debt)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                ",") }}</p>
+                            <div class="mt-3">
+                                <InputLabel value="Monto a abonar *" />
+                                <el-input-number v-model="installmentForm.amount" placeholder="Ej: 1,000" />
+                                <InputError :message="installmentForm.errors.amount" />
+                            </div>
+                        </section>
+                    </el-tab-pane>
+                    <el-tab-pane label="Historial de abonos" name="2">
+                        <el-table :data="Object.values(installments)" style="width: 96%" max-height="400">
+                            <el-table-column label="Monto">
+                                <template #default="scope">
+                                    $ {{ scope.row.reduce((acc, ele) => {
+                                        return acc += ele.amount;
+                                    }, 0)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Fecha">
+                                <template #default="scope">
+                                    {{ Object.keys(installments)[scope.$index] }}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-tab-pane>
+                </el-tabs>
             </template>
             <template #footer>
-                <div class="flex items-center space-x-1">
+                <div v-if="installmentActiveTab == 1" class="flex items-center space-x-1">
                     <CancelButton @click="closeInstallmentModal" :disabled="installmentForm.processing">Cancelar
                     </CancelButton>
                     <PrimaryButton @click="storeInstallment"
@@ -136,6 +155,7 @@ export default {
             installmentForm,
             clientId: this.client.id, //guarda el id del cliente seleccionado para ingresar a sus detalles desde el select
             activeTab: '1',
+            installmentActiveTab: '1',
             encodedId: null, //id codificado
             showGeneralInstallmentModal: false,
         }
@@ -157,6 +177,7 @@ export default {
     props: {
         client: Object,
         clients: Array,
+        installments: Object,
     },
     methods: {
         storeInstallment() {

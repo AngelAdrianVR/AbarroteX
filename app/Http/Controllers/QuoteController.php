@@ -312,6 +312,7 @@ class QuoteController extends Controller
             'payment_method' => $request->payment_method,
             'notes' => 'Abono a cotización',
             'credit_sale_data_id' => $credit_sale_data->id,
+            'client_id' => $credit_sale_data->client_id,
             'user_id' => auth()->id(),
         ]);
 
@@ -473,6 +474,7 @@ class QuoteController extends Controller
                 'payment_method' => $request->payment_method,
                 'notes' => 'Anticipo de la cotización',
                 'credit_sale_data_id' => $new_credit_sale_data->id,
+                'client_id' => $quote->client_id,
                 'user_id' => auth()->id(),
             ]);
 

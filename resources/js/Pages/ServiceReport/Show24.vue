@@ -1051,8 +1051,7 @@ export default {
                             this.paymentModalStep = 1; //reinicia el paso del modal de pago
                         }, 1000);
                     } else if (newStatus === 'Cancelada') {
-                        window.location.reload(); // Recarga la página para reflejar el cambio de estado
-                        // this.report.aditionals = this.report.aditionals || {};
+                        this.report.aditionals.review_amount = this.reviewAmount;
                     }
                 } else {
                     this.$notify({
