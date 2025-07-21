@@ -6,23 +6,15 @@
     <template #content>
       <div v-if="printType === 'Ticket'" class="flex items-start space-x-4">
         <figure class="h-24">
-          <img
-            src="@/../../public/images/ticket.png"
-            :draggable="false"
-            class="select-none object-contain h-full"
-            alt="Imagen de ticket de venta"
-          />
+          <img src="@/../../public/images/ticket.png" :draggable="false" class="select-none object-contain h-full"
+            alt="Imagen de ticket de venta" />
         </figure>
         <p class="w-2/3 text-base text-gray37">¿Desea imprimir el ticket de la venta?</p>
       </div>
       <div v-else class="flex items-start space-x-4">
         <figure class="h-24">
-          <img
-            src="@/../../public/images/label.png"
-            :draggable="false"
-            class="select-none object-contain h-full"
-            alt="Imagen de ticket de venta"
-          />
+          <img src="@/../../public/images/label.png" :draggable="false" class="select-none object-contain h-full"
+            alt="Imagen de ticket de venta" />
         </figure>
         <p class="w-2/3 text-base text-gray37">
           ¿Desea imprimir la etiqueta del servicio?
@@ -32,46 +24,21 @@
         <div>
           <p>Impresora conectada por USB:</p>
           <div class="flex items-center space-x-2">
-            <el-select
-              v-model="selectedPrinter"
-              placeholder="Selecciona la impresora"
-              no-data-text="No hay opciones registradas"
-              no-match-text="No se encontraron coincidencias"
-            >
-              <el-option
-                v-for="printer in availablePrinters"
-                :key="printer"
-                :value="printer"
-                :label="printer"
-              />
+            <el-select v-model="selectedPrinter" placeholder="Selecciona la impresora"
+              no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+              <el-option v-for="printer in availablePrinters" :key="printer" :value="printer" :label="printer" />
             </el-select>
-            <button
-              type="button"
-              @click="getAvailablePrinters"
-              title="Actualizar impresoras disponibles"
-              class="size-6 bg-[#EDEDED] text-gray37 flex items-center justify-center rounded-full"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                />
+            <button type="button" @click="getAvailablePrinters" title="Actualizar impresoras disponibles"
+              class="size-6 bg-[#EDEDED] text-gray37 flex items-center justify-center rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
               </svg>
             </button>
           </div>
           <el-divider> Ó </el-divider>
-          <ThirthButton
-            @click="connectBluetooth"
-            class="!py-px !bg-blue-100 !text-blue-600 mr-2"
-          >
+          <ThirthButton @click="connectBluetooth" class="!py-px !bg-blue-100 !text-blue-600 mr-2">
             <i class="fa-brands fa-bluetooth text-lg mr-2"></i>
             Conectar impresora Bluetooth
           </ThirthButton>
@@ -82,10 +49,7 @@
       <div class="flex items-center space-x-2">
         <CancelButton @click="$emit('close')" :disabled="printing">No</CancelButton>
         <PrimaryButton @click="printByUSB" :disabled="!selectedPrinter || printing">
-          <i
-            v-if="printing"
-            class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"
-          ></i>
+          <i v-if="printing" class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
           Si, imprimir
         </PrimaryButton>
       </div>
@@ -158,10 +122,17 @@ export default {
 
       // Encabezado
       ticket += ALINEAR_CENTRO;
-      ticket += NEGRITA_ON + this.$page.props.auth.user.store.name + NEGRITA_OFF + "\n";
-      if (this.$page.props.auth.user.store.address) {
-        ticket += this.$page.props.auth.user.store.address + "\n";
+      if (this.$page.props.auth.user.store) {
+        ticket += NEGRITA_ON + this.$page.props.auth.user.store.name + NEGRITA_OFF + '\n';
+        if (this.$page.props.auth.user.store.address) {
+          ticket += this.$page.props.auth.user.store.address + '\n';
+        }
+
+        if (this.$page.props.auth.user.printer_config?.ticketContactInfo) {
+          ticket += this.$page.props.auth.user.printer_config?.ticketContactInfo + '\n';
+        }
       }
+      
       ticket += ALINEAR_IZQUIERDA;
       ticket += "Folio: " + this.sales[0].folio + "\n";
       ticket += this.formatDate(this.sales[0]?.created_at) + "\n";
@@ -388,7 +359,7 @@ export default {
       } catch (error) {
         alert(
           "Error al imprimir por Bluetooth. Asegúrate de que la impresora esté conectada. " +
-            error.message
+          error.message
         );
       } finally {
         this.printing = false;

@@ -79,7 +79,6 @@ class SaleController extends Controller
     {
         $storeId = auth()->user()->store_id;
         $storeUsers = auth()->user()->store->users->pluck('id');
-
         // Obtener las ventas registradas en la fecha recibida
         $sales = Sale::with(['cashRegister:id,name', 'user:id,name'])
             ->where('store_id', $storeId)
@@ -97,11 +96,13 @@ class SaleController extends Controller
             ->get();
 
         // Obtener los servicios entregados y pagados en la fecha especificada
-        $order_services = ServiceReport::where(function ($query) {
-            $query->where('status', 'Entregado/Pagado')
-                ->orWhere('status', 'Cancelada');
-        })
+        $order_services = ServiceReport::query()
+            ->where(function ($query) {
+                $query->where('status', 'Entregado/Pagado')
+                    ->orWhere('status', 'Cancelada');
+            })
             ->where('store_id', auth()->user()->store_id)
+            ->whereDate('paid_at', $date)
             ->latest()
             ->get();
 
@@ -332,6 +333,7 @@ class SaleController extends Controller
                     'amount' => $sale_data['deposit'],
                     'notes' => 'Primer abono hecho en la compra',
                     'credit_sale_data_id' => $new_credit_sale_data->id,
+                    'client_id' => $new_credit_sale_data->client_id,
                     'user_id' => auth()->id(),
                 ]);
 
@@ -379,10 +381,11 @@ class SaleController extends Controller
             ->latest()
             ->get();
 
-        $order_services = ServiceReport::where(function ($query) {
-            $query->where('status', 'Entregado/Pagado')
-                ->orWhere('status', 'Cancelada');
-        })
+        $order_services = ServiceReport::query()
+            ->where(function ($query) {
+                $query->where('status', 'Entregado/Pagado')
+                    ->orWhere('status', 'Cancelada');
+            })
             ->where('store_id', auth()->user()->store_id)
             ->latest()
             ->get(['id', 'folio', 'total_cost', 'paid_at', 'created_at']);
@@ -686,7 +689,21 @@ class SaleController extends Controller
             }
         })->map(function ($dailySales) use ($returnSales, $installments) {
             // 3. Clasificar las ventas del día
-            $date = $dailySales[0]['created_at'];
+            $sale = $dailySales[0];
+            if (isset($sale['current_price'])) {
+                $date = Carbon::parse($sale['created_at'])->toDateString(); // Venta normal o cotización
+            } elseif ($sale instanceof OnlineSale) { // Venta en linea
+                if ($sale['delivered_at']) {
+                    $date = Carbon::parse($sale['delivered_at'])->toDateString();
+                } elseif ($sale['refunded_at']) {
+                    $date = Carbon::parse($sale['refunded_at'])->toDateString();
+                } else {
+                    $date = Carbon::parse($sale['created_at'])->toDateString(); // fallback
+                }
+            } else {
+                $date = Carbon::parse($sale['paid_at'])->toDateString(); // Orden de servicio
+            }
+            // $date = $dailySales[0]['created_at'];
             $normalSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
             $quoteSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && $sale->quote_id);
             $onlineSales = $dailySales->filter(fn($sale) => $sale instanceof OnlineSale);
