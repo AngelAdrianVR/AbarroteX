@@ -262,6 +262,7 @@ class ServiceReportController extends Controller
 
             $data['cancellation_reason'] = $request->cancellation_reason;
             $data['aditionals'] = $aditionals;
+            $data['paid_at'] = now(); // Fecha y hora del pago
         } elseif ($request->status === 'Entregado/Pagado') {
             $data['payment_method'] = $request->paymentMethod;
             // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden por si se quiere guardar en base de datos
