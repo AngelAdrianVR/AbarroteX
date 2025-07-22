@@ -2,45 +2,29 @@
     <AppLayout :title="'Gastos del día'">
         <section class="mx-2 lg:mx-10 mt-7">
             <Back :to="route('expenses.index')" />
-            <div class="flex items-center justify-end space-x-1">
-                <!-- ** descomentar cuando se haga una plantilla para imprimir todos los gastos del día **  -->
-                <!-- <el-popconfirm confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303" title="¿Continuar?"
-                    @confirm="print(expenses[0].id)">
-                    <template #reference>
-                        <i @click.stop
-                            class="fa-solid fa-print text-primary hover:bg-gray-200 cursor-pointer bg-grayED rounded-full p-[6px]"></i>
-                    </template>
-</el-popconfirm> -->
-                <!-- <el-popconfirm v-if="canDelete" confirm-button-text="Si" cancel-button-text="No" icon-color="#C30303"
-                    title="¿Continuar?" @confirm="deleteDayExpenses(expenses[0].id)">
-                    <template #reference>
-                        <i @click.stop
-                            class="fa-regular fa-trash-can text-primary cursor-pointer hover:bg-gray-200 rounded-full p-2"></i>
-                    </template>
-                </el-popconfirm> -->
-            </div>
         </section>
-        <header class="flex items-center justify-between font-bold mx-2 lg:mx-36 text-sm mt-4">
-            <h1>Detalle de gastos </h1>
-            <h2>
+        <header class="font-bold text-sm mx-2 lg:mx-20 mt-4">
+            <h2 class="text-center">
                 <span class="text-gray77">Fecha: </span>
                 {{ formatDate(expenses[0]?.created_at) }}
             </h2>
+            <h1>Detalle de gastos </h1>
             <span></span>
         </header>
-        <main class="mx-2 lg:mx-32 text-xs md:text-sm mt-4 mb-6">
+        <main class="mx-2 lg:mx-20 text-xs lg:text-sm mt-4 mb-6">
             <section class="border border-gray9A rounded-[5px] p-4 grid grid-cols-4 gap-4">
                 <p class="text-gray77 font-semibold">Monto:</p>
                 <b class="col-span-3">${{ totalExpenses().toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</b>
                 <p class="text-gray77 font-semibold pt-1">Desgloce:</p>
                 <table class="col-span-full md:col-span-3 w-full">
                     <thead>
-                        <tr
-                            class="*:py-1 *:px-2 *:md:px-4 *:text-xs *:md:text-sm text-gray37 bg-primarylight text-start">
-                            <th class="w-[40%] rounded-s-full text-start">Concepto</th>
-                            <th class="w-[15%] text-end">Cantidad</th>
-                            <th class="w-[20%] text-end">Costo</th>
-                            <th class="w-[20%] text-end">$ tomado de caja</th>
+                        <tr class="*:py-1 *:px-2 *:md:px-4 *:text-xs *:md:text-sm text-gray37 bg-[#EDEDED] text-start">
+                            <th class="w-[30%] rounded-s-full text-start">Concepto</th>
+                            <th class="w-[12%] text-end">Cantidad</th>
+                            <th class="w-[12%] text-end">Efectivo</th>
+                            <th class="w-[12%] text-end">Tarjeta</th>
+                            <th class="w-[12%] text-end">Transferencia</th>
+                            <th class="w-[17%] text-end">Tomado de caja</th>
                             <th class="w-[5%] rounded-e-full"></th>
                         </tr>
                     </thead>
@@ -50,9 +34,28 @@
                             <td>{{ expense.concept }}</td>
                             <td class="text-end">{{ expense.quantity }}</td>
                             <td class="text-end">
-                                ${{ (expense.quantity *
-                                    expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                        ",") }}
+                                {{
+                                    expense.payment_method == 'Efectivo'
+                                        ? '$' + (expense.quantity *
+                                            expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                        : '-'
+                                }}
+                            </td>
+                            <td class="text-end">
+                                {{
+                                    expense.payment_method == 'Tarjeta'
+                                        ? '$' + (expense.quantity *
+                                            expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                        : '-'
+                                }}
+                            </td>
+                            <td class="text-end">
+                                {{
+                                    expense.payment_method == 'Transferencia'
+                                        ? '$' + (expense.quantity *
+                                            expense.current_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                        : '-'
+                                }}
                             </td>
                             <td class="text-end">
                                 ${{ expense.amount_from_cash_register?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -75,7 +78,8 @@
                                                 </svg>
                                                 <span class="text-xs">Editar</span>
                                             </el-dropdown-item>
-                                            <el-dropdown-item v-if="canDelete && expenses.length > 1" :command="'delete|' + expense.id">
+                                            <el-dropdown-item v-if="canDelete && expenses.length > 1"
+                                                :command="'delete|' + expense.id">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"
                                                     class="size-[14px] mr-2 text-red-600">
@@ -90,17 +94,57 @@
                             </td>
                         </tr>
                     </tbody>
+                    <tfoot>
+                        <tr class="*:py-1 *:px-2 *:md:px-4 *:text-xs *:md:text-sm text-gray37 bg-[#EDEDED] text-start">
+                            <th class="w-[30%] rounded-s-full text-start" colspan="2">Total</th>
+                            <th class="w-[12%] text-end">
+                                ${{
+                                    expenses.reduce((acc, elem) => {
+                                        return acc += elem.payment_method == 'Efectivo'
+                                            ? elem.quantity * elem.current_price
+                                            : 0
+                                    }, 0)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}
+                            </th>
+                            <th class="w-[12%] text-end">
+                                ${{
+                                    expenses.reduce((acc, elem) => {
+                                        return acc += elem.payment_method == 'Tarjeta'
+                                            ? elem.quantity * elem.current_price
+                                            : 0
+                                    }, 0)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}
+                            </th>
+                            <th class="w-[12%] text-end">
+                                ${{
+                                    expenses.reduce((acc, elem) => {
+                                        return acc += elem.payment_method == 'Transferencia'
+                                            ? elem.quantity * elem.current_price
+                                            : 0
+                                    }, 0)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}
+                            </th>
+                            <th class="w-[17%] text-end">
+                                ${{
+                                    expenses.reduce((acc, elem) => {
+                                        return acc += elem.amount_from_cash_register ?? 0
+                                    }, 0)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                }}
+                            </th>
+                            <th class="w-[5%] rounded-e-full"></th>
+                        </tr>
+                    </tfoot>
                 </table>
             </section>
         </main>
-        <DialogModal :show="showEditModal" @close="showEditModal = false">
+        <DialogModal :show="showEditModal" @close="showEditModal = false" max-width="lg">
             <template #title>
                 <h1>Editar gasto</h1>
             </template>
             <template #content>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-start space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="size-8">
+                        stroke="currentColor" class="size-5 flex-shrink-0">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                     </svg>
@@ -132,6 +176,15 @@
                             :parser="(value) => value.replace(/\D/g, '')">
                         </el-input>
                         <InputError :message="form.errors.current_price" />
+                    </div>
+                    <div class="mt-2">
+                        <InputLabel :value="'Método de pago'" />
+                        <el-select class="w-full" v-model="form.payment_method" placeholder="Selecciona"
+                            no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                            <el-option v-for="method in ['Efectivo', 'Tarjeta', 'Transferencia']" :key="method"
+                                :label="method" :value="method" />
+                        </el-select>
+                        <InputError :message="form.errors.payment_method" />
                     </div>
                 </form>
             </template>
@@ -176,6 +229,7 @@ import DialogModal from '@/Components/DialogModal.vue';
 import { useForm } from "@inertiajs/vue3";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import axios from 'axios';
 
 export default {
     data() {
@@ -183,6 +237,7 @@ export default {
             concept: null,
             quantity: null,
             current_price: null,
+            payment_method: null,
         });
 
         return {
@@ -222,6 +277,7 @@ export default {
                 this.form.concept = expense.concept;
                 this.form.quantity = expense.quantity;
                 this.form.current_price = expense.current_price;
+                this.form.payment_method = expense.payment_method;
                 this.itemIdToEdit = itemId;
                 this.showEditModal = true;
             } else if (commandName == 'delete') {
@@ -258,7 +314,7 @@ export default {
         async deleteItem() {
             this.deleting = true;
             try {
-                const response = await axios.delete(route('expenses.destroy', {expense: this.itemIdToDelete, dayExpenses: this.expenses.length}));
+                const response = await axios.delete(route('expenses.destroy', { expense: this.itemIdToDelete, dayExpenses: this.expenses.length }));
                 if (response.status == 200) {
                     this.showDeleteConfirm = false;
 

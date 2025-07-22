@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('concept');
             $table->unsignedFloat('quantity');
             $table->unsignedFloat('current_price');
+            $table->string('payment_method')->default('Efectivo');
             $table->unsignedFloat('amount_from_cash_register')->nullable();
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
