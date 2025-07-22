@@ -77,7 +77,7 @@ class ExpenseController extends Controller
             'concept' => 'required|string|max:255',
             'quantity' => 'required|numeric|min:1',
             'current_price' => 'required|numeric|min:0',
-            'payment_method' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|max:255',
         ]);
 
         $expense->update($validated);

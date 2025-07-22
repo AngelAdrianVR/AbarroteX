@@ -137,14 +137,14 @@
                 </table>
             </section>
         </main>
-        <DialogModal :show="showEditModal" @close="showEditModal = false">
+        <DialogModal :show="showEditModal" @close="showEditModal = false" max-width="lg">
             <template #title>
                 <h1>Editar gasto</h1>
             </template>
             <template #content>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-start space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="size-8">
+                        stroke="currentColor" class="size-5 flex-shrink-0">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                     </svg>
@@ -176,6 +176,15 @@
                             :parser="(value) => value.replace(/\D/g, '')">
                         </el-input>
                         <InputError :message="form.errors.current_price" />
+                    </div>
+                    <div class="mt-2">
+                        <InputLabel :value="'Método de pago'" />
+                        <el-select class="w-full" v-model="form.payment_method" placeholder="Selecciona"
+                            no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
+                            <el-option v-for="method in ['Efectivo', 'Tarjeta', 'Transferencia']" :key="method"
+                                :label="method" :value="method" />
+                        </el-select>
+                        <InputError :message="form.errors.payment_method" />
                     </div>
                 </form>
             </template>
@@ -220,6 +229,7 @@ import DialogModal from '@/Components/DialogModal.vue';
 import { useForm } from "@inertiajs/vue3";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
+import axios from 'axios';
 
 export default {
     data() {
@@ -227,6 +237,7 @@ export default {
             concept: null,
             quantity: null,
             current_price: null,
+            payment_method: null,
         });
 
         return {
@@ -266,6 +277,7 @@ export default {
                 this.form.concept = expense.concept;
                 this.form.quantity = expense.quantity;
                 this.form.current_price = expense.current_price;
+                this.form.payment_method = expense.payment_method;
                 this.itemIdToEdit = itemId;
                 this.showEditModal = true;
             } else if (commandName == 'delete') {
