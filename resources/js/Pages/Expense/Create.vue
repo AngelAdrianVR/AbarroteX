@@ -49,7 +49,7 @@
                             :parser="(value) => value.replace(/\D/g, '')" placeholder="Ej. 1" />
                     </div> -->
                     <div class="mt-3">
-                        <InputLabel :value="'Costo total de gasto ' + (index + 1) + '*'" class="ml-3 mb-1 text-sm" />
+                        <InputLabel :value="'Costo total de gasto ' + (index + 1) + '*'" />
                         <el-input v-model="expense.current_price" required type="text"
                             :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                             :parser="(value) => value.replace(/[^\d.]/g, '')"
@@ -61,14 +61,24 @@
                         <InputError :message="expense.errors.current_price" />
                     </div>
                     <div class="mt-3">
-                        <el-checkbox v-model="expense.from_cash_register" size="small"
+                        <InputLabel :value="'Método de pago ' + (index + 1) + '*'" />
+                        <el-select class="w-full" v-model="expense.payment_method"
+                            placeholder="Selecciona" no-data-text="No hay opciones registradas"
+                            no-match-text="No se encontraron coincidencias">
+                            <el-option v-for="method in ['Efectivo', 'Tarjeta', 'Transferencia']" :key="method"
+                                :label="method" :value="method" />
+                        </el-select>
+                        <InputError :message="expense.errors.payment_method" />
+                    </div>
+                    <div class="mt-3">
+                        <el-checkbox v-if="expense.payment_method == 'Efectivo'" v-model="expense.from_cash_register" size="small"
                             :disabled="!hasEnoughCash(index)">
                             <span v-html="getCheckboxLabel(index)"></span>
                         </el-checkbox>
                     </div>
                 </div>
                 <div @click="addExpense"
-                    class="flex justify-center items-center cursor-pointer rounded-md border border-dashed border-grayD9">
+                    class="flex justify-center items-center cursor-pointer rounded-md border border-dashed border-grayD9 bg-[#FFFEEE]">
                     <p class="text-primary text-sm my-3">+ Agregar otro gasto</p>
                 </div>
 
@@ -104,6 +114,7 @@ export default {
                 concept: null,
                 quantity: 1,
                 current_price: null,
+                payment_method: 'Efectivo',
                 from_cash_register: false,
                 date: new Date(),
                 errors: {} // Assuming you have errors object for each expense
@@ -222,6 +233,7 @@ export default {
                 concept: null,
                 quantity: 1,
                 current_price: null,
+                payment_method: 'Efectivo',
                 from_cash_register: false,
                 date: new Date(),
                 errors: {} // Assuming you have errors object for each expense
@@ -234,7 +246,7 @@ export default {
             }
         },
         store() {
-            this.form.post(route("expenses.store", { expenses: this.form.expenses }), {
+            this.form.post(route("expenses.store"), {
                 onSuccess: () => {
                     this.$notify({
                         title: "Correcto",
