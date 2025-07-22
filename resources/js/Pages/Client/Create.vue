@@ -8,14 +8,14 @@
                 <h1 class="font-bold ml-2 col-span-full">Nuevo cliente</h1>
 
                 <div class="mt-3 col-span-full">
-                    <InputLabel value="Nombre de la empresa (opcional)" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre de la empresa (opcional)" />
                     <el-input v-model="form.company" placeholder="Escribe el nombre del cliente" :maxlength="100"
                         clearable />
                     <InputError :message="form.errors.company" />
                 </div>
 
                 <div class="mt-3 col-span-full">
-                    <InputLabel value="Nombre del contacto*" class="ml-3 mb-1" />
+                    <InputLabel value="Nombre del contacto*" />
                     <el-input v-model="form.name" placeholder="Escribe el nombre del cliente" :maxlength="100"
                         clearable />
                     <InputError :message="form.errors.name" />
@@ -39,26 +39,26 @@
                 <!-- Domicilio -->
                 <section class="col-span-full md:grid md:grid-cols-2 gap-x-3" v-if="form.addAddress">
                     <div class="mt-3">
-                        <InputLabel value="Calle*" class="ml-3 mb-1" />
+                        <InputLabel value="Calle*" />
                         <el-input v-model="form.street" placeholder="Escribe la calle" :maxlength="255" clearable />
                         <InputError :message="form.errors.street" />
                     </div>
 
                     <div class="mt-3">
-                        <InputLabel value="Colonia*" class="ml-3 mb-1" />
+                        <InputLabel value="Colonia*" />
                         <el-input v-model="form.suburb" placeholder="Escribe la colonia" :maxlength="255" clearable />
                         <InputError :message="form.errors.suburb" />
                     </div>
 
                     <div class="mt-3">
-                        <InputLabel value="Número exterior*" class="ml-3 mb-1" />
+                        <InputLabel value="Número exterior*" />
                         <el-input v-model="form.ext_number" placeholder="Número de vivienda" :maxlength="255"
                             clearable />
                         <InputError :message="form.errors.ext_number" />
                     </div>
 
                     <div class="mt-3">
-                        <InputLabel value="Número Interior (opcional)" class="ml-3 mb-1" />
+                        <InputLabel value="Número Interior (opcional)" />
                         <el-input v-model="form.int_number" placeholder="Número de edificio, coto, fraccionamiento"
                             :maxlength="255" clearable />
                         <InputError :message="form.errors.int_number" />
@@ -74,14 +74,14 @@
                     </div>
 
                     <div class="mt-3">
-                        <InputLabel value="Municipio*" class="ml-3 mb-1" />
+                        <InputLabel value="Municipio*" />
                         <el-input v-model="form.town" placeholder="Ej. Guadalajara, Tlajomulco, Tonala" :maxlength="255"
                             clearable />
                         <InputError :message="form.errors.town" />
                     </div>
 
                     <div class="mt-3">
-                        <InputLabel value="Estado*" class="ml-3 mb-1" />
+                        <InputLabel value="Estado*" />
                         <el-input v-model="form.polity_state" placeholder="Ej. Jalisco, Monterrey, Michoacan"
                             :maxlength="255" clearable />
                         <InputError :message="form.errors.polity_state" />
@@ -97,19 +97,19 @@
                 <!-- datos de facturación -->
                 <section class="col-span-full md:grid md:grid-cols-2 gap-x-3" v-if="form.addFiscalInfo">
                     <div class="mt-3">
-                        <InputLabel value="Razón social*" class="ml-3 mb-1" />
+                        <InputLabel value="Razón social*" />
                         <el-input v-model="form.razon_social"
                             placeholder="Ingresar sin régimen societario (ej. sin S.A de C.V)" :maxlength="255"
                             clearable />
                         <InputError :message="form.errors.razon_social" />
                     </div>
                     <div class="mt-3">
-                        <InputLabel value="R.F.C*" class="ml-3 mb-1" />
+                        <InputLabel value="R.F.C*" />
                         <el-input v-model="form.rfc" placeholder="Ingresar R.F.C" :maxlength="255" clearable />
                         <InputError :message="form.errors.rfc" />
                     </div>
                     <div class="mt-3">
-                        <InputLabel value="Régimen fiscal*" class="ml-3 mb-1" />
+                        <InputLabel value="Régimen fiscal*" />
                         <el-select class="w-full" filterable v-model="form.tax_regime" clearable
                             placeholder="Seleccione" no-data-text="No hay opciones registradas"
                             no-match-text="No se encontraron coincidencias">

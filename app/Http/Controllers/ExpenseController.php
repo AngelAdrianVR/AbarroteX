@@ -33,6 +33,7 @@ class ExpenseController extends Controller
                 'concept' => $expenseData['concept'],
                 'quantity' => $expenseData['quantity'],
                 'current_price' => $expenseData['current_price'],
+                'payment_method' => $expenseData['payment_method'],
                 'amount_from_cash_register' => $expenseData['from_cash_register'] ? $expenseData['current_price'] : null,
                 'store_id' => auth()->user()->store_id,
                 // 'created_at' => now(),
@@ -76,6 +77,7 @@ class ExpenseController extends Controller
             'concept' => 'required|string|max:255',
             'quantity' => 'required|numeric|min:1',
             'current_price' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|max:255',
         ]);
 
         $expense->update($validated);
