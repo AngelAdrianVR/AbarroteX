@@ -77,6 +77,7 @@ import ThirthButton from '@/Components/MyComponents/ThirthButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import CashCutsTable from '@/Pages/CashRegister/Tabs/CashCutsTable.vue';
 import CashRegister from '@/Pages/CashRegister/Tabs/CashRegister.vue';
+import axios from 'axios';
 
 export default {
     data() {
