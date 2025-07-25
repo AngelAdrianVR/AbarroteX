@@ -338,6 +338,8 @@ export default {
                         } else {
                             console.error("No se recibió el folio para la impresión automática.");
                         }
+                    } else {
+                        this.$inertia.visit(route('service-reports.index'));
                     }
                 },
                 onError: (err) => {
@@ -658,7 +660,6 @@ export default {
             this.dialogImageUrl = file.url;
             this.dialogVisible = true;
         },
-        // async getLastFolio
     },
 }
 </script>

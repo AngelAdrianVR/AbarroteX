@@ -33,16 +33,22 @@ class CashRegisterController extends Controller
                 return $date->created_at->format('Y-m-d');
             })
             ->map(function ($group) {
-                $total_store_sales = $group->sum('store_sales_cash');
-                $total_online_sales = $group->sum('online_sales_cash');
-                $total_difference = $group->sum('difference');
+                $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
+                $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
+                $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+                $total_expected = $group->sum('expected_cash') + $group->sum('expected_card');
+                $total_counted = $group->sum('counted_cash') + $group->sum('counted_card');
+                $total_difference =  $total_counted - $total_expected;
+                $amount_sales_products = $group->count();
 
                 return [
                     'cuts' => $group,
                     'total_store_sales' => $total_store_sales,
                     'total_online_sales' => $total_online_sales,
-                    'total_sales' => $total_online_sales + $total_store_sales,
-                    'total_difference' => $total_difference
+                    'total_service_orders' => $total_service_orders,
+                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
+                    'total_difference' => $total_difference,
+                    'amount_sales_products' => $amount_sales_products
                 ];
             })->take(7);
 
