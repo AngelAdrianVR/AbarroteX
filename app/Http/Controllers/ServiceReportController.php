@@ -269,7 +269,7 @@ class ServiceReportController extends Controller
             $data['paid_at'] = now(); // Fecha y hora del pago
 
             // crear gasto de comision del técnico si la comision es mayor a 0
-            if ($service_report->comision_percentage > 0) {
+            if ($service_report->comision_percentage > 0 && $service_report->service_cost > 0) {
                 $expense = Expense::create([
                     'concept' => 'Comision de servicio técnico a ' . $service_report->technician_name,
                     'quantity' => 1,

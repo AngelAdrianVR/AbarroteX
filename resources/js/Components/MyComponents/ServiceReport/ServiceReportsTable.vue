@@ -369,7 +369,6 @@ export default {
             selectedReports: [],
             checkAll: false,
             showPaymentModal: false,
-            // internalReports: [...this.reports], // copia local editable
             reportSelected: null, // Reporte seleccionado para pagar
 
             // modal de pago
@@ -450,21 +449,30 @@ export default {
                 this.itemIdToDelete = data;
             } else if (commandName === 'changeStatus') {
                 if (newStatus === 'Entregado/Pagado') {
-                    this.reportSelected = this.internalReports.find(r => r.id == data);
+                    this.reportSelected = this.reports?.find(r => r.id == data);
                     this.showPaymentModal = true;
                 } else {
                     this.changeStatus(newStatus, data);
                 }
             }
         },
+        encodeId(id) {
+            const encodedId = btoa(id.toString());
+            return encodedId;
+        },
+        receivedInputFocus() {
+            this.$nextTick(() => {
+                this.$refs.receivedInput.focus(); // Enfocar el input de recibido cuando se abre el modal
+            });
+        },
         async changeStatus(status, reportId) {
             try {
                 const response = await axios.post(route('service-reports.change-status', reportId), { status, paymentMethod: this.paymentMethod });
                 if (response.status === 200) {
-                    const reportIndex = this.internalReports.findIndex(r => r.id == reportId);
+                    const reportIndex = this.reports.findIndex(r => r.id == reportId);
 
                     if (reportIndex !== -1) {
-                        this.internalReports[reportIndex].status = status;
+                        this.reports[reportIndex].status = status;
                         this.$notify({
                             title: 'Correcto',
                             message: 'Se ha cambiado el estatus',
@@ -487,15 +495,6 @@ export default {
                 console.log(error);
             }
         },
-        encodeId(id) {
-            const encodedId = btoa(id.toString());
-            return encodedId;
-        },
-        receivedInputFocus() {
-            this.$nextTick(() => {
-                this.$refs.receivedInput.focus(); // Enfocar el input de recibido cuando se abre el modal
-            });
-        },
         async deleteItem() {
             try {
                 const response = await axios.delete(route('service-reports.destroy', this.itemIdToDelete));
@@ -506,9 +505,9 @@ export default {
                         type: 'success',
                     });
                     //se busca el index del cliente eliminado para removerlo del arreglo
-                    const indexServiceDeleted = this.internalReports.findIndex(item => item.id == this.itemIdToDelete);
+                    const indexServiceDeleted = this.reports.findIndex(item => item.id == this.itemIdToDelete);
                     if (indexServiceDeleted != -1) {
-                        this.internalReports.splice(indexServiceDeleted, 1);
+                        this.reports.splice(indexServiceDeleted, 1);
                     }
                     this.showDeleteConfirm = false;
                 }
