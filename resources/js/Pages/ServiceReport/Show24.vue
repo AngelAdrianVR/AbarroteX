@@ -252,7 +252,7 @@
                                         </p>
                                         <p v-if="report.aditionals?.review_amount < report.advance_payment"
                                             class="flex">
-                                            <span class="w-40">Total devuelto</span><span class="ml-3">$</span><span
+                                            <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span
                                                 class="w-24 text-right">{{
                                                     report.aditionals.review_amount ?
                                                         (report.advance_payment -
@@ -264,7 +264,7 @@
                                                 }}</span>
                                         </p>
                                         <p v-else class="flex">
-                                            <span class="w-40">Total pagado</span><span class="ml-3">$</span><span
+                                            <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span
                                                 class="w-24 text-right">{{
                                                     (parseFloat(report.aditionals.review_amount) -
                                                         report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
@@ -508,26 +508,29 @@
                     <p class="font-semibold text-right">Resumen de la orden</p>
                     <div class="mt-2 text-[15px] space-y-1 flex flex-col items-end">
                         <p class="flex">
-                            <span class="w-40">Costo del servicio</span><span class="ml-3">$</span><span
+                            <span class="w-44">Costo total del servicio</span><span class="ml-3">$</span><span
                                 class="w-24 text-right">{{
                                     report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                     ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
+                            <span class="w-44">Anticipo</span><span class="ml-[2px]">- $</span><span
                                 class="w-24 text-right">{{
                                     report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00'
                                 }}</span>
                         </p>
-                        <p class="flex">
-                            <span class="w-40">Refacciones</span><span class="ml-3">$</span><span
+                        <!-- <p class="flex">
+                            <span class="w-44">Refacciones</span><span class="ml-3">$</span><span
                                 class="w-24 text-right">{{
                                     totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                        </p>
+                        </p> -->
                         <p class="flex font-bold">
-                            <span class="w-40">Total restante</span><span class="ml-3">$</span><span
-                                class="w-24 text-right">{{
-                                    report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                            <span class="w-44">Restante por pagar</span><span class="ml-3">$</span><span
+                                class="w-24 text-right">
+                                {{
+                                    (report.total_cost - report.advance_payment)
+                                        ?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+                            </span>
                         </p>
                     </div>
                 </div>
@@ -1013,55 +1016,55 @@ export default {
             ticket += separador;
 
             // --- 2. Ajustar sección de refacciones con columnas dinámicas ---
-            if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
-                ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
+            // if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
+            //     ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
 
-                // Definir anchos de columna
-                const colAnchoPrecio = 10; // " $1,234.56"
-                const colAnchoCant = 4;    // "Cant "
-                const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
+            //     // Definir anchos de columna
+            //     const colAnchoPrecio = 10; // " $1,234.56"
+            //     const colAnchoCant = 4;    // "Cant "
+            //     const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
 
-                // Crear encabezado dinámico
-                let header = 'Pzs'.padEnd(colAnchoCant);
-                header += 'Concepto'.padEnd(colAnchoNombre);
-                header += 'Importe'.padStart(colAnchoPrecio);
+            //     // Crear encabezado dinámico
+            //     let header = 'Pzs'.padEnd(colAnchoCant);
+            //     header += 'Concepto'.padEnd(colAnchoNombre);
+            //     header += 'Importe'.padStart(colAnchoPrecio);
 
-                ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
-                ticket += separador;
-                ticket += ALINEAR_IZQUIERDA;
+            //     ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
+            //     ticket += separador;
+            //     ticket += ALINEAR_IZQUIERDA;
 
-                this.report.spare_parts.forEach(part => {
-                    const cantidad = part.quantity.toString();
-                    // Trunca el nombre del producto para que quepa en su columna
-                    const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
-                    const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
+            //     this.report.spare_parts.forEach(part => {
+            //         const cantidad = part.quantity.toString();
+            //         // Trunca el nombre del producto para que quepa en su columna
+            //         const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
+            //         const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
 
-                    let linea = '';
-                    linea += cantidad.padEnd(colAnchoCant);
-                    linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
-                    linea += ('$' + totalProducto).padStart(colAnchoPrecio);
+            //         let linea = '';
+            //         linea += cantidad.padEnd(colAnchoCant);
+            //         linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
+            //         linea += ('$' + totalProducto).padStart(colAnchoPrecio);
 
-                    ticket += linea + '\n';
-                });
-                ticket += separador;
-            }
+            //         ticket += linea + '\n';
+            //     });
+            //     ticket += separador;
+            // }
 
             // --- 3. Ajustar sección de costos para alineación derecha ---
             const formatCurrency = (value) => {
                 return '$' + parseFloat(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             };
 
-            let subtotalRefacciones = 0;
-            if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
-                subtotalRefacciones = this.report.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
-                let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
-                ticket += subtotalStr.padStart(anchoTicket) + '\n';
-            }
+            // let subtotalRefacciones = 0;
+            // if (this.report.spare_parts && this.report.spare_parts.length > 0 && this.report.spare_parts[0].name) {
+            //     subtotalRefacciones = this.report.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
+            //     let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
+            //     ticket += subtotalStr.padStart(anchoTicket) + '\n';
+            // }
 
-            let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.report.service_cost);
-            ticket += costoServicioStr.padStart(anchoTicket) + '\n';
+            // let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.report.service_cost);
+            // ticket += costoServicioStr.padStart(anchoTicket) + '\n';
 
-            let totalStr = 'Total: ' + formatCurrency(this.report.total_cost);
+            let totalStr = 'Total del servicio: ' + formatCurrency(this.report.total_cost);
             ticket += NEGRITA_ON + totalStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
             if (this.report.advance_payment > 0) {
@@ -1071,6 +1074,27 @@ export default {
                 let restanteStr = 'Resta: ' + formatCurrency(this.report.total_cost - this.report.advance_payment);
                 ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
             }
+
+            // --- 4. Generar Código de Barras con el Folio ---
+            // Asegúrate que el folio exista y no esté vacío
+            if (this.report.folio) {
+                const SET_BARCODE_HEIGHT = GS + 'h' + '\x50'; // Altura del código: 80 dots
+                const SET_BARCODE_WIDTH = GS + 'w' + '\x02';  // Ancho del código: multiplicador 2
+                const PRINT_HRI_BELOW = GS + 'H' + '\x02';   // Imprimir texto legible debajo del código
+
+                // Comando para imprimir CODE128: GS k m n [d1...dn]
+                // m = 73 (0x49) para CODE128
+                // n = longitud de los datos
+                const folio = String(this.report.folio).padStart(3, '0');
+                const printBarcodeCommand = GS + 'k' + '\x49' + String.fromCharCode(folio.length) + folio;
+
+                ticket += ALINEAR_CENTRO;
+                ticket += SET_BARCODE_HEIGHT;
+                ticket += SET_BARCODE_WIDTH;
+                ticket += PRINT_HRI_BELOW;
+                ticket += printBarcodeCommand + '\n\n';
+            }
+            // --- Fin del código de barras ---
 
             // terminos y condiciones
             ticket += '\n' + this.$page.props.auth.user.printer_config?.ticketTerms + '\n\n';

@@ -413,55 +413,55 @@ export default {
             ticket += separador;
 
             // --- 2. Ajustar sección de refacciones con columnas dinámicas ---
-            if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
-                ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
+            // if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
+            //     ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
 
-                // Definir anchos de columna
-                const colAnchoPrecio = 10; // " $1,234.56"
-                const colAnchoCant = 4;    // "Cant "
-                const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
+            //     // Definir anchos de columna
+            //     const colAnchoPrecio = 10; // " $1,234.56"
+            //     const colAnchoCant = 4;    // "Cant "
+            //     const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
 
-                // Crear encabezado dinámico
-                let header = 'Pzs'.padEnd(colAnchoCant);
-                header += 'Concepto'.padEnd(colAnchoNombre);
-                header += 'Importe'.padStart(colAnchoPrecio);
+            //     // Crear encabezado dinámico
+            //     let header = 'Pzs'.padEnd(colAnchoCant);
+            //     header += 'Concepto'.padEnd(colAnchoNombre);
+            //     header += 'Importe'.padStart(colAnchoPrecio);
 
-                ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
-                ticket += separador;
-                ticket += ALINEAR_IZQUIERDA;
+            //     ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
+            //     ticket += separador;
+            //     ticket += ALINEAR_IZQUIERDA;
 
-                this.form.spare_parts.forEach(part => {
-                    const cantidad = part.quantity.toString();
-                    // Trunca el nombre del producto para que quepa en su columna
-                    const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
-                    const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
+            //     this.form.spare_parts.forEach(part => {
+            //         const cantidad = part.quantity.toString();
+            //         // Trunca el nombre del producto para que quepa en su columna
+            //         const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
+            //         const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
 
-                    let linea = '';
-                    linea += cantidad.padEnd(colAnchoCant);
-                    linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
-                    linea += ('$' + totalProducto).padStart(colAnchoPrecio);
+            //         let linea = '';
+            //         linea += cantidad.padEnd(colAnchoCant);
+            //         linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
+            //         linea += ('$' + totalProducto).padStart(colAnchoPrecio);
 
-                    ticket += linea + '\n';
-                });
-                ticket += separador;
-            }
+            //         ticket += linea + '\n';
+            //     });
+            //     ticket += separador;
+            // }
 
             // --- 3. Ajustar sección de costos para alineación derecha ---
             const formatCurrency = (value) => {
                 return '$' + parseFloat(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             };
 
-            let subtotalRefacciones = 0;
-            if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
-                subtotalRefacciones = this.form.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
-                let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
-                ticket += subtotalStr.padStart(anchoTicket) + '\n';
-            }
+            // let subtotalRefacciones = 0;
+            // if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
+            //     subtotalRefacciones = this.form.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
+            //     let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
+            //     ticket += subtotalStr.padStart(anchoTicket) + '\n';
+            // }
 
-            let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.form.service_cost);
-            ticket += costoServicioStr.padStart(anchoTicket) + '\n';
+            // let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.form.service_cost);
+            // ticket += costoServicioStr.padStart(anchoTicket) + '\n';
 
-            let totalStr = 'Total: ' + formatCurrency(this.form.total_cost);
+            let totalStr = 'Total del servicio: ' + formatCurrency(this.form.total_cost);
             ticket += NEGRITA_ON + totalStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
             if (this.form.advance_payment > 0) {
@@ -471,6 +471,27 @@ export default {
                 let restanteStr = 'Resta: ' + formatCurrency(this.form.total_cost - this.form.advance_payment);
                 ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
             }
+
+            // --- 4. Generar Código de Barras con el Folio ---
+            // Asegúrate que el folio exista y no esté vacío
+            if (this.newFolio) {
+                const SET_BARCODE_HEIGHT = GS + 'h' + '\x50'; // Altura del código: 80 dots
+                const SET_BARCODE_WIDTH = GS + 'w' + '\x02';  // Ancho del código: multiplicador 2
+                const PRINT_HRI_BELOW = GS + 'H' + '\x02';   // Imprimir texto legible debajo del código
+
+                // Comando para imprimir CODE128: GS k m n [d1...dn]
+                // m = 73 (0x49) para CODE128
+                // n = longitud de los datos
+                const folio = String(this.newFolio).padStart(3, '0');
+                const printBarcodeCommand = GS + 'k' + '\x49' + String.fromCharCode(folio.length) + folio;
+
+                ticket += ALINEAR_CENTRO;
+                ticket += SET_BARCODE_HEIGHT;
+                ticket += SET_BARCODE_WIDTH;
+                ticket += PRINT_HRI_BELOW;
+                ticket += printBarcodeCommand + '\n\n';
+            }
+            // --- Fin del código de barras ---
 
             // terminos y condiciones
             ticket += '\n' + this.$page.props.auth.user.printer_config?.ticketTerms + '\n\n';
