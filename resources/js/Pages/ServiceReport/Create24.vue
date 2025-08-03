@@ -77,7 +77,7 @@
 
                 <section class="grid grid-cols-3 gap-3 col-span-full mt-5">
                     <div>
-                        <InputLabel value="Costo del servicio*" />
+                        <InputLabel value="Costo total del servicio*" />
                         <el-input v-model="form.service_cost" placeholder="Ej. 2,500" clearable
                             :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
                             :parser="(value) => value.replace(/[^\d.]/g, '')">
@@ -164,24 +164,24 @@
                 <section class="grid grid-cols-3 col-span-full mt-5">
                     <PatronMobil @syncPattern="syncPattern" @syncPassword="syncPassword" class="col-span-2" />
                     <article class="mt-24 text-sm space-y-1">
+                        <!-- <p class="flex">
+                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span
+                                class="w-16 text-right">{{
+                                    totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p> -->
                         <p class="flex">
-                            <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span
+                            <span class="w-44">Costo total del servicio</span><span class="ml-3">$</span><span
                                 class="w-16 text-right">{{
                                     form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span
+                            <span class="w-44">Anticipo</span><span class="ml-[2px]">- $</span><span
                                 class="w-16 text-right">{{
                                     form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00'
                                 }}</span>
                         </p>
-                        <p class="flex">
-                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span
-                                class="w-16 text-right">{{
-                                    totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                        </p>
                         <p class="flex font-bold">
-                            <span class="w-32">Total restante</span><span class="ml-3">$</span><span
+                            <span class="w-44">Restante por pagar</span><span class="ml-3">$</span><span
                                 class="w-16 text-right">{{
                                     total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </p>
@@ -302,8 +302,8 @@ export default {
             },
         },
         total() {
-            this.form.total_cost = this.form.service_cost + this.totalSpareParts;
-            return this.form.service_cost - this.form.advance_payment + this.totalSpareParts;
+            this.form.total_cost = this.form.service_cost;
+            return this.form.service_cost - this.form.advance_payment;
         },
         totalSpareParts() {
             if (!this.form.spare_parts[0].name) return 0;
@@ -381,7 +381,7 @@ export default {
                 if (this.$page.props.auth.user.store.address) {
                     ticket += this.$page.props.auth.user.store.address + '\n';
                 }
-                
+
                 if (this.$page.props.auth.user.printer_config?.ticketContactInfo) {
                     ticket += this.$page.props.auth.user.printer_config?.ticketContactInfo + '\n';
                 }

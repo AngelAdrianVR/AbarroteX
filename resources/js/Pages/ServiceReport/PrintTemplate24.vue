@@ -79,19 +79,19 @@
 
                 <section class="flex space-x-1 mt-1 text-[13px] border border-[#D9D9D9] rounded-lg py-1 px-3">
                     <p class="flex border-r border-[#D9D9D9] pr-2">
-                        <span>Costo del servicio:</span><span class="ml-2">$</span><span class=" text-right">{{
+                        <span>Costo total del servicio:</span><span class="ml-2">$</span><span class=" text-right">{{
                             report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                     </p>
                     <p class="flex border-r border-[#D9D9D9] px-2">
                         <span>Anticipo:</span><span class="ml-2"> - $</span><span class="text-right">{{
                             report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                     </p>
-                    <p class="flex border-r border-[#D9D9D9] px-2">
+                    <!-- <p class="flex border-r border-[#D9D9D9] px-2">
                         <span>Refacciones:</span><span class="ml-3">$</span><span class="text-right">{{
                             totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                    </p>
+                    </p> -->
                     <p class="flex font-bold px-2">
-                        <span>Total restante:</span><span class="ml-3">$</span><span class="text-right">{{
+                        <span>Restante por pagar:</span><span class="ml-3">$</span><span class="text-right">{{
                             (report.total_cost -
                                 report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                     </p>
