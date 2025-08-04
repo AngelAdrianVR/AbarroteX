@@ -345,10 +345,10 @@
                                         <span class="w-48">Ganancia </span><span class="ml-3">$</span><span
                                             class="w-20 text-right">
                                             {{
-                                                report.service_cost
+                                                (report.service_cost
                                                 - totalSpareParts
                                                 - (((report.comision_percentage ?? 0) / 100)
-                                                    * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                                    * report.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                             }}
                                         </span>
                                     </p>
