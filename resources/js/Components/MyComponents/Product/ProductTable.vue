@@ -35,9 +35,22 @@
             </el-table-column>
             <el-table-column label="Código" width="118">
                 <template #default="scope">
-                    <p>
-                        {{ scope.row.global_product_id ? scope.row.global_product?.code : scope.row.code ?? '-' }}
-                    </p>
+                    <div class="flex items-center space-x-2">
+                        <p>
+                            {{ scope.row.global_product_id ? scope.row.global_product?.code : scope.row.code ?? '-' }}
+                        </p>
+                        <el-tooltip v-if="scope.row.global_product_id ? scope.row.global_product?.code : scope.row.code"
+                            content="Imprimir código" placement="right">
+                            <button @click.stop="handleTicketPrinting(scope.row)"
+                                class="flex items-center justify-center text-xs rounded-full text-gray37 bg-[#ededed] hover:bg-gray37 hover:text-grayF2 size-5 transition-all ease-in-out duration-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
+                                </svg>
+                            </button>
+                        </el-tooltip>
+                    </div>
                 </template>
             </el-table-column>
             <el-table-column label="Precio">
@@ -170,7 +183,7 @@
                 </template>
             </el-table-column>
         </el-table>
-
+        <PrintingModal :show="showPrintingModal" @close="showPrintingModal = false" ref="printingModal" />
         <ConfirmationModal :show="showDeleteConfirm" @close="showDeleteConfirm = false">
             <template #title>
                 <h1>Eliminar producto</h1>
@@ -200,6 +213,7 @@ import { useForm } from '@inertiajs/vue3';
 import emitter from '@/eventBus.js';
 import PromotionCard from '../Promotions/PromotionCard.vue';
 import { isPast, parseISO } from 'date-fns';
+import PrintingModal from '../Sale/PrintingModal.vue';
 
 export default {
     data() {
@@ -207,6 +221,7 @@ export default {
 
         return {
             form,
+            showPrintingModal: false,
             deleting: false,
             showDeleteConfirm: false,
             itemToDelete: null,
@@ -224,6 +239,7 @@ export default {
         PrimaryButton,
         CancelButton,
         PromotionCard,
+        PrintingModal,
     },
     props: {
         products: Object,
@@ -248,13 +264,113 @@ export default {
         },
     },
     methods: {
+        handleTicketPrinting(product) {
+            const code = product.global_product_id ? product.global_product?.code : product.code;
+            const name = product.global_product_id ? product.global_product?.name : product.name;
+            if (code) {
+                this.$refs.printingModal.setLabelMode();
+                this.$refs.printingModal.customData = this.generateTSPLLabelCommands(code, name);
+                this.showPrintingModal = true;
+            }
+        },
+        generateTSPLLabelCommands(code, name) {
+            // --- 1. Configuración de la Etiqueta ---
+            // Define aquí las dimensiones de tu etiqueta en milímetros.
+            const labelConfig = {
+                widthMM: this.$page.props.auth.user.printer_config?.labelWidth,  // Ancho de la etiqueta en mm
+                heightMM: this.$page.props.auth.user.printer_config?.labelHeight, // Alto de la etiqueta en mm
+                gapMM: this.$page.props.auth.user.printer_config?.labelGap,     // Espacio entre etiquetas en mm
+                dotsPerMM: Math.round(this.$page.props.auth.user.printer_config?.labelResolution / 25.4)  // Resolución de la impresora (203 dpi = 8 dots/mm)
+            };
+
+            // --- 2. Comandos Iniciales (¡La parte más importante!) ---
+            // SIZE: Define el tamaño de la etiqueta.
+            // GAP: Define la separación entre etiquetas. Esto corrige el problema de sobreimpresión.
+            // CODEPAGE: Define la tabla de caracteres. 1252 es para Latin-1 (incluye acentos, ñ).
+            // CLS: Limpia el búfer de la impresora antes de empezar a dibujar.
+            let commands = '';
+            commands += `SIZE ${labelConfig.widthMM} mm, ${labelConfig.heightMM} mm\n`;
+            commands += `GAP ${labelConfig.gapMM} mm, 0 mm\n`;
+            // commands += `COUNTRY 003\n`;
+            // commands += `CODEPAGE 1252\n`;
+            commands += `CLS\n`;
+
+            // --- 3. Coordenadas y Diseño ---
+            let currentY = 15; // Posición Y inicial (margen superior en dots)
+            const startX = 15; // Posición X inicial (margen izquierdo en dots)
+            const rightMargin = 15;
+            const lineHeight = this.$page.props.auth.user.printer_config?.labelLineHeight; // Espacio entre líneas
+            const font = `"${this.$page.props.auth.user.printer_config?.labelFont}"`; // Fuente a utilizar. Las comillas dobles son importantes.
+            const fontAvgCharWidth = 12; // Ancho promedio de un carácter en dots. Ajusta según la fuente.
+
+            const addTextLine = (label, value) => {
+                if (!value) return; // No añadir si el valor está vacío
+
+                let fullText = `${label} ${value}`;
+
+                // --- CÁLCULO DINÁMICO DEL MÁXIMO DE CARACTERES ---
+                // 1. Calcula el ancho total disponible para el texto en dots.
+                const availableWidth = (labelConfig.widthMM * labelConfig.dotsPerMM) - startX - rightMargin;
+                // 2. Calcula cuántos caracteres caben en ese espacio. Usamos Math.floor para redondear hacia abajo.
+                const maxLength = Math.floor(availableWidth / fontAvgCharWidth);
+
+                const textParts = [];
+                while (fullText.length > maxLength) {
+                    let chunk = fullText.substring(0, maxLength);
+                    let lastSpace = chunk.lastIndexOf(' ');
+                    if (lastSpace > 0) {
+                        chunk = chunk.substring(0, lastSpace);
+                    }
+                    textParts.push(chunk);
+                    fullText = fullText.substring(chunk.length).trim();
+                }
+                textParts.push(fullText);
+
+                // Imprime cada parte del texto
+                textParts.forEach(part => {
+                    // Se usa TEXT y se escapa el contenido para evitar conflictos con comillas
+                    commands += `TEXT ${startX},${currentY},${font},0,1,1,"${part.replace(/"/g, '\\"')}"\n`;
+                    currentY += lineHeight;
+                });
+            };
+
+            // --- Contenido de la Etiqueta ---
+            addTextLine("", this.removeAccents(name));
+
+            // --- Código de Barras ---
+            const humanReadable = this.$page.props.auth.user.printer_config?.labelBarCodeHumanReadable || 0;
+
+            // BARCODE X,Y,"TIPO",ALTURA,LEER_HUMANO,ROTACION,ANCHO_ESTRECHO,ANCHO_ANCHO,"CONTENIDO"
+            const barcodeHeight = 22;    // Altura del código en dots
+            const narrowWidth = 2;     // Ancho de la barra más estrecha
+            const wideWidth = 5;       // Ancho de la barra más ancha
+
+            // Centrar el código de barras (opcional)
+            const barcodeX = startX;
+
+            commands += `BARCODE ${barcodeX},${currentY},"128",${barcodeHeight},${humanReadable},0,${narrowWidth},${wideWidth},"${code}"\n`;
+            currentY += barcodeHeight + 20; // Actualizar Y después del barcode
+
+            // Usamos PRINT 1 para imprimir una sola copia de la etiqueta diseñada.
+            commands += 'PRINT 1\n';
+
+            // console.log("Comandos TSPL Generados:\n", commands); // Útil para depuración
+            return commands;
+        },
+        removeAccents(text = '') {
+            if (!text) return '';
+            // cambiar ñ por n
+            text = text.replace(/ñ/g, 'n').replace(/Ñ/g, 'N');
+            // Normalizar el texto y eliminar los acentos
+            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        },
         handleSizeChange() {
             // reiniciar la pagina a 1
             this.currentPage = 1;
-            this.$emit('refresh-data' , this.currentPage, this.pageSize);
+            this.$emit('refresh-data', this.currentPage, this.pageSize);
         },
         handlePagination(val) {
-            this.$emit('refresh-data' , val, this.pageSize);
+            this.$emit('refresh-data', val, this.pageSize);
         },
         filterCategory(category, row) {
             let productCategory = row.global_product_id ? row.global_product?.category?.name : row.category?.name;

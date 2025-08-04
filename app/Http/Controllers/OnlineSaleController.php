@@ -611,11 +611,11 @@ class OnlineSaleController extends Controller
             $temp_product = $product['isLocal'] ? Product::find($product['product_id']) : GlobalProductStore::find($product['product_id']);
 
             //revisa que no sea producto bajo pedido para no tomar en cuenta el stock
-            if ($temp_product->current_stock < $product['quantity'] && !$product['product_on_request']) {
-                throw ValidationException::withMessages([
-                    'products' => 'No hay suficiente stock disponible de ' . $product['name'],
-                ]);
-            }
+            // if ($temp_product->current_stock < $product['quantity'] && !$product['product_on_request']) {
+            //     throw ValidationException::withMessages([
+            //         'products' => 'No hay suficiente stock disponible de ' . $product['name'],
+            //     ]);
+            // }
         }
     }
 
