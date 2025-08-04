@@ -1079,7 +1079,7 @@ export default {
             // Asegúrate que el folio exista y no esté vacío
             if (this.report.folio) {
                 const SET_BARCODE_HEIGHT = GS + 'h' + '\x50'; // Altura del código: 80 dots
-                const SET_BARCODE_WIDTH = GS + 'w' + '\x02';  // Ancho del código: multiplicador 2
+                const SET_BARCODE_WIDTH = GS + 'w' + '\x03';  // Ancho del código: multiplicador 3
                 const PRINT_HRI_BELOW = GS + 'H' + '\x02';   // Imprimir texto legible debajo del código
 
                 // Comando para imprimir CODE128: GS k m n [d1...dn]
@@ -1092,7 +1092,7 @@ export default {
                 ticket += SET_BARCODE_HEIGHT;
                 ticket += SET_BARCODE_WIDTH;
                 ticket += PRINT_HRI_BELOW;
-                ticket += printBarcodeCommand + '\n\n';
+                ticket += '\n' + printBarcodeCommand + '\n';
             }
             // --- Fin del código de barras ---
 
