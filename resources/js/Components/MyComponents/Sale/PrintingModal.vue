@@ -132,7 +132,7 @@ export default {
           ticket += this.$page.props.auth.user.printer_config?.ticketContactInfo + '\n';
         }
       }
-      
+
       ticket += ALINEAR_IZQUIERDA;
       ticket += "Folio: " + this.sales[0].folio + "\n";
       ticket += this.formatDate(this.sales[0]?.created_at) + "\n";
@@ -283,7 +283,7 @@ export default {
         });
         listaDeOperaciones.push({
           nombre: "Feed",
-          argumentos: [this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines],
+          argumentos: [this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines ?? 2],
         });
         /* {
               nombre: "EscribirTexto",

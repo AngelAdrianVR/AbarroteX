@@ -77,7 +77,7 @@
 
                 <section class="grid grid-cols-3 gap-3 col-span-full mt-5">
                     <div>
-                        <InputLabel value="Costo del servicio*" />
+                        <InputLabel value="Costo total del servicio*" />
                         <el-input v-model="form.service_cost" placeholder="Ej. 2,500" clearable
                             :formatter="(value) => `${Number(value).toLocaleString('es-MX')}`"
                             :parser="(value) => value.replace(/[^\d.]/g, '')">
@@ -164,24 +164,24 @@
                 <section class="grid grid-cols-3 col-span-full mt-5">
                     <PatronMobil @syncPattern="syncPattern" @syncPassword="syncPassword" class="col-span-2" />
                     <article class="mt-24 text-sm space-y-1">
+                        <!-- <p class="flex">
+                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span
+                                class="w-16 text-right">{{
+                                    totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
+                        </p> -->
                         <p class="flex">
-                            <span class="w-32">Costo del servicio</span><span class="ml-3">$</span><span
+                            <span class="w-44">Costo total del servicio</span><span class="ml-3">$</span><span
                                 class="w-16 text-right">{{
                                     form.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</span>
                         </p>
                         <p class="flex">
-                            <span class="w-32">Anticipo</span><span class="ml-[2px]">- $</span><span
+                            <span class="w-44">Anticipo</span><span class="ml-[2px]">- $</span><span
                                 class="w-16 text-right">{{
                                     form.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00'
                                 }}</span>
                         </p>
-                        <p class="flex">
-                            <span class="w-32">Refacciones</span><span class="ml-3">$</span><span
-                                class="w-16 text-right">{{
-                                    totalSpareParts?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
-                        </p>
                         <p class="flex font-bold">
-                            <span class="w-32">Total restante</span><span class="ml-3">$</span><span
+                            <span class="w-44">Restante por pagar</span><span class="ml-3">$</span><span
                                 class="w-16 text-right">{{
                                     total?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</span>
                         </p>
@@ -302,8 +302,8 @@ export default {
             },
         },
         total() {
-            this.form.total_cost = this.form.service_cost + this.totalSpareParts;
-            return this.form.service_cost - this.form.advance_payment + this.totalSpareParts;
+            this.form.total_cost = this.form.service_cost;
+            return this.form.service_cost - this.form.advance_payment;
         },
         totalSpareParts() {
             if (!this.form.spare_parts[0].name) return 0;
@@ -381,7 +381,7 @@ export default {
                 if (this.$page.props.auth.user.store.address) {
                     ticket += this.$page.props.auth.user.store.address + '\n';
                 }
-                
+
                 if (this.$page.props.auth.user.printer_config?.ticketContactInfo) {
                     ticket += this.$page.props.auth.user.printer_config?.ticketContactInfo + '\n';
                 }
@@ -413,55 +413,55 @@ export default {
             ticket += separador;
 
             // --- 2. Ajustar sección de refacciones con columnas dinámicas ---
-            if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
-                ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
+            // if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
+            //     ticket += ALINEAR_CENTRO + NEGRITA_ON + 'Refacciones' + NEGRITA_OFF + '\n';
 
-                // Definir anchos de columna
-                const colAnchoPrecio = 10; // " $1,234.56"
-                const colAnchoCant = 4;    // "Cant "
-                const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
+            //     // Definir anchos de columna
+            //     const colAnchoPrecio = 10; // " $1,234.56"
+            //     const colAnchoCant = 4;    // "Cant "
+            //     const colAnchoNombre = anchoTicket - colAnchoPrecio - colAnchoCant;
 
-                // Crear encabezado dinámico
-                let header = 'Pzs'.padEnd(colAnchoCant);
-                header += 'Concepto'.padEnd(colAnchoNombre);
-                header += 'Importe'.padStart(colAnchoPrecio);
+            //     // Crear encabezado dinámico
+            //     let header = 'Pzs'.padEnd(colAnchoCant);
+            //     header += 'Concepto'.padEnd(colAnchoNombre);
+            //     header += 'Importe'.padStart(colAnchoPrecio);
 
-                ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
-                ticket += separador;
-                ticket += ALINEAR_IZQUIERDA;
+            //     ticket += NEGRITA_ON + header + NEGRITA_OFF + '\n';
+            //     ticket += separador;
+            //     ticket += ALINEAR_IZQUIERDA;
 
-                this.form.spare_parts.forEach(part => {
-                    const cantidad = part.quantity.toString();
-                    // Trunca el nombre del producto para que quepa en su columna
-                    const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
-                    const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
+            //     this.form.spare_parts.forEach(part => {
+            //         const cantidad = part.quantity.toString();
+            //         // Trunca el nombre del producto para que quepa en su columna
+            //         const nombre = part.name.substring(0, colAnchoNombre - 1); // -1 por el espacio
+            //         const totalProducto = (part.quantity * part.unitPrice).toFixed(2);
 
-                    let linea = '';
-                    linea += cantidad.padEnd(colAnchoCant);
-                    linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
-                    linea += ('$' + totalProducto).padStart(colAnchoPrecio);
+            //         let linea = '';
+            //         linea += cantidad.padEnd(colAnchoCant);
+            //         linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
+            //         linea += ('$' + totalProducto).padStart(colAnchoPrecio);
 
-                    ticket += linea + '\n';
-                });
-                ticket += separador;
-            }
+            //         ticket += linea + '\n';
+            //     });
+            //     ticket += separador;
+            // }
 
             // --- 3. Ajustar sección de costos para alineación derecha ---
             const formatCurrency = (value) => {
                 return '$' + parseFloat(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             };
 
-            let subtotalRefacciones = 0;
-            if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
-                subtotalRefacciones = this.form.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
-                let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
-                ticket += subtotalStr.padStart(anchoTicket) + '\n';
-            }
+            // let subtotalRefacciones = 0;
+            // if (this.form.spare_parts && this.form.spare_parts.length > 0 && this.form.spare_parts[0].name) {
+            //     subtotalRefacciones = this.form.spare_parts.reduce((acc, part) => acc + (part.quantity * part.unitPrice), 0);
+            //     let subtotalStr = 'Subtotal Refacciones: ' + formatCurrency(subtotalRefacciones);
+            //     ticket += subtotalStr.padStart(anchoTicket) + '\n';
+            // }
 
-            let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.form.service_cost);
-            ticket += costoServicioStr.padStart(anchoTicket) + '\n';
+            // let costoServicioStr = 'Mano de Obra: ' + formatCurrency(this.form.service_cost);
+            // ticket += costoServicioStr.padStart(anchoTicket) + '\n';
 
-            let totalStr = 'Total: ' + formatCurrency(this.form.total_cost);
+            let totalStr = 'Total del servicio: ' + formatCurrency(this.form.total_cost);
             ticket += NEGRITA_ON + totalStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
             if (this.form.advance_payment > 0) {
@@ -471,6 +471,27 @@ export default {
                 let restanteStr = 'Resta: ' + formatCurrency(this.form.total_cost - this.form.advance_payment);
                 ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
             }
+
+            // --- 4. Generar Código de Barras con el Folio ---
+            // Asegúrate que el folio exista y no esté vacío
+            if (this.newFolio) {
+                const SET_BARCODE_HEIGHT = GS + 'h' + '\x50'; // Altura del código: 80 dots
+                const SET_BARCODE_WIDTH = GS + 'w' + '\x03';  // Ancho del código: multiplicador 3
+                const PRINT_HRI_BELOW = GS + 'H' + '\x02';   // Imprimir texto legible debajo del código
+
+                // Comando para imprimir CODE128: GS k m n [d1...dn]
+                // m = 73 (0x49) para CODE128
+                // n = longitud de los datos
+                const folio = String(this.newFolio).padStart(3, '0');
+                const printBarcodeCommand = GS + 'k' + '\x49' + String.fromCharCode(folio.length) + folio;
+
+                ticket += ALINEAR_CENTRO;
+                ticket += SET_BARCODE_HEIGHT;
+                ticket += SET_BARCODE_WIDTH;
+                ticket += PRINT_HRI_BELOW;
+                ticket += '\n' + printBarcodeCommand + '\n';
+            }
+            // --- Fin del código de barras ---
 
             // terminos y condiciones
             ticket += '\n' + this.$page.props.auth.user.printer_config?.ticketTerms + '\n\n';
