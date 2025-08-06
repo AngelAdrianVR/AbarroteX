@@ -220,7 +220,9 @@ class ServiceReportController extends Controller
                 $q->where('client_name', 'like', "%$query%")
                     ->orWhere(DB::raw('CAST(folio AS CHAR)'), 'like', "%$query%")
                     ->orWhere(DB::raw('CAST(folio AS UNSIGNED)'), 'like', "%$queryNormalized%")
-                    ->orWhere('service_date', 'like', "%$query%");
+                    ->orWhere('service_date', 'like', "%$query%")
+                    ->orWhere('product_details->brand', 'like', "%$query%")
+                    ->orWhere('product_details->model', 'like', "%$query%");
             })
             ->get();
 
