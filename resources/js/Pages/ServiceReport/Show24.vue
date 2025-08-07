@@ -166,7 +166,7 @@
                             <p class="lg:w-1/2">
                                 <span v-if="report.product_details?.brand">{{ report.product_details?.brand }}</span>
                                 <span v-if="report.product_details?.model">{{ ' ' + report.product_details?.model
-                                }}</span>
+                                    }}</span>
                             </p>
                         </div>
                         <div v-if="report.observations" class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
@@ -188,7 +188,7 @@
                         <div class="flex space-x-4 py-2 px-1">
                             <p class="text-[#373737] w-56">Porcentaje de comisión: </p>
                             <p v-if="report.comision_percentage" class="lg:w-1/2">{{ report.comision_percentage ?? '0'
-                                }}% (${{
+                            }}% (${{
                                     ((report.comision_percentage / 100)
                                         * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }})</p>
                             <p v-else class="lg:w-1/2">No aplica</p>
@@ -250,26 +250,28 @@
                                                         ",") ??
                                                     '0.00' }}</span>
                                         </p>
-                                        <p v-if="report.aditionals?.review_amount < report.advance_payment"
+                                        <p v-if="report.aditionals?.review_amount && report.aditionals?.review_amount < report.advance_payment"
                                             class="flex">
                                             <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span
                                                 class="w-24 text-right">{{
-                                                    report.aditionals.review_amount ?
+                                                    report.aditionals.review_amount
+                                                        ?
                                                         (report.advance_payment -
                                                             parseFloat(report.aditionals.review_amount))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                                                 ",")
                                                         :
-                                                        report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                            ",")
+                                                        report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                                 }}</span>
                                         </p>
                                         <p v-else class="flex">
                                             <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span
-                                                class="w-24 text-right">{{
-                                                    (parseFloat(report.aditionals.review_amount) -
-                                                        report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
-                                                            ",")
-                                                }}</span>
+                                                class="w-24 text-right">
+                                                {{
+                                                    (parseFloat(report.aditionals.review_amount || 0) -
+                                                        parseFloat(report.advance_payment || 0))
+                                                        ?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")
+                                                }}
+                                            </span>
                                         </p>
                                     </div>
                                 </div>
@@ -335,7 +337,7 @@
                                     </p>
                                     <p class="flex">
                                         <span class="w-48">Comisión del técnico ({{ report.comision_percentage ?? '0'
-                                            }}%)</span><span class="ml-3">-$</span><span class="w-20 text-right">
+                                        }}%)</span><span class="ml-3">-$</span><span class="w-20 text-right">
                                             {{
                                                 (((report.comision_percentage ?? 0) / 100)
                                                     * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -346,9 +348,9 @@
                                             class="w-20 text-right">
                                             {{
                                                 (report.service_cost
-                                                - totalSpareParts
-                                                - (((report.comision_percentage ?? 0) / 100)
-                                                    * report.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                                    - totalSpareParts
+                                                    - (((report.comision_percentage ?? 0) / 100)
+                                                        * report.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                             }}
                                         </span>
                                     </p>
