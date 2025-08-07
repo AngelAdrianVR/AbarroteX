@@ -92,6 +92,16 @@ class ServiceReportController extends Controller
             'folio' => $folio,
         ]);
 
+        if ($request->advance_payment) {
+            $cash_register = auth()->user()->cashRegister;
+            CashRegisterMovement::create([
+                'amount' => $request->advance_payment,
+                'type' => 'Ingreso',
+                'notes' => 'Anticipo. orden de servicio con folio ' . $folio,
+                'cash_register_id' => $cash_register->id,
+            ]);
+        }
+
         // Subir y asociar las imagenes
         if ($request->media) {
             $service_order->addAllMediaFromRequest()->each(function ($fileAdder) {
@@ -265,30 +275,40 @@ class ServiceReportController extends Controller
             $data['cancellation_reason'] = $request->cancellation_reason;
             $data['aditionals'] = $aditionals;
             $data['paid_at'] = now(); // Fecha y hora del pago
+            $advance_payment = $service_report->advance_payment ?? 0;
+            if ($aditionals['review_amount'] && $aditionals['review_amount'] > $advance_payment) {
+                $cash_register = auth()->user()->cashRegister;
+                CashRegisterMovement::create([
+                    'amount' => $aditionals['review_amount'] - $advance_payment,
+                    'type' => 'Ingreso',
+                    'notes' => 'Costo por revisión de equipo en orden cancelada con folio ' . $service_report->folio,
+                    'cash_register_id' => $cash_register->id,
+                ]);
+            }
         } elseif ($request->status === 'Entregado/Pagado') {
             $data['payment_method'] = $request->paymentMethod;
             // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden por si se quiere guardar en base de datos
             $data['paid_at'] = now(); // Fecha y hora del pago
 
             // crear gasto de comision del técnico si la comision es mayor a 0
-            if ($service_report->comision_percentage > 0 && $service_report->service_cost > 0) {
-                $expense = Expense::create([
-                    'concept' => 'Comision de servicio técnico a ' . $service_report->technician_name,
-                    'quantity' => 1,
-                    'current_price' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
-                    'store_id' => $service_report->store_id,
-                ]);
+            // if ($service_report->comision_percentage > 0 && $service_report->service_cost > 0) {
+            //     $expense = Expense::create([
+            //         'concept' => 'Comision de servicio técnico a ' . $service_report->technician_name,
+            //         'quantity' => 1,
+            //         'current_price' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
+            //         'store_id' => $service_report->store_id,
+            //     ]);
 
-                // Registrar el movimiento de caja para el gasto de comision
-                $cash_register = auth()->user()->cashRegister;
-                CashRegisterMovement::create([
-                    'amount' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
-                    'type' => 'Retiro',
-                    'notes' => 'Registro. Comisión ' . $service_report->comision_percentage . '% ' . $service_report->technician_name . '. Venta folio ' . $service_report->folio,
-                    'cash_register_id' => $cash_register->id,
-                    'expense_id' => $expense->id,
-                ]);
-            }
+            //     // Registrar el movimiento de caja para el gasto de comision
+            //     $cash_register = auth()->user()->cashRegister;
+            //     CashRegisterMovement::create([
+            //         'amount' => ($service_report->comision_percentage / 100) * $service_report->service_cost,
+            //         'type' => 'Retiro',
+            //         'notes' => 'Registro. Comisión ' . $service_report->comision_percentage . '% ' . $service_report->technician_name . '. Venta folio ' . $service_report->folio,
+            //         'cash_register_id' => $cash_register->id,
+            //         'expense_id' => $expense->id,
+            //     ]);
+            // }
         }
 
         $service_report->update($data);
