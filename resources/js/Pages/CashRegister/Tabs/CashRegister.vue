@@ -77,7 +77,9 @@
           <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-[#373737]"><span
               class="text-[#373737] mr-3 ml-[17px]">$</span>{{
                 cutForm.totalOnlineSale?.cash?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-          <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')" class="text-[#373737] col-span-3">Ordenes de servicio</p>
+          <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')" class="text-[#373737] col-span-3">
+            Ordenes de servicio liquidadas
+          </p>
           <div v-if="cutLoading">
             <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
           </div>
@@ -94,9 +96,6 @@
               + cutForm.totalStoreSale?.cash 
               + cutForm.totalOnlineSale?.cash 
               + cutForm.totalServiceOrders?.cash)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-
-
-
           <!-- Movimientos de caja -->
           <p v-if="currentMovements?.length" @click="showcashRegisterMovements = !showcashRegisterMovements"
             class="text-primary flex items-center cursor-pointer col-span-full pt-5">Movimientos de caja
@@ -146,13 +145,24 @@
           <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')" class="text-[#373737]"><span
               class="text-[#373737] mr-3 ml-[17px]">$</span>{{
                 cutForm.totalOnlineSale?.card?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
-          <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')" class="text-[#373737] col-span-3">Ordenes de servicio</p>
+          <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')" class="text-[#373737] col-span-3">
+            Ordenes de servicio liquidadas
+          </p>
           <div v-if="cutLoading">
             <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
           </div>
           <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')" class="text-[#373737]"><span
               class="text-[#373737] mr-3 ml-[17px]">$</span>{{
                 cutForm.totalServiceOrders?.card?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+          <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')" class="text-[#373737] col-span-3">
+            Anticipos de ordenes de servicio
+          </p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')" class="text-[#373737]"><span
+              class="text-[#373737] mr-3 ml-[17px]">$</span>{{
+                cutForm.totalServiceOrdersAdvances?.card_or_transfer?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
           <p class="font-bold text-[#373737] col-span-3 text-right">Total en tarjeta</p>
           <div v-if="cutLoading">
             <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
@@ -160,7 +170,8 @@
           <p v-else class="font-bold text-[#373737] mb-3 pl-4"><span class="mr-3">$</span>{{
             (cutForm.totalStoreSale?.card 
                   + cutForm.totalOnlineSale?.card
-                  + cutForm.totalServiceOrders?.card )?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+                  + cutForm.totalServiceOrders?.card
+                  + cutForm.totalServiceOrdersAdvances?.card_or_transfer)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
         </div>
 
         <footer class="bg-[#F2F2F2] font-bold py-2 rounded-xl flex px-2">
@@ -504,6 +515,7 @@ import Modal from "@/Components/Modal.vue";
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { useForm } from "@inertiajs/vue3";
+import axios from 'axios';
 
 export default {
   data() {
@@ -523,7 +535,8 @@ export default {
       difference_card: null, //diferencia de dinero contado en tarjeta y dinero esperado en
       totalStoreSale: null, //dinero esperado de ventas hechas para hacer corte
       totalOnlineSale: null, //dinero esperado de ventas en linea para hacer corte
-      totalServiceOrders: null, //dinero esperado de ventas de ordenes de servicio para hacer corte
+      totalServiceOrders: null, //dinero esperado de liquidaciones de ordenes de servicio para hacer corte
+      totalServiceOrdersAdvances: null, //dinero esperado de anticipos de ordenes de servicio para hacer corte
       totalCashMovements: null, //dinero de movimientos de caja para hacer corte
       withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
       withdrawn_card: null, //dinero retirado de tarjeta tras haber hecho el corte
@@ -631,7 +644,8 @@ export default {
         if (response.status === 200) {
           this.cutForm.totalStoreSale = response.data.store_sales; //ventas en tienda
           this.cutForm.totalOnlineSale = response.data.online_sales; // ventas en linea
-          this.cutForm.totalServiceOrders = response.data.service_orders; // ventas de ordenes de servicio
+          this.cutForm.totalServiceOrders = response.data.service_orders; // Liquidaciones de ordenes de servicio
+          this.cutForm.totalServiceOrdersAdvances = response.data.service_advances; // Anticipos de ordenes de servicio
         }
       } catch (error) {
         console.log(error);

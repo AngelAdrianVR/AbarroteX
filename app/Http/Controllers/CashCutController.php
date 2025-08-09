@@ -114,7 +114,7 @@ class CashCutController extends Controller
                     'amount_sales_products' => $amount_sales_products
                 ];
             });
-        
+
         // return $groupedCashCuts;
         return inertia('CashRegister/Show', compact('groupedCashCuts'));
     }
@@ -150,23 +150,23 @@ class CashCutController extends Controller
         $groupedCashCuts = $cash_cuts->groupBy(function ($date) {
             return $date->created_at->format('Y-m-d');
         })
-        ->map(function ($group) {
-            $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
-            $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
-            $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
-            $total_difference = $group->sum('difference_cash') + $group->sum('difference_card');
-            $amount_sales_products = $group->count();
+            ->map(function ($group) {
+                $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
+                $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
+                $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+                $total_difference = $group->sum('difference_cash') + $group->sum('difference_card');
+                $amount_sales_products = $group->count();
 
-            return [
-                'cuts' => $group,
-                'total_store_sales' => $total_store_sales,
-                'total_online_sales' => $total_online_sales,
-                'total_service_orders' => $total_service_orders,
-                'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
-                'total_difference' => $total_difference ,
-                'amount_sales_products' => $amount_sales_products
-            ];
-        });
+                return [
+                    'cuts' => $group,
+                    'total_store_sales' => $total_store_sales,
+                    'total_online_sales' => $total_online_sales,
+                    'total_service_orders' => $total_service_orders,
+                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
+                    'total_difference' => $total_difference,
+                    'amount_sales_products' => $amount_sales_products
+                ];
+            });
         //  return $groupedCashCuts;
         return inertia('CashRegister/Print', compact('groupedCashCuts'));
     }
@@ -183,6 +183,7 @@ class CashCutController extends Controller
             && array_key_exists('online_sales_cash_register', $online_store_properties)
             && intval($online_store_properties['online_sales_cash_register']) === intval($cash_register_id);
 
+        // Si hay un último corte, filtra las ventas y órdenes de servicio posteriores a ese corte
         if ($last_cash_cut !== null) {
             $sales = Sale::where('cash_register_id', $cash_register_id)
                 ->where('created_at', '>', $last_cash_cut->created_at)
@@ -195,8 +196,9 @@ class CashCutController extends Controller
                     ->get();
             }
 
+            // ---- Se buscan solo órdenes de servicio ya liquidadas ----
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->where('status', 'Entregado/Pagado') // no se toman en cuenta las canceladas pero revisar si se tienen que tomar en cuenta
+                ->where('status', 'Entregado/Pagado') // Solo las completadas
                 ->where('paid_at', '>', $last_cash_cut->created_at)
                 ->get();
         } else {
@@ -208,8 +210,9 @@ class CashCutController extends Controller
                     ->get();
             }
 
+            // ---- Se buscan solo órdenes de servicio ya liquidadas ----
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->whereIn('status', ['Entregado/Pagado'])
+                ->where('status', 'Entregado/Pagado') // Solo las completadas
                 ->get();
         }
 
@@ -231,9 +234,19 @@ class CashCutController extends Controller
         $online_cash_sales = $online_sales->where('payment_method', 'Efectivo')->sum(fn($o) => $o->total + $o->delivery_price);
         $online_card_sales = $online_sales->where('payment_method', 'Tarjeta')->sum(fn($o) => $o->total + $o->delivery_price);
 
-        // Órdenes de servicio por método de pago
-        $service_cash_sales = $service_orders->where('payment_method', 'Efectivo')->sum('service_cost');
-        $service_card_sales = $service_orders->where('payment_method', 'Tarjeta')->sum('service_cost');
+        // ---- Se calcula la liquidación de las órdenes (Total - Anticipo) ----
+        $service_cash_settlement = $service_orders->where('payment_method', 'Efectivo')
+            ->sum(fn($order) => $order->service_cost - $order->advance_payment);
+        $service_card_settlement = $service_orders->where('payment_method', 'Tarjeta')
+            ->sum(fn($order) => $order->service_cost - $order->advance_payment);
+
+        // ---- Obtener anticipos del día para servicios NO completados ----
+        $today_advances = ServiceReport::where('store_id', $store_id)
+            ->whereDate('created_at', today()) // Filtra por la fecha de hoy
+            ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+            ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
+            ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+
 
         return response()->json([
             'store_sales' => [
@@ -245,8 +258,11 @@ class CashCutController extends Controller
                 'card' => $online_card_sales,
             ],
             'service_orders' => [
-                'cash' => $service_cash_sales,
-                'card' => $service_card_sales,
+                'cash' => $service_cash_settlement,
+                'card' => $service_card_settlement,
+            ],
+            'service_advances' => [
+                'card_or_transfer' => $today_advances,
             ],
         ]);
     }

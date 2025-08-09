@@ -86,13 +86,13 @@ class ServiceReportController extends Controller
         $storeId = auth()->user()->store_id;
         $last_report = ServiceReport::where('store_id', $storeId)->latest('id')->first();
         $folio = $last_report ? intval($last_report->folio) + 1 : 1;
-
+        
         $service_order = ServiceReport::create($request->all() + [
             'store_id' => $storeId,
             'folio' => $folio,
         ]);
 
-        if ($request->advance_payment) {
+        if ($request->advance_payment && $request->payment_method === 'Efectivo') {
             $cash_register = auth()->user()->cashRegister;
             CashRegisterMovement::create([
                 'amount' => $request->advance_payment,
