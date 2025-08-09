@@ -36,6 +36,7 @@ class CashRegisterController extends Controller
                 $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
                 $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
                 $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+                $total_service_orders_advance = $group->sum('service_orders_advance_cash') + $group->sum('service_orders_advance_card');
                 $total_expected = $group->sum('expected_cash') + $group->sum('expected_card');
                 $total_counted = $group->sum('counted_cash') + $group->sum('counted_card');
                 $total_difference =  $total_counted - $total_expected;
@@ -46,7 +47,8 @@ class CashRegisterController extends Controller
                     'total_store_sales' => $total_store_sales,
                     'total_online_sales' => $total_online_sales,
                     'total_service_orders' => $total_service_orders,
-                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
+                    'total_service_orders_advance' => $total_service_orders_advance,
+                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders + $total_service_orders_advance,
                     'total_difference' => $total_difference,
                     'amount_sales_products' => $amount_sales_products
                 ];

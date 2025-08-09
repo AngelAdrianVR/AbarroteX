@@ -374,6 +374,7 @@
                   + cutForm.totalStoreSale?.cash
                   + cutForm.totalOnlineSale?.cash
                   + cutForm.totalServiceOrders?.cash
+                  + cutForm.totalServiceOrdersAdvances?.cash
                   + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               </div>
             </div>
@@ -454,7 +455,9 @@
                 <span class="pl-3">$</span>
                 <p>{{ (cutForm.totalStoreSale?.card
                   + cutForm.totalOnlineSale?.card
-                  + cutForm.totalServiceOrders?.card)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                  + cutForm.totalServiceOrders?.card
+                  + cutForm.totalServiceOrdersAdvances?.card_or_transfer
+                  )?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               </div>
             </div>
             <el-input @input="differenceCard()" v-model="cutForm.counted_card" type="text" placeholder="0.00"
@@ -732,6 +735,7 @@ export default {
         this.cutForm.totalStoreSale?.cash +
         this.cutForm.totalOnlineSale?.cash +
         this.cutForm.totalServiceOrders?.cash +
+        this.cutForm.totalServiceOrdersAdvances?.cash +
         this.cutForm.totalCashMovements +
         this.cash_register.started_cash) -
         this.cutForm.counted_cash
@@ -741,7 +745,8 @@ export default {
       this.cutForm.difference_card = (
         this.cutForm.totalStoreSale?.card +
         this.cutForm.totalOnlineSale?.card +
-        this.cutForm.totalServiceOrders?.card) -
+        this.cutForm.totalServiceOrders?.card +
+        this.cutForm.totalServiceOrdersAdvances?.card_or_transfer) -
         this.cutForm.counted_card
     },
   },

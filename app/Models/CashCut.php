@@ -22,6 +22,8 @@ class CashCut extends Model
         'online_sales_card',
         'service_orders_cash',
         'service_orders_card',
+        'service_orders_advance_cash',
+        'service_orders_advance_card',
         'counted_cash',
         'counted_card',
         'withdrawn_cash',
