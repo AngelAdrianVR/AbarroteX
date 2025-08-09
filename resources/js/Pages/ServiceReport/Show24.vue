@@ -920,7 +920,7 @@ export default {
             addTextLine("Fecha:", this.formatDateTime(this.report.created_at));
             addTextLine("Nombre:", this.removeAccents(this.report.client_name.slice(0, 20)));
             addTextLine("Equipo:", this.removeAccents(this.report.product_details?.brand) + ' ' + this.removeAccents(this.report.product_details?.model));
-            addTextLine("Total:", '$' + (this.totalSpareParts + parseFloat(this.report.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            addTextLine("Total:", '$' + (parseFloat(this.report.service_cost))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             addTextLine("Desbloqueo:", this.report.aditionals?.unlockPassword ?? 'Por patron');
             addTextLine("Problemas:", this.removeAccents(this.report.observations));
             // addTextLine("Servicio:", this.removeAccents(this.report.service_description));
