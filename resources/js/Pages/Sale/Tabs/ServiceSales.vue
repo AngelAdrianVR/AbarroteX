@@ -27,8 +27,8 @@ export default {
 
     },
     methods: {
-        showModal(modal, saleFolio) {
-            this.$emit('show-modal', modal, saleFolio, 'service');
+        showModal(modal, saleFolio, type, commands = null) {
+            this.$emit('show-modal', modal, saleFolio, type, commands);
         },
     },
     mounted() {

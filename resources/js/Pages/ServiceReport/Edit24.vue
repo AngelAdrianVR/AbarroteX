@@ -98,15 +98,15 @@
                         </el-input>
                         <InputError :message="form.errors.advance_payment" />
                     </div>
-                    <!-- <div>
-                        <InputLabel value="Método de pago" />
+                    <div v-if="form.advance_payment">
+                        <InputLabel value="Método de pago del anticipo" />
                         <el-select v-model="form.payment_method" clearable placeholder="Selecciona el método de pago"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                             <el-option v-for="payment_method in payment_methods" :key="payment_method"
                                 :label="payment_method"
                                 :value="payment_method" />
                         </el-select>
-                    </div> -->
+                    </div>
                 </section>
 
                 <div>
@@ -237,7 +237,7 @@ export default {
             service_cost: this.report.service_cost, // costo unicamente de mano de obra
             total_cost: this.report.total_cost, // costo total
             service_description: this.report.service_description, //descripcion de los servicios que se harán
-            // payment_method: this.report.payment_method,
+            payment_method: this.report.payment_method,
             advance_payment: this.report.advance_payment, // anticipo
             comision_percentage: this.report.comision_percentage, // comisión de la persona que realizó el servicio
             media: [], //imagenes de evidencia
@@ -246,7 +246,7 @@ export default {
 
         return {
             form,
-            payment_methods: ['Efectivo', 'Tarjeta'],
+            payment_methods: ['Efectivo', 'Tarjeta', 'Transferencia'],
 
             //uploader
             uploading: false,

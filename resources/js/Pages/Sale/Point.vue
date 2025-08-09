@@ -171,7 +171,7 @@
                         </svg>
                         Retirar efectivo
                       </el-dropdown-item>
-                      <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut">
+                      <!-- <el-dropdown-item :disabled="!asignedCashRegister" @click="handleCashCut">
                         <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg"
                           class="size-4 mr-2">
                           <path
@@ -179,7 +179,7 @@
                             stroke="currentColor" stroke-width="0.6" stroke-linecap="round" />
                         </svg>
                         Hacer corte
-                      </el-dropdown-item>
+                      </el-dropdown-item> -->
                       <div
                         v-if="isShowCahsOn && $page.props.auth.user.permissions.includes('Ver dinero en caja') && $page.props.auth?.user?.cash_register_id"
                         class="text-gray99 text-xs px-2 bg-grayF2 py-1">

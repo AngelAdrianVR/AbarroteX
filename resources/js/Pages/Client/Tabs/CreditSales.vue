@@ -306,6 +306,9 @@ export default {
         },
     },
     methods: {
+        print() {
+            window.open(route('clients.print-credit-historial', this.clientId), '_blank');
+        },
         calcRemainingDebtWithNewInstallment() {
             const totalSale = this.saleToSeeInstallments.total_sale;
             const installments = this.saleToSeeInstallments.credit_data.installments;

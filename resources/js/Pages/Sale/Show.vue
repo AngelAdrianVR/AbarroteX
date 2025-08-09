@@ -555,16 +555,36 @@ export default {
                 this.saleToSeeInstallments = this.getGroupedSales.find(item => item.folio == saleFolio);
             }
         },
-        openPrintingModal(saleFolio) {
-            this.$refs.printingModal.saleFolio = saleFolio;
+        openPrintingModal(saleFolio = null) {
+            if (saleFolio) {
+                this.$refs.printingModal.saleFolio = saleFolio;
+            }
+
             this.showPrintingModal = true;
         },
-        handleShowModal(modal, saleFolio, type = 'Normal') {
+        handleTicketPrinting(language, commands) {
+            // enviar comandos al componente de impresión dependiendo del tipo de ticket
+            if (language === 'TSPL') {
+                this.$refs.printingModal.setLabelMode();
+            } else if (language === 'ESC/POS') {
+                this.$refs.printingModal.setTicketMode();
+            }
+            this.$refs.printingModal.customData = commands;
+            this.showPrintingModal = true;
+        },
+        handleShowModal(modal, saleFolio, type = 'Normal', commands = null) {
             this.saleType = type;
             if (modal == 'edit') this.openEditModal(saleFolio);
             else if (modal == 'refund') this.openRefundModal(saleFolio);
             else if (modal == 'installment') this.openInstallmentModal(saleFolio);
-            else if (modal == 'printing') this.openPrintingModal(saleFolio);
+            else if (modal == 'printing') {
+                if (commands !== null) {
+                    this.handleTicketPrinting(commands[0], commands[1]);
+                    this.openPrintingModal();
+                } else {
+                    this.openPrintingModal(saleFolio);
+                }
+            }
         },
         update() {
             this.editing = true;

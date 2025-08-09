@@ -10,37 +10,43 @@
                 <div class="text-center">
                     <h1 class="lg:ml-10">Detalles de cortes</h1>
                     <h1 class="lg:ml-10 font-bold">{{ formatDate(Object.values(groupedCashCuts)[0].cuts[0].created_at)
-                        }}</h1>
+                    }}</h1>
                 </div>
-
-                <PrintButton @click="handlePrint" />
+                <span></span>
+                <!-- <PrintButton @click="handlePrint" /> -->
             </div>
 
-            <div class="mt-8 mb-10 space-y-1 text-sm rounded-xl border border-grayD9 p-4 w-80">
+            <div class="mt-8 mb-10 space-y-1 text-sm rounded-xl border border-grayD9 p-4 w-96">
                 <div class="flex justify-between items-center space-x-2 border-b border-grayD9 pb-1 pr-2">
                     <p class="font-semibold">Total de cortes</p>
                     <p class="ml-4 font-bold">{{ Object.values(groupedCashCuts)[0].cuts?.length }}</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <p class="w-40">Ventas en tienda</p>
+                    <p class="w-56">Ventas en tienda</p>
                     <p class="ml-4"><span class="mr-4">$</span>{{
                         Object.values(groupedCashCuts)[0].total_store_sales.toLocaleString('en-US',
                             { minimumFractionDigits: 2 }) }}</p>
                 </div>
                 <div v-if="hasModule('Tienda en línea')" class="flex items-center space-x-2">
-                    <p class="w-40">Pedidos en linea</p>
+                    <p class="w-56">Pedidos en linea</p>
                     <p class="ml-4"><span class="mr-4">$</span>{{
                         Object.values(groupedCashCuts)[0].total_online_sales.toLocaleString('en-US',
                             { minimumFractionDigits: 2 }) }}</p>
                 </div>
                 <div v-if="hasModule('Ordenes de servicio')" class="flex items-center space-x-2">
-                    <p class="w-40">Ordenes de servicio</p>
+                    <p class="w-56">Anticipos de órdenes de servicio</p>
+                    <p class="ml-4"><span class="mr-4">$</span>{{
+                        Object.values(groupedCashCuts)[0].total_service_orders_advance.toLocaleString('en-US',
+                            { minimumFractionDigits: 2 }) }}</p>
+                </div>
+                <div v-if="hasModule('Ordenes de servicio')" class="flex items-center space-x-2">
+                    <p class="w-56">Órdenes de servicio liquidadas</p>
                     <p class="ml-4"><span class="mr-4">$</span>{{
                         Object.values(groupedCashCuts)[0].total_service_orders.toLocaleString('en-US',
                             { minimumFractionDigits: 2 }) }}</p>
                 </div>
                 <div class="flex items-center space-x-2 font-semibold border-b border-grayD9 pb-1">
-                    <p class="w-40">Total de ventas</p>
+                    <p class="w-56">Total de ventas</p>
                     <p class="ml-4"><span class="mr-4">$</span>{{
                         Object.values(groupedCashCuts)[0].total_sales.toLocaleString('en-US', {
                             minimumFractionDigits:
@@ -48,7 +54,7 @@
                         }) }}</p>
                 </div>
                 <div class="flex items-center space-x-2 font-semibold">
-                    <p class="w-40">Total de diferencias</p>
+                    <p class="w-56">Total de diferencias</p>
                     <p :class="getTextColorClass(Object.values(groupedCashCuts)[0].total_difference)" class="ml-4"><span
                             class="mr-4">$</span>{{
                                 Object.values(groupedCashCuts)[0].total_difference.toLocaleString('en-US',
@@ -90,8 +96,17 @@
                                 $ {{ (cash_cut.online_sales_cash)?.toLocaleString('en-US',
                                     { minimumFractionDigits: 2 }) }}
                             </p>
-                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">Órdenes de
-                                servicio</p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">
+                                Anticipos de órdenes de servicio
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">
+                                $ {{ (cash_cut.service_orders_advance_cash)?.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2
+                                }) }}
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">
+                                Órdenes de servicio
+                            </p>
                             <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">
                                 $ {{ (cash_cut.service_orders_cash)?.toLocaleString('en-US', {
                                     minimumFractionDigits: 2
@@ -104,6 +119,7 @@
                                         cash_cut.store_sales_cash
                                         + cash_cut.online_sales_cash
                                         + cash_cut.service_orders_cash
+                                        + cash_cut.service_orders_advance_cash
                                     )
                                         ?.toLocaleString('en-US', { minimumFractionDigits: 2 })
                                 }}
@@ -152,8 +168,17 @@
                                 $ {{ (cash_cut.online_sales_card)?.toLocaleString('en-US',
                                     { minimumFractionDigits: 2 }) }}
                             </p>
-                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">Órdenes de
-                                servicio</p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">
+                                Ancticipos de órdenes de servicio
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">
+                                $ {{ (cash_cut.service_orders_advance_card)?.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2
+                                }) }}
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">
+                                Órdenes de servicio liquidadas
+                            </p>
                             <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">
                                 $ {{ (cash_cut.service_orders_card)?.toLocaleString('en-US', {
                                     minimumFractionDigits: 2
@@ -216,15 +241,16 @@
                                                 { minimumFractionDigits: 2 }) }}
                                     </span>
                                 </p>
-                                <p class="pb-5 flex justify-between" :class="differenceStyles(cash_cut)"><span class="pr-3">$</span>{{
-                                    (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US',
-                                        { minimumFractionDigits: 2 }) }}</p>
+                                <p class="pb-5 flex justify-between" :class="differenceStyles(cash_cut)"><span
+                                        class="pr-3">$</span>{{
+                                            (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US',
+                                                { minimumFractionDigits: 2 }) }}</p>
                                 <p class="flex justify-between"><span class="text-gray99 pr-3">$</span>
                                     <span>
                                         {{
                                             cash_cut.withdrawn_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 })
                                             ??
-                                        '0.00' }}
+                                            '0.00' }}
                                     </span>
                                 </p>
                                 <p class="flex justify-between"><span class="text-gray99 pr-3">$</span>
@@ -277,10 +303,10 @@
                                                     { minimumFractionDigits: 2 }) ?? '0.00' }}
                                             </span>
                                         </p>
-                                        <p class="pb-5 flex justify-between" :class="differenceCardStyles(cash_cut)"><span
-                                                class="pr-3">$</span>{{
-                                                    (cash_cut.counted_card - cash_cut.expected_card)?.toLocaleString('en-US',
-                                                        { minimumFractionDigits: 2 }) }}</p>
+                                        <p class="pb-5 flex justify-between" :class="differenceCardStyles(cash_cut)">
+                                            <span class="pr-3">$</span>{{
+                                                (cash_cut.counted_card - cash_cut.expected_card)?.toLocaleString('en-US',
+                                                    { minimumFractionDigits: 2 }) }}</p>
                                     </div>
                                 </div>
                                 <!-- mensaje de diferencia de efectivo -->

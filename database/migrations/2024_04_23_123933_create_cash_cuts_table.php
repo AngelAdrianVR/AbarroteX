@@ -23,6 +23,8 @@ return new class extends Migration
             $table->unsignedFloat('online_sales_card')->nullable(); // Total de venta en línea pagado con tarjeta
             $table->unsignedFloat('service_orders_cash')->nullable(); // Total de venta de ordenes de servicio pagado en efectivo
             $table->unsignedFloat('service_orders_card')->nullable(); // Total de venta de ordenes de servicio pagado con tarjeta
+            $table->unsignedFloat('service_orders_advance_cash')->nullable();
+            $table->unsignedFloat('service_orders_advance_card')->nullable();
             $table->unsignedFloat('counted_cash')->nullable(); //dinero contado manualmente de la caja
             $table->unsignedFloat('counted_card')->nullable(); //dinero contado en tarjeta
             $table->unsignedFloat('withdrawn_cash')->nullable(); //dinero retirado de caja despues de hacer el corte
