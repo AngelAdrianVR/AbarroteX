@@ -10,7 +10,7 @@
                 <div class="text-center">
                     <h1 class="lg:ml-10">Detalles de cortes</h1>
                     <h1 class="lg:ml-10 font-bold">{{ formatDate(Object.values(groupedCashCuts)[0].cuts[0].created_at)
-                        }}</h1>
+                    }}</h1>
                 </div>
 
                 <PrintButton @click="handlePrint" />
@@ -90,8 +90,9 @@
                                 $ {{ (cash_cut.online_sales_cash)?.toLocaleString('en-US',
                                     { minimumFractionDigits: 2 }) }}
                             </p>
-                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">Órdenes de
-                                servicio</p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">
+                                Órdenes de servicio
+                            </p>
                             <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">
                                 $ {{ (cash_cut.service_orders_cash)?.toLocaleString('en-US', {
                                     minimumFractionDigits: 2
@@ -216,15 +217,16 @@
                                                 { minimumFractionDigits: 2 }) }}
                                     </span>
                                 </p>
-                                <p class="pb-5 flex justify-between" :class="differenceStyles(cash_cut)"><span class="pr-3">$</span>{{
-                                    (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US',
-                                        { minimumFractionDigits: 2 }) }}</p>
+                                <p class="pb-5 flex justify-between" :class="differenceStyles(cash_cut)"><span
+                                        class="pr-3">$</span>{{
+                                            (cash_cut.counted_cash - cash_cut.expected_cash)?.toLocaleString('en-US',
+                                                { minimumFractionDigits: 2 }) }}</p>
                                 <p class="flex justify-between"><span class="text-gray99 pr-3">$</span>
                                     <span>
                                         {{
                                             cash_cut.withdrawn_cash?.toLocaleString('en-US', { minimumFractionDigits: 2 })
                                             ??
-                                        '0.00' }}
+                                            '0.00' }}
                                     </span>
                                 </p>
                                 <p class="flex justify-between"><span class="text-gray99 pr-3">$</span>
@@ -277,10 +279,10 @@
                                                     { minimumFractionDigits: 2 }) ?? '0.00' }}
                                             </span>
                                         </p>
-                                        <p class="pb-5 flex justify-between" :class="differenceCardStyles(cash_cut)"><span
-                                                class="pr-3">$</span>{{
-                                                    (cash_cut.counted_card - cash_cut.expected_card)?.toLocaleString('en-US',
-                                                        { minimumFractionDigits: 2 }) }}</p>
+                                        <p class="pb-5 flex justify-between" :class="differenceCardStyles(cash_cut)">
+                                            <span class="pr-3">$</span>{{
+                                                (cash_cut.counted_card - cash_cut.expected_card)?.toLocaleString('en-US',
+                                                    { minimumFractionDigits: 2 }) }}</p>
                                     </div>
                                 </div>
                                 <!-- mensaje de diferencia de efectivo -->

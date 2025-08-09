@@ -86,20 +86,15 @@ class ServiceReportController extends Controller
         $storeId = auth()->user()->store_id;
         $last_report = ServiceReport::where('store_id', $storeId)->latest('id')->first();
         $folio = $last_report ? intval($last_report->folio) + 1 : 1;
-        
+
         $service_order = ServiceReport::create($request->all() + [
             'store_id' => $storeId,
             'folio' => $folio,
         ]);
 
         if ($request->advance_payment && $request->payment_method === 'Efectivo') {
-            $cash_register = auth()->user()->cashRegister;
-            CashRegisterMovement::create([
-                'amount' => $request->advance_payment,
-                'type' => 'Ingreso',
-                'notes' => 'Anticipo. orden de servicio con folio ' . $folio,
-                'cash_register_id' => $cash_register->id,
-            ]);
+            // agregar en caja el anticipo
+            auth()->user()->cashRegister->increment('current_cash', $request->advance_payment);
         }
 
         // Subir y asociar las imagenes
@@ -289,6 +284,13 @@ class ServiceReportController extends Controller
             $data['payment_method'] = $request->paymentMethod;
             // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden por si se quiere guardar en base de datos
             $data['paid_at'] = now(); // Fecha y hora del pago
+            if ($request->paymentMethod === 'Efectivo') {
+                $advance_payment = $service_report->advance_payment ?? 0;
+                $service_cost = $service_report->service_cost ?? 0;
+                
+                // agregar en caja el pago restante de la orden
+                auth()->user()->cashRegister->increment('current_cash', $service_cost - $advance_payment);
+            }
 
             // crear gasto de comision del técnico si la comision es mayor a 0
             // if ($service_report->comision_percentage > 0 && $service_report->service_cost > 0) {

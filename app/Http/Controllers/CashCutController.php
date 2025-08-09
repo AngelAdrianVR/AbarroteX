@@ -201,6 +201,19 @@ class CashCutController extends Controller
                 ->where('status', 'Entregado/Pagado') // Solo las completadas
                 ->where('paid_at', '>', $last_cash_cut->created_at)
                 ->get();
+
+            // ---- Obtener anticipos a partir del ultimo corte realizado ----
+            $today_advances = ServiceReport::where('store_id', $store_id)
+                ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+            $today_advances_cash = ServiceReport::where('store_id', $store_id)
+                ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+
         } else {
             $sales = Sale::where('cash_register_id', $cash_register_id)->get();
 
@@ -214,6 +227,16 @@ class CashCutController extends Controller
             $service_orders = ServiceReport::where('store_id', $store_id)
                 ->where('status', 'Entregado/Pagado') // Solo las completadas
                 ->get();
+
+            // ---- Obtener todos los anticipos  ----
+            $today_advances = ServiceReport::where('store_id', $store_id)
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+            $today_advances_cash = ServiceReport::where('store_id', $store_id)
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
         }
 
         // Filtra las ventas a crédito
@@ -240,14 +263,6 @@ class CashCutController extends Controller
         $service_card_settlement = $service_orders->where('payment_method', 'Tarjeta')
             ->sum(fn($order) => $order->service_cost - $order->advance_payment);
 
-        // ---- Obtener anticipos del día para servicios NO completados ----
-        $today_advances = ServiceReport::where('store_id', $store_id)
-            ->whereDate('created_at', today()) // Filtra por la fecha de hoy
-            ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
-            ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
-            ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
-
-
         return response()->json([
             'store_sales' => [
                 'cash' => $total_cash_sales,
@@ -262,6 +277,7 @@ class CashCutController extends Controller
                 'card' => $service_card_settlement,
             ],
             'service_advances' => [
+                'cash' => $today_advances_cash,
                 'card_or_transfer' => $today_advances,
             ],
         ]);

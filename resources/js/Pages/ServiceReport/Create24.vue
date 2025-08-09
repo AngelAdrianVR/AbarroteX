@@ -241,7 +241,7 @@ export default {
             service_cost: null, // costo unicamente de mano de obra
             total_cost: null, // costo total
             service_description: null, //descripcion de los servicios que se harán
-            // payment_method: null,
+            payment_method: null,
             advance_payment: null, // anticipo
             comision_percentage: null, // comisión de la persona que realizó el servicio
             media: [], //imagenes de evidencia

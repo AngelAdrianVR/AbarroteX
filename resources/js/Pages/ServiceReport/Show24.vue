@@ -653,7 +653,7 @@
                         class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
                         <span class="font-bold">Total a pagar</span>
                         <p class="font-bold"><span class="mr-4">$</span>{{
-                            report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            (report.total_cost - (report.advance_payment || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                     </div>
                     <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
                         <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
@@ -666,14 +666,14 @@
                         <p class="pt-5 font-bold">Cambio</p>
                         <div
                             class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-7 flex items-center justify-between">
-                            <p v-if="report.total_cost <= moneyReceived" class="font-bold">
+                            <p v-if="(report.total_cost - (report.advance_payment || 0)) <= moneyReceived" class="font-bold">
                                 <span class="mr-5">$</span>
                                 {{
-                                    (moneyReceived - report.total_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                    (moneyReceived - (report.total_cost - (report.advance_payment || 0)))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                 }}
                             </p>
                         </div>
-                        <p v-if="(report.total_cost > moneyReceived) && moneyReceived"
+                        <p v-if="((report.total_cost - (report.advance_payment || 0)) > moneyReceived) && moneyReceived"
                             class="text-base font-bold text-red-600 text-center mb-3">
                             La cantidad es insuficiente. Por favor, ingrese una cantidad igual o mayor al total a pagar.
                         </p>
@@ -727,7 +727,7 @@
                             class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
                             <span class="font-bold">Total a pagar</span>
                             <p class="font-bold"><span class="mr-4">$</span>{{
-                                report.total_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                (report.total_cost - (report.advance_payment || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
                         </div>
 
                         <div class="flex justify-center mt-7">

@@ -237,7 +237,7 @@ export default {
             service_cost: this.report.service_cost, // costo unicamente de mano de obra
             total_cost: this.report.total_cost, // costo total
             service_description: this.report.service_description, //descripcion de los servicios que se harán
-            // payment_method: this.report.payment_method,
+            payment_method: this.report.payment_method,
             advance_payment: this.report.advance_payment, // anticipo
             comision_percentage: this.report.comision_percentage, // comisión de la persona que realizó el servicio
             media: [], //imagenes de evidencia
