@@ -103,9 +103,10 @@
                         <el-select v-model="form.payment_method" clearable placeholder="Selecciona el método de pago"
                             no-data-text="No hay opciones registradas" no-match-text="No se encontraron coincidencias">
                             <el-option v-for="payment_method in payment_methods" :key="payment_method"
-                                :label="payment_method"
-                                :value="payment_method" />
+                            :label="payment_method"
+                            :value="payment_method" />
                         </el-select>
+                        <InputError :message="form.errors.payment_method" />
                     </div>
                 </section>
 

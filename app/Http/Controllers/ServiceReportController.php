@@ -72,6 +72,8 @@ class ServiceReportController extends Controller
             'client_phone_number' => 'required|string|max:10',
             'spare_parts' => 'nullable|array|min:0',
             'technician_name' => 'required|string|max:255',
+            'advance_payment' => 'nullable|numeric|min:0|max:999999',
+            // 'payment_method' => 'required_unless:advance_payment,0', // Si advance_payment es mayor a 0, payment_method es requerido
             'description' => 'nullable|string|max:1000',
             'service_description' => 'required|string|max:1000',
             'service_cost' => 'required|numeric|min:0|max:999999',
