@@ -12,6 +12,7 @@ use App\Models\ServiceReport;
 use App\Models\Store;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CashCutController extends Controller
 {
@@ -45,11 +46,13 @@ class CashCutController extends Controller
             + $request->totalCashMovements
             + $request->totalStoreSale['cash']
             + $request->totalOnlineSale['cash']
-            + $request->totalServiceOrders['cash'];
+            + $request->totalServiceOrders['cash']
+            + $request->totalServiceOrdersAdvances['cash'];
 
         $expected_card = $request->totalStoreSale['card']
             + $request->totalOnlineSale['card']
-            + $request->totalServiceOrders['card'];
+            + $request->totalServiceOrders['card']
+            + $request->totalServiceOrdersAdvances['card_or_transfer'];
 
         //Crea el registro de corte de caja
         CashCut::create([
@@ -63,6 +66,8 @@ class CashCutController extends Controller
             'online_sales_card' => $request->totalOnlineSale['card'], //ventas en línea pago con tarjeta
             'service_orders_cash' => $request->totalServiceOrders['cash'], //ventas de ordenes de servicio en efectivo
             'service_orders_card' => $request->totalServiceOrders['card'], //ventas de
+            'service_orders_advance_cash' => $request->totalServiceOrdersAdvances['cash'],
+            'service_orders_advance_card' => $request->totalServiceOrdersAdvances['card_or_transfer'],
             'counted_cash' => $request->counted_cash, //dinero contado manualmente
             'counted_card' => $request->counted_card, //dinero contado en tarjeta
             'difference_cash' => $request->difference_cash * -1, //se multiplica por menos 1 para guardar en la base de datos negativo si la diferencia fue negativa (faltó dinero)
@@ -99,6 +104,7 @@ class CashCutController extends Controller
                 $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
                 $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
                 $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+                $total_service_orders_advance = $group->sum('service_orders_advance_cash') + $group->sum('service_orders_advance_card');
                 $total_expected = $group->sum('expected_cash') + $group->sum('expected_card');
                 $total_counted = $group->sum('counted_cash') + $group->sum('counted_card');
                 $total_difference =  $total_counted - $total_expected;
@@ -109,12 +115,13 @@ class CashCutController extends Controller
                     'total_store_sales' => $total_store_sales,
                     'total_online_sales' => $total_online_sales,
                     'total_service_orders' => $total_service_orders,
-                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
+                    'total_service_orders_advance' => $total_service_orders_advance,
+                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders + $total_service_orders_advance,
                     'total_difference' => $total_difference,
                     'amount_sales_products' => $amount_sales_products
                 ];
             });
-        
+
         // return $groupedCashCuts;
         return inertia('CashRegister/Show', compact('groupedCashCuts'));
     }
@@ -150,25 +157,29 @@ class CashCutController extends Controller
         $groupedCashCuts = $cash_cuts->groupBy(function ($date) {
             return $date->created_at->format('Y-m-d');
         })
-        ->map(function ($group) {
-            $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
-            $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
-            $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
-            $total_difference = $group->sum('difference_cash') + $group->sum('difference_card');
-            $amount_sales_products = $group->count();
+            ->map(function ($group) {
+                $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
+                $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
+                $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+                $total_service_orders_advance = $group->sum('service_orders_advance_cash') + $group->sum('service_orders_advance_card');
+                $total_expected = $group->sum('expected_cash') + $group->sum('expected_card');
+                $total_counted = $group->sum('counted_cash') + $group->sum('counted_card');
+                $total_difference =  $total_counted - $total_expected;
+                $amount_sales_products = $group->count();
 
-            return [
-                'cuts' => $group,
-                'total_store_sales' => $total_store_sales,
-                'total_online_sales' => $total_online_sales,
-                'total_service_orders' => $total_service_orders,
-                'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders,
-                'total_difference' => $total_difference ,
-                'amount_sales_products' => $amount_sales_products
-            ];
-        });
-        //  return $groupedCashCuts;
-        return inertia('CashRegister/Print', compact('groupedCashCuts'));
+                return [
+                    'cuts' => $group,
+                    'total_store_sales' => $total_store_sales,
+                    'total_online_sales' => $total_online_sales,
+                    'total_service_orders' => $total_service_orders,
+                    'total_service_orders_advance' => $total_service_orders_advance,
+                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders + $total_service_orders_advance,
+                    'total_difference' => $total_difference,
+                    'amount_sales_products' => $amount_sales_products
+                ];
+            });
+
+            return inertia('CashRegister/Print', compact('groupedCashCuts'));
     }
 
     public function fetchTotalSaleForCashCut($cash_register_id)
@@ -183,6 +194,7 @@ class CashCutController extends Controller
             && array_key_exists('online_sales_cash_register', $online_store_properties)
             && intval($online_store_properties['online_sales_cash_register']) === intval($cash_register_id);
 
+        // Si hay un último corte, filtra las ventas y órdenes de servicio posteriores a ese corte
         if ($last_cash_cut !== null) {
             $sales = Sale::where('cash_register_id', $cash_register_id)
                 ->where('created_at', '>', $last_cash_cut->created_at)
@@ -195,10 +207,24 @@ class CashCutController extends Controller
                     ->get();
             }
 
+            // ---- Se buscan solo órdenes de servicio ya liquidadas ----
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->where('status', 'Entregado/Pagado') // no se toman en cuenta las canceladas pero revisar si se tienen que tomar en cuenta
+                ->where('status', 'Entregado/Pagado') // Solo las completadas
                 ->where('paid_at', '>', $last_cash_cut->created_at)
                 ->get();
+
+            // ---- Obtener anticipos a partir del ultimo corte realizado ----
+            $today_advances = ServiceReport::where('store_id', $store_id)
+                ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+            $today_advances_cash = ServiceReport::where('store_id', $store_id)
+                ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+
         } else {
             $sales = Sale::where('cash_register_id', $cash_register_id)->get();
 
@@ -208,9 +234,20 @@ class CashCutController extends Controller
                     ->get();
             }
 
+            // ---- Se buscan solo órdenes de servicio ya liquidadas ----
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->whereIn('status', ['Entregado/Pagado'])
+                ->where('status', 'Entregado/Pagado') // Solo las completadas
                 ->get();
+
+            // ---- Obtener todos los anticipos  ----
+            $today_advances = ServiceReport::where('store_id', $store_id)
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+            $today_advances_cash = ServiceReport::where('store_id', $store_id)
+                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
+                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
         }
 
         // Filtra las ventas a crédito
@@ -231,9 +268,11 @@ class CashCutController extends Controller
         $online_cash_sales = $online_sales->where('payment_method', 'Efectivo')->sum(fn($o) => $o->total + $o->delivery_price);
         $online_card_sales = $online_sales->where('payment_method', 'Tarjeta')->sum(fn($o) => $o->total + $o->delivery_price);
 
-        // Órdenes de servicio por método de pago
-        $service_cash_sales = $service_orders->where('payment_method', 'Efectivo')->sum('service_cost');
-        $service_card_sales = $service_orders->where('payment_method', 'Tarjeta')->sum('service_cost');
+        // ---- Se calcula la liquidación de las órdenes (Total - Anticipo) ----
+        $service_cash_settlement = $service_orders->where('payment_method', 'Efectivo')
+            ->sum(fn($order) => $order->service_cost - $order->advance_payment);
+        $service_card_settlement = $service_orders->where('payment_method', 'Tarjeta')
+            ->sum(fn($order) => $order->service_cost - $order->advance_payment);
 
         return response()->json([
             'store_sales' => [
@@ -245,8 +284,12 @@ class CashCutController extends Controller
                 'card' => $online_card_sales,
             ],
             'service_orders' => [
-                'cash' => $service_cash_sales,
-                'card' => $service_card_sales,
+                'cash' => $service_cash_settlement,
+                'card' => $service_card_settlement,
+            ],
+            'service_advances' => [
+                'cash' => $today_advances_cash,
+                'card_or_transfer' => $today_advances,
             ],
         ]);
     }
@@ -265,13 +308,24 @@ class CashCutController extends Controller
             return $date->created_at->format('Y-m-d');
         })
             ->map(function ($group) {
-                $total_sales = $group->sum('sales_cash');
-                $total_difference = $group->sum('difference');
+                $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
+                $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
+                $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
+                $total_service_orders_advance = $group->sum('service_orders_advance_cash') + $group->sum('service_orders_advance_card');
+                $total_expected = $group->sum('expected_cash') + $group->sum('expected_card');
+                $total_counted = $group->sum('counted_cash') + $group->sum('counted_card');
+                $total_difference =  $total_counted - $total_expected;
+                $amount_sales_products = $group->count();
 
                 return [
                     'cuts' => $group,
-                    'total_sales' => $total_sales,
-                    'total_difference' => $total_difference
+                    'total_store_sales' => $total_store_sales,
+                    'total_online_sales' => $total_online_sales,
+                    'total_service_orders' => $total_service_orders,
+                    'total_service_orders_advance' => $total_service_orders_advance,
+                    'total_sales' => $total_store_sales + $total_online_sales + $total_service_orders + $total_service_orders_advance,
+                    'total_difference' => $total_difference,
+                    'amount_sales_products' => $amount_sales_products
                 ];
             });
 

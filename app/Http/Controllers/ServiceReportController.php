@@ -72,6 +72,8 @@ class ServiceReportController extends Controller
             'client_phone_number' => 'required|string|max:10',
             'spare_parts' => 'nullable|array|min:0',
             'technician_name' => 'required|string|max:255',
+            'advance_payment' => 'nullable|numeric|min:0|max:999999',
+            // 'payment_method' => 'required_unless:advance_payment,0', // Si advance_payment es mayor a 0, payment_method es requerido
             'description' => 'nullable|string|max:1000',
             'service_description' => 'required|string|max:1000',
             'service_cost' => 'required|numeric|min:0|max:999999',
@@ -92,14 +94,9 @@ class ServiceReportController extends Controller
             'folio' => $folio,
         ]);
 
-        if ($request->advance_payment) {
-            $cash_register = auth()->user()->cashRegister;
-            CashRegisterMovement::create([
-                'amount' => $request->advance_payment,
-                'type' => 'Ingreso',
-                'notes' => 'Anticipo. orden de servicio con folio ' . $folio,
-                'cash_register_id' => $cash_register->id,
-            ]);
+        if ($request->advance_payment && $request->payment_method === 'Efectivo') {
+            // agregar en caja el anticipo
+            auth()->user()->cashRegister->increment('current_cash', $request->advance_payment);
         }
 
         // Subir y asociar las imagenes
@@ -289,6 +286,13 @@ class ServiceReportController extends Controller
             $data['payment_method'] = $request->paymentMethod;
             // $data['money_received'] = $request->money_received; // Dinero recibido al pagar la orden por si se quiere guardar en base de datos
             $data['paid_at'] = now(); // Fecha y hora del pago
+            if ($request->paymentMethod === 'Efectivo') {
+                $advance_payment = $service_report->advance_payment ?? 0;
+                $service_cost = $service_report->service_cost ?? 0;
+                
+                // agregar en caja el pago restante de la orden
+                auth()->user()->cashRegister->increment('current_cash', $service_cost - $advance_payment);
+            }
 
             // crear gasto de comision del técnico si la comision es mayor a 0
             // if ($service_report->comision_percentage > 0 && $service_report->service_cost > 0) {
