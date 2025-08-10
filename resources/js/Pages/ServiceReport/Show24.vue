@@ -24,14 +24,25 @@
                                 </svg>
                                 Comprobante de servicio</el-dropdown-item>
                             <el-dropdown-item :disabled="report.status === 'Cancelada'"
-                                @click="handleTicketPrinting('ESC/POS')">
+                                @click="handleTicketPrinting('ESC/POS', 'orden')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M3.92 8.06692C3.78 8.08442 3.64 8.10308 3.5 8.12292M3.92 8.06692C5.96532 7.81031 8.03468 7.81031 10.08 8.06692M3.92 8.06692L3.69833 10.5M10.08 8.06692C10.22 8.08442 10.36 8.10308 10.5 8.12292M10.08 8.06692L10.3017 10.5L10.4352 11.9718C10.4435 12.0626 10.4328 12.1541 10.4037 12.2405C10.3746 12.3269 10.3279 12.4063 10.2664 12.4737C10.2049 12.541 10.1301 12.5948 10.0467 12.6316C9.96327 12.6684 9.87309 12.6875 9.78192 12.6875H4.21808C3.83192 12.6875 3.52975 12.3562 3.56475 11.9718L3.69833 10.5M3.69833 10.5H3.0625C2.7144 10.5 2.38056 10.3617 2.13442 10.1156C1.88828 9.86944 1.75 9.5356 1.75 9.1875V5.516C1.75 4.88542 2.198 4.34058 2.82158 4.24725C3.19255 4.19176 3.5646 4.14372 3.9375 4.10317M10.3005 10.5H10.9369C11.1093 10.5001 11.2801 10.4662 11.4394 10.4003C11.5987 10.3343 11.7434 10.2377 11.8654 10.1158C11.9873 9.9939 12.084 9.84918 12.15 9.68991C12.216 9.53063 12.25 9.35991 12.25 9.1875V5.516C12.25 4.88542 11.802 4.34058 11.1784 4.24725C10.8074 4.19176 10.4354 4.14372 10.0625 4.10317M10.0625 4.10317C8.02684 3.88168 5.97316 3.88168 3.9375 4.10317M10.0625 4.10317V1.96875C10.0625 1.6065 9.7685 1.3125 9.40625 1.3125H4.59375C4.2315 1.3125 3.9375 1.6065 3.9375 1.96875V4.10317M10.5 6.125H10.5047V6.12967H10.5V6.125ZM8.75 6.125H8.75467V6.12967H8.75V6.125Z"
                                         stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
-                                Imprimir ticket
+                                Imprimir ticket de orden
+                            </el-dropdown-item>
+                            <el-dropdown-item v-if="report.status == 'Entregado/Pagado'"
+                                :disabled="report.status === 'Cancelada'"
+                                @click="handleTicketPrinting('ESC/POS', 'comprobante')">
+                                <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M3.92 8.06692C3.78 8.08442 3.64 8.10308 3.5 8.12292M3.92 8.06692C5.96532 7.81031 8.03468 7.81031 10.08 8.06692M3.92 8.06692L3.69833 10.5M10.08 8.06692C10.22 8.08442 10.36 8.10308 10.5 8.12292M10.08 8.06692L10.3017 10.5L10.4352 11.9718C10.4435 12.0626 10.4328 12.1541 10.4037 12.2405C10.3746 12.3269 10.3279 12.4063 10.2664 12.4737C10.2049 12.541 10.1301 12.5948 10.0467 12.6316C9.96327 12.6684 9.87309 12.6875 9.78192 12.6875H4.21808C3.83192 12.6875 3.52975 12.3562 3.56475 11.9718L3.69833 10.5M3.69833 10.5H3.0625C2.7144 10.5 2.38056 10.3617 2.13442 10.1156C1.88828 9.86944 1.75 9.5356 1.75 9.1875V5.516C1.75 4.88542 2.198 4.34058 2.82158 4.24725C3.19255 4.19176 3.5646 4.14372 3.9375 4.10317M10.3005 10.5H10.9369C11.1093 10.5001 11.2801 10.4662 11.4394 10.4003C11.5987 10.3343 11.7434 10.2377 11.8654 10.1158C11.9873 9.9939 12.084 9.84918 12.15 9.68991C12.216 9.53063 12.25 9.35991 12.25 9.1875V5.516C12.25 4.88542 11.802 4.34058 11.1784 4.24725C10.8074 4.19176 10.4354 4.14372 10.0625 4.10317M10.0625 4.10317C8.02684 3.88168 5.97316 3.88168 3.9375 4.10317M10.0625 4.10317V1.96875C10.0625 1.6065 9.7685 1.3125 9.40625 1.3125H4.59375C4.2315 1.3125 3.9375 1.6065 3.9375 1.96875V4.10317M10.5 6.125H10.5047V6.12967H10.5V6.125ZM8.75 6.125H8.75467V6.12967H8.75V6.125Z"
+                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Imprimir comprobante de pago
                             </el-dropdown-item>
                             <el-dropdown-item :disabled="report.status === 'Cancelada'"
                                 @click="handleTicketPrinting('TSPL')">
@@ -202,25 +213,37 @@
                                 </template>
                                 <div class="mt-2 text-[15px] space-y-1 flex flex-col items-end">
                                     <p class="flex">
-                                        <span class="w-40">Costo total del servicio</span><span
+                                        <span class="w-52">Costo total del servicio</span><span
                                             class="ml-3">$</span><span class="w-24 text-right">{{
                                                 report.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                                 ?? '0.00' }}</span>
                                     </p>
                                     <p class="flex">
-                                        <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
+                                        <span class="w-52">Anticipo</span><span class="ml-[2px]">- $</span><span
                                             class="w-24 text-right">{{
                                                 report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                                 ?? '0.00'
                                             }}</span>
                                     </p>
-                                    <p class="flex font-bold border-t border-[#D9D9D9] pt-1">
-                                        <span class="w-40">Restante por pagar</span><span class="ml-3">$</span><span
+                                    <p class="flex">
+                                        <span class="w-52">Pago al entergar equipo</span><span class="ml-[2px]">-
+                                            $</span><span class="w-24 text-right">{{
+                                                (report.service_cost - (report.advance_payment ||
+                                                    0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                                ?? '0.00'
+                                            }}</span>
+                                    </p>
+                                    <p v-if="report.status != 'Entregado/Pagado'"
+                                        class="flex font-bold border-t border-[#D9D9D9] pt-1">
+                                        <span class="w-52">Restante por pagar</span><span class="ml-3">$</span><span
                                             class="w-24 text-right">{{
                                                 (report.total_cost -
                                                     report.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                                         ",")
                                             }}</span>
+                                    </p>
+                                    <p v-else class="w-80 flex justify-end font-bold border-t border-[#D9D9D9] pt-1">
+                                        <span>Pagado</span>
                                     </p>
 
                                     <!-- Información de cancelación -->
@@ -237,14 +260,14 @@
                                         </div>
 
                                         <p class="flex">
-                                            <span class="w-40">Costo de Revisión</span><span class="ml-3">$</span><span
+                                            <span class="w-52">Costo de Revisión</span><span class="ml-3">$</span><span
                                                 class="w-24 text-right">{{
                                                     report.aditionals.review_amount ?
                                                         parseFloat(report.aditionals.review_amount)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                                             ",") : '0.00' }}</span>
                                         </p>
                                         <p class="flex">
-                                            <span class="w-40">Anticipo</span><span class="ml-[2px]">- $</span><span
+                                            <span class="w-52">Anticipo</span><span class="ml-[2px]">- $</span><span
                                                 class="w-24 text-right">{{
                                                     report.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                                         ",") ??
@@ -252,7 +275,7 @@
                                         </p>
                                         <p v-if="report.aditionals?.review_amount && report.aditionals?.review_amount < report.advance_payment"
                                             class="flex">
-                                            <span class="w-40">Total a devolver</span><span class="ml-3">$</span><span
+                                            <span class="w-52">Total a devolver</span><span class="ml-3">$</span><span
                                                 class="w-24 text-right">{{
                                                     report.aditionals.review_amount
                                                         ?
@@ -264,12 +287,12 @@
                                                 }}</span>
                                         </p>
                                         <p v-else class="flex">
-                                            <span class="w-40">Total a pagar</span><span class="ml-3">$</span><span
+                                            <span class="w-52">Total a pagar</span><span class="ml-3">$</span><span
                                                 class="w-24 text-right">
                                                 {{
                                                     (parseFloat(report.aditionals.review_amount || 0) -
                                                         parseFloat(report.advance_payment || 0))
-                                                        ?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")
+                                                        ?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                                 }}
                                             </span>
                                         </p>
@@ -653,7 +676,9 @@
                         class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
                         <span class="font-bold">Total a pagar</span>
                         <p class="font-bold"><span class="mr-4">$</span>{{
-                            (report.total_cost - (report.advance_payment || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                            (report.total_cost - (report.advance_payment ||
+                                0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                    ",") }}</p>
                     </div>
                     <div v-if="!paymentConfirmed" class="mt-5 flex flex-col items-center space-y-3">
                         <p class="text-center font-bold">¿Con cuánto paga el cliente?</p>
@@ -666,10 +691,12 @@
                         <p class="pt-5 font-bold">Cambio</p>
                         <div
                             class="rounded-full border border-[#D9D9D9D] bg-[#E0FEC5] py-2 px-7 flex items-center justify-between">
-                            <p v-if="(report.total_cost - (report.advance_payment || 0)) <= moneyReceived" class="font-bold">
+                            <p v-if="(report.total_cost - (report.advance_payment || 0)) <= moneyReceived"
+                                class="font-bold">
                                 <span class="mr-5">$</span>
                                 {{
-                                    (moneyReceived - (report.total_cost - (report.advance_payment || 0)))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                    (moneyReceived - (report.total_cost - (report.advance_payment ||
+                                        0)))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                 }}
                             </p>
                         </div>
@@ -727,7 +754,9 @@
                             class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
                             <span class="font-bold">Total a pagar</span>
                             <p class="font-bold"><span class="mr-4">$</span>{{
-                                (report.total_cost - (report.advance_payment || 0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                                (report.total_cost - (report.advance_payment ||
+                                    0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",") }}</p>
                         </div>
 
                         <div class="flex justify-center mt-7">
@@ -839,16 +868,100 @@ export default {
         }
     },
     methods: {
-        handleTicketPrinting(type) {
+        handleTicketPrinting(language, type) {
             // enviar comandos al componente de impresión dependiendo del tipo de ticket
-            if (type === 'TSPL') {
+            if (language === 'TSPL') {
                 this.$refs.printingModal.setLabelMode();
-                this.$refs.printingModal.customData = this.generateTSPLLabelCommands(false);
-            } else if (type === 'ESC/POS') {
+                this.$refs.printingModal.customData = this.generateTSPLLabelCommands();
+            } else if (language === 'ESC/POS') {
                 this.$refs.printingModal.setTicketMode();
-                this.$refs.printingModal.customData = this.generateESCPOSTicketCommands(false);
+                if (type === 'orden') {
+                    this.$refs.printingModal.customData = this.generateESCPOSTicketCommands();
+                } else if (type === 'comprobante') {
+                    this.$refs.printingModal.customData = this.generatePaymentTicketCommands();
+                }
             }
             this.showPrintingModal = true;
+        },
+        generatePaymentTicketCommands() {
+            const ESC = '\x1B';
+            const GS = '\x1D';
+            const INICIALIZAR_IMPRESORA = ESC + '@';
+            const NEGRITA_ON = ESC + 'E' + '\x01';
+            const NEGRITA_OFF = ESC + 'E' + '\x00';
+            const ALINEAR_IZQUIERDA = ESC + 'a' + '\x00';
+            const ALINEAR_CENTRO = ESC + 'a' + '\x01';
+            const CORTAR_PAPEL = GS + 'V' + '\x00' + '\x00';
+
+            // Determinar el ancho del ticket
+            const ticketWidthSetting = this.$page.props.auth.user.printer_config?.ticketWidth;
+            const anchoTicket = ticketWidthSetting === '80mm' ? 48 : 32;
+            const separador = '-'.repeat(anchoTicket) + '\n';
+
+            let ticket = INICIALIZAR_IMPRESORA;
+
+            // Encabezado del comprobante
+            ticket += ALINEAR_CENTRO;
+            if (this.$page.props.auth.user.store) {
+                ticket += NEGRITA_ON + this.$page.props.auth.user.store.name + NEGRITA_OFF + '\n';
+                if (this.$page.props.auth.user.store.address) {
+                    ticket += this.$page.props.auth.user.store.address + '\n';
+                }
+                if (this.$page.props.auth.user.printer_config?.ticketContactInfo) {
+                    ticket += this.$page.props.auth.user.printer_config?.ticketContactInfo + '\n';
+                }
+            }
+            ticket += separador;
+            ticket += NEGRITA_ON + 'COMPROBANTE DE PAGO' + NEGRITA_OFF + '\n';
+            ticket += separador;
+
+            // Datos del servicio y cliente
+            ticket += ALINEAR_IZQUIERDA;
+            ticket += `Folio: ${this.report.folio || 'N/A'}\n`;
+            ticket += `Fecha: ${this.formatDateTime()}\n`;
+            ticket += `Cliente: ${this.report.client_name || 'N/A'}\n`;
+            ticket += `Servicio: ${this.report.service_description || 'N/A'}\n`;
+            ticket += `Equipo: ${this.report.product_details.brand || '-'} ${this.report.product_details.model || '-'}\n`;
+            ticket += separador;
+
+            // Sección de costos y pago
+            const formatCurrency = (value) => {
+                return '$' + parseFloat(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            };
+
+            // Total del servicio
+            let totalServicioStr = 'Total del Servicio: ' + formatCurrency(this.report.total_cost);
+            ticket += totalServicioStr.padStart(anchoTicket) + '\n';
+
+            // Anticipo
+            const anticipo = this.report.advance_payment || 0;
+            if (anticipo > 0) {
+                let anticipoStr = 'Anticipo: ' + formatCurrency(anticipo);
+                ticket += anticipoStr.padStart(anchoTicket) + '\n';
+            }
+
+            // Saldo restante
+            const saldoRestante = this.report.total_cost - anticipo;
+            let restanteStr = 'Saldo Pagado: ' + formatCurrency(saldoRestante);
+            ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
+
+            // Método de pago
+            if (this.report.payment_method) {
+                let metodoPagoStr = 'Metodo de Pago: ' + this.report.payment_method;
+                ticket += metodoPagoStr.padStart(anchoTicket) + '\n';
+            }
+
+            ticket += separador;
+
+            // Mensaje final
+            ticket += '\n' + ALINEAR_CENTRO;
+            ticket += 'PAGO RECIBIDO\n\n';
+            ticket += 'GRACIAS POR SU PREFERENCIA';
+
+            // Corte de papel
+            ticket += CORTAR_PAPEL;
+
+            return ticket;
         },
         generateTSPLLabelCommands() {
             // --- 1. Configuración de la Etiqueta ---
@@ -960,7 +1073,7 @@ export default {
             // Normalizar el texto y eliminar los acentos
             return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         },
-        generateESCPOSTicketCommands(hasCut = true) {
+        generateESCPOSTicketCommands() {
             const ESC = '\x1B';
             const GS = '\x1D';
             const INICIALIZAR_IMPRESORA = ESC + '@';
@@ -1113,7 +1226,7 @@ export default {
         formatDateTime(dateString = new Date().toISOString()) {
             return format(parseISO(dateString), 'dd MMMM yyyy, h:mm a', { locale: es });
         },
-        formatDate(dateString) {
+        formatDate(dateString = new Date().toISOString()) {
             return format(parseISO(dateString), 'dd MMMM yyyy', { locale: es });
         },
         formatPhoneNumber(number) {
@@ -1207,6 +1320,7 @@ export default {
                             // Aquí cierra el modal como lo manejes normalmente
                             this.showPaymentModal = false; // ajusta este método a tu implementación
                             this.paymentModalStep = 1; //reinicia el paso del modal de pago
+                            this.handleTicketPrinting('ESC/POS', 'comprobante');
                         }, 1000);
                     } else if (newStatus === 'Cancelada') {
                         this.report.aditionals.review_amount = this.reviewAmount;
