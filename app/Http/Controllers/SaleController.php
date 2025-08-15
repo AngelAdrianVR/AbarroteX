@@ -198,7 +198,8 @@ class SaleController extends Controller
     public function getByFolio($folio)
     {
         // Obtener las ventas registradas en la fecha recibida
-        $sales = Sale::where([
+        $sales = Sale::with('product')
+        ->where([
             'store_id' => auth()->user()->store_id,
             'folio' => $folio,
         ])->get();
