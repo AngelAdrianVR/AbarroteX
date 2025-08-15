@@ -59,4 +59,13 @@ class Sale extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function product()
+    {
+        if ($this->is_global_product) {
+            return null;
+            // return $this->belongsTo(GlobalProductStore::class, 'product_id');
+        }
+        return $this->belongsTo(Product::class);
+    }
 }
