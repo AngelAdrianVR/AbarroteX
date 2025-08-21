@@ -292,7 +292,7 @@ export default {
         if (logo) {
           listaDeOperaciones.push({
             nombre: "DescargarImagenDeInternetEImprimir",
-            argumentos: ["https://ezyventas.com/storage/3361/Screenshot_1.jpg", 330],
+            argumentos: [logo, 380, 0, false],
           });
         }
         listaDeOperaciones.push({
@@ -303,6 +303,10 @@ export default {
           nombre: "Feed",
           argumentos: [this.$page.props.auth.user.printer_config?.ticketFinalWhiteLines ?? 2],
         });
+        /* {
+              nombre: "EscribirTexto",
+              argumentos: [ticketText],
+            }, */
       } else {
         listaDeOperaciones = [
           {
@@ -314,8 +318,7 @@ export default {
 
       // Payload para la petición HTTP
       const cargaUtil = {
-        // serial: this.serial, // Serial del plugin
-        anchoImpresora: this.$page.props.auth.user.printer_config?.ticketWidth, // 80mm o 58mm
+        serial: this.serial, // Serial del plugin
         operaciones: listaDeOperaciones,
         nombreImpresora: this.selectedPrinter,
       };
