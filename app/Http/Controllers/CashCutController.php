@@ -138,7 +138,6 @@ class CashCutController extends Controller
         //
     }
 
-
     public function destroy(CashCut $cash_cut)
     {
         $cash_cut->delete();
@@ -179,7 +178,7 @@ class CashCutController extends Controller
                 ];
             });
 
-            return inertia('CashRegister/Print', compact('groupedCashCuts'));
+        return inertia('CashRegister/Print', compact('groupedCashCuts'));
     }
 
     public function fetchTotalSaleForCashCut($cash_register_id)
@@ -215,17 +214,21 @@ class CashCutController extends Controller
 
             // ---- Obtener anticipos a partir del ultimo corte realizado ----
             $today_advances = ServiceReport::where('store_id', $store_id)
-                ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                // CAMBIO: Se usa where() para comparar fecha y hora completas
+                ->where('created_at', '>', $last_cash_cut->created_at)
                 ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
                 ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
                 ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+
             $today_advances_cash = ServiceReport::where('store_id', $store_id)
-                ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                // CAMBIO: Se usa where() para comparar fecha y hora completas
+                ->where('created_at', '>', $last_cash_cut->created_at)
                 ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
                 ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
                 ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
 
         } else {
+            // --- Esta sección (cuando no hay cortes previos) ya era correcta ---
             $sales = Sale::where('cash_register_id', $cash_register_id)->get();
 
             if ($has_online_sales_cash_register) {
@@ -234,41 +237,35 @@ class CashCutController extends Controller
                     ->get();
             }
 
-            // ---- Se buscan solo órdenes de servicio ya liquidadas ----
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->where('status', 'Entregado/Pagado') // Solo las completadas
+                ->where('status', 'Entregado/Pagado')
                 ->get();
 
-            // ---- Obtener todos los anticipos  ----
             $today_advances = ServiceReport::where('store_id', $store_id)
-                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
-                ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
-                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+                ->where('status', '!=', 'Entregado/Pagado')
+                ->whereIn('payment_method', ['Tarjeta', 'Transferencia'])
+                ->sum('advance_payment');
             $today_advances_cash = ServiceReport::where('store_id', $store_id)
-                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
-                ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
-                ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+                ->where('status', '!=', 'Entregado/Pagado')
+                ->whereIn('payment_method', ['Efectivo'])
+                ->sum('advance_payment');
         }
 
-        // Filtra las ventas a crédito
+        // El resto de la función para procesar los datos es correcto...
         $credit_sales_folios = CreditSaleData::where('store_id', $store_id)->pluck('folio')->toArray();
         $filtered_sales = $sales->reject(function ($sale) use ($credit_sales_folios) {
             return in_array($sale->folio, $credit_sales_folios);
         });
 
-        // Separa ventas por método de pago
         $cash_sales = $filtered_sales->where('payment_method', 'Efectivo');
         $card_sales = $filtered_sales->where('payment_method', 'Tarjeta');
 
-        // Calcula totales de ventas en tienda
         $total_cash_sales = $cash_sales->sum(fn($sale) => $sale->quantity * $sale->current_price);
         $total_card_sales = $card_sales->sum(fn($sale) => $sale->quantity * $sale->current_price);
 
-        // Ventas en línea por método de pago
         $online_cash_sales = $online_sales->where('payment_method', 'Efectivo')->sum(fn($o) => $o->total + $o->delivery_price);
         $online_card_sales = $online_sales->where('payment_method', 'Tarjeta')->sum(fn($o) => $o->total + $o->delivery_price);
 
-        // ---- Se calcula la liquidación de las órdenes (Total - Anticipo) ----
         $service_cash_settlement = $service_orders->where('payment_method', 'Efectivo')
             ->sum(fn($order) => $order->service_cost - $order->advance_payment);
         $service_card_settlement = $service_orders->where('payment_method', 'Tarjeta')
