@@ -97,12 +97,12 @@ class SaleController extends Controller
 
         // Obtener los servicios entregados y pagados en la fecha especificada
         $order_services = ServiceReport::query()
-            ->where(function ($query) {
-                $query->where('status', 'Entregado/Pagado')
-                    ->orWhere('status', 'Cancelada');
-            })
+            // ->where(function ($query) {
+            //     $query->where('status', 'Entregado/Pagado')
+            //         ->orWhere('status', 'Cancelada');
+            // })
             ->where('store_id', auth()->user()->store_id)
-            ->whereDate('paid_at', $date)
+            ->whereDate('created_at', $date)
             ->latest()
             ->get();
 
@@ -383,10 +383,10 @@ class SaleController extends Controller
             ->get();
 
         $order_services = ServiceReport::query()
-            ->where(function ($query) {
-                $query->where('status', 'Entregado/Pagado')
-                    ->orWhere('status', 'Cancelada');
-            })
+            // ->where(function ($query) {
+            //     $query->where('status', 'Entregado/Pagado')
+            //         ->orWhere('status', 'Cancelada');
+            // })
             ->where('store_id', auth()->user()->store_id)
             ->latest()
             ->get(['id', 'folio', 'total_cost', 'paid_at', 'created_at']);
@@ -686,7 +686,7 @@ class SaleController extends Controller
                     return Carbon::parse($sale->created_at)->toDateString(); // fallback
                 }
             } else {
-                return Carbon::parse($sale->paid_at)->toDateString(); // Orden de servicio
+                return Carbon::parse($sale->created_at)->toDateString(); // Orden de servicio
             }
         })->map(function ($dailySales) use ($returnSales, $installments) {
             // 3. Clasificar las ventas del día
@@ -702,7 +702,7 @@ class SaleController extends Controller
                     $date = Carbon::parse($sale['created_at'])->toDateString(); // fallback
                 }
             } else {
-                $date = Carbon::parse($sale['paid_at'])->toDateString(); // Orden de servicio
+                $date = Carbon::parse($sale['created_at'])->toDateString(); // Orden de servicio
             }
             // $date = $dailySales[0]['created_at'];
             $normalSales = $dailySales->filter(fn($sale) => isset($sale->current_price) && !$sale->quote_id);
