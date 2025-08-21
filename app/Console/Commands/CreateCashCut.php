@@ -64,12 +64,15 @@ class CreateCashCut extends Command
 
                     // ---- Obtener anticipos a partir del ultimo corte realizado ----
                     $today_advances = ServiceReport::where('store_id', $store->id)
-                        ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                        // CAMBIO: Se usa where() para comparar fecha y hora completas
+                        ->where('created_at', '>', $last_cash_cut->created_at)
                         ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
                         ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
                         ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+
                     $today_advances_cash = ServiceReport::where('store_id', $store->id)
-                        ->whereDate('created_at', '>', $last_cash_cut->created_at) // Filtra por la fecha de hoy
+                        // CAMBIO: Se usa where() para comparar fecha y hora completas
+                        ->where('created_at', '>', $last_cash_cut->created_at)
                         ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
                         ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
                         ->sum('advance_payment'); // Suma solo el campo 'advance_payment'

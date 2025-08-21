@@ -172,7 +172,7 @@
           <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
             class="text-[#373737]"><span class="text-[#373737] mr-3 ml-[17px]">$</span>{{
               cutForm.totalServiceOrdersAdvances?.card_or_transfer?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
-            '0.00'
+              '0.00'
             }}</p>
           <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
             class="text-[#373737] col-span-3">
@@ -420,7 +420,7 @@
                   <span class="pl-3">$</span>
                   <p>{{ (cutForm.counted_cash - cutForm.withdrawn_cash)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",")
-                    }}</p>
+                  }}</p>
                 </div>
           </div>
         </section>
@@ -457,7 +457,7 @@
                   + cutForm.totalOnlineSale?.card
                   + cutForm.totalServiceOrders?.card
                   + cutForm.totalServiceOrdersAdvances?.card_or_transfer
-                  )?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+                )?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               </div>
             </div>
             <el-input @input="differenceCard()" v-model="cutForm.counted_card" type="text" placeholder="0.00"
@@ -503,7 +503,7 @@
                   <span class="pl-3">$</span>
                   <p>{{ (cutForm.counted_card - cutForm.withdrawn_card)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",")
-                    }}</p>
+                  }}</p>
                 </div>
           </div>
         </section>
@@ -523,6 +523,8 @@
               + cutForm.totalOnlineSale?.cash
               + cutForm.totalOnlineSale?.card
               + cutForm.totalServiceOrders?.cash
+              + cutForm.totalServiceOrdersAdvances?.cash
+              + cutForm.totalServiceOrdersAdvances?.card_or_transfer
               + cutForm.totalServiceOrders?.card) == 0)">
             Hacer corte</PrimaryButton>
         </div>
@@ -531,6 +533,8 @@
           + cutForm.totalOnlineSale?.cash
           + cutForm.totalOnlineSale?.card
           + cutForm.totalServiceOrders?.cash
+          + cutForm.totalServiceOrdersAdvances?.cash
+          + cutForm.totalServiceOrdersAdvances?.card_or_transfer
           + cutForm.totalServiceOrders?.card) == 0" class="text-xs text-red-600 text-right">*Para
           hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
       </form>
