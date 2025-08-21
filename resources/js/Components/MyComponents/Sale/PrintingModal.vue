@@ -102,7 +102,7 @@ export default {
   },
   computed: {},
   methods: {
-    generateTicketCommands(hasCut = true) {
+    generateTicketCommands() {
       const ESC = "\x1B";
       const GS = "\x1D";
       const INICIALIZAR_IMPRESORA = ESC + "@";
@@ -154,28 +154,46 @@ export default {
 
       this.sales.forEach((sale) => {
         const cantidad = sale.quantity.toString();
-        // Truncar el nombre del producto dinámicamente
-        const nombre = sale.product_name.substring(0, colAnchoNombre - 1); // -1 para un espacio de margen
+        const nombre = sale.product_name.substring(0, colAnchoNombre - 1);
         const totalProducto = (sale.quantity * sale.current_price).toFixed(2);
 
-        // Alineamos las columnas manualmente con los anchos dinámicos
         let linea = "";
         linea += cantidad.padEnd(colAnchoCant);
         linea += this.removeAccents(nombre).padEnd(colAnchoNombre);
-        linea += ("$" + totalProducto).padStart(colAnchoTotal); // Añadimos '$' y alineamos
+        linea += ("$" + totalProducto).padStart(colAnchoTotal);
         ticket += linea + "\n";
+
+        // 1. Revisa si el producto tiene una descripción no vacía.
+        if (sale.product.description && sale.product.description.trim() !== '') {
+          const indentacion = ' '.repeat(colAnchoCant); // Indentación igual al ancho de la cantidad (Pzs)
+          const anchoMaximoDesc = anchoTicket - colAnchoCant; // Ancho disponible para el texto
+          const palabras = this.removeAccents(sale.product.description).split(' ');
+          let lineaActual = '';
+
+          palabras.forEach(palabra => {
+            // Revisa si la palabra cabe en la línea actual
+            if ((lineaActual + ' ' + palabra).trim().length > anchoMaximoDesc) {
+              // No cabe, así que imprimimos la línea actual y empezamos una nueva
+              ticket += indentacion + lineaActual + '\n';
+              lineaActual = palabra;
+            } else {
+              // Sí cabe, la añadimos a la línea actual
+              lineaActual = (lineaActual + ' ' + palabra).trim();
+            }
+          });
+
+          // Asegúrate de imprimir la última línea que quedó pendiente
+          if (lineaActual.length > 0) {
+            ticket += indentacion + lineaActual + '\n';
+          }
+        }
 
         if (sale.promotions_applied && sale.promotions_applied.length > 0) {
           sale.promotions_applied.forEach((promo) => {
-            // 1. Reinicia la variable 'linea' en CADA iteración para no acumular texto.
             let lineaPromo = "";
-
-            // 2. Indenta la descripción para mayor claridad y ajústala al ancho de las primeras dos columnas.
             const textoPromo = "Descuento por promo";
-            // lineaPromo += textoPromo.padEnd(colAnchoCant + colAnchoNombre);
             lineaPromo += textoPromo.padEnd(colAnchoCant + colAnchoNombre - 1);
 
-            // 3. Ajusta el descuento al ancho EXACTO de la columna de total.
             const discounted = promo.discount.toFixed(2);
             const textoDescuento = "-$" + discounted;
             lineaPromo += textoDescuento.padStart(colAnchoTotal);
