@@ -86,7 +86,7 @@
                                         <p>{{ groupedSales.service_description }}</p>
                                     </td>
                                     <td>${{ groupedSales.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                    }}</td>
+                                        }}</td>
                                     <td>1</td>
                                     <td class="text-end pb-1">${{
                                         groupedSales.service_cost?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -112,7 +112,7 @@
                                         <p>{{ part.name }}</p>
                                     </td>
                                     <td>${{ parseFloat(part.unitPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                    }}</td>
+                                        }}</td>
                                     <td>{{ part.quantity }}</td>
                                     <td class="text-end pb-1">${{ (parseFloat(part.unitPrice) *
                                         parseFloat(part.quantity))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -153,10 +153,20 @@
                         {{ groupedSales.advance_payment?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
                     </span>
                 </div>
+                <div v-if="groupedSales.status == 'Entregado/Pagado'" class="flex items-center justify-end text-gray37">
+                    <span class="text-start w-40">Pago al entregar equipo:</span>
+                    <span class="w-12">-$</span>
+                    <span class="w-12">
+                        {{ (groupedSales.total_cost -
+                            groupedSales.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                ",") }}
+                    </span>
+                </div>
                 <div class="flex items-center justify-end text-gray37">
                     <span class="text-start w-40">Total restante:</span>
                     <span class="w-12">$</span>
-                    <span class="w-12">
+                    <span v-if="groupedSales.status == 'Entregado/Pagado'" class="w-12">0</span>
+                    <span v-else class="w-12">
                         {{ (groupedSales.total_cost -
                             groupedSales.advance_payment)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                                 ",") }}
@@ -327,7 +337,7 @@ export default {
             let restanteStr = 'Saldo Pagado: ' + formatCurrency(saldoRestante);
             ticket += NEGRITA_ON + restanteStr.padStart(anchoTicket) + NEGRITA_OFF + '\n';
 
-             // Método de pago
+            // Método de pago
             if (this.groupedSales.payment_method) {
                 let metodoPagoStr = 'Metodo de Pago: ' + this.groupedSales.payment_method;
                 ticket += metodoPagoStr.padStart(anchoTicket) + '\n';
