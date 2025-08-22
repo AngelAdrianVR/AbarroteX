@@ -208,22 +208,22 @@ class CashCutController extends Controller
 
             // ---- Se buscan solo órdenes de servicio ya liquidadas ----
             $service_orders = ServiceReport::where('store_id', $store_id)
-                ->where('status', 'Entregado/Pagado') // Solo las completadas
-                ->where('paid_at', '>', $last_cash_cut->created_at)
+                // ->where('status', 'Entregado/Pagado') // Solo las completadas
+                ->where('paid_at', '>=', $last_cash_cut->created_at)
                 ->get();
 
             // ---- Obtener anticipos a partir del ultimo corte realizado ----
             $today_advances = ServiceReport::where('store_id', $store_id)
                 // CAMBIO: Se usa where() para comparar fecha y hora completas
-                ->where('created_at', '>', $last_cash_cut->created_at)
-                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->where('created_at', '>=', $last_cash_cut->created_at)
+                // ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
                 ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
                 ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
 
             $today_advances_cash = ServiceReport::where('store_id', $store_id)
                 // CAMBIO: Se usa where() para comparar fecha y hora completas
-                ->where('created_at', '>', $last_cash_cut->created_at)
-                ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                ->where('created_at', '>=', $last_cash_cut->created_at)
+                // ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
                 ->whereIn('payment_method', ['Efectivo']) // Solo con estos métodos
                 ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
 
@@ -242,11 +242,11 @@ class CashCutController extends Controller
                 ->get();
 
             $today_advances = ServiceReport::where('store_id', $store_id)
-                ->where('status', '!=', 'Entregado/Pagado')
+                // ->where('status', '!=', 'Entregado/Pagado')
                 ->whereIn('payment_method', ['Tarjeta', 'Transferencia'])
                 ->sum('advance_payment');
             $today_advances_cash = ServiceReport::where('store_id', $store_id)
-                ->where('status', '!=', 'Entregado/Pagado')
+                // ->where('status', '!=', 'Entregado/Pagado')
                 ->whereIn('payment_method', ['Efectivo'])
                 ->sum('advance_payment');
         }

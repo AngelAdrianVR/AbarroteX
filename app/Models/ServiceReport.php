@@ -42,7 +42,7 @@ class ServiceReport extends Model implements HasMedia
 
     protected $casts = [
         'service_date' => 'date',
-        'paid_at' => 'date',
+        'paid_at' => 'datetime',
         'product_details' => 'array',
         'spare_parts' => 'array',
         'observations' => 'array',

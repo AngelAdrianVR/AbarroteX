@@ -6,8 +6,13 @@
             <h1 class="text-lg md:text-2xl font-bold">Orden de servicio No. {{ String(report.folio).padStart(3, '0') }}
             </h1>
             <div class="md:flex justify-between mt-3 mb-5">
-                <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
-                    formatDate(report.service_date) }}</span></p>
+                <div>
+                    <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
+                        formatDateTime(report.created_at) }}</span></p>
+                    <p class="text-[#999999]">Fecha de entrega: <span class="text-black">
+                        {{ report.paid_at ? formatDateTime(report.paid_at) : 'Equipo no entregado aún' }}
+                    </span></p>
+                </div>
                 <el-dropdown v-if="report.status !== 'Cancelada' && canEdit || true"
                     :disabled="report.status === 'Cancelada'" split-button trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
@@ -1315,6 +1320,7 @@ export default {
 
                     if (newStatus === 'Entregado/Pagado') {
                         this.paymentConfirmed = true; //indica que el pago ha sido confirmado
+                        this.report.paid_at = new Date().toISOString; //
                         setTimeout(() => {
                             this.paymentConfirmed = false;
                             // Aquí cierra el modal como lo manejes normalmente
