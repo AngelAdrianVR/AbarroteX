@@ -1,5 +1,11 @@
 <template>
     <div>
+        <p class="text-sm">
+            Si aún no tienes el plugin para la impresión de tickets, 
+            <a href="@/../../ezy_plugin_v1.0.0.zip" target="_blank" class="underline text-primary">
+                Click aqui (v1.0.0 Windows x64)
+            </a>
+        </p>
         <section class="my-5 divide-y-[1px] border border-grayD9 rounded-[5px]">
             <article class="text-sm rounded-t-md p-4">
                 <div class="flex items-center space-x-2">
@@ -182,8 +188,8 @@
                     <div class="flex items-center space-x-2 mt-3 lg:mt-0 justify-self-end">
                         <p>Información de contacto:</p>
                         <el-input v-model="form.printer_config.ticketContactInfo" @blur="updateTicketContactInfo"
-                            :autosize="{ minRows: 3, maxRows: 8 }" type="textarea" placeholder="Ej: Cel: 1234567890" :maxlength="1500"
-                            show-word-limit class="!w-72" clearable />
+                            :autosize="{ minRows: 3, maxRows: 8 }" type="textarea" placeholder="Ej: Cel: 1234567890"
+                            :maxlength="1500" show-word-limit class="!w-72" clearable />
                     </div>
                     <p v-if="loadingTicketContactInfo" class="text-gray-400 text-end text-xs">Guardando...</p>
                 </div>
