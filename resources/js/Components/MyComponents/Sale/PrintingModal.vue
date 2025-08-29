@@ -292,7 +292,8 @@ export default {
         if (logo) {
           listaDeOperaciones.push({
             nombre: "DescargarImagenDeInternetEImprimir",
-            argumentos: [logo, 380, 0, false],
+            argumentos: [logo, 330],
+            // argumentos: ["https://ezyventas.com/storage/3361/Screenshot_1.jpg", 330],
           });
         }
         listaDeOperaciones.push({
