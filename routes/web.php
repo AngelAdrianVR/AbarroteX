@@ -69,6 +69,8 @@ Route::middleware([
     Route::get('dashboard-get-day-data/{date}', [DashboardController::class, 'getDayData'])->name('dashboard.get-day-data');
     Route::get('dashboard-get-week-data/{date}', [DashboardController::class, 'getWeekData'])->name('dashboard.get-week-data');
     Route::get('dashboard-get-month-data/{date}', [DashboardController::class, 'getMonthData'])->name('dashboard.get-month-data');
+    Route::post('/dashboard/reports/generate', [DashboardController::class, 'generateReport'])
+    ->name('dashboard.reports.generate');
 });
 
 //Global products routes (Catálgo base)----------------------------------------------------------------------------------
