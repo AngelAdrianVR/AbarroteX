@@ -1320,7 +1320,7 @@ export default {
 
                     if (newStatus === 'Entregado/Pagado') {
                         this.paymentConfirmed = true; //indica que el pago ha sido confirmado
-                        this.report.paid_at = new Date().toISOString; //
+                        // this.report.paid_at = new Date().toDateString();
                         setTimeout(() => {
                             this.paymentConfirmed = false;
                             // Aquí cierra el modal como lo manejes normalmente

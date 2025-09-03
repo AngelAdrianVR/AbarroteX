@@ -1,6 +1,13 @@
 <template>
     <AppLayout title="Reportes">
-        <h1 class="font-bold mx-4 lg:mx-32 mt-4">Reportes</h1>
+        <h1 class="mx-4 lg:mx-32 mt-4 flex items-center justify-between">
+            <span class="font-bold">Reportes</span>
+            <!-- Botón para abrir el modal del reporte -->
+            <PrimaryButton @click="openReportModal" class="!py-1">
+                <i class="fa-regular fa-file-excel mr-2"></i>
+                Generar Reporte
+            </PrimaryButton>
+        </h1>
         <section v-if="$page.props.auth.user.permissions.includes('Filtrar por periodo')"
             class="flex items-center justify-center">
             <el-radio-group v-model="period" @change="handleChangePeriod"
@@ -32,17 +39,71 @@
                     <SimpleKPI v-if="item.show" :title="item.title" :icon="item.icon" class="self-start card"
                         :value="item.value" />
                 </template>
-                <Kpi class="chart" v-for="(item, index) in getKpiOptions" :key="index" :options="item" :title="getKPITitle()" />
+                <Kpi class="chart" v-for="(item, index) in getKpiOptions" :key="index" :options="item"
+                    :title="getKPITitle()" />
             </section>
             <section class="grid-cols-1 grid lg:grid-cols-2 gap-1 lg:gap-8 mt-2 space-y-3 md:space-y-0">
                 <template v-for="(item, index) in getBarChartOptions" :key="index">
-                    <ComparisonBarChart class="chart" v-if="item.show" :options="item" :title="getBarChartTitle(item.title)" />
+                    <ComparisonBarChart class="chart" v-if="item.show" :options="item"
+                        :title="getBarChartTitle(item.title)" />
                 </template>
                 <PieChart class="chart" v-for="(item, index) in getPieChartOptions" :key="index" :options="item"
-                    title="Top 5 productos más vendidos" icon='<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0" /></svg>' />
+                    title="Top 5 productos más vendidos"
+                    icon='<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0" /></svg>' />
                 <!-- <BasicAreaChart class="col-span-full" title="Venta acumulada anual" /> -->
             </section>
         </main>
+
+        <!-- -------------- MODAL PARA GENERAR REPORTE -------------- -->
+        <DialogModal :show="showReportModal" @close="showReportModal = false">
+            <template #title>
+                Generar Reporte de Ingresos y Gastos
+            </template>
+            <template #content>
+                <p class="text-sm text-gray-600">
+                    Selecciona un rango de fechas para generar el reporte en formato Excel.
+                </p>
+
+                <!-- Opciones rápidas de fecha -->
+                <div class="my-4 flex items-center space-x-2">
+                    <SecondaryButton @click="setReportRange('today')">Hoy</SecondaryButton>
+                    <SecondaryButton @click="setReportRange('week')">Esta semana</SecondaryButton>
+                    <SecondaryButton @click="setReportRange('month')">Este mes</SecondaryButton>
+                </div>
+
+                <!-- Inputs de fecha -->
+                <div class="grid grid-cols-2 gap-4 mt-4 mb-6">
+                    <div>
+                        <InputLabel value="Fecha de inicio*" />
+                        <el-date-picker v-model="reportForm.start_date" type="date" placeholder="Seleccionar fecha"
+                            format="DD/MM/YYYY" value-format="YYYY-MM-DD" class="!w-full" />
+                        <InputError :message="reportFormErrors.start_date" />
+                    </div>
+                    <div>
+                        <InputLabel value="Fecha de fin*" />
+                        <el-date-picker v-model="reportForm.end_date" type="date" placeholder="Seleccionar fecha"
+                            format="DD/MM/YYYY" value-format="YYYY-MM-DD" class="!w-full" />
+                        <InputError :message="reportFormErrors.end_date" />
+                    </div>
+                </div>
+
+            </template>
+            <template #footer>
+                <CancelButton @click="showReportModal = false" :disabled="isGeneratingReport">
+                    Cancelar
+                </CancelButton>
+                <PrimaryButton @click="generateReport" :disabled="isGeneratingReport" class="ml-2">
+                    <span v-if="isGeneratingReport">
+                        <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                        Generando...
+                    </span>
+                    <span v-else>
+                        <i class="fa-regular fa-file-excel mr-2"></i>
+                        Generar y Descargar
+                    </span>
+                </PrimaryButton>
+            </template>
+        </DialogModal>
     </AppLayout>
 </template>
 
@@ -54,9 +115,16 @@ import BasicAreaChart from '@/Components/MyComponents/Charts/BasicAreaChart.vue'
 import Kpi from '@/Components/MyComponents/Dashboard/Kpi.vue';
 import Loading from '@/Components/MyComponents/Loading.vue';
 import ComparisonBarChart from "@/Components/MyComponents/Charts/ComparisonBarChart.vue";
-import { format, subHours, parseISO } from 'date-fns';
+import { format, subHours, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import es from 'date-fns/locale/es';
 import axios from 'axios';
+
+import DialogModal from '@/Components/DialogModal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import InputError from '@/Components/InputError.vue';
+import CancelButton from '@/Components/MyComponents/CancelButton.vue';
 
 export default {
     data() {
@@ -85,6 +153,15 @@ export default {
             canSeeDashboard: this.$page.props.auth.user.store.activated_modules?.includes('Reportes'),
 
             loading: false,
+
+            // reporte
+            showReportModal: false,
+            isGeneratingReport: false,
+            reportForm: {
+                start_date: null,
+                end_date: null,
+            },
+            reportFormErrors: {},
         }
     },
     props: {
@@ -98,6 +175,12 @@ export default {
         PieChart,
         Loading,
         Kpi,
+        DialogModal,
+        PrimaryButton,
+        SecondaryButton,
+        CancelButton,
+        InputLabel,
+        InputError,
     },
     computed: {
         calculateTotalSale() {
@@ -554,6 +637,91 @@ export default {
             } finally {
                 this.loading = false;
             }
+        },
+
+        // --- NUEVOS MÉTODOS PARA EL REPORTE ---
+        openReportModal() {
+            // Pre-llenar fechas con la vista actual del dashboard si es posible
+            if (this.periodRange) {
+                if (this.period === 'Hoy') {
+                    this.setReportRange('today');
+                } else if (this.period === 'Semanal') {
+                    const date = parseISO(this.periodRange);
+                    this.reportForm.start_date = format(startOfWeek(date, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+                    this.reportForm.end_date = format(endOfWeek(date, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+                } else if (this.period === 'Mensual') {
+                    const date = parseISO(this.periodRange);
+                    this.reportForm.start_date = format(startOfMonth(date), 'yyyy-MM-dd');
+                    this.reportForm.end_date = format(endOfMonth(date), 'yyyy-MM-dd');
+                }
+            } else {
+                this.setReportRange('today');
+            }
+            this.reportFormErrors = {};
+            this.showReportModal = true;
+        },
+        setReportRange(period) {
+            const today = new Date();
+            if (period === 'today') {
+                this.reportForm.start_date = format(startOfDay(today), 'yyyy-MM-dd');
+                this.reportForm.end_date = format(endOfDay(today), 'yyyy-MM-dd');
+            } else if (period === 'week') {
+                this.reportForm.start_date = format(startOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd'); // Lunes
+                this.reportForm.end_date = format(endOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd'); // Domingo
+            } else if (period === 'month') {
+                this.reportForm.start_date = format(startOfMonth(today), 'yyyy-MM-dd');
+                this.reportForm.end_date = format(endOfMonth(today), 'yyyy-MM-dd');
+            }
+        },
+        validateReportForm() {
+            this.reportFormErrors = {};
+            if (!this.reportForm.start_date) {
+                this.reportFormErrors.start_date = 'La fecha de inicio es obligatoria.';
+            }
+            if (!this.reportForm.end_date) {
+                this.reportFormErrors.end_date = 'La fecha de fin es obligatoria.';
+            }
+            if (this.reportForm.start_date && this.reportForm.end_date && this.reportForm.start_date > this.reportForm.end_date) {
+                this.reportFormErrors.end_date = 'La fecha de fin no puede ser anterior a la de inicio.';
+            }
+            return Object.keys(this.reportFormErrors).length === 0;
+        },
+        async generateReport() {
+            if (!this.validateReportForm()) return;
+
+            this.isGeneratingReport = true;
+
+            try {
+                const response = await axios.post(route('dashboard.reports.generate'), this.reportForm, {
+                    responseType: 'blob', // ¡Importante para manejar la descarga de archivos!
+                });
+
+                // Crear un enlace temporal para descargar el archivo
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                const fileName = `Reporte_Ingresos_Gastos_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                link.setAttribute('download', fileName);
+                document.body.appendChild(link);
+                link.click();
+
+                // Limpiar
+                link.remove();
+                window.URL.revokeObjectURL(url);
+
+                this.showReportModal = false;
+
+            } catch (error) {
+                console.error("Error al generar el reporte:", error);
+                // Aquí podrías manejar errores, por ejemplo, si la API devuelve un JSON con un error
+                this.$notify({
+                    title: 'Error',
+                    message: 'No se pudo generar el reporte. Inténtalo de nuevo.',
+                    type: 'error'
+                });
+            } finally {
+                this.isGeneratingReport = false;
+            }
         }
     },
     mounted() {
@@ -575,16 +743,17 @@ export default {
 
 <style>
 .card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
+
 .chart {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 </style>
