@@ -15,7 +15,7 @@ class Expense extends Model
         'concept',
         'quantity', // cantidad del gasto
         'current_price', // costo del gasto
-        'payment_method',
+        'payment_method', // Efectivo, Tarjeta, Transferencia
         'store_id',
         'amount_from_cash_register', //para saber si se retiro dinero de caja y cuanto
         'created_at', // para poderponer cambiar la fecha desde el registro
