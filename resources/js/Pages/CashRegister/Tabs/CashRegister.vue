@@ -171,7 +171,7 @@
           </div>
           <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
             class="text-[#373737]"><span class="text-[#373737] mr-3 ml-[17px]">$</span>{{
-              cutForm.totalServiceOrdersAdvances?.card_or_transfer?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
+              cutForm.totalServiceOrdersAdvances?.card?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
               '0.00'
             }}</p>
           <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
@@ -192,12 +192,66 @@
             (cutForm.totalStoreSale?.card
               + cutForm.totalOnlineSale?.card
               + cutForm.totalServiceOrders?.card
-              + cutForm.totalServiceOrdersAdvances?.card_or_transfer)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
+              + cutForm.totalServiceOrdersAdvances?.card)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
+            '0.00' }}</p>
+
+          <!-- Monto en trnasferencia -->
+          <div class="flex items-center space-x-2 col-span-full py-2 border-t border-[#D9D9D9]">
+            <img class="h-7" src="@/../../public/images/transfer.png" alt="Pago con transferencia">
+            <p class="font-bold text-gray-600">Monto esperado en transferencia</p>
+          </div>
+          <p class="text-[#373737] col-span-3">Ventas en tienda</p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else class="text-[#373737]"><span class="text-[#373737] mr-3 ml-[17px]">$</span>{{
+            cutForm.totalStoreSale?.transfer?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+          <p v-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')"
+            class="text-[#373737] col-span-3">Pedidos en línea</p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Tienda en línea')"
+            class="text-[#373737]">
+            <span class="text-[#373737] mr-3 ml-[17px]">$</span>{{
+              cutForm.totalOnlineSale?.transfer?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}
+          </p>
+          <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
+            class="text-[#373737] col-span-3">
+            Anticipos de ordenes de servicio
+          </p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
+            class="text-[#373737]"><span class="text-[#373737] mr-3 ml-[17px]">$</span>{{
+              cutForm.totalServiceOrdersAdvances?.transfer?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
+              '0.00'
+            }}</p>
+          <p v-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
+            class="text-[#373737] col-span-3">
+            Ordenes de servicio liquidadas
+          </p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else-if="$page.props.auth.user.store.activated_modules.includes('Ordenes de servicio')"
+            class="text-[#373737]"><span class="text-[#373737] mr-3 ml-[17px]">$</span>{{
+              cutForm.totalServiceOrders?.transfer?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</p>
+          <p class="font-bold text-[#373737] col-span-3 text-right">Total en transferencia</p>
+          <div v-if="cutLoading">
+            <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+          </div>
+          <p v-else class="font-bold text-[#373737] mb-3 pl-4"><span class="mr-3">$</span>{{
+            (cutForm.totalStoreSale?.transfer
+              + cutForm.totalOnlineSale?.transfer
+              + cutForm.totalServiceOrders?.transfer
+              + cutForm.totalServiceOrdersAdvances?.transfer)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
             '0.00' }}</p>
         </div>
 
         <footer class="bg-[#F2F2F2] font-bold py-2 rounded-xl flex px-2">
-          <p class="w-3/4 text-right pr-7">Total efectivo + tarjeta</p>
+          <p class="w-3/4 text-right pr-7">Total efectivo + tarjeta + transferencia</p>
           <div v-if="cutLoading">
             <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
           </div>
@@ -208,12 +262,16 @@
             <b>{{ (cutForm.totalStoreSale?.card
               + cutForm.totalOnlineSale?.card
               + cutForm.totalServiceOrders?.card
+              + cutForm.totalServiceOrdersAdvances?.card
               + cash_register.started_cash
               + cutForm.totalStoreSale?.cash
               + cutForm.totalOnlineSale?.cash
               + cutForm.totalServiceOrders?.cash
               + cutForm.totalServiceOrdersAdvances?.cash
-              + cutForm.totalServiceOrdersAdvances?.card_or_transfer
+              + cutForm.totalStoreSale?.transfer
+              + cutForm.totalOnlineSale?.transfer
+              + cutForm.totalServiceOrders?.transfer
+              + cutForm.totalServiceOrdersAdvances?.transfer
               + cutForm.totalCashMovements)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ?? '0.00' }}</b>
           </p>
         </footer>
@@ -420,7 +478,7 @@
                   <span class="pl-3">$</span>
                   <p>{{ (cutForm.counted_cash - cutForm.withdrawn_cash)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",")
-                  }}</p>
+                    }}</p>
                 </div>
           </div>
         </section>
@@ -456,7 +514,7 @@
                 <p>{{ (cutForm.totalStoreSale?.card
                   + cutForm.totalOnlineSale?.card
                   + cutForm.totalServiceOrders?.card
-                  + cutForm.totalServiceOrdersAdvances?.card_or_transfer
+                  + cutForm.totalServiceOrdersAdvances?.card
                 )?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
               </div>
             </div>
@@ -503,7 +561,90 @@
                   <span class="pl-3">$</span>
                   <p>{{ (cutForm.counted_card - cutForm.withdrawn_card)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
                     ",")
-                  }}</p>
+                    }}</p>
+                </div>
+          </div>
+        </section>
+
+         <!-- Transferencia -->
+        <div class="flex justify-between items-center space-x-2">
+          <el-checkbox v-model="cutForm.cutTransfer_enabled" class="!text-sm !text-gray-700">
+            <span class="!text-sm">Corte de transferencias</span>
+          </el-checkbox>
+          <div class="flex items-center justify-end space-x-2 my-3">
+            <img class="w-5" src="@/../../public/images/transfer.png" alt="Pago con tarjeta">
+            <p class="text-sm md:text-base font-semibold text-[#373737]"
+              :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }">Pagos con transferencia</p>
+          </div>
+        </div>
+        <section class="w-full flex justify-end space-x-5 text-xs md:text-sm border-b border-gray-200 pb-3">
+          <div class="space-y-2 text-right">
+            <p :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }">Monto esperado en transferencia</p>
+            <p :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }">Monto reportado</p>
+            <p :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }">Diferencia</p>
+            <p :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }" class="opacity-0">status</p>
+            <p :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }" v-if="cutForm.counted_transfer">Monto a retirar</p>
+            <p :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }" v-if="cutForm.counted_transfer">Dinero que dejas en
+              transferencia</p>
+          </div>
+          <div class="space-y-2 text-right w-36" :class="{ 'text-gray-400': !cutForm.cutTransfer_enabled }">
+            <div v-if="cutLoading">
+              <i class="fa-sharp fa-solid fa-circle-notch fa-spin ml-2 text-primary"></i>
+            </div>
+            <div class="space-y-[8px]" v-else>
+              <div class="flex justify-between">
+                <span class="pl-3">$</span>
+                <p>{{ (cutForm.totalStoreSale?.transfer
+                  + cutForm.totalOnlineSale?.transfer
+                  + cutForm.totalServiceOrders?.transfer
+                  + cutForm.totalServiceOrdersAdvances?.transfer
+                )?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
+              </div>
+            </div>
+            <el-input @input="differenceTransfer()" v-model="cutForm.counted_transfer" type="text" placeholder="0.00"
+              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+              :parser="(value) => value.replace(/[^\d.]/g, '')" class="!w-full !h-6"
+              :disabled="!cutForm.cutTransfer_enabled">
+              <template #prefix>
+                <i class="fa-solid fa-dollar-sign"></i>
+              </template>
+            </el-input>
+            <p v-if="cutForm.counted_transfer" :class="{
+              'text-green-500': (cutForm.difference_transfer) === 0,
+              'text-blue-500': (cutForm.difference_transfer) < 0,
+              'text-red-500': (cutForm.difference_transfer) > 0
+            }">
+              <!-- Se multiplica por -1 para cambiar el signo y si sobra sea positivo y si falta negativo -->
+              ${{ (cutForm.difference_transfer * -1)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
+            </p>
+            <p v-if="cutForm.counted_transfer" :class="{
+              'text-green-500 bg-green-100': (cutForm.difference_transfer) === 0,
+              'text-blue-500 bg-blue-100': (cutForm.difference_transfer) < 0,
+              'text-red-500 bg-red-100': (cutForm.difference_transfer) > 0
+            }" class="rounded-full text-xs inline py-[2px] px-2 w-full">
+              <!-- Icono de proveedor de verificación si la diferencia es 0 -->
+              <i v-if="(cutForm.difference_transfer) === 0" class="fa-solid fa-check mr-1"></i>
+              <!-- Icono de sobrante en caja si la diferencia es negativa -->
+              <i v-else-if="(cutForm.difference_transfer) < 0" class="fa-solid fa-plus mr-1"></i>
+              <!-- Icono de faltante de efectivo si la diferencia es positiva -->
+              <i v-else class="fa-solid fa-xmark mr-1"></i>
+              <!-- Muestra el mensaje correspondiente -->
+              {{ (cutForm.difference_transfer) === 0 ? 'Todo bien' : ((cutForm.difference_transfer) < 0 ? 'Sobrante en caja'
+                : 'Faltante de efectivo') }} </p>
+                <div v-if="cutForm.counted_transfer" class="w-full">
+                  <el-input v-model="cutForm.withdrawn_transfer" type="number" step="0.01" class="!w-full !h-6"
+                    placeholder="0.00">
+                    <template #prefix>
+                      <i class="fa-solid fa-dollar-sign"></i>
+                    </template>
+                  </el-input>
+                  <InputError :message="cutForm.errors.withdrawn_transfer" />
+                </div>
+                <div class="flex justify-between">
+                  <span class="pl-3">$</span>
+                  <p>{{ (cutForm.counted_transfer - cutForm.withdrawn_transfer)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                    ",")
+                    }}</p>
                 </div>
           </div>
         </section>
@@ -522,19 +663,25 @@
               + cutForm.totalStoreSale?.card
               + cutForm.totalOnlineSale?.cash
               + cutForm.totalOnlineSale?.card
+              + cutForm.totalOnlineSale?.transfer
               + cutForm.totalServiceOrders?.cash
+              + cutForm.totalServiceOrders?.transfer
               + cutForm.totalServiceOrdersAdvances?.cash
-              + cutForm.totalServiceOrdersAdvances?.card_or_transfer
+              + cutForm.totalServiceOrdersAdvances?.card
+              + cutForm.totalServiceOrdersAdvances?.transfer
               + cutForm.totalServiceOrders?.card) == 0)">
             Hacer corte</PrimaryButton>
         </div>
         <p v-if="!currentMovements.length && (cutForm.totalStoreSale?.cash
           + cutForm.totalStoreSale?.card
-          + cutForm.totalOnlineSale?.cash
-          + cutForm.totalOnlineSale?.card
-          + cutForm.totalServiceOrders?.cash
-          + cutForm.totalServiceOrdersAdvances?.cash
-          + cutForm.totalServiceOrdersAdvances?.card_or_transfer
+              + cutForm.totalOnlineSale?.cash
+              + cutForm.totalOnlineSale?.card
+              + cutForm.totalOnlineSale?.transfer
+              + cutForm.totalServiceOrders?.cash
+              + cutForm.totalServiceOrders?.transfer
+              + cutForm.totalServiceOrdersAdvances?.cash
+              + cutForm.totalServiceOrdersAdvances?.card
+              + cutForm.totalServiceOrdersAdvances?.transfer
           + cutForm.totalServiceOrders?.card) == 0" class="text-xs text-red-600 text-right">*Para
           hacer corte es necesario que haya almenos una venta o movimiento de caja registrado</p>
       </form>
@@ -570,8 +717,10 @@ export default {
     const cutForm = useForm({
       counted_cash: null, //dinero contado en caja tras haber hecho el corte
       counted_card: null, //dinero contado en tarjeta tras haber hecho el corte
+      counted_transfer: null, //dinero contado en transferencia tras haber hecho el corte
       difference_cash: null, //diferencia de dinero contado en caja y dinero esperado en caja
       difference_card: null, //diferencia de dinero contado en tarjeta y dinero esperado en
+      difference_transfer: null, //diferencia de dinero contado en transfer y dinero esperado en
       totalStoreSale: null, //dinero esperado de ventas hechas para hacer corte
       totalOnlineSale: null, //dinero esperado de ventas en linea para hacer corte
       totalServiceOrders: null, //dinero esperado de liquidaciones de ordenes de servicio para hacer corte
@@ -579,7 +728,9 @@ export default {
       totalCashMovements: null, //dinero de movimientos de caja para hacer corte
       withdrawn_cash: null, //dinero retirado de caja tras haber hecho el corte
       withdrawn_card: null, //dinero retirado de tarjeta tras haber hecho el corte
+      withdrawn_transfer: null, //dinero retirado de tarjeta tras haber hecho el corte
       cutCard_enabled: false, //bandera para contar tarjeta en corte de caja
+      cutTransfer_enabled: false, //bandera para contar transferencia en corte de caja
       notes: null,
     });
 
@@ -750,8 +901,17 @@ export default {
         this.cutForm.totalStoreSale?.card +
         this.cutForm.totalOnlineSale?.card +
         this.cutForm.totalServiceOrders?.card +
-        this.cutForm.totalServiceOrdersAdvances?.card_or_transfer) -
+        this.cutForm.totalServiceOrdersAdvances?.card) -
         this.cutForm.counted_card
+    },
+    differenceTransfer() {
+      //  Se hace la resta al reves para cambiar el signo y si sobra sea positivo y si falta negativo
+      this.cutForm.difference_transfer = (
+        this.cutForm.totalStoreSale?.transfer +
+        this.cutForm.totalOnlineSale?.transfer +
+        this.cutForm.totalServiceOrders?.transfer +
+        this.cutForm.totalServiceOrdersAdvances?.transfer) -
+        this.cutForm.counted_transfer
     },
   },
   mounted() {

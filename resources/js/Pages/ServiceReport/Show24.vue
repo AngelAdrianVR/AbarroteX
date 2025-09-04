@@ -10,8 +10,8 @@
                     <p class="text-[#999999]">Fecha de recepción: <span class="text-black">{{
                         formatDateTime(report.created_at) }}</span></p>
                     <p class="text-[#999999]">Fecha de entrega: <span class="text-black">
-                        {{ report.paid_at ? formatDateTime(report.paid_at) : 'Equipo no entregado aún' }}
-                    </span></p>
+                            {{ report.paid_at ? formatDateTime(report.paid_at) : 'Equipo no entregado aún' }}
+                        </span></p>
                 </div>
                 <el-dropdown v-if="report.status !== 'Cancelada' && canEdit || true"
                     :disabled="report.status === 'Cancelada'" split-button trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
@@ -660,6 +660,11 @@
                         <p class="text-lg text-center font-bold">TARJETA</p>
                         <img src="@/../../public/images/card.webp" alt="Pago con tarjeta">
                     </button>
+                    <button @click="paymentModalStep = 4; paymentMethod = 'Transferencia'" type="button"
+                        class="bg-[#FAFFBA] text-[#B38A00] border border-[#D9D9D9] h-60 rounded-3xl p-3 hover:scale-105 transition-all ease-linear duration-200 flex flex-col justify-center items-center space-y-3">
+                        <p class="text-lg text-center font-bold">Transferencia</p>
+                        <img src="@/../../public/images/transfer.png" alt="Pago con transferencia">
+                    </button>
                 </section>
             </div>
             <!-- Pago con efectivo (step 2) -->
@@ -753,6 +758,58 @@
                             class="rounded-full border border-[#D9D9D9D] bg-[#DAE6FF] py-2 px-4 flex items-center justify-between mt-3">
                             <span class="font-bold text-[#05394F]">TARJETA</span>
                             <img src="@/../../public/images/card.webp" alt="Pago con tarjeta" class="h-7">
+                        </div>
+
+                        <div
+                            class="rounded-full border border-[#D9D9D9D] bg-[#F2F2F2] py-2 px-4 flex items-center justify-between mt-3">
+                            <span class="font-bold">Total a pagar</span>
+                            <p class="font-bold"><span class="mr-4">$</span>{{
+                                (report.total_cost - (report.advance_payment ||
+                                    0))?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",") }}</p>
+                        </div>
+
+                        <div class="flex justify-center mt-7">
+                            <PrimaryButton @click="changeStatus('Entregado/Pagado')" :disabled="updatingStatus"
+                                class="!px-20">
+                                <i v-if="updatingStatus"
+                                    class="fa-sharp fa-solid fa-circle-notch fa-spin mr-2 text-white"></i>
+                                Confirmar pago
+                            </PrimaryButton>
+                        </div>
+                    </div>
+
+                    <!-- Confirmacion de pago -->
+                    <template v-else>
+                        <div class="flex flex-col items-center space-y-4 animate-fade-in-up">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            <p class="text-green-600 font-bold text-lg">¡Pago realizado con éxito!</p>
+                        </div>
+                    </template>
+                </section>
+            </div>
+
+            <!-- Pago con transferencia (step 4) -->
+            <div v-if="paymentModalStep === 4" class="py-4 px-7 relative">
+                <section class="flex items-center justify-between">
+                    <h1 class="font-bold mt-2 text-lg">Registrar pago</h1>
+                    <div @click="paymentModalStep = 1" class="flex items-center space-x-4 text-primary cursor-pointer">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Regresar</span>
+                    </div>
+                </section>
+
+                <section class="mx-auto mt-2 md:w-2/3">
+                    <div v-if="!paymentConfirmed">
+                        <p class="my-3 text-sm text-center">Recibir pago por transferencia.</p>
+                        <div
+                            class="rounded-full border border-[#D9D9D9D] bg-[#FAFFBA] py-2 px-4 flex items-center justify-between mt-3">
+                            <span class="font-bold text-[#B38A00]">TRANSFERENCIA</span>
+                            <img src="@/../../public/images/transfer.png" alt="Pago por transferencia" class="h-7">
                         </div>
 
                         <div
