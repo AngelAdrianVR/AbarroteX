@@ -33,12 +33,12 @@ class CashRegisterController extends Controller
                 return $date->created_at->format('Y-m-d');
             })
             ->map(function ($group) {
-                $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card');
-                $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card');
-                $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card');
-                $total_service_orders_advance = $group->sum('service_orders_advance_cash') + $group->sum('service_orders_advance_card');
-                $total_expected = $group->sum('expected_cash') + $group->sum('expected_card');
-                $total_counted = $group->sum('counted_cash') + $group->sum('counted_card');
+                $total_store_sales = $group->sum('store_sales_cash') + $group->sum('store_sales_card') + $group->sum('store_sales_transfer');
+                $total_online_sales = $group->sum('online_sales_cash') + $group->sum('online_sales_card') + $group->sum('online_sales_transfer');
+                $total_service_orders = $group->sum('service_orders_cash') + $group->sum('service_orders_card') + $group->sum('service_orders_transfer');
+                $total_service_orders_advance = $group->sum('service_orders_advance_cash') + $group->sum('service_orders_advance_card') + $group->sum('service_orders_advance_transfer');
+                $total_expected = $group->sum('expected_cash') + $group->sum('expected_card') + $group->sum('expected_transfer');
+                $total_counted = $group->sum('counted_cash') + $group->sum('counted_card') + $group->sum('counted_transfer');
                 $total_difference =  $total_counted - $total_expected;
                 $amount_sales_products = $group->count();
 

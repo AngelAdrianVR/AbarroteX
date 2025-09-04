@@ -159,9 +159,15 @@
                     <img class="w-5" src="@/../../public/images/card.webp" alt="Pago con tarjeta">
                     <p class="text-[#05394F] font-semibold">Pago con Tarjeta</p>
                 </div>
-                <div v-else class="py-1 flex items-center justify-start space-x-2 self-end ml-3">
+                <div v-else-if="groupedSales.products[0].payment_method === 'Efectivo'"
+                    class="py-1 flex items-center justify-start space-x-2 self-end ml-3">
                     <img class="w-5" src="@/../../public/images/dollar.webp" alt="Pago en efectivo">
                     <p class="text-[#37672B] font-semibold">Pago en Efectivo</p>
+                </div>
+                <div v-else
+                    class="py-1 flex items-center justify-start space-x-2 self-end ml-3">
+                    <img class="h-5" src="@/../../public/images/transfer.png" alt="Pago en efectivo">
+                    <p class="text-[#B38A00] font-semibold">Pago por transferencia</p>
                 </div>
                 <div v-if="groupedSales.credit_data"
                     class="flex items-center space-x-3 self-end border-0 md:border-t md:border-r rounded-tr-[5px] border-grayD9 pt-2 pb-3 pl-6 pr-9">
