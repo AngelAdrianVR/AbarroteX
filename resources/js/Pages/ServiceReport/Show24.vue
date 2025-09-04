@@ -13,14 +13,18 @@
                             {{ report.paid_at ? formatDateTime(report.paid_at) : 'Equipo no entregado aún' }}
                         </span></p>
                 </div>
-                <el-dropdown v-if="report.status !== 'Cancelada' && canEdit || true"
-                    :disabled="report.status === 'Cancelada'" split-button trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
+                <el-dropdown v-if="report.status !== 'Cancelada'"
+                    :disabled="report.status === 'Cancelada'" :split-button="canEdit" trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
-                    Editar
+                    <span v-if="canEdit">Editar</span>
+                    <span v-else class="bg-primary text-white px-3 py-2 rounded-md cursor-pointer self-start">
+                        Opciones
+                        <i class="fa-solid fa-chevron-down ml-2 text-sm"></i>
+                    </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item @click="printTemplate" :disabled="report.status === 'Cancelada'">
+                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')" @click="printTemplate" :disabled="report.status === 'Cancelada'">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -28,7 +32,7 @@
                                         stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 Comprobante de servicio</el-dropdown-item>
-                            <el-dropdown-item :disabled="report.status === 'Cancelada'"
+                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')" :disabled="report.status === 'Cancelada'"
                                 @click="handleTicketPrinting('ESC/POS', 'orden')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -38,7 +42,7 @@
                                 </svg>
                                 Imprimir ticket de orden
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="report.status == 'Entregado/Pagado'"
+                            <el-dropdown-item v-if="report.status == 'Entregado/Pagado' && hasPermission('Ver información financiera en ordenes de servicio')"
                                 :disabled="report.status === 'Cancelada'"
                                 @click="handleTicketPrinting('ESC/POS', 'comprobante')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
@@ -63,7 +67,7 @@
                                 Generar etiqueta
                             </el-dropdown-item>
                             <el-dropdown-item @click="confirmDeleteModal = true"
-                                v-if="$page.props.auth.user.permissions.includes('Eliminar ordenes de servicio')">
+                                v-if="hasPermission('Eliminar ordenes de servicio')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -140,7 +144,7 @@
                     </div>
 
                     <div class="flex items-start justify-between my-2 ml-4">
-                        <button v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit"
+                        <button v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit && hasPermission('Cambiar status en ordenes de servicio')"
                             @click="confirmCancelModal = true"
                             class="flex items-center space-x-2 text-gray37 text-[11px] md:text-[13px] border-b border-gray37">
                             <svg class="size-[12px]" width="12" height="12" viewBox="0 0 13 13" fill="none"
@@ -153,7 +157,7 @@
                             <span>Cancelar orden de servicio</span>
                         </button>
                         <el-popconfirm
-                            v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit"
+                            v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit && hasPermission('Cambiar status en ordenes de servicio')"
                             confirm-button-text="Si" cancel-button-text="No" icon-color="#6F6E72"
                             :title="'Cambiar estatus?'"
                             @confirm="handleChangeStatus(statuses[statuses.findIndex(status => status === report.status) + 1])">
@@ -210,7 +214,8 @@
                             <p v-else class="lg:w-1/2">No aplica</p>
                         </div>
                         <el-collapse v-model="activeCollapseSections" class="mt-8">
-                            <el-collapse-item name="1">
+                            <el-collapse-item name="1"
+                                v-if="hasPermission('Ver información financiera en ordenes de servicio')">
                                 <template #title>
                                     <h2 class="text-gray37 font-semibold text-base">
                                         Detalles del pago
@@ -304,7 +309,8 @@
                                     </div>
                                 </div>
                             </el-collapse-item>
-                            <el-collapse-item name="2">
+                            <el-collapse-item name="2"
+                                v-if="hasPermission('Ver información financiera en ordenes de servicio')">
                                 <template #title>
                                     <h2 class="text-gray37 font-semibold text-base">
                                         Invertido en refacciones
@@ -334,7 +340,8 @@
                                     No se registraron refacciones para este servicio.
                                 </div>
                             </el-collapse-item>
-                            <el-collapse-item name="3">
+                            <el-collapse-item name="3"
+                                v-if="hasPermission('Ver información financiera en ordenes de servicio')">
                                 <template #title>
                                     <h2 class="text-gray37 font-semibold text-base">
                                         Desglose de ganancia
@@ -462,22 +469,23 @@
                 <!-- Lado derecho -->
                 <section>
                     <div class="border border-[#D9D9D9] rounded-lg p-4 space-y-2 h-[650px]">
-                        <h2 class="font-bold text-lg text-[#373737] mb-2">Detalles del cliente</h2>
-
-                        <div class="flex items-center space-x-4 text-sm">
-                            <i class="fa-solid fa-user"></i>
-                            <p>{{ report.client_name }}</p>
-                        </div>
-                        <div class="flex justify-between">
+                        <section v-if="hasPermission('Ver información de cliente en ordenes de servicio')">
+                            <h2 class="font-bold text-lg text-[#373737] mb-2">Detalles del cliente</h2>
                             <div class="flex items-center space-x-4 text-sm">
-                                <i class="fa-brands fa-whatsapp"></i>
-                                <p>{{ formatPhoneNumber(report.client_phone_number) }}</p>
+                                <i class="fa-solid fa-user"></i>
+                                <p>{{ report.client_name }}</p>
                             </div>
-                            <button @click="sendWhatsAppMessage(report.client_phone_number)"
-                                class="text-primary bg-primarylight rounded-full px-3 text-sm">
-                                Enviar mensaje
-                            </button>
-                        </div>
+                            <div class="flex justify-between">
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                    <p>{{ formatPhoneNumber(report.client_phone_number) }}</p>
+                                </div>
+                                <button @click="sendWhatsAppMessage(report.client_phone_number)"
+                                    class="text-primary bg-primarylight rounded-full px-3 text-sm">
+                                    Enviar mensaje
+                                </button>
+                            </div>
+                        </section>
 
                         <h2 class="font-bold text-lg text-[#373737] pt-3">Datos del equipo</h2>
 
@@ -930,6 +938,9 @@ export default {
         }
     },
     methods: {
+        hasPermission(permission) {
+            return this.$page.props.auth.user.permissions.includes(permission);
+        },
         handleTicketPrinting(language, type) {
             // enviar comandos al componente de impresión dependiendo del tipo de ticket
             if (language === 'TSPL') {
