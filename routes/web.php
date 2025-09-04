@@ -466,6 +466,14 @@ Route::delete('/media/{media}', function (Media $media) {
     }
 })->name('media.delete-file');
 
+Route::get('/clear-all', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    // Artisan::call('view:clear');
+    return 'cleared.';
+});
+
 
 // Actualizar el método de pago de todas las ventas a "Efectivo"
 // use Illuminate\Support\Facades\DB;

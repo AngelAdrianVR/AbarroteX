@@ -13,7 +13,7 @@
                             {{ report.paid_at ? formatDateTime(report.paid_at) : 'Equipo no entregado aún' }}
                         </span></p>
                 </div>
-                <el-dropdown v-if="report.status !== 'Cancelada' && canEdit"
+                <el-dropdown v-if="report.status !== 'Cancelada'"
                     :disabled="report.status === 'Cancelada'" :split-button="canEdit" trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
@@ -24,7 +24,7 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item @click="printTemplate" :disabled="report.status === 'Cancelada'">
+                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')" @click="printTemplate" :disabled="report.status === 'Cancelada'">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -32,7 +32,7 @@
                                         stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 Comprobante de servicio</el-dropdown-item>
-                            <el-dropdown-item :disabled="report.status === 'Cancelada'"
+                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')" :disabled="report.status === 'Cancelada'"
                                 @click="handleTicketPrinting('ESC/POS', 'orden')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -42,7 +42,7 @@
                                 </svg>
                                 Imprimir ticket de orden
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="report.status == 'Entregado/Pagado'"
+                            <el-dropdown-item v-if="report.status == 'Entregado/Pagado' && hasPermission('Ver información financiera en ordenes de servicio')"
                                 :disabled="report.status === 'Cancelada'"
                                 @click="handleTicketPrinting('ESC/POS', 'comprobante')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
