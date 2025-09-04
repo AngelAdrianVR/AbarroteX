@@ -191,11 +191,53 @@
                                     ?? '0.00'
                                 }}
                             </p>
+                            <!-- transfer -->
+                            <div class="flex items-center space-x-2 col-span-full py-2 border-t border-[#D9D9D9]">
+                                <img class="w-7" src="@/../../public/images/transfer.png" alt="Pago con tarjeta">
+                                <p class="font-bold text-gray-600">Monto esperado en transferencia</p>
+                            </div>
+                            <p class="col-span-2 text-[#373737]">Ventas en tienda</p>
+                            <p class="text-[#373737]">
+                                $ {{ (cash_cut.store_sales_transfer)?.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2
+                                }) }}
+                            </p>
+                            <p v-if="hasModule('Tienda en línea')" class="col-span-2 text-[#373737]">Pedidos en línea
+                            </p>
+                            <p v-if="hasModule('Tienda en línea')" class="text-[#373737]">
+                                $ {{ (cash_cut.online_sales_transfer)?.toLocaleString('en-US',
+                                    { minimumFractionDigits: 2 }) }}
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">
+                                Ancticipos de órdenes de servicio
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">
+                                $ {{ (cash_cut.service_orders_advance_transfer)?.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2
+                                }) }}
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="col-span-2 text-[#373737]">
+                                Órdenes de servicio liquidadas
+                            </p>
+                            <p v-if="hasModule('Ordenes de servicio')" class="text-[#373737]">
+                                $ {{ (cash_cut.service_orders_transfer)?.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2
+                                }) }}
+                            </p>
+                            <p class="col-span-2 text-[#373737] text-right font-semibold mr-3">Total por transferencia
+                            </p>
+                            <p class="font-semibold">
+                                $ {{
+                                    cash_cut.expected_transfer?.toLocaleString('en-US', { minimumFractionDigits: 2 })
+                                    ?? '0.00'
+                                }}
+                            </p>
                         </div>
+
                         <footer class="bg-[#F2F2F2] rounded-xl text-black font-bold py-2 flex px-2">
-                            <p class="w-[66%] text-right pr-7">Total efectivo + tarjeta</p>
+                            <p class="w-[66%] text-right pr-7">Total efectivo + tarjeta + transferencia</p>
                             <p class="w-[33%] pl-4">
-                                $ {{ (cash_cut.expected_cash + cash_cut.expected_card)
+                                $ {{ (cash_cut.expected_cash + cash_cut.expected_card + cash_cut.expected_transfer)
                                     ?.toLocaleString('en-US', { minimumFractionDigits: 2 })
                                 }}
                             </p>
@@ -306,10 +348,11 @@
                                         <p class="pb-5 flex justify-between" :class="differenceCardStyles(cash_cut)">
                                             <span class="pr-3">$</span>{{
                                                 (cash_cut.counted_card - cash_cut.expected_card)?.toLocaleString('en-US',
-                                                    { minimumFractionDigits: 2 }) }}</p>
+                                                    { minimumFractionDigits: 2 }) }}
+                                        </p>
                                     </div>
                                 </div>
-                                <!-- mensaje de diferencia de efectivo -->
+                                <!-- mensaje de diferencia de card -->
                                 <p :class="{
                                     'text-green-500 bg-green-100': (cash_cut.expected_card - cash_cut.counted_card) === 0,
                                     'text-blue-500 bg-blue-100': (cash_cut.expected_card - cash_cut.counted_card) < 0,
@@ -323,6 +366,57 @@
                                     {{ (cash_cut.expected_card - cash_cut.counted_card) === 0 ? 'Todo bien' :
                                         ((cash_cut.expected_card - cash_cut.counted_card) < 0 ? 'Sobrante en caja'
                                             : 'Faltante de efectivo') }} </p>
+
+                                        <!-- Detalles de ventas pagadas con transfer -->
+                                        <div class="flex items-center space-x-2 px-5 pt-7">
+                                            <img class="w-5" src="@/../../public/images/transfer.png"
+                                                alt="Pago con transferencia">
+                                            <p class="text-[#05394F] font-semibold">Transferencia</p>
+                                        </div>
+                                        <div class="flex justify-between space-x-1 px-5 pt-1 text-sm">
+                                            <div class="font-semibold space-y-1 w-40">
+                                                <p>Esperado</p>
+                                                <p>Reportado</p>
+                                                <p class="pb-5">Diferencia</p>
+                                            </div>
+                                            <div class="space-y-1 font-semibold">
+                                                <p class="flex justify-between">
+                                                    <span class="text-gray99 pr-3">$</span>
+                                                    <span>
+                                                        {{ cash_cut.expected_transfer?.toLocaleString('en-US',
+                                                            { minimumFractionDigits: 2 }) ?? '0.00' }}
+                                                    </span>
+                                                </p>
+                                                <p class="flex justify-between">
+                                                    <span class="text-gray99 pr-3">$</span>
+                                                    <span>
+                                                        {{ cash_cut.counted_transfer?.toLocaleString('en-US',
+                                                            { minimumFractionDigits: 2 }) ?? '0.00' }}
+                                                    </span>
+                                                </p>
+                                                <p class="pb-5 flex justify-between"
+                                                    :class="differenceCardStyles(cash_cut)">
+                                                    <span class="pr-3">$</span>{{
+                                                        (cash_cut.counted_transfer -
+                                                            cash_cut.expected_transfer)?.toLocaleString('en-US',
+                                                    { minimumFractionDigits: 2 }) }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <!-- mensaje de diferencia de efectivo -->
+                                        <p :class="{
+                                            'text-green-500 bg-green-100': (cash_cut.expected_transfer - cash_cut.counted_transfer) === 0,
+                                            'text-blue-500 bg-blue-100': (cash_cut.expected_transfer - cash_cut.counted_transfer) < 0,
+                                            'text-red-500 bg-red-100': (cash_cut.expected_transfer - cash_cut.counted_transfer) > 0
+                                        }" class="rounded-b-xl text-xs py-[2px] px-2 text-center">
+                                            <i v-if="(cash_cut.expected_transfer - cash_cut.counted_transfer) === 0"
+                                                class="fa-solid fa-check mr-1"></i>
+                                            <i v-else-if="(cash_cut.expected_transfer - cash_cut.counted_transfer) < 0"
+                                                class="fa-solid fa-plus mr-1"></i>
+                                            <i v-else class="fa-solid fa-xmark mr-1"></i>
+                                            {{ (cash_cut.expected_transfer - cash_cut.counted_transfer) === 0 ? 'Todo bien' :
+                                                ((cash_cut.expected_transfer - cash_cut.counted_transfer) < 0 ? 'Sobrante en caja'
+                                                    : 'Faltante de efectivo' ) }} </p>
                     </div>
                 </article>
                 <div class="border-b my-12"></div>

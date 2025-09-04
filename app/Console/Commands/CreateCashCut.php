@@ -63,13 +63,18 @@ class CreateCashCut extends Command
                         ->get();
 
                     // ---- Obtener anticipos a partir del ultimo corte realizado ----
-                    $today_advances = ServiceReport::where('store_id', $store->id)
+                    $today_advances_card = ServiceReport::where('store_id', $store->id)
                         // CAMBIO: Se usa where() para comparar fecha y hora completas
                         ->where('created_at', '>', $last_cash_cut->created_at)
                         // ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
-                        ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
+                        ->whereIn('payment_method', ['Tarjeta']) // Solo con estos métodos
                         ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
-
+                    $today_advances_transfer = ServiceReport::where('store_id', $store->id)
+                        // CAMBIO: Se usa where() para comparar fecha y hora completas
+                        ->where('created_at', '>', $last_cash_cut->created_at)
+                        // ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                        ->whereIn('payment_method', ['Transferencia']) // Solo con estos métodos
+                        ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
                     $today_advances_cash = ServiceReport::where('store_id', $store->id)
                         // CAMBIO: Se usa where() para comparar fecha y hora completas
                         ->where('created_at', '>', $last_cash_cut->created_at)
@@ -83,9 +88,13 @@ class CreateCashCut extends Command
                         ->get();
 
                     // ---- Obtener todos los anticipos  ----
-                    $today_advances = ServiceReport::where('store_id', $store->id)
+                    $today_advances_card = ServiceReport::where('store_id', $store->id)
                         // ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
-                        ->whereIn('payment_method', ['Tarjeta', 'Transferencia']) // Solo con estos métodos
+                        ->whereIn('payment_method', ['Tarjeta']) // Solo con estos métodos
+                        ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
+                    $today_advances_transfer = ServiceReport::where('store_id', $store->id)
+                        // ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
+                        ->whereIn('payment_method', ['Transferencia']) // Solo con estos métodos
                         ->sum('advance_payment'); // Suma solo el campo 'advance_payment'
                     $today_advances_cash = ServiceReport::where('store_id', $store->id)
                         // ->where('status', '!=', 'Entregado/Pagado') // Solo las que no están completadas
@@ -110,10 +119,12 @@ class CreateCashCut extends Command
                 // Ventas en tienda
                 $store_sales_cash = $filtered_sales->where('payment_method', 'Efectivo')->sum(fn($s) => $s->quantity * $s->current_price);
                 $store_sales_card = $filtered_sales->where('payment_method', 'Tarjeta')->sum(fn($s) => $s->quantity * $s->current_price);
+                $store_sales_transfer = $filtered_sales->where('payment_method', 'Transferencia')->sum(fn($s) => $s->quantity * $s->current_price);
 
                 // Ventas en línea
                 $online_sales_cash = $onlineSalesPendentToday->where('payment_method', 'Efectivo')->sum(fn($o) => $o->total + $o->delivery_price);
                 $online_sales_card = $onlineSalesPendentToday->where('payment_method', 'Tarjeta')->sum(fn($o) => $o->total + $o->delivery_price);
+                $online_sales_transfer = $onlineSalesPendentToday->where('payment_method', 'Transferencia')->sum(fn($o) => $o->total + $o->delivery_price);
 
                 // Órdenes de servicio
                 // $service_orders_cash = $serviceOrdersPendentToday->where('payment_method', 'Efectivo')->sum('service_cost');
@@ -123,6 +134,8 @@ class CreateCashCut extends Command
                 $service_cash_settlement = $serviceOrdersPendentToday->where('payment_method', 'Efectivo')
                     ->sum(fn($order) => $order->service_cost - $order->advance_payment);
                 $service_card_settlement = $serviceOrdersPendentToday->where('payment_method', 'Tarjeta')
+                    ->sum(fn($order) => $order->service_cost - $order->advance_payment);
+                $service_transfer_settlement = $serviceOrdersPendentToday->where('payment_method', 'Transferencia')
                     ->sum(fn($order) => $order->service_cost - $order->advance_payment);
 
                 // Totales esperados
@@ -137,7 +150,12 @@ class CreateCashCut extends Command
                 $expected_card = $store_sales_card
                     + $online_sales_card
                     + $service_card_settlement
-                    + $today_advances;
+                    + $today_advances_card;
+
+                $expected_transfer = $store_sales_transfer
+                    + $online_sales_transfer
+                    + $service_transfer_settlement
+                    + $today_advances_transfer;
 
                 if (
                     $movementsPendentToday->isNotEmpty() ||
@@ -150,20 +168,28 @@ class CreateCashCut extends Command
                         // 'started_card' => $cashRegister->started_card,
                         'expected_cash' => max($expected_cash, 0),
                         'expected_card' => max($expected_card, 0),
+                        'expected_transfer' => max($expected_transfer, 0),
                         'store_sales_cash' => $store_sales_cash,
                         'store_sales_card' => $store_sales_card,
+                        'store_sales_transfer' => $store_sales_transfer,
                         'online_sales_cash' => $online_sales_cash,
                         'online_sales_card' => $online_sales_card,
+                        'online_sales_transfer' => $online_sales_transfer,
                         'service_orders_cash' => $service_cash_settlement,
                         'service_orders_card' => $service_card_settlement,
+                        'service_orders_transfer' => $service_transfer_settlement,
                         'service_orders_advance_cash' => $today_advances_cash,
-                        'service_orders_advance_card' => $today_advances,
+                        'service_orders_advance_card' => $today_advances_card,
+                        'service_orders_advance_transfer' => $today_advances_transfer,
                         'counted_cash' => max($expected_cash, 0),
                         'counted_card' => max($expected_card, 0),
+                        'counted_transfer' => max($expected_transfer, 0),
                         'withdrawn_cash' => 0,
                         'withdrawn_card' => 0,
+                        'withdrawn_transfer' => 0,
                         'difference_cash' => 0,
                         'difference_card' => 0,
+                        'difference_transfer' => 0,
                         'notes' => 'Corte realizado automáticamente por el sistema al terminar el día',
                         'cash_register_id' => $cashRegister->id,
                         'store_id' => $store->id,
