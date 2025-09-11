@@ -13,8 +13,8 @@
                             {{ report.paid_at ? formatDateTime(report.paid_at) : 'Equipo no entregado aún' }}
                         </span></p>
                 </div>
-                <el-dropdown v-if="report.status !== 'Cancelada'"
-                    :disabled="report.status === 'Cancelada'" :split-button="canEdit" trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
+                <el-dropdown v-if="report.status !== 'Cancelada'" :disabled="report.status === 'Cancelada'"
+                    :split-button="canEdit" trigger="click" type="primary" @click="report.status !== 'Cancelada' && report.status !== 'Entregado/Pagado'
                         ? $inertia.get(route('service-reports.edit', encodeId(report.id)))
                         : ''">
                     <span v-if="canEdit">Editar</span>
@@ -24,7 +24,8 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')" @click="printTemplate" :disabled="report.status === 'Cancelada'">
+                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')"
+                                @click="printTemplate" :disabled="report.status === 'Cancelada'">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -32,7 +33,8 @@
                                         stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 Comprobante de servicio</el-dropdown-item>
-                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')" :disabled="report.status === 'Cancelada'"
+                            <el-dropdown-item v-if="hasPermission('Ver información financiera en ordenes de servicio')"
+                                :disabled="report.status === 'Cancelada'"
                                 @click="handleTicketPrinting('ESC/POS', 'orden')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -42,7 +44,8 @@
                                 </svg>
                                 Imprimir ticket de orden
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="report.status == 'Entregado/Pagado' && hasPermission('Ver información financiera en ordenes de servicio')"
+                            <el-dropdown-item
+                                v-if="report.status == 'Entregado/Pagado' && hasPermission('Ver información financiera en ordenes de servicio')"
                                 :disabled="report.status === 'Cancelada'"
                                 @click="handleTicketPrinting('ESC/POS', 'comprobante')">
                                 <svg class="mr-1" width="14" height="14" viewBox="0 0 14 14" fill="none"
@@ -144,7 +147,8 @@
                     </div>
 
                     <div class="flex items-start justify-between my-2 ml-4">
-                        <button v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit && hasPermission('Cambiar status en ordenes de servicio')"
+                        <button
+                            v-if="report.status !== 'Entregado/Pagado' && report.status !== 'Cancelada' && canEdit && hasPermission('Cambiar status en ordenes de servicio')"
                             @click="confirmCancelModal = true"
                             class="flex items-center space-x-2 text-gray37 text-[11px] md:text-[13px] border-b border-gray37">
                             <svg class="size-[12px]" width="12" height="12" viewBox="0 0 13 13" fill="none"
@@ -442,19 +446,25 @@
                                 </div>
                             </el-collapse-item>
                             <el-collapse-item name="4">
-                                <template #title>
-                                    <h2 class="text-gray37 font-semibold text-base">
-                                        Evidencias
-                                    </h2>
-                                </template>
-                                <div v-if="report.media.length" class="my-7">
+                                 <template #title>
+                                     <h2 class="text-gray37 font-semibold text-base">
+                                         Evidencias
+                                     </h2>
+                                 </template>
+                                <div class="flex justify-end mb-4">
+                                    <!-- BOTÓN PARA ABRIR EL MODAL -->
+                                    <el-button type="primary" @click="openUploadModal">
+                                        Subir evidencias de reparación
+                                    </el-button>
+                                </div>
+                                <div v-if="report.media && report.media.length > 0" class="my-7">
                                     <h2 class="font-bold text-lg text-[#373737] mt-5 mb-2">Evidencias</h2>
                                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 space-x-2">
                                         <figure @click="openImage(media?.original_url)"
                                             class="border rounded-xl border-[#D9D9D9] overflow-hidden group"
-                                            v-for="media in report.media" :key="media">
+                                            v-for="media in report.media" :key="media.id">
                                             <img class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110 cursor-zoom-in"
-                                                :src="media?.original_url" alt="">
+                                                :src="media?.original_url" alt="Evidencia de servicio">
                                         </figure>
                                     </div>
                                 </div>
@@ -867,6 +877,32 @@
                 </div>
             </template>
         </ConfirmationModal>
+
+        <el-dialog v-model="uploadModalVisible" title="Subir Evidencias de Reparación" width="50%">
+            <p class="mb-4 text-gray-600">
+                Sube hasta 5 imágenes que demuestren la reparación completada.
+            </p>
+            <el-upload class="upload-demo" drag :on-change="handleChange" :on-remove="handleRemoveImage"
+                :on-exceed="handleExceed" :on-preview="handlePictureCardPreview" v-model:file-list="fileList"
+                :before-upload="beforeUpload" :multiple="true" :limit="5" list-type="picture-card" :auto-upload="false">
+                <i class="el-icon-upload"></i>
+                <div class="el-upload__text">Arrastra o haz clic para subir</div>
+            </el-upload>
+
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="closeUploadModal">Cancelar</el-button>
+                    <el-button type="primary" @click="submitEvidence" :loading="form.processing">
+                        Guardar Evidencias
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
+
+        <!-- DIÁLOGO PARA PREVIEW DE IMAGEN -->
+        <el-dialog v-model="dialogVisible">
+            <img w-full :src="dialogImageUrl" alt="Preview Image" style="width: 100%" />
+        </el-dialog>
     </AppLayout>
 </template>
 
@@ -884,6 +920,7 @@ import StatusStep from '@/Components/MyComponents/StatusStep.vue';
 import { format, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import PrintingModal from "@/Components/MyComponents/Sale/PrintingModal.vue";
+import { useForm } from "@inertiajs/vue3";
 
 export default {
     data() {
@@ -906,6 +943,14 @@ export default {
             showPrintingModal: false,
             canEdit: this.$page.props.auth.user.permissions.includes('Editar ordenes de servicio'),
             activeCollapseSections: ['1'], // Para el collapse de detalles
+            //subir evicencias
+            uploadModalVisible: false,
+            fileList: [],
+            dialogImageUrl: '',
+            dialogVisible: false,
+            form: useForm({
+                media: [],
+            }),
         }
     },
     components: {
@@ -938,6 +983,59 @@ export default {
         }
     },
     methods: {
+        // --- Funciones para abrir y cerrar el modal ---
+        openUploadModal() {
+            this.uploadModalVisible = true;
+        },
+        closeUploadModal() {
+            this.uploadModalVisible = false;
+            this.form.reset(); // Limpia los archivos del formulario
+            this.fileList = []; // Limpia la lista de archivos de la UI
+        },
+        beforeUpload(rawFile) {
+            if (!rawFile.type.startsWith('image/')) {
+                ElMessage.error('Solo se permiten archivos de tipo imagen.');
+                return false;
+            }
+            return true;
+        },
+        handleChange(uploadFile, uploadFiles) {
+            // Sincroniza el array de `media` en el formulario con los archivos raw
+            this.form.media = uploadFiles.map(file => file.raw);
+        },
+        handleRemoveImage(uploadFile, uploadFiles) {
+            // Sincroniza el array de `media` en el formulario
+            this.form.media = uploadFiles.map(file => file.raw);
+        },
+        handleExceed() {
+            ElMessage.warning('Has alcanzado el límite de 5 imágenes.');
+        },
+        handlePictureCardPreview(uploadFile) {
+            this.dialogImageUrl = uploadFile.url;
+            this.dialogVisible = true;
+        },
+        // --- Función para enviar el formulario ---
+        submitEvidence() {
+            if (this.form.media.length === 0) {
+                ElMessage.error('Debes seleccionar al menos una imagen.');
+                return;
+            }
+
+            this.form.post(this.route('service-reports.evidence.store', this.report.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    ElMessage.success('Evidencias subidas correctamente.');
+                    this.closeUploadModal();
+                },
+                onError: () => {
+                    ElMessage.error('Ocurrió un error al subir las evidencias.');
+                },
+            });
+        },
+        // Suponiendo que tienes un método para abrir la imagen original
+        openImage(url) {
+            window.open(url, '_blank');
+        },
         hasPermission(permission) {
             return this.$page.props.auth.user.permissions.includes(permission);
         },

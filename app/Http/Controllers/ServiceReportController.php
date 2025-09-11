@@ -236,6 +236,43 @@ class ServiceReportController extends Controller
         return response()->json(['items' => $reports]);
     }
 
+    public function storeEvidence(Request $request, ServiceReport $service_order)
+    {
+        $request->validate([
+            'media'   => 'required|array',
+            'media.*' => 'image|mimes:jpeg,png,jpg,gif,webp', // Valida cada imagen
+        ]);
+
+        // if ($request->hasFile('media')) {
+        //     // El nombre de la colección es 'service_evidence' como solicitaste
+        //     $service_order->addAllMediaFromRequest()->each(fn($file) => $file->toMediaCollection('service_evidence'));
+        // }
+
+        if ($request->hasFile('media')) {
+            $service_order->addAllMediaFromRequest()->each(function ($fileAdder) {
+                // Guarda el archivo en la colección y obtiene el modelo Media
+                $media = $fileAdder->toMediaCollection('service_evidence');
+
+                // Ahora sí puedes acceder a getPath()
+                $path = $media->getPath();
+
+                // Validar tamaño, entorno y compresiones disponibles
+                if (
+                    filesize($path) > 400 * 1024 &&
+                    app()->environment() === 'production' &&
+                    $this->tinifyService->totalCompressions() < 500
+                ) {
+                    $this->tinifyService->optimizeImage($path);
+                } else {
+                    // Otra lógica para imágenes pequeñas o fuera de producción
+                }
+            });
+        }
+
+
+        return back()->with('success', 'Evidencias agregadas correctamente.');
+    }
+
     public function getDataForTable()
     {
         $perPage = request('pageSize', 100);
@@ -289,7 +326,7 @@ class ServiceReportController extends Controller
             if ($request->paymentMethod === 'Efectivo') {
                 $advance_payment = $service_report->advance_payment ?? 0;
                 $service_cost = $service_report->service_cost ?? 0;
-                
+
                 // agregar en caja el pago restante de la orden
                 auth()->user()->cashRegister->increment('current_cash', $service_cost - $advance_payment);
             }
