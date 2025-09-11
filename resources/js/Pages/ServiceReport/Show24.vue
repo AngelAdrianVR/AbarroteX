@@ -190,7 +190,7 @@
                             <p class="lg:w-1/2">
                                 <span v-if="report.product_details?.brand">{{ report.product_details?.brand }}</span>
                                 <span v-if="report.product_details?.model">{{ ' ' + report.product_details?.model
-                                    }}</span>
+                                }}</span>
                             </p>
                         </div>
                         <div v-if="report.observations" class="flex space-x-4 border-b border-[#D9D9D9] py-2 px-1">
@@ -212,7 +212,7 @@
                         <div class="flex space-x-4 py-2 px-1">
                             <p class="text-[#373737] w-56">Porcentaje de comisión: </p>
                             <p v-if="report.comision_percentage" class="lg:w-1/2">{{ report.comision_percentage ?? '0'
-                            }}% (${{
+                                }}% (${{
                                     ((report.comision_percentage / 100)
                                         * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }})</p>
                             <p v-else class="lg:w-1/2">No aplica</p>
@@ -376,7 +376,7 @@
                                     </p>
                                     <p class="flex">
                                         <span class="w-48">Comisión del técnico ({{ report.comision_percentage ?? '0'
-                                        }}%)</span><span class="ml-3">-$</span><span class="w-20 text-right">
+                                            }}%)</span><span class="ml-3">-$</span><span class="w-20 text-right">
                                             {{
                                                 (((report.comision_percentage ?? 0) / 100)
                                                     * report.service_cost)?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -446,27 +446,41 @@
                                 </div>
                             </el-collapse-item>
                             <el-collapse-item name="4">
-                                 <template #title>
-                                     <h2 class="text-gray37 font-semibold text-base">
-                                         Evidencias
-                                     </h2>
-                                 </template>
-                                <div class="flex justify-end mb-4">
+                                <template #title>
+                                    <h2 class="text-gray37 font-semibold text-base">
+                                        Evidencias
+                                    </h2>
+                                </template>
+                                <div class="flex">
                                     <!-- BOTÓN PARA ABRIR EL MODAL -->
-                                    <el-button type="primary" @click="openUploadModal">
+                                    <PrimaryButton type="button" class="!bg-primarylight !text-primary !font-semibold !leading-tight tracking-normal" @click="openUploadModal">
                                         Subir evidencias de reparación
-                                    </el-button>
+                                    </PrimaryButton>
                                 </div>
-                                <div v-if="report.media && report.media.length > 0" class="my-7">
-                                    <h2 class="font-bold text-lg text-[#373737] mt-5 mb-2">Evidencias</h2>
-                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 space-x-2">
+                                <div v-if="report.media && report.media.length > 0" class="my-3">
+                                    <p class="font-semibold mb-4">Evidencias de recepción de equipo</p>
+                                    <div v-if="report.media.filter(m => m.collection_name == 'default').length"
+                                        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 space-x-2">
                                         <figure @click="openImage(media?.original_url)"
                                             class="border rounded-xl border-[#D9D9D9] overflow-hidden group"
-                                            v-for="media in report.media" :key="media.id">
+                                            v-for="media in report.media.filter(m => m.collection_name == 'default')" :key="media.id">
                                             <img class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110 cursor-zoom-in"
                                                 :src="media?.original_url" alt="Evidencia de servicio">
                                         </figure>
                                     </div>
+                                    <p v-else class="italic text-gray-500 py-3">No se subieron evidencias de recepción de equipo</p>
+
+                                    <p class="font-semibold my-4">Evidencias de reparación</p>
+                                    <div v-if="report.media.filter(m => m.collection_name == 'service_evidence').length"
+                                        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 space-x-2">
+                                        <figure @click="openImage(media?.original_url)"
+                                            class="border rounded-xl border-[#D9D9D9] overflow-hidden group"
+                                            v-for="media in report.media.filter(m => m.collection_name == 'service_evidence')" :key="media.id">
+                                            <img class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110 cursor-zoom-in"
+                                                :src="media?.original_url" alt="Evidencia de servicio">
+                                        </figure>
+                                    </div>
+                                    <p v-else class="italic text-gray-500 py-3">No se subieron evidencias de reparación</p>
                                 </div>
                                 <div v-else class="text-gray37 text-sm italic">
                                     No se registraron evidencias para este servicio.
