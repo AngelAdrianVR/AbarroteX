@@ -648,6 +648,11 @@ export default {
             this.form.aditionals.unlockPassword = unlockItem;
         },
         // uploader
+        handleSuccess(response, file, fileList) {
+            ElMessage.success('Archivo subido correctamente');
+            this.uploading = false;
+            this.uploadPercentage = 0;
+        },
         beforeUpload(file) {
             const isImage = file.type.startsWith('image/');
             if (!isImage) {
@@ -657,11 +662,6 @@ export default {
         },
         handleChange(file, fileList) {
             this.form.media = fileList.map(item => item.raw); // Actualiza form.media con los archivos
-        },
-        handleSuccess(response, file, fileList) {
-            ElMessage.success('Archivo subido correctamente');
-            this.uploading = false;
-            this.uploadPercentage = 0;
         },
         handleRemoveImage(file, fileList) {
             // Remover de form.media
