@@ -248,9 +248,9 @@ export default {
             const hasMoreUsers = ['Cotizaciones', 'Renta de productos', 'Tienda en línea']
                 .some(module => this.$page.props.auth.user.store.activated_modules?.includes(module));
 
-            if (hasMoreUsers && this.total_users <= 5) {
+            if (hasMoreUsers && this.total_users <= 10) {
                 return true;
-            } else if (!hasMoreUsers && this.total_users <= 2) {
+            } else if (!hasMoreUsers && this.total_users <= 5) {
                 return true;
             } else {
                 return false;
