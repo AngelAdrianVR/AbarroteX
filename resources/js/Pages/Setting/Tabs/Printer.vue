@@ -2,7 +2,7 @@
     <div>
         <p class="text-sm">
             Si aún no tienes el plugin para la impresión de tickets, 
-            <a href="@/../../ezy_plugin_v1.0.0.zip" target="_blank" class="underline text-primary">
+            <a href="@/../../ezy_plugin_v1.0.0.exe" target="_blank" class="underline text-primary">
                 Click aqui (v1.0.0 Windows x64)
             </a>
         </p>
